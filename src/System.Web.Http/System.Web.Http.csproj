@@ -1,0 +1,374 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' ">false</CodeAnalysis>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DDC1CE0C-486E-4E35-BB3B-EAB61F8F9440}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Web.Http</RootNamespace>
+    <AssemblyName>System.Web.Http</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ASPNETMVC</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;ASPNETMVC</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\bin\CodeCoverage\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;CODE_COVERAGE;ASPNETMVC</DefineConstants>
+    <DebugType>full</DebugType>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Net.Http">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20302.1\lib\net40\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20302.1\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\AptcaCommonAssemblyInfo.cs">
+      <Link>Properties\AptcaCommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="AcceptVerbsAttribute.cs" />
+    <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
+    <Compile Include="Controllers\HttpActionContext.cs" />
+    <Compile Include="Description\ApiDescription.cs" />
+    <Compile Include="Description\ApiExplorer.cs" />
+    <Compile Include="Description\ApiExplorerSettingsAttribute.cs" />
+    <Compile Include="Description\ApiParameterDescription.cs" />
+    <Compile Include="Description\ApiParameterSource.cs" />
+    <Compile Include="Description\IDocumentationProvider.cs" />
+    <Compile Include="Description\IApiExplorer.cs" />
+    <Compile Include="IncludeErrorDetailPolicy.cs" />
+    <Compile Include="Filters\HttpActionExecutedContext.cs" />
+    <Compile Include="Filters\EnumerableEvaluatorFilter.cs" />
+    <Compile Include="Filters\EnumerableEvaluatorFilterProvider.cs" />
+    <Compile Include="Filters\QueryCompositionFilterProvider.cs" />
+    <Compile Include="Internal\UriQueryUtility.cs" />
+    <Compile Include="ModelBinding\FormatterParameterBinding.cs" />
+    <Compile Include="ModelBinding\CancellationTokenParameterBinding.cs" />
+    <Compile Include="ModelBinding\ErrorParameterBinding.cs" />
+    <Compile Include="ModelBinding\FormDataCollectionExtensions.cs" />
+    <Compile Include="ModelBinding\HttpActionBinding.cs" />
+    <Compile Include="Controllers\HttpActionDescriptor.cs" />
+    <Compile Include="ActionNameAttribute.cs" />
+    <Compile Include="Controllers\ReflectedHttpActionDescriptor.cs" />
+    <Compile Include="AllowAnonymousAttribute.cs" />
+    <Compile Include="Dispatcher\ExceptionSurrogate.cs" />
+    <Compile Include="HttpResponseException.cs" />
+    <Compile Include="ModelBinding\HttpRequestParameterBinding.cs" />
+    <Compile Include="ModelBinding\JQueryMVCFormUrlEncodedFormatter.cs" />
+    <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
+    <Compile Include="Query\ServiceQueryPart.cs" />
+    <Compile Include="ResultLimitAttribute.cs" />
+    <Compile Include="Filters\QueryCompositionFilterAttribute.cs" />
+    <Compile Include="HttpResponseMessageExtensions.cs" />
+    <Compile Include="Dispatcher\DefaultHttpControllerActivator.cs" />
+    <Compile Include="Controllers\HttpControllerDescriptor.cs" />
+    <Compile Include="Dispatcher\IHttpControllerActivator.cs" />
+    <Compile Include="HttpRouteCollection.cs" />
+    <Compile Include="Controllers\TaskActionResponseConverter.cs" />
+    <Compile Include="Controllers\HttpContentMessageConverter.cs" />
+    <Compile Include="Controllers\VoidHttpResponseMessageConverter.cs" />
+    <Compile Include="Controllers\HttpResponseMessageConverter.cs" />
+    <Compile Include="Controllers\ActionResponseConverter.cs" />
+    <Compile Include="HttpPutAttribute.cs" />
+    <Compile Include="HttpDeleteAttribute.cs" />
+    <Compile Include="Controllers\IActionHttpMethodProvider.cs" />
+    <Compile Include="Controllers\IActionMethodSelector.cs" />
+    <Compile Include="Controllers\ApiControllerActionInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AuthorizeAttribute.cs" />
+    <Compile Include="HttpGetAttribute.cs" />
+    <Compile Include="HttpPostAttribute.cs" />
+    <Compile Include="HttpRequestMessageExtensions.cs" />
+    <Compile Include="Filters\HttpFilterCollection.cs" />
+    <Compile Include="Filters\IFilter.cs" />
+    <Compile Include="HttpServer.cs" />
+    <Compile Include="Internal\TypeActivator.cs" />
+    <Compile Include="ModelBinding\DefaultActionValueBinder.cs" />
+    <Compile Include="Controllers\IHttpActionInvoker.cs" />
+    <Compile Include="Controllers\IActionValueBinder.cs" />
+    <Compile Include="Controllers\IHttpActionSelector.cs" />
+    <Compile Include="Filters\ActionFilterAttribute.cs" />
+    <Compile Include="Filters\AuthorizationFilterAttribute.cs" />
+    <Compile Include="Filters\ExceptionFilterAttribute.cs" />
+    <Compile Include="Filters\ActionDescriptorFilterProvider.cs" />
+    <Compile Include="Filters\FilterInfo.cs" />
+    <Compile Include="Filters\FilterInfoComparer.cs" />
+    <Compile Include="Filters\FilterScope.cs" />
+    <Compile Include="Filters\ConfigurationFilterProvider.cs" />
+    <Compile Include="Filters\IActionFilter.cs" />
+    <Compile Include="Filters\IAuthorizationFilter.cs" />
+    <Compile Include="Filters\IExceptionFilter.cs" />
+    <Compile Include="Filters\IFilterProvider.cs" />
+    <Compile Include="Internal\MemberInfoExtensions.cs" />
+    <Compile Include="ModelBinding\Binders\CompositeModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\CompositeModelBinder.cs" />
+    <Compile Include="HttpRouteCollectionExtensions.cs" />
+    <Compile Include="Internal\ParameterDescriptorExtensionMethods.cs" />
+    <Compile Include="Query\QueryValidator.cs" />
+    <Compile Include="Routing\BoundRouteTemplate.cs" />
+    <Compile Include="Routing\IHttpVirtualPathData.cs" />
+    <Compile Include="Routing\IHttpRouteData.cs" />
+    <Compile Include="Routing\IHttpRoute.cs" />
+    <Compile Include="Routing\HttpMethodConstraint.cs" />
+    <Compile Include="Routing\HttpParsedRoute.cs" />
+    <Compile Include="Routing\HttpRoute.cs" />
+    <Compile Include="Routing\HttpRouteData.cs" />
+    <Compile Include="Routing\HttpRouteDirection.cs" />
+    <Compile Include="Routing\HttpRouteParser.cs" />
+    <Compile Include="Routing\HttpRouteValueDictionary.cs" />
+    <Compile Include="Routing\HttpVirtualPathData.cs" />
+    <Compile Include="Routing\IHttpRouteConstraint.cs" />
+    <Compile Include="Routing\PathContentSegment.cs" />
+    <Compile Include="Routing\PathLiteralSubsegment.cs" />
+    <Compile Include="Routing\PathParameterSubsegment.cs" />
+    <Compile Include="Routing\PathSegment.cs" />
+    <Compile Include="Routing\PathSeparatorSegment.cs" />
+    <Compile Include="Routing\PathSubsegment.cs" />
+    <Compile Include="NonActionAttribute.cs" />
+    <Compile Include="Routing\UrlHelper.cs" />
+    <Compile Include="Services\DependencyResolver.cs" />
+    <Compile Include="Dispatcher\HttpControllerTypeCache.cs" />
+    <Compile Include="Dispatcher\DefaultHttpControllerFactory.cs" />
+    <Compile Include="Dispatcher\DefaultBuildManager.cs" />
+    <Compile Include="DependencyResolverExtensions.cs" />
+    <Compile Include="Services\IDependencyResolver.cs" />
+    <Compile Include="Dispatcher\IHttpControllerFactory.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="Filters\FilterAttribute.cs" />
+    <Compile Include="Hosting\HttpPropertyKeys.cs" />
+    <Compile Include="Hosting\HttpPipelineFactory.cs" />
+    <Compile Include="Dispatcher\HttpControllerDispatcher.cs" />
+    <Compile Include="Dispatcher\IBuildManager.cs" />
+    <Compile Include="Dispatcher\HttpControllerTypeCacheSerializer.cs" />
+    <Compile Include="Dispatcher\HttpControllerTypeCacheUtil.cs" />
+    <Compile Include="Internal\TypeHelper.cs" />
+    <Compile Include="Internal\ParameterInfoExtensions.cs" />
+    <Compile Include="Controllers\ReflectedHttpParameterDescriptor.cs" />
+    <Compile Include="HttpBindNeverAttribute.cs" />
+    <Compile Include="HttpBindRequiredAttribute.cs" />
+    <Compile Include="Controllers\HttpActionContextExtensions.cs" />
+    <Compile Include="ModelBinding\ModelBindingHelper.cs" />
+    <Compile Include="Controllers\ApiControllerActionSelector.cs" />
+    <Compile Include="ModelBinding\HttpParameterBinding.cs" />
+    <Compile Include="Controllers\HttpParameterDescriptor.cs" />
+    <Compile Include="Services\DefaultServiceResolver.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Controllers\IHttpController.cs" />
+    <Compile Include="Internal\DataTypeUtil.cs" />
+    <Compile Include="Internal\TypeDescriptorHelper.cs" />
+    <Compile Include="Internal\ValueProviderUtil.cs" />
+    <Compile Include="Internal\CollectionModelBinderUtil.cs" />
+    <Compile Include="Metadata\Providers\CachedAssociatedMetadataProvider.cs" />
+    <Compile Include="Metadata\Providers\CachedDataAnnotationsMetadataAttributes.cs" />
+    <Compile Include="Metadata\Providers\CachedModelMetadata.cs" />
+    <Compile Include="Metadata\IMetadataAware.cs" />
+    <Compile Include="Metadata\ModelMetadata.cs" />
+    <Compile Include="Metadata\ModelMetadataProvider.cs" />
+    <Compile Include="Metadata\Providers\AssociatedMetadataProvider.cs" />
+    <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadata.cs" />
+    <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadataProvider.cs" />
+    <Compile Include="Metadata\Providers\EmptyMetadataProvider.cs" />
+    <Compile Include="ModelBinding\Binders\ArrayModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\ArrayModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\BinaryDataModelBinderProvider.cs" />
+    <Compile Include="HttpBindingBehavior.cs" />
+    <Compile Include="HttpBindingBehaviorAttribute.cs" />
+    <Compile Include="ModelBinding\Binders\CollectionModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\CollectionModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\ComplexModelDto.cs" />
+    <Compile Include="ModelBinding\Binders\ComplexModelDtoModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\ComplexModelDtoModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\ComplexModelDtoResult.cs" />
+    <Compile Include="ModelBinding\Binders\DictionaryModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\DictionaryModelBinder.cs" />
+    <Compile Include="ModelBinding\ModelBinderAttribute.cs" />
+    <Compile Include="ModelBinding\CustomModelBinderAttribute.cs" />
+    <Compile Include="ModelBinding\ModelBindingContext.cs" />
+    <Compile Include="ModelBinding\Binders\GenericModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\IModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\KeyValuePairModelBinderProvider.cs" />
+    <Compile Include="Internal\HttpActionContextExtensions.cs" />
+    <Compile Include="ModelBinding\Binders\KeyValuePairModelBinder.cs" />
+    <Compile Include="ModelBinding\ModelBinderConfig.cs" />
+    <Compile Include="ModelBinding\ModelBinderErrorMessageProvider.cs" />
+    <Compile Include="ModelBinding\ModelBinderProvider.cs" />
+    <Compile Include="Controllers\HttpControllerContext.cs" />
+    <Compile Include="ModelBinding\ModelError.cs" />
+    <Compile Include="ModelBinding\ModelErrorCollection.cs" />
+    <Compile Include="ModelBinding\ModelState.cs" />
+    <Compile Include="ModelBinding\ModelStateDictionary.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\SRResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SRResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Tracing\HttpRequestMessageExtensions.cs" />
+    <Compile Include="Tracing\IFormatterTracer.cs" />
+    <Compile Include="Tracing\ITraceManager.cs" />
+    <Compile Include="Tracing\ITraceWriter.cs" />
+    <Compile Include="Tracing\ITraceWriterExtensions.cs" />
+    <Compile Include="Tracing\TraceManager.cs" />
+    <Compile Include="Tracing\TraceCategories.cs" />
+    <Compile Include="Tracing\TraceKind.cs" />
+    <Compile Include="Tracing\TraceLevel.cs" />
+    <Compile Include="Tracing\TraceRecord.cs" />
+    <Compile Include="Tracing\Tracers\HttpActionBindingTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpActionDescriptorTracer.cs" />
+    <Compile Include="Tracing\Tracers\ActionFilterAttributeTracer.cs" />
+    <Compile Include="Tracing\Tracers\ActionFilterTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpActionInvokerTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpActionSelectorTracer.cs" />
+    <Compile Include="Tracing\Tracers\ActionValueBinderTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpControllerTracer.cs" />
+    <Compile Include="Tracing\Tracers\AuthorizationFilterAttributeTracer.cs" />
+    <Compile Include="Tracing\Tracers\AuthorizationFilterTracer.cs" />
+    <Compile Include="Tracing\Tracers\BufferedMediaTypeFormatterTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpControllerActivatorTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpControllerFactoryTracer.cs" />
+    <Compile Include="Tracing\Tracers\ExceptionFilterAttributeTracer.cs" />
+    <Compile Include="Tracing\Tracers\ExceptionFilterTracer.cs" />
+    <Compile Include="Tracing\Tracers\FilterTracer.cs" />
+    <Compile Include="Tracing\Tracers\ContentNegotiatorTracer.cs" />
+    <Compile Include="Tracing\Tracers\FormatterParameterBindingTracer.cs" />
+    <Compile Include="Tracing\Tracers\FormUrlEncodedMediaTypeFormatterTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpParameterBindingTracer.cs" />
+    <Compile Include="Tracing\Tracers\JsonMediaTypeFormatterTracer.cs" />
+    <Compile Include="Tracing\Tracers\MediaTypeFormatterTracer.cs" />
+    <Compile Include="Tracing\Tracers\MessageHandlerTracer.cs" />
+    <Compile Include="Tracing\Tracers\RequestMessageHandlerTracer.cs" />
+    <Compile Include="Tracing\Tracers\XmlMediaTypeFormatterTracer.cs" />
+    <Compile Include="Tracing\FormattingUtilities.cs" />
+    <Compile Include="Validation\ClientRules\ModelClientValidationStringLengthRule.cs" />
+    <Compile Include="Validation\ClientRules\ModelClientValidationRequiredRule.cs" />
+    <Compile Include="Validation\ClientRules\ModelClientValidationRegexRule.cs" />
+    <Compile Include="Validation\ClientRules\ModelClientValidationRangeRule.cs" />
+    <Compile Include="Validation\DefaultBodyModelValidator.cs" />
+    <Compile Include="Validation\IBodyModelValidator.cs" />
+    <Compile Include="Validation\IClientValidatable.cs" />
+    <Compile Include="Validation\ModelClientValidationRule.cs" />
+    <Compile Include="Validation\ModelStateFormatterLogger.cs" />
+    <Compile Include="Validation\ModelValidatedEventArgs.cs" />
+    <Compile Include="Validation\ModelValidatingEventArgs.cs" />
+    <Compile Include="Validation\ModelValidationNode.cs" />
+    <Compile Include="ModelBinding\Binders\MutableObjectModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\MutableObjectModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\SimpleModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\TypeConverterModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\TypeConverterModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\Binders\TypeMatchModelBinder.cs" />
+    <Compile Include="ModelBinding\Binders\TypeMatchModelBinderProvider.cs" />
+    <Compile Include="Validation\ModelValidationRequiredMemberSelector.cs" />
+    <Compile Include="Validation\ModelValidationResult.cs" />
+    <Compile Include="Validation\ModelValidator.cs" />
+    <Compile Include="Validation\ModelValidatorProvider.cs" />
+    <Compile Include="Validation\Providers\AssociatedValidatorProvider.cs" />
+    <Compile Include="Validation\Providers\ClientDataTypeModelValidatorProvider.cs" />
+    <Compile Include="Validation\Providers\DataAnnotationsModelValidatorProvider.cs" />
+    <Compile Include="Validation\Providers\DataMemberModelValidatorProvider.cs" />
+    <Compile Include="Validation\Validators\RequiredMemberModelValidator.cs" />
+    <Compile Include="Validation\Validators\ValidatableObjectAdapter.cs" />
+    <Compile Include="Validation\Validators\StringLengthAttributeAdapter.cs" />
+    <Compile Include="Validation\Validators\RequiredAttributeAdapter.cs" />
+    <Compile Include="Validation\Validators\RegularExpressionAttributeAdapter.cs" />
+    <Compile Include="Validation\Validators\DataAnnotationsModelValidator.cs" />
+    <Compile Include="Validation\Validators\RangeAttributeAdapter.cs" />
+    <Compile Include="FromBodyAttribute.cs" />
+    <Compile Include="FromUriAttribute.cs" />
+    <Compile Include="ValueProviders\IUriValueProviderFactory.cs" />
+    <Compile Include="ValueProviders\Providers\CompositeValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\CompositeValueProviderFactory.cs" />
+    <Compile Include="ValueProviders\Providers\NameValueCollectionValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\ElementalValueProvider.cs" />
+    <Compile Include="ValueProviders\IEnumerableValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\KeyValueModelValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\RouteDataValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\RouteDataValueProviderFactory.cs" />
+    <Compile Include="ValueProviders\SingleObjectKeyValueModel.cs" />
+    <Compile Include="ValueProviders\ValueProviderFactory.cs" />
+    <Compile Include="ValueProviders\Providers\QueryStringValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\QueryStringValueProviderFactory.cs" />
+    <Compile Include="ValueProviders\ValueProviderAttribute.cs" />
+    <Compile Include="ValueProviders\ValueProviderResult.cs" />
+    <Compile Include="ValueProviders\IValueProvider.cs" />
+    <Compile Include="HttpConfiguration.cs" />
+    <Compile Include="ApiController.cs" />
+    <Compile Include="Query\DynamicQueryable.cs" />
+    <Compile Include="Query\ODataQueryDeserializer.cs" />
+    <Compile Include="Query\QueryComposer.cs" />
+    <Compile Include="Query\QueryResolver.cs" />
+    <Compile Include="Query\QueryTypeHelper.cs" />
+    <Compile Include="Query\ServiceQuery.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Modelbinding_ClassDiagram.cd" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\SRResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Json\System.Json.csproj">
+      <Project>{F0441BE9-BDC0-4629-BE5A-8765FFAA2481}</Project>
+      <Name>System.Json</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
+      <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
+      <Name>System.Net.Http.Formatting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Web.Http.Common\System.Web.Http.Common.csproj">
+      <Project>{03A5E5F2-2E23-48F2-ABCC-6C41BAC9AC02}</Project>
+      <Name>System.Web.Http.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

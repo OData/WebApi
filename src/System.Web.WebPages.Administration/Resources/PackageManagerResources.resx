@@ -1,0 +1,277 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PackageSourceLabel" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="PageLabel" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="InstallPackage" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="DefaultPackageSourceName" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="NoPackagesFound" xml:space="preserve">
+    <value>No packages found.</value>
+  </data>
+  <data name="PackageInstallationError" xml:space="preserve">
+    <value>Error installing package "{0}":</value>
+  </data>
+  <data name="PackageUninstallationError" xml:space="preserve">
+    <value>Error occurred uninstalling package "{0}":</value>
+  </data>
+  <data name="SearchLabel" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="UninstallPackage" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="BadRequest" xml:space="preserve">
+    <value>Bad Request</value>
+  </data>
+  <data name="ModuleDesc" xml:space="preserve">
+    <value>A collection of tools to automate the process of installing, upgrading, configuring, and removing packages from an ASP.NET application.</value>
+  </data>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Package Manager</value>
+  </data>
+  <data name="NoPackagesInstalled" xml:space="preserve">
+    <value>No packages installed. &lt;p&gt;&lt;a href="{0}"&gt;Install packages from an online feed&lt;/a&gt;&lt;/p&gt;</value>
+    <comment>Not HTML encoding the text. Ensure params are encoded</comment>
+  </data>
+  <data name="AuthorsLabel" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="WordSeparator" xml:space="preserve">
+    <value>, </value>
+    <comment>String used as glue to join multiple words into a single comma separated string </comment>
+  </data>
+  <data name="Disclaimer" xml:space="preserve">
+    <value>By clicking "Install" you agree to the license terms for the package(s) above. If you do not agree to the license terms, click "Cancel." Each package is licensed to you by its owner. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.</value>
+  </data>
+  <data name="InstallPackageDesc" xml:space="preserve">
+    <value>Installing package {0}.</value>
+  </data>
+  <data name="UninstallPackageDesc" xml:space="preserve">
+    <value>Uninstalling package {0}.</value>
+  </data>
+  <data name="AreYouSureUninstall" xml:space="preserve">
+    <value>Are you sure you want to uninstall &lt;strong&gt;{0}&lt;/strong&gt;?</value>
+    <comment>Not HTML encoding the text. Ensure params are encoded </comment>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="UninstallSuccess" xml:space="preserve">
+    <value>Package &lt;strong&gt;{0}&lt;/strong&gt; was successfully uninstalled.</value>
+    <comment>Not HTML encoding the text. Ensure params are encoded</comment>
+  </data>
+  <data name="UpdatePackage" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="JavascriptRequired" xml:space="preserve">
+    <value>JavaScript is required to correctly view this page.</value>
+  </data>
+  <data name="ViewLicenseTerms" xml:space="preserve">
+    <value>View License Terms</value>
+  </data>
+  <data name="InstallSuccess" xml:space="preserve">
+    <value>Package &lt;strong&gt;{0}&lt;/strong&gt; was successfully installed.</value>
+    <comment>Not HTML encoding the text. Ensure params are encoded</comment>
+  </data>
+  <data name="UpdatePackageDesc" xml:space="preserve">
+    <value>Updating package {0} to version {1}.</value>
+    <comment>Updating Foo 1.1 to version 1.3.</comment>
+  </data>
+  <data name="UpdateSuccess" xml:space="preserve">
+    <value>Package &lt;strong&gt;{0}&lt;/strong&gt; was successfully updated.</value>
+    <comment>Not HTML encoding the text. Ensure params are encoded</comment>
+  </data>
+  <data name="ClearLabel" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ManageSourcesDesc" xml:space="preserve">
+    <value>Use this page to manage your package sources.</value>
+  </data>
+  <data name="AddPackageSourceLabel" xml:space="preserve">
+    <value>Add Package Source</value>
+  </data>
+  <data name="DeleteLabel" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="SourceNameLabel" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="SourceUrlLabel" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ManageSourcesTitle" xml:space="preserve">
+    <value>Manage Package Sources</value>
+  </data>
+  <data name="Validation_InvalidPackageSourceUrl" xml:space="preserve">
+    <value>Invalid source url.</value>
+  </data>
+  <data name="PackageSourceFileInstructions" xml:space="preserve">
+    <value>Unable to read package source file. Ensure that the file "{0}" is writeable and the contents of the file have not been modified externally.</value>
+  </data>
+  <data name="RestoreDefaultSources" xml:space="preserve">
+    <value>Restore Default </value>
+  </data>
+  <data name="PackageUpdateError" xml:space="preserve">
+    <value>Error occurred updating package "{0}":</value>
+  </data>
+  <data name="RemoveDependencies" xml:space="preserve">
+    <value>Remove Dependencies?</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Packages</value>
+  </data>
+  <data name="Validation_PackageSourceAlreadyExists" xml:space="preserve">
+    <value>Specified package source already exists.</value>
+  </data>
+  <data name="ShowLabel" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="InstalledLabel" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="OnlineLabel" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="UpdatesLabel" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="NuGetFeed" xml:space="preserve">
+    <value>Default (All)</value>
+  </data>
+  <data name="PrivacyStatement" xml:space="preserve">
+    <value>Privacy Statement</value>
+  </data>
+  <data name="UnknownFrameworkReference" xml:space="preserve">
+    <value>Unknown framework assembly: "{0}"</value>
+  </data>
+  <data name="NextText" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="PreviousText" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+</root>

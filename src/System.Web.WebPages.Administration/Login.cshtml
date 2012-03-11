@@ -1,0 +1,65 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@{
+    Page.Title = AdminResources.LoginTitle;
+
+    // No admin password has been registered so redirect
+    if(!AdminSecurity.HasAdminPassword()) {
+        SiteAdmin.RedirectToRegister(Response);
+        return;
+    }
+
+    if (IsPost) {
+        AntiForgery.Validate();
+        var password = Request.Form["password"];
+
+        if (AdminSecurity.CheckPassword(password)) {
+            // Get the return url
+            var returnUrl = SiteAdmin.GetReturnUrl(Request) ?? SiteAdmin.AdminVirtualPath;
+
+            // Set the admin auth cookie
+            AdminSecurity.SetAuthCookie(Response);
+
+            // Redirect to the return url
+            Response.Redirect(returnUrl);
+        }
+        else {
+            ModelState.AddError("password", AdminResources.Validation_PasswordIncorrect);
+        }
+    }
+}
+
+@section Head{
+    <script type="text/javascript">
+    function showForgotPasswordInfo(){
+        document.getElementById('forgotPasswordInfo').style.display = '';
+    }
+    </script>
+}
+
+@Html.ValidationSummary()
+<br />
+
+<form method="post" action="">
+    @AntiForgery.GetHtml()
+    <fieldset>
+    <ol>
+        <li class="password">
+            <label for="password">@AdminResources.Password:</label>
+            @Html.Password("password") @Html.ValidationMessage("password", "*")
+    </ol>
+    <p class="form-actions">
+        <input type="submit" value="@AdminResources.Login" />
+    </p>
+    </fieldset>
+    <p>
+        <a href="#" onclick="showForgotPasswordInfo(); return false;">@AdminResources.ForgotPassword</a>
+    </p>
+</form>
+<br />
+@{ 
+    var passwordFileLocation = AdminSecurity.AdminPasswordFile.TrimStart('~', '/');
+    var forgotPasswordHelp = String.Format(CultureInfo.CurrentCulture, AdminResources.AdminPasswordChangeInstructions, Html.Encode(passwordFileLocation));
+}
+<span id="forgotPasswordInfo" style="display: none">@Html.Raw(forgotPasswordHelp)</span>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- Define some basic reference paths -->
+        <WebStackRootPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\'))</WebStackRootPath>
+        <WebStackToolsPath>$(MSBuildThisFileDirectory)</WebStackToolsPath>
+
+        <!-- Define default configuration (so building from command line is consistent) -->
+        <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+
+        <!-- Define basic output paths -->
+        <OutputPath Condition=" '$(OutputPath)' == '' ">$(WebStackRootPath)bin\$(Configuration)\</OutputPath>
+        <WebStackIntermediateOutputPath>$(WebStackRootPath)obj\$(Configuration)\$(MSBuildProjectName)\</WebStackIntermediateOutputPath>
+
+        <!-- Variables for output redirection (localization, signing, etc)-->
+        <Language Condition=" '$(Language)' == '' ">ENU</Language>
+        <LocalizedPath Condition=" '$(LocalizedPath)' == '' "></LocalizedPath>
+
+        <!-- StyleCop support -->
+        <StyleCopTreatErrorsAsWarnings Condition=" '$(StyleCopTreatErrorsAsWarnings)' == '' ">false</StyleCopTreatErrorsAsWarnings>
+        <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">false</StyleCopEnabled>
+
+        <!-- VisualStudioVersion does not appear in 4.0 so its absence defaults to Dev10 -->
+        <VisualStudioVersion Condition = "'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+
+        <!-- Target 4.0 for both VS2010 and VS 11 by default -->
+        <TargetFrameworkVersion Condition = "'$(TargetFrameworkVersion)' == ''">v4.0</TargetFrameworkVersion>
+
+        <!-- Enable NuGet package restore for all projects -->
+        <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(WebStackRootPath)</SolutionDir>
+        <RestorePackages>true</RestorePackages>
+
+        <!-- Use CustomAfterMicrosoftCommonTargets property (defined in Microsoft.Common.targets) to
+             inject post-Common targets files without requiring the inclusion -->
+        <CustomAfterMicrosoftCommonTargets>$(WebStackToolsPath)WebStack.targets</CustomAfterMicrosoftCommonTargets>
+    </PropertyGroup>
+
+    <!-- Everything is delay signed by default -->
+    <PropertyGroup>
+        <SignAssembly>true</SignAssembly>
+        <DelaySign>true</DelaySign>
+        <AssemblyOriginatorKeyFile>$(WebStackRootPath)\tools\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+</Project>

@@ -1,0 +1,269 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' ">false</CodeAnalysis>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{76EFA9C5-8D7E-4FDF-B710-E20F8B6B00D2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Web.WebPages</RootNamespace>
+    <AssemblyName>System.Web.WebPages</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;ASPNETWEBPAGES</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\bin\CodeCoverage\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;CODE_COVERAGE;ASPNETWEBPAGES</DefineConstants>
+    <DebugType>full</DebugType>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonResources.Designer.cs">
+      <Link>Common\CommonResources.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\ExceptionHelper.cs">
+      <Link>Common\ExceptionHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\GlobalSuppressions.cs">
+      <Link>Common\GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\HashCodeCombiner.cs">
+      <Link>Common\HashCodeCombiner.cs</Link>
+    </Compile>
+    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
+      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="ApplicationPart.cs" />
+    <Compile Include="ApplicationParts\ApplicationPartRegistry.cs" />
+    <Compile Include="ApplicationParts\DictionaryBasedVirtualPathFactory.cs" />
+    <Compile Include="ApplicationParts\IResourceAssembly.cs" />
+    <Compile Include="ApplicationParts\LazyAction.cs" />
+    <Compile Include="..\MimeMapping.cs">
+      <Link>Common\MimeMapping.cs</Link>
+    </Compile>
+    <Compile Include="ApplicationParts\ResourceAssembly.cs" />
+    <Compile Include="ApplicationParts\ResourceHandler.cs" />
+    <Compile Include="ApplicationParts\ResourceRouteHandler.cs" />
+    <Compile Include="ApplicationStartPage.cs" />
+    <Compile Include="AttributeValue.cs" />
+    <Compile Include="BrowserOverrideStore.cs" />
+    <Compile Include="BrowserOverrideStores.cs" />
+    <Compile Include="BrowserOverride.cs" />
+    <Compile Include="BuildManagerWrapper.cs" />
+    <Compile Include="CookieBrowserOverrideStore.cs" />
+    <Compile Include="DisplayInfo.cs" />
+    <Compile Include="DisplayModeProvider.cs" />
+    <Compile Include="BrowserHelpers.cs" />
+    <Compile Include="IDisplayMode.cs" />
+    <Compile Include="DefaultDisplayMode.cs" />
+    <Compile Include="FileExistenceCache.cs" />
+    <Compile Include="Helpers\AntiForgeryData.cs" />
+    <Compile Include="Helpers\AntiForgeryDataSerializer.cs" />
+    <Compile Include="Helpers\AntiForgery.cs" />
+    <Compile Include="Helpers\AntiForgeryWorker.cs" />
+    <Compile Include="HttpContextExtensions.cs" />
+    <Compile Include="Instrumentation\HttpContextAdapter.Availability.cs" />
+    <Compile Include="Instrumentation\HttpContextAdapter.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HttpContextAdapter.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Instrumentation\InstrumentationService.cs" />
+    <Compile Include="Instrumentation\PageExecutionContextAdapter.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PageExecutionContextAdapter.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Instrumentation\PageExecutionListenerAdapter.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PageExecutionListenerAdapter.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Instrumentation\PageInstrumentationServiceAdapter.cs" />
+    <Compile Include="Instrumentation\PositionTagged.cs" />
+    <Compile Include="Mvc\ModelClientValidationEqualToRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationRangeRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationRegexRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationRemoteRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationRequiredRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationStringLengthRule.cs" />
+    <Compile Include="Mvc\UnobtrusiveValidationAttributesGenerator.cs" />
+    <Compile Include="RequestBrowserOverrideStore.cs" />
+    <Compile Include="Utils\SessionStateUtil.cs" />
+    <Compile Include="Utils\TypeHelper.cs" />
+    <Compile Include="Utils\UrlUtil.cs" />
+    <Compile Include="Validation\CompareValidator.cs" />
+    <Compile Include="Validation\DataTypeValidator.cs" />
+    <Compile Include="Validation\IValidator.cs" />
+    <Compile Include="Validation\RequestFieldValidatorBase.cs" />
+    <Compile Include="Validation\ValidationAttributeAdapter.cs" />
+    <Compile Include="Validation\ValidationHelper.cs" />
+    <Compile Include="Validation\Validator.cs" />
+    <Compile Include="VirtualPathFactoryExtensions.cs" />
+    <Compile Include="Mvc\HttpAntiForgeryException.cs" />
+    <Compile Include="RequestExtensions.cs" />
+    <Compile Include="Helpers\UnvalidatedRequestValues.cs" />
+    <Compile Include="Helpers\Validation.cs" />
+    <Compile Include="ITemplateFile.cs" />
+    <Compile Include="Mvc\TagBuilder.cs" />
+    <Compile Include="Mvc\TagRenderMode.cs" />
+    <Compile Include="StartPage.cs" />
+    <Compile Include="RequestResourceTracker.cs" />
+    <Compile Include="SecurityUtil.cs" />
+    <Compile Include="DynamicHttpApplicationState.cs" />
+    <Compile Include="DynamicPageDataDictionary.cs" />
+    <Compile Include="Html\HtmlHelper.Checkbox.cs" />
+    <Compile Include="Html\HtmlHelper.cs" />
+    <Compile Include="Html\HtmlHelper.Input.cs" />
+    <Compile Include="Html\HtmlHelper.Internal.cs" />
+    <Compile Include="Html\HtmlHelper.Label.cs" />
+    <Compile Include="Html\HtmlHelper.Radio.cs" />
+    <Compile Include="Html\HtmlHelper.Select.cs" />
+    <Compile Include="Html\HtmlHelper.TextArea.cs" />
+    <Compile Include="Html\HtmlHelper.Validation.cs" />
+    <Compile Include="Html\SelectListItem.cs" />
+    <Compile Include="IVirtualPathFactory.cs" />
+    <Compile Include="Scope\ApplicationScopeStorageDictionary.cs" />
+    <Compile Include="Scope\AspNetRequestScopeStorageProvider.cs" />
+    <Compile Include="Common\DisposableAction.cs" />
+    <Compile Include="Scope\IScopeStorageProvider.cs" />
+    <Compile Include="Scope\ScopeStorage.cs" />
+    <Compile Include="Scope\ScopeStorageComparer.cs" />
+    <Compile Include="Scope\ScopeStorageDictionary.cs" />
+    <Compile Include="Scope\StaticScopeStorageProvider.cs" />
+    <Compile Include="Scope\WebConfigScopeStorageDictionary.cs" />
+    <Compile Include="TemplateFileInfo.cs" />
+    <Compile Include="TemplateStack.cs" />
+    <Compile Include="Utils\CultureUtil.cs" />
+    <Compile Include="Utils\PathUtil.cs" />
+    <Compile Include="WebPageHttpModule.cs" />
+    <Compile Include="HelperPage.cs" />
+    <Compile Include="HelperResult.cs" />
+    <Compile Include="IWebPageRequestExecutor.cs" />
+    <Compile Include="Html\ModelState.cs" />
+    <Compile Include="Html\ModelStateDictionary.cs" />
+    <Compile Include="WebPageRoute.cs" />
+    <Compile Include="WebPageContext.cs" />
+    <Compile Include="SectionWriter.cs" />
+    <Compile Include="WebPageExecutingBase.cs" />
+    <Compile Include="WebPageRenderingBase.cs" />
+    <Compile Include="ReflectionDynamicObject.cs" />
+    <Compile Include="ResponseExtensions.cs" />
+    <Compile Include="PageDataDictionary.cs" />
+    <Compile Include="PageVirtualPathAttribute.cs" />
+    <Compile Include="UrlDataList.cs" />
+    <Compile Include="StringExtensions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Resources\WebPageResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>WebPageResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="WebPageMatch.cs" />
+    <Compile Include="VirtualPathFactoryManager.cs" />
+    <Compile Include="WebPageBase.cs" />
+    <Compile Include="WebPageHttpHandler.cs" />
+    <Compile Include="PreApplicationStartCode.cs" />
+    <Compile Include="Utils\BuildManagerExceptionUtil.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebPage.cs" />
+    <Compile Include="..\IVirtualPathUtility.cs">
+      <Link>Common\IVirtualPathUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\VirtualPathUtilityWrapper.cs">
+      <Link>Common\VirtualPathUtilityWrapper.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\CommonResources.resx">
+      <Link>Common\CommonResources.resx</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\WebPageResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>WebPageResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Web.Razor\System.Web.Razor.csproj">
+      <Project>{8F18041B-9410-4C36-A9C5-067813DF5F31}</Project>
+      <Name>System.Web.Razor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Web.WebPages.Deployment\System.Web.WebPages.Deployment.csproj">
+      <Project>{22BABB60-8F02-4027-AFFC-ACF069954536}</Project>
+      <Name>System.Web.WebPages.Deployment</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Instrumentation\HttpContextAdapter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>HttpContextAdapter.generated.cs</LastGenOutput>
+    </None>
+    <None Include="Instrumentation\PageExecutionContextAdapter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PageExecutionContextAdapter.generated.cs</LastGenOutput>
+    </None>
+    <None Include="Instrumentation\PageExecutionListenerAdapter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PageExecutionListenerAdapter.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

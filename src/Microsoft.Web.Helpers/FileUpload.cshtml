@@ -1,0 +1,111 @@
+﻿@* Generator: WebPagesHelper *@
+
+@using System.Globalization
+@using System.Web
+@using Microsoft.Internal.Web.Utils
+@using Resources
+
+@functions {
+    private class FileUploadTracker {
+        private static readonly object _countKey = new object();
+        private static readonly object _scriptAlreadyRendered = new object();
+        private readonly HttpContextBase _httpContext;
+
+        public FileUploadTracker(HttpContextBase httpContext) {
+            _httpContext = httpContext;
+        }
+
+        public bool ScriptAlreadyRendered {
+            get {
+                bool? rendered = _httpContext.Items[_scriptAlreadyRendered] as bool?;
+                return rendered.HasValue && rendered.Value;
+            }
+            set {
+                _httpContext.Items[_scriptAlreadyRendered] = value;
+            }
+        }
+
+        public int RenderCount {
+            get {
+                int? count = _httpContext.Items[_countKey] as int?;
+                if (!count.HasValue) {
+                    count = 0;
+                }
+                return count.Value;
+            }
+            set {
+                _httpContext.Items[_countKey] = value;
+            }
+        }
+    }
+}
+
+@helper GetHtml(string name = null,
+            int initialNumberOfFiles = 1,
+            bool allowMoreFilesToBeAdded = true,
+            bool includeFormTag = true,
+            string addText = null,
+            string uploadText = null) {
+    @_GetHtml(new HttpContextWrapper(HttpContext.Current), name, initialNumberOfFiles, allowMoreFilesToBeAdded,
+                includeFormTag, addText, uploadText)
+}
+
+@helper _GetHtml(HttpContextBase context, string name, int initialNumberOfFiles, 
+        bool allowMoreFilesToBeAdded, bool includeFormTag, string addText, string uploadText) {
+    
+    if (initialNumberOfFiles < 0) {
+        throw new ArgumentOutOfRangeException(
+            "initialNumberOfFiles",
+            String.Format(CultureInfo.InvariantCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, "0"));
+    }
+    var tracker = new FileUploadTracker(context);
+    int count = tracker.RenderCount++;
+
+    name = name ?? "fileUpload";
+    uploadText = uploadText ?? HelpersToolkitResources.FileUpload_Upload;
+    addText = addText ?? HelpersToolkitResources.FileUpload_AddMore;
+
+
+    if (allowMoreFilesToBeAdded && !tracker.ScriptAlreadyRendered) {
+        tracker.ScriptAlreadyRendered = true;
+
+        <script type="text/javascript"> 
+            if (!window["FileUploadHelper"]) window["FileUploadHelper"] = {};  
+            FileUploadHelper.addInputElement = function(index, name) {  
+                var inputElem = document.createElement("input");  
+                inputElem.type = "file";  
+                inputElem.name = name;  
+                var divElem = document.createElement("div");  
+                divElem.appendChild(inputElem.cloneNode(false));   
+                var inputs = document.getElementById("file-upload-" + index);  
+                inputs.appendChild(divElem);  
+            } 
+        </script>
+    }
+
+    if (includeFormTag) {
+        @:<form action="" enctype="multipart/form-data" method="post">
+    }
+    <div class="file-upload" id="file-upload-@(count)">
+        @for(int i = 0; i < initialNumberOfFiles; i++) {
+            <div>
+                <input name="@name" type="file" />
+            </div>
+        }
+    </div>
+
+    if (allowMoreFilesToBeAdded || includeFormTag) {
+        <div class="file-upload-buttons">
+        @if (allowMoreFilesToBeAdded) {
+            <a href="#" onclick="FileUploadHelper.addInputElement(@count, @HttpUtility.JavaScriptStringEncode(name, addDoubleQuotes: true)); return false;">@addText</a>
+        }
+        @if (includeFormTag) {
+            <input type="submit" value="@uploadText" />
+        }
+        </div>
+    }
+    
+    if (includeFormTag) {
+        @:</form>
+    }
+}

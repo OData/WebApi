@@ -1,0 +1,66 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@{
+    Page.Title = AdminResources.RegisterTitle;
+    var adminPath = SiteAdmin.AdminVirtualPath.TrimStart('~');
+    Page.Desc = String.Format(CultureInfo.CurrentCulture, AdminResources.RegisterDesc, Html.Encode(adminPath));
+
+    // If the password is already set the redirect to login
+    if(AdminSecurity.HasAdminPassword()) {
+        SiteAdmin.RedirectToLogin(Response);
+        return;
+    }
+
+    if (IsPost) {
+        AntiForgery.Validate();
+
+        var password = Request.Form["password"];
+        var reenteredPassword = Request.Form["repassword"];
+        if (password.IsEmpty()) {
+            ModelState.AddError("password", AdminResources.Validation_PasswordRequired); 
+        }
+        else if (password != reenteredPassword) {
+            ModelState.AddError("repassword", AdminResources.Validation_PasswordsDoNotMatch);
+        }
+
+        if (ModelState.IsValid) {
+            // Save the admin password
+            if(AdminSecurity.SaveTemporaryPassword(password)) {
+                // Get the return url
+                var returnUrl = SiteAdmin.GetReturnUrl(Request) ?? SiteAdmin.AdminVirtualPath;
+
+                // Redirect to the return url
+                Response.Redirect(returnUrl);
+            }
+            else {
+                // Add a validation error since creating the password.txt failed
+                ModelState.AddFormError(AdminResources.AdminModuleRequiresAccessToAppData);
+            }
+            
+        }
+    }
+}
+
+<br/>
+
+@Html.ValidationSummary()
+
+<form method="post" action="">
+@AntiForgery.GetHtml()
+<fieldset>
+    <ol>
+        <li class="password">
+            <label for="password">@AdminResources.EnterPassword</label>
+            @Html.Password("password") @Html.ValidationMessage("password", "*")
+        </li>
+        <li class="password">
+            <label>@AdminResources.ReenterPassword</label>
+            @Html.Password("repassword") @Html.ValidationMessage("repassword", "*")
+        </li>
+    </ol>
+    <p class="form-actions">
+        <input type="submit" value="@AdminResources.CreatePassword" class="long-input" />
+    </p>
+</fieldset>
+</form>

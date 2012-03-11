@@ -1,0 +1,79 @@
+<Project DefaultTargets="UnitTest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+
+        <!-- TODO: CodeAnalysis is off by default in VS11 because FxCop cannot load custom rules built against Dev10 -->
+        <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(VS110COMNTOOLS)' == ''">true</CodeAnalysis>
+
+        <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
+        <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
+        <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
+        <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
+    </PropertyGroup>
+
+    <Target Name="Integration" DependsOnTargets="Clean;Build;UnitTest" />
+
+    <Target Name="Clean">
+        <MSBuild
+            Projects="Runtime.sln"
+            Targets="Clean"
+            Properties="Configuration=$(Configuration)" />
+        <RemoveDir Directories="bin\$(Configuration)" />
+    </Target>
+
+    <Target Name="RestorePackages">
+        <!--
+        This can't build in parallel because of NuGet package restore race conditions.
+        When this is fixed in NuGet, we can remove the CSPROJ part of this target
+        (we will continue to need the NuGet install for StyleCop and FxCop tasks).
+
+        NOTE: These projects are hand selected to be the minimum # of CSPROJ files that
+              ensure we've restored every remote package. If another collision is found,
+              please review the project list as appropriate.
+        -->
+        <ItemGroup>
+            <RestoreCsProjFiles
+                Include="test\Microsoft.Web.Http.Data.Test\*.csproj;
+                         src\System.Web.WebPages.Administration\*.csproj;
+                         src\System.Web.WebPages.Deployment\*.csproj;
+                         src\Microsoft.Web.WebPages.OAuth\*.csproj" />
+        </ItemGroup>
+        <Message Text="Restoring NuGet packages..." Importance="High" />
+        <!-- Download NuGet.exe -->
+        <MSBuild
+            Projects="tools\WebStack.NuGet.targets"
+            Targets="CheckPrerequisites" />
+        <!-- Restore the things the CSPROJ files need -->
+        <MSBuild
+            Projects="@(RestoreCsProjFiles)"
+            BuildInParallel="false"
+            Targets="RestorePackages" />
+        <!-- Hand restore packages with binaries that this MSBuild process needs -->
+        <Exec
+            Command='tools\NuGet.exe install StyleCop -Source "\\webstack-git\packages;https://go.microsoft.com/fwlink/?LinkID=230477" -Version 4.7.10.0 -o packages > NUL'
+            LogStandardErrorAsError="true" />
+        <Exec
+            Command='tools\NuGet.exe install Microsoft.Web.FxCop -Source "\\webstack-git\packages;https://go.microsoft.com/fwlink/?LinkID=230477" -ExcludeVersion -o packages > NUL'
+            LogStandardErrorAsError="true" />
+    </Target>
+
+    <Target Name="Build" DependsOnTargets="RestorePackages">
+        <MakeDir Directories="bin\$(Configuration)" />
+        <MSBuild
+            Projects="Runtime.sln"
+            BuildInParallel="$(BuildInParallel)"
+            Targets="Build"
+            Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled)" />
+    </Target>
+
+    <Target Name="UnitTest" DependsOnTargets="Build">
+        <ItemGroup>            
+            <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll" />
+            <XunitProject Include="tools\WebStack.xunit.targets">
+                <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=$(TestResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
+            </XunitProject>
+        </ItemGroup>
+        <MakeDir Directories="$(TestResultsDirectory)" />
+        <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
+    </Target>
+</Project>

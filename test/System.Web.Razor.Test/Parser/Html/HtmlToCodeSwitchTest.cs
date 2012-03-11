@@ -1,0 +1,222 @@
+﻿using System.Web.Razor.Editor;
+using System.Web.Razor.Generator;
+using System.Web.Razor.Parser;
+using System.Web.Razor.Parser.SyntaxTree;
+using System.Web.Razor.Test.Framework;
+using System.Web.Razor.Text;
+using System.Web.Razor.Tokenizer.Symbols;
+using Xunit;
+
+namespace System.Web.Razor.Test.Parser.Html
+{
+    public class HtmlToCodeSwitchTest : CsHtmlMarkupParserTestBase
+    {
+        [Fact]
+        public void ParseBlockSwitchesWhenCharacterBeforeSwapIsNonAlphanumeric()
+        {
+            ParseBlockTest("<p>foo#@i</p>",
+                new MarkupBlock(
+                    Factory.Markup("<p>foo#"),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("i").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup("</p>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockSwitchesToCodeWhenSwapCharacterEncounteredMidTag()
+        {
+            ParseBlockTest("<foo @bar />",
+                new MarkupBlock(
+                    Factory.Markup("<foo "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" />").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockSwitchesToCodeWhenSwapCharacterEncounteredInAttributeValue()
+        {
+            ParseBlockTest("<foo bar=\"@baz\" />",
+                new MarkupBlock(
+                    Factory.Markup("<foo"),
+                    new MarkupBlock(new AttributeBlockCodeGenerator("bar", new LocationTagged<string>(" bar=\"", 4, 0, 4), new LocationTagged<string>("\"", 14, 0, 14)),
+                        Factory.Markup(" bar=\"").With(SpanCodeGenerator.Null),
+                        new MarkupBlock(new DynamicAttributeBlockCodeGenerator(new LocationTagged<string>(String.Empty, 10, 0, 10), 10, 0, 10),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("baz")
+                                       .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                       .Accepts(AcceptedCharacters.NonWhiteSpace))),
+                        Factory.Markup("\"").With(SpanCodeGenerator.Null)),
+                    Factory.Markup(" />").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockSwitchesToCodeWhenSwapCharacterEncounteredInTagContent()
+        {
+            ParseBlockTest("<foo>@bar<baz>@boz</baz></foo>",
+                new MarkupBlock(
+                    Factory.Markup("<foo>"),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup("<baz>"),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("boz")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup("</baz></foo>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockParsesCodeWithinSingleLineMarkup()
+        {
+            ParseBlockTest(@"@:<li>Foo @Bar Baz
+bork",
+                new MarkupBlock(
+                    Factory.MarkupTransition(),
+                    Factory.MetaMarkup(":", HtmlSymbolType.Colon),
+                    Factory.Markup("<li>Foo ").With(new SingleLineMarkupEditHandler(CSharpLanguageCharacteristics.Instance.TokenizeString)),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("Bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" Baz\r\n")
+                           .With(new SingleLineMarkupEditHandler(CSharpLanguageCharacteristics.Instance.TokenizeString, AcceptedCharacters.None))));
+        }
+
+        [Fact]
+        public void ParseBlockSupportsCodeWithinComment()
+        {
+            ParseBlockTest("<foo><!-- @foo --></foo>",
+                new MarkupBlock(
+                    Factory.Markup("<foo><!-- "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("foo")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" --></foo>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockSupportsCodeWithinSGMLDeclaration()
+        {
+            ParseBlockTest("<foo><!DOCTYPE foo @bar baz></foo>",
+                new MarkupBlock(
+                    Factory.Markup("<foo><!DOCTYPE foo "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" baz></foo>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockSupportsCodeWithinCDataDeclaration()
+        {
+            ParseBlockTest("<foo><![CDATA[ foo @bar baz]]></foo>",
+                new MarkupBlock(
+                    Factory.Markup("<foo><![CDATA[ foo "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" baz]]></foo>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockSupportsCodeWithinXMLProcessingInstruction()
+        {
+            ParseBlockTest("<foo><?xml foo @bar baz?></foo>",
+                new MarkupBlock(
+                    Factory.Markup("<foo><?xml foo "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" baz?></foo>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockDoesNotSwitchToCodeOnEmailAddressInText()
+        {
+            SingleSpanBlockTest("<foo>anurse@microsoft.com</foo>", BlockType.Markup, SpanKind.Markup, acceptedCharacters: AcceptedCharacters.None);
+        }
+
+        [Fact]
+        public void ParseBlockDoesNotSwitchToCodeOnEmailAddressInAttribute()
+        {
+            ParseBlockTest("<a href=\"mailto:anurse@microsoft.com\">Email me</a>",
+                new MarkupBlock(
+                    Factory.Markup("<a"),
+                    new MarkupBlock(new AttributeBlockCodeGenerator("href", new LocationTagged<string>(" href=\"", 2, 0, 2), new LocationTagged<string>("\"", 36, 0, 36)),
+                        Factory.Markup(" href=\"").With(SpanCodeGenerator.Null),
+                        Factory.Markup("mailto:anurse@microsoft.com")
+                               .With(new LiteralAttributeCodeGenerator(new LocationTagged<string>(String.Empty, 9, 0, 9), new LocationTagged<string>("mailto:anurse@microsoft.com", 9, 0, 9))),
+                        Factory.Markup("\"").With(SpanCodeGenerator.Null)),
+                    Factory.Markup(">Email me</a>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ParseBlockGivesWhitespacePreceedingAtToCodeIfThereIsNoMarkupOnThatLine()
+        {
+            ParseBlockTest(@"   <ul>
+    @foreach(var p in Products) {
+        <li>Product: @p.Name</li>
+    }
+    </ul>",
+                new MarkupBlock(
+                    Factory.Markup("   <ul>\r\n"),
+                    new StatementBlock(
+                        Factory.Code("    ").AsStatement(),
+                        Factory.CodeTransition(),
+                        Factory.Code("foreach(var p in Products) {\r\n").AsStatement(),
+                        new MarkupBlock(
+                            Factory.Markup("        <li>Product: "),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("p.Name")
+                                       .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                       .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                            Factory.Markup("</li>\r\n").Accepts(AcceptedCharacters.None)),
+                        Factory.Code("    }\r\n").AsStatement().Accepts(AcceptedCharacters.None)),
+                    Factory.Markup("    </ul>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void CSharpCodeParserDoesNotAcceptLeadingOrTrailingWhitespaceInDesignMode()
+        {
+            ParseBlockTest(@"   <ul>
+    @foreach(var p in Products) {
+        <li>Product: @p.Name</li>
+    }
+    </ul>",
+                new MarkupBlock(
+                    Factory.Markup("   <ul>\r\n    "),
+                    new StatementBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("foreach(var p in Products) {\r\n        ").AsStatement(),
+                        new MarkupBlock(
+                            Factory.Markup("<li>Product: "),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("p.Name").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                            Factory.Markup("</li>").Accepts(AcceptedCharacters.None)),
+                        Factory.Code("\r\n    }").AsStatement().Accepts(AcceptedCharacters.None)),
+                    Factory.Markup("\r\n    </ul>").Accepts(AcceptedCharacters.None)),
+                designTimeParser: true);
+        }
+    }
+}

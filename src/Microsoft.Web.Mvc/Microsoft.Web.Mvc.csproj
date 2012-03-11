@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <CodeAnalysis Condition=" '$(CodeAnalysis)' == ''">false</CodeAnalysis>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D3CF7430-6DA4-42B0-BD90-CA39D16687B2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Web.Mvc</RootNamespace>
+    <AssemblyName>Microsoft.Web.Mvc</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Force signing off -->
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ASPNETMVC</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;ASPNETMVC</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\bin\CodeCoverage\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ASPNETMVC</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
+      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="MachineKeyWrapper.cs" />
+    <Compile Include="IMachineKey.cs" />
+    <Compile Include="CreditCardAttribute.cs" />
+    <Compile Include="EmailAddressAttribute.cs" />
+    <Compile Include="FileExtensionsAttribute.cs" />
+    <Compile Include="AreaHelpers.cs" />
+    <Compile Include="AsyncManagerExtensions.cs" />
+    <Compile Include="CookieValueProviderFactory.cs" />
+    <Compile Include="ActionLinkAreaAttribute.cs" />
+    <Compile Include="ControllerExtensions.cs" />
+    <Compile Include="DynamicReflectionObject.cs" />
+    <Compile Include="DynamicViewDataDictionary.cs" />
+    <Compile Include="DynamicViewPage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DynamicViewPage`1.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ExpressionUtil\BinaryExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\CachedExpressionCompiler.cs" />
+    <Compile Include="ExpressionUtil\ConditionalExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\ConstantExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\DefaultExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\ExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\ExpressionFingerprintChain.cs" />
+    <Compile Include="ExpressionUtil\FingerprintingExpressionVisitor.cs" />
+    <Compile Include="ExpressionUtil\HashCodeCombiner.cs" />
+    <Compile Include="ExpressionUtil\Hoisted`2.cs" />
+    <Compile Include="ExpressionUtil\HoistingExpressionVisitor.cs" />
+    <Compile Include="ExpressionUtil\IndexExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\LambdaExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\MemberExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\MethodCallExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\ParameterExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\TypeBinaryExpressionFingerprint.cs" />
+    <Compile Include="ExpressionUtil\UnaryExpressionFingerprint.cs" />
+    <Compile Include="Html\HtmlHelperExtensions.cs" />
+    <Compile Include="ModelBinding\BinaryDataModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\ExtensibleModelBinderAttribute.cs" />
+    <Compile Include="ModelBinding\ModelBinderProviderOptionsAttribute.cs" />
+    <Compile Include="ModelBinding\ExtensibleModelBinderAdapter.cs" />
+    <Compile Include="ModelBinding\ExtensibleModelBindingContext.cs" />
+    <Compile Include="ModelBinding\IExtensibleModelBinder.cs" />
+    <Compile Include="ModelBinding\ModelBinderErrorMessageProvider.cs" />
+    <Compile Include="ModelCopier.cs" />
+    <Compile Include="ModelBinding\CollectionModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\CollectionModelBinderUtil.cs" />
+    <Compile Include="ModelBinding\CollectionModelBinder`1.cs" />
+    <Compile Include="ModelBinding\ComplexModelDtoModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\ArrayModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\ArrayModelBinder`1.cs" />
+    <Compile Include="ModelBinding\BindingBehaviorAttribute.cs" />
+    <Compile Include="ModelBinding\BindingBehavior.cs" />
+    <Compile Include="ModelBinding\BindNeverAttribute.cs" />
+    <Compile Include="ModelBinding\BindRequiredAttribute.cs" />
+    <Compile Include="ModelBinding\GenericModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\DictionaryModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\DictionaryModelBinder`2.cs" />
+    <Compile Include="UrlAttribute.cs" />
+    <Compile Include="ValueProviderUtil.cs" />
+    <Compile Include="ElementalValueProvider.cs" />
+    <Compile Include="ModelBinding\KeyValuePairModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\KeyValuePairModelBinderUtil.cs" />
+    <Compile Include="ModelBinding\KeyValuePairModelBinder`2.cs" />
+    <Compile Include="TypeDescriptorHelper.cs" />
+    <Compile Include="Error.cs" />
+    <Compile Include="ModelBinding\ComplexModelDto.cs" />
+    <Compile Include="ModelBinding\ComplexModelDtoModelBinder.cs" />
+    <Compile Include="ModelBinding\ComplexModelDtoResult.cs" />
+    <Compile Include="ModelBinding\ModelBinderConfig.cs" />
+    <Compile Include="ModelBinding\MutableObjectModelBinder.cs" />
+    <Compile Include="ModelBinding\MutableObjectModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\SimpleModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\TypeConverterModelBinder.cs" />
+    <Compile Include="ModelBinding\TypeConverterModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\TypeMatchModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\TypeMatchModelBinder.cs" />
+    <Compile Include="ModelBinding\ModelBinderProviderCollection.cs" />
+    <Compile Include="ModelBinding\ModelBinderProvider.cs" />
+    <Compile Include="ModelBinding\ModelBinderUtil.cs" />
+    <Compile Include="ModelBinding\ModelValidatedEventArgs.cs" />
+    <Compile Include="ModelBinding\ModelValidatingEventArgs.cs" />
+    <Compile Include="ModelBinding\ModelValidationNode.cs" />
+    <Compile Include="ModelBinding\ModelBinderProviders.cs" />
+    <Compile Include="ServerVariablesValueProviderFactory.cs" />
+    <Compile Include="TempDataValueProviderFactory.cs" />
+    <Compile Include="SessionValueProviderFactory.cs" />
+    <Compile Include="CopyAsyncParametersAttribute.cs" />
+    <Compile Include="CssExtensions.cs" />
+    <Compile Include="Resources\ActionType.cs" />
+    <Compile Include="Resources\AjaxHelperExtensions.cs" />
+    <Compile Include="Resources\AtomEntryActionResult.cs" />
+    <Compile Include="Resources\AtomFeedActionResult.cs" />
+    <Compile Include="Resources\AtomServiceDocumentActionResult.cs" />
+    <Compile Include="Resources\DataContractJsonActionResult.cs" />
+    <Compile Include="Resources\JsonFormatHandler.cs" />
+    <Compile Include="Resources\RouteCollectionExtensions.cs" />
+    <Compile Include="Resources\UriHelperExtensions.cs" />
+    <Compile Include="Resources\WebApiEnabledAttribute.cs" />
+    <Compile Include="Resources\XmlFormatHandler.cs" />
+    <Compile Include="Resources\IResponseFormatHandler.cs" />
+    <Compile Include="Resources\IRequestFormatHandler.cs" />
+    <Compile Include="Resources\FormatManager.cs" />
+    <Compile Include="Resources\HtmlHelperExtensions.cs" />
+    <Compile Include="Resources\MultiFormatActionResult.cs" />
+    <Compile Include="Resources\RequestContextExtensions.cs" />
+    <Compile Include="Resources\ResourceControllerFactory.cs" />
+    <Compile Include="Resources\ResourceErrorActionResult.cs" />
+    <Compile Include="Resources\ResourceModelBinder.cs" />
+    <Compile Include="Resources\ResourceRedirectToRouteResult.cs" />
+    <Compile Include="Resources\DataContractXmlActionResult.cs" />
+    <Compile Include="Resources\HttpRequestBaseExtensions.cs" />
+    <Compile Include="Resources\IEnumerableExtensions.cs" />
+    <Compile Include="Resources\DefaultFormatHelper.cs" />
+    <Compile Include="Resources\DefaultFormatManager.cs" />
+    <Compile Include="Resources\FormatHelper.cs" />
+    <Compile Include="Internal\ExpressionHelper.cs" />
+    <Compile Include="DeserializeAttribute.cs" />
+    <Compile Include="ScriptExtensions.cs" />
+    <Compile Include="SerializationExtensions.cs" />
+    <Compile Include="SerializationMode.cs" />
+    <Compile Include="MvcSerializer.cs" />
+    <Compile Include="AjaxOnlyAttribute.cs" />
+    <Compile Include="CachedExpressionCompiler.cs" />
+    <Compile Include="ReaderWriterCache`2.cs" />
+    <Compile Include="ButtonBuilder.cs" />
+    <Compile Include="ButtonsAndLinkExtensions.cs" />
+    <Compile Include="ContentTypeAttribute.cs" />
+    <Compile Include="Controls\ActionLink.cs" />
+    <Compile Include="Controls\EncodeType.cs" />
+    <Compile Include="Controls\DropDownList.cs" />
+    <Compile Include="Controls\Hidden.cs" />
+    <Compile Include="Controls\Label.cs" />
+    <Compile Include="Controls\MvcControl.cs" />
+    <Compile Include="Controls\MvcInputControl.cs" />
+    <Compile Include="Controls\Password.cs" />
+    <Compile Include="Controls\Repeater.cs" />
+    <Compile Include="Controls\RepeaterItem.cs" />
+    <Compile Include="Controls\RouteValues.cs" />
+    <Compile Include="Controls\TextBox.cs" />
+    <Compile Include="CookieTempDataProvider.cs" />
+    <Compile Include="SkipBindingAttribute.cs" />
+    <Compile Include="FormExtensions.cs" />
+    <Compile Include="HtmlButtonType.cs" />
+    <Compile Include="LinkBuilder.cs" />
+    <Compile Include="LinkExtensions.cs" />
+    <Compile Include="RadioExtensions.cs" />
+    <Compile Include="ImageExtensions.cs" />
+    <Compile Include="MailToExtensions.cs" />
+    <Compile Include="TypeHelpers.cs" />
+    <Compile Include="ViewExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\MvcResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MvcResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Web.Mvc\System.Web.Mvc.csproj">
+      <Project>{3D3FFD8A-624D-4E9B-954B-E1C105507975}</Project>
+      <Name>System.Web.Mvc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Web.WebPages\System.Web.WebPages.csproj">
+      <Project>{76EFA9C5-8D7E-4FDF-B710-E20F8B6B00D2}</Project>
+      <Name>System.Web.WebPages</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\MvcResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MvcResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\Boolean.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </None>
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\Collection.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\Decimal.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\EmailAddress.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\HiddenInput.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\Html.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\Object.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\String.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\DisplayTemplates\Url.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\Boolean.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\Collection.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\Decimal.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\HiddenInput.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\MultilineText.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\Object.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\Password.ascx" />
+    <None Include="FuturesFiles\DefaultTemplates\EditorTemplates\String.ascx" />
+    <None Include="FuturesFiles\iismap.vbs" />
+    <None Include="FuturesFiles\MvcDiagnostics.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </None>
+    <None Include="FuturesFiles\registermvc.wsf" />
+    <None Include="FuturesFiles\unregistermvc.wsf" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

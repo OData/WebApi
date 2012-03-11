@@ -1,0 +1,15 @@
+﻿body 
+{
+    padding: 0px;
+    margin: 0px;
+}
+h1 
+{
+    margin: 5px;
+}
+div.test-results 
+{
+    width: 500px; 
+    height: 700px; 
+    margin:5px;
+}

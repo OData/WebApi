@@ -1,0 +1,21 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" inherits="Microsoft.Web.CodeGen.DynamicCallerGenerator" #>
+<#@ import namespace="System.Reflection" #>
+<#@ assembly name="$(SolutionDir)\tools\Microsoft.Web.CodeGen\Microsoft.Web.CodeGen.dll" #>
+<#@ output extension=".cs" #>
+<#
+TargetNamespace = "System.Web.WebPages.Instrumentation";
+
+Include(MemberTypes.Property, "PageInstrumentation");
+
+Map(
+	"System.Web.Instrumentation.PageInstrumentationService",
+	"System.Web.WebPages.Instrumentation.PageInstrumentationServiceAdapter",
+	s => {#><#=s#>.Adaptee<#},
+	s => {#>new PageInstrumentationServiceAdapter(<#=s#>)<#}
+);
+
+WriteAdaptor(
+	"System.Web.HttpContext", 
+	Host.ResolvePath(@"..\..\..\ReferenceAssemblies\NetFx\Dev11\System.Web.dll")
+); 
+#>

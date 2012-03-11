@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0F4870DB-A799-4DBA-99DF-0D74BB52FEC2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Web.WebPages.Test</RootNamespace>
+    <AssemblyName>System.Web.WebPages.Test</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(WebStackRootPath)\bin\Debug\Test\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(WebStackRootPath)\bin\Release\Test\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'CodeCoverage' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(WebStackRootPath)\bin\CodeCoverage\Test\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="xunit">
+      <HintPath>..\..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.extensions">
+      <HintPath>..\..\packages\xunit.extensions.1.9.0.1566\lib\xunit.extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApplicationParts\ApplicationPartTest.cs" />
+    <Compile Include="ApplicationParts\ApplicationPartRegistryTest.cs" />
+    <Compile Include="ApplicationParts\MimeMappingTest.cs" />
+    <Compile Include="ApplicationParts\ResourceHandlerTest.cs" />
+    <Compile Include="ApplicationParts\TestResourceAssembly.cs" />
+    <Compile Include="Utils\SessionStateUtilTest.cs" />
+    <Compile Include="WebPage\BrowserHelpersTest.cs" />
+    <Compile Include="WebPage\BrowserOverrideStoresTest.cs" />
+    <Compile Include="WebPage\CookieBrowserOverrideStoreTest.cs" />
+    <Compile Include="WebPage\DefaultDisplayModeTest.cs" />
+    <Compile Include="WebPage\DisplayInfoTest.cs" />
+    <Compile Include="WebPage\DisplayModeProviderTest.cs" />
+    <Compile Include="Extensions\HttpContextExtensionsTest.cs" />
+    <Compile Include="Extensions\HttpRequestExtensionsTest.cs" />
+    <Compile Include="Extensions\StringExtensionsTest.cs" />
+    <Compile Include="Extensions\HttpResponseExtensionsTest.cs" />
+    <Compile Include="Helpers\AntiForgeryDataSerializerTest.cs" />
+    <Compile Include="Helpers\AntiForgeryDataTest.cs" />
+    <Compile Include="Helpers\AntiForgeryTest.cs" />
+    <Compile Include="Helpers\AntiForgeryWorkerTest.cs" />
+    <Compile Include="Helpers\UnvalidatedRequestValuesTest.cs" />
+    <Compile Include="Html\CheckBoxTest.cs" />
+    <Compile Include="Html\HtmlHelperFactory.cs" />
+    <Compile Include="Html\HtmlHelperTest.cs" />
+    <Compile Include="Html\InputHelperTest.cs" />
+    <Compile Include="Html\RadioButtonTest.cs" />
+    <Compile Include="Html\SelectHelperTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Html\TextAreaHelperTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Html\ValidationHelperTest.cs" />
+    <Compile Include="Instrumentation\InstrumentationServiceTest.cs" />
+    <Compile Include="Mvc\HttpAntiForgeryExceptionTest.cs" />
+    <Compile Include="Mvc\TagBuilderTest.cs" />
+    <Compile Include="PreApplicationStartCodeTest.cs" />
+    <Compile Include="ScopeStorage\AspNetRequestScopeStorageProviderTest.cs" />
+    <Compile Include="ScopeStorage\ScopeStorageDictionaryTest.cs" />
+    <Compile Include="ScopeStorage\ScopeStorageKeyComparerTest.cs" />
+    <Compile Include="ScopeStorage\WebConfigScopeStorageTest.cs" />
+    <Compile Include="Utils\CultureUtilTest.cs" />
+    <Compile Include="Utils\PathUtilTest.cs" />
+    <Compile Include="Utils\TestObjectFactory.cs" />
+    <Compile Include="Utils\TypeHelperTest.cs" />
+    <Compile Include="Utils\UrlUtilTest.cs" />
+    <Compile Include="Validation\ValidationHelperTest.cs" />
+    <Compile Include="Validation\ValidatorTest.cs" />
+    <Compile Include="WebPage\ApplicationStartPageTest.cs" />
+    <Compile Include="WebPage\DynamicHttpApplicationStateTest.cs" />
+    <Compile Include="WebPage\DynamicPageDataDictionaryTest.cs" />
+    <Compile Include="WebPage\FileExistenceCacheTest.cs" />
+    <Compile Include="WebPage\RequestBrowserOverrideStoreTest.cs" />
+    <Compile Include="WebPage\RequestResourceTrackerTest.cs" />
+    <Compile Include="WebPage\TemplateStackTest.cs" />
+    <Compile Include="WebPage\BuildManagerWrapperTest.cs" />
+    <Compile Include="WebPage\VirtualPathFactoryExtensionsTest.cs" />
+    <Compile Include="WebPage\VirtualPathFactoryManagerTest.cs" />
+    <Compile Include="WebPage\WebPageContextTest.cs" />
+    <Compile Include="WebPage\WebPageExecutingBaseTest.cs" />
+    <Compile Include="WebPage\WebPageHttpModuleTest.cs" />
+    <Compile Include="WebPage\WebPageHttpHandlerTest.cs" />
+    <Compile Include="WebPage\UrlDataTest.cs" />
+    <Compile Include="WebPage\StartPageTest.cs" />
+    <Compile Include="WebPage\Utils.cs" />
+    <Compile Include="WebPage\PageDataDictionaryTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebPage\WebPageRenderingBaseTest.cs" />
+    <Compile Include="WebPage\WebPageRouteTest.cs" />
+    <Compile Include="WebPage\RenderPageTest.cs" />
+    <Compile Include="WebPage\BuildManagerExceptionUtilTest.cs" />
+    <Compile Include="WebPage\LayoutTest.cs" />
+    <Compile Include="WebPage\WebPageTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Web.Razor\System.Web.Razor.csproj">
+      <Project>{8F18041B-9410-4C36-A9C5-067813DF5F31}</Project>
+      <Name>System.Web.Razor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.WebPages\System.Web.WebPages.csproj">
+      <Project>{76EFA9C5-8D7E-4FDF-B710-E20F8B6B00D2}</Project>
+      <Name>System.Web.WebPages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
+      <Project>{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}</Project>
+      <Name>Microsoft.TestCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="TestFiles\Deployed\Bar" />
+    <None Include="TestFiles\Deployed\Bar.foohtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestFiles\Deployed\Bar.cshtml" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

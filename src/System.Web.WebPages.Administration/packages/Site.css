@@ -1,0 +1,127 @@
+.validation-summary-errors li {
+    list-style-image: url(images/error.png);
+}
+
+.package-description {
+    padding: 0px;
+    margin: 5px 5px 3px 0px;
+}
+
+.package {
+    list-style-image: url(images/package.png);
+    padding-left: 10px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+}
+
+.centered {
+    text-align: center;
+}
+
+.nav li {
+    font-size: 16px;
+}
+
+#package-name {
+    font-weight: bold;
+}
+
+.package-author {
+    font-style: oblique;
+}
+
+#package-list {
+    width: 100%;
+    border-collapse: collapse;
+    list-style-type: none;
+}
+
+#package-list li {
+    margin-bottom: 10px;
+}
+
+#package-list li:last {
+    margin-bottom: 0;
+}
+
+.column-left {
+    width: 90%;
+    float: left;
+}
+
+.column-right {
+    width: 10%;
+    float: left;
+}
+
+.package-info h4 {
+    background: url("images/package.png") no-repeat scroll 0 50% transparent;
+    padding-left: 30px;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.package-info h4:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.pager {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px auto;
+}
+
+.pager a, .pager span {
+    margin: 0 2px;
+    padding: 3px;
+}
+
+.pager span {
+    background-color: #699;
+    color: #fff;
+}
+
+.pager a, .pager a:hover {
+    text-decoration: none;
+}
+
+.nav li {
+    margin-bottom: 5px;
+}
+
+fieldset.no-border {
+    border: none;
+    margin: 10px 0;
+    padding: 10px 0;
+}
+
+.message h4 {
+    margin-top: 0;
+}
+
+.package-details .package-info {
+    width: 60%;
+}
+
+.notice {
+    font-size: 0.9em;
+}
+
+#searchForm fieldset {
+    margin: 0;
+    padding: 0;
+}
+
+#searchForm input[type="text"] {
+    width: auto;
+}
+
+fieldset.install {
+    margin: 0;
+    padding: 5px;
+}
+
+table#feed th, td {
+    padding: 4px;
+}

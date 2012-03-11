@@ -1,0 +1,179 @@
+﻿@* Generator: WebPagesHelper *@
+
+@using System
+@using System.Globalization
+@using System.IO
+@using System.Text
+@using System.Web.WebPages.Scope
+@using Microsoft.Internal.Web.Utils
+@using Resources
+
+@functions{
+    private const string _reCaptchaUrl = "http://www.google.com/recaptcha/api";
+    private const string _reCaptchaSecureUrl = "https://www.google.com/recaptcha/api";
+    private static readonly object _errorCodeCacheKey = new object();
+    internal static readonly object _privateKey = new object();
+    internal static readonly object _publicKey = new object();
+    
+    public static string PrivateKey {
+        get {
+            return ScopeStorage.CurrentScope[_privateKey] as string;
+        }
+
+        set {
+            if (value == null) {
+                throw new ArgumentNullException("value");
+            }
+            ScopeStorage.CurrentScope[_privateKey] = value;
+        }
+    }
+
+    public static string PublicKey {
+        get {
+            return ScopeStorage.CurrentScope[_publicKey] as string;
+        }
+
+        set {
+            if (value == null) {
+                throw new ArgumentNullException("value");
+            }
+            ScopeStorage.CurrentScope[_publicKey] = value;
+        }
+    }
+    
+    public static bool Validate(string privateKey = null) {
+        return Validate(HttpContext.Current == null ? null : new HttpContextWrapper(HttpContext.Current), privateKey, UrlBuilder.DefaultVirtualPathUtility);
+    }   
+
+    internal static string GetLastError(HttpContextBase context) {
+        if (context.Items.Contains(_errorCodeCacheKey)) {
+            return context.Items[_errorCodeCacheKey] as string;
+        }
+        return String.Empty;
+    }
+    
+    internal static bool Validate(HttpContextBase context, string privateKey, VirtualPathUtilityBase virtualPathUtility) {
+        privateKey = privateKey ?? PrivateKey;
+
+        if (String.IsNullOrEmpty(privateKey)) {
+            throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "privateKey");
+        }
+
+        SetLastError(context, String.Empty);
+        string postedBody = GetValidatePostData(context, privateKey, virtualPathUtility);
+        if (String.IsNullOrEmpty(postedBody)) {
+            return false;
+        }
+        string result = ExecuteValidateRequest(postedBody);
+        return HandleValidateResponse(context, result);
+    }
+
+    internal static string GetValidatePostData(HttpContextBase context, string privateKey, VirtualPathUtilityBase virtualPathUtility) {
+        string remoteIP = context.Request.ServerVariables["REMOTE_ADDR"];
+        if (String.IsNullOrEmpty(remoteIP)) {
+            throw new InvalidOperationException(HelpersToolkitResources.ReCaptcha_RemoteIPNotFound);
+        }
+
+        // Noscript rendering requires the user to copy and paste the challenge string to a textarea.
+        // When the challenge is invalid the recaptcha service doesn't return an error that affects
+        // UI rendering, so Validate should just return false without issuing the web request.
+        string challenge = context.Request.Form["recaptcha_challenge_field"];
+        if (String.IsNullOrEmpty(challenge)) {
+            return String.Empty;
+        }
+        string response = (context.Request.Form["recaptcha_response_field"] ?? String.Empty).Trim();
+
+        var builder = new UrlBuilder(context, virtualPathUtility, path: null, parameters: null)
+                .AddParam("privatekey", privateKey)
+                .AddParam("remoteip", context.Request.ServerVariables["REMOTE_ADDR"])
+                .AddParam("challenge", challenge)
+                .AddParam("response", response);
+        
+        // Trim the leading ? and return the QueryString
+        return builder.QueryString.Substring(1);
+    }
+
+    internal static bool HandleValidateResponse(HttpContextBase context, string response) {
+        if (!String.IsNullOrEmpty(response)) {
+            string[] results = response.Split('\n');
+            if (results.Length > 0) {
+                bool rval = Convert.ToBoolean(results[0], CultureInfo.InvariantCulture);
+                if (!rval && (results.Length > 1)) {
+                    SetLastError(context, results[1]);
+                }
+                return rval;
+            }
+        }
+        return false;
+    }
+
+    internal static string GetChallengeUrl(HttpContextBase httpContext, string publicKey = null, string errorCode = null) {
+        return GetUrlHelper(httpContext, "challenge", publicKey, errorCode: errorCode);
+    }
+
+    private static string ExecuteValidateRequest(string formData) {
+        WebRequest request = WebRequest.Create(_reCaptchaUrl + "/verify");
+        request.Method = "POST";
+        request.Timeout = 5000; //milliseconds
+        request.ContentType = "application/x-www-form-urlencoded";
+
+        byte[] content = Encoding.UTF8.GetBytes(formData);
+        using (Stream stream = request.GetRequestStream()) {
+            stream.Write(content, 0, content.Length);
+        }
+        using (WebResponse response = request.GetResponse()) {
+            using (StreamReader reader = new StreamReader(response.GetResponseStream())) {
+                return reader.ReadToEnd();
+            }
+        }
+    }
+
+    private static string GetUrlHelper(HttpContextBase context, string path, string publicKey, string errorCode) {
+
+        publicKey = publicKey ?? PublicKey;
+        if (String.IsNullOrEmpty(publicKey)) {
+            throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "publicKey");
+        }
+
+        var builder = new UrlBuilder(context.Request.IsSecureConnection ? _reCaptchaSecureUrl : _reCaptchaUrl);
+        builder.AddPath(path);
+        builder.AddParam("k", publicKey);
+        if (!String.IsNullOrEmpty(errorCode)) {
+            builder.AddParam("error", errorCode);
+        }
+        return builder;
+    }
+
+    private static void SetLastError(HttpContextBase context, string value) {
+        context.Items[_errorCodeCacheKey] = value;
+    }
+}
+
+@helper GetHtml(string publicKey = null, string theme = "red", 
+    string language = "en", int tabIndex = 0) {
+
+    @GetHtmlWithOptions(publicKey, options: new Dictionary<string, object>() {
+        { "theme", theme }, { "lang", language }, { "tabindex", tabIndex }
+    })
+}
+
+@helper GetHtmlWithOptions(string publicKey = null, object options = null) {
+    @GetHtml(HttpContext.Current == null ? null : new HttpContextWrapper(HttpContext.Current), publicKey, options)
+}
+
+@helper GetHtml(HttpContextBase httpContext, string publicKey = null, object options = null) {
+    if (options != null) {
+        var optionJson = new HtmlString(Json.Encode(options));
+        <script type="text/javascript">
+            var RecaptchaOptions=@optionJson;
+        </script>
+    }
+    <script src="@GetChallengeUrl(httpContext, publicKey, GetLastError(httpContext))" type="text/javascript"></script>
+
+    <noscript>
+        <iframe frameborder="0" height="300px" src="@GetUrlHelper(httpContext, "noscript", publicKey, errorCode: null)" width="500px"></iframe>
+        <br /><br />
+        <textarea cols="40" name="recaptcha_challenge_field" rows="3"></textarea>
+        <input name="recaptcha_response_field" type="hidden" value="manual_challenge" />
+    </noscript>
+}

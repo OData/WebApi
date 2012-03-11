@@ -1,0 +1,279 @@
+﻿@* Generator: WebPagesHelper *@
+
+@using System.Globalization
+@using Microsoft.Internal.Web.Utils
+
+@helper TweetButton(
+            string dataCount = "vertical",
+            string shareText = "Tweet",
+            string tweetText = "",
+            string url = "",
+            string language = "",
+            string userName = "",
+            string relatedUserName = "",
+            string relatedUserDescription = "") {
+    var tweetTextAttribute = new HtmlString(!tweetText.IsEmpty() ? String.Format(CultureInfo.InvariantCulture, " data-text=\"{0}\"", HttpUtility.HtmlAttributeEncode(tweetText)) : "");
+    var urlAttribute = new HtmlString(!url.IsEmpty() ? String.Format(CultureInfo.InvariantCulture, " data-url=\"{0}\"", HttpUtility.HtmlAttributeEncode(url)) : "");
+    var languageAttribute = new HtmlString(!language.IsEmpty() && !language.Equals("en", StringComparison.OrdinalIgnoreCase) ? String.Format(CultureInfo.InvariantCulture, " data-lang=\"{0}\"", HttpUtility.HtmlAttributeEncode(language)) : "");
+    var userNameAttribute = new HtmlString(!userName.IsEmpty() ? String.Format(CultureInfo.InvariantCulture, " data-via=\"{0}\"", HttpUtility.HtmlAttributeEncode(userName)) : "");
+    var relatedAttribute = new HtmlString(!relatedUserName.IsEmpty() ? String.Format(CultureInfo.InvariantCulture, " data-related=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(relatedUserName), 
+        !relatedUserDescription.IsEmpty() ? ":" + HttpUtility.HtmlAttributeEncode(relatedUserDescription) : "") : "");
+<a href="http://twitter.com/share" class="twitter-share-button"@tweetTextAttribute@urlAttribute@languageAttribute@userNameAttribute@relatedAttribute data-count="@dataCount.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()">@shareText</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+}
+
+@helper FollowButton(
+            string userName,
+            string followStyle = "follow_me",
+            string followColor = "a") {
+<a href="http://www.twitter.com/@HttpUtility.UrlEncode(userName)"><img src="http://twitter-badges.s3.amazonaws.com/@(HttpUtility.UrlEncode(followStyle + '-' + followColor)).png" alt="Follow @userName on Twitter"/></a>
+}
+
+@helper Profile(
+            string userName,
+            int width = 250,
+            int height = 300,
+            string backgroundShellColor = "#333333",
+            string shellColor = "#ffffff",
+            string tweetsBackgroundColor = "#000000",
+            string tweetsColor = "#ffffff",
+            string tweetsLinksColor = "#4aed05",
+            int numberOfTweets = 4,
+            bool scrollBar = false,
+            bool loop = false,
+            bool live = false,
+            bool hashTags = true,
+            bool timestamp = true,
+            bool avatars = false,
+            string behavior = "default",
+            int interval = 6) {
+
+    if (String.IsNullOrEmpty(userName)) {
+        throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "userName"), "userName");
+    }
+
+<script type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></script>
+<script type="text/javascript">
+new TWTR.Widget({
+  version: 2,
+  type: 'profile',
+  rpp: @(numberOfTweets < 1 ? 1 : (numberOfTweets > 30 ? 30 : numberOfTweets)),
+  interval: @(interval < 2 ? 2000 : (interval > 20 ? 20000 : (interval * 1000))),
+  width: @(new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture))),
+  height: @(height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture)),
+  theme: {
+    shell: {
+      background: '@RawJS(backgroundShellColor.IsEmpty() ? "#333333" : backgroundShellColor)',
+      color: '@RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor)'
+    },
+    tweets: {
+      background: '@RawJS(tweetsBackgroundColor.IsEmpty() ? "#000000" : tweetsBackgroundColor)',
+      color: '@RawJS(tweetsColor.IsEmpty() ? "#ffffff" : tweetsColor)',
+      links: '@RawJS(tweetsLinksColor.IsEmpty() ? "#4aed05" : tweetsLinksColor)'
+    }
+  },
+  features: {
+    scrollbar: @scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    loop: @loop.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture),
+    live: @live.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture),
+    hashtags: @hashTags.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture),
+    timestamp: @timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    avatars: @avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    behavior: '@behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()'
+  }
+}).render().setUser('@RawJS(userName)').start();
+</script>
+}
+
+@* Advanced queries: http://search.twitter.com/operators *@
+@helper Search(
+            string searchQuery,
+            int width = 250,
+            int height = 300,
+            string title = null,
+            string caption = null,
+            string backgroundShellColor = "#8ec1da",
+            string shellColor = "#ffffff",
+            string tweetsBackgroundColor = "#ffffff",
+            string tweetsColor = "#444444",
+            string tweetsLinksColor = "#1985b5",
+            bool scrollBar = false,
+            bool loop = true,
+            bool live = true,
+            bool hashTags = true,
+            bool timestamp = true,
+            bool avatars = true,
+            bool topTweets = true,
+            string behavior = "default",
+            int interval = 6) {
+     
+    if (String.IsNullOrEmpty(searchQuery)) {
+        throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "searchQuery"), "searchQuery");
+    }
+
+<script type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></script>
+<script type="text/javascript">
+new TWTR.Widget({
+  version: 2,
+  type: 'search',
+  search: '@RawJS(searchQuery)',
+  interval: @(Math.Min(Math.Max(2, interval), 20) * 1000),
+  title: '@RawJS(title)',
+  subject: '@RawJS(caption)',
+  width: @(new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture))),
+  height: @(height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture)),
+  theme: {
+    shell: {
+      background: '@RawJS(backgroundShellColor.IsEmpty() ? "#8ec1da" : backgroundShellColor)',
+      color: '@RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor)'
+    },
+    tweets: {
+      background: '@RawJS(tweetsBackgroundColor.IsEmpty() ? "#ffffff" : tweetsBackgroundColor)',
+      color: '@RawJS(tweetsColor.IsEmpty() ? "#444444" : tweetsColor)',
+      links: '@RawJS(tweetsLinksColor.IsEmpty() ? "#1985b5" : tweetsLinksColor)'
+    }
+  },
+  features: {
+    scrollbar: @scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    loop: @loop.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    live: @live.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    hashtags: @hashTags.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    timestamp: @timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    avatars: @avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    toptweets: @topTweets.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    behavior: '@behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()'
+  }
+}).render().start();
+</script>
+}
+
+@helper Faves(
+            string userName,
+            int width = 250,
+            int height = 300,
+            string title = null,
+            string caption = null,
+            string backgroundShellColor = "#43c43f",
+            string shellColor = "#ffffff",
+            string tweetsBackgroundColor = "#ffffff",
+            string tweetsColor = "#444444",
+            string tweetsLinksColor = "#43c43f",
+            int numberOfTweets = 10,
+            bool scrollBar = true,
+            bool loop = false,
+            bool live = true,
+            bool hashTags = true,
+            bool timestamp = true,
+            bool avatars = true,
+            string behavior = "default",
+            int interval = 6) {
+
+    if (String.IsNullOrEmpty(userName)) {
+        throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "userName"), "userName");
+    }
+    
+<script type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></script>
+<script type="text/javascript">
+new TWTR.Widget({
+  version: 2,
+  type: 'faves',
+  rpp: @(numberOfTweets < 1 ? 1 : (numberOfTweets > 20 ? 20 : numberOfTweets)),
+  interval: @(interval < 2 ? 2000 : (interval > 20 ? 20000 : (interval * 1000))),
+  title: '@RawJS(title)',
+  subject: '@RawJS(caption)',
+  width: @(new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture))),
+  height: @(height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture)),
+  theme: {
+    shell: {
+      background: '@RawJS(backgroundShellColor.IsEmpty() ? "#43c43f" : backgroundShellColor)',
+      color: '@RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor)'
+    },
+    tweets: {
+      background: '@RawJS(tweetsBackgroundColor.IsEmpty() ? "#ffffff" : tweetsBackgroundColor)',
+      color: '@RawJS(tweetsColor.IsEmpty() ? "#444444" : tweetsColor)',
+      links: '@RawJS(tweetsLinksColor.IsEmpty() ? "#43c43f" : tweetsLinksColor)'
+    }
+  },
+  features: {
+    scrollbar: @scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    loop: @loop.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    live: @live.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    hashtags: @hashTags.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    timestamp: @timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    avatars: @avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    behavior: '@behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()'
+  }
+}).render().setUser('@RawJS(userName)').start();
+</script>
+}
+
+@helper List(
+            string userName,
+            string list,
+            int width = 250,
+            int height = 300,
+            string title = null,
+            string caption = null,
+            string backgroundShellColor = "#ff96e7",
+            string shellColor = "#ffffff",
+            string tweetsBackgroundColor = "#ffffff",
+            string tweetsColor = "#444444",
+            string tweetsLinksColor = "#b740c2",
+            int numberOfTweets = 30,
+            bool scrollBar = true,
+            bool loop = false,
+            bool live = true,
+            bool hashTags = true,
+            bool timestamp = true,
+            bool avatars = true,
+            string behavior = "default",
+            int interval = 6) {
+
+    if (String.IsNullOrEmpty(userName)) {
+        throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "userName"), "userName");
+    }
+    
+    if (String.IsNullOrEmpty(list)) {
+        throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "list"), "list");
+    }
+    
+<script type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></script>
+<script type="text/javascript">
+new TWTR.Widget({
+  version: 2,
+  type: 'list',
+  rpp: @(numberOfTweets < 1 ? 1 : (numberOfTweets > 100 ? 100 : numberOfTweets)),
+  interval: @(interval < 2 ? 2000 : (interval > 20 ? 20000 : (interval * 1000))),
+  title: '@RawJS(title)',
+  subject: '@RawJS(caption)',
+  width: @(new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture))),
+  height: @(height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture)),
+  theme: {
+    shell: {
+      background: '@RawJS(backgroundShellColor.IsEmpty() ? "#ff96e7" : backgroundShellColor)',
+      color: '@RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor)'
+    },
+    tweets: {
+      background: '@RawJS(tweetsBackgroundColor.IsEmpty() ? "#ffffff" : tweetsBackgroundColor)',
+      color: '@RawJS(tweetsColor.IsEmpty() ? "#444444" : tweetsColor)',
+      links: '@RawJS(tweetsLinksColor.IsEmpty() ? "#b740c2" : tweetsLinksColor)'
+    }
+  },
+  features: {
+    scrollbar: @scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    loop: @loop.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    live: @live.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    hashtags: @hashTags.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    timestamp: @timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    avatars: @avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant(),
+    behavior: '@behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()'
+  }
+}).render().setList('@RawJS(userName)', '@RawJS(list)').start();
+</script>
+}
+
+
+@functions {
+    private static IHtmlString RawJS(string text) {
+        return new HtmlString(HttpUtility.JavaScriptStringEncode(text));
+    }
+}

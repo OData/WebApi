@@ -1,0 +1,819 @@
+﻿@* Generator: WebPagesHelper *@
+
+@using System.Collections.Specialized
+@using System.Globalization
+@using System.Security
+@using System.Text
+@using System.Web.Helpers
+@using System.Web.WebPages.Scope
+@using WebMatrix.Data
+@using WebMatrix.WebData
+
+@functions {
+    
+    private const string FacebookCredentialsTableName = "webpages_FacebookCredentials";
+    private const string FacebookCredentialsIdColumn = "FacebookId";
+    private const string FacebookCredentialsUserIdColumn = "UserId";
+
+    private const string DefaultUserIdColumn = "UserId";
+    private const string DefaultUserNameColumn = "email";
+    private const string DefaultUserTableName = "UserProfile";
+
+    private const string DefaultFacebookPerms = "email";
+    private const string DefaultCallbackUrl = "~/Facebook/Login";
+    private const string FacebookApiProfileUrl = "https://graph.facebook.com/me";
+    private const string FacebookCookieAccessToken = "access_token";
+
+    private static readonly object _isInitializedKey = new object();
+    private static readonly object _membershipDBNameKey = new object();
+    private static readonly object _appIdKey = new object();
+    private static readonly object _appSecretKey = new object();
+    private static readonly object _language = new object();
+
+    public static bool HasMembershipIntegration {
+        get {
+            return !MembershipDBName.IsEmpty();
+        }
+    }
+
+    public static bool IsFacebookUserAuthenticated {
+        get {
+            return !GetFacebookCookieInfo(HttpContext, "uid").IsEmpty();
+        }
+    }
+
+    public static bool IsFacebookUserAssociated {
+        get {
+            return !GetAssociatedMembershipUserName().IsEmpty();
+        }
+    }
+
+    public static bool IsInitialized {
+        get {
+            return (bool)(ScopeStorage.CurrentScope[_isInitializedKey] ?? false);
+        }
+
+        private set {
+            ScopeStorage.CurrentScope[_isInitializedKey] = value;
+        }
+    }
+
+    public static string MembershipDBName {
+        get {
+            return (string)(ScopeStorage.CurrentScope[_membershipDBNameKey] ?? "");
+        }
+
+        set {
+            ScopeStorage.CurrentScope[_membershipDBNameKey] = value;
+        }
+    }
+
+    public static string AppId {
+        get {
+            return (string)(ScopeStorage.CurrentScope[_appIdKey] ?? "");
+        }
+
+        set {
+            ScopeStorage.CurrentScope[_appIdKey] = value;
+        }
+    }
+
+    public static string AppSecret {
+        get {
+            return (string)(ScopeStorage.CurrentScope[_appSecretKey] ?? "");
+        }
+
+        set {
+            ScopeStorage.CurrentScope[_appSecretKey] = value;
+        }
+    }
+
+    public static string Language {
+        get {
+            return (string)(ScopeStorage.CurrentScope[_language] ?? "en_US");
+        }
+
+        set {
+            ScopeStorage.CurrentScope[_language] = value;
+        }
+    }
+    
+    private static HttpContextBase HttpContext {
+        get {
+            return new HttpContextWrapper(System.Web.HttpContext.Current);
+        }
+    }
+
+    ///<summary>
+    /// Initialize the helper with your Facebook application settings. 
+    /// 
+    /// If the 'membershipDBName' parameter is specified, Facebook membership integration will be enabled, 
+    /// allowing users to register and associate their Facebook user account (identified with the e-mail) 
+    /// with your site membership and the WebSecurity helper. 
+    /// In this case, the helper will initialize the WebSecurity WebMatrix helper automatically (if not done previously) 
+    /// and the store the Facebook membership information in the 'membershipDbName' database.    
+    ///</summary>
+    ///<param name="appId">Facebook application id.</param>        
+    ///<param name="appSecret">Facebook application secret.</param>   
+    ///<param name="membershipDbName">Name of the database used for storing the membership data.</param>   
+    public static void Initialize(string appId, string appSecret, string membershipDbName = "") {
+        AppId = appId;
+        AppSecret = appSecret;
+        IsInitialized = true;
+
+        if (!membershipDbName.IsEmpty()) {
+            MembershipDBName = membershipDbName;
+
+            InitializeMembershipProviderIfNeeded();
+            InitializeFacebookTableIfNeeded();
+        }
+    }
+
+    ///<summary>
+    /// Retrieves the Facebook profile of current logged in user.
+    ///</summary>
+    public static UserProfile GetFacebookUserProfile() {
+        var accessToken = GetFacebookCookieInfo(HttpContext, FacebookCookieAccessToken);
+
+        if (accessToken.IsEmpty()) {
+            return null;
+        }
+
+        var userProfileUrl = new Uri(new UrlBuilder(FacebookApiProfileUrl).AddParam(FacebookCookieAccessToken, accessToken));
+
+        using (var client = new WebClient()) {
+            using (var receiveStream = client.OpenRead(userProfileUrl)) {
+                var result = new StreamReader(receiveStream).ReadToEnd();
+                var profile = Json.Decode<UserProfile>(result);
+
+                return profile;
+            }
+        }
+    }
+
+    ///<summary>
+    /// Associates the specified User Name (e.g. email, depending on your membership model) with the current Facebook User Id from the logged user.
+    ///</summary>
+    ///<param name="userName">The user name to associate the current logged-in facebook account to.</param>
+    public static void AssociateMembershipAccount(string userName) {
+        if (!IsFacebookUserAuthenticated) {
+            throw new InvalidOperationException("No Facebook user is authenticated.");
+        }
+
+        if (IsFacebookUserAssociated) {
+            throw new InvalidOperationException("The authenticated Facebook user is already associated to a membership account.");
+        }
+
+        using (var db = Database.Open(MembershipDBName)) {
+            var facebookUserId = GetFacebookCookieInfo(HttpContext, "uid").As<long>();
+
+            var userId = WebSecurity.GetUserId(userName);
+            db.Execute(String.Format(CultureInfo.InvariantCulture, "INSERT INTO {0} ({1}, {2}) VALUES (@0, @1)", FacebookCredentialsTableName, FacebookCredentialsUserIdColumn, FacebookCredentialsIdColumn), 
+                userId, facebookUserId);
+
+            // User is registered in the application
+            FormsAuthentication.SetAuthCookie(userName, false);
+        }
+    }
+
+    public static bool MembershipLogin() {
+        var user = GetAssociatedMembershipUserName();
+
+        if (!user.IsEmpty()) {
+            // User is registered in the application
+            FormsAuthentication.SetAuthCookie(user, false);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private static void InitializeMembershipProviderIfNeeded() {
+        var provider = GetMembershipProvider();
+
+        if (IsMembershipProviderInitialized(provider)) {
+            WebSecurity.InitializeDatabaseConnection(MembershipDBName, DefaultUserTableName, DefaultUserIdColumn, DefaultUserNameColumn, true);
+        }
+    }
+
+    private static void InitializeFacebookTableIfNeeded() {
+        using (var db = Database.Open(MembershipDBName)) {
+            var table = db.QuerySingle("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @0", FacebookCredentialsTableName);
+
+            if (table == null) {
+                db.Execute(String.Format(CultureInfo.InvariantCulture, "CREATE TABLE {0} ({1} INT NOT NULL, {2} BIGINT NOT NULL)", FacebookCredentialsTableName, FacebookCredentialsUserIdColumn, FacebookCredentialsIdColumn));
+            }
+        }
+    }
+
+    private static string GetAssociatedMembershipUserName() {
+        var userName = "";
+
+        if (IsFacebookUserAuthenticated) {
+            using (var db = Database.Open(MembershipDBName)) {
+                var userId = db.QueryValue(String.Format(CultureInfo.InvariantCulture, "SELECT {0} FROM {1} WHERE {2} = LOWER(@0)", FacebookCredentialsUserIdColumn, FacebookCredentialsTableName, FacebookCredentialsIdColumn),
+                    GetFacebookCookieInfo(HttpContext, "uid"));
+                if (userId != null) {
+                    userName = GetUserName(userId);
+                }
+            }
+        }
+
+        return userName;
+    }
+
+    private static string GetUserName(int userId) {
+        var userName = "";
+
+        using (var db = Database.Open(MembershipDBName)) {
+            var provider = GetMembershipProvider();
+            userName = db.QueryValue(String.Format(CultureInfo.InvariantCulture, "SELECT {0} FROM {1} WHERE {2} = @0", provider.UserNameColumn, provider.UserTableName, provider.UserIdColumn), userId);
+        }
+
+        return userName;
+    }
+
+    private static SimpleMembershipProvider GetMembershipProvider() {
+        var provider = Membership.Provider as SimpleMembershipProvider;
+
+        if (provider == null) {
+            throw new InvalidOperationException("Simple Membership Provider not found.");
+        }
+
+        return provider;
+    }
+
+    private static bool IsMembershipProviderInitialized(SimpleMembershipProvider provider) {
+        return provider.UserTableName.IsEmpty() || provider.UserIdColumn.IsEmpty() || provider.UserNameColumn.IsEmpty();
+    }
+
+    internal static string GetFacebookCookieInfo(HttpContextBase httpContext, string key) {
+        var request = httpContext.Request;
+        var name = "fbs_" + AppId;
+
+        if (request.Cookies[name] != null) {
+            var value = request.Cookies[name].Value;
+            var args = HttpUtility.ParseQueryString(value.Replace("\"", ""));
+
+            if (!IsFacebookCookieValid(args)) {
+                throw new InvalidOperationException("Invalid Facebook cookie.");
+            }
+
+            return args[key];
+        }
+        else {
+            return "";
+        }
+    }
+
+    private static bool IsFacebookCookieValid(NameValueCollection args) {
+        var payload = new StringBuilder();
+        var keys = args.AllKeys;
+        Array.Sort(keys);
+        foreach (var key in keys) {
+            if (!key.Equals("sig", StringComparison.OrdinalIgnoreCase)) {
+                payload.AppendFormat("{0}={1}", key, args[key]);
+            }
+        }
+        
+        payload.Append(AppSecret);
+
+        // Review: The HMAC uses MD5 which is not cryptographically secure. We need to investigate other Facebook authentication methods.
+        var signature = new StringBuilder();
+        using (var md5 = System.Security.Cryptography.MD5CryptoServiceProvider.Create()) {
+            var hash = md5.ComputeHash(Encoding.ASCII.GetBytes(payload.ToString()));
+            for (int i = 0; i < hash.Length; i++) {
+                signature.Append(hash[i].ToString("X2", CultureInfo.InvariantCulture));
+            }
+        }
+        return String.Equals(args["sig"], signature.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    public class UserProfile {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string First_Name { get; set; }
+        public string Last_Name { get; set; }
+        public string Link { get; set; }
+        public string Bio { get; set; }
+        public string Gender { get; set; }
+        public string Email { get; set; }
+        public string Timezone { get; set; }
+        public string Locale { get; set; }
+        public string Updated_Time { get; set; }
+    }
+
+    private static IHtmlString RawJS(string text) {
+        return new HtmlString(HttpUtility.JavaScriptStringEncode(text));
+    }
+}
+
+@*
+Summary: 
+  Initialize the Facebook JavaScript SDK to be able to support the XFBML tags of the social plugins.
+*@
+@helper GetInitializationScripts() {
+    <div id="fb-root"></div>
+    <script type="text/javascript">
+        window.fbAsyncInit = function () {
+            FB.init({ appId: '@RawJS(AppId)', status: true, cookie: true, xfbml: true });
+        };
+        (function () {
+            var e = document.createElement('script'); e.async = true;
+            e.src = document.location.protocol +
+            '//connect.facebook.net/@RawJS(Language)/all.js';
+            document.getElementById('fb-root').appendChild(e);
+        } ());
+
+        function loginRedirect(url) { window.location = url; }
+    </script>
+}
+
+@*
+Summary:
+  Shows a Facebook Login Button, with site membership integration, allowing users to login on your site with their Facebook account (e-mail).
+  To use this method, you need to provide the 'membershipDbName' in the helper's Initialize() method.
+
+Parameter: registerUrl
+    Specifies the URL to register the logged user, and associate it with a Membership account.
+Parameter: returnUrl
+    Specifies URL to redirect after the user has successfully logged in (i.e. the Facebook User has a Membership Account).
+Parameter: callbackUrl
+    Specifies the URL of the WebMatrix page that will handle the Membership login (default URL is ~/Facebook/Login.cshtml).
+Parameter: buttonText
+    Specifies the Login Button Text.
+Parameter: autoLogoutLink
+    When set to true, if the user is logged into Facebook the button will display a logout button instead.
+Parameter: size
+    Specifies the button size: "small", "medium", "large", "xlarge".
+Paramter: length
+    Specifies the text lenght: "long" --> 'Connect with Facebook" or "short" --> 'Connect'.
+Parameter: showFaces
+    Specifies whether to display profile photos below the button.
+Parameter: extendedPermissions
+    The extendedPermissions parameter can be used to request extended permissions from the user. For example, if you want to incorporate a user's photos into your application, set this value to “user_photos”.
+*@
+@helper LoginButton(
+        string registerUrl,
+        string returnUrl = "~/",
+        string callbackUrl = DefaultCallbackUrl,
+        string buttonText = "",
+        bool autoLogoutLink = false,
+        string size = "medium",
+        string length = "long",
+        bool showFaces = false,
+        string extendedPermissions = "") {
+
+    var redirectUrl = new UrlBuilder(callbackUrl)
+                            .AddParam("registerUrl", new UrlBuilder(registerUrl))
+                            .AddParam("returnUrl", new UrlBuilder(returnUrl));
+    var onLogin = String.Format(CultureInfo.InvariantCulture, "loginRedirect('{0}')", RawJS(redirectUrl));
+    extendedPermissions = extendedPermissions.IsEmpty() ? "email" : String.Concat("email,", extendedPermissions);
+
+    <fb:login-button autologoutlink="@autoLogoutLink" size="@size" length="@length" onlogin="@onLogin" show-faces="@showFaces" perms="@extendedPermissions">@buttonText</fb:login-button>        
+}  
+
+@*
+Summary:
+  Shows a Facebook Login Button, without integrating Facebook login with your site membership.
+
+Parameter: buttonText
+    Specifies the Login Button Text.
+Parameter: autoLogoutLink
+    When set to true, if the user is logged into Facebook the button will display a logout button instead.
+Parameter: size
+    The button size: "small", "medium", "large", "xlarge".
+Parameter: length
+    The text lenght: "long" --> 'Connect with Facebook" or "short" --> 'Connect'
+Parameter: onLogin
+    Specifies the JavaScript action to execute after the user login. 
+Parameter: showFaces
+    Whether to display profile photos below the button.
+Parameter: extendedPermissions
+    The extendedPermissions parameter can be used to request extended permissions from the user. For example, if you want to incorporate a user's photos into your application, set this value to “user_photos”.
+*@
+@helper LoginButtonTagOnly(
+    string buttonText = "",
+    bool autoLogoutLink = false,
+    string size = "long",
+    string length = "short",
+    string onLogin = "",
+    bool showFaces = false,
+    string extendedPermissions = "") {
+    <fb:login-button autologoutlink="@autoLogoutLink" size="@size" length="@length" onlogin="@onLogin" show-faces="@showFaces" perms="@extendedPermissions">@buttonText</fb:login-button>
+}
+    
+@*
+Summary:
+  Shows a Facebook Like Button. When the user clicks the Like button on your site, a story appears in the user's friends' News Feed with a link back to your website.
+
+Parameter: href
+    The URL to like.
+Parameter: buttonLayout
+    The button layout:
+        - standard: Displays social text to the right of the button and friends' profile photos below. 
+            Minimum width: 225 pixels. Default width: 450 pixels. Height: 35 pixels (without photos) or 80 pixels (with photos). 
+        - button_count: Displays the total number of likes to the right of the button. 
+            Minimum width: 90 pixels. Default width: 90 pixels. Height: 20 pixels.
+Parameter: showFaces
+    Specifies whether to display profile photos below the button (standard layout only).
+Parameter: width
+    The width of the Like button.
+Parameter: height
+    The height of the plugin in pixels.
+Parameter: action
+    The verb to display on the button: 'like', 'recommend'. 
+Parameter: font
+    The font to display in the button: 'arial', 'lucida grande', 'segoe ui', 'tahoma', 'trebuchet ms', 'verdana'.
+Parameter: colorScheme
+    The color scheme for the like button: 'light' or 'dark'.
+Parameter: refLabel
+    A label for tracking referrals; must be less than 50 characters and can contain alphanumeric characters and some punctuation (currently +/=-.:_).
+    
+*@
+@helper LikeButton(
+            string href = "",
+            string buttonLayout = "standard",
+            bool showFaces = true,
+            int width = 450,
+            int height = 80,
+            string action = "like",
+            string font = "",
+            string colorScheme = "light",
+            string refLabel = ""
+            ) {    
+                
+    if (href.IsEmpty()) {
+        href = Request.Url.OriginalString;
+    }
+
+    var src = new UrlBuilder("http://www.facebook.com/plugins/like.php")
+                    .AddParam("href", href)
+                    .AddParam("layout", buttonLayout)
+                    .AddParam("show_faces", showFaces)
+                    .AddParam("width", width)
+                    .AddParam("action", action)
+                    .AddParam("colorscheme", colorScheme)
+                    .AddParam("height", height)
+                    .AddParam("font", font)
+                    .AddParam("locale", Language)
+                    .AddParam("ref", refLabel);
+        
+    <iframe src="@src" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:@(width)px; height:@(height)px;" allowTransparency="true"></iframe>
+}
+
+@*
+Summary:
+    Shows a Facebook Comments plugin.
+    The Comments Box easily enables your users to comment on your site's content — whether it's for a web page, article, photo, or other piece of content. 
+    Then the user can share the comment on Facebook on their Wall and in their friends' streams.
+    An 'Administer Comments' link will appear below the 'Post' button for developers of the application.
+
+Parameter: xid
+    An id associated with the comments object (defaults to URL-encoded page URL).
+Parameter: width
+    The width of the plugin, in pixels.
+Parameter: numPosts
+    The number of comments to display, or 0 to hide all comments. 
+Parameter: reverse
+    Changes the order of comments and comment area to allow greater customization.
+Parameter: removeRoundedBox
+    Removes the rounded box around the text area where comments are written to allow greater customization.
+*@
+@helper Comments(
+            string xid = "",
+            int width = 550,
+            int numPosts = 10,
+            bool reverseOrder = false,
+            bool removeRoundedBox = false) {
+    <fb:comments @if (!xid.IsEmpty()) { <text>xid="@xid" </text> }numposts="@numPosts" width="@width" reverse="@reverseOrder" simple="@removeRoundedBox" ></fb:comments>
+}
+
+@*
+Summary:
+    Shows a Facebook Recommendations plugin. The Recommendations plugin shows personalized recommendations to your users.
+    Since the content is hosted by Facebook, the plugin can display personalized recommendations whether or not the user has logged into your site.
+    To generate the recommendations, the plugin considers all the social interactions with URLs from your site.
+    For a logged in Facebook user, the plugin will give preference to and highlight objects her friends have interacted with.
+    
+    *NOTE*: This helper method requires that your site is published into a public address where others can use it. Check this tutorial on publishing with WebMatrix: http://www.asp.net/webmatrix/tutorials/publish-a-website 
+
+Parameter: site
+    The address of your published site. For example "www.fourthcoffee.com"
+Parameter: width
+    The width of the plugin in pixels.
+Parameter: height
+    The height of the plugin in pixels.
+Parameter: showHeader
+    Whether to show a 'Recommendations' title bar.
+Parameter: colorScheme
+    The color scheme of the plugin: 'light' or 'dark'.
+Parameter: font
+    The font name for the plugin.
+Parameter: borderColor
+    The border color of the plugin. Use common color names as Red, White, Black, and so on.
+Parameter: filter
+    Allows you to filter which URLs are shown in the plugin. The plugin will only include URLs which contain the filter term in the first two path parameters of the URL.
+Parameter: refLabel
+    A label for tracking referrals; must be less than 50 characters and can contain alphanumeric characters and some punctuation (currently +/=-.:_).
+*@
+@helper Recommendations(
+            string site = "",
+            int width = 300,
+            int height = 300,
+            bool showHeader = true,
+            string colorScheme = "light",
+            string font = "",
+            string borderColor = "",
+            string filter = "",
+            string refLabel = ""
+    ) {	
+        if (site.IsEmpty()) {
+            site = Request.Url.Host;
+        }
+
+    var src = new UrlBuilder("http://www.facebook.com/plugins/recommendations.php")
+                    .AddParam("site", site)
+                    .AddParam("width", width)
+                    .AddParam("height", height)
+                    .AddParam("header", showHeader)
+                    .AddParam("colorscheme", colorScheme)
+                    .AddParam("font", font)
+                    .AddParam("border_color", borderColor)
+                    .AddParam("filter", filter)
+                    .AddParam("ref", refLabel)
+                    .AddParam("locale", Language);
+    
+    <iframe src="@src" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:@(width)px; height:@(height)px;" allowTransparency="true"></iframe>
+}
+
+@*
+Summary:
+    Shows a Facebook Like Box. The Like Box is a social plugin that enables Facebook Page owners to attract and gain Likes from their own website.
+    The Like Box enables users to:
+        - See how many users already like this page, and which of their friends like it too
+        - Read recent posts from the page
+        - Like the page with one click, without needing to visit the page   
+
+Parameter: href
+    The URL of the Facebook Page for this Like box.
+Parameter: width
+    The width of the plugin in pixels.
+Parameter: height
+    The height of the plugin in pixels.
+Parameter: colorScheme
+    The color scheme of the plugin: 'light' or 'dark'.
+Parameter: connections
+    Number of shown users who have liked this Page. Use 0 to avoid showing the users box.
+Parameter: showStream
+    Shows the profile stream for the public profile of the page. 
+Parameter: showHeader
+    Shows the 'Find us on Facebook' bar at top. Only shown when either stream or connections are present.
+*@
+@helper LikeBox(
+            string href,
+            int width = 292,
+            int height = 587,
+            string colorScheme = "light",
+            int connections = 10,
+            bool showStream = true,
+            bool showHeader = true) {   
+    
+    var src = new UrlBuilder("http://www.facebook.com/plugins/recommendations.php")
+                    .AddParam("href", href)
+                    .AddParam("width", width)
+                    .AddParam("height", height)
+                    .AddParam("header", showHeader)
+                    .AddParam("colorscheme", colorScheme)
+                    .AddParam("connections", connections)
+                    .AddParam("stream", showStream)
+                    .AddParam("header", showHeader)
+                    .AddParam("locale", Language);
+                                 
+    <iframe src="@src" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:@(width)px; height:@(height)px;" allowTransparency="true"></iframe>                
+}
+
+@*
+Summary:
+    Shows a Facebook Facepile plugin.
+    The Facepile plugin shows the Facebook profile pictures of the user's friends who have already signed up for your site. 
+    The plugin doesn't show up if the user is logged out of Facebook or doesn't have friends who have signed up for your site using Facebook.
+
+Parameter: maxRows
+    The maximum number of rows of profile pictures to show. The plugin dynamically sizes its height; for example, if you specify a maximum of four rows, and there are only enough friends to fill two rows, the height of the plugin will be only what is needed for two rows of profile pictures. 
+Parameter: width
+    The width of the plugin in pixels. 
+*@
+@helper Facepile(
+            int maxRows = 1,
+            int width = 200) {
+    <fb:facepile max-rows="@maxRows" width="@width"></fb:facepile>
+}
+
+@*
+Summary:
+    Shows a Facebook Live Stream plugin.
+    The Live Stream plugin lets users visiting your site or application share activity and comments in real time. 
+    The Live Stream Box works best when you are running a real-time event, like live streaming video for concerts, speeches, or webcasts, live Web chats, 
+    webinars, massively multiplayer games.
+
+Parameter: width
+    The width of the plugin in pixels.
+Parameter: height
+    The height of the plugin in pixels.
+Parameter: xid
+    If you have multiple live stream boxes on the same page, specify a unique 'xid' for each.
+Parameter: viaUrl
+    The URL that users are redirected to when they click on your app name on a status (if not specified, your Connect URL is used).
+Parameter: alwaysPostToFriends
+    If set, all user posts will always go to their profile. This option should only be used when users' posts are likely to make sense outside of the context of the event.
+*@
+@helper LiveStream(
+            int width = 400,
+            int height = 500,
+            string xid = "",
+            string viaUrl = "",
+            bool alwaysPostToFriends = false) {
+       
+                
+    var builder = new UrlBuilder("http://www.facebook.com/plugins/live_stream_box.php")
+        .AddParam("app_id", AppId)
+        .AddParam("width", width)
+        .AddParam("height", height)
+        .AddParam("always_post_to_friends", alwaysPostToFriends)
+        .AddParam("locale", Language);
+
+    if (!xid.IsEmpty()) {
+        builder.AddParam("xid", xid);
+        builder.AddParam("via_url", viaUrl);
+    }
+    
+    <iframe src="@builder" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:@(width)px; height:@(height)px;" allowTransparency="true"></iframe>
+}
+
+@*
+Summary:
+    Shows a Facebook Activity Feed plugin.    
+    The Activity Feed plugin displays the most interesting recent activity taking place on your site. Since the content is hosted by Facebook, 
+    the plugin can display personalized content whether or not the user has logged into your site. The activity feed displays stories both when 
+    users like content on your site and when users share content from your site back to Facebook.
+    
+    *NOTE*: This helper method requires that your site is published into a public address where others can use it. Check this tutorial on publishing with WebMatrix: http://www.asp.net/webmatrix/tutorials/publish-a-website 
+
+Parameter: site
+    The address of your published site. For example "www.fourthcoffee.com"
+Parameter: width
+    The width of the plugin in pixels.
+Parameter: height
+    The height of the plugin in pixels.
+Parameter: showHeader
+    Show the 'Recent Activity' title bar.
+Parameter: colorScheme
+    The color scheme of the plugin: 'light' or 'dark'.
+Parameter: font
+    The font name for the plugin.
+Parameter: borderColor
+    The border color of the plugin. Use common color names as Red, White, Black, and so on.
+Parameter: showRecommendations
+    Whether to show recommendations on the activity feed.
+*@
+@helper ActivityFeed(
+        string site = "",
+        int width = 300,
+        int height = 300,
+        bool showHeader = true,
+        string colorScheme = "light",
+        string font = "",
+        string borderColor = "",
+        bool showRecommendations = false) {
+    if (site.IsEmpty()) {
+        site = Request.Url.Host;
+    }
+
+    var src = new UrlBuilder("http://www.facebook.com/plugins/activity.php")
+                    .AddParam("site", site)
+                    .AddParam("width", width)
+                    .AddParam("height", height)
+                    .AddParam("header", showHeader)
+                    .AddParam("colorscheme", colorScheme)
+                    .AddParam("font", font)
+                    .AddParam("border_color", borderColor)
+                    .AddParam("recommendations", showRecommendations)
+                    .AddParam("locale", Language);                
+                    
+    <iframe src="@src" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:300px; height:300px;" allowTransparency="true"></iframe>
+}
+
+@*
+Summary:
+    OpenGraph properties allows you to specify structured information about your web pages to show up your pages richly across Facebook and enable Facebook users to establish connections to your pages.
+    
+    Use this method to show OpenGraph page data, as the page title, URL, and so on.
+    
+    *NOTE*: It is important to notice that the OpenGraph properties are read directly from your site by Facebook, therefore your site needs to be published into a public address to see the OpenGraph properties working. 
+    Check this tutorial on publishing with WebMatrix: http://www.asp.net/webmatrix/tutorials/publish-a-website 
+
+Parameter: siteName
+    A human-readable name for your site, e.g., "Fourth Coffee".
+Parameter: title
+    The title of your page as it should appear within Facebook, e.g., "Pecan Pie".
+Parameter: type
+    The type of your page, e.g., "food". See the complete list of supported types here: http://developers.facebook.com/docs/opengraph#types
+Parameter: url
+    The canonical URL of your object that will be used as its permanent ID in the graph, e.g., http://www.fourthcoffe.com/Product/1/.
+Parameter: imageUrl
+    An image URL which should represent your page within the graph. The image must be at least 50px by 50px and have a maximum aspect ratio of 3:1.
+Parameter: description
+    A one to two sentence description of your page.
+*@
+@helper OpenGraphRequiredProperties(
+    string siteName,
+    string title,
+    string type,
+    string url,
+    string imageUrl,
+    string description = "") {  
+    <meta property="og:site_name" content="@siteName"/>
+    <meta property="fb:app_id" content="@AppId"/>     
+    <meta property="og:title" content="@title"/>
+    <meta property="og:type" content="@type"/>
+    <meta property="og:url" content="@url"/>
+    <meta property="og:image" content="@imageUrl"/>        
+        if (!description.IsEmpty()) {
+    <meta property="og:description" content="@description"/>
+        }
+}
+
+@*
+Summary:
+    OpenGraph properties allows you to specify structured information about your web pages to show up your pages richly across Facebook and enable Facebook users to establish connections to your pages.
+    
+    Use this method to show page location data. This is useful if your pages is a business profile or about anything else with a real-world location. You can specify location via latitude and longitude, a full address, or both.
+    
+    *NOTE*: It is important to notice that the OpenGraph properties are read directly from your site by Facebook, therefore your site needs to be published into a public address to see the OpenGraph properties working. 
+    Check this tutorial on publishing with WebMatrix: http://www.asp.net/webmatrix/tutorials/publish-a-website 
+*@     
+@helper OpenGraphLocationProperties(
+    string latitude = "",
+    string longitude = "",
+    string streetAddress = "",
+    string locality = "",
+    string region = "",
+    string postalCode = "",
+    string countryName = "") {        
+        if (!latitude.IsEmpty()) {
+    <meta property="og:latitude" content="@latitude"/>
+        }
+        if (!longitude.IsEmpty()) {
+    <meta property="og:longitude" content="@longitude"/>
+        }
+        if (!streetAddress.IsEmpty()) {
+    <meta property="og:street-address" content="@streetAddress"/>
+        }
+        if (!locality.IsEmpty()) {
+    <meta property="og:locality" content="@locality"/>
+        }
+        if (!region.IsEmpty()) {
+    <meta property="og:region" content="@region"/>
+        }
+        if (!postalCode.IsEmpty()) {
+    <meta property="og:postal-code" content="@postalCode"/>
+        }
+        if (!countryName.IsEmpty()) {
+    <meta property="og:country-name" content="@countryName"/>
+        }
+}
+
+@*
+Summary:
+    OpenGraph properties allows you to specify structured information about your web pages to show up your pages richly across Facebook and enable Facebook users to establish connections to your pages.
+    
+    Use this method to show contact information about your page. Consider including contact information if your page is about an entity that can be contacted.
+    
+    *NOTE*: It is important to notice that the OpenGraph properties are read directly from your site by Facebook, therefore your site needs to be published into a public address to see the OpenGraph properties working. 
+    Check this tutorial on publishing with WebMatrix: http://www.asp.net/webmatrix/tutorials/publish-a-website 
+*@
+@helper OpenGraphContactProperties(
+    string email = "",
+    string phoneNumber = "",
+    string faxNumber = "") {        
+    
+        if (!email.IsEmpty()) {
+    <meta property="og:email" content="@email"/>
+        }
+        if (!phoneNumber.IsEmpty()) {
+    <meta property="og:phone_number" content="@phoneNumber"/>
+        }
+        if (!faxNumber.IsEmpty()) {
+    <meta property="og:fax_number" content="@faxNumber"/>
+        }
+    
+}
+
+@*
+Summary:
+    Use this method inside your opening HTML tag for W3C compatibility.
+        For example: <html xmlns="http://www.w3.org/1999/xhtml" @Facebook.FbmlNamespaces()>         
+*@
+@helper FbmlNamespaces() {<text>xmlns:fb="http://www.facebook.com/2008/fbml" xmlns:og="http://opengraphprotocol.org/schema/"</text>}

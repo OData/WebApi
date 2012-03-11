@@ -1,0 +1,74 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@using System.Text.RegularExpressions;
+@using NuGet;
+
+@section PackageHead { 
+    <script type="text/javascript" src="@Href("scripts/PackageAction.js")"></script>
+    <noscript>@PackageManagerResources.JavascriptRequired</noscript>
+}
+
+@{
+    // Read from request  
+    var packageId = Request["package"];
+    var version = Request["version"];
+
+    WebProjectManager projectManager;
+    try {
+        projectManager = new WebProjectManager(PackageManagerModule.ActiveSource.Source, PackageManagerModule.SiteRoot);
+    } catch (Exception exception) {
+        <div class="error message">@exception.Message</div>
+        return;
+    }
+
+    IPackage package = projectManager.LocalRepository.FindPackage(packageId, version != null ? SemanticVersion.Parse(version) : null);
+
+    if (package == null) {
+        ModelState.AddFormError(PackageManagerResources.BadRequest);
+        @Html.ValidationSummary()
+        return; 
+    }
+
+    // Set up layout values
+    var packagesHomeUrl = Href(PageUtils.GetPackagesHome(), Request.Url.Query);
+    Page.SectionTitle = String.Format(CultureInfo.CurrentCulture, PackageManagerResources.UninstallPackageDesc, package.GetDisplayName());
+
+    if (IsPost) {
+        AntiForgery.Validate();
+        bool removeDependencies = Request.Form["removeDependencies"].AsBool(false);
+        try { 
+            projectManager.UninstallPackage(package, removeDependencies: removeDependencies);
+        } catch (Exception exception) {
+            ModelState.AddFormError(exception.Message);
+        }
+        
+        if (ModelState.IsValid) {
+            Response.Redirect(packagesHomeUrl + "&action-completed=Uninstall");
+        }
+        else {
+            @Html.ValidationSummary(String.Format(CultureInfo.CurrentCulture, PackageManagerResources.PackageUninstallationError, package.GetDisplayName()))
+        }
+        return;
+    }
+}
+@{
+    var encodedPackageName = Html.Encode(package.GetDisplayName());
+    <h4>@Html.Raw(String.Format(CultureInfo.CurrentCulture, PackageManagerResources.AreYouSureUninstall, encodedPackageName))</h4>
+}
+<form method="post" action="" id="submitForm">
+<fieldset class="no-border">
+    @AntiForgery.GetHtml()
+    <input type="hidden" name="package" value="@packageId" />
+    <input type="hidden" name="version" value="@version" />
+    @if (package.Dependencies.Any()) {
+        <div>
+            <label><input type="checkbox" name="removeDependencies" value="true" checked="checked"/>@PackageManagerResources.RemoveDependencies</label>
+        </div>
+        <br />
+    }
+    <input type="submit" value="@PackageManagerResources.UninstallPackage" />
+    &nbsp;
+    <input type="reset" value="@PackageManagerResources.Cancel" data-returnurl="@packagesHomeUrl" />
+</fieldset>
+</form>

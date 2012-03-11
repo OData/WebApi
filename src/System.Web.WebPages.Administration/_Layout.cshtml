@@ -1,0 +1,73 @@
+﻿@* Generator: WebPage *@
+
+@{
+    string title = Page.Title;
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <title>@AdminResources.AdminModuleTitle@if (!title.IsEmpty()) { <text>- @title </text> }</title>
+      <link href="@Href("Site.css")" rel="stylesheet" type="text/css" />
+      @RenderSection("Head", required: false)
+   </head>
+   <body>
+      <div id="page">
+         <div id="header" class="group">
+            <h1 class="site-title">
+                <img src="@Href("images/aspLogo.gif")" alt="@AdminResources.LogoLabel" />
+                <span class="aspnet">ASP.NET</span>&nbsp;@AdminResources.AdminModuleDisplayTitle
+            </h1>
+             <div id="settings">
+                <span>
+                    @RenderSection("PageSettings", required: false)
+                    &nbsp;
+                    @if (AdminSecurity.IsAuthenticated(Request)) {
+                        <a href="@Href("Logout")">@AdminResources.Logout</a>
+                    }
+                </span>
+             </div>
+           </div>
+           <div class="clear"></div>
+           <div id="breadcrumbs" class="group">
+           <ul>
+           @{
+                var firstCrumb = true;
+                int current = 0;
+            }
+            @foreach(var item in Page.BreadCrumbs){
+                current++;
+                if(firstCrumb) {
+                    firstCrumb = false;
+                }
+                else {
+                    <li><span>&gt;</span></li>
+                }
+                <li @((current == Page.BreadCrumbs.Count) ? @Html.Raw("class=\"selected\"") : null)>
+                <a href="@item.Item2" title="@item.Item1">@item.Item1</a>
+                </li>
+           }
+           </ul>
+
+        </div>
+        <div id="main">
+            @{
+                string sectionTitle = Page.SectionTitle ?? title;
+            }
+            @if (!sectionTitle.IsEmpty()) {
+                <div class="page-title">
+                    <h1>@sectionTitle</h1>
+                    @if (!String.IsNullOrEmpty(Page.Desc)) {
+                        <span>@Page.Desc</span>
+                    }
+                </div>
+            }          
+            @RenderBody()
+            <p />
+        </div>
+        <div id="footer">
+            @RenderSection("Footer", required: false)
+        </div>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,10 @@
+﻿@* Generator: WebPagesHelper *@
+
+@using Microsoft.Internal.Web.Utils
+
+@helper GetHtml(string gamerTag) {
+    if (gamerTag.IsEmpty()) {
+        throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "gamerTag");
+    }
+    <iframe frameborder="0" height="140" scrolling="no" src="http://gamercard.xbox.com/@(HttpUtility.UrlPathEncode(gamerTag)).card" width="204">@gamerTag</iframe>
+}

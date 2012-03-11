@@ -1,0 +1,321 @@
+﻿@using System.Globalization 
+@using System.Text 
+@using System.Web.Helpers.Resources
+@using System.Web.Mvc 
+@using System.Web.WebPages.Scope 
+@using Microsoft.Internal.Web.Utils
+
+@helper GridInitScript(WebGrid webGrid, HttpContextBase httpContext) { 
+    if (!webGrid.IsAjaxEnabled) {
+        return;
+    } 
+    if (!IsGridScriptRendered(httpContext)) { 
+        SetGridScriptRendered(httpContext, true);
+        <script type="text/javascript">
+        (function($) {
+            $.fn.swhgLoad = function(url, containerId, callback) {
+                url = url + (url.indexOf('?') == -1 ? '?' : '&') + '__swhg=' + new Date().getTime();
+
+                $('<div/>').load(url + ' ' + containerId, function(data, status, xhr) {
+                    $(containerId).replaceWith($(this).html());
+                    if (typeof(callback) === 'function') {
+                        callback.apply(this, arguments);
+                    }
+                });
+                return this;
+            }
+
+            $(function() {
+                $('table[data-swhgajax="true"],span[data-swhgajax="true"]').each(function() {
+                    var self = $(this);
+                    var containerId = '#' + self.data('swhgcontainer');
+                    var callback = getFunction(self.data('swhgcallback'));
+
+                    $(containerId).parent().delegate(containerId + ' a[data-swhglnk="true"]', 'click', function() {
+                        $(containerId).swhgLoad($(this).attr('href'), containerId, callback);
+                        return false;
+                    });
+                })
+            });
+
+            function getFunction(code, argNames) {
+                argNames = argNames || [];
+                var fn = window, parts = (code || "").split(".");
+                while (fn && parts.length) {
+                    fn = fn[parts.shift()];
+                }
+                if (typeof (fn) === "function") {
+                    return fn;
+                }
+                argNames.push(code);
+                return Function.constructor.apply(null, argNames);
+            }
+        })(jQuery);
+        </script>
+    } 
+} 
+
+@helper Table(WebGrid webGrid, 
+        HttpContextBase httpContext, 
+        string tableStyle, 
+        string headerStyle, 
+        string footerStyle, 
+        string rowStyle, 
+        string alternatingRowStyle, 
+        string selectedRowStyle,
+        string caption, 
+        bool displayHeader, 
+        bool fillEmptyRows, 
+        string emptyRowCellValue,
+        IEnumerable<WebGridColumn> columns,
+        IEnumerable<string> exclusions,
+        Func<dynamic, object> footer,
+        object htmlAttributes) {
+    
+    if (emptyRowCellValue == null) {
+        emptyRowCellValue = "&nbsp;";
+    }
+
+    @GridInitScript(webGrid, httpContext) 
+
+    var htmlAttributeDictionary = TypeHelper.ObjectToDictionary(htmlAttributes);
+    if (webGrid.IsAjaxEnabled) {
+        htmlAttributeDictionary["data-swhgajax"] = "true";
+        htmlAttributeDictionary["data-swhgcontainer"] = webGrid.AjaxUpdateContainerId;
+        htmlAttributeDictionary["data-swhgcallback"] = webGrid.AjaxUpdateCallback;
+    }
+
+    <table@(tableStyle.IsEmpty() ? null : Raw(" class=\"" + HttpUtility.HtmlAttributeEncode(tableStyle) + "\""))@PrintAttributes(htmlAttributeDictionary)>
+    @if (!caption.IsEmpty()) {
+        <caption>@caption</caption>
+    }
+    @if (displayHeader) {
+    <thead>
+        <tr@CssClass(headerStyle)>
+        @foreach (var column in columns) {
+            <th scope="col">
+            @if (ShowSortableColumnHeader(webGrid, column)) {
+                var text = column.Header.IsEmpty() ? column.ColumnName : column.Header;
+                @GridLink(webGrid, webGrid.GetSortUrl(column.ColumnName), text)
+            }
+            else {
+                @(column.Header ?? column.ColumnName)
+            }
+            </th>
+        }
+        </tr>
+    </thead>
+    }
+    @if (footer != null) {
+    <tfoot>
+        <tr @CssClass(footerStyle)>
+            <td colspan="@columns.Count()">@Format(footer, null)</td>
+        </tr>
+    </tfoot>
+    }
+    <tbody>
+    @{
+        int rowIndex = 0;
+    }
+    @foreach (var row in webGrid.Rows) {
+        string style = GetRowStyle(webGrid, rowIndex++, rowStyle, alternatingRowStyle, selectedRowStyle);
+        <tr@CssClass(style)>
+        @foreach (var column in columns) {
+            var value = (column.Format == null) ? HttpUtility.HtmlEncode(row[column.ColumnName]) : Format(column.Format, row).ToString();
+            <td@CssClass(column.Style)>@Raw(value)</td>
+        }
+        </tr>
+    }
+    @if (fillEmptyRows) {
+        rowIndex = webGrid.Rows.Count;
+        while (rowIndex < webGrid.RowsPerPage) {
+            string style = GetRowStyle(webGrid, rowIndex++, rowStyle, alternatingRowStyle, null);
+            <tr@CssClass(style)>
+                @foreach (var column in columns) {
+                    <td@CssClass(column.Style)>@Raw(emptyRowCellValue)</td>
+                }
+            </tr>
+        }
+    }
+    </tbody>
+    </table>
+}
+
+
+@helper Pager(
+        WebGrid webGrid,
+        HttpContextBase httpContext,
+        WebGridPagerModes mode,
+        string firstText,
+        string previousText,
+        string nextText,
+        string lastText,
+        int numericLinksCount,
+        bool renderAjaxContainer) {
+
+    int currentPage = webGrid.PageIndex;
+    int totalPages = webGrid.PageCount;
+    int lastPage = totalPages - 1;
+
+    @GridInitScript(webGrid, httpContext) 
+    
+    if (renderAjaxContainer && webGrid.IsAjaxEnabled) {
+        @:<span data-swhgajax="true" data-swhgcontainer="@webGrid.AjaxUpdateContainerId" data-swhgcallback="@webGrid.AjaxUpdateCallback">
+    }
+
+    if (ModeEnabled(mode, WebGridPagerModes.FirstLast) && currentPage > 1) {
+        if (String.IsNullOrEmpty(firstText)) {
+            firstText = "<<";
+        }
+        @GridLink(webGrid, webGrid.GetPageUrl(0), firstText)
+        @Raw(" ")
+    }
+  
+    if (ModeEnabled(mode, WebGridPagerModes.NextPrevious) && currentPage > 0) {
+        if (String.IsNullOrEmpty(previousText)) {
+            previousText = "<";
+        }
+        @GridLink(webGrid, webGrid.GetPageUrl(currentPage - 1), previousText)
+        @Raw(" ")
+    }
+
+    if (ModeEnabled(mode, WebGridPagerModes.Numeric) && (totalPages > 1)) {
+        int last = currentPage + (numericLinksCount / 2);
+        int first = last - numericLinksCount + 1;
+        if (last > lastPage) {
+            first -= last - lastPage;
+            last = lastPage;
+        }
+        if (first < 0) {
+            last = Math.Min(last + (0 - first), lastPage);
+            first = 0;
+        }
+        for (int i = first; i <= last; i++) {
+            var pageText = (i + 1).ToString(CultureInfo.InvariantCulture);
+            if (i == currentPage) {
+              <span>@pageText</span>
+            }
+            else {
+              @GridLink(webGrid, webGrid.GetPageUrl(i), pageText)
+            }
+            @Raw(" ")
+        }
+    }
+
+    if (ModeEnabled(mode, WebGridPagerModes.NextPrevious) && (currentPage < lastPage)) {
+        if (String.IsNullOrEmpty(nextText)) {
+          nextText = ">";
+        }
+        @GridLink(webGrid, webGrid.GetPageUrl(currentPage + 1), nextText)
+        @Raw(" ")
+    }
+    
+    if (ModeEnabled(mode, WebGridPagerModes.FirstLast) && (currentPage < lastPage - 1)) {
+        if (String.IsNullOrEmpty(lastText)) {
+          lastText = ">>";
+        }
+        @GridLink(webGrid, webGrid.GetPageUrl(lastPage), lastText)
+    }
+    
+    if (renderAjaxContainer && webGrid.IsAjaxEnabled) {
+        @:</span>
+    }
+}
+
+@functions{
+    private static readonly object _gridScriptRenderedKey = new object();
+
+    private static bool IsGridScriptRendered(HttpContextBase context) {
+        bool? value = (bool?)context.Items[_gridScriptRenderedKey];
+        return value.HasValue && value.Value;
+    }
+
+    private static void SetGridScriptRendered(HttpContextBase context, bool value) {
+        context.Items[_gridScriptRenderedKey] = value;
+    }
+
+    private static bool ShowSortableColumnHeader(WebGrid grid, WebGridColumn column) {
+        return grid.CanSort && column.CanSort && !column.ColumnName.IsEmpty();
+    }
+
+    public static IHtmlString GridLink(WebGrid webGrid, string url, string text) {
+        TagBuilder builder = new TagBuilder("a");
+        builder.SetInnerText(text);
+        builder.MergeAttribute("href", url);
+        if (webGrid.IsAjaxEnabled) {
+            builder.MergeAttribute("data-swhglnk", "true");
+        }
+        return builder.ToHtmlString(TagRenderMode.Normal);
+    }
+
+    private static IHtmlString Raw(string text) {
+        return new HtmlString(text);
+    }
+
+    private static IHtmlString RawJS(string text) {
+        return new HtmlString(HttpUtility.JavaScriptStringEncode(text));
+    }
+
+    private static IHtmlString CssClass(string className) {
+        return new HtmlString((!className.IsEmpty()) ? " class=\"" + HttpUtility.HtmlAttributeEncode(className) + "\"" : String.Empty);
+    }
+
+    private static string GetRowStyle(WebGrid webGrid, int rowIndex, string rowStyle, string alternatingRowStyle, string selectedRowStyle) {
+        StringBuilder style = new StringBuilder();
+
+        if (rowIndex % 2 == 0) {
+            if (!String.IsNullOrEmpty(rowStyle)) {
+                style.Append(rowStyle);
+            }
+        }
+        else {
+            if (!String.IsNullOrEmpty(alternatingRowStyle)) {
+                style.Append(alternatingRowStyle);
+            }
+        }
+
+        if (!String.IsNullOrEmpty(selectedRowStyle) && (rowIndex == webGrid.SelectedIndex)) {
+            if (style.Length > 0) {
+                style.Append(" ");
+            }
+            style.Append(selectedRowStyle);
+        }
+        return style.ToString();
+    }
+
+    private static HelperResult Format(Func<dynamic, object> format, dynamic arg) {
+        var result = format(arg);
+        return new HelperResult(tw => {
+            var helper = result as HelperResult;
+            if (helper != null) {
+                helper.WriteTo(tw);
+                return;
+            }
+            IHtmlString htmlString = result as IHtmlString;
+            if (htmlString != null) {
+                tw.Write(htmlString);
+                return;
+            }
+            if (result != null) {
+                tw.Write(HttpUtility.HtmlEncode(result));
+            }
+        });
+    }
+
+    private static IHtmlString PrintAttributes(IDictionary<string, object> attributes) {
+        var builder = new StringBuilder();
+        foreach (var item in attributes) {
+            var value = Convert.ToString(item.Value, CultureInfo.InvariantCulture);
+            builder.Append(' ')
+                    .Append(HttpUtility.HtmlEncode(item.Key))
+                    .Append("=\"")
+                    .Append(HttpUtility.HtmlAttributeEncode(value))
+                    .Append('"');
+        }
+        return new HtmlString(builder.ToString());
+    }
+
+    private static bool ModeEnabled(WebGridPagerModes mode, WebGridPagerModes modeCheck) {
+        return (mode & modeCheck) == modeCheck;
+    }
+}

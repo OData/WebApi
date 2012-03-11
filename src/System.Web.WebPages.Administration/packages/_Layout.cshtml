@@ -1,0 +1,22 @@
+﻿@* Generator: WebPage *@
+
+@{
+    Layout = "../_Layout.cshtml";
+    Page.Title = PackageManagerResources.ModuleTitle;
+}
+@section Head {
+    <link href="@Href("Site.css")" rel="stylesheet" type="text/css" />
+    <script src="http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.js" type="text/javascript"></script>
+
+    @RenderSection("PackageHead", required: false)
+}
+
+@section PageSettings {
+    <a href="@Href("PackageSources")">@PackageManagerResources.ManageSourcesTitle</a>
+}
+
+@RenderBody()
+
+@section Footer {
+    <a href="http://go.microsoft.com/fwlink/?LinkID=205205" target="_blank">@PackageManagerResources.PrivacyStatement</a>
+}

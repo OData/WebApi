@@ -1,0 +1,68 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask TaskName="ProcessScriptFiles" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <ScriptFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+            <OutputFile ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System"/>
+            <Using Namespace="System.IO"/>
+            <Using Namespace="System.Text"/>
+            <Using Namespace="System.Text.RegularExpressions"/>
+            <Using Namespace="Microsoft.Build.Framework"/>
+            <Using Namespace="Microsoft.Build.Utilities"/>
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+                    try
+                    {
+                        string output = string.Empty;
+
+                        // Adding copyright
+                        output +=
+                            "// Copyright (c) Microsoft.  All rights reserved." + Environment.NewLine +
+                            "// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation" + Environment.NewLine +
+                            "// files (the \"Software\"), to deal  in the Software without restriction, including without limitation the rights  to use, copy," + Environment.NewLine +
+                            "// modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the" + Environment.NewLine +
+                            "// Software is furnished to do so, subject to the following conditions:" + Environment.NewLine +
+                            "//" + Environment.NewLine +
+                            "// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software." + Environment.NewLine +
+                            "//" + Environment.NewLine +
+                            "// THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  IMPLIED, INCLUDING BUT NOT LIMITED TO THE" + Environment.NewLine +
+                            "// WARRANTIES OF MERCHANTABILITY,  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR" + Environment.NewLine +
+                            "// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE," + Environment.NewLine +
+                            "// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE." + Environment.NewLine;
+
+                        // Removing /// <reference path="script.js" /> lines
+                        // Removing ///#RESTORE from lines
+                        Regex regex = new Regex("/// <reference path=\"[^\"]*\" />\r+\n|///#RESTORE ", RegexOptions.Multiline | RegexOptions.Compiled);
+
+                        foreach (ITaskItem file in ScriptFiles)
+                        {
+                            string fullPath = Path.GetFullPath(file.ItemSpec);
+        
+                            // Adding the original file name
+                            output +=
+                                Environment.NewLine +
+                                "///" + Environment.NewLine +
+                                "/// " + Path.GetFileName(fullPath) + Environment.NewLine +
+                                "///" + Environment.NewLine +
+                                Environment.NewLine;
+        
+                            output += regex.Replace(File.ReadAllText(fullPath), "");
+                        }
+        
+                        string outputPath = Path.GetFullPath(OutputFile.ItemSpec);
+                        File.WriteAllText(outputPath, output, Encoding.UTF8);
+        
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogErrorFromException(ex);
+                        return false;
+                    }
+                ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+</Project>

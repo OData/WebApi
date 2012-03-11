@@ -1,0 +1,21 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+
+@{
+    Page.Title = AdminResources.SecurityTitle;
+
+    if(AdminSecurity.HasAdminPassword()) {
+        SiteAdmin.RedirectToHome(Response);
+        return;
+    }
+
+    string url = SiteAdmin.GetRedirectUrl(SiteAdmin.AdminVirtualPath);
+}   
+
+@Html.Raw(AdminResources.EnableInstructions)
+<br />
+<p>
+    @Html.Raw(String.Format(CultureInfo.CurrentCulture, AdminResources.ContinueAfterEnableText, Html.Encode(Href(url))))
+</p>
+

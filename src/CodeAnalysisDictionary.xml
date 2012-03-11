@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Dictionary>
+    <Words>
+        <Recognized>
+            <Word>Multi</Word>
+            <Word>Bitly</Word>
+            <Word>Digg</Word>
+            <Word>Facebook</Word>
+            <Word>Reddit</Word>
+            <Word>Captcha</Word>
+            <Word>Facebook</Word>
+            <Word>Gravatar</Word>
+            <Word>JSON</Word>
+            <Word>Lookahead</Word>
+            <Word>MVC</Word>
+            <Word>Param</Word>
+            <Word>Params</Word>
+            <Word>Pluralizer</Word>
+            <Word>Pragma</Word>
+            <Word>Pragmas</Word>
+            <Word>Templating</Word>
+            <Word>Unvalidated</Word>
+            <Word>Validator</Word>
+            <Word>Validators</Word>
+            <Word>Validatable</Word>
+            <Word>WebPage</Word>
+            <Word>cshtml</Word>
+            <Word>vbhtml</Word>
+            <Word>asax</Word>
+            <Word>Eval</Word>
+            <Word>Src</Word>
+            <Word>Charset</Word>
+            <Word>Coords</Word>
+            <Word>Rel</Word>
+            <Word>Dto</Word>
+            <Word>Tokenizer</Word>
+            <Word>ReDim</Word>
+            <Word>OAuth</Word>
+            <Word>OpenID</Word>
+            <Word>Yadis</Word>
+        </Recognized>
+        <Compound>
+            <Term CompoundAlternate="WebPage">WebPage</Term>
+            <Term CompoundAlternate="TimeLine">TimeLine</Term>
+            <Term CompoundAlternate="OAuth">oAuth</Term>
+            <Term CompoundAlternate="UserName">userName</Term>
+        </Compound>
+    </Words>
+    <Acronyms>
+        <CasingExceptions>
+            <Acronym>ID</Acronym>
+            <Acronym>Db</Acronym>
+            <Acronym>Dto</Acronym>
+        </CasingExceptions>
+    </Acronyms>
+</Dictionary>

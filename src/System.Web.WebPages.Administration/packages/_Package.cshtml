@@ -1,0 +1,16 @@
+﻿@* Generator: WebPage *@
+
+@using System.Linq;
+@using NuGet;
+@{
+    IPackage package = Page.package;
+}
+
+<div class="package-info">
+    <h4>
+        @package.GetDisplayName()
+    </h4>
+    @if (!String.IsNullOrEmpty(package.Description)) {
+        <p class="package-description">@package.Description</p>
+    }
+</div>

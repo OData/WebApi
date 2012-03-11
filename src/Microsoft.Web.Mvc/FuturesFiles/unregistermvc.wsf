@@ -1,0 +1,20 @@
+<job>
+    <script language="VBScript" src="iismap.vbs">
+        If WScript.Arguments.Count = 0 Then
+            msg = "You need to specify a .NET Framework version. Please use one of the following: " & VbCrLf
+            For Each fxVersion in GetFrameworkVersions()
+                msg = msg & fxVersion & VbCrLf
+            Next
+            WScript.Echo msg
+            WScript.Quit
+        ElseIf Not IsValidFrameworkVersion(WScript.Arguments(0)) Then
+            msg = WScript.Arguments(0) & " is not a valid .NET Framework version. Please use one of the following: " & VbCrLf
+            For Each fxVersion in GetFrameworkVersions()
+                msg = msg & fxVersion & VbCrLf
+            Next
+            WScript.Echo msg
+            WScript.Quit
+        End If
+        UnregisterExtension "mvc", WScript.Arguments(0)
+    </script>
+</job>

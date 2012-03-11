@@ -1,0 +1,182 @@
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
+
+namespace System.Net.Http.Formatting
+{
+    /// <summary>
+    /// Class that selects a <see cref="MediaTypeFormatter"/> for an <see cref="HttpRequestMessage"/>
+    /// or <see cref="HttpResponseMessage"/>.
+    /// </summary>
+    public class DefaultContentNegotiator : IContentNegotiator
+    {
+        /// <summary>
+        /// Performs content negotiating by selecting the most appropriate <see cref="MediaTypeFormatter"/> out of the passed in
+        /// <paramref name="formatters"/> for the given <paramref name="request"/> that can serialize an object of the given
+        /// <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">The type to be serialized.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="formatters">The set of <see cref="MediaTypeFormatter"/> objects from which to choose.</param>
+        /// <param name="mediaType">The media type that is associated with the formatter chosen for serialization.</param>
+        /// <returns>The <see cref="MediaTypeFormatter"/> chosen for serialization or null if their is no appropriate formatter.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "This requirement is inherited from the interface.")]
+        public virtual MediaTypeFormatter Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters, out MediaTypeHeaderValue mediaType)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+            if (formatters == null)
+            {
+                throw new ArgumentNullException("formatters");
+            }
+
+            MediaTypeFormatter formatter = RunNegotiation(type, request, formatters, out mediaType);
+            if (formatter != null)
+            {
+                formatter = formatter.GetPerRequestFormatterInstance(type, request, mediaType);
+            }
+            return formatter;
+        }
+
+        private static MediaTypeFormatter RunNegotiation(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters, out MediaTypeHeaderValue mediaType)
+        {
+            // Asking to serialize a response.   This is the nominal code path.
+            // We ask all formatters for their best kind of match, and then we
+            // choose the best among those.
+            MediaTypeFormatter formatterMatchOnType = null;
+            ResponseMediaTypeMatch mediaTypeMatchOnType = null;
+
+            MediaTypeFormatter formatterMatchOnAcceptHeader = null;
+            ResponseMediaTypeMatch mediaTypeMatchOnAcceptHeader = null;
+
+            MediaTypeFormatter formatterMatchOnAcceptHeaderWithMapping = null;
+            ResponseMediaTypeMatch mediaTypeMatchOnAcceptHeaderWithMapping = null;
+
+            MediaTypeFormatter formatterMatchOnRequestContentType = null;
+            ResponseMediaTypeMatch mediaTypeMatchOnRequestContentType = null;
+
+            foreach (MediaTypeFormatter formatter in formatters)
+            {
+                ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(type, request);
+                if (match == null)
+                {
+                    // Null signifies no match
+                    continue;
+                }
+
+                ResponseFormatterSelectionResult matchResult = match.ResponseFormatterSelectionResult;
+                switch (matchResult)
+                {
+                    case ResponseFormatterSelectionResult.MatchOnCanWriteType:
+
+                        // First match by type trumps all other type matches
+                        if (formatterMatchOnType == null)
+                        {
+                            formatterMatchOnType = formatter;
+                            mediaTypeMatchOnType = match;
+                        }
+
+                        break;
+
+                    case ResponseFormatterSelectionResult.MatchOnResponseContentType:
+
+                        // Match on response content trumps all other choices
+                        mediaType = match.MediaTypeMatch.MediaType;
+                        return formatter;
+
+                    case ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader:
+
+                        // Matches on accept headers must choose the highest quality match
+                        double thisQuality = match.MediaTypeMatch.Quality;
+                        if (formatterMatchOnAcceptHeader != null)
+                        {
+                            double bestQualitySeen = mediaTypeMatchOnAcceptHeader.MediaTypeMatch.Quality;
+                            if (thisQuality <= bestQualitySeen)
+                            {
+                                continue;
+                            }
+                        }
+
+                        formatterMatchOnAcceptHeader = formatter;
+                        mediaTypeMatchOnAcceptHeader = match;
+
+                        break;
+
+                    case ResponseFormatterSelectionResult.MatchOnRequestAcceptHeaderWithMediaTypeMapping:
+
+                        // Matches on accept headers using mappings must choose the highest quality match
+                        double thisMappingQuality = match.MediaTypeMatch.Quality;
+                        if (mediaTypeMatchOnAcceptHeaderWithMapping != null)
+                        {
+                            double bestMappingQualitySeen = mediaTypeMatchOnAcceptHeaderWithMapping.MediaTypeMatch.Quality;
+                            if (thisMappingQuality <= bestMappingQualitySeen)
+                            {
+                                continue;
+                            }
+                        }
+
+                        formatterMatchOnAcceptHeaderWithMapping = formatter;
+                        mediaTypeMatchOnAcceptHeaderWithMapping = match;
+
+                        break;
+
+                    case ResponseFormatterSelectionResult.MatchOnRequestContentType:
+
+                        // First match on request content type trumps other request content matches
+                        if (formatterMatchOnRequestContentType == null)
+                        {
+                            formatterMatchOnRequestContentType = formatter;
+                            mediaTypeMatchOnRequestContentType = match;
+                        }
+
+                        break;
+                }
+            }
+
+            // If we received matches based on both supported media types and from media type mappings,
+            // we want to give precedence to the media type mappings, but only if their quality is >= that of the supported media type.
+            // We do this because media type mappings are the user's extensibility point and must take precedence over normal
+            // supported media types in the case of a tie.   The 99% case is where both have quality 1.0.
+            if (mediaTypeMatchOnAcceptHeaderWithMapping != null && mediaTypeMatchOnAcceptHeader != null)
+            {
+                if (mediaTypeMatchOnAcceptHeader.MediaTypeMatch.Quality > mediaTypeMatchOnAcceptHeaderWithMapping.MediaTypeMatch.Quality)
+                {
+                    formatterMatchOnAcceptHeaderWithMapping = null;
+                }
+            }
+
+            // now select the formatter and media type
+            // A MediaTypeMapping is highest precedence -- it is an extensibility point
+            // allowing the user to override normal accept header matching
+            if (formatterMatchOnAcceptHeaderWithMapping != null)
+            {
+                mediaType = mediaTypeMatchOnAcceptHeaderWithMapping.MediaTypeMatch.MediaType;
+                return formatterMatchOnAcceptHeaderWithMapping;
+            }
+            else if (formatterMatchOnAcceptHeader != null)
+            {
+                mediaType = mediaTypeMatchOnAcceptHeader.MediaTypeMatch.MediaType;
+                return formatterMatchOnAcceptHeader;
+            }
+            else if (formatterMatchOnRequestContentType != null)
+            {
+                mediaType = mediaTypeMatchOnRequestContentType.MediaTypeMatch.MediaType;
+                return formatterMatchOnRequestContentType;
+            }
+            else if (formatterMatchOnType != null)
+            {
+                mediaType = mediaTypeMatchOnType.MediaTypeMatch.MediaType;
+                return formatterMatchOnType;
+            }
+
+            mediaType = null;
+            return null;
+        }
+    }
+}

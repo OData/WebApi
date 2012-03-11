@@ -1,0 +1,202 @@
+﻿using System.Diagnostics;
+using System.Web.Razor.Parser.SyntaxTree;
+using System.Web.Razor.Resources;
+using System.Web.Razor.Tokenizer.Symbols;
+
+namespace System.Web.Razor.Parser
+{
+    public partial class HtmlMarkupParser
+    {
+        private bool CaseSensitive { get; set; }
+
+        private StringComparison Comparison
+        {
+            get { return CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase; }
+        }
+
+        public override void ParseSection(Tuple<string, string> nestingSequences, bool caseSensitive)
+        {
+            if (Context == null)
+            {
+                throw new InvalidOperationException(RazorResources.Parser_Context_Not_Set);
+            }
+
+            using (PushSpanConfig(DefaultMarkupSpan))
+            {
+                using (Context.StartBlock(BlockType.Markup))
+                {
+                    NextToken();
+                    CaseSensitive = caseSensitive;
+                    if (nestingSequences.Item1 == null)
+                    {
+                        NonNestingSection(nestingSequences.Item2.Split());
+                    }
+                    else
+                    {
+                        NestingSection(nestingSequences);
+                    }
+                    AddMarkerSymbolIfNecessary();
+                    Output(SpanKind.Markup);
+                }
+            }
+        }
+
+        private void NonNestingSection(string[] nestingSequenceComponents)
+        {
+            do
+            {
+                SkipToAndParseCode(sym => sym.Type == HtmlSymbolType.OpenAngle || AtEnd(nestingSequenceComponents));
+                if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
+                {
+                    Optional(HtmlSymbolType.Text); // Tag Name, but we don't care what it is
+                    TagContent(); // Parse the tag, don't care about the content
+                }
+                else if (!EndOfFile && AtEnd(nestingSequenceComponents))
+                {
+                    break;
+                }
+            }
+            while (!EndOfFile);
+
+            PutCurrentBack();
+        }
+
+        private void NestingSection(Tuple<string, string> nestingSequences)
+        {
+            int nesting = 1;
+            while (nesting > 0 && !EndOfFile)
+            {
+                if (At(HtmlSymbolType.Text))
+                {
+                    nesting += ProcessTextToken(nestingSequences, nesting);
+                }
+                else if (At(HtmlSymbolType.Transition))
+                {
+                    PutCurrentBack();
+                    Output(SpanKind.Markup);
+                    OtherParserBlock();
+                    continue;
+                }
+                else if (At(HtmlSymbolType.RazorCommentTransition))
+                {
+                    RazorComment();
+                }
+                else if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
+                {
+                    Optional(HtmlSymbolType.Text); // Tag Name, but we don't care what it is
+                    TagContent(); // Parse the tag, don't care about the content
+                    continue;
+                }
+
+                if (CurrentSymbol != null)
+                {
+                    AcceptAndMoveNext();
+                }
+                else if (nesting > 0)
+                {
+                    NextToken();
+                }
+            }
+        }
+
+        private bool AtEnd(string[] nestingSequenceComponents)
+        {
+            EnsureCurrent();
+            if (String.Equals(CurrentSymbol.Content, nestingSequenceComponents[0], Comparison))
+            {
+                int bookmark = CurrentSymbol.Start.AbsoluteIndex;
+                try
+                {
+                    foreach (string component in nestingSequenceComponents)
+                    {
+                        if (!String.Equals(CurrentSymbol.Content, component, Comparison))
+                        {
+                            return false;
+                        }
+                        NextToken();
+                        while (!EndOfFile && IsSpacingToken(includeNewLines: true)(CurrentSymbol))
+                        {
+                            NextToken();
+                        }
+                    }
+                    return true;
+                }
+                finally
+                {
+                    Context.Source.Position = bookmark;
+                    NextToken();
+                }
+            }
+            return false;
+        }
+
+        private int ProcessTextToken(Tuple<string, string> nestingSequences, int currentNesting)
+        {
+            for (int i = 0; i < CurrentSymbol.Content.Length; i++)
+            {
+                int nestingDelta = HandleNestingSequence(nestingSequences.Item1, i, currentNesting, 1);
+                if (nestingDelta == 0)
+                {
+                    nestingDelta = HandleNestingSequence(nestingSequences.Item2, i, currentNesting, -1);
+                }
+
+                if (nestingDelta != 0)
+                {
+                    return nestingDelta;
+                }
+            }
+            return 0;
+        }
+
+        private int HandleNestingSequence(string sequence, int position, int currentNesting, int retIfMatched)
+        {
+            if (sequence != null &&
+                CurrentSymbol.Content[position] == sequence[0] &&
+                position + sequence.Length <= CurrentSymbol.Content.Length)
+            {
+                string possibleStart = CurrentSymbol.Content.Substring(position, sequence.Length);
+                if (String.Equals(possibleStart, sequence, Comparison))
+                {
+                    // Capture the current symbol and "put it back" (really we just want to clear CurrentSymbol)
+                    int bookmark = Context.Source.Position;
+                    HtmlSymbol sym = CurrentSymbol;
+                    PutCurrentBack();
+
+                    // Carve up the symbol
+                    Tuple<HtmlSymbol, HtmlSymbol> pair = Language.SplitSymbol(sym, position, HtmlSymbolType.Text);
+                    HtmlSymbol preSequence = pair.Item1;
+                    Debug.Assert(pair.Item2 != null);
+                    pair = Language.SplitSymbol(pair.Item2, sequence.Length, HtmlSymbolType.Text);
+                    HtmlSymbol sequenceToken = pair.Item1;
+                    HtmlSymbol postSequence = pair.Item2;
+
+                    // Accept the first chunk (up to the nesting sequence we just saw)
+                    if (!String.IsNullOrEmpty(preSequence.Content))
+                    {
+                        Accept(preSequence);
+                    }
+
+                    // Accept the sequence if it isn't the last one
+                    if (currentNesting + retIfMatched != 0)
+                    {
+                        Accept(sequenceToken);
+
+                        // Position at the start of the postSequence symbol
+                        if (postSequence != null)
+                        {
+                            Context.Source.Position = postSequence.Start.AbsoluteIndex;
+                        }
+                        else
+                        {
+                            Context.Source.Position = bookmark;
+                        }
+                    }
+
+                    // Return the value we were asked to return if matched, since we found a nesting sequence
+                    return retIfMatched;
+                }
+            }
+            return 0;
+        }
+    }
+}

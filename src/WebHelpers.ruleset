@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="FxCop rules for Web Helpers"  ToolsVersion="10.0">
+    <Include Path="strict.ruleset" Action="Default" />
+    <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+        <Rule Id="CA1026" Action="None" />
+    </Rules>
+</RuleSet>

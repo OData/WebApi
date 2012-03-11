@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Unit tests for Upshot</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+
+    <link href="css/qunit.css" rel="stylesheet" type="text/css" />
+    <link href="css/tests.css" rel="stylesheet" type="text/css" />
+
+    <script src="_Scripts/qunit/qunit.js" type="text/javascript"></script>
+
+    <script src="_Scripts/jquery/jquery-1.6.2.js" type="text/javascript"></script>
+    <script src="_Scripts/jquery/jquery.customfunctions.js" type="text/javascript"></script>
+    <!-- jquery.ui requirements for upshot.dataview.js -->
+    <script src="_Scripts/jquery/jquery.ui.widget.js" type="text/javascript"></script>
+    <script src="_Scripts/jquery/jquery.ui.observable.js" type="text/javascript"></script>
+    <script src="_Scripts/jquery/jquery.ui.dataview.js" type="text/javascript"></script>
+
+    <script src="_Scripts/knockout/knockout-2.0.0.js" type="text/javascript"></script>
+
+    <script src="_Scripts/upshot/upshot.js" type="text/javascript"></script>
+    <!-- Knockout compat is loaded before jQueryUI so it's not the default -->
+    <script src="_Scripts/upshot/Upshot.Compat.Knockout.js" type="text/javascript"></script>
+    <script src="_Scripts/upshot/Upshot.Compat.jQueryUI.js" type="text/javascript"></script>
+    <script src="_Scripts/upshot/upshot.dataview.js" type="text/javascript"></script>
+
+    <!-- Prepare test bed -->
+    <script src="Scripts/TestSetup.js" type="text/javascript"></script>
+
+    <script src="upshot/Init.js" type="text/javascript"></script>
+</head>
+<body>
+    <h2 id="qunit-banner">
+    </h2>
+    <h1>Unit Tests</h1>
+    <div class="test-results">
+        <div id="qunit-testrunner-toolbar">
+        </div>
+        <h2 id="qunit-userAgent">
+        </h2>
+        <ol id="qunit-tests">
+        </ol>
+        <div id="qunit-fixture">
+            test markup, will be hidden</div>
+    </div>
+</body>
+</html>

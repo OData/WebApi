@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3267DFC6-B34D-4011-BC0F-D3B56AF6F608}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Web.Http</RootNamespace>
+    <AssemblyName>System.Web.Http.Integration.Test</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(WebStackRootPath)\bin\Debug\Test\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(WebStackRootPath)\bin\Release\Test\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'CodeCoverage' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(WebStackRootPath)\bin\CodeCoverage\Test\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Moq">
+      <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20302.1\lib\net40\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20302.1\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="xunit">
+      <HintPath>..\..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.extensions">
+      <HintPath>..\..\packages\xunit.extensions.1.9.0.1566\lib\xunit.extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiExplorer\Controllers\DocumentationController.cs" />
+    <Compile Include="ApiExplorer\Controllers\ParameterSourceController.cs" />
+    <Compile Include="ApiExplorer\DocumentationProviders\AttributeDocumentationProvider.cs" />
+    <Compile Include="ApiExplorer\FormattersTest.cs" />
+    <Compile Include="ApiExplorer\Formatters\ItemFormatter.cs" />
+    <Compile Include="ApiExplorer\ParameterSourceTest.cs" />
+    <Compile Include="ApiExplorer\DocumentationTest.cs" />
+    <Compile Include="ApiExplorer\RouteConstraintsTest.cs" />
+    <Compile Include="ApiExplorer\RoutesTest.cs" />
+    <Compile Include="Util\ApiExplorerHelper.cs" />
+    <Compile Include="ApiExplorer\ApiExplorerSettingsTest.cs" />
+    <Compile Include="ApiExplorer\Controllers\HiddenController.cs" />
+    <Compile Include="ApiExplorer\Controllers\ItemController.cs" />
+    <Compile Include="ApiExplorer\Controllers\HiddenActionController.cs" />
+    <Compile Include="ApiExplorer\Controllers\OverloadsController.cs" />
+    <Compile Include="Authentication\BasicOverHttpTest.cs" />
+    <Compile Include="Authentication\CustomMessageHandler.cs" />
+    <Compile Include="Authentication\CustomUsernamePasswordValidator.cs" />
+    <Compile Include="Authentication\RequireAdminAttribute.cs" />
+    <Compile Include="Authentication\SampleController.cs" />
+    <Compile Include="ContentNegotiation\ContentNegotiationTestBase.cs" />
+    <Compile Include="ContentNegotiation\CustomFormatterTests.cs" />
+    <Compile Include="ContentNegotiation\DefaultContentNegotiatorTests.cs" />
+    <Compile Include="ContentNegotiation\HttpResponseReturnTests.cs" />
+    <Compile Include="ContentNegotiation\ConnegController.cs" />
+    <Compile Include="ContentNegotiation\ConnegItem.cs" />
+    <Compile Include="ContentNegotiation\AcceptHeaderTests.cs" />
+    <Compile Include="Controllers\ActionAttributesTest.cs" />
+    <Compile Include="Controllers\ApiControllerActionSelectorTest.cs" />
+    <Compile Include="Controllers\Apis\ActionAttributeTestController.cs" />
+    <Compile Include="Controllers\Apis\TestController.cs" />
+    <Compile Include="Controllers\Apis\User.cs" />
+    <Compile Include="Controllers\Apis\UserAddress.cs" />
+    <Compile Include="Controllers\CustomControllerFactoryTest.cs" />
+    <Compile Include="Controllers\Helpers\ApiControllerHelper.cs" />
+    <Compile Include="ExceptionHandling\DuplicateControllers.cs" />
+    <Compile Include="ExceptionHandling\ExceptionController.cs" />
+    <Compile Include="ExceptionHandling\ExceptionHandlingTest.cs" />
+    <Compile Include="ExceptionHandling\HttpResponseExceptionTest.cs" />
+    <Compile Include="ExceptionHandling\IncludeErrorDetailTest.cs" />
+    <Compile Include="Filters\IQueryableFilterPipelineTest.cs" />
+    <Compile Include="ModelBinding\BodyBindingTests.cs" />
+    <Compile Include="ModelBinding\CustomBindingTests.cs" />
+    <Compile Include="ModelBinding\DefaultActionValueBinderTest.cs" />
+    <Compile Include="ModelBinding\ModelBindingController.cs" />
+    <Compile Include="ModelBinding\ModelBindingTests.cs" />
+    <Compile Include="ModelBinding\HttpContentBindingTests.cs" />
+    <Compile Include="ModelBinding\QueryStringBindingTests.cs" />
+    <Compile Include="ModelBinding\RouteBindingTests.cs" />
+    <Compile Include="PartialTrust\BasicScenarioTest.cs" />
+    <Compile Include="PartialTrust\PartialTrustRunner.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\ContextUtil.cs" />
+    <Compile Include="Util\ScenarioHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Json\System.Json.csproj">
+      <Project>{F0441BE9-BDC0-4629-BE5A-8765FFAA2481}</Project>
+      <Name>System.Json</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
+      <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
+      <Name>System.Net.Http.Formatting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.Http.Common\System.Web.Http.Common.csproj">
+      <Project>{03A5E5F2-2E23-48F2-ABCC-6C41BAC9AC02}</Project>
+      <Name>System.Web.Http.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.Http.SelfHost\System.Web.Http.SelfHost.csproj">
+      <Project>{66492E69-CE4C-4FB1-9B1F-88DEE09D06F1}</Project>
+      <Name>System.Web.Http.SelfHost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.Http\System.Web.Http.csproj">
+      <Project>{DDC1CE0C-486E-4E35-BB3B-EAB61F8F9440}</Project>
+      <Name>System.Web.Http</Name>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
+      <Project>{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}</Project>
+      <Name>Microsoft.TestCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

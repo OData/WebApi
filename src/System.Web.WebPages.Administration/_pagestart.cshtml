@@ -1,0 +1,30 @@
+﻿@* Generator: WebPage *@
+
+@{
+    // 404 if the admin page isn't available
+    if (!SiteAdmin.Available) {
+        Response.SetStatus(HttpStatusCode.NotFound);
+        return;
+    }
+       
+    AdminSecurity.Authorize(this);    
+}
+
+@{
+    // Set up layout values
+    var breadCrumbs = new List<Tuple<string, string>>();
+    if (SiteAdmin.Modules.Any()) {
+        breadCrumbs.Add(Tuple.Create(AdminResources.AdminHome, Href(SiteAdmin.AdminVirtualPath)));
+    }
+    PageData["BreadCrumbs"] = breadCrumbs;
+    Layout = "_Layout.cshtml";  
+
+    
+    HtmlHelper.ValidationSummaryClass = "message error";
+    HtmlHelper.ValidationInputCssClassName = "validation-error";
+
+    // Force IE9 standards mode rendering
+    Response.AddHeader("X-UA-Compatible", "IE=Edge");
+}
+
+

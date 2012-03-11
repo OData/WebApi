@@ -1,0 +1,218 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@using NuGet;
+
+@section PackageHead{
+    <script type="text/javascript" src="@Href("scripts/Default.js")"></script>
+    <noscript>@PackageManagerResources.JavascriptRequired</noscript>
+}
+@{ 
+    Page.SectionTitle = PackageManagerResources.SectionTitle;
+    // Page Constants
+    const int PackagesPerPage = 10;
+    const string FilterCookieName = "packagesFilter";
+
+    // Request parameters
+    var view = GetView(PageUtils.GetFilterValue(Request, FilterCookieName, "view"));
+    var searchTerm = Request.QueryString["search"];
+    var packageSourceName = PageUtils.GetFilterValue(Request, FilterCookieName, "source");
+
+    var packageSource = PageUtils.GetPackageSource(packageSourceName);
+
+    PageUtils.PersistFilter(Response, FilterCookieName, new Dictionary<string, string> { 
+                { "view", view.ToString() }, 
+                { "source", packageSourceName },
+    });
+
+    // Add values to ModelState
+    ModelState.SetModelValue("view", view.ToString());
+
+    WebProjectManager projectManager;
+    WebGrid grid;
+    int totalPackages = 0;
+
+    try {
+        // This entire block needs ot be inside a try catch block. This is necessary because exceptions could be fired at two places 
+        // 1. When trying to connect to the remote repository. 2. When executing the Linq expression 
+
+        IEnumerable<IPackage> packages;
+
+        projectManager = new WebProjectManager(packageSource.Source, PackageManagerModule.SiteRoot);
+        // Read packages
+        switch (view) {
+            case View.Updates:
+                packages = projectManager.GetPackagesWithUpdates(searchTerm, packageSource.FilterPreferredPackages);
+                break;
+            case View.Online:
+                IQueryable<IPackage> remotePackages = projectManager.GetRemotePackages(searchTerm, packageSource.FilterPreferredPackages);
+                totalPackages = remotePackages.Count();
+                packages = WebProjectManager.CollapseVersions(remotePackages);
+                break;
+            default:
+                packages = projectManager.GetInstalledPackages(searchTerm);
+                break;
+        }
+        if (view != View.Online) {
+            totalPackages = packages.Count();
+        }
+        
+        grid = new WebGrid(rowsPerPage: PackagesPerPage, pageFieldName: "page");
+
+        packages = packages.Skip(grid.PageIndex * PackagesPerPage)
+                           .Take(PackagesPerPage);
+
+        grid.Bind(packages.ToList(), columnNames: Enumerable.Empty<string>(), autoSortAndPage: false, rowCount: totalPackages);
+
+    }
+    catch (Exception exception) {
+        <div class="error message">@exception.Message</div>
+        return;
+    }
+}
+
+@{
+    var completedAction = Request.QueryString["action-completed"];
+    if (!completedAction.IsEmpty()) {
+        var packageName = Html.Encode(Request.QueryString["packageName"]);
+        string message = null;
+        if (completedAction.Equals("Install", StringComparison.OrdinalIgnoreCase)) {
+            message = String.Format(CultureInfo.CurrentCulture, PackageManagerResources.InstallSuccess, packageName);
+        }
+        else if (completedAction.Equals("Uninstall", StringComparison.OrdinalIgnoreCase)) {
+            message = String.Format(CultureInfo.CurrentCulture, PackageManagerResources.UninstallSuccess, packageName);
+        }
+        else if (completedAction.Equals("Update", StringComparison.OrdinalIgnoreCase)) {
+            message = String.Format(CultureInfo.CurrentCulture, PackageManagerResources.UpdateSuccess, packageName);
+        }
+
+        if (message != null) { 
+            <div class="success message">
+                <img class="inline" src="@Href(SiteAdmin.GetVirtualPath("~/images/ok.png"))" alt="@Html.Raw(message)" />&nbsp;@Html.Raw(message)
+            </div>
+            <br />
+        }
+    }
+}
+<form method="get" action="" class="group">
+    <div class="left form-actions">
+        <label>@PackageManagerResources.ShowLabel:
+        @Html.DropDownList("view", from v in new[] { View.Installed, View.Online, View.Updates }
+                                   select new SelectListItem { Text = GetViewName(v), Value = v.ToString() })
+        </label>                           
+   
+        @if (PackageManagerModule.PackageSources.Count() > 1) {
+            <span @if (view == View.Installed) { @Html.Raw("style=\"display: none\"");
+                  }>
+                &nbsp;
+                <label>@PackageManagerResources.PackageSourceLabel:</label>
+                @Html.DropDownList("source", from f in PackageManagerModule.PackageSources.OrderBy(p => p.Name)
+                                             select new SelectListItem {
+                                                 Value = f.Name,
+                                                 Text = f.Name,
+                                                 Selected = f.Name.Equals(packageSourceName, StringComparison.OrdinalIgnoreCase)
+                                             }
+                                   )
+            </span>
+        }
+    </div>
+
+    <div class="right">
+        <fieldset class="no-border">
+            <input type="text" id="search" name="search" size="30" value="@searchTerm" />
+            <input type="submit" value="@PackageManagerResources.SearchLabel" />
+            <input type="reset" id="searchReset" value="@PackageManagerResources.ClearLabel" />
+        </fieldset>
+    </div>
+</form>
+
+@if (view != View.Online && !projectManager.LocalRepository.GetPackages().Any()) {
+    var onlineLink = Href(PageUtils.GetPackagesHome()) + "?view=" + View.Online;
+    @Html.Raw(String.Format(CultureInfo.CurrentCulture, PackageManagerResources.NoPackagesInstalled, Html.Encode(onlineLink)))
+    return;
+}
+
+@if (!grid.Rows.Any()) {
+    <h3>@PackageManagerResources.NoPackagesFound</h3>
+}
+else {
+    <ul id="package-list">
+    @{ var dataDictionary = new Dictionary<string, object>(1); }
+    @foreach (var item in grid.Rows) {
+        IPackage package = item.Value;
+        dataDictionary["package"] = package;
+        <li>
+            <div class="column-left">
+                @RenderPage("_Package.cshtml", dataDictionary)
+            </div>
+            <div class="right">
+                <form method="get" action="@Href(GetPostUrl(view, package, projectManager))">
+                    <input type="hidden" name="page" value="@(grid.PageIndex + 1)" />
+                    <input type="hidden" name="package" value="@package.Id" />
+                    <input type="hidden" name="version" value="@package.Version" />
+                    <input type="hidden" name="packageName" value="@package.GetDisplayName()" />
+                    <input class="formatted" type="submit" value="@GetSubmitText(view, package, projectManager)" />
+                </form>
+            </div>
+            <div class="clear"></div>
+        </li>
+    }
+    </ul>
+}
+@if (totalPackages > PackagesPerPage) {
+    <div class="pager">
+        <strong>@PackageManagerResources.PageLabel: </strong>
+        @grid.Pager(WebGridPagerModes.FirstLast | WebGridPagerModes.NextPrevious, 
+            nextText: PackageManagerResources.NextText,
+            previousText: PackageManagerResources.PreviousText)
+    </div>
+}
+
+
+@functions {
+    private enum View { Installed, Updates, Online };
+    private static readonly IDictionary<string, View> _viewMapping = new Dictionary<string, View>(StringComparer.OrdinalIgnoreCase) { 
+        { "Installed", View.Installed }, { "Updates", View.Updates }, { "Online", View.Online } 
+    };
+
+    private static View GetView(string viewName) {
+        View view;
+        if (String.IsNullOrEmpty(viewName) || !_viewMapping.TryGetValue(viewName, out view)) {
+            view = View.Installed;
+        }
+        return view;
+    }
+
+    private static string GetViewName(View view) {
+        switch (view) {
+            case View.Online:
+                return PackageManagerResources.OnlineLabel;
+            case View.Updates:
+                return PackageManagerResources.UpdatesLabel;
+            default:
+                return PackageManagerResources.InstalledLabel;
+        }
+    }
+
+    private static string GetSubmitText(View view, IPackage package, WebProjectManager projectManager) {
+        switch (view) {
+            case View.Online:
+                return projectManager.IsPackageInstalled(package) ? PackageManagerResources.UninstallPackage : PackageManagerResources.InstallPackage;
+            case View.Updates:
+                return PackageManagerResources.UpdatePackage;
+            default:
+                return PackageManagerResources.UninstallPackage;
+        }
+    }
+
+    private static string GetPostUrl(View view, IPackage package, WebProjectManager projectManager) {
+        switch (view) {
+            case View.Online:
+                return projectManager.IsPackageInstalled(package) ? "Uninstall" : "Install";
+            case View.Updates:
+                return "Update";
+            default:
+                return "Uninstall";
+        }
+    }
+}

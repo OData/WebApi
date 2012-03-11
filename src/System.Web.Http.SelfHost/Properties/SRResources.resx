@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AsyncResultAlreadyEnded" xml:space="preserve">
+    <value>End cannot be called twice on an AsyncResult.</value>
+  </data>
+  <data name="AsyncResultCompletedTwice" xml:space="preserve">
+    <value>The IAsyncResult implementation '{0}' tried to complete a single operation multiple times. This could be caused by an incorrect application IAsyncResult implementation or other extensibility code, such as an IAsyncResult that returns incorrect CompletedSynchronously values or invokes the AsyncCallback multiple times.</value>
+  </data>
+  <data name="CannotUseWindowsAuthWithUserNamePasswordValidator" xml:space="preserve">
+    <value>The UseWindowsAuthentication option cannot be enabled when a UserNamePasswordValidator is specified on the HttpSelfHostConfiguration."</value>
+  </data>
+  <data name="CertificateUnsupportedForHttpTransportCredentialOnly" xml:space="preserve">
+    <value>Certificate-based client authentication is not supported in TransportCredentialOnly security mode. Select the Transport security mode.</value>
+  </data>
+  <data name="ChannelFactoryNotSupported" xml:space="preserve">
+    <value>The '{0}' type does not support building '{1}' instances.</value>
+  </data>
+  <data name="ChannelShapeNotSupported" xml:space="preserve">
+    <value>The '{0}' type does not support the '{1}' channel shape. Implement the '{2}' channel shape to use this type.</value>
+  </data>
+  <data name="EncoderMessageVersionMismatch" xml:space="preserve">
+    <value>The message version of the outgoing message ({0}) does not match that of the encoder ({1}). Make sure the binding is configured with the same version as the message.</value>
+  </data>
+  <data name="HttpMessageEncoderFactoryDoesNotSupportSessionEncoder" xml:space="preserve">
+    <value>The '{0}' type does not support a session encoder.</value>
+  </data>
+  <data name="HttpMessageHandlerInvalidMessage" xml:space="preserve">
+    <value>Could not obtain an HTTP request from message of type '{0}'.</value>
+  </data>
+  <data name="HttpServerAlreadyRunning" xml:space="preserve">
+    <value>This '{0}' instance has already been started once. To start another instance, please create a new '{0}' object and start that.</value>
+  </data>
+  <data name="InnerListenerFactoryNotSet" xml:space="preserve">
+    <value>The inner listener factory of {0} must be set before this operation.</value>
+  </data>
+  <data name="InvalidAsyncResult" xml:space="preserve">
+    <value>An incorrect IAsyncResult was provided to an 'End' method. The IAsyncResult object passed to 'End' must be the one returned from the matching 'Begin' or passed to the callback provided to 'Begin'.</value>
+  </data>
+  <data name="InvalidAsyncResultImplementation" xml:space="preserve">
+    <value>An incorrect implementation of the IAsyncResult interface may be returning incorrect values from the CompletedSynchronously property or calling the AsyncCallback more than once. The type {0} could be the incorrect implementation.</value>
+  </data>
+  <data name="InvalidAsyncResultImplementationGeneric" xml:space="preserve">
+    <value>An incorrect implementation of the IAsyncResult interface may be returning incorrect values from the CompletedSynchronously property or calling the AsyncCallback more than once.</value>
+  </data>
+  <data name="InvalidChannelListener" xml:space="preserve">
+    <value>Error creating '{0}' instance using '{1}'.</value>
+  </data>
+  <data name="InvalidNullAsyncResult" xml:space="preserve">
+    <value>A null value was returned from an async 'Begin' method or passed to an AsyncCallback. Async 'Begin' implementations must return a non-null IAsyncResult and pass the same IAsyncResult object as the parameter to the AsyncCallback.</value>
+  </data>
+  <data name="MessageBodyIsHttpRequestMessageWithKnownContentLength" xml:space="preserve">
+    <value>HTTP request message body with a content length of '{0}' bytes.</value>
+  </data>
+  <data name="MessageBodyIsHttpRequestMessageWithUnknownContentLength" xml:space="preserve">
+    <value>HTTP request message body with an undetermined content length.</value>
+  </data>
+  <data name="MessageBodyIsHttpResponseMessageWithKnownContentLength" xml:space="preserve">
+    <value>HTTP response message body with a content length of '{0}' bytes.</value>
+  </data>
+  <data name="MessageBodyIsHttpResponseMessageWithUnknownContentLength" xml:space="preserve">
+    <value>HTTP response message body with an undetermined content length.</value>
+  </data>
+  <data name="MessageClosed" xml:space="preserve">
+    <value>The '{0}' is closed and can no longer be used.</value>
+  </data>
+  <data name="MessageInvalidForHttpMessageEncoder" xml:space="preserve">
+    <value>The response message is not valid for the encoder used by the '{0}' binding, which requires that the response message have been created with the '{1}' extension method on the '{2}' class.</value>
+  </data>
+  <data name="MessageReadWriteCopyNotSupported" xml:space="preserve">
+    <value>The message instance does not support being read, written out or copied. Use the '{0}' or '{1}' extension methods on the '{2}' class to access the message content.</value>
+  </data>
+  <data name="NonHttpMessageMustBeEmpty" xml:space="preserve">
+    <value>The message instance is non-empty but the '{0}' extension method on the '{1}' class returned null. Message instances that do not support the '{0}' extension method must be empty. </value>
+  </data>
+  <data name="NonnegativeNumberRequired" xml:space="preserve">
+    <value>Nonnegative number required</value>
+  </data>
+  <data name="OnlyMessageVersionNoneSupportedOnHttpMessageEncodingBindingElement" xml:space="preserve">
+    <value>The '{0}' type supports only MessageVersion.None. </value>
+  </data>
+  <data name="ParameterMustBeLessThanOrEqualSecondParameter" xml:space="preserve">
+    <value>The value of the '{0}' parameter must be less than or equal to the value of the '{1}' parameter.</value>
+  </data>
+  <data name="RequestMissingHttpRequestMessageProperty" xml:space="preserve">
+    <value>The incoming message does not have the required '{0}' property of type '{1}'.</value>
+  </data>
+  <data name="RequestMissingToHeader" xml:space="preserve">
+    <value>The incoming message does not have the required 'To' header.</value>
+  </data>
+  <data name="BufferedOutputStreamQuotaExceeded" xml:space="preserve">
+    <value>The size quota for this stream ({0}) has been exceeded.</value>
+  </data>
+  <data name="BufferIsNotRightSizeForBufferManager" xml:space="preserve">
+    <value>This buffer cannot be returned to the buffer manager because it is the wrong size.</value>
+  </data>
+  <data name="ReadNotSupported" xml:space="preserve">
+    <value>Read not supported on this stream.</value>
+  </data>
+  <data name="SeekNotSupported" xml:space="preserve">
+    <value>Seek not supported on this stream.</value>
+  </data>
+  <data name="ValueMustBeNonNegative" xml:space="preserve">
+    <value>Value must be non-negative.</value>
+  </data>
+  <data name="BufferAllocationFailed" xml:space="preserve">
+    <value>Failed to allocate a managed memory buffer of {0} bytes. The amount of available memory may be low.</value>
+  </data>
+</root>

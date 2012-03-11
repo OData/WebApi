@@ -1,0 +1,329 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <CodeAnalysis Condition=" '$(CodeAnalysis)' == ''">false</CodeAnalysis>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C23F02FC-4538-43F5-ABBA-38BA069AEA8F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Web.WebPages.Administration</RootNamespace>
+    <AssemblyName>System.Web.WebPages.Administration</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;ASPNETWEBPAGES</DefineConstants>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\bin\CodeCoverage\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;CODE_COVERAGE;ASPNETWEBPAGES</DefineConstants>
+    <DebugType>full</DebugType>
+    <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NuGet.Core">
+      <HintPath>..\..\packages\Nuget.Core.1.6.2\lib\net40\NuGet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonResources.Designer.cs">
+      <Link>Common\CommonResources.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\GlobalSuppressions.cs">
+      <Link>Common\GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\TransparentCommonAssemblyInfo.cs">
+      <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="EnableInstructions.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EnableInstructions.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Framework\packages\RemoteAssembly.cs" />
+    <Compile Include="Framework\packages\IPackagesSourceFile.cs" />
+    <Compile Include="Framework\packages\IWebProjectManager.cs" />
+    <Compile Include="Framework\packages\PackageSourceFile.cs" />
+    <Compile Include="Framework\packages\WebProjectManager.cs" />
+    <Compile Include="Framework\packages\WebProjectSystem.cs" />
+    <Compile Include="Framework\SiteAdmin.cs" />
+    <Compile Include="Framework\packages\WebPackageSource.cs" />
+    <Compile Include="Framework\packages\PackageManagerModule.cs" />
+    <Compile Include="Framework\packages\PageUtils.cs" />
+    <Compile Include="Logout.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Logout.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\SourceFileInstructions.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SourceFileInstructions.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\PackageSources.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PackageSources.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\Install.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Install.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\Update.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Update.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\_PackageDetails.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_PackageDetails.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\PackageManagerResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PackageManagerResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="packages\Uninstall.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Uninstall.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\_Package.generated.cs">
+      <DependentUpon>_Package.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="packages\Default.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Default.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\_pagestart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_pagestart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="packages\_Layout.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_Layout.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\AdminResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AdminResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Login.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Login.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Register.generated.cs">
+      <DependentUpon>Register.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Framework\AdminSecurity.cs" />
+    <Compile Include="Default.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Default.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Framework\PreApplicationStartCode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="_pagestart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_pagestart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="_Layout.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_Layout.cshtml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Framework\packages\PackageExtensions.cs" />
+    <None Include="packages.config" />
+    <None Include="_Layout.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_Layout.generated.cs</LastGenOutput>
+    </None>
+    <None Include="Logout.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Logout.generated.cs</LastGenOutput>
+    </None>
+    <None Include="Register.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Register.generated.cs</LastGenOutput>
+    </None>
+    <None Include="Login.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Login.generated.cs</LastGenOutput>
+    </None>
+    <None Include="_pagestart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_pagestart.generated.cs</LastGenOutput>
+    </None>
+    <None Include="Default.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Default.generated.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\CommonResources.resx">
+      <Link>Common\CommonResources.resx</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\AdminResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AdminResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\PackageManagerResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PackageManagerResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Site.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="images\error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="images\package.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Web.WebPages.Deployment\System.Web.WebPages.Deployment.csproj">
+      <Project>{22BABB60-8F02-4027-AFFC-ACF069954536}</Project>
+      <Name>System.Web.WebPages.Deployment</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebMatrix.Data\WebMatrix.Data.csproj">
+      <Project>{4D39BAAF-8A96-473E-AB79-C8A341885137}</Project>
+      <Name>WebMatrix.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Web.Helpers\System.Web.Helpers.csproj">
+      <Project>{9B7E3740-6161-4548-833C-4BBCA43B970E}</Project>
+      <Name>System.Web.Helpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Web.WebPages\System.Web.WebPages.csproj">
+      <Project>{76EFA9C5-8D7E-4FDF-B710-E20F8B6B00D2}</Project>
+      <Name>System.Web.WebPages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebMatrix.WebData\WebMatrix.WebData.csproj">
+      <Project>{55A15F40-1435-4248-A7F2-2A146BB83586}</Project>
+      <Name>WebMatrix.WebData</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="images\aspLogo.gif" />
+    <EmbeddedResource Include="images\tabon.gif" />
+    <EmbeddedResource Include="images\ok.png" />
+    <EmbeddedResource Include="packages\scripts\PackageAction.js" />
+    <EmbeddedResource Include="packages\scripts\Default.js" />
+    <None Include="EnableInstructions.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EnableInstructions.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages\SourceFileInstructions.cshtml">
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SourceFileInstructions.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages\PackageSources.cshtml">
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PackageSources.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages\Install.cshtml">
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Install.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages\Update.cshtml">
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Update.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages\_Package.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_Package.generated.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+    </None>
+    <None Include="packages\Default.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Default.generated.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+    </None>
+    <EmbeddedResource Include="packages\images\error.png" />
+    <EmbeddedResource Include="packages\images\package.png" />
+    <EmbeddedResource Include="packages\Site.css" />
+    <None Include="packages\Uninstall.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Uninstall.generated.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+    </None>
+    <None Include="packages\_PackageDetails.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_PackageDetails.generated.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+    </None>
+    <None Include="packages\_pagestart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+      <LastGenOutput>_pagestart.generated.cs</LastGenOutput>
+    </None>
+    <None Include="packages\_Layout.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_Layout.generated.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.WebPages.Administration.PackageManager</CustomToolNamespace>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="packages\Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,28 @@
+﻿using System.Collections.Generic;
+using System.Web.Razor.Parser;
+
+namespace System.Web.Razor.Test.Framework
+{
+    public abstract class VBHtmlCodeParserTestBase : CodeParserTestBase
+    {
+        protected override ISet<string> KeywordSet
+        {
+            get { return VBCodeParser.DefaultKeywords; }
+        }
+
+        protected override SpanFactory CreateSpanFactory()
+        {
+            return SpanFactory.CreateVbHtml();
+        }
+
+        public override ParserBase CreateMarkupParser()
+        {
+            return new HtmlMarkupParser();
+        }
+
+        public override ParserBase CreateCodeParser()
+        {
+            return new VBCodeParser();
+        }
+    }
+}

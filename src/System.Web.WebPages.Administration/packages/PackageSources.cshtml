@@ -1,0 +1,111 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@{
+    // Setup layout
+    var currentPage = Href(PageUtils.GetPageVirtualPath("PackageSources"));
+    PageData["BreadCrumbs"].Add(Tuple.Create(PackageManagerResources.ManageSourcesTitle, currentPage));
+    Page.Desc = PackageManagerResources.ManageSourcesDesc;
+    Page.SectionTitle = PackageManagerResources.ManageSourcesTitle;
+
+    if (IsPost) {
+        AntiForgery.Validate();
+        var action = Request.Form["action"];
+        var sourceUrl = Request.Form["sourceUrl"];
+        var sourceName = Request.Form["sourceName"];
+        try { 
+            if (action.Equals(PackageManagerResources.AddPackageSourceLabel, StringComparison.OrdinalIgnoreCase)) {
+
+                ModelState.SetModelValue("sourceName", sourceName);
+                ModelState.SetModelValue("sourceUrl", sourceUrl);
+
+                Uri url;
+                if (!Uri.TryCreate(sourceUrl, UriKind.Absolute, out url)) {
+                    ModelState.AddError("sourceUrl", PackageManagerResources.Validation_InvalidPackageSourceUrl);
+                } else if (!PackageManagerModule.AddPackageSource(source: sourceUrl, name: sourceName)) {
+                    ModelState.AddError("sourceName", PackageManagerResources.Validation_PackageSourceAlreadyExists);
+                } else {
+                    // The feed was successfully added. Clear the model state.
+                    ModelState.Clear();
+                }
+            }
+            else if (action.Equals(PackageManagerResources.DeleteLabel, StringComparison.OrdinalIgnoreCase)) {
+                PackageManagerModule.RemovePackageSource(sourceName);
+            }
+            else if (action.Equals(PackageManagerResources.RestoreDefaultSources, StringComparison.OrdinalIgnoreCase)) {
+                foreach(var packageSource in PackageManagerModule.DefaultSources) {
+                    PackageManagerModule.AddPackageSource(packageSource);
+                }
+            }
+        } catch (UnauthorizedAccessException) {
+            <div class="message error">
+                @String.Format(CultureInfo.CurrentCulture, PackageManagerResources.PackageSourceFileInstructions, PackageManagerModule.PackageSourceFilePath)
+            </div>
+        } 
+    }
+
+    var numSources = PackageManagerModule.PackageSources.Count();
+}
+
+@Html.ValidationSummary(excludeFieldErrors: true)
+
+<table id="feeds">
+<thead>
+    <tr>
+        <th scope="col">@PackageManagerResources.SourceNameLabel</th>
+        <th scope="col">@PackageManagerResources.SourceUrlLabel</th>
+        <th></th>
+    </tr>
+</thead>
+<tbody>     
+    @foreach(var source in PackageManagerModule.PackageSources) {
+    <tr>
+        <td>@source.Name</td>
+        <td><a href="@source.Source">@source.Source</a></td>
+        <td>
+            @if(numSources > 1) {
+                <form method="post" action="">
+                    <input type="hidden" name="sourceName" value="@source.Name" />
+                    <input type="submit" name="action" value="@PackageManagerResources.DeleteLabel" />
+                    @AntiForgery.GetHtml()
+                </form>
+            }
+        </td>
+    </tr>
+    }
+</tbody>
+</table>
+<br />
+<form method="post" action="">
+@AntiForgery.GetHtml()
+<fieldset>
+    <legend>@PackageManagerResources.AddPackageSourceLabel</legend>
+    <ol>
+        <li>
+            <label for="feedName">@PackageManagerResources.SourceNameLabel:</label>
+            @Html.TextBox("sourceName") @Html.ValidationMessage("sourceName")
+        </li>
+        <li>
+            <label for="feedUrl">@PackageManagerResources.SourceUrlLabel:</label>
+            @Html.TextBox("sourceUrl") @Html.ValidationMessage("sourceUrl")
+        </li>
+    </ol>
+    <p class="form-actions">
+        
+    <input type="submit" name="action" class="long-input" value="@PackageManagerResources.AddPackageSourceLabel" />
+    </p>
+</fieldset>
+</form>
+
+@{
+    if (PackageManagerModule.DefaultSources.Intersect(PackageManagerModule.PackageSources).Count() != PackageManagerModule.DefaultSources.Count()) { 
+    <p>
+        <form method="post" action="">
+            @AntiForgery.GetHtml()
+            <fieldset class="no-border">  
+                <input type="submit" name="action" class="long-input"  value="@PackageManagerResources.RestoreDefaultSources" />
+            </fieldset>
+        </form>
+    </p>
+    }
+}

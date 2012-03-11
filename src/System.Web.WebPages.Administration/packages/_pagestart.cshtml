@@ -1,0 +1,15 @@
+﻿@* Generator: WebPage *@
+
+@using System.Web.WebPages.Administration;
+@{
+    if (!PackageManagerModule.InitPackageSourceFile()) {
+        var instructionsPath = VirtualPathUtility.ToAbsolute(PageUtils.GetPageVirtualPath("SourceFileInstructions"));
+        if (!Request.FilePath.Equals(instructionsPath, StringComparison.OrdinalIgnoreCase)) {
+            Response.Redirect(instructionsPath);
+        }
+    }
+    Layout = "_Layout.cshtml";
+    PageData["Title"] = PackageManagerResources.ModuleTitle;
+    string packagesVirutalPath = SiteAdmin.GetVirtualPath("~/packages");
+    PageData["BreadCrumbs"].Add(Tuple.Create(PackageManagerResources.ModuleTitle, Href(packagesVirutalPath)));
+}

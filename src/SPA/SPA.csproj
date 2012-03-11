@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <ProductVersion>1.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1ACEF677-B6A0-4680-A076-7893DE176D6B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <ScriptOutputPath>$(OutputPath)</ScriptOutputPath>
+    <OutputPath>bin\$(Configuration)</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'CodeCov|AnyCPU' ">
+    <DefineConstants>DEBUG;TRACE;CODECOV</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="upshot\AssociatedEntitiesView.js" />
+    <Content Include="upshot\Core.js" />
+    <Content Include="upshot\DataContext.js" />
+    <Content Include="upshot\DataProvider.js" />
+    <Content Include="upshot\DataProvider.OData.js" />
+    <Content Include="upshot\DataProvider.ria.js" />
+    <Content Include="upshot\DataSource.js" />
+    <Content Include="upshot\EntitySet.js" />
+    <Content Include="upshot\EntitySource.js" />
+    <Content Include="upshot\EntityView.js" />
+    <Content Include="upshot\LocalDataSource.js" />
+    <Content Include="upshot\Metadata.js" />
+    <Content Include="upshot\Observability.js" />
+    <Content Include="upshot\RemoteDataSource.js" />
+    <Content Include="upshot\Upshot.Compat.jQueryUI.js" />
+    <Content Include="upshot\Upshot.Compat.JsViews.js" />
+    <Content Include="upshot\Upshot.Compat.Knockout.js" />
+    <Content Include="upshot\Upshot.Compat.WinJS.js" />
+    <Content Include="upshot\upshot.dataview.js" />
+    <Content Include="nav\nav.js">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>nav.coffee</DependentUpon>
+    </Content>
+    <Content Include="nav\nav.transitions.js">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>nav.transitions.coffee</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <IntelliSense Include="upshot\IntelliSense\Dependencies.js" />
+    <IntelliSense Include="upshot\IntelliSense\jquery-1.5.2-vsdoc.js" />
+    <IntelliSense Include="upshot\IntelliSense\knockout-2.0.0.debug.js" />
+    <IntelliSense Include="upshot\IntelliSense\References.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="nav\nav.coffee">
+      <Generator>CoffeeScriptGenerator</Generator>
+      <LastGenOutput>nav.js</LastGenOutput>
+    </None>
+    <None Include="nav\nav.transitions.coffee">
+      <Generator>CoffeeScriptGenerator</Generator>
+      <LastGenOutput>nav.transitions.js</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <JSKnownGlobalNames>jQuery,$,upshot,WinJS,OData,JSON,ko</JSKnownGlobalNames>
+  </PropertyGroup>
+  <!-- We don't use these targets, but VS will try to upgrade the project when they aren't present -->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions />
+  <!-- SPA build targets -->
+  <Import Project="SPA.targets" />
+  <Target Name="CompileJs">
+    <!-- purpose of compile step here is to do some basic syntax checking on the files prior to packaging -->
+    <ItemGroup>
+      <!-- for validation, compile all js files in the project; this doesn't mean they will be included in the package -->
+      <_CompileJavascript Include="@(Content->'%(FullPath)')" Condition="%(Extension) == '.js'" />
+    </ItemGroup>
+  </Target>
+  <Target Name="BuildUpshot" BeforeTargets="Build">
+    <PropertyGroup>
+      <UpshotPkgOutputFile>$(ScriptOutputPath)\upshot.js</UpshotPkgOutputFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <PkgOutputFile Include="$(UpshotPkgOutputFile)" />
+      <!-- order matters here -->
+      <UpshotPkg Include="upshot\Core.js" />
+      <UpshotPkg Include="upshot\Observability.js" />
+      <UpshotPkg Include="upshot\Metadata.js" />
+      <UpshotPkg Include="upshot\EntitySource.js" />
+      <UpshotPkg Include="upshot\EntityView.js" />
+      <UpshotPkg Include="upshot\DataSource.js" />
+      <UpshotPkg Include="upshot\EntitySet.js" />
+      <UpshotPkg Include="upshot\DataContext.js" />
+      <UpshotPkg Include="upshot\DataProvider.js" />
+      <UpshotPkg Include="upshot\RemoteDataSource.js" />
+      <UpshotPkg Include="upshot\AssociatedEntitiesView.js" />
+      <UpshotPkg Include="upshot\LocalDataSource.js" />
+      <UpshotPkg Include="upshot\DataProvider.OData.js" />
+      <UpshotPkg Include="upshot\DataProvider.ria.js" />
+    </ItemGroup>
+    <PropertyGroup>
+      <UpshotJQueryPkgOutputFile>$(ScriptOutputPath)\Upshot.Compat.jQueryUI.js</UpshotJQueryPkgOutputFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <PkgOutputFile Include="$(UpshotJQueryPkgOutputFile)" />
+      <UpshotJQueryPkg Include="upshot\Upshot.Compat.jQueryUI.js" />
+    </ItemGroup>
+    <PropertyGroup>
+      <UpshotJsViewsPkgOutputFile>$(ScriptOutputPath)\Upshot.Compat.JsViews.js</UpshotJsViewsPkgOutputFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <PkgOutputFile Include="$(UpshotJsViewsPkgOutputFile)" />
+      <UpshotJsViewsPkg Include="upshot\Upshot.Compat.JsViews.js" />
+    </ItemGroup>
+    <PropertyGroup>
+      <UpshotKnockoutPkgOutputFile>$(ScriptOutputPath)\Upshot.Compat.Knockout.js</UpshotKnockoutPkgOutputFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <PkgOutputFile Include="$(UpshotKnockoutPkgOutputFile)" />
+      <UpshotKnockoutPkg Include="upshot\Upshot.Compat.Knockout.js" />
+    </ItemGroup>
+    <PropertyGroup>
+      <UpshotDataViewPkgOutputFile>$(ScriptOutputPath)\upshot.dataview.js</UpshotDataViewPkgOutputFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <PkgOutputFile Include="$(UpshotDataViewPkgOutputFile)" />
+      <UpshotDataViewPkg Include="upshot\upshot.dataview.js" />
+    </ItemGroup>
+    <ProcessScriptFiles ScriptFiles="@(UpshotPkg)" OutputFile="$(UpshotPkgOutputFile)" />
+    <ProcessScriptFiles ScriptFiles="@(UpshotJQueryPkg)" OutputFile="$(UpshotJQueryPkgOutputFile)" />
+    <ProcessScriptFiles ScriptFiles="@(UpshotJsViewsPkg)" OutputFile="$(UpshotJsViewsPkgOutputFile)" />
+    <ProcessScriptFiles ScriptFiles="@(UpshotKnockoutPkg)" OutputFile="$(UpshotKnockoutPkgOutputFile)" />
+    <ProcessScriptFiles ScriptFiles="@(UpshotDataViewPkg)" OutputFile="$(UpshotDataViewPkgOutputFile)" />
+  </Target>
+  <Target Name="BuildNav" BeforeTargets="Build">
+    <ItemGroup>
+      <NavJsFiles Include="nav\nav.js;nav\nav.transitions.js" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NavJsFiles)" DestinationFolder="$(ScriptOutputPath)" />
+    <ItemGroup>
+      <NavPkgOutputFile Include="$(ScriptOutputPath)\nav.js" />
+      <NavPkgOutputFile Include="$(ScriptOutputPath)\nav.transitions.js" />
+    </ItemGroup>
+  </Target>
+  <Target Name="CleanJs" BeforeTargets="Clean">
+    <ItemGroup>
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\upshot.js" />
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\Upshot.Compat.jQueryUI.js" />
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\Upshot.Compat.JsViews.js" />
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\Upshot.Compat.Knockout.js" />
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\upshot.dataview.js" />
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\nav.js" />
+      <CleanPkgOutputFile Include="$(ScriptOutputPath)\nav.transitions.js" />
+    </ItemGroup>
+    <Delete Files="@(CleanPkgOutputFile->'%(RootDir)%(Directory)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

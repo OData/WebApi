@@ -1,0 +1,39 @@
+﻿@* Generator: WebPage *@
+
+@using System.Web.WebPages.Administration.PackageManager;
+@{    
+    Page.Title = AdminResources.Modules;
+    var adminModules = from p in SiteAdmin.Modules
+                       where !p.StartPageVirtualPath.Equals(SiteAdmin.AdminVirtualPath, StringComparison.OrdinalIgnoreCase)
+                       orderby p.DisplayName
+                       select p;
+}
+
+@if (!adminModules.Any() && !PackageManagerModule.Available) {
+    <h3>@AdminResources.NoAdminModulesInstalled</h3>
+}
+else if (PackageManagerModule.Available && !adminModules.Any()) {
+    // If no other module is available, take the user directly to the package manager
+    Response.Redirect(Href("packages"));
+    return;
+}
+else {
+    <ul class="modules">
+    @if (PackageManagerModule.Available) {
+        <li>    
+            <a href="@Href("packages")" title="@PackageManagerModule.ModuleName"><strong>@PackageManagerModule.ModuleName</strong></a>
+            <div class="description">@PackageManagerModule.ModuleDescription</div>
+        </li>
+    }
+    @if (adminModules.Any()) {
+        foreach (var module in adminModules) {
+            <li>
+                <a href="@Href(module.StartPageVirtualPath)"><strong>@module.DisplayName</strong></a>
+                <div class="description">
+                    @module.Description
+                </div>
+            </li>
+        }
+    }
+    </ul>
+}

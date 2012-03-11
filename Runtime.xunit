@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xunit>
+  <assemblies>
+    <assembly filename="bin\Debug\Test\Microsoft.Web.Helpers.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.Http.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\Microsoft.Web.Mvc.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.Helpers.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.Mvc.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.Razor.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.WebPages.Administration.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.WebPages.Deployment.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.WebPages.Razor.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\System.Web.WebPages.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\WebMatrix.Data.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\Test\WebMatrix.WebData.Test.dll" shadow-copy="true" />
+    <assembly filename="bin\Debug\System.Web.Http.Test.Sample.dll" shadow-copy="true" />
+  </assemblies>
+</xunit>

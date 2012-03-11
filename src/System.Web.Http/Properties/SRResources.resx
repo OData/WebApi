@@ -1,0 +1,497 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BindingBehavior_ValueNotFound" xml:space="preserve">
+    <value>A value for '{0}' is required but was not present in the request.</value>
+  </data>
+  <data name="Common_TypeMustImplementInterface" xml:space="preserve">
+    <value>The type '{0}' does not implement the interface '{1}'.</value>
+  </data>
+  <data name="GenericModelBinderProvider_ParameterMustSpecifyOpenGenericType" xml:space="preserve">
+    <value>The type '{0}' is not an open generic type.</value>
+  </data>
+  <data name="GenericModelBinderProvider_TypeArgumentCountMismatch" xml:space="preserve">
+    <value>The open model type '{0}' has {1} generic type argument(s), but the open binder type '{2}' has {3} generic type argument(s). The binder type must not be an open generic type or must have the same number of generic arguments as the open model type.</value>
+  </data>
+  <data name="ModelBinderUtil_ModelCannotBeNull" xml:space="preserve">
+    <value>The binding context has a null Model, but this binder requires a non-null model of type '{0}'.</value>
+  </data>
+  <data name="ModelBinderUtil_ModelInstanceIsWrong" xml:space="preserve">
+    <value>The binding context has a Model of type '{0}', but this binder can only operate on models of type '{1}'.</value>
+  </data>
+  <data name="ModelBinderUtil_ModelMetadataCannotBeNull" xml:space="preserve">
+    <value>The binding context cannot have a null ModelMetadata.</value>
+  </data>
+  <data name="ModelBinderUtil_ModelTypeIsWrong" xml:space="preserve">
+    <value>The binding context has a ModelType of '{0}', but this binder can only operate on models of type '{1}'.</value>
+  </data>
+  <data name="ModelBinderConfig_ValueInvalid" xml:space="preserve">
+    <value>The value '{0}' is not valid for {1}.</value>
+  </data>
+  <data name="ModelBinderConfig_ValueRequired" xml:space="preserve">
+    <value>A value is required.</value>
+  </data>
+  <data name="ModelBindingContext_ModelMetadataMustBeSet" xml:space="preserve">
+    <value>The ModelMetadata property must be set before accessing this property.</value>
+  </data>
+  <data name="Common_PropertyNotFound" xml:space="preserve">
+    <value>The property {0}.{1} could not be found.</value>
+  </data>
+  <data name="DataAnnotationsModelMetadataProvider_UnknownProperty" xml:space="preserve">
+    <value>{0} has a DisplayColumn attribute for {1}, but property {1} does not exist.</value>
+  </data>
+  <data name="DataAnnotationsModelMetadataProvider_UnreadableProperty" xml:space="preserve">
+    <value>{0} has a DisplayColumn attribute for {1}, but property {1} does not have a public getter.</value>
+  </data>
+  <data name="DependencyResolver_DoesNotImplementICommonServiceLocator" xml:space="preserve">
+    <value>The type {0} does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator.</value>
+  </data>
+  <data name="ModelBinderProviderCollection_BinderForTypeNotFound" xml:space="preserve">
+    <value>A binder for type {0} could not be located.</value>
+  </data>
+  <data name="ModelBinderProviderCollection_InvalidBinderType" xml:space="preserve">
+    <value>The type '{0}' does not subclass {1} or implement the interface {2}.</value>
+  </data>
+  <data name="ValueProviderResult_ConversionThrew" xml:space="preserve">
+    <value>The parameter conversion from type '{0}' to type '{1}' failed. See the inner exception for more information.</value>
+  </data>
+  <data name="ValueProviderResult_NoConverterExists" xml:space="preserve">
+    <value>The parameter conversion from type '{0}' to type '{1}' failed because no type converter can convert between these types.</value>
+  </data>
+  <data name="ClientDataTypeModelValidatorProvider_FieldMustBeDate" xml:space="preserve">
+    <value>The field {0} must be a date.</value>
+  </data>
+  <data name="ClientDataTypeModelValidatorProvider_FieldMustBeNumeric" xml:space="preserve">
+    <value>The field {0} must be a number.</value>
+  </data>
+  <data name="Common_TypeMustDriveFromType" xml:space="preserve">
+    <value>The type {0} must derive from {1}.</value>
+  </data>
+  <data name="DataAnnotationsModelValidatorProvider_ConstructorRequirements" xml:space="preserve">
+    <value>The type {0} must have a public constructor which accepts three parameters of types {1}, {2}, and {3}.</value>
+  </data>
+  <data name="DataAnnotationsModelValidatorProvider_ValidatableConstructorRequirements" xml:space="preserve">
+    <value>The type {0} must have a public constructor which accepts two parameters of types {1} and {2}.</value>
+  </data>
+  <data name="ValidatableObjectAdapter_IncompatibleType" xml:space="preserve">
+    <value>The model object inside the metadata claimed to be compatible with {0}, but was actually {1}.</value>
+  </data>
+  <data name="DelegatingHandlerArrayContainsNullItem" xml:space="preserve">
+    <value>The '{0}' list is invalid because it contains one or more null items.</value>
+  </data>
+  <data name="DelegatingHandlerArrayHasNonNullInnerHandler" xml:space="preserve">
+    <value>The '{0}' list is invalid because the property '{1}' of '{2}' is not null.</value>
+  </data>
+  <data name="HttpMessageHandlerDisposed" xml:space="preserve">
+    <value>This '{0}' instance has been disposed and can no longer accept HTTP requests.</value>
+  </data>
+  <data name="HttpResponseExceptionMessage" xml:space="preserve">
+    <value>Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the '{0}' property of this exception for details.</value>
+  </data>
+  <data name="ApiControllerActionSelector_AmbiguousMatch" xml:space="preserve">
+    <value>Multiple actions were found that match the request: {0}</value>
+  </data>
+  <data name="MultipleTypeParametersForHttpContentType" xml:space="preserve">
+    <value>Unable to determine the type of the content because the type '{0}' has two or more type parameters.</value>
+  </data>
+  <data name="DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate" xml:space="preserve">
+    <value>Multiple types were found that match the controller named '{0}'. This can happen if the route that services this request ('{1}') found multiple controllers defined with the same name but differing namespaces, which is not supported.
+
+The request for '{0}' has found the following matching controllers:{2}</value>
+  </data>
+  <data name="DefaultControllerFactory_ControllerNameNotFound" xml:space="preserve">
+    <value>No type was found that matches the controller named '{0}'.</value>
+  </data>
+  <data name="DefaultControllerFactory_ErrorCreatingController" xml:space="preserve">
+    <value>An error occurred when trying to create a controller of type '{0}'. Make sure that the controller has a parameterless public constructor.</value>
+  </data>
+  <data name="TypeCache_DoNotModify" xml:space="preserve">
+    <value>This file is automatically generated. Please do not modify the contents of this file.</value>
+  </data>
+  <data name="DependencyResolverNoService" xml:space="preserve">
+    <value>No service registered for type '{0}'.</value>
+  </data>
+  <data name="ApiControllerActionSelector_ActionNotFound" xml:space="preserve">
+    <value>No action was found on the controller '{0}' that matches the request.</value>
+  </data>
+  <data name="ApiControllerActionSelector_ActionNameNotFound" xml:space="preserve">
+    <value>No action was found on the controller '{0}' that matches the name '{1}'.</value>
+  </data>
+  <data name="ApiControllerActionSelector_HttpMethodNotSupported" xml:space="preserve">
+    <value>The requested resource does not support http method '{0}'.</value>
+  </data>
+  <data name="ActionSelector_AmbiguousMatchType" xml:space="preserve">
+    <value>{0} on type {1}</value>
+  </data>
+  <data name="ReflectedActionDescriptor_ParameterCannotBeNull" xml:space="preserve">
+    <value>The parameters dictionary contains a null entry for parameter '{0}' of non-nullable type '{1}' for method '{2}' in '{3}'. An optional parameter must be a reference type, a nullable type, or be declared as an optional parameter.</value>
+  </data>
+  <data name="ReflectedActionDescriptor_ParameterNotInDictionary" xml:space="preserve">
+    <value>The parameters dictionary does not contain an entry for parameter '{0}' of type '{1}' for method '{2}' in '{3}'. The dictionary must contain an entry for each parameter, including parameters that have null values.</value>
+  </data>
+  <data name="ReflectedActionDescriptor_ParameterValueHasWrongType" xml:space="preserve">
+    <value>The parameters dictionary contains an invalid entry for parameter '{0}' for method '{1}' in '{2}'. The dictionary contains a value of type '{3}', but the parameter requires a value of type '{4}'.</value>
+  </data>
+  <data name="DictionaryMissingRequiredValue" xml:space="preserve">
+    <value>The '{0}' must contain an item named '{1}' with a value of type '{2}'.</value>
+  </data>
+  <data name="Route_CannotHaveCatchAllInMultiSegment" xml:space="preserve">
+    <value>A path segment that contains more than one section, such as a literal section or a parameter, cannot contain a catch-all parameter.</value>
+  </data>
+  <data name="Route_CannotHaveConsecutiveParameters" xml:space="preserve">
+    <value>A path segment cannot contain two consecutive parameters. They must be separated by a '/' or by a literal string.</value>
+  </data>
+  <data name="Route_CannotHaveConsecutiveSeparators" xml:space="preserve">
+    <value>The route template separator character '/' cannot appear consecutively. It must be separated by either a parameter or a literal value.</value>
+  </data>
+  <data name="Route_CatchAllMustBeLast" xml:space="preserve">
+    <value>A catch-all parameter can only appear as the last segment of the route template.</value>
+  </data>
+  <data name="Route_InvalidParameterName" xml:space="preserve">
+    <value>The route parameter name '{0}' is invalid. Route parameter names must be non-empty and cannot contain these characters: "{{", "}}", "/", "?"</value>
+  </data>
+  <data name="Route_InvalidRouteTemplate" xml:space="preserve">
+    <value>The route template cannot start with a '/' or '~' character and it cannot contain a '?' character.</value>
+  </data>
+  <data name="Route_MismatchedParameter" xml:space="preserve">
+    <value>There is an incomplete parameter in this path segment: '{0}'. Check that each '{{' character has a matching '}}' character.</value>
+  </data>
+  <data name="Route_RepeatedParameter" xml:space="preserve">
+    <value>The route parameter name '{0}' appears more than one time in the route template.</value>
+  </data>
+  <data name="Route_ValidationMustBeStringOrCustomConstraint" xml:space="preserve">
+    <value>The constraint entry '{0}' on the route with route template '{1}' must have a string value or be of a type which implements '{2}'.</value>
+  </data>
+  <data name="Route_AddRemoveWithNoKeyNotSupported" xml:space="preserve">
+    <value>Adding or removing items from a '{0}' is not supported. Please use a key when adding and removing items.</value>
+  </data>
+  <data name="AmbiguousIndexerInvocation" xml:space="preserve">
+    <value>Ambiguous invocation of indexer in type '{0}'</value>
+  </data>
+  <data name="AmbiguousMethodInvocation" xml:space="preserve">
+    <value>Ambiguous invocation of method '{0}' in type '{1}'</value>
+  </data>
+  <data name="CannotIndexMultiDimArray" xml:space="preserve">
+    <value>Indexing of multi-dimensional arrays is not supported</value>
+  </data>
+  <data name="CloseBracketOrCommaExpected" xml:space="preserve">
+    <value>']' or ',' expected</value>
+  </data>
+  <data name="CloseParenOrCommaExpected" xml:space="preserve">
+    <value>')' or ',' expected</value>
+  </data>
+  <data name="CloseParenOrOperatorExpected" xml:space="preserve">
+    <value>')' or operator expected</value>
+  </data>
+  <data name="DigitExpected" xml:space="preserve">
+    <value>Digit expected</value>
+  </data>
+  <data name="DuplicateIdentifier" xml:space="preserve">
+    <value>The identifier '{0}' was defined more than once</value>
+  </data>
+  <data name="ExpressionExpected" xml:space="preserve">
+    <value>Expression expected</value>
+  </data>
+  <data name="ExpressionTypeMismatch" xml:space="preserve">
+    <value>Expression of type '{0}' expected</value>
+  </data>
+  <data name="IdentifierExpected" xml:space="preserve">
+    <value>Identifier expected</value>
+  </data>
+  <data name="IncompatibleOperand" xml:space="preserve">
+    <value>Operator '{0}' incompatible with operand type '{1}'</value>
+  </data>
+  <data name="IncompatibleOperands" xml:space="preserve">
+    <value>Operator '{0}' incompatible with operand types '{1}' and '{2}'</value>
+  </data>
+  <data name="InvalidCharacter" xml:space="preserve">
+    <value>Syntax error '{0}'</value>
+  </data>
+  <data name="InvalidIndex" xml:space="preserve">
+    <value>Array index must be an integer expression</value>
+  </data>
+  <data name="InvalidIntegerLiteral" xml:space="preserve">
+    <value>Invalid integer literal '{0}'</value>
+  </data>
+  <data name="InvalidQueryOperator" xml:space="preserve">
+    <value>Invalid query operator '{0}'.</value>
+  </data>
+  <data name="InvalidRealLiteral" xml:space="preserve">
+    <value>Invalid real literal '{0}'</value>
+  </data>
+  <data name="MethodIsVoid" xml:space="preserve">
+    <value>Method '{0}' in type '{1}' does not return a value</value>
+  </data>
+  <data name="NoApplicableAggregate" xml:space="preserve">
+    <value>No applicable aggregate method '{0}' exists</value>
+  </data>
+  <data name="NoApplicableIndexer" xml:space="preserve">
+    <value>No applicable indexer exists in type '{0}'</value>
+  </data>
+  <data name="NoApplicableMethod" xml:space="preserve">
+    <value>No applicable method '{0}' exists in type '{1}'</value>
+  </data>
+  <data name="OpenParenExpected" xml:space="preserve">
+    <value>'(' expected</value>
+  </data>
+  <data name="ParseExceptionFormat" xml:space="preserve">
+    <value>{0} (at index {1})</value>
+  </data>
+  <data name="SyntaxError" xml:space="preserve">
+    <value>Syntax error</value>
+  </data>
+  <data name="UnknownIdentifier" xml:space="preserve">
+    <value>Unknown identifier '{0}'</value>
+  </data>
+  <data name="UnknownPropertyOrField" xml:space="preserve">
+    <value>No property or field '{0}' exists in type '{1}'</value>
+  </data>
+  <data name="UnterminatedStringLiteral" xml:space="preserve">
+    <value>Unterminated string literal</value>
+  </data>
+  <data name="UriQueryStringInvalid" xml:space="preserve">
+    <value>The query specified in the URI is not valid.</value>
+  </data>
+  <data name="ValueProviderFactory_Cannot_Create" xml:space="preserve">
+    <value>Could not create a '{0}' from '{1}'. Please ensure it derives from '{0}' and has a public parameterless constructor.</value>
+  </data>
+  <data name="ResultLimitFilter_InvalidReturnType" xml:space="preserve">
+    <value>ResultLimitAttribute cannot be applied to action '{0}' because it's return type is not IEnumerable.</value>
+  </data>
+  <data name="ResultLimitFilter_OutOfRange" xml:space="preserve">
+    <value>The limit specified by the ResultLimitAttribute applied to action '{0}' must be greater than zero.</value>
+  </data>
+  <data name="Validation_ValueNotFound" xml:space="preserve">
+    <value>A value is required but was not present in the request.</value>
+  </data>
+  <data name="InvalidTypeCreationExpression" xml:space="preserve">
+    <value>Invalid '{0}' type creation expression.</value>
+  </data>
+  <data name="InvalidHexLiteral" xml:space="preserve">
+    <value>Invalid hexadecimal literal.</value>
+  </data>
+  <data name="PositiveIntegerExpectedForODataQueryParameter" xml:space="preserve">
+    <value>The OData query parameter '{0}' has an invalid value. The value should be a positive integer. The provided value was '{1}'</value>
+  </data>
+  <data name="CannotSupportSingletonInstance" xml:space="preserve">
+    <value>Cannot reuse an '{0}' instance. '{0}' has to be constructed per incoming message. Check your custom '{1}' and make sure that it will not manufacture the same instance.</value>
+  </data>
+  <data name="ActionFilterAttribute_MustSupplyResponseOrException" xml:space="preserve">
+    <value>After calling {0}.OnActionExecuted, the HttpActionExecutedContext properties Result and Exception were both null. At least one of these values must be non-null. To provide a new response, please set the Result object; to indicate an error, please throw an exception.</value>
+  </data>
+  <data name="TraceActionInvokeMessage" xml:space="preserve">
+    <value>Action='{0}'</value>
+  </data>
+  <data name="TraceActionFilterMessage" xml:space="preserve">
+    <value>Action filter for '{0}'</value>
+  </data>
+  <data name="TraceActionSelectedMessage" xml:space="preserve">
+    <value>Selected action '{0}'</value>
+  </data>
+  <data name="TraceCancelledMessage" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="TraceControllerNameAndRouteMessage" xml:space="preserve">
+    <value>Controller name='{0}', route='{1}'</value>
+  </data>
+  <data name="TraceModelStateInvalidMessage" xml:space="preserve">
+    <value>Model state is invalid. {0}</value>
+  </data>
+  <data name="TraceNoneObjectMessage" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="TraceReadFromStreamMessage" xml:space="preserve">
+    <value>Type='{0}', content-type='{1}'</value>
+  </data>
+  <data name="TraceReadFromStreamValueMessage" xml:space="preserve">
+    <value>Value read='{0}'</value>
+  </data>
+  <data name="TraceRequestCompleteMessage" xml:space="preserve">
+    <value>Content-type='{0}', content-length={1}</value>
+  </data>
+  <data name="TraceSelectedFormatter" xml:space="preserve">
+    <value>Selected formatter='{0}', content-type='{1}'</value>
+  </data>
+  <data name="TraceNegotiateFormatter" xml:space="preserve">
+    <value>Type='{0}', formatters=[{1}]</value>
+  </data>
+  <data name="TraceUnknownMessage" xml:space="preserve">
+    <value>unknown</value>
+  </data>
+  <data name="TraceWriteToStreamMessage" xml:space="preserve">
+    <value>Value='{0}', type='{1}', content-type='{2}'</value>
+  </data>
+  <data name="HttpRequestMessageExtensions_NoConfiguration" xml:space="preserve">
+    <value>The request does not have an associated configuration object or the provided configuration was null.</value>
+  </data>
+  <data name="TraceGetPerRequestFormatterEndMessage" xml:space="preserve">
+    <value>Will use same '{0}' formatter</value>
+  </data>
+  <data name="TraceGetPerRequestFormatterMessage" xml:space="preserve">
+    <value>Obtaining formatter of type '{0}' for type='{1}', mediaType='{2}'</value>
+  </data>
+  <data name="RouteCollection_NameNotFound" xml:space="preserve">
+    <value>A route named '{0}' could not be found in the route collection.</value>
+  </data>
+  <data name="ApiExplorer_DefaultDocumentation" xml:space="preserve">
+    <value>Documentation for '{0}'.</value>
+  </data>
+  <data name="ParameterBindingCantHaveMultipleBodyParameters" xml:space="preserve">
+    <value>Can't bind multiple parameters ('{0}' and '{1}') to the request's content.</value>
+  </data>
+  <data name="ParameterBindingConflictingAttributes" xml:space="preserve">
+    <value>Can't bind parameter '{0}' because it has conflicting attributes on it.</value>
+  </data>
+  <data name="ParameterBindingIllegalType" xml:space="preserve">
+    <value>Can't bind parameter '{1}'. Must specify a custom model binder to bind parameters of type '{0}'.</value>
+  </data>
+  <data name="MissingRequiredMember" xml:space="preserve">
+    <value>The {0} property is required.</value>
+  </data>
+  <data name="TraceBeginParameterBind" xml:space="preserve">
+    <value>Binding parameter '{0}'</value>
+  </data>
+  <data name="TraceEndParameterBind" xml:space="preserve">
+    <value>Parameter '{0}' bound to the value '{1}'</value>
+  </data>
+  <data name="TraceEndParameterBindNoBind" xml:space="preserve">
+    <value>Parameter '{0}' failed to bind.</value>
+  </data>
+  <data name="TraceInvokingAction" xml:space="preserve">
+    <value>Invoking action '{0}'</value>
+  </data>
+  <data name="TraceActionReturnValue" xml:space="preserve">
+    <value>Action returned '{0}'</value>
+  </data>
+  <data name="TraceModelStateErrorMessage" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="TraceGetPerRequestNullFormatterEndMessage" xml:space="preserve">
+    <value>Null formatter</value>
+  </data>
+  <data name="TraceValidModelState" xml:space="preserve">
+    <value>Model state is valid. Values: {0}</value>
+  </data>
+  <data name="TraceGetPerRequestFormatterEndMessageNew" xml:space="preserve">
+    <value>Will use new '{0}' formatter</value>
+  </data>
+  <data name="JQuerySyntaxMissingClosingBracket" xml:space="preserve">
+    <value>The key is invalid JQuery syntax because it is missing a closing bracket</value>
+  </data>
+</root>

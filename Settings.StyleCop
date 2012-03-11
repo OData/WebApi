@@ -1,0 +1,109 @@
+<StyleCopSettings Version="4.3">
+
+<!-- 
+     This file was cloned directly from ndp\cdf\src
+     to apply ADP conventions to all product source.
+-->
+  <GlobalSettings>
+    <StringProperty Name="MergeSettingsFiles">NoMerge</StringProperty>
+  </GlobalSettings>
+  <Analyzers>
+
+    <Analyzer AnalyzerId="Microsoft.StyleCop.CSharp.NamingRules">
+      <AnalyzerSettings>
+        <CollectionProperty Name="Hungarian">
+          <Value>as</Value>
+          <Value>db</Value>
+          <Value>dc</Value>
+          <Value>do</Value>
+          <Value>ef</Value>
+          <Value>id</Value>
+          <Value>if</Value>
+          <Value>in</Value>
+          <Value>is</Value>
+          <Value>my</Value>
+          <Value>no</Value>
+          <Value>on</Value>
+          <Value>sl</Value>
+          <Value>to</Value>
+          <Value>ui</Value>
+          <Value>vs</Value>
+        </CollectionProperty>
+      </AnalyzerSettings>
+    </Analyzer>
+
+    <Analyzer AnalyzerId="Microsoft.StyleCop.CSharp.DocumentationRules">
+      <AnalyzerSettings>
+        <BooleanProperty Name="IgnorePrivates">True</BooleanProperty>
+        <BooleanProperty Name="IgnoreInternals">True</BooleanProperty>
+        <StringProperty Name="Copyright">Copyright (c) Microsoft Corporation.  All rights reserved.</StringProperty>
+      </AnalyzerSettings>
+
+      <Rules>
+        <Rule Name="FileMustHaveHeader">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+
+        <!-- Per ADP guidelines, the file header does not need to contain the name of the file. -->
+        <Rule Name="FileHeaderMustContainFileName">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderFileNameDocumentationMustMatchFileName">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+
+        <!-- Per ADP guidelines, the file header does not need to contain a Company attribute. -->
+        <Rule Name="FileHeaderMustHaveValidCompanyText">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+
+        <!-- Per ADP guidelines, constructor summary documentation does not have to match a specific format, since they are not directly consumed for external documentation. -->
+        <Rule Name="ConstructorSummaryDocumentationMustBeginWithStandardText">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        
+        <!-- Per ADP guidelines, destructor summary documentation does not have to match a specific format, since they are not directly consumed for external documentation. -->
+        <Rule Name="DestructorSummaryDocumentationMustBeginWithStandardText">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        
+        <!-- Per ADP guidelines, documentation headers can contain blank lines, since they are not directly consumed for external documentation. -->
+        <Rule Name="DocumentationHeadersMustNotContainBlankLines">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+    </Analyzer>
+
+    <Analyzer AnalyzerId="Microsoft.StyleCop.CSharp.ReadabilityRules">
+      <Rules>
+        <!-- Per ADP guidelines, the use of regions is not allowed (copied from CSD guidelines doc) -->
+        <Rule Name="DoNotUseRegions">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">True</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <!-- Per ADP guidelines, method parameter are allowed to span across multiple lines (rather than having to be assigned to a temporary variable). -->
+        <Rule Name="ParameterMustNotSpanMultipleLines">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+    </Analyzer>
+
+  </Analyzers>
+</StyleCopSettings>

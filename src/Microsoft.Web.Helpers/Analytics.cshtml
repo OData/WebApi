@@ -1,0 +1,61 @@
+﻿@* Generator: WebPagesHelper *@
+
+@helper GetGoogleHtml(string webPropertyId) {
+    var webPropertyIdJson = new HtmlString(HttpUtility.JavaScriptStringEncode(webPropertyId, addDoubleQuotes: false));
+
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try{
+            var pageTracker = _gat._getTracker("@webPropertyIdJson");
+            pageTracker._trackPageview();
+        } catch(err) {}
+    </script>
+}
+
+@helper GetGoogleAsyncHtml(string webPropertyId) {
+    var webPropertyIdJson = new HtmlString(HttpUtility.JavaScriptStringEncode(webPropertyId, addDoubleQuotes: false));
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', '@webPropertyIdJson']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+}
+
+@helper GetYahooHtml(string account) {
+    var accountJson = new HtmlString(HttpUtility.JavaScriptStringEncode(account, addDoubleQuotes: false));
+    <script type="text/javascript">
+        window.ysm_customData = new Object();
+        window.ysm_customData.conversion = "transId=,currency=,amount=";
+        var ysm_accountid = "@accountJson";
+        document.write("<SCR" + "IPT language='JavaScript' type='text/javascript' "
+        + "SRC=//" + "srv3.wa.marketingsolutions.yahoo.com" + "/script/ScriptServlet" + "?aid=" + ysm_accountid
+        + "></SCR" + "IPT>");
+    </script>
+}
+
+@helper GetStatCounterHtml(int project, string security) {
+    var securityJson = new HtmlString(HttpUtility.JavaScriptStringEncode(security, addDoubleQuotes: false));
+
+    <script type="text/javascript">
+    var sc_project=@project;
+    var sc_invisible=1;
+    var sc_security="@securityJson";
+    var sc_text=2;
+    var sc_https=1;
+    var scJsHost = (("https:" == document.location.protocol) ? "https://secure." : "http://www.");
+    document.write("<sc" + "ript type='text/javascript' src='" + scJsHost + "statcounter.com/counter/counter_xhtml.js'></" + "script>");
+    </script>
+    <noscript>
+    <div class="statcounter">
+    <a title="tumblrstatistics" class="statcounter" href="http://www.statcounter.com/tumblr/"><img class="statcounter" src="https://c.statcounter.com/@project/0/@security/1/" alt="tumblr statistics"/></a></div>
+    </noscript>
+}     
+       

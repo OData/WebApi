@@ -1,0 +1,214 @@
+﻿using System.Web.Razor.Generator;
+using System.Web.Razor.Parser;
+using System.Web.Razor.Parser.SyntaxTree;
+using System.Web.Razor.Resources;
+using System.Web.Razor.Test.Framework;
+using System.Web.Razor.Text;
+using System.Web.WebPages.TestUtils;
+using Xunit;
+using Assert = Microsoft.TestCommon.AssertEx;
+
+namespace System.Web.Razor.Test.Parser.Html
+{
+    public class HtmlDocumentTest : CsHtmlMarkupParserTestBase
+    {
+        private static readonly TestFile Nested1000 = TestFile.Create("nested-1000.html");
+
+        [Fact]
+        public void ParseDocumentMethodThrowsArgNullExceptionOnNullContext()
+        {
+            // Arrange
+            HtmlMarkupParser parser = new HtmlMarkupParser();
+
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(() => parser.ParseDocument(), RazorResources.Parser_Context_Not_Set);
+        }
+
+        [Fact]
+        public void ParseSectionMethodThrowsArgNullExceptionOnNullContext()
+        {
+            // Arrange
+            HtmlMarkupParser parser = new HtmlMarkupParser();
+
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(() => parser.ParseSection(null, true), RazorResources.Parser_Context_Not_Set);
+        }
+
+        [Fact]
+        public void ParseDocumentOutputsEmptyBlockWithEmptyMarkupSpanIfContentIsEmptyString()
+        {
+            ParseDocumentTest(String.Empty, new MarkupBlock(Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void ParseDocumentOutputsWhitespaceOnlyContentAsSingleWhitespaceMarkupSpan()
+        {
+            SingleSpanDocumentTest("          ", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentAcceptsSwapTokenAtEndOfFileAndOutputsZeroLengthCodeSpan()
+        {
+            ParseDocumentTest("@",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.EmptyCSharp()
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.EmptyHtml()),
+                new RazorError(RazorResources.ParseError_Unexpected_EndOfFile_At_Start_Of_CodeBlock, 1, 0, 1));
+        }
+
+        [Fact]
+        public void ParseDocumentCorrectlyHandlesSingleLineOfMarkupWithEmbeddedStatement()
+        {
+            ParseDocumentTest("<div>Foo @if(true) {} Bar</div>",
+                new MarkupBlock(
+                    Factory.Markup("<div>Foo "),
+                    new StatementBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("if(true) {}").AsStatement()),
+                    Factory.Markup(" Bar</div>")));
+        }
+
+        [Fact]
+        public void ParseDocumentWithinSectionDoesNotCreateDocumentLevelSpan()
+        {
+            ParseDocumentTest(@"@section Foo {
+    <html></html>
+}",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("Foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section Foo {")
+                               .AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup("\r\n    <html></html>\r\n")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void ParseDocumentParsesWholeContentAsOneSpanIfNoSwapCharacterEncountered()
+        {
+            SingleSpanDocumentTest("foo <bar>baz</bar>", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentHandsParsingOverToCodeParserWhenAtSignEncounteredAndEmitsOutput()
+        {
+            ParseDocumentTest("foo @bar baz",
+                new MarkupBlock(
+                    Factory.Markup("foo "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup(" baz")));
+        }
+
+        [Fact]
+        public void ParseDocumentEmitsAtSignAsMarkupIfAtEndOfFile()
+        {
+            ParseDocumentTest("foo @",
+                new MarkupBlock(
+                    Factory.Markup("foo "),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.EmptyCSharp()
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.EmptyHtml()),
+                new RazorError(RazorResources.ParseError_Unexpected_EndOfFile_At_Start_Of_CodeBlock, 5, 0, 5));
+        }
+
+        [Fact]
+        public void ParseDocumentEmitsCodeBlockIfFirstCharacterIsSwapCharacter()
+        {
+            ParseDocumentTest("@bar",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("bar")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void ParseDocumentDoesNotSwitchToCodeOnEmailAddressInText()
+        {
+            SingleSpanDocumentTest("<foo>anurse@microsoft.com</foo>", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentDoesNotSwitchToCodeOnEmailAddressInAttribute()
+        {
+            ParseDocumentTest("<a href=\"mailto:anurse@microsoft.com\">Email me</a>",
+                new MarkupBlock(
+                    Factory.Markup("<a"),
+                    new MarkupBlock(new AttributeBlockCodeGenerator("href", new LocationTagged<string>(" href=\"", 2, 0, 2), new LocationTagged<string>("\"", 36, 0, 36)),
+                        Factory.Markup(" href=\"").With(SpanCodeGenerator.Null),
+                        Factory.Markup("mailto:anurse@microsoft.com")
+                               .With(new LiteralAttributeCodeGenerator(new LocationTagged<string>(String.Empty, 9, 0, 9), new LocationTagged<string>("mailto:anurse@microsoft.com", 9, 0, 9))),
+                        Factory.Markup("\"").With(SpanCodeGenerator.Null)),
+                    Factory.Markup(">Email me</a>")));
+        }
+
+        [Fact]
+        public void ParseDocumentDoesNotReturnErrorOnMismatchedTags()
+        {
+            SingleSpanDocumentTest("Foo <div><p></p></p> Baz", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentReturnsOneMarkupSegmentIfNoCodeBlocksEncountered()
+        {
+            SingleSpanDocumentTest("Foo <p>Baz<!--Foo-->Bar<!-F> Qux", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentRendersTextPseudoTagAsMarkup()
+        {
+            SingleSpanDocumentTest("Foo <text>Foo</text>", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentAcceptsEndTagWithNoMatchingStartTag()
+        {
+            SingleSpanDocumentTest("Foo </div> Bar", BlockType.Markup, SpanKind.Markup);
+        }
+
+        [Fact]
+        public void ParseDocumentNoLongerSupportsDollarOpenBraceCombination()
+        {
+            ParseDocumentTest("<foo>${bar}</foo>",
+                new MarkupBlock(
+                    Factory.Markup("<foo>${bar}</foo>")));
+        }
+
+        [Fact]
+        public void ParseDocumentTreatsTwoAtSignsAsEscapeSequence()
+        {
+            HtmlParserTestUtils.RunSingleAtEscapeTest(ParseDocumentTest, lastSpanAcceptedCharacters: AcceptedCharacters.Any);
+        }
+
+        [Fact]
+        public void ParseDocumentTreatsPairsOfAtSignsAsEscapeSequence()
+        {
+            HtmlParserTestUtils.RunMultiAtEscapeTest(ParseDocumentTest, lastSpanAcceptedCharacters: AcceptedCharacters.Any);
+        }
+
+        [Fact]
+        public void ParseBlockCanParse1000NestedElements()
+        {
+            string content = Nested1000.ReadAllText();
+            SingleSpanDocumentTest(content, BlockType.Markup, SpanKind.Markup);
+        }
+    }
+}

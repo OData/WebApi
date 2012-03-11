@@ -1,0 +1,69 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@using System.IO;
+@using NuGet;
+
+@section PackageHead { 
+    <script type="text/javascript" src="@Href("scripts/PackageAction.js")"></script>
+    <noscript>@PackageManagerResources.JavascriptRequired</noscript>
+}
+@{
+    // Read params from request
+    var sourceName = Request["source"];
+    var packageId = Request["package"];
+    var versionString = Request["version"];
+    var packageSource = PageUtils.GetPackageSource(sourceName);
+   
+    var version = !versionString.IsEmpty() ? SemanticVersion.Parse(versionString) : null;
+    
+    WebProjectManager projectManager;
+    try {
+        projectManager = new WebProjectManager(packageSource.Source, PackageManagerModule.SiteRoot);
+    } catch (Exception exception) {
+        <div class="error message">@exception.Message</div>
+        return;
+    }
+    var updatePackage = projectManager.SourceRepository.FindPackage(packageId, version);
+    if (updatePackage == null) {
+        ModelState.AddFormError(PackageManagerResources.BadRequest);
+        @Html.ValidationSummary()
+        return; 
+    }
+
+    var package = projectManager.LocalRepository.FindPackage(packageId);
+
+    // Layout
+    Page.SectionTitle = String.Format(CultureInfo.CurrentCulture, PackageManagerResources.UpdatePackageDesc, package.GetDisplayName(), updatePackage.Version);
+    var packagesHomeUrl = Href(PageUtils.GetPackagesHome(), Request.Url.Query);
+
+    if (IsPost) {
+        AntiForgery.Validate();
+        try { 
+            projectManager.UpdatePackage(updatePackage);   
+        } catch (Exception exception) {
+            ModelState.AddFormError(exception.Message);
+        }
+
+        if (ModelState.IsValid) {
+            Response.Redirect(packagesHomeUrl + "&action-completed=Update");
+        }
+        else {
+            @Html.ValidationSummary(String.Format(CultureInfo.CurrentCulture, PackageManagerResources.PackageUpdateError, package.GetDisplayName()))
+        }
+        return;
+    }
+}
+
+@RenderPage("_PackageDetails.cshtml", new Dictionary<string, object>{ {"Package", updatePackage} })
+<br />
+<form method="post" action="" id="submitForm">
+    @AntiForgery.GetHtml()
+    <input type="hidden" name="source" value="@sourceName" />
+    <input type="hidden" name="package" value="@packageId" />
+    <input type="hidden" name="version" value="@version" />
+
+    <input type="submit" value="@PackageManagerResources.UpdatePackage" />
+    <input type="reset" value="@PackageManagerResources.Cancel" data-returnurl="@packagesHomeUrl" />
+    <br /><br />
+</form>

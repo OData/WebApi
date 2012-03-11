@@ -1,0 +1,91 @@
+﻿@* Generator: WebPage *@
+
+@using System.Globalization;
+@using System.IO;
+@using System.Linq;
+@using NuGet;
+
+@section PackageHead { 
+    <script type="text/javascript" src="@Href("scripts/PackageAction.js")"></script>
+    <noscript>@PackageManagerResources.JavascriptRequired</noscript>
+}
+@{
+    // Read params from request
+    var sourceName = Request["source"];
+    var packageId = Request["package"];
+    var version = Request["version"];
+
+    var packageSource = PageUtils.GetPackageSource(sourceName);
+    
+    WebProjectManager projectManager;
+    try {
+        projectManager = new WebProjectManager(packageSource.Source, PackageManagerModule.SiteRoot);
+    } catch (Exception exception) {
+        <div class="error message">@exception.Message</div>
+        return;
+    }
+    IPackage package = projectManager.SourceRepository.FindPackage(packageId, version != null ? SemanticVersion.Parse(version) : null);
+
+    if (package == null) {
+        ModelState.AddFormError(PackageManagerResources.BadRequest);
+        @Html.ValidationSummary()
+        return; 
+    } 
+    
+    Page.SectionTitle = String.Format(CultureInfo.CurrentCulture, PackageManagerResources.InstallPackageDesc, package.GetDisplayName());
+
+    var packagesHomeUrl = Href(PageUtils.GetPackagesHome(), Request.Url.Query);
+    if (IsPost) {
+        AntiForgery.Validate();
+        try {
+            projectManager.InstallPackage(package);   
+        } catch (Exception exception) {
+            ModelState.AddFormError(exception.Message);
+        }
+        
+        if (ModelState.IsValid) {
+            Response.Redirect(packagesHomeUrl + "&action-completed=Install");
+        }
+        else {
+            @Html.ValidationSummary(String.Format(CultureInfo.CurrentCulture, PackageManagerResources.PackageInstallationError, package.GetDisplayName()))
+            return;
+        }
+    }
+}
+
+@RenderPage("_PackageDetails.cshtml", new Dictionary<string, object>{ {"Package", package} })
+
+@{
+    var licensePackages = projectManager.GetPackagesRequiringLicenseAcceptance(package);
+    if (licensePackages.Any()) {
+       <hr />
+       <ul>
+            @foreach(var licensePackage in licensePackages.Where(p => PageUtils.IsValidLicenseUrl(p.LicenseUrl))){
+                <li>
+                    <strong>@licensePackage.Id @licensePackage.Version</strong> 
+                    (@PackageManagerResources.AuthorsLabel: <span class="package-author">@String.Join(PackageManagerResources.WordSeparator, licensePackage.Authors)</span>)
+                    <br />
+                    <a href="@licensePackage.LicenseUrl" target="_blank">@PackageManagerResources.ViewLicenseTerms</a>
+                </li>
+            }
+       </ul>   
+    }else {
+        <br />
+        <hr />
+    }
+}
+
+<form method="post" action="" id="submitForm">
+<p>@PackageManagerResources.Disclaimer</p>    
+<fieldset class="no-border install">
+    <input type="hidden" name="source" value="@sourceName" />
+    <input type="hidden" name="package" value="@packageId" />
+    <input type="hidden" name="version" value="@version" />
+    @AntiForgery.GetHtml()
+
+    <input type="submit" value="@PackageManagerResources.InstallPackage" />
+    <input type="reset" value="@PackageManagerResources.Cancel" data-returnurl="@packagesHomeUrl" />
+</fieldset>
+    
+
+</form>

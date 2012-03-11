@@ -1,0 +1,93 @@
+﻿@* Generator: WebPagesHelper *@
+
+@using System.Globalization
+@using System.Web
+@using System.Web.WebPages.Scope
+@using Microsoft.Internal.Web.Utils
+@using Resources
+
+@functions {
+    private const string DefaultBoxWidth = "322px";
+    internal static readonly object _siteTitleKey = new object();
+    internal static readonly object _siteUrlKey = new object();
+
+
+    public static string SiteTitle {
+        get {
+            return ScopeStorage.CurrentScope[_siteTitleKey] as string;
+        }
+
+        set {
+            if (value == null) {
+                throw new ArgumentNullException("SiteTitle");
+            }
+            ScopeStorage.CurrentScope[_siteTitleKey] = value;
+        }
+    }
+
+    public static string SiteUrl {
+        get {
+           return ScopeStorage.CurrentScope[_siteUrlKey] as string;
+        }
+
+        set {
+            if (value == null) {
+                throw new ArgumentNullException("SiteUrl");
+            }
+            ScopeStorage.CurrentScope[_siteUrlKey] = value;
+        }
+    }
+    
+    private static int GetCodePageFromRequest(HttpContextBase httpContext) {
+        return httpContext.Response.ContentEncoding.CodePage;
+    }
+
+    private static string GetSiteUrl(IDictionary<object, object> scopeStorage, string siteUrl) {
+        object result;
+        if (siteUrl.IsEmpty() && scopeStorage.TryGetValue(_siteUrlKey, out result)){
+            siteUrl = result as string;
+        }
+        return siteUrl;
+    }
+
+    private static string GetSiteTitle(IDictionary<object, object> scopeStorage, string siteTitle) {
+        object result;
+        if (siteTitle.IsEmpty() && scopeStorage.TryGetValue(_siteTitleKey, out result)) {
+            siteTitle = result as string;
+        }
+        return siteTitle;
+    }
+}
+
+@helper SearchBox(string boxWidth = DefaultBoxWidth, string siteUrl = null, string siteTitle = null) {
+    @_SearchBox(boxWidth, siteUrl, siteTitle, new HttpContextWrapper(HttpContext.Current), ScopeStorage.CurrentScope)
+ }
+
+@helper _SearchBox(string boxWidth, string siteUrl, string siteTitle, HttpContextBase context, IDictionary<object, object> scopeStorage) {
+    siteTitle = GetSiteTitle(scopeStorage, siteTitle);
+    siteUrl = GetSiteUrl(scopeStorage, siteUrl);
+    string searchSite = String.IsNullOrEmpty(siteTitle) ?  HelpersToolkitResources.BingSearch_DefaultSiteSearchText : siteTitle;
+
+    <form action="http://www.bing.com/search" class="BingSearch" method="get" target="_blank">
+    <input name="FORM" type="hidden" value="FREESS" />
+    <input name="cp" type="hidden" value="@GetCodePageFromRequest(context)" />
+    <table cellpadding="0" cellspacing="0" style="width:@boxWidth;">
+    <tr style="height: 32px">
+        <td style="width: 100%; border:solid 1px #ccc; border-right-style:none; padding-left:10px; padding-right:10px; vertical-align:middle;">
+            <input name="q" style="background-image:url(http://www.bing.com/siteowner/s/siteowner/searchbox_background_k.png); background-position:right; background-repeat:no-repeat; font-family:Arial; font-size:14px; color:#000; width:100%; border:none 0 transparent;" title="Search Bing" type="text" />
+        </td>
+        <td style="border:solid 1px #ccc; border-left-style:none; padding-left:0px; padding-right:3px;">
+            <input alt="Search" src="http://www.bing.com/siteowner/s/siteowner/searchbutton_normal_k.gif" style="border:none 0 transparent; height:24px; width:24px; vertical-align:top;" type="image" />
+        </td>
+    </tr>
+    @if (!String.IsNullOrEmpty(siteUrl)) {
+    <tr>
+        <td colspan="2" style="font-size: small">
+            <label><input checked="checked" name="q1" type="radio" value="site:@siteUrl" />@searchSite</label>&nbsp;<label><input name="q1" type="radio" value="" />@HelpersToolkitResources.BingSearch_DefaultWebSearchText</label>
+         </td>
+    </tr>
+    }
+    </table>
+    </form>
+}
+

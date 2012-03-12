@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using System.Threading;
-using System.Web.Http.Common;
 
 namespace System.Web.Http
 {
@@ -19,11 +18,12 @@ namespace System.Web.Http
                 configurer(config);
             }
             HttpServer server = new HttpServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
             HttpResponseMessage response = null;
             try
             {
                 // Act
-                response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+                response = invoker.SendAsync(request, CancellationToken.None).Result;
 
                 // Assert
                 assert(response);

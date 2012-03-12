@@ -92,11 +92,12 @@ namespace System.Web.Http
             // Arrange
             Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>();
             HttpServer server = new HttpServer(dispatcherMock.Object);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
             server.Dispose();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            return server.SubmitRequestAsync(request, CancellationToken.None).ContinueWith(
+            return invoker.SendAsync(request, CancellationToken.None).ContinueWith(
                 (reqTask) =>
                 {
                     // Assert
@@ -119,9 +120,10 @@ namespace System.Web.Http
 
             HttpConfiguration config = new HttpConfiguration();
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             // Act
-            return server.SubmitRequestAsync(request, CancellationToken.None).ContinueWith(
+            return invoker.SendAsync(request, CancellationToken.None).ContinueWith(
                 (reqTask) =>
                 {
                     // Assert
@@ -144,12 +146,13 @@ namespace System.Web.Http
 
             HttpConfiguration config = new HttpConfiguration();
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             SynchronizationContext syncContext = new SynchronizationContext();
             SynchronizationContext.SetSynchronizationContext(syncContext);
 
             // Act
-            return server.SubmitRequestAsync(request, CancellationToken.None).ContinueWith(
+            return invoker.SendAsync(request, CancellationToken.None).ContinueWith(
                 (reqTask) =>
                 {
                     // Assert

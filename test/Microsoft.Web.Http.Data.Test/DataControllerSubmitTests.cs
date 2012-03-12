@@ -244,6 +244,7 @@ namespace Microsoft.Web.Http.Data.Test
 
             HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(config);
             HttpServer server = new HttpServer(config, dispatcher);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string serializedChangeSet = String.Empty;
             if (mediaType == "application/json")
@@ -270,7 +271,7 @@ namespace Microsoft.Web.Http.Data.Test
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mediaType));
             request.Content = new StringContent(serializedChangeSet, Encoding.UTF8, mediaType);
 
-            return server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            return invoker.SendAsync(request, CancellationToken.None).Result;
         }
 
         /// <summary>

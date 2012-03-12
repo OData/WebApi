@@ -23,9 +23,10 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts", HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             Product[] products = response.Content.ReadAsAsync<IQueryable<Product>>().Result.ToArray();
             Assert.Equal(9, products.Length);
@@ -39,10 +40,11 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string query = "?$filter=UnitPrice lt 5.0";
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts" + query, HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             Product[] products = response.Content.ReadAsAsync<IQueryable<Product>>().Result.ToArray();
             Assert.Equal(8, products.Length);
@@ -57,11 +59,14 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer catalogServer = GetTestCatalogServer(config);
+            HttpMessageInvoker catalogInvoker = new HttpMessageInvoker(catalogServer);
+
             HttpServer citiesServer = GetTestCitiesServer(config);
+            HttpMessageInvoker citiesInvoker = new HttpMessageInvoker(citiesServer);
 
             // verify products query
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts", HttpMethod.Get, config);
-            HttpResponseMessage response = catalogServer.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = catalogInvoker.SendAsync(request, CancellationToken.None).Result;
             Product[] products = response.Content.ReadAsAsync<IQueryable<Product>>().Result.ToArray();
             Assert.Equal(9, products.Length);
 
@@ -75,7 +80,7 @@ namespace Microsoft.Web.Http.Data.Test
 
             // verify cities query
             request = TestHelpers.CreateTestMessage(TestConstants.CitiesUrl + "GetCities", HttpMethod.Get, config);
-            response = citiesServer.SubmitRequestAsync(request, CancellationToken.None).Result;
+            response = citiesInvoker.SendAsync(request, CancellationToken.None).Result;
             City[] cities = response.Content.ReadAsAsync<IQueryable<City>>().Result.ToArray();
             Assert.Equal(11, cities.Length);
 
@@ -96,10 +101,11 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string query = "?$filter=UnitPrice lt 5.0&$skip=2&$top=5&$inlinecount=allpages";
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts" + query, HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             QueryResult queryResult = response.Content.ReadAsAsync<QueryResult>().Result;
             Assert.Equal(5, queryResult.Results.Cast<object>().Count());
@@ -115,10 +121,11 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string query = "?$filter=UnitPrice lt 5.0&$top=5&$inlinecount=allpages";
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts" + query, HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             QueryResult queryResult = response.Content.ReadAsAsync<QueryResult>().Result;
             Assert.Equal(5, queryResult.Results.Cast<object>().Count());
@@ -134,10 +141,11 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string query = "?$filter=UnitPrice lt 5.0&$inlinecount=allpages";
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts" + query, HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             QueryResult queryResult = response.Content.ReadAsAsync<QueryResult>().Result;
             Assert.Equal(8, queryResult.Results.Cast<object>().Count());
@@ -152,10 +160,11 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string query = "?$filter=UnitPrice lt 5.0&$inlinecount=none";
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProducts" + query, HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             Product[] products = response.Content.ReadAsAsync<IQueryable<Product>>().Result.ToArray();
             Assert.Equal(8, products.Length);
@@ -169,9 +178,10 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProductsEnumerable", HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             Product[] products = response.Content.ReadAsAsync<IEnumerable<Product>>().Result.ToArray();
             Assert.Equal(5, products.Length);
@@ -188,10 +198,11 @@ namespace Microsoft.Web.Http.Data.Test
         {
             HttpConfiguration config = GetTestConfiguration();
             HttpServer server = GetTestCatalogServer(config);
+            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
             string query = "?$inlinecount=allpages";
             HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetOrders" + query, HttpMethod.Get, config);
-            HttpResponseMessage response = server.SubmitRequestAsync(request, CancellationToken.None).Result;
+            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
 
             QueryResult result = response.Content.ReadAsAsync<QueryResult>().Result;
             Assert.Equal(2, result.Results.Cast<object>().Count());

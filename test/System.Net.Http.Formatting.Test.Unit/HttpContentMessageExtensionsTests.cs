@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.TestCommon;
 using Xunit;
@@ -278,6 +279,45 @@ namespace System.Net.Http
 
             HttpContent content = CreateContent(true, request, null);
             Assert.Throws<IOException>(() => content.ReadAsHttpRequestMessageAsync().Result);
+        }
+
+        [Fact]
+        [Trait("Description", "ReadAsHttpRequestMessage sorts request vs entity headers correctly.")]
+        public void ReadAsHttpRequestMessageAsync_SortHeaders()
+        {
+            string[] request = new[] {
+                @"GET / HTTP/1.1",
+                @"Host: somehost.com",
+                @"Content-Language: xx",
+                @"Request-Header: zz",
+            };
+
+            HttpContent content = CreateContent(true, request, "sample body");
+            HttpRequestMessage httpRequest = content.ReadAsHttpRequestMessageAsync().Result;
+            Assert.Equal("xx", httpRequest.Content.Headers.ContentLanguage.ToString());
+
+            IEnumerable<string> requestHeaderValues;
+            Assert.True(httpRequest.Headers.TryGetValues("request-header", out requestHeaderValues));
+            Assert.Equal("zz", requestHeaderValues.First());
+        }
+
+        [Fact]
+        [Trait("Description", "ReadAsHttpResponseMessage sorts response vs entity headers correctly.")]
+        public void ReadAsHttpResponseMessageAsync_SortHeaders()
+        {
+            string[] response = new[] {
+                @"HTTP/1.1 200 OK",
+                @"Content-Language: xx",
+                @"Response-Header: zz",
+            };
+
+            HttpContent content = CreateContent(false, response, "sample body");
+            HttpResponseMessage httpResponse = content.ReadAsHttpResponseMessageAsync().Result;
+            Assert.Equal("xx", httpResponse.Content.Headers.ContentLanguage.ToString());
+
+            IEnumerable<string> ResponseHeaderValues;
+            Assert.True(httpResponse.Headers.TryGetValues("Response-header", out ResponseHeaderValues));
+            Assert.Equal("zz", ResponseHeaderValues.First());
         }
 
         [Fact]

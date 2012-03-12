@@ -73,7 +73,6 @@
     <JSKnownGlobalNames>jQuery,$,upshot,WinJS,OData,JSON,ko</JSKnownGlobalNames>
   </PropertyGroup>
   <!-- We don't use these targets, but VS will try to upgrade the project when they aren't present -->
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions />
   <!-- SPA build targets -->

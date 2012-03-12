@@ -2,7 +2,9 @@
 
 namespace System.Web.Http.ModelBinding
 {
-    // Interface for model binding
+    /// <summary>
+    /// Interface for model binding.
+    /// </summary>
     public interface IModelBinder
     {
         bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext);

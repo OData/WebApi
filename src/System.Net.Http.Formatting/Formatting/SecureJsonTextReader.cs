@@ -38,26 +38,39 @@ namespace System.Net.Http.Formatting
 
         private static string FixUpInvalidUnicodeString(string s)
         {
-            StringBuilder sb = new StringBuilder(s);
-            for (int i = 0; i < sb.Length; i++)
+            // The following invariant is maintained : while isValid is true, sb == null; while isValid is false, sb != null
+            bool isValid = true;
+            StringBuilder sb = null;
+
+            for (int i = 0; i < s.Length; i++)
             {
-                char ch = sb[i];
+                char ch = s[i];
                 if (Char.IsLowSurrogate(ch))
                 {
                     // Low surrogate with no preceding high surrogate; this char is replaced
+                    if (isValid)
+                    {
+                        isValid = false;
+                        sb = new StringBuilder(s);
+                    }
                     sb[i] = UnicodeReplacementChar;
                 }
                 else if (Char.IsHighSurrogate(ch))
                 {
                     // Potential start of a surrogate pair
-                    if (i + 1 == sb.Length)
+                    if (i + 1 == s.Length)
                     {
                         // last character is an unmatched surrogate - replace
+                        if (isValid)
+                        {
+                            isValid = false;
+                            sb = new StringBuilder(s);
+                        }
                         sb[i] = UnicodeReplacementChar;
                     }
                     else
                     {
-                        char nextChar = sb[i + 1];
+                        char nextChar = s[i + 1];
                         if (Char.IsLowSurrogate(nextChar))
                         {
                             // the surrogate pair is valid
@@ -67,12 +80,17 @@ namespace System.Net.Http.Formatting
                         else
                         {
                             // High surrogate not followed by low surrogate; original char is replaced
+                            if (isValid)
+                            {
+                                isValid = false;
+                                sb = new StringBuilder(s);
+                            }
                             sb[i] = UnicodeReplacementChar;
                         }
                     }
                 }
             }
-            return sb.ToString();
+            return isValid ? s : sb.ToString();
         }
     }
 }

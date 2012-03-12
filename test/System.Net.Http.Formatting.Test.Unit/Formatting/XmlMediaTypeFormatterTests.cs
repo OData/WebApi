@@ -79,6 +79,8 @@ namespace System.Net.Http.Formatting
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("DataContractSampleType"),
                 "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractSerializer is set to true.");
+            Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
+                    "Using DCS should not emit the xml declaration by default.");
         }
 
         [Fact]
@@ -93,6 +95,8 @@ namespace System.Net.Http.Formatting
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.False(serializedString.Contains("DataContractSampleType"),
                 "SampleType should not be serialized with data contract name DataContractSampleType because UseDataContractSerializer is set to false.");
+            Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
+              "Using XmlSerializer should not emit the xml declaration by default.");
         }
 
         [Theory]

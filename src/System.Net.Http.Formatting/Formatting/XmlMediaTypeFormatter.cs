@@ -370,7 +370,14 @@ namespace System.Net.Http.Formatting
                 object serializer = GetSerializerForType(type);
 
                 // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
-                using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding, ownsStream: false))
+                XmlWriterSettings settings = new XmlWriterSettings()
+                {
+                    OmitXmlDeclaration = true,
+                    Encoding = Encoding,
+                    CloseOutput = false
+                };
+
+                using (XmlWriter writer = XmlWriter.Create(stream, settings))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)

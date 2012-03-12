@@ -21,8 +21,13 @@ namespace System.Web.Http.WebHost
     {
         internal static readonly string HttpContextBaseKey = "MS_HttpContext";
 
-        private static readonly Lazy<HttpServer> _server =
-            new Lazy<HttpServer>(() => new HttpServer(GlobalConfiguration.Configuration, GlobalConfiguration.Dispatcher));
+        private static readonly Lazy<HttpMessageInvoker> _server =
+            new Lazy<HttpMessageInvoker>(
+                () =>
+                {
+                    HttpServer server = new HttpServer(GlobalConfiguration.Configuration, GlobalConfiguration.Dispatcher);
+                    return new HttpMessageInvoker(server);
+                });
 
         private IHttpRouteData _routeData;
 
@@ -113,7 +118,7 @@ namespace System.Web.Http.WebHost
             // Add route data
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
 
-            Task responseBodyTask = _server.Value.SubmitRequestAsync(request, CancellationToken.None)
+            Task responseBodyTask = _server.Value.SendAsync(request, CancellationToken.None)
                 .Then(response => ConvertResponse(httpContextBase, response, request))
                 .FastUnwrap();
 

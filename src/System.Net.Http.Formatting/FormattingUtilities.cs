@@ -83,31 +83,6 @@ namespace System.Net.Http
         /// </summary>
         public static readonly Type JsonValueType = typeof(JsonValue);
 
-        // This list should be kept in sync with the list of headers supported by HttpContentHeaders
-        // TODO: CSDMAIN 231195 -- Change hard-coded list of HttpContentHeaders to dynamic list provided by DCR #225156
-        private static readonly HashSet<string> _httpContentHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "Allow",
-            "Content-Disposition",
-            "Content-Encoding",
-            "Content-Language",
-            "Content-Length",
-            "Content-Location",
-            "Content-MD5",
-            "Content-Range",
-            "Content-Type",
-            "Expires",
-            "Last-Modified",
-        };
-
-        /// <summary>
-        /// Gets the HTTP headers that are associated with <see cref="HttpContentHeaders"/>.
-        /// </summary>
-        public static HashSet<string> HttpContentHeaders
-        {
-            get { return FormattingUtilities._httpContentHeaders; }
-        }
-
         /// <summary>
         /// Determines whether <paramref name="type"/> is a <see cref="JsonValue"/> type.
         /// </summary>

@@ -18,7 +18,6 @@ namespace System.Net.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpContentMessageExtensions
     {
-        private const string HttpContentLengthHeader = "Content-Length";
         private const int MinBufferSize = 256;
         private const int DefaultBufferSize = 32 * 1024;
 
@@ -294,7 +293,7 @@ namespace System.Net.Http
             // Set the header fields
             foreach (KeyValuePair<string, IEnumerable<string>> header in source)
             {
-                if (FormattingUtilities.HttpContentHeaders.Contains(header.Key))
+                if (!destination.TryAddWithoutValidation(header.Key, header.Value))
                 {
                     if (contentHeaders == null)
                     {
@@ -302,10 +301,6 @@ namespace System.Net.Http
                     }
 
                     contentHeaders.TryAddWithoutValidation(header.Key, header.Value);
-                }
-                else
-                {
-                    destination.TryAddWithoutValidation(header.Key, header.Value);
                 }
             }
 

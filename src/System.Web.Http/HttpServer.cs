@@ -93,18 +93,6 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Submits the request asynchronously for dispatching.
-        /// </summary>
-        /// <param name="request"><see cref="HttpRequestMessage"/> to submit</param>
-        /// <param name="cancellationToken">Token used to cancel operation.</param>
-        /// <returns>A <see cref="Task{T}"/> representing the operation.</returns>
-        public Task<HttpResponseMessage> SubmitRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            // TODO: DevDiv 315316: Remove once we have HttpMessageInvoker from NCL
-            return SendAsync(request, cancellationToken);
-        }
-
-        /// <summary>
         /// Releases unmanaged and - optionally - managed resources
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged SRResources.</param>

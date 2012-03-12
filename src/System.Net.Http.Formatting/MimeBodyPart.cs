@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
@@ -104,10 +103,7 @@ namespace System.Net.Http
                 }
 
                 HttpContent = new StreamContent(_outputStream);
-                foreach (KeyValuePair<string, IEnumerable<string>> header in _headers)
-                {
-                    HttpContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                }
+                _headers.CopyTo(HttpContent.Headers);
             }
 
             return _outputStream;

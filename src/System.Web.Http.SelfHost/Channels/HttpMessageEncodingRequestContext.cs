@@ -13,17 +13,7 @@ namespace System.Web.Http.SelfHost.Channels
 {
     internal class HttpMessageEncodingRequestContext : RequestContext
     {
-        private const string ContentLengthHeader = "Content-Length";
         private const string DefaultReasonPhrase = "OK";
-
-        // TODO: Remove this list of content-type headers once the NCL team publicly exposes
-        //       this list. Opened bug #50459 in DevDiv2 TFS on the NCL team.
-        //       Opened #189321 in CSDmain to track  [randallt] 
-        private static readonly HashSet<string> _httpContentHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "Allow", "Content-Encoding", "Content-Language", "Content-Location", "Content-MD5",
-            "Content-Range", "Expires", "Last-Modified", "Content-Type", ContentLengthHeader
-        };
 
         private RequestContext _innerContext;
         private Message _configuredRequestMessage;
@@ -120,39 +110,6 @@ namespace System.Web.Http.SelfHost.Channels
             }
         }
 
-        private static void AddHeaderToHttpRequestMessageAndHandleExceptions(HttpRequestMessage httpRequestMessage, string headerName, string headerValue)
-        {
-            try
-            {
-                AddHeaderToHttpRequestMessage(httpRequestMessage, headerName, headerValue);
-            }
-            catch (FormatException)
-            {
-            }
-            catch (InvalidOperationException)
-            {
-            }
-        }
-
-        private static void AddHeaderToHttpRequestMessage(HttpRequestMessage httpRequestMessage, string headerName, string headerValue)
-        {
-            if (_httpContentHeaders.Contains(headerName))
-            {
-                // Only set the content-length header if it is not already set
-                if (String.Equals(headerName, ContentLengthHeader, StringComparison.Ordinal) &&
-                    httpRequestMessage.Content.Headers.ContentLength != null)
-                {
-                    return;
-                }
-
-                httpRequestMessage.Content.Headers.Add(headerName, headerValue);
-            }
-            else
-            {
-                httpRequestMessage.Headers.Add(headerName, headerValue);
-            }
-        }
-
         private static void CopyHeadersToNameValueCollection(HttpHeaders headers, NameValueCollection nameValueCollection)
         {
             foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
@@ -233,10 +190,11 @@ namespace System.Web.Http.SelfHost.Channels
 
             foreach (var headerName in requestProperty.Headers.AllKeys)
             {
-                AddHeaderToHttpRequestMessageAndHandleExceptions(
-                    httpRequestMessage,
-                    headerName,
-                    requestProperty.Headers[headerName]);
+                string headerValue = requestProperty.Headers[headerName];
+                if (!httpRequestMessage.Headers.TryAddWithoutValidation(headerName, headerValue))
+                {
+                    httpRequestMessage.Content.Headers.TryAddWithoutValidation(headerName, headerValue);
+                }
             }
 
             return message;

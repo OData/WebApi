@@ -82,8 +82,12 @@
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
     <Compile Include="AcceptVerbsAttribute.cs" />
+    <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
+    <Compile Include="Controllers\ResponseMessageResultConverter.cs" />
+    <Compile Include="Controllers\ValueResultConverter.cs" />
+    <Compile Include="Controllers\VoidResultConverter.cs" />
     <Compile Include="HttpOptionsAttribute.cs" />
     <Compile Include="HttpHeadAttribute.cs" />
     <Compile Include="HttpPatchAttribute.cs" />
@@ -124,11 +128,6 @@
     <Compile Include="Controllers\HttpControllerDescriptor.cs" />
     <Compile Include="Dispatcher\IHttpControllerActivator.cs" />
     <Compile Include="HttpRouteCollection.cs" />
-    <Compile Include="Controllers\TaskActionResponseConverter.cs" />
-    <Compile Include="Controllers\HttpContentMessageConverter.cs" />
-    <Compile Include="Controllers\VoidHttpResponseMessageConverter.cs" />
-    <Compile Include="Controllers\HttpResponseMessageConverter.cs" />
-    <Compile Include="Controllers\ActionResponseConverter.cs" />
     <Compile Include="HttpPutAttribute.cs" />
     <Compile Include="HttpDeleteAttribute.cs" />
     <Compile Include="Controllers\IActionHttpMethodProvider.cs" />

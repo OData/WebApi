@@ -29,18 +29,19 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void InvokeActionAsync_Calls_ActionDescriptor_Execute()
+        public void InvokeActionAsync_Calls_ActionDescriptor_ExecuteAsync()
         {
             // Arrange
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("mockAction");
             mockActionDescriptor.Setup(a => a.GetParameters()).Returns(new Collection<HttpParameterDescriptor>(new HttpParameterDescriptor[0]));
             mockActionDescriptor.Setup(a => a.ReturnType).Returns(typeof(void));
+            mockActionDescriptor.Setup(a => a.ResultConverter).Returns(new VoidResultConverter());
             bool executeWasCalled = false;
-            mockActionDescriptor.Setup(
-                a => a.Execute(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>())).Callback(
-                    () => { executeWasCalled = true; });
-            
+            mockActionDescriptor.Setup(a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>()))
+                .Returns(() => TaskHelpers.FromResult<object>(null))
+                .Callback(() => { executeWasCalled = true; });
+
             HttpActionContext context = ContextUtil.CreateActionContext(
                 ContextUtil.CreateControllerContext(instance: _apiController),
                 mockActionDescriptor.Object);

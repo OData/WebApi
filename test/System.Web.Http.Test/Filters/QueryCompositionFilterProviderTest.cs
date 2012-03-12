@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
@@ -38,7 +36,6 @@ namespace System.Web.Http.Filters
                     { typeof(IQueryable<int>), typeof(int) },
                     { typeof(IQueryable<string>), typeof(string)},
                     { typeof(IQueryable<IQueryable<int>>), typeof(IQueryable<int>) },
-                    { typeof(Task<IQueryable<int>>), typeof(int) } 
                     // { typeof(HttpResponseMessage), typeof(int) } // static signature problems
                 };
             }

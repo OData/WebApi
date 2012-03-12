@@ -61,6 +61,24 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The method &apos;{0}&apos; on type &apos;{1}&apos; returned a Task instance even though it is not an asynchronous method..
+        /// </summary>
+        internal static string ActionExecutor_UnexpectedTaskInstance {
+            get {
+                return ResourceManager.GetString("ActionExecutor_UnexpectedTaskInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The method &apos;{0}&apos; on type &apos;{1}&apos; returned an instance of &apos;{2}&apos;. Make sure to call Unwrap on the returned value to avoid unobserved faulted Task..
+        /// </summary>
+        internal static string ActionExecutor_WrappedTaskInstance {
+            get {
+                return ResourceManager.GetString("ActionExecutor_WrappedTaskInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to After calling {0}.OnActionExecuted, the HttpActionExecutedContext properties Result and Exception were both null. At least one of these values must be non-null. To provide a new response, please set the Result object; to indicate an error, please throw an exception..
         /// </summary>
         internal static string ActionFilterAttribute_MustSupplyResponseOrException {
@@ -347,6 +365,15 @@ namespace System.Web.Http.Properties {
         internal static string GenericModelBinderProvider_TypeArgumentCountMismatch {
             get {
                 return ResourceManager.GetString("GenericModelBinderProvider_TypeArgumentCountMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No action result converter could be constructed for a generic parameter type &apos;{0}&apos;..
+        /// </summary>
+        internal static string HttpActionDescriptor_NoConverterForGenericParamterTypeExists {
+            get {
+                return ResourceManager.GetString("HttpActionDescriptor_NoConverterForGenericParamterTypeExists", resourceCulture);
             }
         }
         
@@ -689,6 +716,15 @@ namespace System.Web.Http.Properties {
         internal static string ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods {
             get {
                 return ResourceManager.GetString("ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A null value was returned where an instance of HttpResponseMessage was expected..
+        /// </summary>
+        internal static string ResponseMessageResultConverter_NullHttpResponseMessage {
+            get {
+                return ResourceManager.GetString("ResponseMessageResultConverter_NullHttpResponseMessage", resourceCulture);
             }
         }
         

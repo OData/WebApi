@@ -2,7 +2,6 @@
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
-using System.Web.Http.Internal;
 using System.Web.Http.Query;
 
 namespace System.Web.Http.Filters
@@ -28,7 +27,6 @@ namespace System.Web.Http.Filters
         {
             Contract.Assert(returnType != null);
 
-            returnType = TypeHelper.GetUnderlyingContentInnerType(returnType);
             return QueryTypeHelper.GetQueryableInterfaceInnerTypeOrNull(returnType); // IQueryable<T> => T 
         }
     }

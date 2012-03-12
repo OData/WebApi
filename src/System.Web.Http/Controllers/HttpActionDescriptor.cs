@@ -5,7 +5,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http.Filters;
+using System.Web.Http.Internal;
+using System.Web.Http.Properties;
 
 namespace System.Web.Http.Controllers
 {
@@ -13,6 +16,7 @@ namespace System.Web.Http.Controllers
     {
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
 
+        private IActionResultConverter _converter;
         private readonly object _thisLock = new object();
         private Collection<FilterInfo> _filterPipeline;
 
@@ -63,7 +67,38 @@ namespace System.Web.Http.Controllers
             }
         }
 
+        /// <summary>
+        /// The return type of the method or <c>null</c> if the method does not return a value (e.g. a method returning
+        /// <c>void</c>).
+        /// </summary>
+        /// <remarks>
+        /// This property should describe the type of the value contained by the result of executing the action
+        /// via the <see cref="ExecuteAsync(HttpControllerContext, IDictionary{string, object})"/>.
+        /// </remarks>
         public abstract Type ReturnType { get; }
+
+        /// <summary>
+        /// Gets the converter for correctly transforming the result of calling
+        /// <see cref="ExecuteAsync(HttpControllerContext, IDictionary{string, object})"/> into an instance of
+        /// <see cref="HttpResponseMessage"/>. 
+        /// </summary>
+        /// <remarks>
+        /// The behavior of the returned converter should align with the action's declared <see cref="ReturnType"/>.
+        /// </remarks>
+        public virtual IActionResultConverter ResultConverter
+        {
+            get
+            {
+                // This initialization is not thread safe but that's fine since the converters do not have
+                // any interesting state. If 2 threads get 2 different instances of the same converter type
+                // we don't really care.
+                if (_converter == null)
+                {
+                    _converter = GetResultConverter(ReturnType);
+                }
+                return _converter;
+            }
+        }
 
         public virtual Collection<HttpMethod> SupportedHttpMethods
         {
@@ -92,13 +127,38 @@ namespace System.Web.Http.Controllers
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Parameters can be built dynamically")]
         public abstract Collection<HttpParameterDescriptor> GetParameters();
 
+        internal static IActionResultConverter GetResultConverter(Type type)
+        {
+            if (type != null && type.IsGenericParameter)
+            {
+                // This can happen if somebody declares an action method as:
+                // public T Get<T>() { }
+                throw Error.InvalidOperation(SRResources.HttpActionDescriptor_NoConverterForGenericParamterTypeExists, type);
+            }
+
+            if (type == null)
+            {
+                return new VoidResultConverter();
+            }
+            else if (typeof(HttpResponseMessage).IsAssignableFrom(type))
+            {
+                return new ResponseMessageResultConverter();
+            }
+            else
+            {
+                Type valueConverterType = typeof(ValueResultConverter<>).MakeGenericType(type);
+                return TypeActivator.Create<IActionResultConverter>(valueConverterType).Invoke();
+            }
+        }
+
         /// <summary>
-        /// Executes the described action.
+        /// Executes the described action and returns a <see cref="Task{T}"/> that once completed will
+        /// contain the return value of the action.
         /// </summary>
         /// <param name="controllerContext">The context.</param>
         /// <param name="arguments">The arguments.</param>
-        /// <returns>The return value of the action.</returns>
-        public abstract object Execute(HttpControllerContext controllerContext, IDictionary<string, object> arguments);
+        /// <returns>A <see cref="Task{T}"/> that once completed will contain the return value of the action.</returns>
+        public abstract Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments);
 
         /// <summary>
         /// Returns the filters for the given configuration and action. The filter collection is ordered

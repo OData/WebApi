@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
@@ -37,23 +38,26 @@ namespace Microsoft.Web.Http.Data
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns HttpResponseMessage.")]
-        public override object Execute(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
         {
-            // create a changeset from the entries
-            ChangeSet changeSet = new ChangeSet((IEnumerable<ChangeSetEntry>)arguments[ChangeSetParameterName]);
-            changeSet.SetEntityAssociations();
-
-            DataController controller = (DataController)controllerContext.Controller;
-            if (!controller.Submit(changeSet) &&
-                controller.ActionContext.Response != null)
+            return TaskHelpers.RunSynchronously<object>(() =>
             {
-                // If the submit failed due to an authorization failure,
-                // return the authorization response directly
-                return controller.ActionContext.Response;
-            }
+                // create a changeset from the entries
+                ChangeSet changeSet = new ChangeSet((IEnumerable<ChangeSetEntry>)arguments[ChangeSetParameterName]);
+                changeSet.SetEntityAssociations();
 
-            // return the entries
-            return controllerContext.Request.CreateResponse<ChangeSetEntry[]>(HttpStatusCode.OK, changeSet.ChangeSetEntries.ToArray());
+                DataController controller = (DataController)controllerContext.Controller;
+                if (!controller.Submit(changeSet) &&
+                    controller.ActionContext.Response != null)
+                {
+                    // If the submit failed due to an authorization failure,
+                    // return the authorization response directly
+                    return controller.ActionContext.Response;
+                }
+
+                // return the entries
+                return controllerContext.Request.CreateResponse<ChangeSetEntry[]>(HttpStatusCode.OK, changeSet.ChangeSetEntries.ToArray());
+            });
         }
 
         /// <summary>

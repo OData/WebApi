@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -31,9 +32,14 @@ namespace Microsoft.Web.Http.Data
             get { return _innerDescriptor.ReturnType; }
         }
 
-        public override object Execute(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override IActionResultConverter ResultConverter
         {
-            return _innerDescriptor.Execute(controllerContext, arguments);
+            get { return _innerDescriptor.ResultConverter; }
+        }
+
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        {
+            return _innerDescriptor.ExecuteAsync(controllerContext, arguments);
         }
 
         public override Collection<HttpParameterDescriptor> GetParameters()

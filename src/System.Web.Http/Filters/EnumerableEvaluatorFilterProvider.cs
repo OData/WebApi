@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.Controllers;
-using System.Web.Http.Internal;
 
 namespace System.Web.Http.Filters
 {
@@ -18,9 +17,7 @@ namespace System.Web.Http.Filters
                 throw Error.ArgumentNull("actionDescriptor");
             }
 
-            var contentType = TypeHelper.GetUnderlyingContentInnerType(actionDescriptor.ReturnType);
-
-            if (EnumerableEvaluatorFilter.IsSupportedDeclaredContentType(contentType))
+            if (EnumerableEvaluatorFilter.IsSupportedDeclaredContentType(actionDescriptor.ReturnType))
             {
                 // Register filter in FilterScope.First so that it's closest to HttpDispatcher. This means
                 // the filter's "after" code path will be one of the last things to run.

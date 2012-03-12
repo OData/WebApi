@@ -4,16 +4,27 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http
 {
     public class ReflectedHttpActionDescriptorTest
     {
+        private readonly UsersRpcController _controller = new UsersRpcController();
+        private readonly HttpControllerContext _context;
+        private readonly Dictionary<string, object> _arguments = new Dictionary<string, object>();
+
+        public ReflectedHttpActionDescriptorTest()
+        {
+            _context = ContextUtil.CreateControllerContext(instance: _controller);
+        }
+
         [Fact]
         public void Default_Constructor()
         {
@@ -30,8 +41,7 @@ namespace System.Web.Http
         [Fact]
         public void Parameter_Constructor()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.EchoUser;
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
             HttpConfiguration config = new HttpConfiguration();
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "", typeof(UsersRpcController));
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, echoUserMethod.Method);
@@ -97,15 +107,10 @@ namespace System.Web.Http
         [Fact]
         public void GetFilter_Returns_AttributedFilter()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.AddAdmin;
+            Func<string, string, User> echoUserMethod = _controller.AddAdmin;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
-            Dictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                {"firstName", "test"},
-                {"lastName", "unit"}
-            };
+            _arguments["firstName"] = "test";
+            _arguments["lastName"] = "unit";
 
             IEnumerable<IFilter> filters = actionDescriptor.GetFilters();
 
@@ -120,8 +125,7 @@ namespace System.Web.Http
             IActionFilter actionFilter = new Mock<IActionFilter>().Object;
             IExceptionFilter exceptionFilter = new Mock<IExceptionFilter>().Object;
             IAuthorizationFilter authorizationFilter = new AuthorizeAttribute();
-            UsersRpcController controller = new UsersRpcController();
-            Action deleteAllUsersMethod = controller.DeleteAllUsers;
+            Action deleteAllUsersMethod = _controller.DeleteAllUsers;
 
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "UsersRpcController", typeof(UsersRpcController));
             controllerDescriptor.Configuration.Filters.Add(actionFilter);
@@ -139,10 +143,8 @@ namespace System.Web.Http
         [Fact]
         public void GetCustomAttributes_Returns_ActionAttributes()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.AddAdmin;
+            Func<string, string, User> echoUserMethod = _controller.AddAdmin;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
 
             IEnumerable<IFilter> filters = actionDescriptor.GetCustomAttributes<IFilter>();
             IEnumerable<HttpGetAttribute> httpGet = actionDescriptor.GetCustomAttributes<HttpGetAttribute>();
@@ -157,10 +159,8 @@ namespace System.Web.Http
         [Fact]
         public void GetParameters_Returns_ActionParameters()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.EchoUser;
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
 
             Collection<HttpParameterDescriptor> parameterDescriptors = actionDescriptor.GetParameters();
 
@@ -170,79 +170,92 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void Execute_Returns_Null_ForVoidAction()
+        public void ExecuteAsync_Returns_TaskOfNull_ForVoidAction()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Action deleteAllUsersMethod = controller.DeleteAllUsers;
+            Action deleteAllUsersMethod = _controller.DeleteAllUsers;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = deleteAllUsersMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
-            Dictionary<string, object> arguments = new Dictionary<string, object>();
 
-            object returnValue = actionDescriptor.Execute(context, arguments);
+            Task<object> returnValue = actionDescriptor.ExecuteAsync(_context, _arguments);
 
-            Assert.Null(returnValue);
+            returnValue.WaitUntilCompleted();
+            Assert.Null(returnValue.Result);
         }
 
         [Fact]
-        public void Execute_Returns_Results_ForNonVoidAction()
+        public void ExecuteAsync_Returns_Results_ForNonVoidAction()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.EchoUser;
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
-            Dictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                {"firstName", "test"},
-                {"lastName", "unit"}
-            };
+            _arguments["firstName"] = "test";
+            _arguments["lastName"] = "unit";
 
-            User returnValue = actionDescriptor.Execute(context, arguments) as User;
+            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments);
 
-            Assert.NotNull(returnValue);
+            result.WaitUntilCompleted();
+            var returnValue = Assert.IsType<User>(result.Result);
             Assert.Equal("test", returnValue.FirstName);
             Assert.Equal("unit", returnValue.LastName);
         }
 
         [Fact]
-        public void Execute_Throws_IfContextIsNull()
+        public void ExecuteAsync_Returns_TaskOfNull_ForTaskAction()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.EchoUser;
+            Func<Task> deleteAllUsersMethod = _controller.DeleteAllUsersAsync;
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = deleteAllUsersMethod.Method };
+
+            Task<object> returnValue = actionDescriptor.ExecuteAsync(_context, _arguments);
+
+            returnValue.WaitUntilCompleted();
+            Assert.Null(returnValue.Result);
+        }
+
+        [Fact]
+        public void ExecuteAsync_Returns_Results_ForTaskOfTAction()
+        {
+            Func<string, string, Task<User>> echoUserMethod = _controller.EchoUserAsync;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
-            Dictionary<string, object> arguments = new Dictionary<string, object>();
+            _arguments["firstName"] = "test";
+            _arguments["lastName"] = "unit";
+
+            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments);
+
+            result.WaitUntilCompleted();
+            var returnValue = Assert.IsType<User>(result.Result);
+            Assert.Equal("test", returnValue.FirstName);
+            Assert.Equal("unit", returnValue.LastName);
+        }
+
+        [Fact]
+        public void ExecuteAsync_Throws_IfContextIsNull()
+        {
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
 
             Assert.ThrowsArgumentNull(
-                () => actionDescriptor.Execute(null, arguments),
+                () => actionDescriptor.ExecuteAsync(null, _arguments),
                 "controllerContext");
         }
 
         [Fact]
-        public void Execute_Throws_IfArgumentsIsNull()
+        public void ExecuteAsync_Throws_IfArgumentsIsNull()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<string, string, User> echoUserMethod = controller.EchoUser;
+            Func<string, string, User> echoUserMethod = _controller.EchoUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext();
 
             Assert.ThrowsArgumentNull(
-                () => actionDescriptor.Execute(context, null),
+                () => actionDescriptor.ExecuteAsync(_context, null).RethrowFaultedTaskException(),
                 "arguments");
         }
 
         [Fact]
-        public void Execute_Throws_IfValueTypeArgumentsIsNull()
+        public void ExecuteAsync_Throws_IfValueTypeArgumentsIsNull()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<int, User> retrieveUserMethod = controller.RetriveUser;
+            Func<int, User> retrieveUserMethod = _controller.RetriveUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = retrieveUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
-            Dictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                {"id", null}
-            };
+            _arguments["id"] = null;
 
             var exception = Assert.Throws<HttpResponseException>(
-                 () => actionDescriptor.Execute(context, arguments));
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
@@ -253,19 +266,14 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void Execute_Throws_IfArgumentNameIsWrong()
+        public void ExecuteAsync_Throws_IfArgumentNameIsWrong()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<int, User> retrieveUserMethod = controller.RetriveUser;
+            Func<int, User> retrieveUserMethod = _controller.RetriveUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = retrieveUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
-            Dictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                {"otherId", 6}
-            };
+            _arguments["otherId"] = 6;
 
             var exception = Assert.Throws<HttpResponseException>(
-                () => actionDescriptor.Execute(context, arguments));
+                () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
@@ -276,19 +284,14 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void Execute_Throws_IfArgumentTypeIsWrong()
+        public void ExecuteAsync_Throws_IfArgumentTypeIsWrong()
         {
-            UsersRpcController controller = new UsersRpcController();
-            Func<int, User> retrieveUserMethod = controller.RetriveUser;
+            Func<int, User> retrieveUserMethod = _controller.RetriveUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = retrieveUserMethod.Method };
-            HttpControllerContext context = ContextUtil.CreateControllerContext(instance: controller);
-            Dictionary<string, object> arguments = new Dictionary<string, object>
-            {
-                {"id", new DateTime()}
-            };
+            _arguments["id"] = new DateTime();
 
             var exception = Assert.Throws<HttpResponseException>(
-                 () => actionDescriptor.Execute(context, arguments));
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
@@ -297,6 +300,41 @@ namespace System.Web.Http
                 "The dictionary contains a value of type 'System.DateTime', but the parameter requires a value " +
                 "of type 'System.Int32'.",
                 content.Value);
+        }
+
+        [Fact]
+        public void ExecuteAsync_IfTaskReturningMethod_ReturnsWrappedTaskInstance_Throws()
+        {
+            Func<Task> method = _controller.WrappedTaskReturningMethod;
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = method.Method };
+
+            var exception = Assert.Throws<InvalidOperationException>(
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException(),
+                 "The method 'WrappedTaskReturningMethod' on type 'UsersRpcController' returned an instance of 'System.Threading.Tasks.Task`1[[System.Threading.Tasks.Task, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'. Make sure to call Unwrap on the returned value to avoid unobserved faulted Task.");
+        }
+
+        [Fact]
+        public void ExecuteAsync_IfObjectReturningMethod_ReturnsTaskInstance_Throws()
+        {
+            Func<object> method = _controller.TaskAsObjectReturningMethod;
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = method.Method };
+
+            var exception = Assert.Throws<InvalidOperationException>(
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException(),
+                 "The method 'TaskAsObjectReturningMethod' on type 'UsersRpcController' returned a Task instance even though it is not an asynchronous method.");
+        }
+
+        [Theory]
+        [InlineData(typeof(void), null)]
+        [InlineData(typeof(string), typeof(string))]
+        [InlineData(typeof(Task), null)]
+        [InlineData(typeof(Task<string>), typeof(string))]
+        public void GetReturnType_ReturnsUnwrappedActionType(Type methodReturnType, Type expectedReturnType)
+        {
+            Mock<MethodInfo> methodMock = new Mock<MethodInfo>();
+            methodMock.Setup(m => m.ReturnType).Returns(methodReturnType);
+
+            Assert.Equal(expectedReturnType, ReflectedHttpActionDescriptor.GetReturnType(methodMock.Object));
         }
     }
 }

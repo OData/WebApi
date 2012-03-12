@@ -40,5 +40,19 @@ namespace System.Web.Http
             value = default(T);
             return false;
         }
+
+        /// <summary>
+        /// Attaches the given <paramref name="request"/> to the <paramref name="response"/> if the response does not already
+        /// have a pointer to a request.
+        /// </summary>
+        /// <param name="response">The response.</param>
+        /// <param name="request">The request.</param>
+        internal static void EnsureResponseHasRequest(this HttpResponseMessage response, HttpRequestMessage request)
+        {
+            if (response != null && response.RequestMessage == null)
+            {
+                response.RequestMessage = request;
+            }
+        }
     }
 }

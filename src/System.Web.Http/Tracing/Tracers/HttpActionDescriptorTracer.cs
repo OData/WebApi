@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Properties;
@@ -12,7 +13,7 @@ namespace System.Web.Http.Tracing.Tracers
     /// </summary>
     internal class HttpActionDescriptorTracer : HttpActionDescriptor
     {
-        private const string ExecuteMethodName = "Execute";
+        private const string ExecuteMethodName = "ExecuteAsync";
 
         private readonly HttpActionDescriptor _innerDescriptor;
         private readonly ITraceWriter _traceWriter;
@@ -28,16 +29,19 @@ namespace System.Web.Http.Tracing.Tracers
             get { return _innerDescriptor.ActionName; }
         }
 
+        public override IActionResultConverter ResultConverter
+        {
+            get { return _innerDescriptor.ResultConverter; }
+        }
+
         public override Type ReturnType
         {
             get { return _innerDescriptor.ReturnType; }
         }
 
-        public override object Execute(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
         {
-            object result = null;
-
-            _traceWriter.TraceBeginEnd(
+            return _traceWriter.TraceBeginEndAsync<object>(
                 controllerContext.Request,
                 TraceCategories.ActionCategory,
                 TraceLevel.Info,
@@ -46,20 +50,18 @@ namespace System.Web.Http.Tracing.Tracers
                 beginTrace: (tr) =>
                 {
                     tr.Message = Error.Format(SRResources.TraceInvokingAction,
-                                              FormattingUtilities.ActionInvokeToString(this.ActionName, arguments));
+                                              FormattingUtilities.ActionInvokeToString(ActionName, arguments));
                 },
                 execute: () =>
                 {
-                    result = _innerDescriptor.Execute(controllerContext, arguments);
+                    return _innerDescriptor.ExecuteAsync(controllerContext, arguments);
                 },
-                endTrace: (tr) => 
+                endTrace: (tr, value) => 
                 {
                     tr.Message = Error.Format(SRResources.TraceActionReturnValue,
-                                              FormattingUtilities.ValueToString(result, CultureInfo.CurrentCulture));
+                                              FormattingUtilities.ValueToString(value, CultureInfo.CurrentCulture));
                 },
                 errorTrace: null);
-
-            return result;
         }
 
         public override Collection<T> GetCustomAttributes<T>()

@@ -45,7 +45,7 @@ namespace System.Web.Http.Filters
             }
 
             HttpActionDescriptor actionDescriptor = actionExecutedContext.ActionContext.ActionDescriptor;
-            Type declaredContentType = TypeHelper.GetUnderlyingContentInnerType(actionDescriptor.ReturnType);
+            Type declaredContentType = actionDescriptor.ReturnType;
 
             if (!IsSupportedDeclaredContentType(declaredContentType))
             {
@@ -87,7 +87,10 @@ namespace System.Web.Http.Filters
 
         internal static bool IsSupportedDeclaredContentType(Type contentType)
         {
-            Contract.Assert(contentType != null);
+            if (contentType == null)
+            {
+                return false;
+            }
             // Only action methods that declare their returned content type as exactly IEnumerable<T> or
             // IQueryable<T> are supported by this filter. Derived types (i.e. List<T>, etc) will not be
             // processed by this filter.

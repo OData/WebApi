@@ -28,8 +28,6 @@ namespace System.Web.Http.ContentNegotiation
         [Theory]
         [InlineData("ReturnHttpResponseMessage")]
         [InlineData("ReturnHttpResponseMessageAsObject")]
-        [InlineData("ReturnObjectContentOfT")]
-        [InlineData("ReturnObjectContent")]
         [InlineData("ReturnString")]
         public void ActionReturnsHttpResponseMessage(string action)
         {
@@ -124,18 +122,6 @@ namespace System.Web.Http.ContentNegotiation
                 Content = new ObjectContent<string>("Hello", new XmlMediaTypeFormatter())
             };
             return response;
-        }
-
-        [HttpGet]
-        public ObjectContent<string> ReturnObjectContentOfT()
-        {
-            return new ObjectContent<string>("Hello", new XmlMediaTypeFormatter());
-        }
-
-        [HttpGet]
-        public ObjectContent ReturnObjectContent()
-        {
-            return new ObjectContent(typeof(string), "Hello", new XmlMediaTypeFormatter());
         }
 
         [HttpGet]

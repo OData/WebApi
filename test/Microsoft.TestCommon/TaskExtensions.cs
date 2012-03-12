@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Xunit;
 
 // No namespace so that these extensions are available for all test classes
 
@@ -21,5 +22,12 @@ public static class TaskExtensions
                 var e = prev.Exception;
             }
         }, TaskContinuationOptions.ExecuteSynchronously).Wait();
+    }
+
+    public static void RethrowFaultedTaskException(this Task task)
+    {
+        task.WaitUntilCompleted();
+        Assert.Equal(TaskStatus.Faulted, task.Status);
+        throw task.Exception.GetBaseException();
     }
 }

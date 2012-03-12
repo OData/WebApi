@@ -476,4 +476,16 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods" xml:space="preserve">
     <value>Cannot call action method '{0}' on controller '{1}' because the action method is a generic method.</value>
   </data>
+  <data name="ResponseMessageResultConverter_NullHttpResponseMessage" xml:space="preserve">
+    <value>A null value was returned where an instance of HttpResponseMessage was expected.</value>
+  </data>
+  <data name="ActionExecutor_UnexpectedTaskInstance" xml:space="preserve">
+    <value>The method '{0}' on type '{1}' returned a Task instance even though it is not an asynchronous method.</value>
+  </data>
+  <data name="ActionExecutor_WrappedTaskInstance" xml:space="preserve">
+    <value>The method '{0}' on type '{1}' returned an instance of '{2}'. Make sure to call Unwrap on the returned value to avoid unobserved faulted Task.</value>
+  </data>
+  <data name="HttpActionDescriptor_NoConverterForGenericParamterTypeExists" xml:space="preserve">
+    <value>No action result converter could be constructed for a generic parameter type '{0}'.</value>
+  </data>
 </root>

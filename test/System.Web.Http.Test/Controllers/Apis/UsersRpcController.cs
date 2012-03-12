@@ -1,4 +1,5 @@
-﻿
+﻿using System.Threading.Tasks;
+
 namespace System.Web.Http
 {
     public class UsersRpcController : ApiController
@@ -10,6 +11,15 @@ namespace System.Web.Http
                 FirstName = firstName,
                 LastName = lastName,
             };
+        }
+
+        public Task<User> EchoUserAsync(string firstName, string lastName)
+        {
+            return TaskHelpers.FromResult(new User()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+            });
         }
 
         [Authorize]
@@ -50,8 +60,23 @@ namespace System.Web.Http
         {
         }
 
+        public Task DeleteAllUsersAsync()
+        {
+            return TaskHelpers.Completed();
+        }
+
         public void AddUser([FromBody] User user)
         {
+        }
+
+        public Task WrappedTaskReturningMethod()
+        {
+            return TaskHelpers.FromResult(TaskHelpers.Completed());
+        }
+
+        public object TaskAsObjectReturningMethod()
+        {
+            return TaskHelpers.Completed();
         }
     }
 }

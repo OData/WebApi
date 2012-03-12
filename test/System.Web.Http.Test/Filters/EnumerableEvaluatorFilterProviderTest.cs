@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using Moq;
 using Xunit;
@@ -40,9 +38,6 @@ namespace System.Web.Http.Filters
         [InlineData(typeof(IEnumerable<object>))]
         [InlineData(typeof(IQueryable<string>))]
         //[InlineData(typeof(HttpResponseMessage))] // static signature problems
-        //[InlineData(typeof(Task<HttpResponseMessage>))] // static signature problems
-        [InlineData(typeof(ObjectContent<IEnumerable<string>>))]
-        [InlineData(typeof(Task<ObjectContent<IEnumerable<string>>>))]
         public void GetFilters_IfActionResultTypeIsSupported_ReturnsFilterInstance(Type actionReturnType)
         {
             // Arrange

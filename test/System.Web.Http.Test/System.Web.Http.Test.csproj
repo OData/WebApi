@@ -72,8 +72,12 @@
     <Compile Include="Common\TaskHelpersTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
+    <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />
+    <Compile Include="Controllers\ValueResultConverterTest.cs" />
+    <Compile Include="Controllers\HttpActionDescriptorTest.cs" />
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
+    <Compile Include="Controllers\VoidResultConverterTest.cs" />
     <Compile Include="DictionaryExtensionsTest.cs" />
     <Compile Include="Filters\HttpFilterCollectionTest.cs" />
     <Compile Include="HttpResponseMessageExtensionsTest.cs" />

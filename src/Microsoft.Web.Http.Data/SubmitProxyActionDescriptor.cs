@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 
 namespace Microsoft.Web.Http.Data
@@ -41,39 +42,42 @@ namespace Microsoft.Web.Http.Data
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for the lifetime of the object")]
-        public override object Execute(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
         {
-            // create the changeset
-            object entity = arguments.Single().Value; // there is only a single parameter - the entity being submitted
-            ChangeSetEntry[] changeSetEntries = new ChangeSetEntry[]
+            return TaskHelpers.RunSynchronously<object>(() =>
             {
-                new ChangeSetEntry
+                // create the changeset
+                object entity = arguments.Single().Value; // there is only a single parameter - the entity being submitted
+                ChangeSetEntry[] changeSetEntries = new ChangeSetEntry[]
                 {
-                    Id = 1,
-                    ActionDescriptor = _updateAction,
-                    Entity = entity,
-                    Operation = _updateAction.ChangeOperation
+                    new ChangeSetEntry
+                    {
+                        Id = 1,
+                        ActionDescriptor = _updateAction,
+                        Entity = entity,
+                        Operation = _updateAction.ChangeOperation
+                    }
+                };
+                ChangeSet changeSet = new ChangeSet(changeSetEntries);
+                changeSet.SetEntityAssociations();
+
+                DataController controller = (DataController)controllerContext.Controller;
+                if (!controller.Submit(changeSet) &&
+                    controller.ActionContext.Response != null)
+                {
+                    // If the submit failed due to an authorization failure,
+                    // return the authorization response directly
+                    return controller.ActionContext.Response;
                 }
-            };
-            ChangeSet changeSet = new ChangeSet(changeSetEntries);
-            changeSet.SetEntityAssociations();
 
-            DataController controller = (DataController)controllerContext.Controller;
-            if (!controller.Submit(changeSet) &&
-                controller.ActionContext.Response != null)
-            {
-                // If the submit failed due to an authorization failure,
-                // return the authorization response directly
-                return controller.ActionContext.Response;
-            }
-
-            // return the entity
-            entity = changeSet.ChangeSetEntries[0].Entity;
-            // REVIEW does JSON make sense here?
-            return new HttpResponseMessage()
-            {
-                Content = new ObjectContent(_updateAction.EntityType, entity, new JsonMediaTypeFormatter())
-            };
+                // return the entity
+                entity = changeSet.ChangeSetEntries[0].Entity;
+                // REVIEW does JSON make sense here?
+                return new HttpResponseMessage()
+                {
+                    Content = new ObjectContent(_updateAction.EntityType, entity, new JsonMediaTypeFormatter())
+                };
+            });
         }
     }
 }

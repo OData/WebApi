@@ -259,8 +259,8 @@ namespace System.Web.Http.Description
                 Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
-            Type returnType = TypeHelper.UnwrapIfTask(actionDescriptor.ReturnType);
-            IEnumerable<MediaTypeFormatter> supportedResponseFormatters = returnType != typeof(void) ?
+            Type returnType = actionDescriptor.ReturnType;
+            IEnumerable<MediaTypeFormatter> supportedResponseFormatters = returnType != null ?
                 _config.Formatters.Where(f => f.CanWriteType(returnType)) :
                 Enumerable.Empty<MediaTypeFormatter>();
 

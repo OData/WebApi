@@ -270,7 +270,9 @@ namespace Microsoft.Web.Http.Data
                 {
                     paramMap.Add(pds[i].ParameterName, parameters[i]);
                 }
-                action.Execute(ActionContext.ControllerContext, paramMap);
+
+                // TODO this method is not correctly observing the execution results, the catch block below is wrong. 385801
+                action.ExecuteAsync(ActionContext.ControllerContext, paramMap);
             }
             catch (TargetInvocationException tie)
             {

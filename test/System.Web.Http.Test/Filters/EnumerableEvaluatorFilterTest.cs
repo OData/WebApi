@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Moq;
@@ -120,9 +119,6 @@ namespace System.Web.Http.Filters
         [Theory]
         [InlineData(typeof(IEnumerable<string>))]
         //[InlineData(typeof(HttpResponseMessage))]  // static signature problems
-        // [InlineData(typeof(Task<HttpResponseMessage>))] // static signature problems
-        [InlineData(typeof(ObjectContent<IEnumerable<string>>))]
-        [InlineData(typeof(Task<ObjectContent<IEnumerable<string>>>))]
         public void OnActionExecuted_IfActionContentTypeIsIEnumerable_AndResponseContentTypeMatches_CopiesContentToNewList(Type actionReturnType)
         {
             // Arrange

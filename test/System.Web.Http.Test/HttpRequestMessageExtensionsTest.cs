@@ -235,7 +235,7 @@ namespace System.Web.Http
             _request.DisposeRequestResources();
 
             _disposableMock.Verify(d => d.Dispose());
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
 
         [Fact]
@@ -250,7 +250,7 @@ namespace System.Web.Http
 
             throwingDisposableMock.Verify(d => d.Dispose());
             _disposableMock.Verify(d => d.Dispose());
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
     }
 }

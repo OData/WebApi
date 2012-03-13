@@ -473,5 +473,13 @@ namespace System.Net.Http.Properties {
                 return ResourceManager.GetString("UnsupportedEncoding", resourceCulture);
             }
         }
+
+        internal static string UnsupportedIndent
+        {
+            get
+            {
+                return ResourceManager.GetString("UnsupportedIndent", resourceCulture);
+            }
+        }
     }
 }

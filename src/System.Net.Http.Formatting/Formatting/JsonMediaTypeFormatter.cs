@@ -354,6 +354,11 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("stream");
             }
 
+            if (UseDataContractJsonSerializer && Indent)
+            {
+                throw new NotSupportedException(RS.Format(Properties.Resources.UnsupportedIndent));
+            }
+
             return TaskHelpers.RunSynchronously(() =>
             {
                 if (FormattingUtilities.IsJsonValueType(type) || !UseDataContractJsonSerializer)
@@ -379,7 +384,7 @@ namespace System.Net.Http.Formatting
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
                     // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
                     using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(stream, Encoding, ownsStream: false))
-                    {
+                    { 
                         dataContractSerializer.WriteObject(writer, value);
                     }
                 }

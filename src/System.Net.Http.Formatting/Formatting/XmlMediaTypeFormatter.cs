@@ -38,18 +38,18 @@ namespace System.Net.Http.Formatting
         };
 
         private ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
-        private XmlWriterSettings _settings;
+        private XmlWriterSettings _writerSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlMediaTypeFormatter"/> class.
         /// </summary>
         public XmlMediaTypeFormatter()
         {
-            _settings = new XmlWriterSettings()
+            _writerSettings = new XmlWriterSettings()
             {
                 OmitXmlDeclaration = true,
                 Encoding = new UTF8Encoding(false, true),
-                CloseOutput = false,
+                CloseOutput = false
             };
 
             foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
@@ -124,11 +124,11 @@ namespace System.Net.Http.Formatting
         {
             get
             {
-                return _settings.Encoding;
+                return _writerSettings.Encoding;
             }
             set
             {
-                _settings.Encoding = value;
+                _writerSettings.Encoding = value;
             }
         }
 
@@ -139,11 +139,11 @@ namespace System.Net.Http.Formatting
         {
             get
             {
-                return _settings.Indent;
+                return _writerSettings.Indent;
             }
             set
             {
-                _settings.Indent = value;
+                _writerSettings.Indent = value;
             }
         }
         
@@ -410,7 +410,7 @@ namespace System.Net.Http.Formatting
                 object serializer = GetSerializerForType(type);
 
                 // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
-                using (XmlWriter writer = XmlWriter.Create(stream, _settings))
+                using (XmlWriter writer = XmlWriter.Create(stream, _writerSettings))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)

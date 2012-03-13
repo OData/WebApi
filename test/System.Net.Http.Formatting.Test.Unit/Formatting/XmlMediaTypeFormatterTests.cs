@@ -51,6 +51,16 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        [Trait("Description", "CharacterEncoding property handles Get/Set correctly.")]
+        public void IndentGetSet()
+        {
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+            Assert.False(xmlFormatter.Indent);
+            xmlFormatter.Indent = true;
+            Assert.True(xmlFormatter.Indent);
+        }
+
+        [Fact]
         [Trait("Description", "CharacterEncoding property throws on invalid arguments")]
         public void CharacterEncodingSetThrows()
         {
@@ -81,6 +91,20 @@ namespace System.Net.Http.Formatting
                 "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractSerializer is set to true.");
             Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
                     "Using DCS should not emit the xml declaration by default.");
+            Assert.False(serializedString.Contains("\r\n"), "Using DCS should emit data without indentation by default.");
+        }
+
+        [Fact]
+        [Trait("Description", "UseDataContractSerializer property with Indent works when set to true.")]
+        public void UseDataContractSerializer_True_Indent()
+        {
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseDataContractSerializer = true, Indent = true};
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            Assert.True(serializedString.Contains("\r\n"), "Using DCS with indent set to true should emit data with indentation.");
         }
 
         [Fact]
@@ -97,6 +121,20 @@ namespace System.Net.Http.Formatting
                 "SampleType should not be serialized with data contract name DataContractSampleType because UseDataContractSerializer is set to false.");
             Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
               "Using XmlSerializer should not emit the xml declaration by default.");
+            Assert.False(serializedString.Contains("\r\n"), "Using default XmlSerializer should emit data without indentation.");
+        }
+
+        [Fact]
+        [Trait("Description", "UseDataContractSerializer property with Indent works when set to false.")]
+        public void UseDataContractSerializer_False_Indent()
+        {
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseDataContractSerializer = false, Indent = true};
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            Assert.True(serializedString.Contains("\r\n"), "Using default XmlSerializer with Indent set to true should emit data with indentation.");
         }
 
         [Theory]

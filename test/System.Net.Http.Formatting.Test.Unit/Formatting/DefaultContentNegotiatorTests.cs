@@ -152,6 +152,32 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void Negotiate_RespectsFormatterOrdering_ForXhrRequestThatDoesNotSpecifyAcceptHeaders()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
+                Content = new StringContent("test")
+            };
+            request.Headers.Add("x-requested-with", "XMLHttpRequest");
+            DefaultContentNegotiator selector = new DefaultContentNegotiator();
+
+            MediaTypeFormatterCollection formatters = new MediaTypeFormatterCollection(new MediaTypeFormatter[]
+            {
+                new XmlMediaTypeFormatter(),
+                new JsonMediaTypeFormatter(),
+                new FormUrlEncodedMediaTypeFormatter()
+            });
+
+            // Act
+            var result = selector.Negotiate(typeof(string), request, formatters);
+
+            // Assert
+            Assert.Equal("application/json", result.MediaType.MediaType);
+            Assert.IsType<JsonMediaTypeFormatter>(result.Formatter);
+        }
+
+        [Fact]
         public void Negotiate_SelectsJsonFormatter_ForXHRAndJsonValueResponse()
         {
             // Arrange

@@ -45,6 +45,10 @@
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.0.8.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.4.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
@@ -77,10 +81,6 @@
     <Compile Include="UpshotExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\System.Json\System.Json.csproj">
-      <Project>{F0441BE9-BDC0-4629-BE5A-8765FFAA2481}</Project>
-      <Name>System.Json</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Web.Http.Data\Microsoft.Web.Http.Data.csproj">
       <Project>{ACE91549-D86E-4EB6-8C2A-5FF51386BB68}</Project>
       <Name>Microsoft.Web.Http.Data</Name>

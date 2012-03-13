@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Json
+namespace System.Net.Http
 {
     public class FormUrlEncodedJsonTests
     {
@@ -40,14 +41,14 @@ namespace System.Json
         [Fact]
         public void TryParseThrowsOnNull()
         {
-            JsonObject value;
+            JObject value;
             Assert.ThrowsArgumentNull(() => FormUrlEncodedJson.TryParse(null, out value), null);
         }
 
         [Fact]
         public void TryParseThrowsInvalidMaxDepth()
         {
-            JsonObject value;
+            JObject value;
             Assert.ThrowsArgument(() => FormUrlEncodedJson.TryParse(CreateQuery(), -1, out value), "maxDepth");
             Assert.ThrowsArgument(() => FormUrlEncodedJson.TryParse(CreateQuery(), 0, out value), "maxDepth");
         }
@@ -55,7 +56,7 @@ namespace System.Json
         [Fact]
         public void TryParseReturnsFalseMaxDepthExceeded()
         {
-            JsonObject value;
+            JObject value;
 
             // Depth of 'a[b]=1' is 3
             IEnumerable<KeyValuePair<string, string>> query = CreateQuery(new KeyValuePair<string, string>("a[b]", "1"));

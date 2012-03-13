@@ -56,7 +56,6 @@
     <Compile Include="Common\AnyInstance.cs" />
     <Compile Include="Common\ExceptionTestHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="FormUrlEncodedJsonTests.cs" />
     <Compile Include="JsonArrayTest.cs" />
     <Compile Include="JsonDefaultTest.cs" />
     <Compile Include="JsonObjectTest.cs" />

@@ -1,7 +1,7 @@
-﻿using System.Json;
-using System.Linq;
+﻿using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -50,10 +50,10 @@ namespace System.Net.Http
         [Trait("Description", "IsJsonValueType returns true")]
         public void IsJsonValueTypeReturnsTrue()
         {
-            Assert.True(FormattingUtilities.IsJsonValueType(typeof(JsonValue)), "Should return true");
-            Assert.True(FormattingUtilities.IsJsonValueType(typeof(JsonPrimitive)), "Should return true");
-            Assert.True(FormattingUtilities.IsJsonValueType(typeof(JsonObject)), "Should return true");
-            Assert.True(FormattingUtilities.IsJsonValueType(typeof(JsonArray)), "Should return true");
+            Assert.True(FormattingUtilities.IsJTokenType(typeof(JToken)), "Should return true");
+            Assert.True(FormattingUtilities.IsJTokenType(typeof(JValue)), "Should return true");
+            Assert.True(FormattingUtilities.IsJTokenType(typeof(JObject)), "Should return true");
+            Assert.True(FormattingUtilities.IsJTokenType(typeof(JArray)), "Should return true");
         }
 
         [Fact]

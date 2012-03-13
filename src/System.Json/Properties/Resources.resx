@@ -132,17 +132,11 @@
   <data name="DynamicPropertyNotDefined" xml:space="preserve">
     <value>'{0}' does not contain a definition for property '{1}'.</value>
   </data>
-  <data name="FormUrlEncodedMismatchingTypes" xml:space="preserve">
-    <value>Mismatched types at node '{0}'.</value>
-  </data>
   <data name="IncorrectJsonFormat" xml:space="preserve">
     <value>The input source is not correctly formatted.</value>
   </data>
   <data name="IndexerNotSupportedOnJsonType" xml:space="preserve">
     <value>'{0}' type indexer is not supported on JsonValue of 'JsonType.{1}' type.</value>
-  </data>
-  <data name="InvalidArrayInsert" xml:space="preserve">
-    <value>Invalid array at node '{0}'.</value>
   </data>
   <data name="InvalidCastNonNullable" xml:space="preserve">
     <value>Cannot convert null to '{0}' because it is a non-nullable value type.</value>
@@ -159,20 +153,11 @@
   <data name="InvalidUriFormat" xml:space="preserve">
     <value>Cannot cast '{0}' value '{1}.{2}' as a type of '{3}'. The provided string is not a valid relative or absolute '{3}'.</value>
   </data>
-  <data name="JQuery13CompatModeNotSupportNestedJson" xml:space="preserve">
-    <value>Traditional style array without '[]' is not supported with nested object at location {0}.</value>
-  </data>
   <data name="JsonStringCannotBeEmpty" xml:space="preserve">
     <value>An empty string cannot be parsed as JSON.</value>
   </data>
-  <data name="MaxDepthExceeded" xml:space="preserve">
-    <value>The maximum read depth ({0}) has been exceeded because the form url-encoded data being read has more levels of nesting than is allowed.</value>
-  </data>
   <data name="MinParameterSize" xml:space="preserve">
     <value>The parameter must be greater than {0}.</value>
-  </data>
-  <data name="NestedBracketNotValid" xml:space="preserve">
-    <value>Nested bracket is not valid for '{0}' data at position {1}.</value>
   </data>
   <data name="NonSingleNonNullIndexNotSupported" xml:space="preserve">
     <value>Null index or multidimensional indexing is not supported by this indexer; use 'System.Int32' or 'System.String' for array and object indexing respectively.</value>
@@ -180,14 +165,8 @@
   <data name="OverflowReadAs" xml:space="preserve">
     <value>Cannot cast JsonPrimitive value '{0}' as '{1}'. The value is either too large or too small for the specified CLR type.</value>
   </data>
-  <data name="QueryStringNameShouldNotNull" xml:space="preserve">
-    <value>Query string name cannot be null.</value>
-  </data>
   <data name="TypeNotSupported" xml:space="preserve">
     <value>Object type not supported.</value>
-  </data>
-  <data name="UnMatchedBracketNotValid" xml:space="preserve">
-    <value>There is an unmatched opened bracket for the '{0}' at position {1}.</value>
   </data>
   <data name="UseOfDefaultNotAllowed" xml:space="preserve">
     <value>Operation not supported on JsonValue instances of 'JsonType.Default' type.</value>

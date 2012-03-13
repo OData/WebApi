@@ -106,6 +106,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mismatched types at node &apos;{0}&apos;..
+        /// </summary>
+        internal static string FormUrlEncodedMismatchingTypes {
+            get {
+                return ResourceManager.GetString("FormUrlEncodedMismatchingTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error parsing HTML form URL-encoded data, byte {0}..
         /// </summary>
         internal static string FormUrlEncodedParseError {
@@ -205,6 +214,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid array at node &apos;{0}&apos;..
+        /// </summary>
+        internal static string InvalidArrayInsert {
+            get {
+                return ResourceManager.GetString("InvalidArrayInsert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; is not a valid media range..
         /// </summary>
         internal static string InvalidMediaRange {
@@ -214,11 +232,29 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Traditional style array without &apos;[]&apos; is not supported with nested object at location {0}..
+        /// </summary>
+        internal static string JQuery13CompatModeNotSupportNestedJson {
+            get {
+                return ResourceManager.GetString("JQuery13CompatModeNotSupportNestedJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This reader&apos;s MaxDepth of {0} has been exceeded. Consider using a larger MaxDepth..
         /// </summary>
         internal static string JsonTooDeep {
             get {
                 return ResourceManager.GetString("JsonTooDeep", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maximum read depth ({0}) has been exceeded because the form url-encoded data being read has more levels of nesting than is allowed..
+        /// </summary>
+        internal static string MaxDepthExceeded {
+            get {
+                return ResourceManager.GetString("MaxDepthExceeded", resourceCulture);
             }
         }
         
@@ -295,6 +331,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nested bracket is not valid for &apos;{0}&apos; data at position {1}..
+        /// </summary>
+        internal static string NestedBracketNotValid {
+            get {
+                return ResourceManager.GetString("NestedBracketNotValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A non-null request URI must be provided to determine if a &apos;{0}&apos; matches a given request or response message..
         /// </summary>
         internal static string NonNullUriRequiredForMediaTypeMapping {
@@ -336,6 +381,15 @@ namespace System.Net.Http.Properties {
         internal static string ObjectContent_FormatterCannotWriteType {
             get {
                 return ResourceManager.GetString("ObjectContent_FormatterCannotWriteType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Query string name cannot be null..
+        /// </summary>
+        internal static string QueryStringNameShouldNotNull {
+            get {
+                return ResourceManager.GetString("QueryStringNameShouldNotNull", resourceCulture);
             }
         }
         
@@ -462,6 +516,15 @@ namespace System.Net.Http.Properties {
         internal static string UndefinedMediaType {
             get {
                 return ResourceManager.GetString("UndefinedMediaType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is an unmatched opened bracket for the &apos;{0}&apos; at position {1}..
+        /// </summary>
+        internal static string UnMatchedBracketNotValid {
+            get {
+                return ResourceManager.GetString("UnMatchedBracketNotValid", resourceCulture);
             }
         }
         

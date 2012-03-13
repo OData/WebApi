@@ -166,7 +166,7 @@ namespace System.Web.Http.ContentNegotiation
             }
 
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(type == typeof(IKeyValueModel) ? (object)new StringKeyValueModel(content) : content);
+            tcs.SetResult(content);
 
             return tcs.Task;
         }
@@ -212,7 +212,7 @@ namespace System.Web.Http.ContentNegotiation
             }
 
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(type == typeof(IKeyValueModel) ? (object)new StringKeyValueModel(content) : content);
+            tcs.SetResult(content);
             return tcs.Task;
         }
 
@@ -247,32 +247,6 @@ namespace System.Web.Http.ContentNegotiation
         public Order EchoOrder(Order order)
         {
             return order;
-        }
-    }
-
-    public class StringKeyValueModel : IKeyValueModel
-    {
-        private string _value;
-        public StringKeyValueModel(string value)
-        {
-            _value = value;
-        }
-
-        public bool TryGetValue(string key, out object value)
-        {
-            if (key.Length == 0)
-            {
-                value = _value;
-                return true;
-            }
-
-            value = null;
-            return false;
-        }
-
-        public IEnumerable<string> Keys
-        {
-            get { return new string[0]; }
         }
     }
 

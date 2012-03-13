@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Json;
 using System.Net.Http.Internal;
+using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http.Formatting
 {
-    internal class JsonValueRoundTripComparer
+    internal class JTokenRoundTripComparer
     {
-        public static bool Compare(JsonValue initValue, JsonValue newValue)
+        public static bool Compare(JToken initValue, JToken newValue)
         {
             if (initValue == null && newValue == null)
             {
@@ -18,42 +18,42 @@ namespace System.Net.Http.Formatting
                 return false;
             }
 
-            if (initValue is JsonPrimitive)
+            if (initValue is JValue)
             {
                 string initStr;
-                if (initValue.JsonType == JsonType.String)
+                if (initValue.Type == JTokenType.String)
                 {
                     initStr = initValue.ToString();
                 }
                 else
                 {
-                    initStr = String.Format("\"{0}\"", ((JsonPrimitive)initValue).Value.ToString());
+                    initStr = String.Format("\"{0}\"", ((JValue)initValue).Value.ToString());
                 }
 
                 string newStr;
-                if (newValue is JsonPrimitive)
+                if (newValue is JValue)
                 {
                     newStr = newValue.ToString();
                     initStr = UriQueryUtility.UrlDecode(UriQueryUtility.UrlEncode(initStr));
                     return initStr.Equals(newStr);
                 }
-                else if (newValue is JsonObject && newValue.Count == 1)
+                else if (newValue is JObject && ((JObject)newValue).Count == 1)
                 {
                     initStr = String.Format("{0}", initValue.ToString());
-                    return ((JsonObject)newValue).Keys.Contains(initStr);
+                    return ((IDictionary<string, JToken>)newValue).ContainsKey(initStr);
                 }
 
                 return false;
             }
 
-            if (initValue.Count != newValue.Count)
+            if (((JContainer)initValue).Count != ((JContainer)newValue).Count)
             {
                 return false;
             }
 
-            if (initValue is JsonObject && newValue is JsonObject)
+            if (initValue is JObject && newValue is JObject)
             {
-                foreach (KeyValuePair<string, JsonValue> item in initValue)
+                foreach (KeyValuePair<string, JToken> item in (JObject)initValue)
                 {
                     if (!Compare(item.Value, newValue[item.Key]))
                     {
@@ -64,9 +64,9 @@ namespace System.Net.Http.Formatting
                 return true;
             }
 
-            if (initValue is JsonArray && newValue is JsonArray)
+            if (initValue is JArray && newValue is JArray)
             {
-                for (int i = 0; i < initValue.Count; i++)
+                for (int i = 0; i < ((JArray)initValue).Count; i++)
                 {
                     if (!Compare(initValue[i], newValue[i]))
                     {

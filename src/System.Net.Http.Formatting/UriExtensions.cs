@@ -2,9 +2,9 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Json;
 using System.Net.Http.Internal;
-using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http
 {
@@ -30,12 +30,12 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Reads HTML form URL encoded data provided in the <see cref="Uri"/> query component as a <see cref="JsonValue"/> object.
+        /// Reads HTML form URL encoded data provided in the <see cref="Uri"/> query component as a <see cref="JToken"/> object.
         /// </summary>
         /// <param name="address">The <see cref="Uri"/> instance from which to read.</param>
         /// <param name="value">An object to be initialized with this instance or null if the conversion cannot be performed.</param>
-        /// <returns><c>true</c> if the query component can be read as <see cref="JsonValue"/>; otherwise <c>false</c>.</returns>
-        public static bool TryReadQueryAsJson(this Uri address, out JsonObject value)
+        /// <returns><c>true</c> if the query component can be read as <see cref="JToken"/>; otherwise <c>false</c>.</returns>
+        public static bool TryReadQueryAsJson(this Uri address, out JObject value)
         {
             if (address == null)
             {
@@ -67,10 +67,14 @@ namespace System.Net.Http
             }
 
             IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
-            JsonObject jsonObject;
-            if (FormUrlEncodedJson.TryParse(query, out jsonObject))
+            JObject jObject;
+            if (FormUrlEncodedJson.TryParse(query, out jObject))
             {
-                return jsonObject.TryReadAsType(type, out value);
+                using (JTokenReader jsonReader = new JTokenReader(jObject))
+                {
+                    value = new JsonSerializer().Deserialize(jsonReader, type);
+                }
+                return true;
             }
 
             value = null;
@@ -93,10 +97,11 @@ namespace System.Net.Http
             }
 
             IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
-            JsonObject jsonObject;
-            if (FormUrlEncodedJson.TryParse(query, out jsonObject))
+            JObject jObject;
+            if (FormUrlEncodedJson.TryParse(query, out jObject))
             {
-                return jsonObject.TryReadAsType<T>(out value);
+                value = jObject.ToObject<T>();
+                return true;
             }
 
             value = default(T);

@@ -2,6 +2,7 @@
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -68,8 +69,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [InlineData(typeof(FormDataCollection))]
-        [InlineData(typeof(System.Json.JsonValue))]
-        [InlineData(typeof(IKeyValueModel))]
+        [InlineData(typeof(JToken))]
         public void CanReadTypeTrue(Type type)
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();

@@ -4,12 +4,13 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
-namespace System.Json
+namespace System.Net.Http
 {
     /// <summary>
     /// This class provides a low-level API for parsing HTML form URL-encoded data, also known as <c>application/x-www-form-urlencoded</c> 
-    /// data. The output of the parser is a <see cref="JsonObject"/> instance. 
+    /// data. The output of the parser is a <see cref="JObject"/> instance. 
     /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
     /// is not intended to be called directly from user code.</remarks>
     /// </summary>
@@ -24,36 +25,36 @@ namespace System.Json
         };
 
         /// <summary>
-        /// Parses a collection of query string values as a <see cref="System.Json.JsonObject"/>.
+        /// Parses a collection of query string values as a <see cref="JObject"/>.
         /// </summary>
         /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
         /// is not intended to be called directly from user code.</remarks>
         /// <param name="nameValuePairs">The collection of query string name-value pairs parsed in lexical order. Both names
         /// and values must be un-escaped so that they don't contain any <see cref="Uri"/> encoding.</param>
-        /// <returns>The <see cref="System.Json.JsonObject"/> corresponding to the given query string values.</returns>
+        /// <returns>The <see cref="JObject"/> corresponding to the given query string values.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
-        public static JsonObject Parse(IEnumerable<KeyValuePair<string, string>> nameValuePairs)
+        public static JObject Parse(IEnumerable<KeyValuePair<string, string>> nameValuePairs)
         {
             return ParseInternal(nameValuePairs, Int32.MaxValue, true);
         }
 
         /// <summary>
-        /// Parses a collection of query string values as a <see cref="System.Json.JsonObject"/>.
+        /// Parses a collection of query string values as a <see cref="JObject"/>.
         /// </summary>
         /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
         /// is not intended to be called directly from user code.</remarks>
         /// <param name="nameValuePairs">The collection of query string name-value pairs parsed in lexical order. Both names
         /// and values must be un-escaped so that they don't contain any <see cref="Uri"/> encoding.</param>
         /// <param name="maxDepth">The maximum depth of object graph encoded as <c>x-www-form-urlencoded</c>.</param>
-        /// <returns>The <see cref="System.Json.JsonObject"/> corresponding to the given query string values.</returns>
+        /// <returns>The <see cref="JObject"/> corresponding to the given query string values.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
-        public static JsonObject Parse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth)
+        public static JObject Parse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth)
         {
             return ParseInternal(nameValuePairs, maxDepth, true);
         }
 
         /// <summary>
-        /// Parses a collection of query string values as a <see cref="System.Json.JsonObject"/>.
+        /// Parses a collection of query string values as a <see cref="JObject"/>.
         /// </summary>
         /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
         /// is not intended to be called directly from user code.</remarks>
@@ -62,13 +63,13 @@ namespace System.Json
         /// <param name="value">The parsed result or null if parsing failed.</param>
         /// <returns><c>true</c> if <paramref name="nameValuePairs"/> was parsed successfully; otherwise false.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
-        public static bool TryParse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, out JsonObject value)
+        public static bool TryParse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, out JObject value)
         {
             return (value = ParseInternal(nameValuePairs, Int32.MaxValue, false)) != null;
         }
 
         /// <summary>
-        /// Parses a collection of query string values as a <see cref="System.Json.JsonObject"/>.
+        /// Parses a collection of query string values as a <see cref="JObject"/>.
         /// </summary>
         /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
         /// is not intended to be called directly from user code.</remarks>
@@ -78,13 +79,13 @@ namespace System.Json
         /// <param name="value">The parsed result or null if parsing failed.</param>
         /// <returns><c>true</c> if <paramref name="nameValuePairs"/> was parsed successfully; otherwise false.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
-        public static bool TryParse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth, out JsonObject value)
+        public static bool TryParse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth, out JObject value)
         {
             return (value = ParseInternal(nameValuePairs, maxDepth, false)) != null;
         }
 
         /// <summary>
-        /// Parses a collection of query string values as a <see cref="System.Json.JsonObject"/>.
+        /// Parses a collection of query string values as a <see cref="JObject"/>.
         /// </summary>
         /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
         /// is not intended to be called directly from user code.</remarks>
@@ -92,9 +93,9 @@ namespace System.Json
         /// and values must be un-escaped so that they don't contain any <see cref="Uri"/> encoding.</param>
         /// <param name="maxDepth">The maximum depth of object graph encoded as <c>x-www-form-urlencoded</c>.</param>
         /// <param name="throwOnError">Indicates whether to throw an exception on error or return false</param>
-        /// <returns>The <see cref="System.Json.JsonObject"/> corresponding to the given query string values.</returns>
+        /// <returns>The <see cref="JObject"/> corresponding to the given query string values.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
-        private static JsonObject ParseInternal(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth, bool throwOnError)
+        private static JObject ParseInternal(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth, bool throwOnError)
         {
             if (nameValuePairs == null)
             {
@@ -106,7 +107,7 @@ namespace System.Json
                 throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinDepth), "maxDepth");
             }
 
-            JsonObject result = new JsonObject();
+            JObject result = new JObject();
             foreach (var nameValuePair in nameValuePairs)
             {
                 if (nameValuePair.Key == null)
@@ -236,13 +237,13 @@ namespace System.Json
             return true;
         }
 
-        private static bool Insert(JsonObject root, string[] path, string value, bool throwOnError)
+        private static bool Insert(JObject root, string[] path, string value, bool throwOnError)
         {
             // to-do: verify consistent with new parsing, whether single value is in path or value
             Contract.Assert(root != null, "Root object can't be null");
 
-            JsonObject current = root;
-            JsonObject parent = null;
+            JObject current = root;
+            JObject parent = null;
 
             for (int i = 0; i < path.Length - 1; i++)
             {
@@ -256,15 +257,15 @@ namespace System.Json
                     return false;
                 }
 
-                if (!current.ContainsKey(path[i]))
+                if (!((IDictionary<string, JToken>)current).ContainsKey(path[i]))
                 {
-                    current[path[i]] = new JsonObject();
+                    current[path[i]] = new JObject();
                 }
                 else
                 {
                     // Since the loop goes up to the next-to-last item in the path, if we hit a null
                     // or a primitive, then we have a mismatching node.
-                    if (current[path[i]] == null || current[path[i]] is JsonPrimitive)
+                    if (current[path[i]] == null || current[path[i]] is JValue)
                     {
                         if (throwOnError)
                         {
@@ -276,7 +277,7 @@ namespace System.Json
                 }
 
                 parent = current;
-                current = current[path[i]] as JsonObject;
+                current = current[path[i]] as JObject;
             }
 
             string lastKey = path[path.Length - 1];
@@ -308,14 +309,14 @@ namespace System.Json
             return true;
         }
 
-        private static bool AddToObject(JsonObject obj, string[] path, string value, bool throwOnError)
+        private static bool AddToObject(JObject obj, string[] path, string value, bool throwOnError)
         {
             Contract.Assert(obj != null, "JsonObject cannot be null");
 
             int pathIndex = path.Length - 1;
             string key = path[pathIndex];
 
-            if (obj.ContainsKey(key))
+            if (((IDictionary<string, JToken>)obj).ContainsKey(key))
             {
                 if (obj[key] == null)
                 {
@@ -331,19 +332,19 @@ namespace System.Json
                 if (isRoot)
                 {
                     // jQuery 1.3 behavior, make it into an array(object) if primitive
-                    if (obj[key].JsonType == JsonType.String)
+                    if (obj[key].Type == JTokenType.String)
                     {
-                        string oldValue = obj[key].ReadAs<string>();
-                        JsonObject jo = new JsonObject();
+                        string oldValue = obj[key].ToObject<string>();
+                        JObject jo = new JObject();
                         jo.Add("0", oldValue);
                         jo.Add("1", value);
                         obj[key] = jo;
                     }
-                    else if (obj[key] is JsonObject)
+                    else if (obj[key] is JObject)
                     {
                         // if it was already an object, simply add the value
-                        JsonObject jo = obj[key] as JsonObject;
-                        string index = GetIndex(jo.Keys, throwOnError);
+                        JObject jo = obj[key] as JObject;
+                        string index = GetIndex(((IDictionary<string,JToken>)jo).Keys, throwOnError);
                         if (index == null)
                         {
                             return false;
@@ -372,15 +373,15 @@ namespace System.Json
         }
 
         // JsonObject passed in is semantically an array
-        private static bool AddToArray(JsonObject parent, string[] path, string value, bool throwOnError)
+        private static bool AddToArray(JObject parent, string[] path, string value, bool throwOnError)
         {
             Contract.Assert(parent != null, "Parent cannot be null");
             Contract.Assert(path.Length >= 2, "The path must be at least 2, one for the ending [], and one for before the '[' (which can be empty)");
 
             string parentPath = path[path.Length - 2];
 
-            Contract.Assert(parent.ContainsKey(parentPath), "It was added on insert to get to this point");
-            JsonObject jo = parent[parentPath] as JsonObject;
+            Contract.Assert(((IDictionary<string, JToken>)parent).ContainsKey(parentPath), "It was added on insert to get to this point");
+            JObject jo = parent[parentPath] as JObject;
 
             if (jo == null)
             {
@@ -394,7 +395,7 @@ namespace System.Json
             }
             else
             {
-                string index = GetIndex(jo.Keys, throwOnError);
+                string index = GetIndex(((IDictionary<string, JToken>)jo).Keys, throwOnError);
                 if (index == null)
                 {
                     return false;
@@ -432,9 +433,9 @@ namespace System.Json
             return max.ToString(CultureInfo.InvariantCulture);
         }
 
-        private static void FixContiguousArrays(JsonValue jv)
+        private static void FixContiguousArrays(JToken jv)
         {
-            JsonArray ja = jv as JsonArray;
+            JArray ja = jv as JArray;
 
             if (ja != null)
             {
@@ -449,11 +450,11 @@ namespace System.Json
             }
             else
             {
-                JsonObject jo = jv as JsonObject;
+                JObject jo = jv as JObject;
 
                 if (jo != null)
                 {
-                    List<string> keys = new List<string>(jo.Keys);
+                    List<string> keys = new List<string>(((IDictionary<string, JToken>)jo).Keys);
                     foreach (string key in keys)
                     {
                         if (jo[key] != null)
@@ -468,16 +469,16 @@ namespace System.Json
             //// do nothing for primitives
         }
 
-        private static JsonValue FixSingleContiguousArray(JsonValue original)
+        private static JToken FixSingleContiguousArray(JToken original)
         {
-            JsonObject jo = original as JsonObject;
+            JObject jo = original as JObject;
             if (jo != null && jo.Count > 0)
             {
-                List<string> childKeys = new List<string>(jo.Keys);
+                List<string> childKeys = new List<string>(((IDictionary<string, JToken>)jo).Keys);
                 List<string> sortedKeys;
                 if (CanBecomeArray(childKeys, out sortedKeys))
                 {
-                    JsonArray newResult = new JsonArray();
+                    JArray newResult = new JArray();
                     foreach (string sortedKey in sortedKeys)
                     {
                         newResult.Add(jo[sortedKey]);

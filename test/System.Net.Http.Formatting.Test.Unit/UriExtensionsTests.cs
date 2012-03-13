@@ -1,7 +1,7 @@
 ﻿using System.Collections.Specialized;
-using System.Json;
 using System.Net.Http.Formatting.DataSets;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -50,7 +50,7 @@ namespace System.Net.Http
         [Trait("Description", "TryReadQueryAsJson(Uri, out JsonObject) throws with null 'this'.")]
         public void TryReadQueryAsJsonThrowsWithNull()
         {
-            JsonObject value;
+            JObject value;
             Assert.ThrowsArgumentNull(() => ((Uri)null).TryReadQueryAsJson(out value), "address");
         }
 
@@ -59,10 +59,10 @@ namespace System.Net.Http
         [Trait("Description", "TryReadQueryAsJson(Uri, out JsonObject) succeeds with valid URIs.")]
         public void TryReadQueryAsJsonSucceeds(Uri address)
         {
-            JsonObject value;
+            JObject value;
             Assert.True(address.TryReadQueryAsJson(out value), "Expected 'true' as result");
             Assert.NotNull(value);
-            Assert.IsType<JsonObject>(value);
+            Assert.IsType<JObject>(value);
         }
 
         [Fact]

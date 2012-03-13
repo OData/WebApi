@@ -2,7 +2,6 @@
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Json;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;
@@ -84,7 +83,7 @@ namespace System.Net.Http.Formatting
             }
 
             // Can't read arbitrary types. 
-            return type == typeof(FormDataCollection) || type == typeof(IKeyValueModel) || FormattingUtilities.IsJsonValueType(type);
+            return type == typeof(FormDataCollection) || FormattingUtilities.IsJTokenType(type);
         }
 
         /// <summary>
@@ -133,14 +132,9 @@ namespace System.Net.Http.Formatting
                     return new FormDataCollection(nameValuePairs);
                 }
 
-                JsonObject jsonObject = FormUrlEncodedJson.Parse(nameValuePairs);
-                if (FormattingUtilities.IsJsonValueType(type))
+                if (FormattingUtilities.IsJTokenType(type))
                 {
-                    return jsonObject;
-                }
-                if (type == typeof(IKeyValueModel))
-                {
-                    return new JsonKeyValueModel(jsonObject);
+                    return FormUrlEncodedJson.Parse(nameValuePairs);
                 }
                 
                 // Passed us an unsupported type. Should have called CanReadType() first.

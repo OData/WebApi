@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Json;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.DataSets.Types;
@@ -8,24 +7,26 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
+using Newtonsoft.Json;
 
 namespace System.Net.Http.Formatting
 {
     public class JsonMediaTypeFormatterTests
     {
-        public static List<Type> JsonValueTypes
+        public static List<Type> JTokenTypes
         {
             get
             {
                 return new List<Type>
                 {
-                    typeof(JsonValue),
-                    typeof(JsonPrimitive),
-                    typeof(JsonArray),
-                    typeof(JsonObject)
+                    typeof(JToken),
+                    typeof(JValue),
+                    typeof(JArray),
+                    typeof(JObject)
                 };
             }
         }
@@ -119,7 +120,7 @@ namespace System.Net.Http.Formatting
         public void CanReadTypeReturnsTrueOnJsonValue()
         {
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            foreach (Type type in JsonValueTypes)
+            foreach (Type type in JTokenTypes)
             {
                 Assert.True(formatter.CanReadTypeProxy(type), "formatter should have returned true.");
             }
@@ -130,7 +131,7 @@ namespace System.Net.Http.Formatting
         public void CanWriteTypeReturnsTrueOnJsonValue()
         {
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            foreach (Type type in JsonValueTypes)
+            foreach (Type type in JTokenTypes)
             {
                 Assert.True(formatter.CanWriteTypeProxy(type), "formatter should have returned false.");
             }
@@ -158,18 +159,18 @@ namespace System.Net.Http.Formatting
 
         [Fact]
         [Trait("Description", "ReadFromStreamAsync() roundtrips JsonValue.")]
-        public void ReadFromStreamAsyncRoundTripsJsonValue()
+        public void ReadFromStreamAsyncRoundTripsJToken()
         {
             string beforeMessage = "Hello World";
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            JsonValue before = beforeMessage;
+            JToken before = beforeMessage;
             MemoryStream memStream = new MemoryStream();
-            before.Save(memStream);
+            before.WriteTo(new JsonTextWriter(new StreamWriter(memStream)));
             memStream.Position = 0;
 
-            JsonValue after = Assert.Task.SucceedsWithResult<object>(formatter.ReadFromStreamAsync(typeof(JsonValue), memStream, null, null)) as JsonValue;
+            JToken after = Assert.Task.SucceedsWithResult<object>(formatter.ReadFromStreamAsync(typeof(JToken), memStream, null, null)) as JToken;
             Assert.NotNull(after);
-            string afterMessage = after.ReadAs<string>();
+            string afterMessage = after.ToObject<string>();
 
             Assert.Equal(beforeMessage, afterMessage);
         }
@@ -261,17 +262,17 @@ namespace System.Net.Http.Formatting
 
         [Fact]
         [Trait("Description", "OnWriteToStreamAsync() roundtrips JsonValue.")]
-        public void WriteToStreamAsyncRoundTripsJsonValue()
+        public void WriteToStreamAsyncRoundTripsJToken()
         {
             string beforeMessage = "Hello World";
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            JsonValue before = new JsonPrimitive(beforeMessage);
+            JToken before = new JValue(beforeMessage);
             MemoryStream memStream = new MemoryStream();
 
-            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(JsonValue), before, memStream, null, null));
+            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(JToken), before, memStream, null, null));
             memStream.Position = 0;
-            JsonValue after = JsonValue.Load(memStream);
-            string afterMessage = after.ReadAs<string>();
+            JToken after = JToken.Load(new JsonTextReader(new StreamReader(memStream)));
+            string afterMessage = after.ToObject<string>();
 
             Assert.Equal(beforeMessage, afterMessage);
         }

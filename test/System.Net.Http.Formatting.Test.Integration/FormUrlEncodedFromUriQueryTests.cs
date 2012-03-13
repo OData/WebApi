@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Json;
 using System.Net.Http.Internal;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
+using System.Json;
 
 namespace System.Net.Http.Formatting
 {
@@ -120,7 +121,7 @@ namespace System.Net.Http.Formatting
             InlineData("true", @"{""true"":null}"),
             InlineData("", "{}"),
             InlineData("%2fabc%2f", @"{""\/abc\/"":null}")]
-        public void TestJsonPrimitive(string encoded, string expectedResult)
+        public void TestJValue(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);
         }
@@ -132,7 +133,7 @@ namespace System.Net.Http.Formatting
             InlineData("a[b]=1&a=2"),
             InlineData("a=2&a[b]=1"),
             InlineData("[]=1")]
-        public void TestJsonPrimitiveNegative(string encoded)
+        public void TestJValueNegative(string encoded)
         {
             ParseInvalidFormUrlEncoded(encoded);
         }
@@ -337,7 +338,7 @@ namespace System.Net.Http.Formatting
         /// Tests for parsing generated form-urlencoded data.
         /// </summary>
         [Fact]
-        public void GeneratedJsonValueTest()
+        public void GeneratedJTokenTest()
         {
             Random rndGen = new Random(1);
             int oldMaxArray = CreatorSettings.MaxArrayLength;
@@ -355,19 +356,19 @@ namespace System.Net.Http.Formatting
             {
                 for (int i = 0; i < 1000; i++)
                 {
-                    JsonValue jv = (JsonValue)jsonValueCreator.CreateInstanceOf(typeof(JsonValue), rndGen);
-                    if (jv.JsonType == JsonType.Array || jv.JsonType == JsonType.Object)
+                    JToken jv = (JToken)jsonValueCreator.CreateInstanceOf(typeof(JToken), rndGen);
+                    if (jv.Type == JTokenType.Array || jv.Type == JTokenType.Object)
                     {
                         string jaStr = FormUrlEncoding(jv);
-                        JsonValue deserJv = ParseFormUrlEncoded(jaStr);
+                        JToken deserJv = ParseFormUrlEncoded(jaStr);
                         bool compare = true;
-                        if (deserJv is JsonObject && ((JsonObject)deserJv).ContainsKey("JV"))
+                        if (deserJv is JObject && ((IDictionary<string, JToken>)deserJv).ContainsKey("JV"))
                         {
-                            compare = JsonValueRoundTripComparer.Compare(jv, deserJv["JV"]);
+                            compare = JTokenRoundTripComparer.Compare(jv, deserJv["JV"]);
                         }
                         else
                         {
-                            compare = JsonValueRoundTripComparer.Compare(jv, deserJv);
+                            compare = JTokenRoundTripComparer.Compare(jv, deserJv);
                         }
 
                         Assert.True(compare, "Comparison failed for test instance " + i);
@@ -387,12 +388,12 @@ namespace System.Net.Http.Formatting
         #endregion
 
         #region Helpers
-        private static string FormUrlEncoding(JsonValue jsonValue)
+        private static string FormUrlEncoding(JToken jsonValue)
         {
             List<string> results = new List<string>();
-            if (jsonValue is JsonPrimitive)
+            if (jsonValue is JValue)
             {
-                return UriQueryUtility.UrlEncode(((JsonPrimitive)jsonValue).Value.ToString());
+                return UriQueryUtility.UrlEncode(((JValue)jsonValue).Value.ToString());
             }
 
             BuildParams("JV", jsonValue, results);
@@ -410,14 +411,14 @@ namespace System.Net.Http.Formatting
             return strResult.ToString();
         }
 
-        private static void BuildParams(string prefix, JsonValue jsonValue, List<string> results)
+        private static void BuildParams(string prefix, JToken jsonValue, List<string> results)
         {
-            if (jsonValue is JsonPrimitive)
+            if (jsonValue is JValue)
             {
-                JsonPrimitive jsonPrimitive = jsonValue as JsonPrimitive;
+                JValue jsonPrimitive = jsonValue as JValue;
                 if (jsonPrimitive != null)
                 {
-                    if (jsonPrimitive.JsonType == JsonType.String && String.IsNullOrEmpty(jsonPrimitive.Value.ToString()))
+                    if (jsonPrimitive.Type == JTokenType.String && String.IsNullOrEmpty(jsonPrimitive.Value.ToString()))
                     {
                         results.Add(prefix + "=" + String.Empty);
                     }
@@ -443,11 +444,11 @@ namespace System.Net.Http.Formatting
                     results.Add(prefix + "=" + String.Empty);
                 }
             }
-            else if (jsonValue is JsonArray)
+            else if (jsonValue is JArray)
             {
-                for (int i = 0; i < jsonValue.Count; i++)
+                for (int i = 0; i < ((JArray)jsonValue).Count; i++)
                 {
-                    if (jsonValue[i] is JsonArray || jsonValue[i] is JsonObject)
+                    if (jsonValue[i] is JArray || jsonValue[i] is JObject)
                     {
                         BuildParams(prefix + "[" + i + "]", jsonValue[i], results);
                     }
@@ -457,9 +458,9 @@ namespace System.Net.Http.Formatting
                     }
                 }
             }
-            else //jsonValue is JsonObject
+            else //jsonValue is JObject
             {
-                foreach (KeyValuePair<string, JsonValue> item in jsonValue)
+                foreach (KeyValuePair<string, JToken> item in (JObject)jsonValue)
                 {
                     BuildParams(prefix + "[" + item.Key + "]", item.Value, results);
                 }
@@ -473,10 +474,10 @@ namespace System.Net.Http.Formatting
             return uriBuilder.Uri;
         }
 
-        private static JsonValue ParseFormUrlEncoded(string encoded)
+        private static JToken ParseFormUrlEncoded(string encoded)
         {
             Uri address = GetQueryUri(encoded);
-            JsonObject result;
+            JObject result;
             Assert.True(address.TryReadQueryAsJson(out result), "Expected parsing to return true");
             return result;
         }
@@ -484,7 +485,7 @@ namespace System.Net.Http.Formatting
         private static void ParseInvalidFormUrlEncoded(string encoded)
         {
             Uri address = GetQueryUri(encoded);
-            JsonObject result;
+            JObject result;
             Assert.False(address.TryReadQueryAsJson(out result), "Expected parsing to return false");
             Assert.Null(result);
         }
@@ -492,7 +493,7 @@ namespace System.Net.Http.Formatting
         private static void ValidateFormUrlEncoded(string encoded, string expectedResult)
         {
             Uri address = GetQueryUri(encoded);
-            JsonObject result;
+            JObject result;
             Assert.True(address.TryReadQueryAsJson(out result), "Expected parsing to return true");
             Assert.NotNull(result);
             Assert.Equal(expectedResult, result.ToString());

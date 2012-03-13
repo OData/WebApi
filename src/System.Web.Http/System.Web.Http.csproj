@@ -144,7 +144,6 @@
     <Compile Include="ModelBinding\Binders\CompositeModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\CompositeModelBinder.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />
-    <Compile Include="Internal\ParameterDescriptorExtensionMethods.cs" />
     <Compile Include="Query\QueryValidator.cs" />
     <Compile Include="Routing\BoundRouteTemplate.cs" />
     <Compile Include="Routing\IHttpVirtualPathData.cs" />
@@ -322,10 +321,8 @@
     <Compile Include="ValueProviders\Providers\NameValueCollectionValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\ElementalValueProvider.cs" />
     <Compile Include="ValueProviders\IEnumerableValueProvider.cs" />
-    <Compile Include="ValueProviders\Providers\KeyValueModelValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\RouteDataValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\RouteDataValueProviderFactory.cs" />
-    <Compile Include="ValueProviders\SingleObjectKeyValueModel.cs" />
     <Compile Include="ValueProviders\ValueProviderFactory.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderFactory.cs" />
@@ -356,10 +353,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\System.Json\System.Json.csproj">
-      <Project>{F0441BE9-BDC0-4629-BE5A-8765FFAA2481}</Project>
-      <Name>System.Json</Name>
-    </ProjectReference>
     <ProjectReference Include="..\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
       <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
       <Name>System.Net.Http.Formatting</Name>

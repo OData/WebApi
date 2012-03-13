@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Json;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http
 {
@@ -79,20 +79,20 @@ namespace System.Net.Http
         public static readonly Type QueryableInterfaceGenericType = typeof(IQueryable<>);
 
         /// <summary>
-        /// A <see cref="Type"/> representing <see cref="JsonValue"/>.
+        /// A <see cref="Type"/> representing <see cref="JToken"/>.
         /// </summary>
-        public static readonly Type JsonValueType = typeof(JsonValue);
+        public static readonly Type JTokenType = typeof(JToken);
 
         /// <summary>
-        /// Determines whether <paramref name="type"/> is a <see cref="JsonValue"/> type.
+        /// Determines whether <paramref name="type"/> is a <see cref="JToken"/> type.
         /// </summary>
         /// <param name="type">The type to test.</param>
         /// <returns>
-        ///   <c>true</c> if <paramref name="type"/> is a <see cref="JsonValue"/> type; otherwise, <c>false</c>.
+        ///   <c>true</c> if <paramref name="type"/> is a <see cref="JToken"/> type; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsJsonValueType(Type type)
+        public static bool IsJTokenType(Type type)
         {
-            return JsonValueType.IsAssignableFrom(type);
+            return JTokenType.IsAssignableFrom(type);
         }
 
         /// <summary>

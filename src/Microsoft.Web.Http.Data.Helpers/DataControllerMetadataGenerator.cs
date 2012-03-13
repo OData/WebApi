@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Json;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Web.Http.Data.Helpers
 {
@@ -14,7 +14,7 @@ namespace Microsoft.Web.Http.Data.Helpers
         private static readonly ConcurrentDictionary<DataControllerDescription, IEnumerable<TypeMetadata>> _metadataMap =
             new ConcurrentDictionary<DataControllerDescription, IEnumerable<TypeMetadata>>();
 
-        private static readonly IEnumerable<KeyValuePair<string, JsonValue>> _emptyKeyValuePairEnumerable = Enumerable.Empty<KeyValuePair<string, JsonValue>>();
+        private static readonly IEnumerable<KeyValuePair<string, JToken>> _emptyKeyValuePairEnumerable = Enumerable.Empty<KeyValuePair<string, JToken>>();
 
         public static IEnumerable<TypeMetadata> GetMetadata(DataControllerDescription description)
         {
@@ -104,44 +104,44 @@ namespace Microsoft.Web.Http.Data.Helpers
                 get { return _properties; }
             }
 
-            public JsonValue ToJsonValue()
+            public JToken ToJToken()
             {
-                JsonObject value = new JsonObject();
+                JObject value = new JObject();
 
-                value[MetadataStrings.KeyString] = new JsonArray(Key.Select(k => (JsonValue)k));
-                value[MetadataStrings.FieldsString] = new JsonObject(Properties.Select(p => new KeyValuePair<string, JsonValue>(p.Name, p.ToJsonValue())));
+                value[MetadataStrings.KeyString] = new JArray(Key.Select(k => (JToken)k));
+                value[MetadataStrings.FieldsString] = new JObject(Properties.Select(p => new KeyValuePair<string, JToken>(p.Name, p.ToJToken())));
 
                 // TODO: Only include these properties when they'll have non-empty values.  Need to update SPA T4 templates to tolerate null in scaffolded SPA JavaScript.
                 //if (Properties.Any(p => p.ValidationRules.Count > 0))
                 //{
-                value[MetadataStrings.RulesString] = new JsonObject(
+                value[MetadataStrings.RulesString] = new JObject(
                     Properties.SelectMany(
                         p => p.ValidationRules.Count == 0
                                  ? _emptyKeyValuePairEnumerable
-                                 : new KeyValuePair<string, JsonValue>[]
+                                 : new KeyValuePair<string, JToken>[]
                                  {
-                                     new KeyValuePair<string, JsonValue>(
+                                     new KeyValuePair<string, JToken>(
                                        p.Name,
-                                       new JsonObject(p.ValidationRules.Select(
-                                           r => new KeyValuePair<string, JsonValue>(r.Name, r.ToJsonValue()))))
+                                       new JObject(p.ValidationRules.Select(
+                                           r => new KeyValuePair<string, JToken>(r.Name, r.ToJToken()))))
                                  }));
                 //}
                 //if (Properties.Any(p => p.ValidationRules.Any(r => r.ErrorMessageString != null))) 
                 //{
-                value[MetadataStrings.MessagesString] = new JsonObject(
+                value[MetadataStrings.MessagesString] = new JObject(
                     Properties.SelectMany(
                         p => !p.ValidationRules.Any(r => r.ErrorMessageString != null)
                                  ? _emptyKeyValuePairEnumerable
-                                 : new KeyValuePair<string, JsonValue>[]
+                                 : new KeyValuePair<string, JToken>[]
                                  {
-                                     new KeyValuePair<string, JsonValue>(
+                                     new KeyValuePair<string, JToken>(
                                        p.Name,
-                                       new JsonObject(p.ValidationRules.SelectMany(r =>
+                                       new JObject(p.ValidationRules.SelectMany(r =>
                                                                                    r.ErrorMessageString == null
                                                                                        ? _emptyKeyValuePairEnumerable
-                                                                                       : new KeyValuePair<string, JsonValue>[]
+                                                                                       : new KeyValuePair<string, JToken>[]
                                                                                        {
-                                                                                           new KeyValuePair<string, JsonValue>(r.Name, r.ErrorMessageString)
+                                                                                           new KeyValuePair<string, JToken>(r.Name, r.ErrorMessageString)
                                                                                        })))
                                  }));
                 //}
@@ -176,12 +176,12 @@ namespace Microsoft.Web.Http.Data.Helpers
                 get { return _otherKeyMembers; }
             }
 
-            public JsonValue ToJsonValue()
+            public JToken ToJToken()
             {
-                JsonObject value = new JsonObject();
+                JObject value = new JObject();
                 value[MetadataStrings.NameString] = Name;
-                value[MetadataStrings.ThisKeyString] = new JsonArray(ThisKeyMembers.Select(k => (JsonValue)k));
-                value[MetadataStrings.OtherKeyString] = new JsonArray(OtherKeyMembers.Select(k => (JsonValue)k));
+                value[MetadataStrings.ThisKeyString] = new JArray(ThisKeyMembers.Select(k => (JToken)k));
+                value[MetadataStrings.OtherKeyString] = new JArray(OtherKeyMembers.Select(k => (JToken)k));
                 value[MetadataStrings.IsForeignKey] = IsForeignKey;
                 return value;
             }
@@ -263,9 +263,9 @@ namespace Microsoft.Web.Http.Data.Helpers
                 get { return _validationRules; }
             }
 
-            public JsonValue ToJsonValue()
+            public JToken ToJToken()
             {
-                JsonObject value = new JsonObject();
+                JObject value = new JObject();
 
                 value[MetadataStrings.TypeString] = EncodeTypeName(TypeName, TypeNamespace);
 
@@ -281,7 +281,7 @@ namespace Microsoft.Web.Http.Data.Helpers
 
                 if (Association != null)
                 {
-                    value[MetadataStrings.AssociationString] = Association.ToJsonValue();
+                    value[MetadataStrings.AssociationString] = Association.ToJToken();
                 }
 
                 return value;
@@ -358,20 +358,14 @@ namespace Microsoft.Web.Http.Data.Helpers
             public object Value2 { get; private set; }
             public string ErrorMessageString { get; private set; }
 
-            public JsonValue ToJsonValue()
+            public JToken ToJToken()
             {
                 // The output json is determined by the number of values. The object constructor takes care the value assignment.
                 // When we have two values, we have two numbers that are written as an array.
                 // When we have only one value, it is written as it's type only.
                 if (_type == "array")
                 {
-                    JsonPrimitive value1;
-                    JsonPrimitive.TryCreate(Value1, out value1);
-
-                    JsonPrimitive value2;
-                    JsonPrimitive.TryCreate(Value2, out value2);
-
-                    return new JsonArray(value1, value2);
+                    return new JArray() { new JValue(Value1), new JValue(Value2) };
                 }
                 else if (_type == "boolean")
                 {

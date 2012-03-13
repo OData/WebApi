@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;
 using System.Runtime.Serialization.Json;
@@ -158,7 +157,6 @@ namespace System.Net.Http.Formatting
         {
             JsonSerializer defaultSerializer = new JsonSerializer();
             defaultSerializer.ContractResolver = new JsonContractResolver();
-            defaultSerializer.Converters.Add(new JsonValueConverter());
 
             // Do not change this setting
             // Setting this to None prevents Json.NET from loading malicious, unsafe, or security-sensitive types
@@ -196,16 +194,6 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("type");
             }
 
-            if (FormattingUtilities.IsJsonValueType(type))
-            {
-                return true;
-            }
-
-            if (type == typeof(IKeyValueModel))
-            {
-                return true;
-            }
-
             if (UseDataContractJsonSerializer)
             {
                 // If there is a registered non-null serializer, we can support this type.
@@ -232,11 +220,6 @@ namespace System.Net.Http.Formatting
             if (type == null)
             {
                 throw new ArgumentNullException("type");
-            }
-
-            if (FormattingUtilities.IsJsonValueType(type))
-            {
-                return true;
             }
 
             if (UseDataContractJsonSerializer)
@@ -279,39 +262,32 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {
-                if (type == typeof(IKeyValueModel))
+                Encoding effectiveEncoding = Encoding;
+
+                if (contentHeaders != null && contentHeaders.ContentType != null)
                 {
-                    return new JsonKeyValueModel(JsonValue.Load(stream));
+                    string charset = contentHeaders.ContentType.CharSet;
+                    if (!String.IsNullOrWhiteSpace(charset) &&
+                        !String.Equals(charset, Encoding.WebName) &&
+                        !_decoders.TryGetValue(charset, out effectiveEncoding))
+                    {
+                        effectiveEncoding = Encoding;
+                    }
+                }
+
+                if (!UseDataContractJsonSerializer)
+                {
+                    using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
+                    {
+                        return _jsonSerializer.Deserialize(jsonTextReader, type);
+                    }
                 }
                 else
                 {
-                    Encoding effectiveEncoding = Encoding;
-
-                    if (contentHeaders != null && contentHeaders.ContentType != null)
+                    DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
+                    using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(stream, effectiveEncoding, _readerQuotas, null))
                     {
-                        string charset = contentHeaders.ContentType.CharSet;
-                        if (!String.IsNullOrWhiteSpace(charset) &&
-                            !String.Equals(charset, Encoding.WebName) &&
-                            !_decoders.TryGetValue(charset, out effectiveEncoding))
-                        {
-                            effectiveEncoding = Encoding;
-                        }
-                    }
-
-                    if (FormattingUtilities.IsJsonValueType(type) || !UseDataContractJsonSerializer)
-                    {
-                        using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
-                        {
-                            return _jsonSerializer.Deserialize(jsonTextReader, type);
-                        }
-                    }
-                    else
-                    {
-                        DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(stream, effectiveEncoding, _readerQuotas, null))
-                        {
-                            return dataContractSerializer.ReadObject(reader);
-                        }
+                        return dataContractSerializer.ReadObject(reader);
                     }
                 }
             });
@@ -346,7 +322,7 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously(() =>
             {
-                if (FormattingUtilities.IsJsonValueType(type) || !UseDataContractJsonSerializer)
+                if (!UseDataContractJsonSerializer)
                 {
                     using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, Encoding)) { CloseOutput = false })
                     {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Json;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -283,22 +282,6 @@ namespace System.Web.Http.Internal
                 return null;
             }
             return o as IEnumerable;
-        }
-
-        /// <summary>
-        /// Determines whether the given type is one of the special known types
-        /// that must be read from the request body via the formatter and cannot
-        /// be validated as a user's complex type.
-        /// </summary>
-        /// <param name="type">The type to check.</param>
-        /// <returns><c>true</c> if this is a known body content type.</returns>
-        internal static bool IsStructuredBodyContentType(Type type)
-        {
-            Contract.Assert(type != null);
-
-            // TODO: [DevDiv2 327725] Consider model that allows model binding to multiple JsonValues inside an outer JsonValue.
-            // TODO: This helper method exists only to say "these types are atomic can only be read as a single object from the body".
-            return type == typeof(JsonValue);
         }
 
         /// <summary>

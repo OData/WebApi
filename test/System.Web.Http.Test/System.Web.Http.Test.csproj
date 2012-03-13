@@ -213,7 +213,6 @@
     <Compile Include="Validation\DefaultBodyModelValidatorTest.cs" />
     <Compile Include="Validation\ModelValidationNodeTest.cs" />
     <Compile Include="Validation\ModelValidationRequiredMemberSelectorTest.cs" />
-    <Compile Include="ValueProviders\Providers\KeyValueModelValueProviderTest.cs" />
     <Compile Include="ValueProviders\Providers\NameValueCollectionValueProviderTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderTest.cs" />
   </ItemGroup>

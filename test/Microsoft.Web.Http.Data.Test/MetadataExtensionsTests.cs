@@ -5,6 +5,7 @@ using System.Json;
 using System.Linq;
 using Microsoft.Web.Http.Data.Helpers;
 using Xunit;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Web.Http.Data.Test
 {
@@ -17,18 +18,21 @@ namespace Microsoft.Web.Http.Data.Test
         [Fact]
         public void TestMetadataSerialization()
         {
-            JsonValue metadata = GenerateMetadata(typeof(TestController));
+            JToken metadata = GenerateMetadata(typeof(TestController));
             string s = metadata.ToString();
             Assert.True(s.Contains("{\"range\":[-10,20.5]}"));
         }
 
-        private static JsonValue GenerateMetadata(Type dataControllerType)
+        private static JToken GenerateMetadata(Type dataControllerType)
         {
             DataControllerDescription desc = DataControllerDescriptionTest.GetDataControllerDescription(dataControllerType);
             var metadata = DataControllerMetadataGenerator.GetMetadata(desc);
 
-            var jsonData = metadata.Select(m => new KeyValuePair<string, JsonValue>(m.EncodedTypeName, m.ToJsonValue()));
-            JsonValue metadataValue = new JsonObject(jsonData);
+            JObject metadataValue = new JObject();
+            foreach (var m in metadata)
+            {
+                metadataValue.Add(m.EncodedTypeName, m.ToJToken());
+            }
 
             return metadataValue;
         }

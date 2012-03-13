@@ -259,4 +259,25 @@
   <data name="ObjectContent_FormatterCannotWriteType" xml:space="preserve">
     <value>The configured formatter '{0}' cannot write an object of type '{1}'.</value>
   </data>
+  <data name="FormUrlEncodedMismatchingTypes" xml:space="preserve">
+    <value>Mismatched types at node '{0}'.</value>
+  </data>
+  <data name="InvalidArrayInsert" xml:space="preserve">
+    <value>Invalid array at node '{0}'.</value>
+  </data>
+  <data name="JQuery13CompatModeNotSupportNestedJson" xml:space="preserve">
+    <value>Traditional style array without '[]' is not supported with nested object at location {0}.</value>
+  </data>
+  <data name="MaxDepthExceeded" xml:space="preserve">
+    <value>The maximum read depth ({0}) has been exceeded because the form url-encoded data being read has more levels of nesting than is allowed.</value>
+  </data>
+  <data name="NestedBracketNotValid" xml:space="preserve">
+    <value>Nested bracket is not valid for '{0}' data at position {1}.</value>
+  </data>
+  <data name="QueryStringNameShouldNotNull" xml:space="preserve">
+    <value>Query string name cannot be null.</value>
+  </data>
+  <data name="UnMatchedBracketNotValid" xml:space="preserve">
+    <value>There is an unmatched opened bracket for the '{0}' at position {1}.</value>
+  </data>
 </root>

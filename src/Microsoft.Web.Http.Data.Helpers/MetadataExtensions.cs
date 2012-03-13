@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Json;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Web.Http.Data.Helpers
 {
@@ -26,8 +26,8 @@ namespace Microsoft.Web.Http.Data.Helpers
             IEnumerable<DataControllerMetadataGenerator.TypeMetadata> metadata =
                 DataControllerMetadataGenerator.GetMetadata(description);
 
-            JsonValue metadataValue = new JsonObject(metadata.Select(
-                m => new KeyValuePair<string, JsonValue>(m.EncodedTypeName, m.ToJsonValue())));
+            JToken metadataValue = new JObject(metadata.Select(
+                m => new KeyValuePair<string, JToken>(m.EncodedTypeName, m.ToJToken())));
 
             return htmlHelper.Raw(metadataValue);
         }

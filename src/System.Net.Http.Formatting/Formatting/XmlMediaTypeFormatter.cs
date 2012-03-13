@@ -230,16 +230,6 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("type");
             }
 
-            if (FormattingUtilities.IsJsonValueType(type))
-            {
-                return false;
-            }
-
-            if (type == typeof(IKeyValueModel))
-            {
-                return true;
-            }
-
             // If there is a registered non-null serializer, we can support this type.
             // Otherwise attempt to create the default serializer.
             object serializer = _serializerCache.GetOrAdd(
@@ -261,11 +251,6 @@ namespace System.Net.Http.Formatting
             if (type == null)
             {
                 throw new ArgumentNullException("type");
-            }
-
-            if (FormattingUtilities.IsJsonValueType(type))
-            {
-                return false;
             }
 
             if (UseDataContractSerializer)
@@ -322,30 +307,19 @@ namespace System.Net.Http.Formatting
                     }
                 }
 
-                if (type == typeof(IKeyValueModel))
-                {
-                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, XmlDictionaryReaderQuotas.Max, null))
-                    {
-                        XElement root = XElement.Load(reader);
-                        return new XmlKeyValueModel(root);
-                    }
-                }
-                else
-                {
-                    object serializer = GetSerializerForType(type);
+                object serializer = GetSerializerForType(type);
 
-                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, XmlDictionaryReaderQuotas.Max, null))
+                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, XmlDictionaryReaderQuotas.Max, null))
+                {
+                    XmlSerializer xmlSerializer = serializer as XmlSerializer;
+                    if (xmlSerializer != null)
                     {
-                        XmlSerializer xmlSerializer = serializer as XmlSerializer;
-                        if (xmlSerializer != null)
-                        {
-                            return xmlSerializer.Deserialize(reader);
-                        }
-                        else
-                        {
-                            XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
-                            return xmlObjectSerializer.ReadObject(reader);
-                        }
+                        return xmlSerializer.Deserialize(reader);
+                    }
+                    else
+                    {
+                        XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
+                        return xmlObjectSerializer.ReadObject(reader);
                     }
                 }
             });

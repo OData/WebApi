@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -74,12 +75,12 @@ namespace System.Net.Http.Formatting
                     { new ArgumentNullException("param"), "{\"ClassName\":\"System.ArgumentNullException\",\"Message\":\"Value cannot be null.\",\"Data\":null,\"InnerException\":null,\"HelpURL\":null,\"StackTraceString\":null,\"RemoteStackTraceString\":null,\"RemoteStackIndex\":0,\"ExceptionMethod\":null,\"HResult\":-2147467261,\"Source\":null,\"WatsonBuckets\":null,\"ParamName\":\"param\"}" },
 
                     // JSON Values
-                    { new JsonPrimitive(false), "false" },
-                    { new JsonPrimitive(54), "54" },
-                    { new JsonPrimitive("s"), "\"s\"" },
-                    { new JsonArray(new JsonPrimitive(1), new JsonPrimitive(2)), "[1,2]" },
-                    { new JsonObject(new KeyValuePair<string, JsonValue>("k1", new JsonPrimitive("v1")), new KeyValuePair<string, JsonValue>("k2", new JsonPrimitive("v2"))), "{\"k1\":\"v1\",\"k2\":\"v2\"}" },
-                    { new KeyValuePair<JsonValue, JsonValue>(new JsonPrimitive("k"), new JsonArray(new JsonPrimitive("v1"), new JsonPrimitive("v2"))), "{\"Key\":\"k\",\"Value\":[\"v1\",\"v2\"]}" },
+                    { new JValue(false), "false" },
+                    { new JValue(54), "54" },
+                    { new JValue("s"), "\"s\"" },
+                    { new JArray() { new JValue(1), new JValue(2) }, "[1,2]" },
+                    { new JObject() { { "k1", new JValue("v1") }, { "k2", new JValue("v2") } }, "{\"k1\":\"v1\",\"k2\":\"v2\"}" },
+                    { new KeyValuePair<JToken, JToken>(new JValue("k"), new JArray() { new JValue("v1"), new JValue("v2") }), "{\"Key\":\"k\",\"Value\":[\"v1\",\"v2\"]}" },
                 };
             }
         }
@@ -92,7 +93,7 @@ namespace System.Net.Http.Formatting
                 {
                     // Null
                     { null, "null", typeof(POCOType) },
-                    { null, "null", typeof(JsonValue) },
+                    { null, "null", typeof(JToken) },
 
                     // Nullables
                     { new int?(), "null", typeof(int?) },
@@ -261,7 +262,7 @@ namespace System.Net.Http.Formatting
 
             if (xType == y.GetType())
             {
-                if (typeof(JsonValue).IsAssignableFrom(xType) || xType == typeof(ArgumentNullException) || xType == typeof(KeyValuePair<JsonValue, JsonValue>))
+                if (typeof(JToken).IsAssignableFrom(xType) || xType == typeof(ArgumentNullException) || xType == typeof(KeyValuePair<JToken, JToken>))
                 {
                     return x.ToString() == y.ToString();
                 }

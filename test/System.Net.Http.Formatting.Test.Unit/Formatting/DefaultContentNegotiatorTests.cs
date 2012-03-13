@@ -1,8 +1,8 @@
-﻿using System.Json;
-using System.Linq;
+﻿using System.Linq;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -169,7 +169,7 @@ namespace System.Net.Http.Formatting
             MediaTypeHeaderValue mediaTypeReturned = null;
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(JsonValue), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            MediaTypeFormatter formatter = selector.Negotiate(typeof(JToken), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
 
             Assert.Equal("application/json", mediaTypeReturned.MediaType);
             Assert.IsType<JsonMediaTypeFormatter>(formatter);

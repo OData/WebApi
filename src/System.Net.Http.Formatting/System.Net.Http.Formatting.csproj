@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
     <Compile Include="Formatting\FormDataCollection.cs" />
+    <Compile Include="FormUrlEncodedJson.cs" />
     <Compile Include="Formatting\SecureJsonTextReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Formatting\IFormatterLogger.cs" />
@@ -92,11 +93,8 @@
     <Compile Include="Formatting\DelegatingEnumerable.cs" />
     <Compile Include="Formatting\DefaultContentNegotiator.cs" />
     <Compile Include="Formatting\FormUrlEncodedMediaTypeFormatter.cs" />
-    <Compile Include="Formatting\IKeyValueModel.cs" />
     <Compile Include="Formatting\IContentNegotiator.cs" />
     <Compile Include="Formatting\JsonMediaTypeFormatter.cs" />
-    <Compile Include="Formatting\JsonKeyValueModel.cs" />
-    <Compile Include="Formatting\JsonValueConverter.cs" />
     <Compile Include="Formatting\MediaRangeMapping.cs" />
     <Compile Include="Formatting\MediaTypeConstants.cs" />
     <Compile Include="Formatting\MediaTypeFormatter.cs" />
@@ -115,7 +113,6 @@
     <Compile Include="Formatting\StringComparisonHelper.cs" />
     <Compile Include="Formatting\UriPathExtensionMapping.cs" />
     <Compile Include="Formatting\XHRRequestHeaderMapping.cs" />
-    <Compile Include="Formatting\XmlKeyValueModel.cs" />
     <Compile Include="Formatting\XmlMediaTypeFormatter.cs" />
     <Compile Include="Formatting\Parsers\FormUrlEncodedParser.cs" />
     <Compile Include="HttpContentCollectionExtensions.cs" />
@@ -153,12 +150,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\System.Json\System.Json.csproj">
-      <Project>{F0441BE9-BDC0-4629-BE5A-8765FFAA2481}</Project>
-      <Name>System.Json</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml">

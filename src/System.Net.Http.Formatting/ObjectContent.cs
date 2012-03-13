@@ -109,8 +109,7 @@ namespace System.Net.Http
             if (value == null)
             {
                 // Null may not be assigned to value types (unless Nullable<T>)
-                // We allow an ObjectContent of type void and value null as a special case
-                if (ObjectType != typeof(void) && !IsTypeNullable(ObjectType))
+                if (!IsTypeNullable(ObjectType))
                 {
                     throw new InvalidOperationException(RS.Format(Properties.Resources.CannotUseNullValueType, typeof(ObjectContent).Name, ObjectType.Name));
                 }

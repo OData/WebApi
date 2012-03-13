@@ -99,7 +99,6 @@ namespace System.Net.Http
                 return new TheoryDataSet<Type, object>
                 {
                     { typeof(Nullable<int>), null },
-                    { typeof(void), null },
                     { typeof(string), null },
                     { typeof(int), 42 },
                     //{ typeof(int), (short)42 }, TODO should this work?

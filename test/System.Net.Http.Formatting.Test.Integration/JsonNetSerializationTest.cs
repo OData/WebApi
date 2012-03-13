@@ -185,26 +185,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void DeserializingDeepObjectsThrows()
-        {
-            StringBuilder sb = new StringBuilder();
-            int depth = 1500;
-            for (int i = 0; i < depth; i++)
-            {
-                sb.Append("{\"a\":");
-            }
-            sb.Append("null");
-            for (int i = 0; i < depth; i++)
-            {
-                sb.Append("}");
-            }
-            string json = sb.ToString();
-
-            MediaTypeFormatter.SkipStreamLimitChecks = true;
-            Assert.Throws(typeof(JsonSerializationException), () => Deserialize(json, typeof(object)));
-        }
-
-        [Fact]
         public void DeserializingDeepArraysThrows()
         {
             StringBuilder sb = new StringBuilder();

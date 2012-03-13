@@ -205,15 +205,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The input stream contains too many delimiter characters which may be a sign that the incoming data may be malicious..
-        /// </summary>
-        internal static string InputStreamHasTooManyDelimiters {
-            get {
-                return ResourceManager.GetString("InputStreamHasTooManyDelimiters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; is not a valid media range..
         /// </summary>
         internal static string InvalidMediaRange {
@@ -475,7 +466,7 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Indentation is not supported with &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Indentation is not supported by &apos;{0}&apos;..
         /// </summary>
         internal static string UnsupportedIndent {
             get {

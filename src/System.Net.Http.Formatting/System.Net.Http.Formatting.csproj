@@ -134,7 +134,6 @@
     <Compile Include="IMultipartStreamProvider.cs" />
     <Compile Include="Internal\AsyncResultWithExtraData.cs" />
     <Compile Include="Internal\DelegatingStream.cs" />
-    <Compile Include="Internal\ThresholdStream.cs" />
     <Compile Include="Formatting\Parsers\InternetMessageFormatHeaderParser.cs" />
     <Compile Include="MimeBodyPart.cs" />
     <Compile Include="Formatting\Parsers\MimeMultipartBodyPartParser.cs" />

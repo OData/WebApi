@@ -287,21 +287,6 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
-        /// Wrap a stream to limit the number of potential keys in the deserialized object. 
-        /// </summary>
-        private static Stream WrapReadStream(Stream stream)
-        {
-            if (SkipStreamLimitChecks)
-            {
-                return stream;
-            }
-            // XML has 2 tags (open and close) for each field.  
-            const int DelimiterDetectionThreshold = 2 * ThresholdStream.DefaultDelimeterThreshold;
-            byte delimeter = (byte)'<'; // delimiter for XML keys
-            return new ThresholdStream(stream, delimeter, DelimiterDetectionThreshold);
-        }
-
-        /// <summary>
         /// Called during deserialization to read an object of the specified <paramref name="type"/>
         /// from the specified <paramref name="stream"/>.
         /// </summary>
@@ -321,8 +306,6 @@ namespace System.Net.Http.Formatting
             {
                 throw new ArgumentNullException("stream");
             }
-
-            stream = WrapReadStream(stream);
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {

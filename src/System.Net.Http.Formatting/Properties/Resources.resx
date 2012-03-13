@@ -241,9 +241,6 @@
     <value>The return value from a Catch() lambda cannot return null.</value>
     <comment>TaskExtensions_Catch_CannotReturnNull description</comment>
   </data>
-  <data name="InputStreamHasTooManyDelimiters" xml:space="preserve">
-    <value>The input stream contains too many delimiter characters which may be a sign that the incoming data may be malicious.</value>
-  </data>
   <data name="MediaTypeFormatterCannotRead" xml:space="preserve">
     <value>The media type formatter of type '{0}' does not support reading since it does not implement the ReadFromStreamAsync method.</value>
   </data>

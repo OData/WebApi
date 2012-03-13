@@ -32,13 +32,6 @@ namespace System.Net.Http.Formatting
             MediaTypeMappings = new Collection<MediaTypeMapping>();
         }
 
-        // Some serialization paths (particularly things using dictionaries) may not scale to arbitrarily large inputs.
-        // By default, we have checks to limit the size of stream inputs to protect the serialization path.
-        // If this flag is true, disable those checks.
-        // Todo 342889 - remove this check.
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static bool SkipStreamLimitChecks { get; set; }
-
         /// <summary>
         /// Gets the mutable collection of <see cref="MediaTypeHeaderValue"/> elements supported by
         /// this <see cref="MediaTypeFormatter"/> instance.

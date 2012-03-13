@@ -10,12 +10,12 @@ namespace System.Net.Http.Formatting
     public class UriPathExtensionMappingTests
     {
         [Fact]
-        [Trait("Description", "UriPathExtensionMapping is public, concrete, and sealed.")]
+        [Trait("Description", "UriPathExtensionMapping is public, and concrete.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(
                 typeof(UriPathExtensionMapping),
-                TypeAssert.TypeProperties.IsPublicVisibleClass | TypeAssert.TypeProperties.IsSealed,
+                TypeAssert.TypeProperties.IsPublicVisibleClass,
                 typeof(MediaTypeMapping));
         }
 

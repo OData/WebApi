@@ -7,7 +7,7 @@ namespace System.Net.Http.Formatting
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s for a request or response
     /// from a media range.
     /// </summary>
-    public sealed class MediaRangeMapping : MediaTypeMapping
+    public class MediaRangeMapping : MediaTypeMapping
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaRangeMapping"/> class.

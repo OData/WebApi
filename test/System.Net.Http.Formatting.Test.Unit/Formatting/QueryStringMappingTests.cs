@@ -20,12 +20,12 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "QueryStringMapping is public, concrete, and sealed.")]
+        [Trait("Description", "QueryStringMapping is public, and concrete.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(
                 typeof(QueryStringMapping),
-                TypeAssert.TypeProperties.IsPublicVisibleClass | TypeAssert.TypeProperties.IsSealed,
+                TypeAssert.TypeProperties.IsPublicVisibleClass,
                 typeof(MediaTypeMapping));
         }
 

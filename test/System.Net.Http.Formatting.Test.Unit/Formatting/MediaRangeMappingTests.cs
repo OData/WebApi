@@ -10,9 +10,13 @@ namespace System.Net.Http.Formatting
     public class MediaRangeMappingTests
     {
         [Fact]
+        [Trait("Description", "MediaRangeMappring is public, and concrete.")]
         public void TypeIsCorrect()
         {
-            Assert.Type.HasProperties<MediaRangeMapping, MediaTypeMapping>(TypeAssert.TypeProperties.IsPublicVisibleClass | TypeAssert.TypeProperties.IsSealed);
+            Assert.Type.HasProperties(
+                typeof(MediaRangeMapping),
+                TypeAssert.TypeProperties.IsPublicVisibleClass,
+                typeof(MediaTypeMapping));
         }
 
         [Theory]

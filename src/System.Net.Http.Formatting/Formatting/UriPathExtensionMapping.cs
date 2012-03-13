@@ -7,7 +7,7 @@ namespace System.Net.Http.Formatting
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s from path extensions appearing
     /// in a <see cref="Uri"/>.
     /// </summary>
-    public sealed class UriPathExtensionMapping : MediaTypeMapping
+    public class UriPathExtensionMapping : MediaTypeMapping
     {
         private static readonly Type _uriPathExtensionMappingType = typeof(UriPathExtensionMapping);
 

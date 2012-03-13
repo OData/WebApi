@@ -7,7 +7,7 @@ namespace System.Net.Http.Formatting
     /// <summary>
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s from query strings.
     /// </summary>
-    public sealed class QueryStringMapping : MediaTypeMapping
+    public class QueryStringMapping : MediaTypeMapping
     {
         private static readonly Type _queryStringMappingType = typeof(QueryStringMapping);
 

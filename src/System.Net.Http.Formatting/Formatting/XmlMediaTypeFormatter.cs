@@ -23,7 +23,7 @@ namespace System.Net.Http.Formatting
         private static readonly Type _xmlSerializerType = typeof(XmlSerializer);
         private static readonly Type _dataContractSerializerType = typeof(DataContractSerializer);
         private static readonly Type _xmlMediaTypeFormatterType = typeof(XmlMediaTypeFormatter);
-
+        
         private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
         {
             MediaTypeConstants.ApplicationXmlMediaType,
@@ -38,13 +38,20 @@ namespace System.Net.Http.Formatting
         };
 
         private ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
+        private XmlWriterSettings _writerSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlMediaTypeFormatter"/> class.
         /// </summary>
         public XmlMediaTypeFormatter()
         {
-            Encoding = new UTF8Encoding(false, true);
+            _writerSettings = new XmlWriterSettings()
+            {
+                OmitXmlDeclaration = true,
+                Encoding = new UTF8Encoding(false, true),
+                CloseOutput = false
+            };
+
             foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
             {
                 SupportedMediaTypes.Add(value);
@@ -107,6 +114,39 @@ namespace System.Net.Http.Formatting
             }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="Encoding"/> to use when reading and writing data.
+        /// </summary>
+        /// <value>
+        /// The <see cref="Encoding"/> to use when reading and writing data.
+        /// </value>
+        protected override Encoding Encoding
+        {
+            get
+            {
+                return _writerSettings.Encoding;
+            }
+            set
+            {
+                _writerSettings.Encoding = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to indent elements when writing data. 
+        /// </summary>
+        public bool Indent
+        {
+            get
+            {
+                return _writerSettings.Indent;
+            }
+            set
+            {
+                _writerSettings.Indent = value;
+            }
+        }
+        
         /// <summary>
         /// Registers the <see cref="XmlObjectSerializer"/> to use to read or write
         /// the specified <paramref name="type"/>.
@@ -370,7 +410,7 @@ namespace System.Net.Http.Formatting
                 object serializer = GetSerializerForType(type);
 
                 // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
-                using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding, ownsStream: false))
+                using (XmlWriter writer = XmlWriter.Create(stream, _writerSettings))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)

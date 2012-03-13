@@ -21,11 +21,13 @@ namespace System.Net.Http.Formatting
         private static readonly ConcurrentDictionary<Type, Type> _delegatingEnumerableCache = new ConcurrentDictionary<Type, Type>();
         private static ConcurrentDictionary<Type, ConstructorInfo> _delegatingEnumerableConstructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
 
+        private Encoding _encoding;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
         /// </summary>
         protected MediaTypeFormatter()
-        {
+        {   
             SupportedMediaTypes = new MediaTypeHeaderValueCollection();
             MediaTypeMappings = new Collection<MediaTypeMapping>();
         }
@@ -61,7 +63,17 @@ namespace System.Net.Http.Formatting
         /// <value>
         /// The <see cref="Encoding"/> to use when reading and writing data.
         /// </value>
-        protected Encoding Encoding { get; set; }
+        protected virtual Encoding Encoding
+        {
+            get
+            {
+                return _encoding;
+            }
+            set
+            {
+                _encoding = value;
+            }
+        }
 
         /// <summary>
         /// Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="stream"/>
@@ -142,6 +154,14 @@ namespace System.Net.Http.Formatting
             ConstructorInfo constructorInfo;
             _delegatingEnumerableConstructorCache.TryGetValue(type, out constructorInfo);
             return constructorInfo;
+        }
+
+        /// <summary>
+        /// Set the encoding to use <see cref="UTF8Encoding"/>.
+        /// </summary>
+        protected void InitializeEncoding()
+        {
+            _encoding = new UTF8Encoding(false, true);
         }
 
         internal bool CanReadAs(Type type, MediaTypeHeaderValue mediaType)

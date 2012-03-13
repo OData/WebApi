@@ -45,7 +45,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public JsonMediaTypeFormatter()
         {
-            Encoding = new UTF8Encoding(false, true);
+            InitializeEncoding();
             foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
             {
                 SupportedMediaTypes.Add(value);
@@ -129,6 +129,11 @@ namespace System.Net.Http.Formatting
         ///     <c>true</c> if use <see cref="DataContractJsonSerializer"/> by default; otherwise, <c>false</c>. The default is <c>false</c>.
         /// </value>
         public bool UseDataContractJsonSerializer { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to indent elements when writing data. 
+        /// </summary>
+        public bool Indent { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum depth allowed by this formatter.
@@ -349,12 +354,22 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("stream");
             }
 
+            if (UseDataContractJsonSerializer && Indent)
+            {
+                throw new NotSupportedException(RS.Format(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer)));
+            }
+
             return TaskHelpers.RunSynchronously(() =>
             {
                 if (FormattingUtilities.IsJsonValueType(type) || !UseDataContractJsonSerializer)
                 {
                     using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, Encoding)) { CloseOutput = false })
                     {
+                        if (Indent)
+                        {
+                            jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+                        }
+
                         Serializer.Serialize(jsonTextWriter, value);
                         jsonTextWriter.Flush();
                     }
@@ -369,7 +384,7 @@ namespace System.Net.Http.Formatting
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
                     // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
                     using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(stream, Encoding, ownsStream: false))
-                    {
+                    { 
                         dataContractSerializer.WriteObject(writer, value);
                     }
                 }

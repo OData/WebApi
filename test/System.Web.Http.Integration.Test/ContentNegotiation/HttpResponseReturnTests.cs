@@ -32,7 +32,7 @@ namespace System.Web.Http.ContentNegotiation
         [InlineData("ReturnString")]
         public void ActionReturnsHttpResponseMessage(string action)
         {
-            string expectedResponseValue = "<?xml version='1.0' encoding='utf-8'?><string>Hello</string>".Replace('\'', '"');
+            string expectedResponseValue = "<string>Hello</string>";
 
             HttpRequestMessage request = new HttpRequestMessage();
             request.RequestUri = new Uri(baseAddress + String.Format("HttpResponseReturn/{0}", action));
@@ -51,7 +51,7 @@ namespace System.Web.Http.ContentNegotiation
         [InlineData("ReturnHttpResponseMessageAsXml")]
         public void ActionReturnsHttpResponseMessageWithExplicitMediaType(string action)
         {
-            string expectedResponseValue = "<?xml version='1.0' encoding='utf-8'?><string>Hello</string>".Replace('\'', '"');
+            string expectedResponseValue = "<string>Hello</string>";
 
             HttpRequestMessage request = new HttpRequestMessage();
             request.RequestUri = new Uri(baseAddress + String.Format("HttpResponseReturn/{0}", action));

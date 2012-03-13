@@ -78,6 +78,16 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        [Trait("Description", "Indent property handles Get/Set correctly.")]
+        public void IndentGetSet()
+        {
+            JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter();
+            Assert.False(jsonFormatter.Indent);
+            jsonFormatter.Indent = true;
+            Assert.True(jsonFormatter.Indent);
+        }
+
+        [Fact]
         [Trait("Description", "CharacterEncoding property throws on invalid arguments")]
         public void CharacterEncodingSetThrows()
         {
@@ -181,7 +191,63 @@ namespace System.Net.Http.Formatting
                     stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null)));
                 Assert.Equal(testData, readObj);
             }
+        }
 
+        [Fact]
+        [Trait("Description", "UseDataContractJsonSerializer property works when set to true.")]
+        public void UseDataContractJsonSerializer_True()
+        {
+            JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true };
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            Assert.Task.Succeeds(jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            //Assert.True(serializedString.Contains("DataContractSampleType"),
+            //    "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractJsonSerializer is set to true.");
+            Assert.False(serializedString.Contains("\r\n"), "Using DCJS should emit data without indentation by default.");
+        }
+
+        [Fact]
+        [Trait("Description", "UseDataContractJsonSerializer property with Indent throws when set to true.")]
+        public void UseDataContractJsonSerializer_True_Indent_Throws()
+        {
+            JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true, Indent = true};
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            Assert.Throws<NotSupportedException>(
+                ()=>jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), 
+                    new XmlMediaTypeFormatterTests.SampleType(), 
+                    memoryStream, contentHeaders, transportContext: null));
+        }
+
+        [Fact]
+        [Trait("Description", "UseDataContractJsonSerializer property works when set to false.")]
+        public void UseDataContractJsonSerializer_False()
+        {
+            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            //Assert.True(serializedString.Contains("DataContractSampleType"),
+            //    "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractJsonSerializer is set to true.");
+            Assert.False(serializedString.Contains("\r\n"), "Using JsonSerializer should emit data without indentation by default.");
+        }
+
+        [Fact]
+        [Trait("Description", "UseDataContractJsonSerializer property with Indent works when set to false.")]
+        public void UseDataContractJsonSerializer_False_Indent()
+        {
+            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            Console.WriteLine(serializedString);
+            Assert.True(serializedString.Contains("\r\n"), "Using JsonSerializer with Indent set to true should emit data with indentation.");
         }
 
         [Fact]

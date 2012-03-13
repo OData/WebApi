@@ -78,7 +78,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CharacterEncoding property handles Get/Set correctly.")]
+        [Trait("Description", "Indent property handles Get/Set correctly.")]
         public void IndentGetSet()
         {
             JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter();
@@ -194,7 +194,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractJsonSerializer property throws when set to true.")]
+        [Trait("Description", "UseDataContractJsonSerializer property works when set to true.")]
         public void UseDataContractJsonSerializer_True()
         {
             JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true };

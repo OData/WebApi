@@ -51,7 +51,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CharacterEncoding property handles Get/Set correctly.")]
+        [Trait("Description", "Indent property handles Get/Set correctly.")]
         public void IndentGetSet()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();

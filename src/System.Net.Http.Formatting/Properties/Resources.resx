@@ -235,7 +235,7 @@
     <value>The character encoding used by '{0}' for writing data must be either '{1}' or '{2}'.'</value>
   </data>
   <data name="UnsupportedIndent" xml:space="preserve">
-    <value>Indentation is not support with DataContractJsonSerializer.</value>
+    <value>Indentation is not supported by '{0}'.</value>
   </data>
   <data name="TaskExtensions_Catch_CannotReturnNull" xml:space="preserve">
     <value>The return value from a Catch() lambda cannot return null.</value>

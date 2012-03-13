@@ -356,7 +356,7 @@ namespace System.Net.Http.Formatting
 
             if (UseDataContractJsonSerializer && Indent)
             {
-                throw new NotSupportedException(RS.Format(Properties.Resources.UnsupportedIndent));
+                throw new NotSupportedException(RS.Format(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer)));
             }
 
             return TaskHelpers.RunSynchronously(() =>

@@ -256,4 +256,7 @@
   <data name="JsonTooDeep" xml:space="preserve">
     <value>This reader's MaxDepth of {0} has been exceeded. Consider using a larger MaxDepth.</value>
   </data>
+  <data name="ObjectContent_FormatterCannotWriteType" xml:space="preserve">
+    <value>The configured formatter '{0}' cannot write an object of type '{1}'.</value>
+  </data>
 </root>

@@ -101,27 +101,30 @@ namespace Microsoft.Web.Http.Data
                  .Then<HttpResponseMessage, HttpResponseMessage>(response =>
                  {
                      int totalCount;
-                     IEnumerable results;
                      if (response != null &&
-                         controllerContext.Request.Properties.TryGetValue<int>(QueryFilterAttribute.TotalCountKey, out totalCount) &&
-                         response.TryGetObjectValue(out results))
+                         controllerContext.Request.Properties.TryGetValue<int>(QueryFilterAttribute.TotalCountKey, out totalCount))
                      {
-                         HttpResponseMessage oldResponse = response;
-                         // Client has requested the total count, so the actual response content will contain
-                         // the query results as well as the count. Create a new ObjectContent for the query results.
-                         // Because this code does not specify any formatters explicitly, it will use the
-                         // formatters in the configuration.
-                         QueryResult queryResult = new QueryResult(results, totalCount);
-                         response = response.RequestMessage.CreateResponse(oldResponse.StatusCode, queryResult);
-
-                         foreach (var header in oldResponse.Headers)
+                         ObjectContent objectContent = response.Content as ObjectContent;
+                         IEnumerable results;
+                         if (objectContent != null && (results = objectContent.Value as IEnumerable) != null)
                          {
-                             response.Headers.Add(header.Key, header.Value);
-                         }
-                         // TODO what about content headers?
+                             HttpResponseMessage oldResponse = response;
+                             // Client has requested the total count, so the actual response content will contain
+                             // the query results as well as the count. Create a new ObjectContent for the query results.
+                             // Because this code does not specify any formatters explicitly, it will use the
+                             // formatters in the configuration.
+                             QueryResult queryResult = new QueryResult(results, totalCount);
+                             response = response.RequestMessage.CreateResponse(oldResponse.StatusCode, queryResult);
 
-                         oldResponse.RequestMessage = null;
-                         oldResponse.Dispose();
+                             foreach (var header in oldResponse.Headers)
+                             {
+                                 response.Headers.Add(header.Key, header.Value);
+                             }
+                             // TODO what about content headers?
+
+                             oldResponse.RequestMessage = null;
+                             oldResponse.Dispose();
+                         }
                      }
 
                      return response;

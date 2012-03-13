@@ -163,10 +163,8 @@ namespace System.Web.Http
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
             Assert.Same(_request, response.RequestMessage);
-            Assert.IsType<ObjectContent<object>>(response.Content);
-            object contentValue;
-            Assert.True(response.TryGetObjectValue<object>(out contentValue));
-            Assert.Same(_value, contentValue);
+            var objectContent = Assert.IsAssignableFrom<ObjectContent>(response.Content);
+            Assert.Same(_value, objectContent.Value);
         }
 
         [Fact]

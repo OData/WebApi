@@ -1,57 +1,24 @@
 ﻿using System.ComponentModel;
 using System.Net.Http;
-using System.Web.Http.Common;
 
 namespace System.Web.Http
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class HttpResponseMessageExtensions
+    internal static class HttpResponseMessageExtensions
     {
-        public static bool TryGetObjectValue<T>(this HttpResponseMessage response, out T value) where T : class
+        internal static bool TryGetObjectValue<T>(this HttpResponseMessage response, out T value) where T : class
         {
-            if (response == null)
+            if (response != null)
             {
-                throw Error.ArgumentNull("response");
-            }
-
-            ObjectContent content = response.Content as ObjectContent;
-            if (content != null)
-            {
-                value = content.Value as T;
-                return value != null;
-            }
-
-            value = null;
-            return false;
-        }
-
-        public static bool TrySetObjectValue<T>(this HttpResponseMessage response, T value) where T : class
-        {
-            if (response == null)
-            {
-                throw Error.ArgumentNull("response");
-            }
-
-            ObjectContent content = response.Content as ObjectContent;
-            if (content != null)
-            {
-                try
+                ObjectContent content = response.Content as ObjectContent;
+                if (content != null)
                 {
-                    content.Value = value;
+                    value = content.Value as T;
+                    return value != null;
                 }
-                catch (ArgumentException)
-                {
-                    return false;
-                }
-                catch (InvalidOperationException)
-                {
-                    return false;
-                }
-
-                return true;
             }
 
-            value = null;
+            value = default(T);
             return false;
         }
     }

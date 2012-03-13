@@ -28,6 +28,7 @@ namespace System.Net.Http
         public void Constructor_CallsFormattersGetDefaultContentHeadersMethod()
         {
             var formatterMock = new Mock<MediaTypeFormatter>();
+            formatterMock.Setup(f => f.CanWriteType(typeof(String))).Returns(true);
 
             var content = new ObjectContent(typeof(string), "", formatterMock.Object, "foo/bar");
 

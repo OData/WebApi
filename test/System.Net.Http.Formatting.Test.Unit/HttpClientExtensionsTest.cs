@@ -11,6 +11,7 @@ namespace System.Net.Http
 {
     public class HttpClientExtensionsTest
     {
+        private readonly MediaTypeFormatter _formatter = new MockMediaTypeFormatter { CallBase = true };
         private readonly HttpClient _client;
 
         public HttpClientExtensionsTest()
@@ -93,7 +94,7 @@ namespace System.Net.Http
         {
             _client.BaseAddress = new Uri("http://example.com/");
 
-            var result = _client.PostAsync("myapi/", new object(), new MockMediaTypeFormatter());
+            var result = _client.PostAsync("myapi/", new object(), _formatter);
 
             var request = result.Result.RequestMessage;
             Assert.Equal("http://example.com/myapi/", request.RequestUri.ToString());
@@ -102,7 +103,7 @@ namespace System.Net.Http
         [Fact]
         public void PostAsync_WhenAuthoritativeMediaTypeIsSet_CreatesRequestWithAppropriateContentType()
         {
-            var result = _client.PostAsync("http://example.com/myapi/", new object(), new MockMediaTypeFormatter(), "foo/bar; charset=utf-16");
+            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
 
             var request = result.Result.RequestMessage;
             Assert.Equal("foo/bar", request.Content.Headers.ContentType.MediaType);
@@ -112,21 +113,17 @@ namespace System.Net.Http
         [Fact]
         public void PostAsync_WhenFormatterIsSet_CreatesRequestWithObjectContentAndCorrectFormatter()
         {
-            var formatter = new MockMediaTypeFormatter();
-
-            var result = _client.PostAsync("http://example.com/myapi/", new object(), formatter, "foo/bar; charset=utf-16");
+            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
 
             var request = result.Result.RequestMessage;
             var content = Assert.IsType<ObjectContent<object>>(request.Content);
-            Assert.Same(formatter, content.Formatter);
+            Assert.Same(_formatter, content.Formatter);
         }
 
         [Fact]
         public void PostAsync_IssuesPostRequest()
         {
-            var formatter = new MockMediaTypeFormatter();
-
-            var result = _client.PostAsync("http://example.com/myapi/", new object(), formatter);
+            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter);
 
             var request = result.Result.RequestMessage;
             Assert.Same(HttpMethod.Post, request.Method);
@@ -208,7 +205,7 @@ namespace System.Net.Http
         {
             _client.BaseAddress = new Uri("http://example.com/");
 
-            var result = _client.PutAsync("myapi/", new object(), new MockMediaTypeFormatter());
+            var result = _client.PutAsync("myapi/", new object(), _formatter);
 
             var request = result.Result.RequestMessage;
             Assert.Equal("http://example.com/myapi/", request.RequestUri.ToString());
@@ -217,7 +214,7 @@ namespace System.Net.Http
         [Fact]
         public void PutAsync_WhenAuthoritativeMediaTypeIsSet_CreatesRequestWithAppropriateContentType()
         {
-            var result = _client.PutAsync("http://example.com/myapi/", new object(), new MockMediaTypeFormatter(), "foo/bar; charset=utf-16");
+            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
 
             var request = result.Result.RequestMessage;
             Assert.Equal("foo/bar", request.Content.Headers.ContentType.MediaType);
@@ -227,21 +224,17 @@ namespace System.Net.Http
         [Fact]
         public void PutAsync_WhenFormatterIsSet_CreatesRequestWithObjectContentAndCorrectFormatter()
         {
-            var formatter = new MockMediaTypeFormatter();
-
-            var result = _client.PutAsync("http://example.com/myapi/", new object(), formatter, "foo/bar; charset=utf-16");
+            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
 
             var request = result.Result.RequestMessage;
             var content = Assert.IsType<ObjectContent<object>>(request.Content);
-            Assert.Same(formatter, content.Formatter);
+            Assert.Same(_formatter, content.Formatter);
         }
 
         [Fact]
         public void PutAsync_IssuesPutRequest()
         {
-            var formatter = new MockMediaTypeFormatter();
-
-            var result = _client.PutAsync("http://example.com/myapi/", new object(), formatter);
+            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter);
 
             var request = result.Result.RequestMessage;
             Assert.Same(HttpMethod.Put, request.Method);

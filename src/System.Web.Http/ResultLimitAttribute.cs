@@ -65,7 +65,7 @@ namespace System.Web.Http
             {
                 // apply the result limit
                 results = results.AsQueryable().Take(_resultLimit);
-                response.TrySetObjectValue(results);
+                ((ObjectContent)response.Content).Value = results;
             }
         }
     }

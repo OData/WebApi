@@ -66,7 +66,7 @@ namespace System.Web.Http.Filters
             if (conversionDelegate != null)
             {
                 object valueAsList = conversionDelegate(valueAsEnumerable);
-                response.TrySetObjectValue(valueAsList);
+                ((ObjectContent)response.Content).Value = valueAsList;
             }
         }
 

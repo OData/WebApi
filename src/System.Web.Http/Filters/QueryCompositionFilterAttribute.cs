@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Common;
 using System.Web.Http.Controllers;
-using System.Web.Http.Internal;
 using System.Web.Http.Properties;
 using System.Web.Http.Query;
 
@@ -97,7 +96,7 @@ namespace System.Web.Http.Filters
             if (response != null && response.TryGetObjectValue(out source))
             {
                 IQueryable composedQuery = QueryComposer.Compose(source, query);
-                response.TrySetObjectValue(composedQuery);
+                ((ObjectContent)response.Content).Value = composedQuery;
             }
         }
     }

@@ -67,7 +67,7 @@ namespace System.Net.Http
         /// <summary>
         /// Gets or sets the value of the current <see cref="ObjectContent"/>.
         /// </summary>
-        internal object Value
+        public object Value
         {
             get { return _value; }
             set { VerifyAndSetObject(value); }
@@ -123,7 +123,13 @@ namespace System.Net.Http
                 {
                     throw new ArgumentException(RS.Format(Properties.Resources.ObjectAndTypeDisagree, objectType.Name, ObjectType.Name), "value");
                 }
+
+                if (!_formatter.CanWriteType(objectType))
+                {
+                    throw new InvalidOperationException(RS.Format(Properties.Resources.ObjectContent_FormatterCannotWriteType, _formatter.GetType().FullName, objectType.Name));
+                }
             }
+
             _value = value;
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
@@ -9,7 +10,6 @@ using Moq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Net.Http.Formatting;
 
 namespace System.Web.Http.Filters
 {
@@ -93,10 +93,10 @@ namespace System.Web.Http.Filters
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            object output;
-            Assert.True(_actionExecutedContext.Result.TryGetObjectValue(out output));
+            var objectContent = Assert.IsAssignableFrom<ObjectContent>(_actionExecutedContext.Result.Content);
+            object output = objectContent.Value;
             Assert.Same(input, output);
-            Assert.Same(content, _actionExecutedContext.Result.Content);
+            Assert.Same(content, objectContent);
         }
 
         public static TheoryDataSet<Type, object> NotSupportedTypesTestData
@@ -134,8 +134,8 @@ namespace System.Web.Http.Filters
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            object output;
-            Assert.True(_actionExecutedContext.Result.TryGetObjectValue(out output));
+            var content = Assert.IsAssignableFrom<ObjectContent>(_actionExecutedContext.Result.Content);
+            object output = content.Value;
             Assert.NotSame(input, output);
             Assert.IsType<List<string>>(output);
         }
@@ -152,8 +152,8 @@ namespace System.Web.Http.Filters
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            List<int> output;
-            Assert.True(_actionExecutedContext.Result.TryGetObjectValue(out output));
+            var content = Assert.IsAssignableFrom<ObjectContent>(_actionExecutedContext.Result.Content);
+            List<int> output = Assert.IsType<List<int>>(content.Value);
             Assert.Same(input, output);
         }
 
@@ -169,8 +169,8 @@ namespace System.Web.Http.Filters
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            object output;
-            Assert.True(_actionExecutedContext.Result.TryGetObjectValue(out output));
+            var content = Assert.IsAssignableFrom<ObjectContent>(_actionExecutedContext.Result.Content);
+            object output = content.Value;
             Assert.NotSame(input, output);
         }
 

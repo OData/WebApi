@@ -44,7 +44,8 @@ namespace Microsoft.Web.Http.Data
             }
 
             IQueryable results;
-            if (response.TryGetObjectValue(out results))
+            ObjectContent objectContent = response.Content as ObjectContent;
+            if (objectContent != null && (results = objectContent.Value as IQueryable) != null)
             {
                 // Compute the total count and add the result as a request property. Later after all
                 // filters have run, DataController will transform the final result into a QueryResult

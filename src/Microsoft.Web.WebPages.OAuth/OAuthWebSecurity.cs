@@ -13,7 +13,7 @@ using WebMatrix.WebData;
 namespace Microsoft.Web.WebPages.OAuth
 {
     /// <summary>
-    /// Contains APIs to manage authentication against OAuth & OpenID service providers
+    /// Contains APIs to manage authentication against OAuth &amp; OpenID service providers
     /// </summary>
     public static class OAuthWebSecurity
     {
@@ -97,6 +97,7 @@ namespace Microsoft.Web.WebPages.OAuth
         /// <summary>
         /// Registers an authentication client.
         /// </summary>
+        [CLSCompliant(false)]
         public static void RegisterClient(IAuthenticationClient client)
         {
             if (client == null)
@@ -152,6 +153,7 @@ namespace Microsoft.Web.WebPages.OAuth
         /// <summary>
         /// Checks if user is successfully authenticated when user is redirected back to this user.
         /// </summary>
+        [CLSCompliant(false)]
         public static AuthenticationResult VerifyAuthentication()
         {
             if (HttpContext.Current == null)
@@ -188,7 +190,10 @@ namespace Microsoft.Web.WebPages.OAuth
         /// </summary>
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="providerUserId">The provider user id.</param>
-        /// <returns><c>true</c> if the login is successful.</returns>
+        /// <param name="createPersistentCookie">if set to <c>true</c> create persistent cookie as part of the login.</param>
+        /// <returns>
+        ///   <c>true</c> if the login is successful.
+        /// </returns>
         [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is used more consistently in ASP.Net")]
         public static bool Login(string providerName, string providerUserId, bool createPersistentCookie)
         {
@@ -224,13 +229,19 @@ namespace Microsoft.Web.WebPages.OAuth
             provider.CreateOrUpdateOAuthAccount(providerName, providerUserId, userName);
         }
 
+        /// <summary>
+        /// Gets the registered user name corresponding to the specified provider and provider user id.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="providerUserId">The provider user id.</param>
+        /// <returns></returns>
         public static string GetUserName(string providerName, string providerUserId)
         {
             return OAuthDataProvider.GetUserNameFromOpenAuth(providerName, providerUserId);
         }
 
         /// <summary>
-        /// Gets all OAuth & OpenID accounts which are associted with the specified user name.
+        /// Gets all OAuth &amp; OpenID accounts which are associted with the specified user name.
         /// </summary>
         /// <param name="userName">The user name.</param>
         public static ICollection<OAuthAccount> GetAccountsFromUserName(string userName)
@@ -247,7 +258,7 @@ namespace Microsoft.Web.WebPages.OAuth
         }
 
         /// <summary>
-        /// Delete the specified OAuth & OpenID account
+        /// Delete the specified OAuth &amp; OpenID account
         /// </summary>
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="providerUserId">The provider user id.</param>

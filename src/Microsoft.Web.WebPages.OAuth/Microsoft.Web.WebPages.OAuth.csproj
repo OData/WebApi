@@ -22,6 +22,7 @@
     <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>..\..\bin\Debug\Microsoft.Web.WebPages.OAuth.xml</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -80,7 +81,7 @@
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="AuthenticationClientCollection.cs" />
-    <Compile Include="BuiltInAuthenticationClient.cs" />
+    <Compile Include="BuiltInOAuthClient.cs" />
     <Compile Include="BuiltInOpenIDClient.cs" />
     <Compile Include="OAuthAccount.cs" />
     <Compile Include="OAuthWebSecurity.cs" />

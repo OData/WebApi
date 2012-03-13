@@ -5,12 +5,12 @@ using Microsoft.Web.WebPages.OAuth.Properties;
 namespace Microsoft.Web.WebPages.OAuth
 {
     /// <summary>
-    /// Represents an OAuth & OpenID account.
+    /// Represents an OAuth &amp; OpenID account.
     /// </summary>
     public class OAuthAccount
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OAuthAccountData"/> class.
+        /// Initializes a new instance of the <see cref="OAuthAccount"/> class.
         /// </summary>
         /// <param name="provider">The provider.</param>
         /// <param name="providerUserId">The provider user id.</param>

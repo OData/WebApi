@@ -38,8 +38,6 @@ namespace System.Net.Http.Formatting
 
         private static string FixUpInvalidUnicodeString(string s)
         {
-            // The following invariant is maintained : while isValid is true, sb == null; while isValid is false, sb != null
-            bool isValid = true;
             StringBuilder sb = null;
 
             for (int i = 0; i < s.Length; i++)
@@ -48,9 +46,8 @@ namespace System.Net.Http.Formatting
                 if (Char.IsLowSurrogate(ch))
                 {
                     // Low surrogate with no preceding high surrogate; this char is replaced
-                    if (isValid)
+                    if (sb == null)
                     {
-                        isValid = false;
                         sb = new StringBuilder(s);
                     }
                     sb[i] = UnicodeReplacementChar;
@@ -61,9 +58,8 @@ namespace System.Net.Http.Formatting
                     if (i + 1 == s.Length)
                     {
                         // last character is an unmatched surrogate - replace
-                        if (isValid)
+                        if (sb == null)
                         {
-                            isValid = false;
                             sb = new StringBuilder(s);
                         }
                         sb[i] = UnicodeReplacementChar;
@@ -80,9 +76,8 @@ namespace System.Net.Http.Formatting
                         else
                         {
                             // High surrogate not followed by low surrogate; original char is replaced
-                            if (isValid)
+                            if (sb == null)
                             {
-                                isValid = false;
                                 sb = new StringBuilder(s);
                             }
                             sb[i] = UnicodeReplacementChar;
@@ -90,7 +85,7 @@ namespace System.Net.Http.Formatting
                     }
                 }
             }
-            return isValid ? s : sb.ToString();
+            return sb == null ? s : sb.ToString();
         }
     }
 }

@@ -198,9 +198,6 @@
   <data name="ApiControllerActionSelector_AmbiguousMatch" xml:space="preserve">
     <value>Multiple actions were found that match the request: {0}</value>
   </data>
-  <data name="MultipleTypeParametersForHttpContentType" xml:space="preserve">
-    <value>Unable to determine the type of the content because the type '{0}' has two or more type parameters.</value>
-  </data>
   <data name="DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate" xml:space="preserve">
     <value>Multiple types were found that match the controller named '{0}'. This can happen if the route that services this request ('{1}') found multiple controllers defined with the same name but differing namespaces, which is not supported.
 

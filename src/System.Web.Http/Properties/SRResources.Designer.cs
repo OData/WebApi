@@ -603,15 +603,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to determine the type of the content because the type &apos;{0}&apos; has two or more type parameters..
-        /// </summary>
-        internal static string MultipleTypeParametersForHttpContentType {
-            get {
-                return ResourceManager.GetString("MultipleTypeParametersForHttpContentType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No applicable method &apos;{0}&apos; exists in type &apos;{1}&apos;.
         /// </summary>
         internal static string NoApplicableMethod {

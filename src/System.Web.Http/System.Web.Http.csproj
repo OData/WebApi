@@ -342,7 +342,6 @@
     <Compile Include="Query\ODataQueryDeserializer.cs" />
     <Compile Include="Query\QueryComposer.cs" />
     <Compile Include="Query\QueryResolver.cs" />
-    <Compile Include="Query\QueryTypeHelper.cs" />
     <Compile Include="Query\ServiceQuery.cs" />
   </ItemGroup>
   <ItemGroup>

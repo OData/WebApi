@@ -43,34 +43,37 @@ namespace System.Threading.Tasks
         private static Task<TResult> CatchImpl<TResult>(this Task task, Func<Exception, Task<TResult>> continuation, CancellationToken cancellationToken)
         {
             // Stay on the same thread if we can
-            if (task.IsCanceled || cancellationToken.IsCancellationRequested)
+            if (task.IsCompleted)
             {
-                return TaskHelpers.Canceled<TResult>();
-            }
-            if (task.IsFaulted)
-            {
-                try
+                if (task.IsFaulted)
                 {
-                    Task<TResult> resultTask = continuation(task.Exception.GetBaseException());
-                    if (resultTask == null)
+                    try
                     {
-                        // Not a resource because this is an internal class, and this is a guard clause that's intended
-                        // to be thrown by us to us, never escaping out to end users.
-                        throw new InvalidOperationException("You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
-                    }
+                        Task<TResult> resultTask = continuation(task.Exception.GetBaseException());
+                        if (resultTask == null)
+                        {
+                            // Not a resource because this is an internal class, and this is a guard clause that's intended
+                            // to be thrown by us to us, never escaping out to end users.
+                            throw new InvalidOperationException("You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
+                        }
 
-                    return resultTask;
+                        return resultTask;
+                    }
+                    catch (Exception ex)
+                    {
+                        return TaskHelpers.FromError<TResult>(ex);
+                    }
                 }
-                catch (Exception ex)
+                if (task.IsCanceled || cancellationToken.IsCancellationRequested)
                 {
-                    return TaskHelpers.FromError<TResult>(ex);
+                    return TaskHelpers.Canceled<TResult>();
                 }
-            }
-            if (task.Status == TaskStatus.RanToCompletion)
-            {
-                TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
-                tcs.TrySetFromTask(task);
-                return tcs.Task;
+                if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+                    tcs.TrySetFromTask(task);
+                    return tcs.Task;
+                }
             }
 
             SynchronizationContext syncContext = SynchronizationContext.Current;
@@ -118,7 +121,7 @@ namespace System.Threading.Tasks
                 }
 
                 return tcs.Task.FastUnwrap();
-            }, cancellationToken).FastUnwrap();
+            }).FastUnwrap();
         }
 
         /// <summary>
@@ -148,6 +151,7 @@ namespace System.Threading.Tasks
         private static Task CopyResultToCompletionSourceImpl<TTask, TResult>(this TTask task, TaskCompletionSource<TResult> tcs, Func<TTask, TResult> resultThunk)
             where TTask : Task
         {
+            // Stay on the same thread if we can
             if (task.IsCompleted)
             {
                 switch (task.Status)
@@ -407,23 +411,26 @@ namespace System.Threading.Tasks
             where TTask : Task
         {
             // Stay on the same thread if we can
-            if (task.IsCanceled || cancellationToken.IsCancellationRequested)
+            if (task.IsCompleted)
             {
-                return TaskHelpers.Canceled<TOuterResult>();
-            }
-            if (task.IsFaulted)
-            {
-                return TaskHelpers.FromErrors<TOuterResult>(task.Exception.InnerExceptions);
-            }
-            if (task.Status == TaskStatus.RanToCompletion)
-            {
-                try
+                if (task.IsFaulted)
                 {
-                    return continuation(task);
+                    return TaskHelpers.FromErrors<TOuterResult>(task.Exception.InnerExceptions);
                 }
-                catch (Exception ex)
+                if (task.IsCanceled || cancellationToken.IsCancellationRequested)
                 {
-                    return TaskHelpers.FromError<TOuterResult>(ex);
+                    return TaskHelpers.Canceled<TOuterResult>();
+                }
+                if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    try
+                    {
+                        return continuation(task);
+                    }
+                    catch (Exception ex)
+                    {
+                        return TaskHelpers.FromError<TOuterResult>(ex);
+                    }
                 }
             }
 
@@ -435,7 +442,7 @@ namespace System.Threading.Tasks
                 {
                     return TaskHelpers.FromErrors<TOuterResult>(innerTask.Exception.InnerExceptions);
                 }
-                if (innerTask.IsCanceled)
+                if (innerTask.IsCanceled || cancellationToken.IsCancellationRequested)
                 {
                     return TaskHelpers.Canceled<TOuterResult>();
                 }
@@ -460,7 +467,7 @@ namespace System.Threading.Tasks
                     tcs.TrySetResult(continuation(task));
                 }
                 return tcs.Task.FastUnwrap();
-            }, cancellationToken).FastUnwrap();
+            }).FastUnwrap();
         }
 
         /// <summary>
@@ -500,17 +507,20 @@ namespace System.Threading.Tasks
             }
 
             // Stay on the same thread if we can
-            if (task.IsCanceled || cancellationToken.IsCancellationRequested)
+            if (task.IsCompleted)
             {
-                return TaskHelpers.Canceled<TResult>();
-            }
-            if (task.IsFaulted)
-            {
-                return TaskHelpers.FromErrors<TResult>(task.Exception.InnerExceptions);
-            }
-            if (task.Status == TaskStatus.RanToCompletion)
-            {
-                return TaskHelpers.FromResult(result);
+                if (task.IsFaulted)
+                {
+                    return TaskHelpers.FromErrors<TResult>(task.Exception.InnerExceptions);
+                }
+                if (task.IsCanceled || cancellationToken.IsCancellationRequested)
+                {
+                    return TaskHelpers.Canceled<TResult>();
+                }
+                if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    return TaskHelpers.FromResult(result);
+                }
             }
 
             return task.ContinueWith(innerTask =>

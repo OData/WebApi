@@ -13,18 +13,18 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task.Catch(Func<Exception, Task>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Catch_NoInputValue_CatchesException_Handled()
         {
             // Arrange
             return TaskHelpers.FromError(new InvalidOperationException())
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  Assert.NotNull(ex);
-                                  Assert.IsType<InvalidOperationException>(ex);
-                                  return TaskHelpers.Completed();
+                                  Assert.NotNull(info.Exception);
+                                  Assert.IsType<InvalidOperationException>(info.Exception);
+                                  return info.Handled();
                               })
 
             // Assert
@@ -34,16 +34,16 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Catch_NoInputValue_CatchesException_Rethrow()
         {
             // Arrange
             return TaskHelpers.FromError(new InvalidOperationException())
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  return TaskHelpers.FromError(ex);
+                                  return info.Throw();
                               })
 
             // Assert
@@ -54,27 +54,27 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Catch_NoInputValue_ReturningNullFromCatchIsProhibited()
+        [Fact, ForceGC]
+        public Task Catch_NoInputValue_ReturningEmptyCatchResultFromCatchIsProhibited()
         {
             // Arrange
             return TaskHelpers.FromError(new Exception())
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  return null;
+                                  return new CatchInfo.CatchResult();
                               })
 
             // Assert
                               .ContinueWith(task =>
                               {
                                   Assert.Equal(TaskStatus.Faulted, task.Status);
-                                  Assert.IsException<InvalidOperationException>(task.Exception, "You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
+                                  Assert.IsException<InvalidOperationException>(task.Exception, "You must set the Task property of the CatchInfo returned from the TaskHelpersExtensions.Catch continuation.");
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_NoInputValue_CompletedTaskOfSuccess_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -85,10 +85,10 @@ namespace System.Threading.Tasks
             return TaskHelpers.Completed()
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
                                   ranContinuation = true;
-                                  return TaskHelpers.Completed();
+                                  return info.Handled();
                               })
 
             // Assert
@@ -99,7 +99,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_NoInputValue_CompletedTaskOfCancellation_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -110,10 +110,10 @@ namespace System.Threading.Tasks
             return TaskHelpers.Canceled()
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
                                   ranContinuation = true;
-                                  return TaskHelpers.Completed();
+                                  return info.Handled();
                               })
 
             // Assert
@@ -124,7 +124,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_NoInputValue_CompletedTaskOfFault_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -138,11 +138,11 @@ namespace System.Threading.Tasks
             return TaskHelpers.FromError(thrownException)
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  caughtException = ex;
+                                  caughtException = info.Exception;
                                   innerThreadId = Thread.CurrentThread.ManagedThreadId;
-                                  return TaskHelpers.Completed();
+                                  return info.Handled();
                               })
 
             // Assert
@@ -154,7 +154,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_NoInputValue_IncompleteTaskOfSuccess_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -165,10 +165,10 @@ namespace System.Threading.Tasks
             Task incompleteTask = new Task(() => { });
 
             // Act
-            Task resultTask = incompleteTask.Catch(ex =>
+            Task resultTask = incompleteTask.Catch(info =>
             {
                 ranContinuation = true;
-                return TaskHelpers.Completed();
+                return info.Handled();
             });
 
             // Assert
@@ -181,7 +181,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_NoInputValue_IncompleteTaskOfCancellation_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -193,10 +193,10 @@ namespace System.Threading.Tasks
             Task resultTask = incompleteTask.ContinueWith(task => TaskHelpers.Canceled()).Unwrap();
 
             // Act
-            resultTask = resultTask.Catch(ex =>
+            resultTask = resultTask.Catch(info =>
             {
                 ranContinuation = true;
-                return TaskHelpers.Completed();
+                return info.Handled();
             });
 
             // Assert
@@ -209,7 +209,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_NoInputValue_IncompleteTaskOfFault_RunsOnNewThreadAndPostsToSynchronizationContext()
         {
             // Arrange
@@ -223,11 +223,11 @@ namespace System.Threading.Tasks
             Task incompleteTask = new Task(() => { throw thrownException; });
 
             // Act
-            Task resultTask = incompleteTask.Catch(ex =>
+            Task resultTask = incompleteTask.Catch(info =>
             {
-                caughtException = ex;
+                caughtException = info.Exception;
                 innerThreadId = Thread.CurrentThread.ManagedThreadId;
-                return TaskHelpers.Completed();
+                return info.Handled();
             });
 
             // Assert
@@ -244,18 +244,18 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task<T>.Catch(Func<Exception, Task<T>>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Catch_WithInputValue_CatchesException_Handled()
         {
             // Arrange
             return TaskHelpers.FromError<int>(new InvalidOperationException())
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  Assert.NotNull(ex);
-                                  Assert.IsType<InvalidOperationException>(ex);
-                                  return TaskHelpers.FromResult(42);
+                                  Assert.NotNull(info.Exception);
+                                  Assert.IsType<InvalidOperationException>(info.Exception);
+                                  return info.Handled(42);
                               })
 
             // Assert
@@ -265,16 +265,16 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Catch_WithInputValue_CatchesException_Rethrow()
         {
             // Arrange
             return TaskHelpers.FromError<int>(new InvalidOperationException())
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  return TaskHelpers.FromError<int>(ex);
+                                  return info.Throw();
                               })
 
             // Assert
@@ -285,27 +285,27 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Catch_WithInputValue_ReturningNullFromCatchIsProhibited()
         {
             // Arrange
             return TaskHelpers.FromError<int>(new Exception())
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  return null;
+                                  return new CatchInfoBase<Task>.CatchResult();
                               })
 
             // Assert
                               .ContinueWith(task =>
                               {
                                   Assert.Equal(TaskStatus.Faulted, task.Status);
-                                  Assert.IsException<InvalidOperationException>(task.Exception, "You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
+                                  Assert.IsException<InvalidOperationException>(task.Exception, "You must set the Task property of the CatchInfo returned from the TaskHelpersExtensions.Catch continuation.");
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_WithInputValue_CompletedTaskOfSuccess_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -316,10 +316,10 @@ namespace System.Threading.Tasks
             return TaskHelpers.FromResult(21)
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
                                   ranContinuation = true;
-                                  return TaskHelpers.FromResult(42);
+                                  return info.Handled(42);
                               })
 
             // Assert
@@ -330,7 +330,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_WithInputValue_CompletedTaskOfCancellation_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -341,10 +341,10 @@ namespace System.Threading.Tasks
             return TaskHelpers.Canceled<int>()
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
                                   ranContinuation = true;
-                                  return TaskHelpers.FromResult(42);
+                                  return info.Handled(42);
                               })
 
             // Assert
@@ -355,7 +355,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_WithInputValue_CompletedTaskOfFault_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -369,11 +369,11 @@ namespace System.Threading.Tasks
             return TaskHelpers.FromError<int>(thrownException)
 
             // Act
-                              .Catch(ex =>
+                              .Catch(info =>
                               {
-                                  caughtException = ex;
+                                  caughtException = info.Exception;
                                   innerThreadId = Thread.CurrentThread.ManagedThreadId;
-                                  return TaskHelpers.FromResult(42);
+                                  return info.Handled(42);
                               })
 
             // Assert
@@ -385,7 +385,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_WithInputValue_IncompleteTaskOfSuccess_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -396,10 +396,10 @@ namespace System.Threading.Tasks
             Task<int> incompleteTask = new Task<int>(() => 42);
 
             // Act
-            Task resultTask = incompleteTask.Catch(ex =>
+            Task<int> resultTask = incompleteTask.Catch(info =>
             {
                 ranContinuation = true;
-                return TaskHelpers.Completed();
+                return info.Handled(42);
             });
 
             // Assert
@@ -412,7 +412,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_WithInputValue_IncompleteTaskOfCancellation_DoesNotRunContinuationAndDoesNotSwitchContexts()
         {
             // Arrange
@@ -421,13 +421,13 @@ namespace System.Threading.Tasks
             SynchronizationContext.SetSynchronizationContext(syncContext.Object);
 
             Task<int> incompleteTask = new Task<int>(() => 42);
-            Task resultTask = incompleteTask.ContinueWith(task => TaskHelpers.Canceled<int>()).Unwrap();
+            Task<int> resultTask = incompleteTask.ContinueWith(task => TaskHelpers.Canceled<int>()).Unwrap();
 
             // Act
-            resultTask = resultTask.Catch(ex =>
+            resultTask = resultTask.Catch(info =>
             {
                 ranContinuation = true;
-                return TaskHelpers.Completed();
+                return info.Handled(2112);
             });
 
             // Assert
@@ -440,7 +440,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Catch_WithInputValue_IncompleteTaskOfFault_RunsOnNewThreadAndPostsToSynchronizationContext()
         {
             // Arrange
@@ -454,11 +454,11 @@ namespace System.Threading.Tasks
             Task<int> incompleteTask = new Task<int>(() => { throw thrownException; });
 
             // Act
-            Task resultTask = incompleteTask.Catch(ex =>
+            Task<int> resultTask = incompleteTask.Catch(info =>
             {
-                caughtException = ex;
+                caughtException = info.Exception;
                 innerThreadId = Thread.CurrentThread.ManagedThreadId;
-                return TaskHelpers.FromResult(42);
+                return info.Handled(42);
             });
 
             // Assert
@@ -475,7 +475,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task.CopyResultToCompletionSource(Task)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task CopyResultToCompletionSource_NoInputValue_SuccessfulTask()
         {
             // Arrange
@@ -496,7 +496,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task CopyResultToCompletionSource_NoInputValue_FaultedTask()
         {
             // Arrange
@@ -517,7 +517,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task CopyResultToCompletionSource_NoInputValue_Canceled()
         {
             // Arrange
@@ -539,7 +539,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task.CopyResultToCompletionSource(Task<T>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task CopyResultToCompletionSource_WithInputValue_SuccessfulTask()
         {
             // Arrange
@@ -559,7 +559,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task CopyResultToCompletionSource_WithInputValue_FaultedTask()
         {
             // Arrange
@@ -580,7 +580,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task CopyResultToCompletionSource_WithInputValue_Canceled()
         {
             // Arrange
@@ -602,7 +602,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task.Finally(Action)
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_CompletedTaskOfSuccess_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -627,7 +627,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_CompletedTaskOfCancellation_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -652,7 +652,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_CompletedTaskOfFault_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -678,7 +678,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_IncompleteTaskOfSuccess_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -705,7 +705,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_IncompleteTaskOfCancellation_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -733,7 +733,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_IncompleteTaskOfFault_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -764,7 +764,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task<T>.Finally(Action)
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_WithInputValue_CompletedTaskOfSuccess_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -790,7 +790,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_WithInputValue_CompletedTaskOfCancellation_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -815,7 +815,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_WithInputValue_CompletedTaskOfFault_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -841,7 +841,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_WithInputValue_IncompleteTaskOfSuccess_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -868,7 +868,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_WithInputValue_IncompleteTaskOfCancellation_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -896,7 +896,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_WithInputValue_IncompleteTaskOfFault_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -927,7 +927,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task Task.Then(Action)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_NoReturnValue_CallsContinuation()
         {
             // Arrange
@@ -949,8 +949,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_NoInputValue_NoReturnValue_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_NoReturnValue_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.Completed()
@@ -970,7 +970,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_NoReturnValue_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -992,7 +992,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_NoReturnValue_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1014,7 +1014,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_NoReturnValue_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1037,7 +1037,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_NoReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -1064,7 +1064,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_NoReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1092,7 +1092,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task Task.Then(Func<Task>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_ReturnsTask_CallsContinuation()
         {
             // Arrange
@@ -1115,8 +1115,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_NoInputValue_ReturnsTask_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_ReturnsTask_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.Completed()
@@ -1137,7 +1137,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_ReturnsTask_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1160,7 +1160,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_ReturnsTask_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1183,7 +1183,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_ReturnsTask_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1207,7 +1207,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_ReturnsTask_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -1235,7 +1235,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_ReturnsTask_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1264,7 +1264,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task<T> Task.Then(Func<T>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithReturnValue_CallsContinuation()
         {
             // Arrange
@@ -1284,8 +1284,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_NoInputValue_WithReturnValue_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_WithReturnValue_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.Completed()
@@ -1306,7 +1306,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithReturnValue_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1329,7 +1329,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithReturnValue_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1352,7 +1352,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithReturnValue_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1376,7 +1376,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_WithReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -1404,7 +1404,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_WithReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1433,7 +1433,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task<T> Task.Then(Func<Task<T>>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithTaskReturnValue_CallsContinuation()
         {
             // Arrange
@@ -1453,8 +1453,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_NoInputValue_WithTaskReturnValue_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_WithTaskReturnValue_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.Completed()
@@ -1475,7 +1475,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithTaskReturnValue_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1498,7 +1498,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithTaskReturnValue_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1521,7 +1521,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_NoInputValue_WithTaskReturnValue_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1545,7 +1545,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_WithTaskReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -1573,7 +1573,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_WithTaskReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1602,7 +1602,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task Task<T>.Then(Action)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_NoReturnValue_CallsContinuationWithPriorTaskResult()
         {
             // Arrange
@@ -1624,8 +1624,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_WithInputValue_NoReturnValue_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_NoReturnValue_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.FromResult(21)
@@ -1645,7 +1645,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_NoReturnValue_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1667,7 +1667,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_NoReturnValue_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1689,7 +1689,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_NoReturnValue_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1712,7 +1712,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_NoReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -1739,7 +1739,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_NoReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1767,7 +1767,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task<T> Task.Then(Func<T>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithReturnValue_CallsContinuation()
         {
             // Arrange
@@ -1787,8 +1787,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_WithInputValue_WithReturnValue_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_WithReturnValue_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.FromResult(21)
@@ -1809,7 +1809,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithReturnValue_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1832,7 +1832,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithReturnValue_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1855,7 +1855,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithReturnValue_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -1879,7 +1879,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_WithReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -1907,7 +1907,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_WithReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1936,7 +1936,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  Task<T> Task.Then(Func<Task<T>>)
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithTaskReturnValue_CallsContinuation()
         {
             // Arrange
@@ -1956,8 +1956,8 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
-        public Task Then_WithInputValue_WithTaskReturnValue_ThrownExceptionIsPropagated()
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_WithTaskReturnValue_ThrownExceptionIsRethrowd()
         {
             // Arrange
             return TaskHelpers.FromResult(21)
@@ -1978,7 +1978,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithTaskReturnValue_FaultPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -2001,7 +2001,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithTaskReturnValue_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -2024,7 +2024,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task Then_WithInputValue_WithTaskReturnValue_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
         {
             // Arrange
@@ -2048,7 +2048,7 @@ namespace System.Threading.Tasks
                               });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_WithTaskReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
         {
             // Arrange
@@ -2076,7 +2076,7 @@ namespace System.Threading.Tasks
             });
         }
 
-        [Fact, PreserveSyncContext]
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_WithTaskReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -2105,7 +2105,7 @@ namespace System.Threading.Tasks
         // -----------------------------------------------------------------
         //  bool Task.TryGetResult(Task<TResult>, out TResult)
 
-        [Fact]
+        [Fact, ForceGC]
         public void TryGetResult_CompleteTask_ReturnsTrueAndGivesResult()
         {
             // Arrange
@@ -2120,7 +2120,7 @@ namespace System.Threading.Tasks
             Assert.Equal(42, value);
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public void TryGetResult_FaultedTask_ReturnsFalse()
         {
             // Arrange
@@ -2135,7 +2135,7 @@ namespace System.Threading.Tasks
             var ex = task.Exception; // Observe the task exception
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public void TryGetResult_CanceledTask_ReturnsFalse()
         {
             // Arrange
@@ -2149,7 +2149,7 @@ namespace System.Threading.Tasks
             Assert.False(result);
         }
 
-        [Fact]
+        [Fact, ForceGC]
         public Task TryGetResult_IncompleteTask_ReturnsFalse()
         {
             // Arrange

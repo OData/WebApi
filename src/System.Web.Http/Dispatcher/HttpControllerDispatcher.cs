@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Common;
@@ -99,14 +98,12 @@ namespace System.Web.Http.Dispatcher
             // Runs Content Negotiation and Error Handling on the result of SendAsyncInternal
             try
             {
-                return SendAsyncInternal(request, cancellationToken).Catch((exception) =>
-                    {
-                        return HandleException(request, exception, _configuration);
-                    });
+                return SendAsyncInternal(request, cancellationToken)
+                      .Catch(info => info.Handled(HandleException(request, info.Exception, _configuration)));
             }
             catch (Exception exception)
             {
-                return HandleException(request, exception, _configuration);
+                return TaskHelpers.FromResult(HandleException(request, exception, _configuration));
             }
         }
 
@@ -174,29 +171,22 @@ namespace System.Web.Http.Dispatcher
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns HttpResponseMessage instance.")]
-        internal static Task<HttpResponseMessage> HandleException(HttpRequestMessage request, Exception exception, HttpConfiguration configuration)
+        private static HttpResponseMessage HandleException(HttpRequestMessage request, Exception exception, HttpConfiguration configuration)
         {
             Exception unwrappedException = exception.GetBaseException();
             HttpResponseException httpResponseException = unwrappedException as HttpResponseException;
-            HttpResponseMessage response;
 
-            if (httpResponseException == null)
+            if (httpResponseException != null)
             {
-                if (configuration.ShouldIncludeErrorDetail(request))
-                {
-                    response = request.CreateResponse<ExceptionSurrogate>(HttpStatusCode.InternalServerError, new ExceptionSurrogate(unwrappedException));
-                }
-                else
-                {
-                    response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                }
-            }
-            else
-            {
-                response = httpResponseException.Response;
+                return httpResponseException.Response;
             }
 
-            return TaskHelpers.FromResult(response);
+            if (configuration.ShouldIncludeErrorDetail(request))
+            {
+                return request.CreateResponse<ExceptionSurrogate>(HttpStatusCode.InternalServerError, new ExceptionSurrogate(unwrappedException));
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.InternalServerError);
         }
 
         private static void RemoveOptionalRoutingParameters(IDictionary<string, object> routeValueDictionary)

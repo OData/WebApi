@@ -179,11 +179,11 @@ namespace System.Web.Http.SelfHost
                     {
                         responseMessage = response ?? request.CreateResponse(HttpStatusCode.OK);
                     })
-                    .Catch(ex =>
+                    .Catch(info =>
                     {
                         // REVIEW: Shouldn't the response contain the exception so it can be serialized?
                         responseMessage = request.CreateResponse(HttpStatusCode.InternalServerError);
-                        return TaskHelpers.Completed();
+                        return info.Handled();
                     })
                     .Finally(() =>
                     {

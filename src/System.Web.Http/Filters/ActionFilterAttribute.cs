@@ -53,23 +53,25 @@ namespace System.Web.Http.Filters
                 .Then(response =>
                 {
                     calledOnActionExecuted = true;
-                    return CallOnActionExecuted(actionContext, response: response);
+                    Tuple<HttpResponseMessage, Exception> result = CallOnActionExecuted(actionContext, response: response);
+                    return result.Item1 != null ? TaskHelpers.FromResult(result.Item1) : TaskHelpers.FromError<HttpResponseMessage>(result.Item2);
                 }, cancellationToken)
-                .Catch(ex =>
+                .Catch<HttpResponseMessage>(info =>
                 {
                     // If we've already called OnActionExecuted, that means this catch is running because
                     // OnActionExecuted threw an exception, so we just want to re-throw the exception rather
                     // that calling OnActionExecuted again.
                     if (calledOnActionExecuted)
                     {
-                        return TaskHelpers.FromError<HttpResponseMessage>(ex);
+                        return info.Throw();
                     }
 
-                    return CallOnActionExecuted(actionContext, exception: ex);
+                    Tuple<HttpResponseMessage, Exception> result = CallOnActionExecuted(actionContext, exception: info.Exception);
+                    return result.Item1 != null ? info.Handled(result.Item1) : info.Throw(result.Item2);
                 }, cancellationToken);
         }
 
-        private Task<HttpResponseMessage> CallOnActionExecuted(HttpActionContext actionContext, HttpResponseMessage response = null, Exception exception = null)
+        private Tuple<HttpResponseMessage, Exception> CallOnActionExecuted(HttpActionContext actionContext, HttpResponseMessage response = null, Exception exception = null)
         {
             Contract.Assert(actionContext != null);
             Contract.Assert(response != null || exception != null);
@@ -80,11 +82,11 @@ namespace System.Web.Http.Filters
 
             if (executedContext.Result != null)
             {
-                return TaskHelpers.FromResult(executedContext.Result);
+                return new Tuple<HttpResponseMessage, Exception>(executedContext.Result, null);
             }
             if (executedContext.Exception != null)
             {
-                return TaskHelpers.FromError<HttpResponseMessage>(executedContext.Exception);
+                return new Tuple<HttpResponseMessage, Exception>(null, executedContext.Exception);
             }
 
             throw Error.InvalidOperation(SRResources.ActionFilterAttribute_MustSupplyResponseOrException, GetType().Name);

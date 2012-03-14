@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -18,9 +19,9 @@ namespace System.Threading.Tasks
         /// that the exception should be propagated). In C#, you cannot normally use await within a catch
         /// block, so returning a real async task should never be done from Catch().
         /// </summary>
-        internal static Task Catch(this Task task, Func<Exception, Task> continuation, CancellationToken cancellationToken = default(CancellationToken))
+        internal static Task Catch(this Task task, Func<CatchInfo, CatchInfo.CatchResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return task.CatchImpl(ex => continuation(ex).ToTask<AsyncVoid>(), cancellationToken);
+            return task.CatchImpl(() => continuation(new CatchInfo(task)).Task.ToTask<AsyncVoid>(), cancellationToken);
         }
 
         /// <summary>
@@ -32,14 +33,15 @@ namespace System.Threading.Tasks
         /// that the exception should be propagated). In C#, you cannot normally use await within a catch
         /// block, so returning a real async task should never be done from Catch().
         /// </summary>
-        internal static Task<TResult> Catch<TResult>(this Task<TResult> task, Func<Exception, Task<TResult>> continuation, CancellationToken cancellationToken = default(CancellationToken))
+        internal static Task<TResult> Catch<TResult>(this Task<TResult> task, Func<CatchInfo<TResult>, CatchInfo<TResult>.CatchResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return task.CatchImpl(continuation, cancellationToken);
+            return task.CatchImpl(() => continuation(new CatchInfo<TResult>(task)).Task, cancellationToken);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "CatchInfo", Justification = "This is the name of a class.")]
         [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "TaskHelpersExtensions", Justification = "This is the name of a class.")]
-        private static Task<TResult> CatchImpl<TResult>(this Task task, Func<Exception, Task<TResult>> continuation, CancellationToken cancellationToken)
+        private static Task<TResult> CatchImpl<TResult>(this Task task, Func<Task<TResult>> continuation, CancellationToken cancellationToken)
         {
             // Stay on the same thread if we can
             if (task.IsCompleted)
@@ -48,12 +50,12 @@ namespace System.Threading.Tasks
                 {
                     try
                     {
-                        Task<TResult> resultTask = continuation(task.Exception.GetBaseException());
+                        Task<TResult> resultTask = continuation();
                         if (resultTask == null)
                         {
                             // Not a resource because this is an internal class, and this is a guard clause that's intended
                             // to be thrown by us to us, never escaping out to end users.
-                            throw new InvalidOperationException("You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
+                            throw new InvalidOperationException("You must set the Task property of the CatchInfo returned from the TaskHelpersExtensions.Catch continuation.");
                         }
 
                         return resultTask;
@@ -76,13 +78,13 @@ namespace System.Threading.Tasks
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily
-            return CatchImplContinuation(task, continuation, cancellationToken);
+            return CatchImplContinuation(task, continuation);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "TaskHelpersExtensions", Justification = "This is the name of a class.")]
         [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
-        private static Task<TResult> CatchImplContinuation<TResult>(Task task, Func<Exception, Task<TResult>> continuation, CancellationToken cancellationToken)
+        private static Task<TResult> CatchImplContinuation<TResult>(Task task, Func<Task<TResult>> continuation)
         {
             SynchronizationContext syncContext = SynchronizationContext.Current;
 
@@ -98,7 +100,7 @@ namespace System.Threading.Tasks
                         {
                             try
                             {
-                                Task<TResult> resultTask = continuation(innerTask.Exception.GetBaseException());
+                                Task<TResult> resultTask = continuation();
                                 if (resultTask == null)
                                 {
                                     throw new InvalidOperationException("You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
@@ -114,7 +116,7 @@ namespace System.Threading.Tasks
                     }
                     else
                     {
-                        Task<TResult> resultTask = continuation(innerTask.Exception.GetBaseException());
+                        Task<TResult> resultTask = continuation();
                         if (resultTask == null)
                         {
                             throw new InvalidOperationException("You cannot return null from the TaskHelpersExtensions.Catch continuation. You must return a valid task or throw an exception.");
@@ -262,7 +264,7 @@ namespace System.Threading.Tasks
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily
-            return FinallyImplContinuation(task, continuation);
+            return FinallyImplContinuation<TResult>(task, continuation);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
@@ -598,6 +600,89 @@ namespace System.Threading.Tasks
         /// </summary>
         private struct AsyncVoid
         {
+        }
+    }
+
+    internal abstract class CatchInfoBase<TTask>
+        where TTask : Task
+    {
+        private Exception _exception;
+        private TTask _task;
+
+        protected CatchInfoBase(TTask task)
+        {
+            Contract.Assert(task != null);
+            _task = task;
+            _exception = _task.Exception.GetBaseException();  // Observe the exception early, to prevent tasks tearing down the app domain
+        }
+
+        public Exception Exception
+        {
+            get { return _exception; }
+        }
+
+        public CatchResult Throw()
+        {
+            return new CatchResult { Task = _task };
+        }
+
+        internal struct CatchResult
+        {
+            internal TTask Task { get; set; }
+        }
+    }
+
+    internal class CatchInfo : CatchInfoBase<Task>
+    {
+        private static CatchResult _completed = new CatchResult { Task = TaskHelpers.Completed() };
+
+        public CatchInfo(Task task)
+            : base(task)
+        {
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
+        public CatchResult Handled()
+        {
+            return _completed;
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
+        public CatchResult Task(Task task)
+        {
+            return new CatchResult { Task = task };
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
+        public CatchResult Throw(Exception ex)
+        {
+            return new CatchResult { Task = TaskHelpers.FromError<object>(ex) };
+        }
+    }
+
+    internal class CatchInfo<T> : CatchInfoBase<Task<T>>
+    {
+        public CatchInfo(Task<T> task)
+            : base(task)
+        {
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
+        public CatchResult Handled(T returnValue)
+        {
+            return new CatchResult { Task = TaskHelpers.FromResult(returnValue) };
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
+        public CatchResult Task(Task<T> task)
+        {
+            return new CatchResult { Task = task };
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
+        public CatchResult Throw(Exception ex)
+        {
+            return new CatchResult { Task = TaskHelpers.FromError<T>(ex) };
         }
     }
 }

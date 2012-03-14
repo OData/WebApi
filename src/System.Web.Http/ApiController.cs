@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
@@ -170,9 +169,9 @@ namespace System.Web.Http
             Contract.Assert(filters != null);
 
             return actionTask.Catch<HttpResponseMessage>(
-                (Exception exception) =>
+                info =>
                 {
-                    HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception);
+                    HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, info.Exception);
 
                     // Note: exception filters need to be scheduled in the reverse order so that
                     // the more specific filter (e.g. Action) executes before the less specific ones (e.g. Global)
@@ -182,19 +181,21 @@ namespace System.Web.Http
                     // must be lazily evaluated. Otherwise all the tasks might start executing even though we want to run them
                     // sequentially and not invoke any of the following ones if an earlier fails.
                     IEnumerable<Task> lazyTaskEnumeration = filters.Select(filter => filter.ExecuteExceptionFilterAsync(executedContext, cancellationToken));
-                    Task iterationTask = TaskHelpers.Iterate(lazyTaskEnumeration, cancellationToken);
+                    Task<HttpResponseMessage> resultTask =
+                        TaskHelpers.Iterate(lazyTaskEnumeration, cancellationToken)
+                                   .Then<HttpResponseMessage>(() =>
+                                   {
+                                       if (executedContext.Result != null)
+                                       {
+                                           return TaskHelpers.FromResult<HttpResponseMessage>(executedContext.Result);
+                                       }
+                                       else
+                                       {
+                                           return TaskHelpers.FromError<HttpResponseMessage>(executedContext.Exception);
+                                       }
+                                   });
 
-                    return iterationTask.Then<HttpResponseMessage>(() =>
-                    {
-                        if (executedContext.Result != null)
-                        {
-                            return TaskHelpers.FromResult<HttpResponseMessage>(executedContext.Result);
-                        }
-                        else
-                        {
-                            return TaskHelpers.FromError<HttpResponseMessage>(executedContext.Exception);
-                        }
-                    });
+                    return info.Task(resultTask);
                 });
         }
 

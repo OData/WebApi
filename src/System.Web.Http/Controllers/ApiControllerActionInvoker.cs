@@ -47,23 +47,22 @@ namespace System.Web.Http.Controllers
 
             // Error handling for HttpResponseException
             return invocationTask.Catch<HttpResponseMessage>(
-                (exception) =>
+                info =>
                 {
-                    HttpResponseException httpResponseException = exception as HttpResponseException;
-
-                    if (httpResponseException != null)
+                    // Propagate anything which isn't HttpResponseException
+                    HttpResponseException httpResponseException = info.Exception as HttpResponseException;
+                    if (httpResponseException == null)
                     {
-                        HttpResponseMessage response = httpResponseException.Response;
-                        if (response.RequestMessage == null)
-                        {
-                            response.RequestMessage = actionContext.ControllerContext.Request;
-                        }
-
-                        return TaskHelpers.FromResult<HttpResponseMessage>(response);
+                        return info.Throw();
                     }
 
-                    // Propagate all other exceptions
-                    return TaskHelpers.FromError<HttpResponseMessage>(exception);
+                    HttpResponseMessage response = httpResponseException.Response;
+                    if (response.RequestMessage == null)
+                    {
+                        response.RequestMessage = actionContext.ControllerContext.Request;
+                    }
+
+                    return info.Handled(response);
                 },
                 cancellationToken);
         }

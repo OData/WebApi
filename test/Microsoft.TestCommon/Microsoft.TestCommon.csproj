@@ -73,6 +73,7 @@
     <Compile Include="ExceptionAssertions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ForceGCAttribute.cs" />
     <Compile Include="MemberHelper.cs" />
     <Compile Include="Microsoft\TestCommon\DataSets\RefTypeTestData.cs" />
     <Compile Include="Microsoft\TestCommon\DataSets\TestDataVariations.cs" />

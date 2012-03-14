@@ -348,7 +348,7 @@ namespace Microsoft.TestCommon
         public static ArgumentOutOfRangeException ThrowsArgumentOutOfRange(Action testCode, string paramName, string exceptionMessage, bool allowDerivedExceptions = false, object actualValue = null)
         {
             exceptionMessage = exceptionMessage != null
-                                   ? exceptionMessage + "\r\nParameter name: " + paramName + 
+                                   ? exceptionMessage + "\r\nParameter name: " + paramName +
                                        (actualValue != null ? "\r\nActual value was " + actualValue.ToString() + "." : "")
                                    : exceptionMessage;
             var ex = Throws<ArgumentOutOfRangeException>(testCode, exceptionMessage, allowDerivedExceptions);
@@ -363,17 +363,17 @@ namespace Microsoft.TestCommon
 
         /// <summary>
         /// Verifies that the code throws an <see cref="ArgumentOutOfRangeException"/> with the expected message that indicates that
-        /// the value must be greater than the given <paramref name="minValue"/>.
+        /// the value must be greater than the given <paramref name="value"/>.
         /// </summary>
         /// <param name="testCode">A delegate to the code to be tested</param>
         /// <param name="paramName">The name of the parameter that should throw the exception</param>
         /// <param name="actualValue">The actual value provided.</param>
-        /// <param name="minValue">The expected limit value.</param>
+        /// <param name="value">The expected limit value.</param>
         /// <returns>The exception that was thrown, when successful</returns>
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
-        public static ArgumentOutOfRangeException ThrowsArgumentGreaterThan(Action testCode, string paramName, string minValue, object actualValue = null)
+        public static ArgumentOutOfRangeException ThrowsArgumentGreaterThan(Action testCode, string paramName, string value, object actualValue = null)
         {
-            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be greater than {0}.", minValue), false, actualValue);
+            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be greater than {0}.", value), false, actualValue);
         }
 
         /// <summary>
@@ -382,12 +382,12 @@ namespace Microsoft.TestCommon
         /// </summary>
         /// <param name="testCode">A delegate to the code to be tested</param>
         /// <param name="paramName">The name of the parameter that should throw the exception</param>
-        /// <param name="minValue">The expected limit value.</param>
+        /// <param name="value">The expected limit value.</param>
         /// <returns>The exception that was thrown, when successful</returns>
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
-        public static ArgumentOutOfRangeException ThrowsArgumentGreaterThanOrEqualTo(Action testCode, string paramName, string minValue, object actualValue = null)
+        public static ArgumentOutOfRangeException ThrowsArgumentGreaterThanOrEqualTo(Action testCode, string paramName, string value, object actualValue = null)
         {
-            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be greater than or equal to {0}.", minValue), false, actualValue);
+            return ThrowsArgumentOutOfRange(testCode, paramName, String.Format("Value must be greater than or equal to {0}.", value), false, actualValue);
         }
 
         /// <summary>

@@ -67,10 +67,10 @@ namespace System.Net.Http
             }
 
             IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
-            JObject jObject;
-            if (FormUrlEncodedJson.TryParse(query, out jObject))
+            JObject jsonObject;
+            if (FormUrlEncodedJson.TryParse(query, out jsonObject))
             {
-                using (JTokenReader jsonReader = new JTokenReader(jObject))
+                using (JTokenReader jsonReader = new JTokenReader(jsonObject))
                 {
                     value = new JsonSerializer().Deserialize(jsonReader, type);
                 }
@@ -97,10 +97,10 @@ namespace System.Net.Http
             }
 
             IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
-            JObject jObject;
-            if (FormUrlEncodedJson.TryParse(query, out jObject))
+            JObject jsonObject;
+            if (FormUrlEncodedJson.TryParse(query, out jsonObject))
             {
-                value = jObject.ToObject<T>();
+                value = jsonObject.ToObject<T>();
                 return true;
             }
 

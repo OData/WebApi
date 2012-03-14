@@ -1,8 +1,8 @@
-﻿using System.Json;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -66,7 +66,7 @@ namespace System.Web.Http
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                    dynamic json = JsonValue.Parse(response.Content.ReadAsStringAsync().Result);
+                    dynamic json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
                     string result = json.ExceptionType;
                     Assert.Equal(typeof(ArgumentNullException).FullName, result);
                 }

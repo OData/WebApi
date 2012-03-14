@@ -14,7 +14,7 @@ namespace Microsoft.Web.Http.Data.Helpers
         private static readonly ConcurrentDictionary<DataControllerDescription, IEnumerable<TypeMetadata>> _metadataMap =
             new ConcurrentDictionary<DataControllerDescription, IEnumerable<TypeMetadata>>();
 
-        private static readonly IEnumerable<KeyValuePair<string, JToken>> _emptyKeyValuePairEnumerable = Enumerable.Empty<KeyValuePair<string, JToken>>();
+        private static readonly IEnumerable<JProperty> _emptyJsonPropertyEnumerable = Enumerable.Empty<JProperty>();
 
         public static IEnumerable<TypeMetadata> GetMetadata(DataControllerDescription description)
         {
@@ -109,7 +109,7 @@ namespace Microsoft.Web.Http.Data.Helpers
                 JObject value = new JObject();
 
                 value[MetadataStrings.KeyString] = new JArray(Key.Select(k => (JToken)k));
-                value[MetadataStrings.FieldsString] = new JObject(Properties.Select(p => new KeyValuePair<string, JToken>(p.Name, p.ToJToken())));
+                value[MetadataStrings.FieldsString] = new JObject(Properties.Select(p => new JProperty(p.Name, p.ToJToken())));
 
                 // TODO: Only include these properties when they'll have non-empty values.  Need to update SPA T4 templates to tolerate null in scaffolded SPA JavaScript.
                 //if (Properties.Any(p => p.ValidationRules.Count > 0))
@@ -117,13 +117,13 @@ namespace Microsoft.Web.Http.Data.Helpers
                 value[MetadataStrings.RulesString] = new JObject(
                     Properties.SelectMany(
                         p => p.ValidationRules.Count == 0
-                                 ? _emptyKeyValuePairEnumerable
-                                 : new KeyValuePair<string, JToken>[]
+                                 ? _emptyJsonPropertyEnumerable
+                                 : new JProperty[]
                                  {
-                                     new KeyValuePair<string, JToken>(
+                                     new JProperty(
                                        p.Name,
                                        new JObject(p.ValidationRules.Select(
-                                           r => new KeyValuePair<string, JToken>(r.Name, r.ToJToken()))))
+                                           r => new JProperty(r.Name, r.ToJToken()))))
                                  }));
                 //}
                 //if (Properties.Any(p => p.ValidationRules.Any(r => r.ErrorMessageString != null))) 
@@ -131,17 +131,17 @@ namespace Microsoft.Web.Http.Data.Helpers
                 value[MetadataStrings.MessagesString] = new JObject(
                     Properties.SelectMany(
                         p => !p.ValidationRules.Any(r => r.ErrorMessageString != null)
-                                 ? _emptyKeyValuePairEnumerable
-                                 : new KeyValuePair<string, JToken>[]
+                                 ? _emptyJsonPropertyEnumerable
+                                 : new JProperty[]
                                  {
-                                     new KeyValuePair<string, JToken>(
+                                     new JProperty(
                                        p.Name,
                                        new JObject(p.ValidationRules.SelectMany(r =>
                                                                                    r.ErrorMessageString == null
-                                                                                       ? _emptyKeyValuePairEnumerable
-                                                                                       : new KeyValuePair<string, JToken>[]
+                                                                                       ? _emptyJsonPropertyEnumerable
+                                                                                       : new JProperty[]
                                                                                        {
-                                                                                           new KeyValuePair<string, JToken>(r.Name, r.ErrorMessageString)
+                                                                                           new JProperty(r.Name, r.ErrorMessageString)
                                                                                        })))
                                  }));
                 //}

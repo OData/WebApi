@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Json;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -13,6 +12,8 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.Http.ValueProviders;
 using Microsoft.TestCommon;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace System.Web.Http.ModelBinding
@@ -806,15 +807,15 @@ namespace System.Web.Http.ModelBinding
         }
 
         [Fact]
-        public void BindValuesAsync_Body_To_JsonValue()
+        public void BindValuesAsync_Body_To_JToken()
         {
             // Arrange
             CancellationToken cancellationToken = new CancellationToken();
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("application/json");
             ActionValueItem item = new ActionValueItem() { Id = 7, FirstName = "testFirstName", LastName = "testLastName" };
             string json = "{\"a\":123,\"b\":[false,null,12.34]}";
-            JsonValue jv = JsonValue.Parse(json);
-            var tempContent = new ObjectContent<JsonValue>(jv, new JsonMediaTypeFormatter());
+            JToken jt = JToken.Parse(json);
+            var tempContent = new ObjectContent<JToken>(jt, new JsonMediaTypeFormatter());
             StringContent stringContent = new StringContent(tempContent.ReadAsStringAsync().Result);
             stringContent.Headers.ContentType = mediaType;
             HttpRequestMessage request = new HttpRequestMessage() { Content = stringContent };
@@ -829,8 +830,8 @@ namespace System.Web.Http.ModelBinding
 
             // Assert
             Assert.Equal(1, context.ActionArguments.Count);
-            JsonValue deserializedJsonValue = Assert.IsAssignableFrom<JsonValue>(context.ActionArguments.First().Value);
-            string deserializedJsonAsString = deserializedJsonValue.ToString();
+            JToken deserializedJsonValue = Assert.IsAssignableFrom<JToken>(context.ActionArguments.First().Value);
+            string deserializedJsonAsString = deserializedJsonValue.ToString(Formatting.None);
             Assert.Equal(json, deserializedJsonAsString);
         }
 
@@ -919,7 +920,7 @@ namespace System.Web.Http.ModelBinding
         }
 
         // Demonstrates binding to JsonValue from body
-        public JsonValue PostJsonValue(JsonValue jsonValue)
+        public JToken PostJsonValue(JToken jsonValue)
         {
             return jsonValue;
         }

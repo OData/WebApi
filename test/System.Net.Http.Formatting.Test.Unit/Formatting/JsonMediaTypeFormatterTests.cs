@@ -165,7 +165,9 @@ namespace System.Net.Http.Formatting
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
             JToken before = beforeMessage;
             MemoryStream memStream = new MemoryStream();
-            before.WriteTo(new JsonTextWriter(new StreamWriter(memStream)));
+            JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriter(memStream));
+            before.WriteTo(jsonWriter);
+            jsonWriter.Flush();
             memStream.Position = 0;
 
             JToken after = Assert.Task.SucceedsWithResult<object>(formatter.ReadFromStreamAsync(typeof(JToken), memStream, null, null)) as JToken;

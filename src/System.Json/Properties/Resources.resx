@@ -156,9 +156,6 @@
   <data name="JsonStringCannotBeEmpty" xml:space="preserve">
     <value>An empty string cannot be parsed as JSON.</value>
   </data>
-  <data name="MinParameterSize" xml:space="preserve">
-    <value>The parameter must be greater than {0}.</value>
-  </data>
   <data name="NonSingleNonNullIndexNotSupported" xml:space="preserve">
     <value>Null index or multidimensional indexing is not supported by this indexer; use 'System.Int32' or 'System.String' for array and object indexing respectively.</value>
   </data>

@@ -178,15 +178,6 @@ namespace System.Json.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The parameter must be greater than {0}..
-        /// </summary>
-        internal static string MinParameterSize {
-            get {
-                return ResourceManager.GetString("MinParameterSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Null index or multidimensional indexing is not supported by this indexer; use &apos;System.Int32&apos; or &apos;System.String&apos; for array and object indexing respectively..
         /// </summary>
         internal static string NonSingleNonNullIndexNotSupported {

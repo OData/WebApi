@@ -27,7 +27,7 @@ namespace System.Net.Http.Formatting
                 }
                 else
                 {
-                    initStr = String.Format("\"{0}\"", ((JValue)initValue).Value.ToString());
+                    initStr = ((JValue)initValue).Value.ToString();
                 }
 
                 string newStr;

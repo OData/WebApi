@@ -157,24 +157,6 @@ namespace System.Net.Http.Formatting
 
         }
 
-        [Theory]
-        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "JsonValueTypes")]
-        [Trait("Description", "CanReadType() returns false on JsonValue.")]
-        public void CanReadTypeReturnsFalseOnJsonValue(Type type)
-        {
-            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
-            Assert.False(formatter.CanReadTypeCaller(type), "formatter should have returned false.");
-        }
-
-        [Theory]
-        [TestDataSet(typeof(JsonMediaTypeFormatterTests), "JsonValueTypes")]
-        [Trait("Description", "CanWriteType() returns false on JsonValue.")]
-        public void CanWriteTypeReturnsFalseOnJsonValue(Type type)
-        {
-            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
-            Assert.False(formatter.CanWriteTypeCaller(type), "formatter should have returned false.");
-        }
-
         [Fact]
         [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null type.")]
         public void SetSerializerThrowsWithNullType()

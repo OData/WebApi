@@ -3,10 +3,10 @@ using System.Json;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Internal;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http.Formatting
 {
@@ -124,7 +124,7 @@ namespace System.Net.Http.Formatting
             InlineData("123", @"{""123"":null}"),
             InlineData("true", @"{""true"":null}"),
             InlineData("", "{}"),
-            InlineData("%2fabc%2f", @"{""\/abc\/"":null}")]
+            InlineData("%2fabc%2f", @"{""/abc/"":null}")]
         public void TestJValue(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);
@@ -246,7 +246,7 @@ namespace System.Net.Http.Formatting
                     "customer[Age][1][]=26&customer[Phones][]=425+888+1111&customer[Phones][]=425+345+7777&customer[Phones][]=425+888+4564&" +
                     "customer[EnrolmentDate]=%22%5C%2FDate(1276562539537)%5C%2F%22&role=NewRole&changeDate=3&count=15";
                 resultStr = @"{""customer"":{""Name"":""Pete"",""Address"":""Redmond"",""Age"":[[""23"",""24""],[""25"",""26""]]," +
-                    @"""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\\/Date(1276562539537)\\\/\""""},""role"":""NewRole"",""changeDate"":""3"",""count"":""15""}";
+                    @"""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\/Date(1276562539537)\\/\""""},""role"":""NewRole"",""changeDate"":""3"",""count"":""15""}";
                 yield return new[] { encoded, resultStr };
 
                 encoded = "customers[0][Name]=Pete2&customers[0][Address]=Redmond2&customers[0][Age][0][]=23&customers[0][Age][0][]=24&" +
@@ -255,8 +255,8 @@ namespace System.Net.Http.Formatting
                     "customers[1][Address]=Redmond3&customers[1][Age][0][]=23&customers[1][Age][0][]=24&customers[1][Age][1][]=25&customers[1][Age][1][]=26&" +
                     "customers[1][Phones][]=425+888+1111&customers[1][Phones][]=425+345+7777&customers[1][Phones][]=425+888+4564&customers[1][EnrolmentDate]=%22%5C%2FDate(1276634840700)%5C%2F%22";
                 resultStr = @"{""customers"":[{""Name"":""Pete2"",""Address"":""Redmond2"",""Age"":[[""23"",""24""],[""25"",""26""]]," +
-                    @"""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\\/Date(1276634840700)\\\/\""""}," +
-                    @"{""Name"":""Pete3"",""Address"":""Redmond3"",""Age"":[[""23"",""24""],[""25"",""26""]],""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\\/Date(1276634840700)\\\/\""""}]}";
+                    @"""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\/Date(1276634840700)\\/\""""}," +
+                    @"{""Name"":""Pete3"",""Address"":""Redmond3"",""Age"":[[""23"",""24""],[""25"",""26""]],""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\/Date(1276634840700)\\/\""""}]}";
                 yield return new[] { encoded, resultStr };
 
                 encoded = "ab%5B%5D=hello";
@@ -305,7 +305,7 @@ namespace System.Net.Http.Formatting
                 yield return new[] { encoded, resultStr };
 
                 encoded = "a[0\r\n][b]=1";
-                resultStr = "{\"a\":{\"0\\u000d\\u000a\":{\"b\":\"1\"}}}";
+                resultStr = "{\"a\":{\"0\\r\\n\":{\"b\":\"1\"}}}";
                 yield return new[] { encoded, resultStr };
                 yield return new[] { encoded.Replace("\r", "%0D").Replace("\n", "%0A"), resultStr };
 
@@ -354,7 +354,7 @@ namespace System.Net.Http.Formatting
             CreatorSettings.MaxStringLength = 3;
             CreatorSettings.NullValueProbability = 0;
             CreatorSettings.CreateOnlyAsciiChars = true;
-            JsonValueCreatorSurrogate jsonValueCreator = new JsonValueCreatorSurrogate();
+            JTokenCreatorSurrogate jsonValueCreator = new JTokenCreatorSurrogate();
             try
             {
                 for (int i = 0; i < 1000; i++)
@@ -519,7 +519,7 @@ namespace System.Net.Http.Formatting
 
                 JObject result = FormUrlEncodedJson.Parse(collection);
                 Assert.NotNull(result);
-                Assert.Equal(expectedResult, result.ToString());
+                Assert.Equal(expectedResult, result.ToString(Newtonsoft.Json.Formatting.None));
             }
         }
 

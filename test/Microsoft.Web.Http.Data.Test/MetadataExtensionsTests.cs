@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Json;
-using System.Linq;
 using Microsoft.Web.Http.Data.Helpers;
-using Xunit;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Web.Http.Data.Test
 {
@@ -19,8 +17,8 @@ namespace Microsoft.Web.Http.Data.Test
         public void TestMetadataSerialization()
         {
             JToken metadata = GenerateMetadata(typeof(TestController));
-            string s = metadata.ToString();
-            Assert.True(s.Contains("{\"range\":[-10,20.5]}"));
+            string s = metadata.ToString(Formatting.None);
+            Assert.True(s.Contains("{\"range\":[-10.0,20.5]}"));
         }
 
         private static JToken GenerateMetadata(Type dataControllerType)

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Json;
 using System.Net;
 using System.Net.Http;
 using Xunit;
 using Xunit.Extensions;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.Http
 {
@@ -62,7 +62,7 @@ namespace System.Web.Http
         private void AssertResponseIncludesErrorDetail(HttpResponseMessage response)
         {
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-            dynamic json = JsonValue.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
             string result = json.ExceptionType;
             Assert.Equal(typeof(ArgumentNullException).FullName, result);
         }

@@ -1,12 +1,16 @@
-﻿namespace System.Json
+﻿using System.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+
+namespace System.Net.Http.Formatting
 {
-    public class JsonValueCreatorSurrogate : InstanceCreatorSurrogate
+    public class JTokenCreatorSurrogate : InstanceCreatorSurrogate
     {
         private const int MaxDepth = 4;
 
         public override bool CanCreateInstanceOf(Type type)
         {
-            return (type == typeof(JsonValue) || type == typeof(JsonArray) || type == typeof(JsonObject) || type == typeof(JsonPrimitive));
+            return (type == typeof(JToken) || type == typeof(JArray) || type == typeof(JObject) || type == typeof(JValue));
         }
 
         public override object CreateInstanceOf(Type type, Random rndGen)
@@ -16,17 +20,17 @@
                 return null;
             }
 
-            if (type == typeof(JsonValue))
+            if (type == typeof(JToken))
             {
-                return CreateJsonValue(rndGen, 0);
+                return CreateJToken(rndGen, 0);
             }
-            else if (type == typeof(JsonArray))
+            else if (type == typeof(JArray))
             {
-                return CreateJsonArray(rndGen, 0);
+                return CreateJArray(rndGen, 0);
             }
-            else if (type == typeof(JsonObject))
+            else if (type == typeof(JObject))
             {
-                return CreateJsonObject(rndGen, 0);
+                return CreateJObject(rndGen, 0);
             }
             else
             {
@@ -34,7 +38,7 @@
             }
         }
 
-        private static JsonValue CreateJsonValue(Random rndGen, int depth)
+        private static JToken CreateJToken(Random rndGen, int depth)
         {
             if (rndGen.Next() < CreatorSettings.NullValueProbability)
             {
@@ -49,12 +53,12 @@
                     case 1:
                     case 2:
                         // 30% chance to create an array
-                        return CreateJsonArray(rndGen, depth);
+                        return CreateJArray(rndGen, depth);
                     case 3:
                     case 4:
                     case 5:
                         // 30% chance to create an object
-                        return CreateJsonObject(rndGen, depth);
+                        return CreateJObject(rndGen, depth);
                     default:
                         // 40% chance to create a primitive
                         break;
@@ -64,14 +68,14 @@
             return CreateJsonPrimitive(rndGen);
         }
 
-        static JsonValue CreateJsonPrimitive(Random rndGen)
+        static JToken CreateJsonPrimitive(Random rndGen)
         {
             switch (rndGen.Next(17))
             {
                 case 0:
                     return PrimitiveCreator.CreateInstanceOfChar(rndGen);
                 case 1:
-                    return PrimitiveCreator.CreateInstanceOfByte(rndGen);
+                    return new JValue(PrimitiveCreator.CreateInstanceOfByte(rndGen));
                 case 2:
                     return PrimitiveCreator.CreateInstanceOfSByte(rndGen);
                 case 3:
@@ -105,7 +109,7 @@
             }
         }
 
-        static JsonArray CreateJsonArray(Random rndGen, int depth)
+        static JArray CreateJArray(Random rndGen, int depth)
         {
             int size = rndGen.Next(CreatorSettings.MaxArrayLength);
             if (CreatorSettings.NullValueProbability == 0 && size == 0)
@@ -113,16 +117,16 @@
                 size++;
             }
 
-            JsonArray result = new JsonArray();
+            JArray result = new JArray();
             for (int i = 0; i < size; i++)
             {
-                result.Add(CreateJsonValue(rndGen, depth + 1));
+                result.Add(CreateJToken(rndGen, depth + 1));
             }
 
             return result;
         }
 
-        static JsonObject CreateJsonObject(Random rndGen, int depth)
+        static JObject CreateJObject(Random rndGen, int depth)
         {
             const string keyChars = "abcdefghijklmnopqrstuvwxyz0123456789";
             int size = rndGen.Next(CreatorSettings.MaxArrayLength);
@@ -131,16 +135,16 @@
                 size++;
             }
 
-            JsonObject result = new JsonObject();
+            JObject result = new JObject();
             for (int i = 0; i < size; i++)
             {
                 string key;
                 do
                 {
                     key = PrimitiveCreator.CreateInstanceOfString(rndGen, 10, keyChars);
-                } while (result.ContainsKey(key));
+                } while (result.Count > 0 && ((IDictionary<string, JToken>)result).ContainsKey(key));
 
-                result.Add(key, CreateJsonValue(rndGen, depth + 1));
+                result.Add(key, CreateJToken(rndGen, depth + 1));
             }
 
             return result;

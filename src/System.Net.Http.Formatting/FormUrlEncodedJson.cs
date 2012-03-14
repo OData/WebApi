@@ -318,7 +318,7 @@ namespace System.Net.Http
 
             if (((IDictionary<string, JToken>)obj).ContainsKey(key))
             {
-                if (obj[key] == null)
+                if (obj[key] == null || obj[key].Type == JTokenType.Null)
                 {
                     if (throwOnError)
                     {
@@ -344,7 +344,7 @@ namespace System.Net.Http
                     {
                         // if it was already an object, simply add the value
                         JObject jo = obj[key] as JObject;
-                        string index = GetIndex(((IDictionary<string,JToken>)jo).Keys, throwOnError);
+                        string index = GetIndex(jo, throwOnError);
                         if (index == null)
                         {
                             return false;
@@ -366,7 +366,15 @@ namespace System.Net.Http
             else
             {
                 // if the object didn't contain the key, simply add it now
-                obj[key] = value;
+                // the null check here is necessary because otherwise the created JValue type will be implictly cast as a string JValue
+                if (value == null)
+                {
+                    obj[key] = null;
+                }
+                else
+                {
+                    obj[key] = value;
+                }
             }
 
             return true;
@@ -395,7 +403,7 @@ namespace System.Net.Http
             }
             else
             {
-                string index = GetIndex(((IDictionary<string, JToken>)jo).Keys, throwOnError);
+                string index = GetIndex(jo, throwOnError);
                 if (index == null)
                 {
                     return false;
@@ -408,24 +416,28 @@ namespace System.Net.Http
         }
 
         // TODO: consider optimize it by only look at the last one
-        private static string GetIndex(IEnumerable<string> keys, bool throwOnError)
+        private static string GetIndex(JObject jsonObject, bool throwOnError)
         {
             int max = -1;
-            foreach (var key in keys)
+            if (jsonObject.Count > 0)
             {
-                int tempInt;
-                if (Int32.TryParse(key, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out tempInt) && tempInt > max)
+                IEnumerable<string> keys = ((IDictionary<string, JToken>)jsonObject).Keys;
+                foreach (var key in keys)
                 {
-                    max = tempInt;
-                }
-                else
-                {
-                    if (throwOnError)
+                    int tempInt;
+                    if (Int32.TryParse(key, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out tempInt) && tempInt > max)
                     {
-                        throw new ArgumentException(RS.Format(Properties.Resources.FormUrlEncodedMismatchingTypes, key));
+                        max = tempInt;
                     }
+                    else
+                    {
+                        if (throwOnError)
+                        {
+                            throw new ArgumentException(RS.Format(Properties.Resources.FormUrlEncodedMismatchingTypes, key));
+                        }
 
-                    return null;
+                        return null;
+                    }
                 }
             }
 
@@ -452,7 +464,7 @@ namespace System.Net.Http
             {
                 JObject jo = jv as JObject;
 
-                if (jo != null)
+                if (jo != null && jo.Count > 0)
                 {
                     List<string> keys = new List<string>(((IDictionary<string, JToken>)jo).Keys);
                     foreach (string key in keys)

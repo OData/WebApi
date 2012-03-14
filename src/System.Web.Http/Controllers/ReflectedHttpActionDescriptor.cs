@@ -87,11 +87,11 @@ namespace System.Web.Http.Controllers
             get { return _methodInfo == null ? null : _methodInfo.ReturnType; }
         }
 
-        public override IEnumerable<T> GetCustomAttributes<T>()
+        public override Collection<T> GetCustomAttributes<T>()
         {
             Contract.Assert(_methodInfo != null); // can't get attributes without the method set!
             Contract.Assert(_attrCached != null); // setting the method should build the attr cache
-            return TypeHelper.OfType<T>(_attrCached);
+            return new Collection<T>(TypeHelper.OfType<T>(_attrCached));
         }
 
         public override object Execute(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
@@ -110,9 +110,9 @@ namespace System.Web.Http.Controllers
             return _actionExecutor.Execute(controllerContext.Controller, argumentValues);
         }
 
-        public override IEnumerable<IFilter> GetFilters()
+        public override Collection<IFilter> GetFilters()
         {
-            return GetCustomAttributes<IFilter>().Concat(base.GetFilters());
+            return new Collection<IFilter>(GetCustomAttributes<IFilter>().Concat(base.GetFilters()).ToList());
         }
 
         public override Collection<HttpParameterDescriptor> GetParameters()

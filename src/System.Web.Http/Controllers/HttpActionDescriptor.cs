@@ -79,15 +79,15 @@ namespace System.Web.Http.Controllers
             get { return _properties; }
         }
 
-        public virtual IEnumerable<T> GetCustomAttributes<T>() where T : class
+        public virtual Collection<T> GetCustomAttributes<T>() where T : class
         {
-            return Enumerable.Empty<T>();
+            return new Collection<T>();
         }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Filters can be built dynamically")]
-        public virtual IEnumerable<IFilter> GetFilters()
+        public virtual Collection<IFilter> GetFilters()
         {
-            return Enumerable.Empty<IFilter>();
+            return new Collection<IFilter>();
         }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Parameters can be built dynamically")]

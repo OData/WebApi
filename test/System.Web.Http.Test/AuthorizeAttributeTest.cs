@@ -17,7 +17,7 @@ namespace System.Web.Http
     public class AuthorizeAttributeTest
     {
         private readonly Mock<HttpActionDescriptor> _actionDescriptorMock = new Mock<HttpActionDescriptor>() { CallBase = true };
-        private readonly IEnumerable<AllowAnonymousAttribute> _allowAnonymousAttributeCollection = new[] { new AllowAnonymousAttribute() };
+        private readonly Collection<AllowAnonymousAttribute> _allowAnonymousAttributeCollection = new Collection<AllowAnonymousAttribute>(new AllowAnonymousAttribute[]  { new AllowAnonymousAttribute() } );
         private readonly MockableAuthorizeAttribute _attribute;
         private readonly Mock<MockableAuthorizeAttribute> _attributeMock = new Mock<MockableAuthorizeAttribute>() { CallBase = true };
         private readonly Mock<HttpControllerDescriptor> _controllerDescriptorMock = new Mock<HttpControllerDescriptor>() { CallBase = true };
@@ -30,8 +30,8 @@ namespace System.Web.Http
         {
             _attribute = _attributeMock.Object;
             _controllerContext = new Mock<HttpControllerContext>() { CallBase = true }.Object;
-            _controllerDescriptorMock.Setup(cd => cd.GetCustomAttributes<AllowAnonymousAttribute>()).Returns(Enumerable.Empty<AllowAnonymousAttribute>().ToList().AsReadOnly());
-            _actionDescriptorMock.Setup(ad => ad.GetCustomAttributes<AllowAnonymousAttribute>()).Returns(Enumerable.Empty<AllowAnonymousAttribute>().ToList().AsReadOnly());
+            _controllerDescriptorMock.Setup(cd => cd.GetCustomAttributes<AllowAnonymousAttribute>()).Returns(new Collection<AllowAnonymousAttribute>(Enumerable.Empty<AllowAnonymousAttribute>().ToList()));
+            _actionDescriptorMock.Setup(ad => ad.GetCustomAttributes<AllowAnonymousAttribute>()).Returns(new Collection<AllowAnonymousAttribute>(Enumerable.Empty<AllowAnonymousAttribute>().ToList()));
             _controllerContext.ControllerDescriptor = _controllerDescriptorMock.Object;
             _controllerContext.Request = _request;
             _actionContext = ContextUtil.CreateActionContext(_controllerContext, _actionDescriptorMock.Object);

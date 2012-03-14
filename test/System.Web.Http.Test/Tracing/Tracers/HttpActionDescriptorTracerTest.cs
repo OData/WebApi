@@ -43,7 +43,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<IFilter> mockFilter = new Mock<IFilter>();
-            IFilter[] filters = new IFilter[] { mockFilter.Object };
+            Collection<IFilter> filters = new Collection<IFilter>(new IFilter[] { mockFilter.Object });
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");
             mockActionDescriptor.Setup(a => a.GetFilters()).Returns(filters);

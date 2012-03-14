@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.Http.Controllers;
 using Moq;
@@ -38,10 +39,10 @@ namespace System.Web.Http.Filters
             IFilter filter1 = new Mock<IFilter>().Object;
             IFilter filter2 = new Mock<IFilter>().Object;
             IFilter filter3 = new Mock<IFilter>().Object;
-            adMock.Setup(ad => ad.GetFilters()).Returns(new[] { filter1, filter2 }).Verifiable();
+            adMock.Setup(ad => ad.GetFilters()).Returns(new Collection<IFilter>(new[] { filter1, filter2 })).Verifiable();
 
             Mock<HttpControllerDescriptor> cdMock = new Mock<HttpControllerDescriptor>();
-            cdMock.Setup(cd => cd.GetFilters()).Returns(new[] { filter3 }).Verifiable();
+            cdMock.Setup(cd => cd.GetFilters()).Returns(new Collection<IFilter>(new[] { filter3 })).Verifiable();
 
             HttpActionDescriptor actionDescriptor = adMock.Object;
             actionDescriptor.ControllerDescriptor = cdMock.Object;

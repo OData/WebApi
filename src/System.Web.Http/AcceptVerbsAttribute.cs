@@ -8,7 +8,7 @@ using System.Web.Http.Controllers;
 
 namespace System.Web.Http
 {
-    [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The accessor is exposed as an ICollection<HttpMethod>.")]
+    [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The accessor is exposed as an Collection<HttpMethod>.")]
     [CLSCompliant(false)]
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public sealed class AcceptVerbsAttribute : Attribute, IActionHttpMethodProvider

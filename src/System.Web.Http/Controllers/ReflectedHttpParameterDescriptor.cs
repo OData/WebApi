@@ -69,9 +69,9 @@ namespace System.Web.Http.Controllers
             get { return ParameterInfo.ParameterType; }
         }
 
-        public override IEnumerable<T> GetCustomAttributes<T>()
+        public override Collection<T> GetCustomAttributes<T>()
         {
-            return ParameterInfo.GetCustomAttributes<T>(false);
+            return new Collection<T>(ParameterInfo.GetCustomAttributes<T>(false));
         }
     }
 }

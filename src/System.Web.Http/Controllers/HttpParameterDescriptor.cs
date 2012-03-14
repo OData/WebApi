@@ -105,9 +105,9 @@ namespace System.Web.Http.Controllers
             set { _modelBinderAttribute = value; }
         }
 
-        public virtual IEnumerable<T> GetCustomAttributes<T>() where T : class
+        public virtual Collection<T> GetCustomAttributes<T>() where T : class
         {
-            return Enumerable.Empty<T>();
+            return new Collection<T>();
         }
 
         private ModelBinderAttribute FindModelBinderAttribute()

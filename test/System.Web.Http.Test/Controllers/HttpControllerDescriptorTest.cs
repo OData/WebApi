@@ -171,7 +171,7 @@ namespace System.Web.Http
         public void GetFilters_InvokesGetCustomAttributesMethod()
         {
             var descriptorMock = new Mock<HttpControllerDescriptor> { CallBase = true };
-            var filters = new ReadOnlyCollection<IFilter>(new List<IFilter>());
+            var filters = new Collection<IFilter>(new List<IFilter>());
             descriptorMock.Setup(d => d.GetCustomAttributes<IFilter>()).Returns(filters).Verifiable();
 
             var result = descriptorMock.Object.GetFilters();

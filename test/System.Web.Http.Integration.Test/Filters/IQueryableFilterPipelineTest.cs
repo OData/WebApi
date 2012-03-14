@@ -22,7 +22,7 @@ namespace System.Web.Http.Filters
             controllerDescriptorMock.Object.Configuration = new HttpConfiguration();
             controllerDescriptorMock.Object.ControllerType = typeof(IQueryableFilterPipelineTest);
             Mock<HttpActionDescriptor> actionDescriptorMock = new Mock<HttpActionDescriptor>(controllerDescriptorMock.Object) { CallBase = true };
-            actionDescriptorMock.Setup(ad => ad.GetFilters()).Returns(new IFilter[] { new ResultLimitAttribute(42) });
+            actionDescriptorMock.Setup(ad => ad.GetFilters()).Returns(new Collection<IFilter>(new IFilter[] { new ResultLimitAttribute(42) }));
             actionDescriptorMock.Setup(ad => ad.ReturnType).Returns(typeof(IQueryable<string>));
             HttpActionDescriptor actionDescriptor = actionDescriptorMock.Object;
 

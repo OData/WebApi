@@ -63,12 +63,12 @@ namespace System.Web.Http.Tracing.Tracers
             return result;
         }
 
-        public override IEnumerable<T> GetCustomAttributes<T>()
+        public override Collection<T> GetCustomAttributes<T>()
         {
             return _innerDescriptor.GetCustomAttributes<T>();
         }
 
-        public override IEnumerable<IFilter> GetFilters()
+        public override Collection<IFilter> GetFilters()
         {
             List<IFilter> filters = new List<IFilter>(_innerDescriptor.GetFilters());
             List<IFilter> returnFilters = new List<IFilter>(filters.Count);
@@ -88,7 +88,7 @@ namespace System.Web.Http.Tracing.Tracers
                 }
             }
 
-            return returnFilters;
+            return new Collection<IFilter>(returnFilters);
         }
 
         public override Collection<FilterInfo> GetFilterPipeline()

@@ -162,7 +162,7 @@ namespace System.Web.Http.Controllers
         /// <remarks>The default implementation calls <see cref="GetCustomAttributes{IFilter}()"/>.</remarks>
         /// <returns>A collection of filters associated with this controller.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Filters can be built dynamically")]
-        public virtual IEnumerable<IFilter> GetFilters()
+        public virtual Collection<IFilter> GetFilters()
         {
             return GetCustomAttributes<IFilter>();
         }
@@ -173,7 +173,7 @@ namespace System.Web.Http.Controllers
         /// <remarks>The default implementation retrieves the matching set of attributes declared on <see cref="ControllerType"/>.</remarks>
         /// <typeparam name="T">Used to filter the collection of attributes. Use a value of <see cref="Object"/> to retrieve all attributes.</typeparam>
         /// <returns>A collection of attributes associated with this controller.</returns>
-        public virtual IEnumerable<T> GetCustomAttributes<T>() where T : class
+        public virtual Collection<T> GetCustomAttributes<T>() where T : class
         {
             // Getting custom attributes via reflection is slow. 
             // But iterating over a object[] to pick out specific types is fast. 
@@ -185,7 +185,7 @@ namespace System.Web.Http.Controllers
                 _attrCached = ControllerType.GetCustomAttributes(inherit: true);
             }
 
-            return TypeHelper.OfType<T>(_attrCached);
+            return new Collection<T>(TypeHelper.OfType<T>(_attrCached));
         }
 
         private void Initialize()

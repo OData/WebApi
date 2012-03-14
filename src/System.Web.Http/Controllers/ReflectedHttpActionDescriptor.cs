@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -106,7 +107,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("arguments");
             }
 
-            object[] argumentValues = PrepareParameters(arguments);
+            object[] argumentValues = PrepareParameters(arguments, controllerContext);
             return _actionExecutor.Execute(controllerContext.Controller, argumentValues);
         }
 
@@ -139,44 +140,45 @@ namespace System.Web.Http.Controllers
             return new Collection<HttpParameterDescriptor>(parameterInfos);
         }
 
-        private object[] PrepareParameters(IDictionary<string, object> parameters)
+        private object[] PrepareParameters(IDictionary<string, object> parameters, HttpControllerContext controllerContext)
         {
             ParameterInfo[] parameterInfos = MethodInfo.GetParameters();
             var rawParameterValues = from parameterInfo in parameterInfos
-                                     select ExtractParameterFromDictionary(parameterInfo, parameters);
+                                     select ExtractParameterFromDictionary(parameterInfo, parameters, controllerContext);
             object[] parametersArray = rawParameterValues.ToArray();
             return parametersArray;
         }
 
-        private object ExtractParameterFromDictionary(ParameterInfo parameterInfo, IDictionary<string, object> parameters)
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
+        private object ExtractParameterFromDictionary(ParameterInfo parameterInfo, IDictionary<string, object> parameters, HttpControllerContext controllerContext)
         {
             object value;
 
             if (!parameters.TryGetValue(parameterInfo.Name, out value))
             {
                 // the key should always be present, even if the parameter value is null
-                throw new HttpResponseException(
-                            Error.Format(SRResources.ReflectedActionDescriptor_ParameterNotInDictionary,
-                                            parameterInfo.Name, parameterInfo.ParameterType, MethodInfo, MethodInfo.DeclaringType),
-                            HttpStatusCode.BadRequest);
+                throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                    HttpStatusCode.BadRequest,
+                    Error.Format(SRResources.ReflectedActionDescriptor_ParameterNotInDictionary,
+                                 parameterInfo.Name, parameterInfo.ParameterType, MethodInfo, MethodInfo.DeclaringType)));
             }
 
             if (value == null && !TypeHelper.TypeAllowsNullValue(parameterInfo.ParameterType))
             {
                 // tried to pass a null value for a non-nullable parameter type
-                throw new HttpResponseException(
-                            Error.Format(SRResources.ReflectedActionDescriptor_ParameterCannotBeNull,
-                                            parameterInfo.Name, parameterInfo.ParameterType, MethodInfo, MethodInfo.DeclaringType),
-                            HttpStatusCode.BadRequest);
+                throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                    HttpStatusCode.BadRequest,
+                    Error.Format(SRResources.ReflectedActionDescriptor_ParameterCannotBeNull,
+                                    parameterInfo.Name, parameterInfo.ParameterType, MethodInfo, MethodInfo.DeclaringType)));
             }
 
             if (value != null && !parameterInfo.ParameterType.IsInstanceOfType(value))
             {
                 // value was supplied but is not of the proper type
-                throw new HttpResponseException(
-                            Error.Format(SRResources.ReflectedActionDescriptor_ParameterValueHasWrongType,
-                                            parameterInfo.Name, MethodInfo, MethodInfo.DeclaringType, value.GetType(), parameterInfo.ParameterType),
-                            HttpStatusCode.BadRequest);
+                throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                    HttpStatusCode.BadRequest,
+                    Error.Format(SRResources.ReflectedActionDescriptor_ParameterValueHasWrongType,
+                                    parameterInfo.Name, MethodInfo, MethodInfo.DeclaringType, value.GetType(), parameterInfo.ParameterType)));
             }
 
             return value;

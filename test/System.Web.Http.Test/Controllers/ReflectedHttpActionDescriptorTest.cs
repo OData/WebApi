@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.Properties;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -241,14 +241,15 @@ namespace System.Web.Http
                 {"id", null}
             };
 
-            Assert.Throws<HttpResponseException>(
-                () => actionDescriptor.Execute(context, arguments),
-                Error.Format(
-                    SRResources.ReflectedActionDescriptor_ParameterCannotBeNull,
-                    "id",
-                    typeof(int),
-                    actionDescriptor.MethodInfo,
-                    controller.GetType()));
+            var exception = Assert.Throws<HttpResponseException>(
+                 () => actionDescriptor.Execute(context, arguments));
+
+            Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The parameters dictionary contains a null entry for parameter 'id' of non-nullable type 'System.Int32' " +
+                "for method 'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. An optional parameter " +
+                "must be a reference type, a nullable type, or be declared as an optional parameter.",
+                content.Value);
         }
 
         [Fact]
@@ -263,14 +264,15 @@ namespace System.Web.Http
                 {"otherId", 6}
             };
 
-            Assert.Throws<HttpResponseException>(
-                () => actionDescriptor.Execute(context, arguments),
-                Error.Format(
-                    SRResources.ReflectedActionDescriptor_ParameterNotInDictionary,
-                    "id",
-                    typeof(int),
-                    actionDescriptor.MethodInfo,
-                    controller.GetType()));
+            var exception = Assert.Throws<HttpResponseException>(
+                () => actionDescriptor.Execute(context, arguments));
+
+            Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The parameters dictionary does not contain an entry for parameter 'id' of type 'System.Int32' " +
+                "for method 'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. " +
+                "The dictionary must contain an entry for each parameter, including parameters that have null values.",
+                content.Value);
         }
 
         [Fact]
@@ -285,15 +287,16 @@ namespace System.Web.Http
                 {"id", new DateTime()}
             };
 
-            Assert.Throws<HttpResponseException>(
-                () => actionDescriptor.Execute(context, arguments),
-                Error.Format(
-                    SRResources.ReflectedActionDescriptor_ParameterValueHasWrongType,
-                    "id",
-                    actionDescriptor.MethodInfo,
-                    controller.GetType(),
-                    typeof(DateTime),
-                    typeof(int)));
+            var exception = Assert.Throws<HttpResponseException>(
+                 () => actionDescriptor.Execute(context, arguments));
+
+            Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The parameters dictionary contains an invalid entry for parameter 'id' for method " +
+                "'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. " +
+                "The dictionary contains a value of type 'System.DateTime', but the parameter requires a value " +
+                "of type 'System.Int32'.",
+                content.Value);
         }
     }
 }

@@ -84,60 +84,40 @@ namespace System.Web.Http.ModelBinding
 
         public HttpResponseMessage PostComplexWithValidation(CustomerNameMax6 customer)
         {
-            // Request should not be null
-            if (this.Request == null)
+            string errors = String.Empty;
+            foreach (var kv in this.ModelState)
             {
-                throw new HttpResponseException("ApiController.Request should not be null.");
-            }
+                int errorCount = kv.Value.Errors.Count;
 
-            // Configuration should not be null
-            if (this.Configuration == null)
-            {
-                throw new HttpResponseException("ApiController.Configuration should not be null.");
-            }
-
-            // ModelState information
-            if (this.ModelState == null)
-            {
-                throw new HttpResponseException("ApiController.ModelState should not be null.");
-            }
-            else
-            {
-                string errors = String.Empty;
-                foreach (var kv in this.ModelState)
+                if (errorCount > 0)
                 {
-                    int errorCount = kv.Value.Errors.Count;
-
-                    if (errorCount > 0)
+                    errors += String.Format("Failed to bind {0}. The errors are:", kv.Key);
+                    for (int i = 0; i < errorCount; i++)
                     {
-                        errors += String.Format("Failed to bind {0}. The errors are:", kv.Key);
-                        for (int i = 0; i < errorCount; i++)
-                        {
-                            ModelError error = kv.Value.Errors[i];
-                            errors += "\nErrorMessage: " + error.ErrorMessage;
+                        ModelError error = kv.Value.Errors[i];
+                        errors += "\nErrorMessage: " + error.ErrorMessage;
 
-                            if (error.Exception != null)
-                            {
-                                errors += "\nException" + error.Exception;
-                            }
+                        if (error.Exception != null)
+                        {
+                            errors += "\nException" + error.Exception;
                         }
                     }
                 }
+            }
 
-                if (errors != String.Empty)
-                {
-                    // Has validation failure
-                    // TODO, 334736, support HttpResponseException which takes ModelState
-                    // throw new HttpResponseException(this.ModelState);
-                    HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
-                    response.Content = new StringContent(errors);
-                    throw new HttpResponseException(response);
-                }
-                else
-                {
-                    // happy path
-                    return Request.CreateResponse<int>(HttpStatusCode.OK, customer.Id);
-                }
+            if (errors != String.Empty)
+            {
+                // Has validation failure
+                // TODO, 334736, support HttpResponseException which takes ModelState
+                // throw new HttpResponseException(this.ModelState);
+                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+                response.Content = new StringContent(errors);
+                throw new HttpResponseException(response);
+            }
+            else
+            {
+                // happy path
+                return Request.CreateResponse<int>(HttpStatusCode.OK, customer.Id);
             }
         }
 

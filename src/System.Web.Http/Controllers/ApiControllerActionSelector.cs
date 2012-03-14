@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
@@ -139,6 +140,7 @@ namespace System.Web.Http.Controllers
                 get { return _controllerDescriptor; }
             }
 
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
             public HttpActionDescriptor SelectAction(HttpControllerContext controllerContext)
             {
                 string actionName;
@@ -157,9 +159,9 @@ namespace System.Web.Http.Controllers
                     // Throws HttpResponseException with NotFound status because no action matches the Name
                     if (actionsFoundByName.Length == 0)
                     {
-                        throw new HttpResponseException(
-                                    Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName),
-                                    HttpStatusCode.NotFound);
+                        throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                            HttpStatusCode.NotFound,
+                            Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
 
                     // filter by verbs.
@@ -167,16 +169,16 @@ namespace System.Web.Http.Controllers
                 }
                 else
                 {
-                    // No {action} parameter, infer it from the verb.                                                             
+                    // No {action} parameter, infer it from the verb.
                     actionsFoundByHttpMethods = FindActionsForVerb(incomingMethod);
                 }
 
                 // Throws HttpResponseException with MethodNotAllowed status because no action matches the Http Method
                 if (actionsFoundByHttpMethods.Count == 0)
                 {
-                    throw new HttpResponseException(
-                                Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod),
-                                HttpStatusCode.MethodNotAllowed);
+                    throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                        HttpStatusCode.MethodNotAllowed,
+                        Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod)));
                 }
 
                 // If there are multiple candidates, then apply overload resolution logic.
@@ -192,17 +194,17 @@ namespace System.Web.Http.Controllers
                 {
                     case 0:
                         // Throws HttpResponseException with NotFound status because no action matches the request
-                        throw new HttpResponseException(
-                                    Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName),
-                                    HttpStatusCode.NotFound);
+                        throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                            HttpStatusCode.NotFound,
+                            Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName)));
                     case 1:
                         return selectedActions[0];
                     default:
                         // Throws HttpResponseException with InternalServerError status because multiple action matches the request
                         string ambiguityList = CreateAmbiguousMatchList(selectedActions);
-                        throw new HttpResponseException(
-                                    Error.Format(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList),
-                                    HttpStatusCode.InternalServerError);
+                        throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                            HttpStatusCode.InternalServerError,
+                            Error.Format(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList)));
                 }
             }
 

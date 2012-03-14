@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
@@ -41,6 +42,7 @@ namespace System.Web.Http.Dispatcher
             _controllerTypeCache = new HttpControllerTypeCache(_configuration);
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
         public virtual IHttpController CreateController(HttpControllerContext controllerContext, string controllerName)
         {
             if (controllerContext == null)
@@ -65,9 +67,9 @@ namespace System.Web.Http.Dispatcher
             {
                 case 0:
                     // no matching types
-                    throw new HttpResponseException(
-                                Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName),
-                                HttpStatusCode.NotFound);
+                    throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                        HttpStatusCode.NotFound,
+                        Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName)));
 
                 case 1:
                     // single matching type
@@ -82,9 +84,9 @@ namespace System.Web.Http.Dispatcher
 
                 default:
                     // multiple matching types
-                    throw new HttpResponseException(
-                                CreateAmbiguousControllerExceptionMessage(controllerContext.RouteData.Route, controllerName, matchingTypes),
-                                HttpStatusCode.InternalServerError);
+                    throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                        CreateAmbiguousControllerExceptionMessage(controllerContext.RouteData.Route, controllerName, matchingTypes)));
             }
         }
 

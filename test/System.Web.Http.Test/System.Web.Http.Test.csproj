@@ -74,6 +74,7 @@
     <Compile Include="DictionaryExtensionsTest.cs" />
     <Compile Include="Filters\HttpFilterCollectionTest.cs" />
     <Compile Include="HttpResponseMessageExtensionsTest.cs" />
+    <Compile Include="HttpResponseExceptionTest.cs" />
     <Compile Include="HttpServerTest.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />

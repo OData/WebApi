@@ -423,7 +423,7 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the &apos;{0}&apos; property of this exception for details..
+        ///   Looks up a localized string similar to Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the &apos;Response&apos; property of this exception for details..
         /// </summary>
         internal static string HttpResponseExceptionMessage {
             get {

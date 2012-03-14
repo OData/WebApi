@@ -1,5 +1,6 @@
-﻿using System.Web.Http.Controllers;
-using System.Web.Http.Properties;
+﻿using System.Net;
+using System.Net.Http;
+using System.Web.Http.Controllers;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -154,13 +155,17 @@ namespace System.Web.Http
             object routeDefault = new { id = RouteParameter.Optional };
             string requestUrl = "Test/GetUsers";
             string httpMethod = "POST";
-            Assert.Throws<HttpResponseException>(() =>
+
+            var exception = Assert.Throws<HttpResponseException>(() =>
             {
                 HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
                 context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
                 HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
-            },
-            string.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, httpMethod));
+            });
+
+            Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method 'POST'.", content.Value);
         }
 
         [Fact]
@@ -179,13 +184,16 @@ namespace System.Web.Http
 
             // When you have the HttpMethod attribute, the convention should not be applied.
             httpMethod = "PUT";
-            Assert.Throws<HttpResponseException>(() =>
+            var exception = Assert.Throws<HttpResponseException>(() =>
             {
                 context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
                 context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
                 ApiControllerHelper.SelectAction(context);
-            },
-            string.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, httpMethod));
+            });
+
+            Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method 'PUT'.", content.Value);
         }
     }
 }

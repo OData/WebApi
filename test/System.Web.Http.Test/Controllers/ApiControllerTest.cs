@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -10,7 +11,6 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
 using Moq;
@@ -278,11 +278,15 @@ namespace System.Web.Http
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, controllerType.Name, controllerType);
 
             // Act & Assert
-            Assert.Throws<HttpResponseException>(() =>
-            {
-                HttpResponseMessage message = api.ExecuteAsync(controllerContext, CancellationToken.None).Result;
-            },
-            String.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, controllerType.Name, actionName));
+            var exception = Assert.Throws<HttpResponseException>(() =>
+             {
+                 HttpResponseMessage message = api.ExecuteAsync(controllerContext, CancellationToken.None).Result;
+             });
+
+            Assert.Equal(HttpStatusCode.NotFound, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("No action was found on the controller 'UsersController' that matches the name 'invalidOp'.",
+                content.Value);
         }
 
         [Fact]
@@ -295,7 +299,7 @@ namespace System.Web.Http
             Mock<IActionValueBinder> binderMock = new Mock<IActionValueBinder>();
             Mock<HttpActionBinding> actionBindingMock = new Mock<HttpActionBinding>();
             actionBindingMock.Setup(b => b.ExecuteBindingAsync(It.IsAny<HttpActionContext>(), It.IsAny<CancellationToken>())).Returns(() => Task.Factory.StartNew(() => { log.Add("model binding"); }));
-            binderMock.Setup(b => b.GetBinding(It.IsAny<HttpActionDescriptor>())).Returns(actionBindingMock.Object);            
+            binderMock.Setup(b => b.GetBinding(It.IsAny<HttpActionDescriptor>())).Returns(actionBindingMock.Object);
             HttpConfiguration configuration = new HttpConfiguration();
 
             HttpControllerContext controllerContext = controllerContextMock.Object;

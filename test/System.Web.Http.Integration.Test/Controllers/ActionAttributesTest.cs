@@ -1,5 +1,6 @@
-﻿using System.Web.Http.Controllers;
-using System.Web.Http.Properties;
+﻿using System.Net;
+using System.Net.Http;
+using System.Web.Http.Controllers;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -61,11 +62,14 @@ namespace System.Web.Http
             Type controllerType = typeof(ActionAttributeTestController);
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, controllerType.Name, controllerType);
 
-            Assert.Throws<HttpResponseException>(() =>
+            var exception = Assert.Throws<HttpResponseException>(() =>
                 {
                     HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(controllerContext);
-                },
-                String.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, httpMethod));
+                });
+
+            Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method '" + httpMethod + "'.", content.Value);
         }
 
         [Theory]
@@ -80,12 +84,14 @@ namespace System.Web.Http
             Type controllerType = typeof(ActionAttributeTestController);
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, controllerType.Name, controllerType);
 
-
-            Assert.Throws<HttpResponseException>(() =>
+            var exception = Assert.Throws<HttpResponseException>(() =>
                 {
                     HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(controllerContext);
-                },
-                String.Format(SRResources.ApiControllerActionSelector_ActionNotFound, controllerType.Name));
+                });
+
+            Assert.Equal(HttpStatusCode.NotFound, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("No action was found on the controller 'ActionAttributeTestController' that matches the request.", content.Value);
         }
 
         [Theory]
@@ -126,13 +132,14 @@ namespace System.Web.Http
             Type controllerType = typeof(ActionAttributeTestController);
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, controllerType.Name, controllerType);
 
-
-            Assert.Throws<HttpResponseException>(() =>
+            var exception = Assert.Throws<HttpResponseException>(() =>
                 {
                     HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(controllerContext);
-                },
-                String.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, httpMethod));
+                });
 
+            Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
+            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method '" + httpMethod + "'.", content.Value);
         }
     }
 }

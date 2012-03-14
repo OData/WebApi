@@ -94,7 +94,7 @@ namespace System.Web.Http
                 if (!String.IsNullOrEmpty(statusString))
                 {
                     HttpStatusCode status = (HttpStatusCode)Enum.Parse(typeof(HttpStatusCode), statusString);
-                    throw new HttpResponseException("HttpResponseExceptionMessage", status);
+                    throw new HttpResponseException(actionContext.Request.CreateResponse(status, "HttpResponseExceptionMessage"));
                 }
             }
         }

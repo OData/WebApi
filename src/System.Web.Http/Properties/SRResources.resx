@@ -202,7 +202,7 @@
     <value>This '{0}' instance has been disposed and can no longer accept HTTP requests.</value>
   </data>
   <data name="HttpResponseExceptionMessage" xml:space="preserve">
-    <value>Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the '{0}' property of this exception for details.</value>
+    <value>Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.</value>
   </data>
   <data name="ApiControllerActionSelector_AmbiguousMatch" xml:space="preserve">
     <value>Multiple actions were found that match the request: {0}</value>

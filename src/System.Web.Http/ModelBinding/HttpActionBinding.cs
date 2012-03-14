@@ -8,7 +8,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 
 namespace System.Web.Http.ModelBinding
-{    
+{
     /// <summary>
     /// This describes *how* the binding will happen. Does not actually bind. 
     /// This is static for a given action descriptor and can be reused across requests. 
@@ -48,7 +48,7 @@ namespace System.Web.Http.ModelBinding
                 _actionDescriptor = value;
             }
         }
-        
+
         /// <summary>
         /// Specifies synchronous bindings for each parameter.This is a parallel array to the ActionDescriptor's parameter array. 
         /// </summary>
@@ -68,7 +68,8 @@ namespace System.Web.Http.ModelBinding
                 _parameterBindings = value;
             }
         }
-                
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
         public virtual Task ExecuteBindingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             // First, make sure the actionBinding is valid before trying to execute it. This keeps us in a known state in case of errors.
@@ -77,13 +78,14 @@ namespace System.Web.Http.ModelBinding
                 if (!parameterBinder.IsValid)
                 {
                     // Error code here is 500 because the WebService developer's action signature is bad. 
-                    return TaskHelpers.FromError(new HttpResponseException(parameterBinder.ErrorMessage, HttpStatusCode.InternalServerError));
+                    return TaskHelpers.FromError(new HttpResponseException(actionContext.Request.CreateResponse(
+                        HttpStatusCode.InternalServerError, parameterBinder.ErrorMessage)));
                 }
             }
 
             ModelMetadataProvider metadataProvider = actionContext.ControllerContext.Configuration.ServiceResolver.GetModelMetadataProvider();
 
-            // Execute all the binders.             
+            // Execute all the binders.
             IEnumerable<Task> tasks = from parameterBinder in ParameterBindings select parameterBinder.ExecuteBindingAsync(metadataProvider, actionContext, cancellationToken);
             return TaskHelpers.Iterate(tasks, cancellationToken);
         }

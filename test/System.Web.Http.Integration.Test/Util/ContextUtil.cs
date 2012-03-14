@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using Moq;
 
@@ -43,6 +44,8 @@ namespace System.Web.Http
             HttpConfiguration config = configuration ?? new HttpConfiguration();
             IHttpRouteData route = routeData ?? new HttpRouteData(new HttpRoute());
             HttpRequestMessage req = request ?? new HttpRequestMessage();
+            req.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            req.Properties[HttpPropertyKeys.HttpRouteDataKey] = route;
             return new HttpControllerContext(config, route, req);
         }
 

@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Net.Http.Formatting;
-using System.Runtime.Serialization;
 using System.Text;
 
 namespace System.Net.Http.Internal

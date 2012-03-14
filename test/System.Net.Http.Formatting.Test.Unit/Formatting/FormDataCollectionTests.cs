@@ -114,15 +114,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void SingleToken()
-        {
-            FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?KeyOnly"));
-
-            KeyValuePair<string, string> kv = form.First();
-
-        }
-
-        [Fact]
         public void ToNameValueCollection()
         {
             FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1a&y=2&x=1b&=ValueOnly&KeyOnly"));

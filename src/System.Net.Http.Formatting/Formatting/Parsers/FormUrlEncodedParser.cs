@@ -291,7 +291,6 @@ namespace System.Net.Http.Formatting.Parsers
             public void CopyNameOnlyTo(ICollection<KeyValuePair<string, string>> nameValuePairs)
             {
                 nameValuePairs.Add(new KeyValuePair<string, string>(null, UriQueryUtility.UrlDecode(_name.ToString())));
-
                 Clear();
             }
 

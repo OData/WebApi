@@ -178,7 +178,7 @@ namespace System.Net.Http.Formatting
                 return ToString(true);
             }
 
-            string ToString(bool urlencoded)
+            private string ToString(bool urlencoded)
             {
                 int n = Count;
                 if (n == 0)

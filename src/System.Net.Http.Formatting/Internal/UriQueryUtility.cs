@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Net.Http.Formatting;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -19,27 +21,53 @@ namespace System.Net.Http.Internal
                 throw new ArgumentNullException("query");
             }
 
+            var r1 = new FormDataCollection(query).ReadAsNameValueCollection();
+
+#if false
             if (query.Length > 0 && query[0] == '?')
             {
                 query = query.Substring(1);
             }
 
-            return new HttpValueCollection(query);
+            var r2 = new HttpValueCollection(query);
+#endif
+            return r1;
         }
-
+#if true
+        // NameValueCollection to represent FormData, has a useful ToString method.
         [Serializable]
         internal class HttpValueCollection : NameValueCollection
-        {
-            [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "Ported from WCF")]
-            internal HttpValueCollection(string str)
-                : base(StringComparer.OrdinalIgnoreCase)
+        {         
+            private HttpValueCollection()
+                : base(StringComparer.Ordinal) // case-sensitive keys
             {
-                if (!String.IsNullOrEmpty(str))
+            }
+
+
+            // Use a builder function instead of a ctor to avoid virtual calls from the ctor. 
+            internal static NameValueCollection Build(IEnumerable<KeyValuePair<string, string>> pairs)                
+            {
+                var nvc = new HttpValueCollection();
+
+                // Ordering example:
+                //   k=A&j=B&k=C --> k:[A,C];j=[B].                
+                foreach (KeyValuePair<string, string> kv in pairs)
                 {
-                    FillFromString(str, true);
+                    string key = kv.Key;
+                    if (key == null)
+                    {
+                        key = string.Empty;
+                    }
+                    string value = kv.Value;
+                    if (value == null)
+                    {
+                        value = string.Empty;
+                    }
+                    nvc.Add(key, value);
                 }
 
-                IsReadOnly = false;
+                nvc.IsReadOnly = false;
+                return nvc;
             }
 
             protected HttpValueCollection(SerializationInfo info, StreamingContext context)
@@ -52,71 +80,7 @@ namespace System.Net.Http.Internal
                 return ToString(true, null);
             }
 
-            internal void FillFromString(string s, bool urlencoded)
-            {
-                int l = (s != null) ? s.Length : 0;
-                int i = 0;
-
-                while (i < l)
-                {
-                    // find next & while noting first = on the way (and if there are more)
-                    int si = i;
-                    int ti = -1;
-
-                    while (i < l)
-                    {
-                        char ch = s[i];
-
-                        if (ch == '=')
-                        {
-                            if (ti < 0)
-                            {
-                                ti = i;
-                            }
-                        }
-                        else if (ch == '&')
-                        {
-                            break;
-                        }
-
-                        i++;
-                    }
-
-                    // extract the name / value pair
-                    string name = String.Empty;
-                    string value = String.Empty;
-
-                    if (ti >= 0)
-                    {
-                        name = s.Substring(si, ti - si);
-                        value = s.Substring(ti + 1, i - ti - 1);
-                    }
-                    else
-                    {
-                        value = s.Substring(si, i - si);
-                    }
-
-                    // add name / value pair to the collection
-                    if (urlencoded)
-                    {
-                        Add(UriQueryUtility.UrlDecode(name), UriQueryUtility.UrlDecode(value));
-                    }
-                    else
-                    {
-                        Add(name, value);
-                    }
-
-                    // trailing '&'
-                    if (i == l - 1 && s[i] == '&')
-                    {
-                        Add(String.Empty, String.Empty);
-                    }
-
-                    i++;
-                }
-            }
-
-            string ToString(bool urlencoded, IDictionary excludeKeys)
+            string ToString(bool urlencoded, IDictionary excludeKeys) // $$$ remove
             {
                 int n = Count;
                 if (n == 0)
@@ -190,7 +154,7 @@ namespace System.Net.Http.Internal
                 return s.ToString();
             }
         }
-
+#endif
         // The implementation below is ported from WebUtility for use in .Net 4
 
         #region UrlEncode implementation
@@ -391,6 +355,7 @@ namespace System.Net.Http.Internal
         }
 
         #endregion
+
 
         #region UrlDecode public methods
 

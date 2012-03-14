@@ -85,6 +85,18 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void CaseSensitive()
+        {
+            FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1&X=2"));
+
+            NameValueCollection nvc = form.ReadAsNameValueCollection();
+
+            Assert.Equal(2, nvc.Count);
+            Assert.Equal("1", nvc.Get("x"));
+            Assert.Equal("2", nvc.Get("X"));
+        }
+
+        [Fact]
         public void ToNameValueCollection()
         {
             FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1a&y=2&x=1b&=ValueOnly&KeyOnly"));
@@ -95,12 +107,11 @@ namespace System.Net.Http.Formatting
             // x=1a;x=1b
             // =ValueOnly
             // KeyOnly
-            Assert.Equal(4, nvc.Count);
+            Assert.Equal(3, nvc.Count);
             Assert.Equal(new string[] { "1a", "1b"}, nvc.GetValues("x"));
             Assert.Equal("1a,1b", nvc.Get("x"));
             Assert.Equal("2", nvc.Get("y"));
-            Assert.Equal(null, nvc.Get("KeyOnly"));
-            Assert.Equal("ValueOnly", nvc.Get(""));
+            Assert.Equal("ValueOnly,KeyOnly", nvc.Get(""));
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
+using System.Net.Http.Internal;
 
 namespace System.Net.Http.Formatting
 {    
@@ -37,7 +38,6 @@ namespace System.Net.Http.Formatting
         /// Initialize a form collection from a query string. 
         /// Uri and FormURl body have the same schema. 
         /// </summary>
-        /// <param name="uri"></param>
         public FormDataCollection(Uri uri)
         {
             if (uri == null)
@@ -46,14 +46,36 @@ namespace System.Net.Http.Formatting
             }
 
             string query = uri.Query;
+
+            _pairs = ParseQueryString(query);
+        }
+
+        /// <summary>
+        /// Initialize a form collection from a query string. 
+        /// This should be just the query string and not the full URI.
+        /// </summary>        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1057:StringUriOverloadsCallSystemUriOverloads", Justification = "string is a querystring, not a URI")]
+        public FormDataCollection(string query)
+        {
+            _pairs = ParseQueryString(query);
+        }
+
+        // Helper to invoke parser around a query string
+        private static IEnumerable<KeyValuePair<string, string>> ParseQueryString(string query)
+        {
+            List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
+            if (String.IsNullOrWhiteSpace(query))
+            {
+                return result;
+            }
+
             if (query.Length > 0 && query[0] == '?')
             {
                 query = query.Substring(1);
             }
 
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(query);
-            
-            List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
+
             FormUrlEncodedParser parser = new FormUrlEncodedParser(result, Int64.MaxValue);
 
             int bytesConsumed = 0;
@@ -64,7 +86,7 @@ namespace System.Net.Http.Formatting
                 throw new InvalidOperationException(RS.Format(Properties.Resources.FormUrlEncodedParseError, bytesConsumed));
             }
 
-            _pairs = result;
+            return result;
         }
         
         /// <summary>
@@ -76,18 +98,9 @@ namespace System.Net.Http.Formatting
         {            
             if (_nameValueCollection == null)
             {
-                // Ordering example:
-                //   k=A&j=B&k=C --> k:[A,C];j=[B].
-                NameValueCollection nvc = new NameValueCollection();
-                foreach (KeyValuePair<string, string> kv in this)
-                {
-                    string key = kv.Key;
-                    nvc.Add(key, kv.Value);
-                }
-
                 // Initialize in a private collection to be thread-safe, and swap the finished object.
                 // Ok to double initialize this. 
-                _nameValueCollection = nvc;
+                _nameValueCollection = UriQueryUtility.HttpValueCollection.Build(this);
             }
             return _nameValueCollection;
         }

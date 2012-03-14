@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Formatting;
 using System.Net.Http.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -110,33 +111,7 @@ namespace System.Net.Http
 
         private static IEnumerable<KeyValuePair<string, string>> ParseQueryString(string queryString)
         {
-            if (!String.IsNullOrEmpty(queryString))
-            {
-                if ((queryString.Length > 0) && (queryString[0] == '?'))
-                {
-                    queryString = queryString.Substring(1);
-                }
-
-                if (!String.IsNullOrEmpty(queryString))
-                {
-                    string[] pairs = queryString.Split('&');
-                    foreach (string str in pairs)
-                    {
-                        string[] keyValue = str.Split('=');
-                        if (keyValue.Length == 2)
-                        {
-                            yield return
-                                keyValue[1].Equals(FormattingUtilities.JsonNullLiteral, StringComparison.Ordinal)
-                                    ? new KeyValuePair<string, string>(UriQueryUtility.UrlDecode(keyValue[0]), null)
-                                    : new KeyValuePair<string, string>(UriQueryUtility.UrlDecode(keyValue[0]), UriQueryUtility.UrlDecode(keyValue[1]));
-                        }
-                        else if (keyValue.Length == 1)
-                        {
-                            yield return new KeyValuePair<string, string>(null, UriQueryUtility.UrlDecode(keyValue[0]));
-                        }
-                    }
-                }
-            }
+            return new FormDataCollection(queryString);
         }
     }
 }

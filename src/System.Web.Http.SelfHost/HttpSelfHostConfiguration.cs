@@ -18,6 +18,9 @@ namespace System.Web.Http.SelfHost
     public class HttpSelfHostConfiguration : HttpConfiguration
     {
         private const int DefaultMaxConcurrentRequests = 100;
+        private const int DefaultMaxBufferSize = 64 * 1024;
+        private const int DefaultReceivedMessageSize = 64 * 1024;
+
         private const int PendingContextFactor = 100;
         private const int MinConcurrentRequests = 1;
         private const int MinBufferSize = 0;
@@ -28,15 +31,16 @@ namespace System.Web.Http.SelfHost
         private ServiceCredentials _credentials = new ServiceCredentials();
         private bool _useWindowsAuth;
         private TransferMode _transferMode;
-        private int _maxBufferSize;
-        private long _maxReceivedMessageSize;
+        private int _maxBufferSize = DefaultMaxBufferSize;
+        private long _maxReceivedMessageSize = DefaultReceivedMessageSize;
+        private HostNameComparisonMode _hostNameComparisonMode;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSelfHostConfiguration"/> class.
         /// </summary>
         /// <param name="baseAddress">The base address.</param>
         public HttpSelfHostConfiguration(string baseAddress)
-            : this(new Uri(baseAddress, UriKind.RelativeOrAbsolute))
+            : this(CreateBaseAddress(baseAddress))
         {
         }
 
@@ -82,6 +86,7 @@ namespace System.Web.Http.SelfHost
                 {
                     throw Error.ArgumentTooSmall("value", value, MinConcurrentRequests);
                 }
+                _maxConcurrentRequests = value;
             }
         }
 
@@ -103,6 +108,20 @@ namespace System.Web.Http.SelfHost
         }
 
         /// <summary>
+        /// Specifies how the host name should be used in URI comparisons when dispatching an incoming message.
+        /// </summary>
+        public HostNameComparisonMode HostNameComparisonMode
+        {
+            get { return _hostNameComparisonMode; }
+
+            set
+            {
+                HostNameComparisonModeHelper.Validate(value);
+                _hostNameComparisonMode = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the size of the max buffer.
         /// </summary>
         /// <value>
@@ -118,7 +137,6 @@ namespace System.Web.Http.SelfHost
                 {
                     throw Error.ArgumentTooSmall("value", value, MinBufferSize);
                 }
-
                 _maxBufferSize = value;
             }
         }
@@ -139,7 +157,6 @@ namespace System.Web.Http.SelfHost
                 {
                     throw Error.ArgumentTooSmall("value", value, MinReceivedMessageSize);
                 }
-
                 _maxReceivedMessageSize = value;
             }
         }
@@ -203,6 +220,8 @@ namespace System.Web.Http.SelfHost
             httpBinding.MaxBufferSize = MaxBufferSize;
             httpBinding.MaxReceivedMessageSize = MaxReceivedMessageSize;
             httpBinding.TransferMode = TransferMode;
+            httpBinding.HostNameComparisonMode = HostNameComparisonMode;
+
             if (_baseAddress.Scheme == Uri.UriSchemeHttps)
             {
                 // we need to use SSL
@@ -232,7 +251,7 @@ namespace System.Web.Http.SelfHost
             }
             else if (_useWindowsAuth)
             {
-                if (httpBinding.Security == null)
+                if (httpBinding.Security == null || httpBinding.Security.Mode == HttpBindingSecurityMode.None)
                 {
                     // Basic over HTTP case, should we even allow this?
                     httpBinding.Security = new HttpBindingSecurity()
@@ -255,6 +274,16 @@ namespace System.Web.Http.SelfHost
             BindingParameterCollection bindingParameters = new BindingParameterCollection();
             bindingParameters.Add(_credentials);
             return bindingParameters;
+        }
+
+        private static Uri CreateBaseAddress(string baseAddress)
+        {
+            if (baseAddress == null)
+            {
+                throw Error.ArgumentNull("baseAddress");
+            }
+
+            return new Uri(baseAddress, UriKind.RelativeOrAbsolute);
         }
 
         private static Uri ValidateBaseAddress(Uri baseAddress)

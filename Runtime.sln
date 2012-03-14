@@ -98,6 +98,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Web.WebPages.OAut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Web.WebPages.OAuth.Test", "test\Microsoft.Web.WebPages.OAuth.Test\Microsoft.Web.WebPages.OAuth.Test.csproj", "{694C6EDF-EA52-438F-B745-82B025ECC0E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.SelfHost.Test", "test\System.Web.Http.SelfHost.Test\System.Web.Http.SelfHost.Test.csproj", "{7F29EE87-6A63-43C6-B7FF-74DD06815830}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeCov|Any CPU = CodeCov|Any CPU
@@ -1014,6 +1016,26 @@ Global
 		{694C6EDF-EA52-438F-B745-82B025ECC0E7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{694C6EDF-EA52-438F-B745-82B025ECC0E7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{694C6EDF-EA52-438F-B745-82B025ECC0E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCov|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCov|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCov|Mixed Platforms.ActiveCfg = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCov|Mixed Platforms.Build.0 = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCov|x86.ActiveCfg = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCoverage|Mixed Platforms.ActiveCfg = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCoverage|Mixed Platforms.Build.0 = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.CodeCoverage|x86.ActiveCfg = CodeCoverage|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1064,5 +1086,6 @@ Global
 		{EA62944F-BD25-4730-9405-9BE8FF5BEACD} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
 		{7B8601F8-8D1F-4B9C-8C20-772B673A2FA6} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
 		{694C6EDF-EA52-438F-B745-82B025ECC0E7} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
+		{7F29EE87-6A63-43C6-B7FF-74DD06815830} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
 	EndGlobalSection
 EndGlobal

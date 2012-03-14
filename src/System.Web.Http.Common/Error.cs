@@ -25,7 +25,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentException"/> with the provided properties and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentException"/> with the provided properties.
         /// </summary>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
@@ -36,7 +36,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentException"/> with the provided properties and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentException"/> with the provided properties.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
@@ -48,7 +48,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentException"/> with a message saying that the argument must be an "http" or "https" URI and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentException"/> with a message saying that the argument must be an "http" or "https" URI.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
@@ -59,7 +59,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentException"/> with a message saying that the argument must be an absolute URI and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentException"/> with a message saying that the argument must be an absolute URI.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
@@ -82,7 +82,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentNullException"/> with the provided properties and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentNullException"/> with the provided properties.
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly", Justification = "The purpose of this API is to return an error for properties")]
@@ -92,7 +92,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentNullException"/> with the provided properties and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentNullException"/> with the provided properties.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
@@ -102,7 +102,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentNullException"/> with the provided properties and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentNullException"/> with the provided properties.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
@@ -114,7 +114,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentException"/> with a default message and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentException"/> with a default message.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
@@ -124,7 +124,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentOutOfRangeException"/> with the provided properties and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentOutOfRangeException"/> with the provided properties.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
@@ -137,7 +137,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentOutOfRangeException"/> with a message saying that the argument must be greater than or equal to <paramref name="minValue"/> and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentOutOfRangeException"/> with a message saying that the argument must be greater than or equal to <paramref name="minValue"/>.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
@@ -149,7 +149,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ArgumentOutOfRangeException"/> with a message saying that the argument must be less than or equal to <paramref name="maxValue"/> and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ArgumentOutOfRangeException"/> with a message saying that the argument must be less than or equal to <paramref name="maxValue"/>.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
@@ -161,7 +161,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="KeyNotFoundException"/> with a message saying that the key was not found and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="KeyNotFoundException"/> with a message saying that the key was not found.
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
         public static KeyNotFoundException KeyNotFound()
@@ -170,7 +170,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="KeyNotFoundException"/> with a message saying that the key was not found and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="KeyNotFoundException"/> with a message saying that the key was not found.
         /// </summary>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
@@ -181,7 +181,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="ObjectDisposedException"/> initialized according to guidelines and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="ObjectDisposedException"/> initialized according to guidelines.
         /// </summary>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
@@ -193,7 +193,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="OperationCanceledException"/> initialized with the provided parameters and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="OperationCanceledException"/> initialized with the provided parameters.
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
         public static OperationCanceledException OperationCanceled()
@@ -202,7 +202,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="OperationCanceledException"/> initialized with the provided parameters and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="OperationCanceledException"/> initialized with the provided parameters.
         /// </summary>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
@@ -213,7 +213,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="InvalidEnumArgumentException"/> and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="InvalidEnumArgumentException"/>.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="invalidValue">The value of the argument that failed.</param>
@@ -225,7 +225,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="InvalidOperationException"/> and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="InvalidOperationException"/>.
         /// </summary>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
@@ -236,7 +236,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="InvalidOperationException"/> and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="InvalidOperationException"/>.
         /// </summary>
         /// <param name="innerException">Inner exception</param>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
@@ -248,7 +248,7 @@ namespace System.Web.Http.Common
         }
 
         /// <summary>
-        /// Creates an <see cref="NotSupportedException"/> and logs it with <see cref="F:TraceLevel.Error"/>.
+        /// Creates an <see cref="NotSupportedException"/>.
         /// </summary>
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>

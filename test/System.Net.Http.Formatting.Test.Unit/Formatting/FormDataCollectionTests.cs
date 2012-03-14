@@ -39,6 +39,23 @@ namespace System.Net.Http.Formatting
             Assert.Throws<ArgumentNullException>(() => new FormDataCollection((Uri)null));
         }
 
+
+        [Fact]
+        public void CreateFromEmptyString()
+        {
+            FormDataCollection form = new FormDataCollection("");
+
+            Assert.Equal(0, form.Count());
+        }
+
+        [Fact]
+        public void CreateFromNullString()
+        {
+            FormDataCollection form = new FormDataCollection((string) null);
+
+            Assert.Equal(0, form.Count());
+        }
+
         [Fact]
         public void PairConstructorThrowsNull()
         {
@@ -94,6 +111,15 @@ namespace System.Net.Http.Formatting
             Assert.Equal(2, nvc.Count);
             Assert.Equal("1", nvc.Get("x"));
             Assert.Equal("2", nvc.Get("X"));
+        }
+
+        [Fact]
+        public void SingleToken()
+        {
+            FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?KeyOnly"));
+
+            KeyValuePair<string, string> kv = form.First();
+
         }
 
         [Fact]

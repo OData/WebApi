@@ -397,5 +397,44 @@ namespace System.Net.Http.Formatting
             Assert.Throws<NotSupportedException>(() => formatter.WriteToStreamAsync(null, null, null, null, null),
                 "The media type formatter of type 'Castle.Proxies.MediaTypeFormatterProxy' does not support writing since it does not implement the WriteToStreamAsync method.");
         }
+
+        [Theory]
+        [InlineData(typeof(object))]
+        [InlineData(typeof(string))]
+        [InlineData(typeof(Nullable<int>))]
+        public void GetDefaultValueForType_ReturnsNullForReferenceTypes(Type referenceType)
+        {
+            Assert.Null(MediaTypeFormatter.GetDefaultValueForType(referenceType));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(0)]
+        [InlineData('a')]
+        public void GetDefaultValueForType_ReturnsValueForValueTypes<T>(T value)
+        {
+            Type valueType = value.GetType();
+            T defaultValue = default(T);
+            Assert.Equal(defaultValue, MediaTypeFormatter.GetDefaultValueForType(valueType));
+        }
+
+        [Fact]
+        public void GetDefaultValueForType_ReturnsValueForStruct()
+        {
+            TestStruct s = new TestStruct();
+
+            TestStruct result = (TestStruct)MediaTypeFormatter.GetDefaultValueForType(typeof(TestStruct));
+
+            Assert.Equal(s, result);
+        }
+
+        public struct TestStruct
+        {
+            private int I;
+            public TestStruct(int i)
+            {
+                I = i + 1;
+            }
+        }
     }
 }

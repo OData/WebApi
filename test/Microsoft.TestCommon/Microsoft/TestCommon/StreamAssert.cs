@@ -15,12 +15,12 @@ namespace Microsoft.TestCommon
         public static StreamAssert Singleton { get { return singleton; } }
 
         /// <summary>
-        /// Creates a <see cref="Stream"/>, invokes <paramref name="codeThatWrites"/> to write to it,
+        /// Creates a <see cref="MemoryStream"/>, invokes <paramref name="codeThatWrites"/> to write to it,
         /// rewinds the stream to the beginning and invokes <paramref name="codeThatReads"/>.
         /// </summary>
         /// <param name="codeThatWrites">Code to write to the stream.  It cannot be <c>null</c>.</param>
         /// <param name="codeThatReads">Code that reads from the stream.  It cannot be <c>null</c>.</param>
-        public void WriteAndRead(Action<Stream> codeThatWrites, Action<Stream> codeThatReads)
+        public void WriteAndRead(Action<MemoryStream> codeThatWrites, Action<Stream> codeThatReads)
         {
             if (codeThatWrites == null)
             {

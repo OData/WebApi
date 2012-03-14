@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -27,7 +26,7 @@ namespace System.Net.Http.Formatting
         /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
         /// </summary>
         protected MediaTypeFormatter()
-        {   
+        {
             SupportedMediaTypes = new MediaTypeHeaderValueCollection();
             MediaTypeMappings = new Collection<MediaTypeMapping>();
         }
@@ -240,9 +239,9 @@ namespace System.Net.Http.Formatting
 
             if (TryMatchSupportedMediaType(acceptHeaderMediaTypes, out mediaTypeMatch))
             {
-                    return new ResponseMediaTypeMatch(
-                        mediaTypeMatch,
-                        ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader);
+                return new ResponseMediaTypeMatch(
+                    mediaTypeMatch,
+                    ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader);
             }
 
             // Match against request's content type
@@ -457,6 +456,15 @@ namespace System.Net.Http.Formatting
 
                     return delegatingType;
                 });
+        }
+
+        internal static object GetDefaultValueForType(Type type)
+        {
+            if (type.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+            return null;
         }
 
         /// <summary>

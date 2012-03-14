@@ -264,14 +264,21 @@ namespace System.Net.Http.Formatting
             {
                 Encoding effectiveEncoding = Encoding;
 
-                if (contentHeaders != null && contentHeaders.ContentType != null)
+                if (contentHeaders != null)
                 {
-                    string charset = contentHeaders.ContentType.CharSet;
-                    if (!String.IsNullOrWhiteSpace(charset) &&
-                        !String.Equals(charset, Encoding.WebName) &&
-                        !_decoders.TryGetValue(charset, out effectiveEncoding))
+                    if (contentHeaders.ContentLength == 0)
                     {
-                        effectiveEncoding = Encoding;
+                        return GetDefaultValueForType(type);
+                    }
+                    if (contentHeaders.ContentType != null)
+                    {
+                        string charset = contentHeaders.ContentType.CharSet;
+                        if (!String.IsNullOrWhiteSpace(charset) &&
+                            !String.Equals(charset, Encoding.WebName) &&
+                            !_decoders.TryGetValue(charset, out effectiveEncoding))
+                        {
+                            effectiveEncoding = Encoding;
+                        }
                     }
                 }
 

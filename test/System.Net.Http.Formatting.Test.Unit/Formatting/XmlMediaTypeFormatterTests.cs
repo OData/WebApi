@@ -230,9 +230,12 @@ namespace System.Net.Http.Formatting
 
                 object readObj = null;
                 Assert.Stream.WriteAndRead(
-                    stream => Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null)),
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null))
-                    );
+                    stream =>
+                    {
+                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
+                        contentHeaders.ContentLength = stream.Length;
+                    },
+                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null)));
                 Assert.Equal(testData, readObj);
             }
         }
@@ -252,11 +255,49 @@ namespace System.Net.Http.Formatting
 
                 object readObj = null;
                 Assert.Stream.WriteAndRead(
-                    stream => Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null)),
+                    stream =>
+                    {
+                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
+                        contentHeaders.ContentLength = stream.Length;
+                    },
                     stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null))
                     );
                 Assert.Equal(testData, readObj);
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(0)]
+        [InlineData("")]
+        public void ReadFromStreamAsync_WhenContentLengthIsZero_ReturnsDefaultTypeValue<T>(T value)
+        {
+            var formatter = new XmlMediaTypeFormatter();
+            var content = new StringContent("");
+
+            var result = formatter.ReadFromStreamAsync(typeof(T), content.ReadAsStreamAsync().Result,
+                content.Headers, null);
+
+            result.WaitUntilCompleted();
+            Assert.Equal(default(T), (T)result.Result);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_WhenContentLengthIsNull_ReadsDataFromStream()
+        {
+            var formatter = new XmlMediaTypeFormatter();
+            SampleType t = new SampleType { Number = 42 };
+            MemoryStream ms = new MemoryStream();
+            formatter.WriteToStreamAsync(t.GetType(), t, ms, null, null).WaitUntilCompleted();
+            var content = new StringContent(Encoding.Default.GetString(ms.ToArray()));
+            content.Headers.ContentLength = null;
+
+            var result = formatter.ReadFromStreamAsync(typeof(SampleType), content.ReadAsStreamAsync().Result,
+                content.Headers, null);
+
+            result.WaitUntilCompleted();
+            var value = Assert.IsType<SampleType>(result.Result);
+            Assert.Equal(42, value.Number);
         }
 
         public class TestXmlMediaTypeFormatter : XmlMediaTypeFormatter

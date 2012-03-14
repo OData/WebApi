@@ -7,11 +7,11 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.TestCommon;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using Newtonsoft.Json;
 
 namespace System.Net.Http.Formatting
 {
@@ -145,13 +145,16 @@ namespace System.Net.Http.Formatting
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
 
-
             bool canSerialize = IsTypeSerializableWithJsonSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
             if (canSerialize)
             {
                 object readObj = null;
                 Assert.Stream.WriteAndRead(
-                    stream => Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null)),
+                    stream =>
+                    {
+                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
+                        contentHeaders.ContentLength = stream.Length;
+                    },
                     stream => readObj = Assert.Task.SucceedsWithResult<object>(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null)));
                 Assert.Equal(testData, readObj);
             }
@@ -190,10 +193,48 @@ namespace System.Net.Http.Formatting
             {
                 object readObj = null;
                 Assert.Stream.WriteAndRead(
-                    stream => Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null)),
+                    stream =>
+                    {
+                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
+                        contentHeaders.ContentLength = stream.Length;
+                    },
                     stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null)));
                 Assert.Equal(testData, readObj);
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(0)]
+        [InlineData("")]
+        public void ReadFromStreamAsync_WhenContentLengthIsZero_ReturnsDefaultTypeValue<T>(T value)
+        {
+            var formatter = new JsonMediaTypeFormatter();
+            var content = new StringContent("");
+
+            var result = formatter.ReadFromStreamAsync(typeof(T), content.ReadAsStreamAsync().Result,
+                content.Headers, null);
+
+            result.WaitUntilCompleted();
+            Assert.Equal(default(T), (T)result.Result);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_WhenContentLengthIsNull_ReadsDataFromStream()
+        {
+            var formatter = new JsonMediaTypeFormatter();
+            var t = new XmlMediaTypeFormatterTests.SampleType { Number = 42 };
+            MemoryStream ms = new MemoryStream();
+            formatter.WriteToStreamAsync(t.GetType(), t, ms, null, null).WaitUntilCompleted();
+            var content = new StringContent(Encoding.Default.GetString(ms.ToArray()));
+            content.Headers.ContentLength = null;
+
+            var result = formatter.ReadFromStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), content.ReadAsStreamAsync().Result,
+                content.Headers, null);
+
+            result.WaitUntilCompleted();
+            var value = Assert.IsType<XmlMediaTypeFormatterTests.SampleType>(result.Result);
+            Assert.Equal(42, value.Number);
         }
 
         [Fact]

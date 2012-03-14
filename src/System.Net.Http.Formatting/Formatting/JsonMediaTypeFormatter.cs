@@ -275,19 +275,19 @@ namespace System.Net.Http.Formatting
                     }
                 }
 
-                if (!UseDataContractJsonSerializer)
-                {
-                    using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
-                    {
-                        return _jsonSerializer.Deserialize(jsonTextReader, type);
-                    }
-                }
-                else
+                if (UseDataContractJsonSerializer)
                 {
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
                     using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(stream, effectiveEncoding, _readerQuotas, null))
                     {
                         return dataContractSerializer.ReadObject(reader);
+                    }
+                }
+                else
+                {
+                    using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
+                    {
+                        return _jsonSerializer.Deserialize(jsonTextReader, type);
                     }
                 }
             });

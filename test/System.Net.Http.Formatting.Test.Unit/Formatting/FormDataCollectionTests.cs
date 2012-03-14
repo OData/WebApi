@@ -124,11 +124,12 @@ namespace System.Net.Http.Formatting
             // x=1a;x=1b
             // =ValueOnly
             // KeyOnly
-            Assert.Equal(3, nvc.Count);
+            Assert.Equal(4, nvc.Count);
             Assert.Equal(new string[] { "1a", "1b"}, nvc.GetValues("x"));
             Assert.Equal("1a,1b", nvc.Get("x"));
             Assert.Equal("2", nvc.Get("y"));
-            Assert.Equal("ValueOnly,KeyOnly", nvc.Get(""));
+            Assert.Equal("", nvc.Get("KeyOnly"));            
+            Assert.Equal("ValueOnly", nvc.Get(""));
         }
     }
 }

@@ -290,7 +290,9 @@ namespace System.Net.Http.Formatting.Parsers
             /// <param name="nameValuePairs">The <see cref="NameValueCollection"/>.</param>
             public void CopyNameOnlyTo(ICollection<KeyValuePair<string, string>> nameValuePairs)
             {
-                nameValuePairs.Add(new KeyValuePair<string, string>(null, UriQueryUtility.UrlDecode(_name.ToString())));
+                string key = UriQueryUtility.UrlDecode(_name.ToString());
+                string value = null;
+                nameValuePairs.Add(new KeyValuePair<string, string>(key, value));
                 Clear();
             }
 

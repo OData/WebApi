@@ -125,8 +125,8 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [InlineData("N", null, "N")]
-        [InlineData("%26", null, "&")]
+        [InlineData("N", "N", null)]
+        [InlineData("%26", "&", null)]
         [PropertyData("UriQueryData")]
         public void ParseBufferCorrectly(string segment, string name, string value)
         {

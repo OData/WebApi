@@ -106,8 +106,8 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [InlineData("N", "", "N")]
-        [InlineData("%26", "", "&")]
+        [InlineData("N", "N", "")]
+        [InlineData("%26", "&", "")]
         [PropertyData("UriQueryData")]
         public void UrlDecodeParsesCorrectly(string segment, string resultName, string resultValue)
         {

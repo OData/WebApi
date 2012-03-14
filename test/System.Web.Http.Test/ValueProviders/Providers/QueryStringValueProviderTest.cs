@@ -19,15 +19,15 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ParseQueryString_SingleNamelessValue()
         {
             // Arrange
-            Uri uri = new Uri("http://localhost/?value1");
+            Uri uri = new Uri("http://localhost/?key1");
 
             // Act
             NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
 
             // Assert
             string key = Assert.Single(result) as string;
-            Assert.Equal("", key);
-            Assert.Equal("value1", result[key]);
+            Assert.Equal("key1", key);
+            Assert.Equal("", result[key]);
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ParseQueryString_MixedNamedAndUnnamedValues()
         {
             // Arrange
-            Uri uri = new Uri("http://localhost/?key1=value1&value2");
+            Uri uri = new Uri("http://localhost/?key1=value1&key2");
 
             // Act
             NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
@@ -72,7 +72,8 @@ namespace System.Web.Http.ValueProviders.Providers
             // Assert
             Assert.Equal(2, result.Count);
             Assert.Equal("value1", result["key1"]);
-            Assert.Equal("value2", result[""]);
+            Assert.Equal("", result["key2"]);
+            Assert.Equal(null, result[""]);
         }
 
         [Fact]

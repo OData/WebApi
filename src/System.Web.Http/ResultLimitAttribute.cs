@@ -61,7 +61,7 @@ namespace System.Web.Http
 
             HttpResponseMessage response = actionExecutedContext.Result;
             IEnumerable results;
-            if (response != null && response.TryGetObjectValue(out results))
+            if (response != null && response.TryGetContentValue(out results))
             {
                 // apply the result limit
                 results = results.AsQueryable().Take(_resultLimit);

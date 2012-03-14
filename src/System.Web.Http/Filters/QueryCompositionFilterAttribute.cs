@@ -93,7 +93,7 @@ namespace System.Web.Http.Filters
             }
 
             IQueryable source;
-            if (response != null && response.TryGetObjectValue(out source))
+            if (response != null && response.TryGetContentValue(out source))
             {
                 IQueryable composedQuery = QueryComposer.Compose(source, query);
                 ((ObjectContent)response.Content).Value = composedQuery;

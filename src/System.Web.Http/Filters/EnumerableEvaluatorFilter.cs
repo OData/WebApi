@@ -40,7 +40,7 @@ namespace System.Web.Http.Filters
 
             HttpResponseMessage response = actionExecutedContext.Result;
             IEnumerable valueAsEnumerable;
-            if (response == null || !response.TryGetObjectValue(out valueAsEnumerable))
+            if (response == null || !response.TryGetContentValue(out valueAsEnumerable))
             {
                 return;
             }

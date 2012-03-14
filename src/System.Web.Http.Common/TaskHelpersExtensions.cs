@@ -39,7 +39,6 @@ namespace System.Threading.Tasks
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "TaskHelpersExtensions", Justification = "This is the name of a class.")]
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
         private static Task<TResult> CatchImpl<TResult>(this Task task, Func<Exception, Task<TResult>> continuation, CancellationToken cancellationToken)
         {
             // Stay on the same thread if we can
@@ -76,6 +75,15 @@ namespace System.Threading.Tasks
                 }
             }
 
+            // Split into a continuation method so that we don't create a closure unnecessarily
+            return CatchImplContinuation(task, continuation, cancellationToken);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "TaskHelpersExtensions", Justification = "This is the name of a class.")]
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
+        private static Task<TResult> CatchImplContinuation<TResult>(Task task, Func<Exception, Task<TResult>> continuation, CancellationToken cancellationToken)
+        {
             SynchronizationContext syncContext = SynchronizationContext.Current;
 
             return task.ContinueWith(innerTask =>
@@ -147,7 +155,6 @@ namespace System.Threading.Tasks
             return task.CopyResultToCompletionSourceImpl(tcs, innerTask => innerTask.Result);
         }
 
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
         private static Task CopyResultToCompletionSourceImpl<TTask, TResult>(this TTask task, TaskCompletionSource<TResult> tcs, Func<TTask, TResult> resultThunk)
             where TTask : Task
         {
@@ -169,6 +176,14 @@ namespace System.Threading.Tasks
                 return TaskHelpers.Completed();
             }
 
+            // Split into a continuation method so that we don't create a closure unnecessarily
+            return CopyResultToCompletionSourceImplContinuation(task, tcs, resultThunk);
+        }
+
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
+        private static Task CopyResultToCompletionSourceImplContinuation<TTask, TResult>(TTask task, TaskCompletionSource<TResult> tcs, Func<TTask, TResult> resultThunk)
+            where TTask : Task
+        {
             return task.ContinueWith(innerTask =>
             {
                 switch (innerTask.Status)
@@ -228,7 +243,6 @@ namespace System.Threading.Tasks
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
         private static Task<TResult> FinallyImpl<TResult>(this Task task, Action continuation)
         {
             // Stay on the same thread if we can
@@ -247,6 +261,14 @@ namespace System.Threading.Tasks
                 return tcs.Task;
             }
 
+            // Split into a continuation method so that we don't create a closure unnecessarily
+            return FinallyImplContinuation(task, continuation);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
+        private static Task<TResult> FinallyImplContinuation<TResult>(Task task, Action continuation)
+        {
             SynchronizationContext syncContext = SynchronizationContext.Current;
 
             return task.ContinueWith(innerTask =>
@@ -406,7 +428,6 @@ namespace System.Threading.Tasks
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
         private static Task<TOuterResult> ThenImpl<TTask, TOuterResult>(this TTask task, Func<TTask, Task<TOuterResult>> continuation, CancellationToken cancellationToken)
             where TTask : Task
         {
@@ -434,6 +455,15 @@ namespace System.Threading.Tasks
                 }
             }
 
+            // Split into a continuation method so that we don't create a closure unnecessarily
+            return ThenImplContinuation(task, continuation, cancellationToken);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
+        private static Task<TOuterResult> ThenImplContinuation<TOuterResult, TTask>(TTask task, Func<TTask, Task<TOuterResult>> continuation, CancellationToken cancellationToken)
+            where TTask : Task
+        {
             SynchronizationContext syncContext = SynchronizationContext.Current;
 
             return task.ContinueWith(innerTask =>
@@ -498,7 +528,6 @@ namespace System.Threading.Tasks
         /// Changes the return value of a task to the given result, if the task ends in the RanToCompletion state.
         /// This potentially imposes an extra ContinueWith to convert a non-completed task, so use this with caution.
         /// </summary>
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
         internal static Task<TResult> ToTask<TResult>(this Task task, CancellationToken cancellationToken = default(CancellationToken), TResult result = default(TResult))
         {
             if (task == null)
@@ -523,6 +552,13 @@ namespace System.Threading.Tasks
                 }
             }
 
+            // Split into a continuation method so that we don't create a closure unnecessarily
+            return ToTaskContinuation(task, result);
+        }
+
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
+        private static Task<TResult> ToTaskContinuation<TResult>(Task task, TResult result)
+        {
             return task.ContinueWith(innerTask =>
             {
                 TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();

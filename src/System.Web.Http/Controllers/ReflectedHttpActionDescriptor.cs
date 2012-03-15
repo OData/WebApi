@@ -218,7 +218,7 @@ namespace System.Web.Http.Controllers
             }
             else
             {
-                // Get HttpMethod from action name convention 
+                // Get HttpMethod from method name convention 
                 for (int i = 0; i < _supportedHttpMethodsByConvention.Length; i++)
                 {
                     if (methodInfo.Name.StartsWith(_supportedHttpMethodsByConvention[i].Method, StringComparison.OrdinalIgnoreCase))

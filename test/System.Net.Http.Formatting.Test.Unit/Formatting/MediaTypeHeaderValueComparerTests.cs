@@ -3,7 +3,7 @@ using Xunit;
 
 namespace System.Net.Http.Formatting
 {
-    public class MediaTypeHeadeValueComparerTests
+    public class MediaTypeHeaderValueComparerTests
     {
 
         [Fact]

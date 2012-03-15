@@ -6,6 +6,7 @@ using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Internal;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 
 namespace System.Net.Http.Formatting
 {    
@@ -101,7 +102,8 @@ namespace System.Net.Http.Formatting
             {
                 // Initialize in a private collection to be thread-safe, and swap the finished object.
                 // Ok to double initialize this. 
-                _nameValueCollection = HttpValueCollection.Build(this);
+                NameValueCollection newCollection = HttpValueCollection.Build(this);
+                Interlocked.Exchange(ref _nameValueCollection, newCollection);
             }
             return _nameValueCollection;
         }

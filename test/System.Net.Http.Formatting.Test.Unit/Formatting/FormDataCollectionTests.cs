@@ -30,7 +30,7 @@ namespace System.Net.Http.Formatting
         {
             FormDataCollection form = new FormDataCollection(new Uri("http://foo.com"));
 
-            Assert.Equal(0, form.Count());            
+            Assert.Empty(form);            
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace System.Net.Http.Formatting
         {
             FormDataCollection form = new FormDataCollection("");
 
-            Assert.Equal(0, form.Count());
+            Assert.Empty(form);       
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace System.Net.Http.Formatting
         {
             FormDataCollection form = new FormDataCollection((string) null);
 
-            Assert.Equal(0, form.Count());
+            Assert.Empty(form);       
         }
 
         [Fact]

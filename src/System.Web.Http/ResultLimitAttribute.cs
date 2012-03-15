@@ -40,13 +40,13 @@ namespace System.Web.Http
 
             if (_resultLimit <= 0)
             {
-                Error.ArgumentOutOfRange("resultLimit", _resultLimit, SRResources.ResultLimitFilter_OutOfRange, actionContext.ActionDescriptor.ActionName);
+                throw Error.ArgumentOutOfRange("resultLimit", _resultLimit, SRResources.ResultLimitFilter_OutOfRange, actionContext.ActionDescriptor.ActionName);
             }
 
             HttpActionDescriptor action = actionContext.ActionDescriptor;
             if (!typeof(IEnumerable).IsAssignableFrom(action.ReturnType))
             {
-                Error.InvalidOperation(SRResources.ResultLimitFilter_InvalidReturnType, action.ActionName);
+                throw Error.InvalidOperation(SRResources.ResultLimitFilter_InvalidReturnType, action.ActionName);
             }
         }
 

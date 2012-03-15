@@ -164,8 +164,8 @@ namespace System.Web.Http.Controllers
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
 
-                    // filter by verbs.
-                    actionsFoundByHttpMethods = RemoveIncompatibleVerbs(incomingMethod, actionsFoundByName).ToArray();
+                    // This filters out any incompatible verbs from the incoming action list
+                    actionsFoundByHttpMethods = actionsFoundByName.Where(actionDescriptor => actionDescriptor.SupportedHttpMethods.Contains(incomingMethod)).ToArray();
                 }
                 else
                 {
@@ -326,16 +326,6 @@ namespace System.Web.Http.Controllers
                 }
 
                 return listMethods.ToArray();
-            }
-
-            // This is called when we have an action name.
-            // This filters our any incompatible verbs from the incoming action list
-            private static IEnumerable<HttpActionDescriptor> RemoveIncompatibleVerbs(HttpMethod incomingMethod, IEnumerable<HttpActionDescriptor> descriptorsFound)
-            {
-                return descriptorsFound.Where(actionDescriptor =>
-                {
-                    return actionDescriptor.SupportedHttpMethods.Contains(incomingMethod);
-                });
             }
 
             private static string CreateAmbiguousMatchList(IEnumerable<HttpActionDescriptor> ambiguousDescriptors)

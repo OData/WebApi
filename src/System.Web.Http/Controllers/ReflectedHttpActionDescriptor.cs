@@ -30,7 +30,7 @@ namespace System.Web.Http.Controllers
         // This cache can be a 2x speedup in some benchmarks.
         private object[] _attrCached;
 
-        private static readonly HttpMethod[] _supportedHttpMethodsByConvention = { HttpMethod.Get, HttpMethod.Post, HttpMethod.Put, HttpMethod.Delete };
+        private static readonly HttpMethod[] _supportedHttpMethodsByConvention = { HttpMethod.Get, HttpMethod.Post, HttpMethod.Put, HttpMethod.Delete, HttpMethod.Head, HttpMethod.Options, new HttpMethod("PATCH") };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReflectedHttpActionDescriptor"/> class.

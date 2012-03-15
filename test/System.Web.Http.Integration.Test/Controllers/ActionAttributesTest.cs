@@ -104,8 +104,14 @@ namespace System.Web.Http
         [InlineData("PUT", "ActionAttributeTest/4", "UpdateUsers")]
         [InlineData("PUT", "ActionAttributeTest/4?extra=thing", "UpdateUsers")]
         [InlineData("DELETE", "ActionAttributeTest", "RemoveUsers")]
-        [InlineData("PATCH", "ActionAttributeTest", "Users")]
-        [InlineData("HEAD", "ActionAttributeTest/", "Users")]
+        [InlineData("PATCH", "ActionAttributeTest", "PatchUsers")]
+        [InlineData("HEAD", "ActionAttributeTest/", "Head")]
+        [InlineData("PATCH", "ActionAttributeTest?key=2", "Users")]
+        [InlineData("HEAD", "ActionAttributeTest?key=2", "Users")]
+        [InlineData("OPTIONS", "ActionAttributeTest", "Options")]
+        [InlineData("PATCH", "ActionAttributeTest/2", "Update")]
+        [InlineData("HEAD", "ActionAttributeTest/2", "Ping")]
+        [InlineData("OPTIONS", "ActionAttributeTest/2", "Help")]
         public void SelectAction_OnDefaultRoute(string httpMethod, string requestUrl, string expectedActionName)
         {
             string routeUrl = "{controller}/{id}";
@@ -119,7 +125,7 @@ namespace System.Web.Http
         }
 
         [Theory]
-        [InlineData("OPTIONS", "ActionAttributeTest")]
+        [InlineData("CONNECT", "ActionAttributeTest")]
         [InlineData("TRACE", "ActionAttributeTest")]
         [InlineData("NonAction", "ActionAttributeTest/")]
         [InlineData("DENY", "ActionAttributeTest")]

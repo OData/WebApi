@@ -69,6 +69,9 @@
     <Compile Include="AcceptVerbsAttribute.cs" />
     <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
+    <Compile Include="HttpOptionsAttribute.cs" />
+    <Compile Include="HttpHeadAttribute.cs" />
+    <Compile Include="HttpPatchAttribute.cs" />
     <Compile Include="Description\ApiDescription.cs" />
     <Compile Include="Description\ApiExplorer.cs" />
     <Compile Include="Description\ApiExplorerSettingsAttribute.cs" />

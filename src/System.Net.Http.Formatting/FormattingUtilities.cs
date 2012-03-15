@@ -79,11 +79,6 @@ namespace System.Net.Http
         public static readonly Type QueryableInterfaceGenericType = typeof(IQueryable<>);
 
         /// <summary>
-        /// A <see cref="Type"/> representing <see cref="JToken"/>.
-        /// </summary>
-        public static readonly Type JTokenType = typeof(JToken);
-
-        /// <summary>
         /// Determines whether <paramref name="type"/> is a <see cref="JToken"/> type.
         /// </summary>
         /// <param name="type">The type to test.</param>
@@ -92,7 +87,7 @@ namespace System.Net.Http
         /// </returns>
         public static bool IsJTokenType(Type type)
         {
-            return JTokenType.IsAssignableFrom(type);
+            return typeof(JToken).IsAssignableFrom(type);
         }
 
         /// <summary>

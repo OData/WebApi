@@ -5,6 +5,7 @@ using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
+using System.Collections.Generic;
 
 namespace System.Net.Http.Formatting
 {
@@ -56,6 +57,39 @@ namespace System.Net.Http.Formatting
 
             Assert.Null(formatter);
             Assert.Null(mediaType);
+        }
+
+        [Fact]
+        public void MediaTypeMappingTakesPrecedenceOverAcceptHeader()
+        {
+            DefaultContentNegotiator negotiator = new DefaultContentNegotiator();
+            
+            // Prepare the request message
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+            request.Headers.Add("Browser", "IE");
+            request.Headers.Add("Cookie", "ABC");
+            
+            // Prepare the formatters
+            List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>();
+            formatters.Add(new JsonMediaTypeFormatter());
+            formatters.Add(new XmlMediaTypeFormatter());
+            PlainTextFormatter frmtr = new PlainTextFormatter();
+            frmtr.SupportedMediaTypes.Clear();
+            frmtr.MediaTypeMappings.Clear();
+            frmtr.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/xml"));
+            frmtr.MediaTypeMappings.Add(new MyMediaTypeMapping(new MediaTypeHeaderValue(("application/xml"))));
+            formatters.Add(frmtr);
+
+            // Act
+            MediaTypeHeaderValue mediaTypeToWrite = null;
+            MediaTypeFormatter formatterToWrite = negotiator.Negotiate(typeof(string), request, formatters, out mediaTypeToWrite);
+            
+            // Assert
+            Assert.NotNull(mediaTypeToWrite);
+            Assert.NotNull(formatterToWrite);
+            Assert.Equal("application/xml", mediaTypeToWrite.MediaType);
+            Assert.Equal(typeof(PlainTextFormatter), formatterToWrite.GetType());
         }
 
         [Fact]
@@ -215,6 +249,38 @@ namespace System.Net.Http.Formatting
             // Assert
             Assert.Equal("application/xml", mediaTypeReturned.MediaType);
             Assert.IsType<XmlMediaTypeFormatter>(formatter);
+        }
+
+        private class PlainTextFormatter : MediaTypeFormatter
+        {
+            public override bool CanReadType(Type type)
+            {
+                return true;
+            }
+
+            public override bool CanWriteType(Type type)
+            {
+                return true; 
+            }
+        }
+
+        private class MyMediaTypeMapping : MediaTypeMapping
+        {
+            public MyMediaTypeMapping(MediaTypeHeaderValue mediaType) : base(mediaType)
+            {
+            }
+
+            public override double TryMatchMediaType(HttpRequestMessage request)
+            {
+                if ( request.Headers.Contains("Cookie"))
+                {
+                    return 1.0;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
         }
     }
 }

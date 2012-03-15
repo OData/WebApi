@@ -33,8 +33,8 @@ namespace System.Web.Http.ExceptionHandling
             HttpRequestMessage request = new HttpRequestMessage();
             request.RequestUri = new Uri(ScenarioHelper.BaseAddress + "/ExceptionTests/ReturnString");
             request.Method = HttpMethod.Post;
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            request.Content = new StringContent("<string>" + throwAt + "</string>", Encoding.UTF8, "application/xml");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("\"" + throwAt + "\"", Encoding.UTF8, "application/json");
 
             ScenarioHelper.RunTest(
                 "ExceptionTests",
@@ -44,18 +44,18 @@ namespace System.Web.Http.ExceptionHandling
                 {
                     Assert.NotNull(response.Content);
                     Assert.NotNull(response.Content.Headers.ContentType);
-                    Assert.Equal(response.Content.Headers.ContentType.MediaType, "application/xml");
+                    Assert.Equal(response.Content.Headers.ContentType.MediaType, "application/json");
 
                     if (throwAt == "DoNotThrow")
                     {
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal("Hello World!", response.Content.ReadAsAsync<string>(new List<MediaTypeFormatter>() { new XmlMediaTypeFormatter() }).Result);
+                        Assert.Equal("Hello World!", response.Content.ReadAsAsync<string>(new List<MediaTypeFormatter>() { new JsonMediaTypeFormatter() }).Result);
                     }
                     else
                     {
                         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                         Assert.Equal(String.Format("Error at {0}", throwAt),
-                                        response.Content.ReadAsAsync<string>(new List<MediaTypeFormatter>() { new XmlMediaTypeFormatter() }).Result);
+                                        response.Content.ReadAsAsync<string>(new List<MediaTypeFormatter>() { new JsonMediaTypeFormatter() }).Result);
                     }
                 },
                 config =>
@@ -67,7 +67,7 @@ namespace System.Web.Http.ExceptionHandling
                     config.Filters.Add(new CustomAuthorizationFilterAttribute(throwAt));
                     config.Filters.Add(new CustomExceptionFilterAttribute(throwAt));
                     config.Formatters.Clear();
-                    config.Formatters.Add(new CustomXmlMediaTypeFormatter(throwAt));
+                    config.Formatters.Add(new CustomJsonMediaTypeFormatter(throwAt));
                 }
             );
         }
@@ -182,11 +182,11 @@ namespace System.Web.Http.ExceptionHandling
         }
     }
 
-    public class CustomXmlMediaTypeFormatter : XmlMediaTypeFormatter
+    public class CustomJsonMediaTypeFormatter : JsonMediaTypeFormatter
     {
         private string _throwAt;
 
-        public CustomXmlMediaTypeFormatter(string throwAt)
+        public CustomJsonMediaTypeFormatter(string throwAt)
         {
             _throwAt = throwAt;
         }
@@ -214,7 +214,7 @@ namespace System.Web.Http.ExceptionHandling
             {
                 HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.NotFound)
                 {
-                    Content = new ObjectContent<string>(String.Format("Error at {0}", stage), new XmlMediaTypeFormatter())
+                    Content = new ObjectContent<string>(String.Format("Error at {0}", stage), new JsonMediaTypeFormatter())
                 };
 
                 throw new HttpResponseException(response);

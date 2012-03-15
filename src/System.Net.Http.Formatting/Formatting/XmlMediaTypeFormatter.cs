@@ -19,11 +19,7 @@ namespace System.Net.Http.Formatting
     /// <see cref="MediaTypeFormatter"/> class to handle Xml.
     /// </summary>
     public class XmlMediaTypeFormatter : MediaTypeFormatter
-    {
-        private static readonly Type _xmlSerializerType = typeof(XmlSerializer);
-        private static readonly Type _dataContractSerializerType = typeof(DataContractSerializer);
-        private static readonly Type _xmlMediaTypeFormatterType = typeof(XmlMediaTypeFormatter);
-        
+    {        
         private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
         {
             MediaTypeConstants.ApplicationXmlMediaType,
@@ -76,13 +72,13 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use <see cref="DataContractSerializer"/> by default.
+        /// Gets or sets a value indicating whether to use <see cref="XmlSerializer"/> instead of <see cref="DataContractSerializer"/> by default.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if use <see cref="DataContractSerializer"/> by default; otherwise, <c>false</c>. The default is <c>false</c>.
+        ///     <c>true</c> if use <see cref="XmlSerializer"/> by default; otherwise, <c>false</c>. The default is <c>false</c>.
         /// </value>
         [DefaultValue(false)]
-        public bool UseDataContractSerializer { get; set; }
+        public bool UseXmlSerializer { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Encoding"/> to use when writing data.
@@ -110,7 +106,7 @@ namespace System.Net.Http.Formatting
                 }
 
                 throw new ArgumentException(
-                    RS.Format(Properties.Resources.UnsupportedEncoding, _xmlMediaTypeFormatterType.Name, FormattingUtilities.Utf8EncodingType.Name, FormattingUtilities.Utf16EncodingType.Name), "value");
+                    RS.Format(Properties.Resources.UnsupportedEncoding, typeof(XmlMediaTypeFormatter).Name, FormattingUtilities.Utf8EncodingType.Name, FormattingUtilities.Utf16EncodingType.Name), "value");
             }
         }
 
@@ -253,13 +249,13 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("type");
             }
 
-            if (UseDataContractSerializer)
+            if (UseXmlSerializer)
             {
-                MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
+                MediaTypeFormatter.TryGetDelegatingTypeForIEnumerableGenericOrSame(ref type);
             }
             else
             {
-                MediaTypeFormatter.TryGetDelegatingTypeForIEnumerableGenericOrSame(ref type);
+                MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
             }
 
             // If there is a registered non-null serializer, we can support this type.
@@ -350,13 +346,13 @@ namespace System.Net.Http.Formatting
             return TaskHelpers.RunSynchronously(() =>
             {
                 bool isRemapped = false;
-                if (UseDataContractSerializer)
+                if (UseXmlSerializer)
                 {
-                    isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
+                    isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIEnumerableGenericOrSame(ref type);
                 }
                 else
                 {
-                    isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIEnumerableGenericOrSame(ref type);
+                    isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
                 }
 
                 if (isRemapped)
@@ -391,13 +387,13 @@ namespace System.Net.Http.Formatting
 
             try
             {
-                if (UseDataContractSerializer)
+                if (UseXmlSerializer)
                 {
-                    serializer = new DataContractSerializer(type);
+                    serializer = new XmlSerializer(type);
                 }
                 else
                 {
-                    serializer = new XmlSerializer(type);
+                    serializer = new DataContractSerializer(type);
                 }
             }
             catch (InvalidOperationException invalidOperationException)
@@ -417,7 +413,7 @@ namespace System.Net.Http.Formatting
                 {
                     throw new InvalidOperationException(
                         RS.Format(Properties.Resources.SerializerCannotSerializeType,
-                                  UseDataContractSerializer ? _dataContractSerializerType.Name : _xmlSerializerType.Name,
+                                  UseXmlSerializer ? typeof(XmlSerializer).Name : typeof(DataContractSerializer).Name,
                                   type.Name),
                         exception);
                 }
@@ -460,7 +456,7 @@ namespace System.Net.Http.Formatting
                 // and found unsupportable.
                 throw new InvalidOperationException(
                     RS.Format(Properties.Resources.SerializerCannotSerializeType,
-                              UseDataContractSerializer ? _dataContractSerializerType.Name : _xmlSerializerType.Name,
+                              UseXmlSerializer ? typeof(XmlSerializer).Name : typeof(DataContractSerializer).Name,
                               type.Name));
             }
 

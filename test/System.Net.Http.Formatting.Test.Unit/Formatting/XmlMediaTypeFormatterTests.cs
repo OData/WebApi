@@ -70,35 +70,35 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractSerializer property should be false by default.")]
-        public void UseDataContractSerializer_Default()
+        [Trait("Description", "UseXmlSerializer property should be false by default.")]
+        public void UseXmlSerializer_Default()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-            Assert.False(xmlFormatter.UseDataContractSerializer, "The UseDataContractSerializer property should be false by default.");
+            Assert.False(xmlFormatter.UseXmlSerializer, "The UseXmlSerializer property should be false by default.");
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractSerializer property works when set to true.")]
-        public void UseDataContractSerializer_True()
+        [Trait("Description", "UseXmlSerializer property works when set to false.")]
+        public void UseXmlSerializer_False()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseDataContractSerializer = true };
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("DataContractSampleType"),
-                "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractSerializer is set to true.");
+                "SampleType should be serialized with data contract name DataContractSampleType because we're using DCS.");
             Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
                     "Using DCS should not emit the xml declaration by default.");
             Assert.False(serializedString.Contains("\r\n"), "Using DCS should emit data without indentation by default.");
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractSerializer property with Indent works when set to true.")]
-        public void UseDataContractSerializer_True_Indent()
+        [Trait("Description", "UseXmlSerializer property with Indent works when set to false.")]
+        public void UseXmlSerializer_False_Indent()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseDataContractSerializer = true, Indent = true};
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false, Indent = true};
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
@@ -108,27 +108,27 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractSerializer property works when set to false.")]
-        public void UseDataContractSerializer_False()
+        [Trait("Description", "UseXmlSerializer property works when set to true.")]
+        public void UseXmlSerializer_True()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseDataContractSerializer = false };
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.False(serializedString.Contains("DataContractSampleType"),
-                "SampleType should not be serialized with data contract name DataContractSampleType because UseDataContractSerializer is set to false.");
+                "SampleType should not be serialized with data contract name DataContractSampleType because UseXmlSerializer is set to true.");
             Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
               "Using XmlSerializer should not emit the xml declaration by default.");
             Assert.False(serializedString.Contains("\r\n"), "Using default XmlSerializer should emit data without indentation.");
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractSerializer property with Indent works when set to false.")]
-        public void UseDataContractSerializer_False_Indent()
+        [Trait("Description", "UseXmlSerializer property with Indent works when set to true.")]
+        public void UseXmlSerializer_True_Indent()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseDataContractSerializer = false, Indent = true};
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true, Indent = true};
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
@@ -142,7 +142,7 @@ namespace System.Net.Http.Formatting
         [Trait("Description", "CanReadType() returns the same result as the XmlSerializer constructor.")]
         public void CanReadTypeReturnsSameResultAsXmlSerializerConstructor(Type variationType, object testData)
         {
-            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter() { UseXmlSerializer = true };
 
             bool isSerializable = IsSerializableWithXmlSerializer(variationType, testData);
             bool canSupport = formatter.CanReadTypeCaller(variationType);

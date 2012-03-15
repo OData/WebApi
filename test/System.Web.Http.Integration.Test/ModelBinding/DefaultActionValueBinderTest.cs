@@ -642,12 +642,11 @@ namespace System.Web.Http.ModelBinding
             // Test sending from a non .NET type (raw xml).            
             // The default XML serializer requires that the xml root name matches the C# class name. 
             string xmlSource =
-                @"<?xml version='1.0' encoding='utf-8'?>
-                <ActionValueItem xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
-                    <Id>7</Id>
-                    <FirstName>testFirstName</FirstName>
-                    <LastName>testLastName</LastName>
-                </ActionValueItem>".Replace('\'', '"');
+                @"<ActionValueItem xmlns='http://schemas.datacontract.org/2004/07/System.Web.Http.ModelBinding' xmlns:i='http://www.w3.org/2001/XMLSchema-instance'>
+                      <FirstName>testFirstName</FirstName>
+                      <Id>7</Id>
+                      <LastName>testLastName</LastName>
+                  </ActionValueItem>".Replace('\'', '"');
 
             StringContent stringContent = new StringContent(xmlSource);
             stringContent.Headers.ContentType = mediaType;

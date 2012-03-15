@@ -267,7 +267,7 @@ namespace System.Net.Http.Formatting
             ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(typeof(string), request);
 
             Assert.NotNull(match);
-            Assert.Equal(ResponseFormatterSelectionResult.MatchOnRequestAcceptHeaderWithMediaTypeMapping, match.ResponseFormatterSelectionResult);
+            Assert.Equal(ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping, match.ResponseFormatterSelectionResult);
             double quality = mediaRangeWithQuality.Quality.Value;
             Assert.Equal(quality, match.MediaTypeMatch.Quality);
             Assert.NotNull(match.MediaTypeMatch.MediaType);

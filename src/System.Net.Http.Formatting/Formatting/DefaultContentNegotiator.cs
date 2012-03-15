@@ -108,7 +108,7 @@ namespace System.Net.Http.Formatting
 
                         break;
 
-                    case ResponseFormatterSelectionResult.MatchOnRequestAcceptHeaderWithMediaTypeMapping:
+                    case ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping:
 
                         // Matches on accept headers using mappings must choose the highest quality match
                         double thisMappingQuality = match.MediaTypeMatch.Quality;

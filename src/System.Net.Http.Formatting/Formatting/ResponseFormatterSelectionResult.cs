@@ -30,7 +30,7 @@
         /// Matched on <see cref="HttpRequestMessage"/> after having applied
         /// the various <see cref="MediaTypeMapping"/>s.
         /// </summary>
-        MatchOnRequestAcceptHeaderWithMediaTypeMapping,
+        MatchOnRequestWithMediaTypeMapping,
 
         /// <summary>
         /// Matched on the media type of the <see cref="HttpContent"/> of the <see cref="HttpRequestMessage"/>.

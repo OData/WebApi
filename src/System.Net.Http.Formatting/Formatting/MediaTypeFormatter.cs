@@ -224,29 +224,25 @@ namespace System.Net.Http.Formatting
                 return null;
             }
 
-            // Match against the accept hader.
+            MediaTypeMatch mediaTypeMatch = null;
+
+            // Match against media type mapping first
+            if (TryMatchMediaTypeMapping(request, out mediaTypeMatch))
+            {
+                return new ResponseMediaTypeMatch(
+                    mediaTypeMatch,
+                    ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping);
+            }
+
+            // Match against the accept header.
             IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderMediaTypes =
                 request.Headers.Accept.OrderBy(m => m, MediaTypeHeaderValueComparer.Comparer);
 
-            MediaTypeMatch mediaTypeMatch = null;
-
             if (TryMatchSupportedMediaType(acceptHeaderMediaTypes, out mediaTypeMatch))
             {
-                MediaTypeMatch mediaTypeMatchOnMapping = null;
-
-                // Match against media type mapping first
-                if (TryMatchMediaTypeMapping(request, out mediaTypeMatchOnMapping))
-                {
-                    return new ResponseMediaTypeMatch(
-                        mediaTypeMatchOnMapping,
-                        ResponseFormatterSelectionResult.MatchOnRequestAcceptHeaderWithMediaTypeMapping);
-                }
-                else
-                {
                     return new ResponseMediaTypeMatch(
                         mediaTypeMatch,
                         ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader);
-                }
             }
 
             // Match against request's content type

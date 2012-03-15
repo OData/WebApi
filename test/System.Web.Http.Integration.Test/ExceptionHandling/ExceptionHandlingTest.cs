@@ -22,7 +22,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
@@ -41,7 +41,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -62,7 +62,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -85,7 +85,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -103,7 +103,7 @@ namespace System.Web.Http
         {
             string controllerName = "Exception";
             string requestUrl = String.Format("{0}/{1}/{2}", ScenarioHelper.BaseAddress, controllerName, actionName);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
             request.Headers.Add(ExceptionController.ResponseExceptionHeaderKey, responseExceptionStatusCode.ToString());
 
             ScenarioHelper.RunTest(
@@ -129,7 +129,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -150,7 +150,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -191,7 +191,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -211,7 +211,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);

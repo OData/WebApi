@@ -13,11 +13,11 @@ namespace System.Web.Http.PartialTrust
             ScenarioHelper.RunTest(
                 "Echo",
                 "/{s}",
-                new HttpRequestMessage(HttpMethod.Get, "http://localhost/Echo/foo"),
+                new HttpRequestMessage(HttpMethod.Post, "http://localhost/Echo/foo"),
                 (response) =>
                 {
                     Assert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-                    Assert.Equal("foo", response.Content.ReadAsStringAsync().Result);
+                    Assert.Equal("foo", response.Content.ReadAsAsync<string>().Result);
                 }
             );
         }
@@ -27,7 +27,7 @@ namespace System.Web.Http.PartialTrust
         [InlineData("text/xml")]
         public void SimpleConNegWorks(string mediaType)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Echo/ContentNegotiatedEcho/foo");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Echo/ContentNegotiatedEcho/foo");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mediaType));
 
             ScenarioHelper.RunTest(

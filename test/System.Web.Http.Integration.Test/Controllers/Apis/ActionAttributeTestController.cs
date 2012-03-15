@@ -27,13 +27,12 @@
         [CLSCompliant(false)]
         public void Users(double key) { }
 
-        [ActionName("Deny")]
-        public void Reject(int id) { }
-
-        public void Approve(int id) { }
-
         [NonAction]
         public void NonAction() { }
+
+        [NonAction]
+        [AcceptVerbs("ACTION")]
+        public void NonActionWitHttpMethod() { }
 
         public void Options() { }
 

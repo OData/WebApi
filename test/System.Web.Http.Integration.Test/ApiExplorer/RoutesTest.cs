@@ -123,7 +123,7 @@ namespace System.Web.Http.ApiExplorer
                     new { HttpMethod = HttpMethod.Get, RelativePath = "Overloads/GetPersonByNameIdAndSsn/{id}?name={name}&ssn={ssn}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 3},
                     new { HttpMethod = HttpMethod.Get, RelativePath = "Overloads/GetPersonByNameAndSsn?name={name}&ssn={ssn}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
                     new { HttpMethod = HttpMethod.Post, RelativePath = "Overloads/Post", HasRequestFormatters = true, HasResponseFormatters = true, NumberOfParameters = 1},
-                    new { HttpMethod = HttpMethod.Post, RelativePath = "Overloads/Post?name={name}&age={age}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
+                    new { HttpMethod = HttpMethod.Post, RelativePath = "Overloads/ActionDefaultedToPost?name={name}&age={age}", HasRequestFormatters = false, HasResponseFormatters = true, NumberOfParameters = 2},
                     new { HttpMethod = HttpMethod.Delete, RelativePath = "Overloads/Delete/{id}?name={name}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 2},
                     new { HttpMethod = HttpMethod.Delete, RelativePath = "Overloads/Delete/{id}?name={name}&age={age}", HasRequestFormatters = false, HasResponseFormatters = false, NumberOfParameters = 3}
                 };

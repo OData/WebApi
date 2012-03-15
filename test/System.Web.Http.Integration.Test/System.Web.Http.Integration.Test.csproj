@@ -77,6 +77,8 @@
     <Compile Include="ApiExplorer\DocumentationTest.cs" />
     <Compile Include="ApiExplorer\RouteConstraintsTest.cs" />
     <Compile Include="ApiExplorer\RoutesTest.cs" />
+    <Compile Include="Controllers\Apis\UsersController.cs" />
+    <Compile Include="Controllers\ActionReachabilityTest.cs" />
     <Compile Include="Util\ApiExplorerHelper.cs" />
     <Compile Include="ApiExplorer\ApiExplorerSettingsTest.cs" />
     <Compile Include="ApiExplorer\Controllers\HiddenController.cs" />

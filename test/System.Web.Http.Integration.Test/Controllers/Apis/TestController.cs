@@ -7,8 +7,7 @@ namespace System.Web.Http
         public User GetUser(int id) { return null; }
         public List<User> GetUsers() { return null; }
 
-        [ActionName("GetUsersByName")]
-        public List<User> RetrieveUsersByName(string name) { return null; }
+        public List<User> GetUsersByName(string name) { return null; }
 
         [AcceptVerbs("PATCH")]
         public void PutUser(User user) { }

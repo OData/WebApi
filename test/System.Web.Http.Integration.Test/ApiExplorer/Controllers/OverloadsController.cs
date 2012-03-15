@@ -13,7 +13,7 @@ namespace System.Web.Http.ApiExplorer
         public Person GetPersonByNameIdAndSsn(string name, int id, int ssn) { return null; }
         public Person GetPersonByNameAndSsn(string name, int ssn) { return null; }
         public Person Post(Person Person) { return null; }
-        public Person Post(string name, int age) { return null; }
+        public Person ActionDefaultedToPost(string name, int age) { return null; }
         public void Delete(int id, string name = "Default Name") { }
         public void Delete(int id, string name, int age) { }
 

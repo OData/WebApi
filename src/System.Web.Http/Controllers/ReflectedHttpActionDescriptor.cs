@@ -137,7 +137,7 @@ namespace System.Web.Http.Controllers
             _attrCached = _methodInfo.GetCustomAttributes(inherit: true);
             CacheAttrsIActionMethodSelector = _attrCached.OfType<IActionMethodSelector>().ToArray();
             _actionName = GetActionName(_methodInfo, _attrCached);
-            _supportedHttpMethods = GetSupportedHttpMethods(_actionName, _attrCached);
+            _supportedHttpMethods = GetSupportedHttpMethods(_methodInfo, _attrCached);
         }
 
         private Collection<HttpParameterDescriptor> InitializeParameterDescriptors()
@@ -201,7 +201,7 @@ namespace System.Web.Http.Controllers
                        : methodInfo.Name;
         }
 
-        private static Collection<HttpMethod> GetSupportedHttpMethods(string actionName, object[] actionAttributes)
+        private static Collection<HttpMethod> GetSupportedHttpMethods(MethodInfo methodInfo, object[] actionAttributes)
         {
             Collection<HttpMethod> supportedHttpMethods = new Collection<HttpMethod>();
             ICollection<IActionHttpMethodProvider> httpMethodProviders = TypeHelper.OfType<IActionHttpMethodProvider>(actionAttributes);
@@ -221,12 +221,18 @@ namespace System.Web.Http.Controllers
                 // Get HttpMethod from action name convention 
                 for (int i = 0; i < _supportedHttpMethodsByConvention.Length; i++)
                 {
-                    if (actionName.StartsWith(_supportedHttpMethodsByConvention[i].Method, StringComparison.OrdinalIgnoreCase))
+                    if (methodInfo.Name.StartsWith(_supportedHttpMethodsByConvention[i].Method, StringComparison.OrdinalIgnoreCase))
                     {
                         supportedHttpMethods.Add(_supportedHttpMethodsByConvention[i]);
                         break;
                     }
                 }
+            }
+
+            if (supportedHttpMethods.Count == 0)
+            {
+                // Use POST as the default HttpMethod
+                supportedHttpMethods.Add(HttpMethod.Post);
             }
 
             return supportedHttpMethods;

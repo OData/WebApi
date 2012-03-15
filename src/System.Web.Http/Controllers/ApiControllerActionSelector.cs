@@ -334,15 +334,7 @@ namespace System.Web.Http.Controllers
             {
                 return descriptorsFound.Where(actionDescriptor =>
                 {
-                    if (actionDescriptor.SupportedHttpMethods.Count > 0)
-                    {
-                        return actionDescriptor.SupportedHttpMethods.Contains(incomingMethod);
-                    }
-                    else
-                    {
-                        // No http verb attribute - Match all verbs when action name is used.
-                        return true;
-                    }
+                    return actionDescriptor.SupportedHttpMethods.Contains(incomingMethod);
                 });
             }
 

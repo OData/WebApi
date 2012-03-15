@@ -37,7 +37,7 @@ namespace System.Web.Http
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Get, requestUrl),
+                new HttpRequestMessage(HttpMethod.Post, requestUrl),
                 (response) =>
                 {
                     if (shouldIncludeErrorDetail)

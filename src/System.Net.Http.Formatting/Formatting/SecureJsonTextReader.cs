@@ -31,7 +31,7 @@ namespace System.Net.Http.Formatting
         {
             if (this.Depth > _maxDepth)
             {
-                throw new JsonSerializationException(RS.Format(Properties.Resources.JsonTooDeep, _maxDepth));
+                throw new JsonReaderException(RS.Format(Properties.Resources.JsonTooDeep, _maxDepth));
             }
             return base.Read();
         }

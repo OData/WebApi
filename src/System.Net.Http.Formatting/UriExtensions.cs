@@ -27,7 +27,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException("address");
             }
 
-            return UriQueryUtility.ParseQueryString(address.Query);
+            return new FormDataCollection(address).ReadAsNameValueCollection();
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException("address");
             }
 
-            IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
+            IEnumerable<KeyValuePair<string, string>> query = new FormDataCollection(address);
             return FormUrlEncodedJson.TryParse(query, out value);
         }
 
@@ -67,7 +67,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException("type");
             }
 
-            IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
+            IEnumerable<KeyValuePair<string, string>> query = new FormDataCollection(address);
             JObject jsonObject;
             if (FormUrlEncodedJson.TryParse(query, out jsonObject))
             {
@@ -97,7 +97,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException("address");
             }
 
-            IEnumerable<KeyValuePair<string, string>> query = ParseQueryString(address.Query);
+            IEnumerable<KeyValuePair<string, string>> query = new FormDataCollection(address);
             JObject jsonObject;
             if (FormUrlEncodedJson.TryParse(query, out jsonObject))
             {
@@ -107,11 +107,6 @@ namespace System.Net.Http
 
             value = default(T);
             return false;
-        }
-
-        private static IEnumerable<KeyValuePair<string, string>> ParseQueryString(string queryString)
-        {
-            return new FormDataCollection(queryString);
         }
     }
 }

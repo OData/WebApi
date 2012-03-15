@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net.Http.Formatting;
 using System.Net.Http.Internal;
 using System.Text;
 using Microsoft.TestCommon;
@@ -16,15 +17,6 @@ namespace System.Net.Http
         {
             Assert.Type.HasProperties(typeof(UriQueryUtility), TypeAssert.TypeProperties.IsClass | TypeAssert.TypeProperties.IsStatic);
         }
-
-        #region ParseQueryString
-        [Fact]
-        public void ParseQueryStringThrowsOnNullQuery()
-        {
-            Assert.ThrowsArgumentNull(() => UriQueryUtility.ParseQueryString(null), "query");
-        }
-
-        #endregion
 
         #region UrlEncode
 
@@ -66,7 +58,7 @@ namespace System.Net.Http
             {
                 segments.Add("&");
                 string query = string.Join("", segments);
-                NameValueCollection result = UriQueryUtility.ParseQueryString(query);
+                NameValueCollection result = ParseQueryString(query);
                 Assert.NotNull(result);
 
                 // Because this is a NameValueCollection, the same name appears only once
@@ -126,7 +118,7 @@ namespace System.Net.Http
             {
                 segments.Add(segment);
                 string query = CreateQuery(segments.ToArray());
-                NameValueCollection result = UriQueryUtility.ParseQueryString(query);
+                NameValueCollection result = ParseQueryString(query);
                 Assert.NotNull(result);
 
                 // Because this is a NameValueCollection, the same name appears only once
@@ -156,5 +148,10 @@ namespace System.Net.Http
 
         #endregion
 
+
+        private static NameValueCollection ParseQueryString(string query)
+        {
+            return new FormDataCollection(query).ReadAsNameValueCollection();
+        }
     }
 }

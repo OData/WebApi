@@ -72,7 +72,7 @@ namespace System.Net.Http.Formatting
                 throw new InvalidOperationException(RS.Format(Properties.Resources.NonNullUriRequiredForMediaTypeMapping, _queryStringMappingType.Name));
             }
 
-            return UriQueryUtility.ParseQueryString(uri.Query);
+            return new FormDataCollection(uri).ReadAsNameValueCollection();
         }
 
         private void Initialize(string queryStringParameterName, string queryStringParameterValue)

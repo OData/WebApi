@@ -10,17 +10,6 @@ namespace System.Net.Http.Internal
     /// </summary>
     internal static class UriQueryUtility
     {
-        public static NameValueCollection ParseQueryString(string query)
-        {
-            if (query == null)
-            {
-                throw new ArgumentNullException("query");
-            }
-
-            NameValueCollection result = new FormDataCollection(query).ReadAsNameValueCollection();
-            return result;
-        }
-
         // The implementation below is ported from WebUtility for use in .Net 4
 
         #region UrlEncode implementation
@@ -221,7 +210,6 @@ namespace System.Net.Http.Internal
         }
 
         #endregion
-
 
         #region UrlDecode public methods
 

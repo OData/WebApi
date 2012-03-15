@@ -55,8 +55,8 @@ namespace System.Net.Http.Formatting
             MediaTypeFormatter formatterMatchOnAcceptHeader = null;
             ResponseMediaTypeMatch mediaTypeMatchOnAcceptHeader = null;
 
-            MediaTypeFormatter formatterMatchOnAcceptHeaderWithMapping = null;
-            ResponseMediaTypeMatch mediaTypeMatchOnAcceptHeaderWithMapping = null;
+            MediaTypeFormatter formatterMatchWithMapping = null;
+            ResponseMediaTypeMatch mediaTypeMatchWithMapping = null;
 
             MediaTypeFormatter formatterMatchOnRequestContentType = null;
             ResponseMediaTypeMatch mediaTypeMatchOnRequestContentType = null;
@@ -112,17 +112,17 @@ namespace System.Net.Http.Formatting
 
                         // Matches on accept headers using mappings must choose the highest quality match
                         double thisMappingQuality = match.MediaTypeMatch.Quality;
-                        if (mediaTypeMatchOnAcceptHeaderWithMapping != null)
+                        if (mediaTypeMatchWithMapping != null)
                         {
-                            double bestMappingQualitySeen = mediaTypeMatchOnAcceptHeaderWithMapping.MediaTypeMatch.Quality;
+                            double bestMappingQualitySeen = mediaTypeMatchWithMapping.MediaTypeMatch.Quality;
                             if (thisMappingQuality <= bestMappingQualitySeen)
                             {
                                 continue;
                             }
                         }
 
-                        formatterMatchOnAcceptHeaderWithMapping = formatter;
-                        mediaTypeMatchOnAcceptHeaderWithMapping = match;
+                        formatterMatchWithMapping = formatter;
+                        mediaTypeMatchWithMapping = match;
 
                         break;
 
@@ -143,21 +143,21 @@ namespace System.Net.Http.Formatting
             // we want to give precedence to the media type mappings, but only if their quality is >= that of the supported media type.
             // We do this because media type mappings are the user's extensibility point and must take precedence over normal
             // supported media types in the case of a tie.   The 99% case is where both have quality 1.0.
-            if (mediaTypeMatchOnAcceptHeaderWithMapping != null && mediaTypeMatchOnAcceptHeader != null)
+            if (mediaTypeMatchWithMapping != null && mediaTypeMatchOnAcceptHeader != null)
             {
-                if (mediaTypeMatchOnAcceptHeader.MediaTypeMatch.Quality > mediaTypeMatchOnAcceptHeaderWithMapping.MediaTypeMatch.Quality)
+                if (mediaTypeMatchOnAcceptHeader.MediaTypeMatch.Quality > mediaTypeMatchWithMapping.MediaTypeMatch.Quality)
                 {
-                    formatterMatchOnAcceptHeaderWithMapping = null;
+                    formatterMatchWithMapping = null;
                 }
             }
 
             // now select the formatter and media type
             // A MediaTypeMapping is highest precedence -- it is an extensibility point
             // allowing the user to override normal accept header matching
-            if (formatterMatchOnAcceptHeaderWithMapping != null)
+            if (formatterMatchWithMapping != null)
             {
-                mediaType = mediaTypeMatchOnAcceptHeaderWithMapping.MediaTypeMatch.MediaType;
-                return formatterMatchOnAcceptHeaderWithMapping;
+                mediaType = mediaTypeMatchWithMapping.MediaTypeMatch.MediaType;
+                return formatterMatchWithMapping;
             }
             else if (formatterMatchOnAcceptHeader != null)
             {

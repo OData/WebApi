@@ -254,7 +254,7 @@ namespace System.Net.Http.Formatting
 
         [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
         [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches media type with quality from media type mapping.")]
-        public void SelectResponseMediaTypeMatchesAcceptHeaderWithMediaTypeMapping(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
+        public void SelectResponseMediaTypeMatchesWithMediaTypeMapping(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
             MediaTypeHeaderValue mediaRangeWithoutQuality = new MediaTypeHeaderValue(mediaRangeWithQuality.MediaType);

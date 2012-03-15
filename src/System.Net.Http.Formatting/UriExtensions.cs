@@ -30,11 +30,11 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Reads HTML form URL encoded data provided in the <see cref="Uri"/> query component as a <see cref="JToken"/> object.
+        /// Reads HTML form URL encoded data provided in the <see cref="Uri"/> query component as a <see cref="JObject"/> object.
         /// </summary>
         /// <param name="address">The <see cref="Uri"/> instance from which to read.</param>
         /// <param name="value">An object to be initialized with this instance or null if the conversion cannot be performed.</param>
-        /// <returns><c>true</c> if the query component can be read as <see cref="JToken"/>; otherwise <c>false</c>.</returns>
+        /// <returns><c>true</c> if the query component can be read as <see cref="JObject"/>; otherwise <c>false</c>.</returns>
         public static bool TryReadQueryAsJson(this Uri address, out JObject value)
         {
             if (address == null)

@@ -161,8 +161,6 @@ namespace System.Web.Http
                 {
                     if (!_initialized)
                     {
-                        _initialized = true;
-
                         // Attach tracing before creating pipeline to allow injection of message handlers
                         ITraceManager traceManager = _configuration.ServiceResolver.GetTraceManager();
                         Contract.Assert(traceManager != null);
@@ -170,6 +168,8 @@ namespace System.Web.Http
 
                         // Create pipeline
                         InnerHandler = HttpPipelineFactory.Create(_configuration.MessageHandlers, _dispatcher);
+
+                        _initialized = true;
                     }
                 }
             }

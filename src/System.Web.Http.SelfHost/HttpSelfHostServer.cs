@@ -149,8 +149,7 @@ namespace System.Web.Http.SelfHost
             HttpRequestMessage request = requestContext.RequestMessage.ToHttpRequestMessage();
             if (request == null)
             {
-                Error.InvalidOperation(SRResources.HttpMessageHandlerInvalidMessage, requestContext.RequestMessage.GetType());
-                return;
+                throw Error.InvalidOperation(SRResources.HttpMessageHandlerInvalidMessage, requestContext.RequestMessage.GetType());
             }
 
             // create principal information and add it the request for the windows auth case

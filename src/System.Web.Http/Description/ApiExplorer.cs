@@ -28,7 +28,6 @@ namespace System.Web.Http.Description
         private const string ControllerVariableName = "controller";
         private static readonly Regex _actionVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", ActionVariableName), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex _controllerVariableRegex = new Regex(String.Format(CultureInfo.CurrentCulture, "{{{0}}}", ControllerVariableName), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        private static readonly HttpMethod _anyHttpMethod = new HttpMethod("ANY");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiExplorer"/> class.
@@ -132,33 +131,13 @@ namespace System.Web.Http.Description
             IList<HttpMethod> actionHttpMethods = actionDescriptor.SupportedHttpMethods;
             HttpMethodConstraint httpMethodConstraint = route.Constraints.Values.FirstOrDefault(c => typeof(HttpMethodConstraint).IsAssignableFrom(c.GetType())) as HttpMethodConstraint;
 
-            if (actionHttpMethods.Count == 0)
+            if (httpMethodConstraint == null)
             {
-                if (isActionVariableSpecified)
-                {
-                    // reachable by any HTTP method
-                    if (httpMethodConstraint == null)
-                    {
-                        supportedMethods.Add(_anyHttpMethod);
-                    }
-                    else
-                    {
-                        // limit the HTTP methods to the ones specified in the constraint
-                        supportedMethods = httpMethodConstraint.AllowedMethods;
-                    }
-                }
-                // if no {action} is specified and the action method doesn't have any http method attribute ([HttpGet], [HttpPost], etc) then it won't be selected by our action selector
+                supportedMethods = actionHttpMethods;
             }
             else
             {
-                if (httpMethodConstraint == null)
-                {
-                    supportedMethods = actionHttpMethods;
-                }
-                else
-                {
-                    supportedMethods = httpMethodConstraint.AllowedMethods.Intersect(actionHttpMethods).ToList();
-                }
+                supportedMethods = httpMethodConstraint.AllowedMethods.Intersect(actionHttpMethods).ToList();
             }
 
             return supportedMethods;

@@ -2,14 +2,13 @@
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
-using System.Web.Http.SelfHost;
 using System.Web.Http.SelfHost.Channels;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Web.Http.WebHost
+namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostConfigurationTest
     {

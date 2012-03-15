@@ -267,9 +267,9 @@ namespace System.Net.Http.Formatting.Parsers
             }
 
             /// <summary>
-            /// Copies current name value pair field to the provided <see cref="NameValueCollection"/> instance.
+            /// Copies current name value pair field to the provided collection instance.
             /// </summary>
-            /// <param name="nameValuePairs">The <see cref="NameValueCollection"/>.</param>
+            /// <param name="nameValuePairs">The collection to copy into.</param>
             public void CopyTo(ICollection<KeyValuePair<string, string>> nameValuePairs)
             {
                 string unescapedName = UriQueryUtility.UrlDecode(_name.ToString());
@@ -285,9 +285,9 @@ namespace System.Net.Http.Formatting.Parsers
             }
 
             /// <summary>
-            /// Copies current name-only to the provided <see cref="NameValueCollection"/> instance.
+            /// Copies current name-only to the provided collection instance.
             /// </summary>
-            /// <param name="nameValuePairs">The <see cref="NameValueCollection"/>.</param>
+            /// <param name="nameValuePairs">The collection to copy into.</param>
             public void CopyNameOnlyTo(ICollection<KeyValuePair<string, string>> nameValuePairs)
             {
                 string key = UriQueryUtility.UrlDecode(_name.ToString());

@@ -19,14 +19,14 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ParseQueryString_SingleNamelessValue()
         {
             // Arrange
-            Uri uri = new Uri("http://localhost/?key1");
+            Uri uri = new Uri("http://localhost/?key");
 
             // Act
             NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
 
             // Assert
             string key = Assert.Single(result) as string;
-            Assert.Equal("key1", key);
+            Assert.Equal("key", key);
             Assert.Equal("", result[key]);
         }
 

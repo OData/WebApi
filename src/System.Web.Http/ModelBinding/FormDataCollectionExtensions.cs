@@ -86,11 +86,7 @@ namespace System.Web.Http.ModelBinding
             foreach (var kv in formData)
             {
                 string key = NormalizeJQueryToMvc(kv.Key);
-                string value = kv.Value;
-                if (value == null)
-                {
-                    value = string.Empty;
-                }
+                string value = kv.Value ?? string.Empty;                
                 nvc.Add(key, value);
             }
             return nvc;

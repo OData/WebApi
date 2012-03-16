@@ -120,12 +120,6 @@ namespace System.Net.Http
                 return TaskHelpers.FromResult((T)obj.Value);
             }
 
-            if (content.Headers.ContentLength == 0)
-            {
-                object defaultValue = GetDefaultValueForType(type);
-                return TaskHelpers.FromResult((T)defaultValue);
-            }
-
             MediaTypeFormatter formatter = null;
             MediaTypeHeaderValue mediaType = content.Headers.ContentType;
             if (mediaType != null)
@@ -143,16 +137,6 @@ namespace System.Net.Http
             return content.ReadAsStreamAsync()
                           .Then(stream => formatter.ReadFromStreamAsync(type, stream, content.Headers, formatterLogger)
                           .Then(value => (T)value));
-        }
-
-        private static object GetDefaultValueForType(Type type)
-        {
-            if (!type.IsValueType)
-            {
-                return null;
-            }
-
-            return Activator.CreateInstance(type);
         }
     }
 }

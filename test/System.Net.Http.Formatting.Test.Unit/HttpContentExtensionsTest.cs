@@ -97,6 +97,20 @@ namespace System.Net.Http
             _formatterMock.Verify(f => f.ReadFromStreamAsync(typeof(string), contentStream, content.Headers, null), Times.Once());
         }
 
+        [Fact]
+        public void ReadAsAsyncOfT_InvokesFormatterEvenIfContentLengthIsZero()
+        {
+            var content = new StringContent("");
+            _formatterMock.Setup(f => f.CanReadType(typeof(string))).Returns(true);
+            _formatterMock.Object.SupportedMediaTypes.Add(content.Headers.ContentType);
+            var formatters = new[] { _formatterMock.Object };
+
+            var result = content.ReadAsAsync<string>(formatters);
+
+            result.WaitUntilCompleted();
+            _formatterMock.Verify(f => f.ReadFromStreamAsync(typeof(string), It.IsAny<Stream>(), content.Headers, It.IsAny<IFormatterLogger>()), Times.Once());
+        }
+
         public abstract class TestableHttpContent : HttpContent
         {
             protected override Task<Stream> CreateContentReadStreamAsync()

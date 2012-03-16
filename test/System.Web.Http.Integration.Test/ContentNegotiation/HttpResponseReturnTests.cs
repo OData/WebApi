@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Web.Http.SelfHost;
 using Xunit;
 using Xunit.Extensions;
+using System.Collections.Generic;
 
 namespace System.Web.Http.ContentNegotiation
 {
@@ -63,6 +64,20 @@ namespace System.Web.Http.ContentNegotiation
             Assert.NotNull(response.Content.Headers.ContentType);
             Assert.Equal<string>("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Equal<string>(expectedResponseValue, response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Theory]
+        [InlineData("ReturnMultipleSetCookieHeaders")]
+        public void ReturnMultipleSetCookieHeadersShouldWork(string action)
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.RequestUri = new Uri(baseAddress + String.Format("HttpResponseReturn/{0}", action));
+            request.Method = HttpMethod.Get;
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+            IEnumerable<string> list;
+            Assert.True(response.Headers.TryGetValues("Set-Cookie",  out list));
+            Assert.Equal("cookie1,cookie2", ((string[]) list)[0]);
         }
 
         public void SetupHost()
@@ -127,6 +142,15 @@ namespace System.Web.Http.ContentNegotiation
         public string ReturnString()
         {
             return "Hello";
+        }
+
+        [HttpGet]
+        public HttpResponseMessage ReturnMultipleSetCookieHeaders()
+        {
+            HttpResponseMessage resp = new HttpResponseMessage(HttpStatusCode.OK);
+            resp.Headers.Add("Set-Cookie", "cookie1");
+            resp.Headers.Add("Set-Cookie", "cookie2");
+            return resp; 
         }
     }
 }

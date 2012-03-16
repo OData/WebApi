@@ -92,6 +92,7 @@
     <Compile Include="Filters\EnumerableEvaluatorFilterTest.cs" />
     <Compile Include="Hosting\HttpRouteTest.cs" />
     <Compile Include="Internal\TypeActivatorTest.cs" />
+    <Compile Include="Internal\ValueProviderUtilTest.cs" />
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
     <Compile Include="Query\DataModel.cs" />

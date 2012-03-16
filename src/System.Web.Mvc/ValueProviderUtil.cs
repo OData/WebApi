@@ -92,6 +92,7 @@ namespace System.Web.Mvc
                                 key = entry.Substring(keyPosition, dotPosition - keyPosition);
                                 fullName = entry.Substring(0, dotPosition);
                                 break;
+
                             case '[':
                                 int bracketPosition = entry.IndexOf(']', keyPosition);
                                 if (bracketPosition == -1)
@@ -103,6 +104,9 @@ namespace System.Web.Mvc
                                 key = entry.Substring(keyPosition, bracketPosition - keyPosition);
                                 fullName = entry.Substring(0, bracketPosition + 1);
                                 break;
+
+                            default:
+                                continue;
                         }
 
                         if (!keys.ContainsKey(key))

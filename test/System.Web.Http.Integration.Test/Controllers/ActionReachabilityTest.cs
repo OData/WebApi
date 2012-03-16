@@ -22,8 +22,8 @@ namespace System.Web.Http
         {
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("REST", "{controller}");
-            HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(config);
-            HttpClient client = new HttpClient(dispatcher);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + requestUrl);
 
             HttpResponseMessage response = client.SendAsync(request).Result;
@@ -56,8 +56,8 @@ namespace System.Web.Http
         {
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("RPC", "{controller}/{action}");
-            HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(config);
-            HttpClient client = new HttpClient(dispatcher);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + requestUrl);
 
             HttpResponseMessage response = client.SendAsync(request).Result;
@@ -94,8 +94,8 @@ namespace System.Web.Http
         {
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Hybrid", "{controller}/{action}", new { action = "" });
-            HttpControllerDispatcher dispatcher = new HttpControllerDispatcher(config);
-            HttpClient client = new HttpClient(dispatcher);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + requestUrl);
 
             HttpResponseMessage response = client.SendAsync(request).Result;

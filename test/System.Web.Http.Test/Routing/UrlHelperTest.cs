@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
 using Xunit;
@@ -32,30 +33,8 @@ namespace System.Web.Http.Routing
         public void UrlHelper_UsesCurrentRouteDataToPopulateValues_WithObjectValues(string controller, int? id, string expectedUrl)
         {
             var url = GetUrlHelperForApi();
+            object routeValues = GetRouteValuesAsObject(controller, id);
 
-            object routeValues = null;
-            if (controller == null)
-            {
-                if (id == null)
-                {
-                    routeValues = null;
-                }
-                else
-                {
-                    routeValues = new { id };
-                }
-            }
-            else
-            {
-                if (id == null)
-                {
-                    routeValues = new { controller };
-                }
-                else
-                {
-                    routeValues = new { controller, id };
-                }
-            }
             string generatedUrl = url.Route("route1", routeValues);
 
             Assert.Equal(expectedUrl, generatedUrl);
@@ -66,31 +45,8 @@ namespace System.Web.Http.Routing
         public void UrlHelper_UsesCurrentRouteDataToPopulateValues_WithDictionaryValues(string controller, int? id, string expectedUrl)
         {
             var url = GetUrlHelperForApi();
+            Dictionary<string, object> routeValues = GetRouteValuesAsDictionary(controller, id);
 
-            Dictionary<string, object> routeValues = new Dictionary<string, object>();
-            if (controller == null)
-            {
-                if (id == null)
-                {
-                    routeValues = null;
-                }
-                else
-                {
-                    routeValues.Add("id", id);
-                }
-            }
-            else
-            {
-                if (id == null)
-                {
-                    routeValues.Add("controller", controller);
-                }
-                else
-                {
-                    routeValues.Add("controller", controller);
-                    routeValues.Add("id", id);
-                }
-            }
             string generatedUrl = url.Route("route1", routeValues);
 
             Assert.Equal(expectedUrl, generatedUrl);
@@ -116,6 +72,38 @@ namespace System.Web.Http.Routing
                 "A route named 'route-doesn't-exist' could not be found in the route collection.");
         }
 
+        [Theory]
+        [TestDataSet(
+            typeof(UrlHelperTest), "UrlGeneratorTestData",
+            typeof(UrlHelperTest), "RequestUrlTestData")]
+        public void UrlHelper_LinkGeneration_GeneratesRightLinksWithDictionary(string controller, int? id, string expectedUrl, string requestUrl)
+        {
+            var urlHelper = GetUrlHelperForApi();
+            urlHelper.ControllerContext.Request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            Dictionary<string, object> routeValues = GetRouteValuesAsDictionary(controller, id);
+            string baseUrl = new Uri(requestUrl).GetLeftPart(UriPartial.Authority);
+
+            string generatedlink = urlHelper.Link("route1", routeValues);
+
+            Assert.Equal(expectedUrl != null ? baseUrl + expectedUrl : null, generatedlink);
+        }
+
+        [Theory]
+        [TestDataSet(
+            typeof(UrlHelperTest), "UrlGeneratorTestData",
+            typeof(UrlHelperTest), "RequestUrlTestData")]
+        public void UrlHelper_LinkGeneration_GeneratesRightLinksWithObject(string controller, int? id, string expectedUrl, string requestUrl)
+        {
+            var urlHelper = GetUrlHelperForApi();
+            urlHelper.ControllerContext.Request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            object routeValues = GetRouteValuesAsObject(controller, id);
+            string baseUrl = new Uri(requestUrl).GetLeftPart(UriPartial.Authority);
+
+            string generatedlink = urlHelper.Link("route1", routeValues);
+
+            Assert.Equal(expectedUrl != null ? baseUrl + expectedUrl : null, generatedlink);
+        }
+
         private static UrlHelper GetUrlHelperForApi()
         {
             HttpControllerContext cc = new HttpControllerContext();
@@ -128,6 +116,65 @@ namespace System.Web.Http.Routing
             cc.RouteData = new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "people", id = "123" }));
 
             return cc.Url;
+        }
+
+        private static object GetRouteValuesAsObject(string controller, int? id)
+        {
+            object routeValues = null;
+            if (controller == null)
+            {
+                if (id == null)
+                {
+                    routeValues = null;
+                }
+                else
+                {
+                    routeValues = new { id };
+                }
+            }
+            else
+            {
+                if (id == null)
+                {
+                    routeValues = new { controller };
+                }
+                else
+                {
+                    routeValues = new { controller, id };
+                }
+            }
+
+            return routeValues;
+        }
+
+        private static Dictionary<string, object> GetRouteValuesAsDictionary(string controller, int? id)
+        {
+            Dictionary<string, object> routeValues = new Dictionary<string, object>();
+            if (controller == null)
+            {
+                if (id == null)
+                {
+                    routeValues = null;
+                }
+                else
+                {
+                    routeValues.Add("id", id);
+                }
+            }
+            else
+            {
+                if (id == null)
+                {
+                    routeValues.Add("controller", controller);
+                }
+                else
+                {
+                    routeValues.Add("controller", controller);
+                    routeValues.Add("id", id);
+                }
+            }
+
+            return routeValues;
         }
 
         public static IEnumerable<object[]> UrlGeneratorTestData
@@ -143,6 +190,14 @@ namespace System.Web.Http.Routing
                     { "customers", 456, "/somerootpath/customers/456"}, // Override everything, so everything changed
                     { "customers", null, null}, // Override controller, which clears out the ID, so it doesn't match (i.e. null)
                 };
+            }
+        }
+
+        public static IEnumerable<object> RequestUrlTestData
+        {
+            get
+            {
+                return new[] { "http://localhost", "http://localhost/123", "http://localhost/123?q=odata&$filter=123#123" };
             }
         }
     }

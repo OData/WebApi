@@ -46,6 +46,28 @@ namespace System.Web.Http.Routing
             return GetHttpRouteHelper(ControllerContext, routeName, routeValues);
         }
 
+        public string Link(string routeName, object routeValues)
+        {
+            string link = Route(routeName, routeValues);
+            if (link != null)
+            {
+                link = ControllerContext.Request.RequestUri.GetLeftPart(UriPartial.Authority) + link;
+            }
+
+            return link;
+        }
+
+        public string Link(string routeName, IDictionary<string, object> routeValues)
+        {
+            string link = Route(routeName, routeValues);
+            if (link != null)
+            {
+                link = ControllerContext.Request.RequestUri.GetLeftPart(UriPartial.Authority) + link;
+            }
+
+            return link;
+        }
+
         private static string GetHttpRouteHelper(HttpControllerContext controllerContext, string routeName, object routeValues)
         {
             IDictionary<string, object> routeValuesDictionary = HttpRouteCollection.GetTypeProperties(routeValues);

@@ -142,7 +142,15 @@ namespace Microsoft.TestCommon
                 throw new InvalidOperationException(string.Format("{0}.{1} is either null or does not implement IEnumerable", declaringType.FullName, propertyName));
             }
 
-            return value.Select((data) => new object[] { data });
+            IEnumerable<object[]> dataset = value as IEnumerable<object[]>;
+            if (dataset != null)
+            {
+                return dataset;
+            }
+            else
+            {
+                return value.Select((data) => new object[] { data });
+            }
         }
 
         private static IEnumerable<object[]> TryGetDataSetFromTestDataCollection(Type declaringType, string propertyName, TestDataVariations variations)

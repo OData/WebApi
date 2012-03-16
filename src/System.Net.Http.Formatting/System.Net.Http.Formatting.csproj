@@ -73,6 +73,7 @@
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
+    <Compile Include="Formatting\StringWithQualityHeaderValueComparer.cs" />
     <Compile Include="Formatting\FormDataCollection.cs" />
     <Compile Include="Formatting\ContentNegotiationResult.cs" />
     <Compile Include="FormUrlEncodedJson.cs" />
@@ -101,7 +102,7 @@
     <Compile Include="Formatting\MediaTypeFormatter.cs" />
     <Compile Include="Formatting\MediaTypeFormatterCollection.cs" />
     <Compile Include="Formatting\MediaTypeFormatterExtensions.cs" />
-    <Compile Include="Formatting\MediaTypeHeaderValueComparer.cs" />
+    <Compile Include="Formatting\MediaTypeWithQualityHeaderValueComparer.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueEqualityComparer.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
     <Compile Include="Formatting\MediaTypeMapping.cs" />

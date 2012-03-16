@@ -4,20 +4,20 @@ using System.Net.Http.Headers;
 
 namespace System.Net.Http.Formatting
 {
-    internal class MediaTypeHeaderValueComparer : IComparer<MediaTypeHeaderValue>
+    internal class MediaTypeWithQualityHeaderValueComparer : IComparer<MediaTypeWithQualityHeaderValue>
     {
-        private static readonly MediaTypeHeaderValueComparer _mediaTypeComparer = new MediaTypeHeaderValueComparer();
+        private static readonly MediaTypeWithQualityHeaderValueComparer _mediaTypeComparer = new MediaTypeWithQualityHeaderValueComparer();
 
-        private MediaTypeHeaderValueComparer()
+        private MediaTypeWithQualityHeaderValueComparer()
         {
         }
 
-        public static MediaTypeHeaderValueComparer Comparer
+        public static MediaTypeWithQualityHeaderValueComparer QualityComparer
         {
             get { return _mediaTypeComparer; }
         }
 
-        public int Compare(MediaTypeHeaderValue mediaType1, MediaTypeHeaderValue mediaType2)
+        public int Compare(MediaTypeWithQualityHeaderValue mediaType1, MediaTypeWithQualityHeaderValue mediaType2)
         {
             Contract.Assert(mediaType1 != null, "The 'mediaType1' parameter should not be null.");
             Contract.Assert(mediaType2 != null, "The 'mediaType2' parameter should not be null.");
@@ -33,36 +33,22 @@ namespace System.Net.Http.Formatting
                 {
                     if (parsedMediaType1.IsAllMediaRange)
                     {
-                        return 1;
+                        return -1;
                     }
                     else if (parsedMediaType2.IsAllMediaRange)
                     {
-                        return -1;
+                        return 1;
                     }
                 }
                 else if (!String.Equals(parsedMediaType1.SubType, parsedMediaType2.SubType, StringComparison.OrdinalIgnoreCase))
                 {
                     if (parsedMediaType1.IsSubTypeMediaRange)
                     {
-                        return 1;
+                        return -1;
                     }
                     else if (parsedMediaType2.IsSubTypeMediaRange)
                     {
-                        return -1;
-                    }
-                }
-                else
-                {
-                    if (!parsedMediaType1.HasNonQualityFactorParameter)
-                    {
-                        if (parsedMediaType2.HasNonQualityFactorParameter)
-                        {
-                            return 1;
-                        }
-                    }
-                    else if (!parsedMediaType2.HasNonQualityFactorParameter)
-                    {
-                        return -1;
+                        return 1;
                     }
                 }
             }
@@ -78,11 +64,11 @@ namespace System.Net.Http.Formatting
             double qualityDifference = parsedMediaType1.QualityFactor - parsedMediaType2.QualityFactor;
             if (qualityDifference < 0)
             {
-                return 1;
+                return -1;
             }
             else if (qualityDifference > 0)
             {
-                return -1;
+                return 1;
             }
 
             return 0;

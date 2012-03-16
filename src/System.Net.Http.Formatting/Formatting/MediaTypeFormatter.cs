@@ -235,7 +235,7 @@ namespace System.Net.Http.Formatting
 
             // Match against the accept header.
             IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderMediaTypes =
-                request.Headers.Accept.OrderBy(m => m, MediaTypeHeaderValueComparer.Comparer);
+                request.Headers.Accept.OrderByDescending(m => m, MediaTypeWithQualityHeaderValueComparer.QualityComparer);
 
             if (TryMatchSupportedMediaType(acceptHeaderMediaTypes, out mediaTypeMatch))
             {

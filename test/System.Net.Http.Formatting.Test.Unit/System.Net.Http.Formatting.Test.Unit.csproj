@@ -83,6 +83,7 @@
     <Compile Include="DataSets\Types\WcfPocoType.cs" />
     <Compile Include="DataSets\HttpUnitTestDataSets.cs" />
     <Compile Include="DataSets\Types\XmlSerializableType.cs" />
+    <Compile Include="Formatting\StringWithQualityHeaderValueComparerTests.cs" />
     <Compile Include="Formatting\FormDataCollectionTests.cs" />
     <Compile Include="Formatting\ContentNegotiationResultTest.cs" />
     <Compile Include="FormUrlEncodedJsonTests.cs" />
@@ -104,7 +105,7 @@
     <Compile Include="Formatting\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueEqualityComparerTests.cs" />
-    <Compile Include="Formatting\MediaTypeHeaderValueComparerTests.cs" />
+    <Compile Include="Formatting\MediaTypeWithQualityHeaderValueComparerTests.cs" />
     <Compile Include="Formatting\MediaTypeHeadeValueExtensionsTests.cs" />
     <Compile Include="Formatting\ParsedMediaTypeHeaderValueTests.cs" />
     <Compile Include="Formatting\QueryStringMappingTests.cs" />

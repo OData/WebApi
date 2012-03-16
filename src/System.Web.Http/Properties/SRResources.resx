@@ -281,17 +281,8 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="Route_AddRemoveWithNoKeyNotSupported" xml:space="preserve">
     <value>Adding or removing items from a '{0}' is not supported. Please use a key when adding and removing items.</value>
   </data>
-  <data name="AmbiguousIndexerInvocation" xml:space="preserve">
-    <value>Ambiguous invocation of indexer in type '{0}'</value>
-  </data>
   <data name="AmbiguousMethodInvocation" xml:space="preserve">
     <value>Ambiguous invocation of method '{0}' in type '{1}'</value>
-  </data>
-  <data name="CannotIndexMultiDimArray" xml:space="preserve">
-    <value>Indexing of multi-dimensional arrays is not supported</value>
-  </data>
-  <data name="CloseBracketOrCommaExpected" xml:space="preserve">
-    <value>']' or ',' expected</value>
   </data>
   <data name="CloseParenOrCommaExpected" xml:space="preserve">
     <value>')' or ',' expected</value>
@@ -323,9 +314,6 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="InvalidCharacter" xml:space="preserve">
     <value>Syntax error '{0}'</value>
   </data>
-  <data name="InvalidIndex" xml:space="preserve">
-    <value>Array index must be an integer expression</value>
-  </data>
   <data name="InvalidIntegerLiteral" xml:space="preserve">
     <value>Invalid integer literal '{0}'</value>
   </data>
@@ -337,12 +325,6 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   </data>
   <data name="MethodIsVoid" xml:space="preserve">
     <value>Method '{0}' in type '{1}' does not return a value</value>
-  </data>
-  <data name="NoApplicableAggregate" xml:space="preserve">
-    <value>No applicable aggregate method '{0}' exists</value>
-  </data>
-  <data name="NoApplicableIndexer" xml:space="preserve">
-    <value>No applicable indexer exists in type '{0}'</value>
   </data>
   <data name="NoApplicableMethod" xml:space="preserve">
     <value>No applicable method '{0}' exists in type '{1}'</value>
@@ -496,5 +478,8 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   </data>
   <data name="HttpRequestMessageExtensions_NoContentNegotiator" xml:space="preserve">
     <value>The provided configuration does not have an instance of the '{0}' service registered.</value>
+  </data>
+  <data name="ParseErrorInClause" xml:space="preserve">
+    <value>Parse error in {0}. {1}</value>
   </data>
 </root>

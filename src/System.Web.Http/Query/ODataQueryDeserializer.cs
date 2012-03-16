@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using System.Web.Http.Common;
 using System.Web.Http.Internal;
@@ -114,26 +115,62 @@ namespace System.Web.Http.Query
                 switch (part.QueryOperator)
                 {
                     case "filter":
-                        query = DynamicQueryable.Where(query, part.Expression, queryResolver);
+                        try
+                        {
+                            query = DynamicQueryable.Where(query, part.Expression, queryResolver);
+                        }
+                        catch (ParseException e)
+                        {
+                            throw new ParseException(
+                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$filter", e.Message));
+                        }
                         break;
                     case "orderby":
-                        query = DynamicQueryable.OrderBy(query, part.Expression, queryResolver);
+                        try
+                        {
+                            query = DynamicQueryable.OrderBy(query, part.Expression, queryResolver);
+                        }
+                        catch (ParseException e)
+                        {
+                            throw new ParseException(
+                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$orderby", e.Message));
+                        }
                         break;
                     case "skip":
-                        int skipCount = Convert.ToInt32(part.Expression, System.Globalization.CultureInfo.InvariantCulture);
-                        if (skipCount < 0)
+                        try
                         {
-                            throw Error.InvalidOperation(SRResources.PositiveIntegerExpectedForODataQueryParameter, "$skip", part.Expression);
+                            int skipCount = Convert.ToInt32(part.Expression, System.Globalization.CultureInfo.InvariantCulture);
+                            if (skipCount < 0)
+                            {
+                                throw new ParseException(
+                                        string.Format(CultureInfo.InvariantCulture, SRResources.PositiveIntegerExpectedForODataQueryParameter, "$skip", part.Expression));
+                            }
+
+                            query = DynamicQueryable.Skip(query, skipCount);
                         }
-                        query = DynamicQueryable.Skip(query, skipCount);
+                        catch (FormatException e)
+                        {
+                            throw new ParseException(
+                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$skip", e.Message));
+                        }
                         break;
                     case "top":
-                        int topCount = Convert.ToInt32(part.Expression, System.Globalization.CultureInfo.InvariantCulture);
-                        if (topCount < 0)
+                        try
                         {
-                            throw Error.InvalidOperation(SRResources.PositiveIntegerExpectedForODataQueryParameter, "$top", part.Expression);
+                            int topCount = Convert.ToInt32(part.Expression, System.Globalization.CultureInfo.InvariantCulture);
+                            if (topCount < 0)
+                            {
+                                throw new ParseException(
+                                    string.Format(CultureInfo.InvariantCulture, SRResources.PositiveIntegerExpectedForODataQueryParameter, "$top", part.Expression));
+                            }
+
+                            query = DynamicQueryable.Take(query, topCount);
                         }
-                        query = DynamicQueryable.Take(query, topCount);
+                        catch (FormatException e)
+                        {
+                            throw new ParseException(
+                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$top", e.Message));
+                        }
                         break;
                 }
             }

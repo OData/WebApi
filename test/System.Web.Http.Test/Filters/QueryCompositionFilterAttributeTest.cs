@@ -57,9 +57,23 @@ namespace System.Web.Http.Filters
 
         [Theory]
         [InlineData("$top=error")]
-        [InlineData("$filter=error")]
         [InlineData("$skip=-100")]
         public void OnActionExecutingThrowsForIncorrectTopQuery(string query)
+        {
+            // Arrange
+            const string baseAddress = "http://localhost/?{0}";
+            var request = new HttpRequestMessage(HttpMethod.Get, String.Format(baseAddress, query));
+            var actionContext = ContextUtil.GetHttpActionContext(request);
+
+            // Act & Assert
+            Assert.Throws<HttpRequestException>(
+                () => _filter.OnActionExecuting(actionContext),
+                "The query specified in the URI is not valid.");
+        }
+
+        [Theory]
+        [InlineData("$filter=error")]
+        public void OnActionExecutingThrowsForIncorrectFilterQuery(string query)
         {
             // Arrange
             const string baseAddress = "http://localhost/?{0}";

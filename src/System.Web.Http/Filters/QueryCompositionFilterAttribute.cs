@@ -59,15 +59,7 @@ namespace System.Web.Http.Filters
                         request.Properties.Add(QueryCompositionFilterAttribute.QueryKey, deserializedQuery);
                     }
                 }
-                catch (InvalidOperationException e)
-                {
-                    throw new HttpRequestException(SRResources.UriQueryStringInvalid, e);
-                }
                 catch (ParseException e)
-                {
-                    throw new HttpRequestException(SRResources.UriQueryStringInvalid, e);
-                }
-                catch (FormatException e)
                 {
                     throw new HttpRequestException(SRResources.UriQueryStringInvalid, e);
                 }

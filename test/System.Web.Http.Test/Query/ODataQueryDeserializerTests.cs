@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using Microsoft.TestCommon;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Query
@@ -40,6 +41,27 @@ namespace System.Web.Http.Query
                 "$orderby=UnitPrice desc",
                 "OrderByDescending(Param_0 => Param_0.UnitPrice)");
         }
+
+        [Fact]
+        public void OrderByAscendingThenDesscending()
+        {
+            VerifyQueryDeserialization(
+                "$orderby=UnitPrice desc, ProductName asc",
+                "OrderByDescending(Param_0 => Param_0.UnitPrice).ThenBy(Param_0 => Param_0.ProductName)");
+        }
+
+        [Theory]
+        [InlineData("UnitPrice desc, ProductName asc", "OrderByDescending(Param_0 => Param_0.UnitPrice).ThenBy(Param_0 => Param_0.ProductName)")]
+        [InlineData("UnitPrice desc, ProductName desc", "OrderByDescending(Param_0 => Param_0.UnitPrice).ThenByDescending(Param_0 => Param_0.ProductName)")]
+        [InlineData("UnitPrice     , ProductName ", "OrderBy(Param_0 => Param_0.UnitPrice).ThenBy(Param_0 => Param_0.ProductName)")]
+        [InlineData("Discontinued, UnitsOnOrder, DiscontinuedDate desc", "OrderBy(Param_0 => Param_0.Discontinued).ThenBy(Param_0 => Param_0.UnitsOnOrder).ThenByDescending(Param_0 => Param_0.DiscontinuedDate)")]
+        public void MultipleOrderBy(string clause, string expressionResult)
+        {
+            VerifyQueryDeserialization(
+               "$orderby=" + clause,
+               expressionResult);
+        }
+
         #endregion
 
         #region Inequalities
@@ -98,6 +120,21 @@ namespace System.Web.Http.Query
                 "$filter=UnitPrice le -5.00",
                 "Where(Param_0 => (Param_0.UnitPrice <= -5.00))");
         }
+
+        [Theory]
+        [InlineData("DateTimeProp eq datetime'2000-12-12T12:00'", "Where(Param_0 => (Param_0.DateTimeProp == 12/12/2000 12:00:00 PM))")]
+        [InlineData("DateTimeOffsetProp eq datetimeoffset'2002-10-10T17:00:00Z'", "Where(Param_0 => (Param_0.DateTimeOffsetProp == 10/10/2002 5:00:00 PM +00:00))")]
+        [InlineData("DateTimeOffsetProp eq DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp == Param_0.DateTimeOffsetProp))")]
+        [InlineData("DateTimeOffsetProp ne DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp != Param_0.DateTimeOffsetProp))")]
+        [InlineData("DateTimeOffsetProp ge DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp >= Param_0.DateTimeOffsetProp))")]
+        [InlineData("DateTimeOffsetProp le DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp <= Param_0.DateTimeOffsetProp))")]
+        public void DateInEqualities(string clause, string expectedExpression)
+        {
+            VerifyQueryDeserialization<DataTypes>(
+                "$filter=" + clause,
+                expectedExpression);
+        }
+
         #endregion
 
         #region Logical Operators
@@ -123,6 +160,22 @@ namespace System.Web.Http.Query
             VerifyQueryDeserialization(
                 "$filter=not (UnitPrice eq 5.00)",
                 "Where(Param_0 => Not((Param_0.UnitPrice == 5.00)))");
+        }
+
+        [Fact]
+        public void BoolNegation()
+        {
+            VerifyQueryDeserialization(
+                "$filter=not Discontinued",
+                "Where(Param_0 => Not(Param_0.Discontinued))");
+        }
+
+        [Fact]
+        public void NestedNegation()
+        {
+            VerifyQueryDeserialization(
+                "$filter=not (not(not    (Discontinued)))",
+                "Where(Param_0 => Not(Not(Not(Param_0.Discontinued))))");
         }
         #endregion
 
@@ -402,7 +455,7 @@ namespace System.Web.Http.Query
             {
                 VerifyQueryDeserialization<DataTypes>("$filter=TimeSpanProp ge time'invalid'", String.Empty);
             },
-            "String was not recognized as a valid TimeSpan. (at index 20)");
+            "Parse error in $filter. String was not recognized as a valid TimeSpan. (at index 20)");
         }
 
         [Fact]
@@ -446,7 +499,7 @@ namespace System.Web.Http.Query
                 VerifyQueryDeserialization<DataTypes>(
                  String.Format("$filter=ByteArrayProp eq binary'{0}'", "WXYZ"), String.Empty);
             },
-            "Input string was not in a correct format. (at index 23)");
+            "Parse error in $filter. Input string was not in a correct format. (at index 23)");
 
             // verify parse error for invalid hex literal (odd hex strings are not supported)
             Assert.Throws<ParseException>(delegate
@@ -454,7 +507,7 @@ namespace System.Web.Http.Query
                 VerifyQueryDeserialization<DataTypes>(
                  String.Format("$filter=ByteArrayProp eq binary'23A'", "XYZ"), String.Empty);
             },
-            "Invalid hexadecimal literal. (at index 23)");
+            "Parse error in $filter. Invalid hexadecimal literal. (at index 23)");
         }
 
         [Fact]
@@ -486,6 +539,22 @@ namespace System.Web.Http.Query
         #endregion
 
         #region Negative tests
+        [Theory]
+        [InlineData('+')]
+        [InlineData('*')]
+        [InlineData('%')]
+        [InlineData('[')]
+        [InlineData(']')]
+        public void InvalidCharactersInQuery_TokenizerFails(char ch)
+        {
+            Assert.Throws<ParseException>(delegate
+            {
+                string filter = string.Format("2 {0} 3", ch);
+                VerifyQueryDeserialization<DataTypes>("$filter=" + Uri.EscapeDataString(filter), String.Empty);
+            },
+            string.Format("Parse error in $filter. Syntax error '{0}' (at index 2)", ch));
+        }
+
         [Fact]
         public void InvalidTypeCreationExpression()
         {
@@ -494,14 +563,14 @@ namespace System.Web.Http.Query
             {
                 VerifyQueryDeserialization<DataTypes>("$filter=TimeSpanProp ge time'13:20:00", String.Empty);
             },
-            "Unterminated string literal (at index 29)");
+            "Parse error in $filter. Unterminated string literal (at index 29)");
 
             // use of parens rather than quotes
             Assert.Throws<ParseException>(delegate
             {
                 VerifyQueryDeserialization<DataTypes>("$filter=TimeSpanProp ge time(13:20:00)", String.Empty);
             },
-            "Invalid 'time' type creation expression. (at index 16)");
+            "Parse error in $filter. Invalid 'time' type creation expression. (at index 16)");
 
             // verify the exception returned when type expression that isn't
             // one of the supported keyword types is used. In this case it falls
@@ -510,7 +579,7 @@ namespace System.Web.Http.Query
             {
                 VerifyQueryDeserialization("$filter=math'123' eq true", String.Empty);
             },
-            "No property or field 'math' exists in type 'Product' (at index 0)");
+            "Parse error in $filter. No property or field 'math' exists in type 'Product' (at index 0)");
         }
 
         [Fact]
@@ -521,27 +590,27 @@ namespace System.Web.Http.Query
             {
                 VerifyQueryDeserialization("$filter=Startswith(ProductName, 'Abc') eq true", String.Empty);
             },
-            "Unknown identifier 'Startswith' (at index 0)");
+            "Parse error in $filter. Unknown identifier 'Startswith' (at index 0)");
 
             // attempt to access a method defined on the entity type
             Assert.Throws<ParseException>(delegate
             {
                 VerifyQueryDeserialization<DataTypes>("$filter=Inaccessable() eq \"Bar\"", String.Empty);
             },
-            "Unknown identifier 'Inaccessable' (at index 0)");
+            "Parse error in $filter. Unknown identifier 'Inaccessable' (at index 0)");
 
             // verify that Type methods like string.PadLeft, etc. are not supported.
             Assert.Throws<ParseException>(delegate
             {
                 VerifyQueryDeserialization("$filter=ProductName/PadLeft(100000000000000000000) eq \"Foo\"", String.Empty);
             },
-            "Unknown identifier 'PadLeft' (at index 12)");
+            "Parse error in $filter. Unknown identifier 'PadLeft' (at index 12)");
         }
 
         [Fact]
         public void InvalidQueryParameterToTop()
         {
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<ParseException>(
                 () => VerifyQueryDeserialization("$top=-42", String.Empty),
                 "The OData query parameter '$top' has an invalid value. The value should be a positive integer. The provided value was '-42'");
         }
@@ -549,17 +618,17 @@ namespace System.Web.Http.Query
         [Fact]
         public void InvalidQueryParameterToSkip()
         {
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<ParseException>(
                 () => VerifyQueryDeserialization("$skip=-42", String.Empty),
                 "The OData query parameter '$skip' has an invalid value. The value should be a positive integer. The provided value was '-42'");
         }
 
         [Fact]
-        public void InvalidFunctionCall_DoesntStartWithOpenParen()
+        public void InvalidProperty_NotExists()
         {
             Assert.Throws<ParseException>(
-                () => VerifyQueryDeserialization("$filter=length%n(ProductName) eq 12", String.Empty),
-                "'(' expected (at index 6)");
+                () => VerifyQueryDeserialization("$filter=length mod n(ProductName) eq 12", String.Empty),
+                "Parse error in $filter. No property or field 'length' exists in type 'Product' (at index 0)");
         }
 
         [Fact]
@@ -567,7 +636,18 @@ namespace System.Web.Http.Query
         {
             Assert.Throws<ParseException>(
                 () => VerifyQueryDeserialization("$filter=length() eq 12", String.Empty),
-                "No applicable method 'Length' exists in type 'System.String' (at index 0)");
+                "Parse error in $filter. No applicable method 'Length' exists in type 'System.String' (at index 0)");
+        }
+
+        [Theory]
+        [InlineData("(2 add 3 eq 2", 13)]
+        [InlineData("(2 add (3) eq 2", 15)]
+        [InlineData("(((( 2 eq 2", 11)]
+        public void Missing_Parantheses(string clause, int index)
+        {
+            Assert.Throws<ParseException>(
+                () => VerifyQueryDeserialization("$filter=" + clause, String.Empty),
+                String.Format("Parse error in $filter. ')' or operator expected (at index {0})", index));
         }
         #endregion
 

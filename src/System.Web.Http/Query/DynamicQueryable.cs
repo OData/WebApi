@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -136,13 +137,9 @@ namespace System.Web.Http.Query
                 return Expression.Lambda(GetFuncType(typeArgs), body, parameters);
             }
 
-            [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly", Justification = "Arguments are provided internally by the parser's ParserLambda methods.")]
             public static Type GetFuncType(params Type[] typeArgs)
             {
-                if (typeArgs == null || typeArgs.Length < 1 || typeArgs.Length > 5)
-                {
-                    throw new ArgumentException();
-                }
+                Contract.Assert(typeArgs != null && typeArgs.Length >= 1 && typeArgs.Length <= 5);
 
                 return funcTypes[typeArgs.Length - 1].MakeGenericType(typeArgs);
             }
@@ -171,32 +168,25 @@ namespace System.Web.Http.Query
                 StringLiteral,
                 IntegerLiteral,
                 RealLiteral,
-                Exclamation,
-                Percent,
-                Amphersand,
+                Not,
+                Modulo,
                 OpenParen,
                 CloseParen,
-                Asterisk,
-                Plus,
+                Multiply,
+                Add,
+                Sub,
                 Comma,
                 Minus,
                 Dot,
-                Slash,
-                Colon,
+                Divide,
                 LessThan,
-                Equal,
                 GreaterThan,
-                Question,
-                OpenBracket,
-                CloseBracket,
-                Bar,
-                ExclamationEqual,
-                DoubleAmphersand,
+                NotEqual,
+                And,
                 LessThanEqual,
-                LessGreater,
-                DoubleEqual,
+                Equal,
                 GreaterThanEqual,
-                DoubleBar
+                Or
             }
 
             internal class MappedMemberInfo
@@ -232,11 +222,8 @@ namespace System.Web.Http.Query
                 void F(double x, double y);
                 void F(decimal x, decimal y);
                 void F(int? x, int? y);
-                [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Legacy code.")]
                 void F(uint? x, uint? y);
-                [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Legacy code.")]
                 void F(long? x, long? y);
-                [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Legacy code.")]
                 void F(ulong? x, ulong? y);
                 void F(float? x, float? y);
                 void F(double? x, double? y);
@@ -253,7 +240,6 @@ namespace System.Web.Http.Query
                 void F(DateTime? x, DateTime? y);
                 void F(TimeSpan? x, TimeSpan? y);
                 void F(DateTimeOffset x, DateTimeOffset y);
-                [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Legacy code.")]
                 void F(DateTimeOffset? x, DateTimeOffset? y);
             }
 
@@ -272,7 +258,6 @@ namespace System.Web.Http.Query
                 void F(DateTime? x, TimeSpan? y);
                 void F(TimeSpan? x, TimeSpan? y);
                 void F(DateTimeOffset x, TimeSpan y);
-                [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Legacy code.")]
                 void F(DateTimeOffset? x, TimeSpan? y);
             }
 
@@ -281,7 +266,6 @@ namespace System.Web.Http.Query
                 void F(DateTime x, DateTime y);
                 void F(DateTime? x, DateTime? y);
                 void F(DateTimeOffset x, DateTimeOffset y);
-                [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Legacy code.")]
                 void F(DateTimeOffset? x, DateTimeOffset? y);
             }
 
@@ -303,38 +287,6 @@ namespace System.Web.Http.Query
             {
                 void F(bool x);
                 void F(bool? x);
-            }
-
-            interface IEnumerableSignatures
-            {
-                void Where(bool predicate);
-                void Any();
-                void Any(bool predicate);
-                void All(bool predicate);
-                void Count();
-                void Count(bool predicate);
-                void Min(object selector);
-                void Max(object selector);
-                void Sum(int selector);
-                void Sum(int? selector);
-                void Sum(long selector);
-                void Sum(long? selector);
-                void Sum(float selector);
-                void Sum(float? selector);
-                void Sum(double selector);
-                void Sum(double? selector);
-                void Sum(decimal selector);
-                void Sum(decimal? selector);
-                void Average(int selector);
-                void Average(int? selector);
-                void Average(long selector);
-                void Average(long? selector);
-                void Average(float selector);
-                void Average(float? selector);
-                void Average(double selector);
-                void Average(double? selector);
-                void Average(decimal selector);
-                void Average(decimal? selector);
             }
 
             static readonly Expression _trueLiteral = Expression.Constant(true);
@@ -413,7 +365,7 @@ namespace System.Web.Http.Query
 
                 if (resultType != null)
                 {
-                    if ((expr = PromoteExpression(expr, resultType, true)) == null)
+                    if ((expr = PromoteExpression(expr, resultType, exact: true)) == null)
                     {
                         throw ParseError(exprPos, string.Format(CultureInfo.CurrentCulture, SRResources.ExpressionTypeMismatch, GetTypeName(resultType)));
                     }
@@ -423,7 +375,6 @@ namespace System.Web.Http.Query
                 return expr;
             }
 
-#pragma warning disable 0219
             public IEnumerable<DynamicOrdering> ParseOrdering()
             {
                 List<DynamicOrdering> orderings = new List<DynamicOrdering>();
@@ -433,11 +384,11 @@ namespace System.Web.Http.Query
                     Expression expr = ParseExpression();
                     bool ascending = true;
 
-                    if (TokenIdentifierIs("asc") || TokenIdentifierIs("ascending"))
+                    if (TokenIdentifierIs("asc"))
                     {
                         NextToken();
                     }
-                    else if (TokenIdentifierIs("desc") || TokenIdentifierIs("descending"))
+                    else if (TokenIdentifierIs("desc"))
                     {
                         NextToken();
                         ascending = false;
@@ -445,10 +396,10 @@ namespace System.Web.Http.Query
 
                     orderings.Add(
                         new DynamicOrdering
-                    {
-                        Selector = expr,
-                        Ascending = ascending
-                    });
+                        {
+                            Selector = expr,
+                            Ascending = ascending
+                        });
 
                     if (_token.id != TokenId.Comma)
                     {
@@ -461,7 +412,6 @@ namespace System.Web.Http.Query
                 ValidateToken(TokenId.End, SRResources.SyntaxError);
                 return orderings;
             }
-#pragma warning restore 0219
 
             Expression ParseExpression()
             {
@@ -469,11 +419,12 @@ namespace System.Web.Http.Query
                 return expr;
             }
 
-            // ||, or operator
+            // or operator
             Expression ParseLogicalOr()
             {
                 Expression left = ParseLogicalAnd();
-                while (_token.id == TokenId.DoubleBar || TokenIdentifierIs("or"))
+
+                while (_token.id == TokenId.Or)
                 {
                     Token op = _token;
                     NextToken();
@@ -485,12 +436,12 @@ namespace System.Web.Http.Query
                 return left;
             }
 
-            // &&, and operator
+            // and operator
             Expression ParseLogicalAnd()
             {
                 Expression left = ParseComparison();
 
-                while (_token.id == TokenId.DoubleAmphersand || TokenIdentifierIs("and"))
+                while (_token.id == TokenId.And)
                 {
                     Token op = _token;
                     NextToken();
@@ -502,17 +453,14 @@ namespace System.Web.Http.Query
                 return left;
             }
 
-            [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Legacy code.")]
-            // =, ==, !=, <>, >, >=, <, <= operators
+            // eq, ne, gt, ge, lt, le operators
             Expression ParseComparison()
             {
                 Expression left = ParseAdditive();
 
                 while (
                     _token.id == TokenId.Equal ||
-                    _token.id == TokenId.DoubleEqual ||
-                    _token.id == TokenId.ExclamationEqual ||
-                    _token.id == TokenId.LessGreater ||
+                    _token.id == TokenId.NotEqual ||
                     _token.id == TokenId.GreaterThan ||
                     _token.id == TokenId.GreaterThanEqual ||
                     _token.id == TokenId.LessThan ||
@@ -524,9 +472,7 @@ namespace System.Web.Http.Query
 
                     bool isEquality =
                         op.id == TokenId.Equal ||
-                        op.id == TokenId.DoubleEqual ||
-                        op.id == TokenId.ExclamationEqual ||
-                        op.id == TokenId.LessGreater;
+                        op.id == TokenId.NotEqual;
 
                     if (isEquality && !left.Type.IsValueType && !right.Type.IsValueType)
                     {
@@ -560,15 +506,12 @@ namespace System.Web.Http.Query
                         CheckAndPromoteOperands(isEquality ? typeof(IEqualitySignatures) : typeof(IRelationalSignatures),
                             op.text, ref left, ref right, op.pos);
                     }
-
                     switch (op.id)
                     {
                         case TokenId.Equal:
-                        case TokenId.DoubleEqual:
                             left = GenerateEqual(left, right);
                             break;
-                        case TokenId.ExclamationEqual:
-                        case TokenId.LessGreater:
+                        case TokenId.NotEqual:
                             left = GenerateNotEqual(left, right);
                             break;
                         case TokenId.GreaterThan:
@@ -615,15 +558,14 @@ namespace System.Web.Http.Query
                 return Expression.Convert(expr, underlyingType);
             }
 
-            // +, -, & operators
+            // add, sub operators
             Expression ParseAdditive()
             {
                 Expression left = ParseMultiplicative();
 
                 while (
-                    _token.id == TokenId.Plus ||
-                    _token.id == TokenId.Minus ||
-                    _token.id == TokenId.Amphersand)
+                    _token.id == TokenId.Add ||
+                    _token.id == TokenId.Sub)
                 {
                     Token op = _token;
                     NextToken();
@@ -631,37 +573,28 @@ namespace System.Web.Http.Query
 
                     switch (op.id)
                     {
-                        case TokenId.Plus:
-                            if (left.Type == typeof(string) || right.Type == typeof(string))
-                            {
-                                goto case TokenId.Amphersand;
-                            }
-
+                        case TokenId.Add:
                             CheckAndPromoteOperands(typeof(IAddSignatures), op.text, ref left, ref right, op.pos);
                             left = GenerateAdd(left, right);
                             break;
-                        case TokenId.Minus:
+                        case TokenId.Sub:
                             CheckAndPromoteOperands(typeof(ISubtractSignatures), op.text, ref left, ref right, op.pos);
                             left = GenerateSubtract(left, right);
-                            break;
-                        case TokenId.Amphersand:
-                            left = GenerateStringConcat(left, right);
                             break;
                     }
                 }
                 return left;
             }
 
-            // *, /, %, mod operators
+            // mul, div, mod operators
             Expression ParseMultiplicative()
             {
                 Expression left = ParseUnary();
 
                 while (
-                    _token.id == TokenId.Asterisk ||
-                    _token.id == TokenId.Slash ||
-                    _token.id == TokenId.Percent ||
-                    TokenIdentifierIs("mod"))
+                    _token.id == TokenId.Multiply ||
+                    _token.id == TokenId.Divide ||
+                    _token.id == TokenId.Modulo)
                 {
                     Token op = _token;
                     NextToken();
@@ -671,14 +604,13 @@ namespace System.Web.Http.Query
 
                     switch (op.id)
                     {
-                        case TokenId.Asterisk:
+                        case TokenId.Multiply:
                             left = Expression.Multiply(left, right);
                             break;
-                        case TokenId.Slash:
+                        case TokenId.Divide:
                             left = Expression.Divide(left, right);
                             break;
-                        case TokenId.Percent:
-                        case TokenId.Identifier:
+                        case TokenId.Modulo:
                             left = Expression.Modulo(left, right);
                             break;
                     }
@@ -686,18 +618,16 @@ namespace System.Web.Http.Query
                 return left;
             }
 
-            // -, !, not unary operators
+            // -, not unary operators
             Expression ParseUnary()
             {
-                if (
-                    _token.id == TokenId.Minus ||
-                    _token.id == TokenId.Exclamation ||
-                    TokenIdentifierIs("not"))
+                if (_token.id == TokenId.Minus || _token.id == TokenId.Not)
                 {
                     Token op = _token;
                     NextToken();
-                    if (op.id == TokenId.Minus && (_token.id == TokenId.IntegerLiteral ||
-                        _token.id == TokenId.RealLiteral))
+
+                    if (op.id == TokenId.Minus &&
+                        (_token.id == TokenId.IntegerLiteral || _token.id == TokenId.RealLiteral))
                     {
                         _token.text = "-" + _token.text;
                         _token.pos = op.pos;
@@ -733,10 +663,6 @@ namespace System.Web.Http.Query
                     {
                         NextToken();
                         expr = ParseMemberAccess(null, expr);
-                    }
-                    else if (_token.id == TokenId.OpenBracket)
-                    {
-                        expr = ParseElementAccess(expr);
                     }
                     else
                     {
@@ -788,7 +714,6 @@ namespace System.Web.Http.Query
                 return CreateLiteral(s, s);
             }
 
-            [SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Justification = "Legacy code.")]
             Expression ParseIntegerLiteral()
             {
                 ValidateToken(TokenId.IntegerLiteral);
@@ -802,7 +727,6 @@ namespace System.Web.Http.Query
                     }
 
                     NextToken();
-
                     if (_token.text == "L" || _token.text == "l")
                     {
                         NextToken();
@@ -829,7 +753,6 @@ namespace System.Web.Http.Query
                 else
                 {
                     long value;
-
                     if (!Int64.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value))
                     {
                         throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.InvalidIntegerLiteral, text));
@@ -852,14 +775,12 @@ namespace System.Web.Http.Query
                 }
             }
 
-            [SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Justification = "Legacy code.")]
             Expression ParseRealLiteral()
             {
                 ValidateToken(TokenId.RealLiteral);
                 string text = _token.text;
                 object value = null;
                 char last = text[text.Length - 1];
-
                 if (last == 'F' || last == 'f')
                 {
                     float f;
@@ -897,6 +818,7 @@ namespace System.Web.Http.Query
                 {
                     throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.InvalidRealLiteral, text));
                 }
+
                 NextToken();
                 return CreateLiteral(value, text);
             }
@@ -918,7 +840,6 @@ namespace System.Web.Http.Query
                 return e;
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "Legacy code.")]
             Expression ParseIdentifier()
             {
                 ValidateToken(TokenId.Identifier);
@@ -926,32 +847,27 @@ namespace System.Web.Http.Query
                 object value;
                 if (_keywords.TryGetValue(_token.text, out value))
                 {
-                    if (value is Type)
+                    Type constructedType = value as Type;
+                    if (constructedType != null)
                     {
-                        return ParseTypeConstruction((Type)value);
+                        return ParseTypeConstruction(constructedType);
                     }
 
                     NextToken();
                     return (Expression)value;
                 }
 
-                if (_symbols.TryGetValue(_token.text, out value))
+                object symbolValue;
+                if (_symbols.TryGetValue(_token.text, out symbolValue))
                 {
-                    Expression expr = value as Expression;
+                    Expression expr = symbolValue as Expression;
                     if (expr == null)
                     {
-                        expr = Expression.Constant(value);
+                        expr = Expression.Constant(symbolValue);
                     }
 
                     NextToken();
                     return expr;
-                }
-
-                // See if the token is a mapped function call
-                MappedMemberInfo mappedFunction = MapFunction(_token.text);
-                if (mappedFunction != null)
-                {
-                    return ParseMappedFunction(mappedFunction);
                 }
 
                 if (_it != null)
@@ -962,7 +878,7 @@ namespace System.Web.Http.Query
                 throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.UnknownIdentifier, _token.text));
             }
 
-            MappedMemberInfo MapFunction(string functionName)
+            static MappedMemberInfo MapFunction(string functionName)
             {
                 MappedMemberInfo mappedMember = MapStringFunction(functionName);
                 if (mappedMember != null)
@@ -985,8 +901,7 @@ namespace System.Web.Http.Query
                 return null;
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Legacy code.")]
-            MappedMemberInfo MapStringFunction(string functionName)
+            static MappedMemberInfo MapStringFunction(string functionName)
             {
                 if (functionName == "startswith")
                 {
@@ -1044,8 +959,7 @@ namespace System.Web.Http.Query
                 return null;
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Legacy code.")]
-            MappedMemberInfo MapDateFunction(string functionName)
+            static MappedMemberInfo MapDateFunction(string functionName)
             {
                 // date functions
                 if (functionName == "day")
@@ -1076,8 +990,7 @@ namespace System.Web.Http.Query
                 return null;
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Legacy code.")]
-            MappedMemberInfo MapMathFunction(string functionName)
+            static MappedMemberInfo MapMathFunction(string functionName)
             {
                 if (functionName == "round")
                 {
@@ -1159,17 +1072,13 @@ namespace System.Web.Http.Query
                 return typeExpression;
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "Legacy code.")]
-            Expression ParseMappedFunction(MappedMemberInfo mappedMember)
+            Expression ParseMappedFunction(MappedMemberInfo mappedMember, int errorPos)
             {
                 Type type = mappedMember.MappedType;
                 string mappedMemberName = mappedMember.MemberName;
-
-                int errorPos = _token.pos;
                 Expression[] args;
                 Expression instance = null;
 
-                NextToken();
                 if (_token.id == TokenId.OpenParen)
                 {
                     args = ParseArgumentList();
@@ -1203,7 +1112,6 @@ namespace System.Web.Http.Query
 
                 if (mappedMember.IsMethod)
                 {
-                    // a mapped function
                     MethodBase mb;
 
                     switch (FindMethod(type, mappedMemberName, mappedMember.IsStatic, args, out mb))
@@ -1243,13 +1151,12 @@ namespace System.Web.Http.Query
                             string.Format(CultureInfo.CurrentCulture, SRResources.UnknownPropertyOrField, mappedMemberName, GetTypeName(type)));
                     }
 
-                    return member is PropertyInfo ?
+                    return member.MemberType == MemberTypes.Property ?
                         Expression.Property(instance, (PropertyInfo)member) :
                         Expression.Field(instance, (FieldInfo)member);
                 }
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "Legacy code.")]
             Expression ParseMemberAccess(Type type, Expression instance)
             {
                 if (instance != null)
@@ -1263,17 +1170,16 @@ namespace System.Web.Http.Query
 
                 if (_token.id == TokenId.OpenParen)
                 {
-                    if (instance != null && type != typeof(string))
+                    // See if the token is a mapped function call
+                    MappedMemberInfo mappedFunction = MapFunction(id);
+                    if (mappedFunction != null)
                     {
-                        Type enumerableType = FindGenericType(typeof(IEnumerable<>), type);
-                        if (enumerableType != null)
-                        {
-                            Type elementType = enumerableType.GetGenericArguments()[0];
-                            return ParseAggregate(instance, elementType, id, errorPos);
-                        }
+                        return ParseMappedFunction(mappedFunction, errorPos);
                     }
-
-                    throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.UnknownIdentifier, id));
+                    else
+                    {
+                        throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.UnknownIdentifier, id));
+                    }
                 }
                 else
                 {
@@ -1289,72 +1195,14 @@ namespace System.Web.Http.Query
                             }
                         }
 
-                        throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.UnknownPropertyOrField,
-                            id, GetTypeName(type)));
+                        throw ParseError(errorPos,
+                            string.Format(CultureInfo.CurrentCulture, SRResources.UnknownPropertyOrField, id, GetTypeName(type)));
                     }
-                    return member is PropertyInfo ?
+
+                    return member.MemberType == MemberTypes.Property ?
                         Expression.Property(instance, (PropertyInfo)member) :
                         Expression.Field(instance, (FieldInfo)member);
                 }
-            }
-
-            static Type FindGenericType(Type generic, Type type)
-            {
-                while (type != null && type != typeof(object))
-                {
-                    if (type.IsGenericType && type.GetGenericTypeDefinition() == generic)
-                    {
-                        return type;
-                    }
-
-                    if (generic.IsInterface)
-                    {
-                        foreach (Type intfType in type.GetInterfaces())
-                        {
-                            Type found = FindGenericType(generic, intfType);
-                            if (found != null)
-                            {
-                                return found;
-                            }
-                        }
-                    }
-                    type = type.BaseType;
-                }
-                return null;
-            }
-
-            Expression ParseAggregate(Expression instance, Type elementType, string methodName, int errorPos)
-            {
-                ParameterExpression outerIt = _it;
-                ParameterExpression innerIt = Expression.Parameter(elementType, "");
-                _it = innerIt;
-                Expression[] args = ParseArgumentList();
-                _it = outerIt;
-                MethodBase signature;
-
-                if (FindMethod(typeof(IEnumerableSignatures), methodName, false, args, out signature) != 1)
-                {
-                    throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.NoApplicableAggregate, methodName));
-                }
-
-                Type[] typeArgs;
-                if (signature.Name == "Min" || signature.Name == "Max")
-                {
-                    typeArgs = new Type[] { elementType, args[0].Type };
-                }
-                else
-                {
-                    typeArgs = new Type[] { elementType };
-                }
-                if (args.Length == 0)
-                {
-                    args = new Expression[] { instance };
-                }
-                else
-                {
-                    args = new Expression[] { instance, DynamicExpression.Lambda(args[0], innerIt) };
-                }
-                return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
             }
 
             Expression[] ParseArgumentList()
@@ -1382,47 +1230,6 @@ namespace System.Web.Http.Query
                     NextToken();
                 }
                 return argList.ToArray();
-            }
-
-            Expression ParseElementAccess(Expression expr)
-            {
-                int errorPos = _token.pos;
-                ValidateToken(TokenId.OpenBracket, SRResources.OpenParenExpected);
-                NextToken();
-                Expression[] args = ParseArguments();
-                ValidateToken(TokenId.CloseBracket, SRResources.CloseBracketOrCommaExpected);
-                NextToken();
-                if (expr.Type.IsArray)
-                {
-                    if (expr.Type.GetArrayRank() != 1 || args.Length != 1)
-                    {
-                        throw ParseError(errorPos, SRResources.CannotIndexMultiDimArray);
-                    }
-
-                    Expression index = PromoteExpression(args[0], typeof(int), true);
-
-                    if (index == null)
-                    {
-                        throw ParseError(errorPos, SRResources.InvalidIndex);
-                    }
-
-                    return Expression.ArrayIndex(expr, index);
-                }
-                else
-                {
-                    MethodBase mb;
-                    switch (FindIndexer(expr.Type, args, out mb))
-                    {
-                        case 0:
-                            throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.NoApplicableIndexer,
-                                GetTypeName(expr.Type)));
-                        case 1:
-                            return Expression.Call(expr, (MethodInfo)mb, args);
-                        default:
-                            throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.AmbiguousIndexerInvocation,
-                                GetTypeName(expr.Type)));
-                    }
-                }
             }
 
             static bool IsNullableType(Type type)
@@ -1460,7 +1267,6 @@ namespace System.Web.Http.Query
             static int GetNumericTypeKind(Type type)
             {
                 type = GetNonNullableType(type);
-
                 if (type.IsEnum)
                 {
                     return 0;
@@ -1498,7 +1304,6 @@ namespace System.Web.Http.Query
                 Expression[] args = new Expression[] { expr };
 
                 MethodBase method;
-
                 if (FindMethod(signatures, "F", false, args, out method) != 1)
                 {
                     throw ParseError(errorPos,
@@ -1513,7 +1318,6 @@ namespace System.Web.Http.Query
                 Expression[] args = new Expression[] { left, right };
 
                 MethodBase method;
-
                 if (FindMethod(signatures, "F", false, args, out method) != 1)
                 {
                     throw IncompatibleOperandsError(opName, left, right, errorPos);
@@ -1566,26 +1370,7 @@ namespace System.Web.Http.Query
                         return count;
                     }
                 }
-                method = null;
-                return 0;
-            }
 
-            int FindIndexer(Type type, Expression[] args, out MethodBase method)
-            {
-                foreach (Type t in SelfAndBaseTypes(type))
-                {
-                    MemberInfo[] members = t.GetDefaultMembers();
-                    if (members.Length != 0)
-                    {
-                        IEnumerable<MethodBase> methods = members.
-                            OfType<PropertyInfo>().
-                            Select(p => (MethodBase)p.GetGetMethod()).
-                            Where(m => m != null);
-                        int count = FindBestMethod(methods, args, out method);
-                        if (count != 0)
-                            return count;
-                    }
-                }
                 method = null;
                 return 0;
             }
@@ -1695,8 +1480,6 @@ namespace System.Web.Http.Query
                 return true;
             }
 
-            [SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Justification = "Legacy code.")]
-            [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "Legacy code.")]
             Expression PromoteExpression(Expression expr, Type type, bool exact)
             {
                 if (expr.Type == type)
@@ -1704,9 +1487,9 @@ namespace System.Web.Http.Query
                     return expr;
                 }
 
-                if (expr is ConstantExpression)
+                ConstantExpression ce = expr as ConstantExpression;
+                if (ce != null)
                 {
-                    ConstantExpression ce = (ConstantExpression)expr;
                     if (ce == _nullLiteral)
                     {
                         if (!type.IsValueType || IsNullableType(type))
@@ -2159,24 +1942,6 @@ namespace System.Web.Http.Query
                 return Expression.Subtract(left, right);
             }
 
-            static Expression GenerateStringConcat(Expression left, Expression right)
-            {
-                if (left.Type.IsValueType)
-                {
-                    left = Expression.Convert(left, typeof(object));
-                }
-
-                if (right.Type.IsValueType)
-                {
-                    right = Expression.Convert(right, typeof(object));
-                }
-
-                return Expression.Call(
-                    null,
-                    typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object) }),
-                    new[] { left, right });
-            }
-
             static MethodInfo GetStaticMethod(string methodName, Expression left, Expression right)
             {
                 return left.Type.GetMethod(methodName, new[] { left.Type, right.Type });
@@ -2216,22 +1981,6 @@ namespace System.Web.Http.Query
 
                 switch (_ch)
                 {
-                    case '%':
-                        NextChar();
-                        t = TokenId.Percent;
-                        break;
-                    case '&':
-                        NextChar();
-                        if (_ch == '&')
-                        {
-                            NextChar();
-                            t = TokenId.DoubleAmphersand;
-                        }
-                        else
-                        {
-                            t = TokenId.Amphersand;
-                        }
-                        break;
                     case '(':
                         NextChar();
                         t = TokenId.OpenParen;
@@ -2251,34 +2000,6 @@ namespace System.Web.Http.Query
                     case '/':
                         NextChar();
                         t = TokenId.Dot;
-                        break;
-                    case ':':
-                        NextChar();
-                        t = TokenId.Colon;
-                        break;
-                    case '?':
-                        NextChar();
-                        t = TokenId.Question;
-                        break;
-                    case '[':
-                        NextChar();
-                        t = TokenId.OpenBracket;
-                        break;
-                    case ']':
-                        NextChar();
-                        t = TokenId.CloseBracket;
-                        break;
-                    case '|':
-                        NextChar();
-                        if (_ch == '|')
-                        {
-                            NextChar();
-                            t = TokenId.DoubleBar;
-                        }
-                        else
-                        {
-                            t = TokenId.Bar;
-                        }
                         break;
                     case '"':
                     case '\'':
@@ -2336,12 +2057,10 @@ namespace System.Web.Http.Query
                             {
                                 t = TokenId.RealLiteral;
                                 NextChar();
-
                                 if (_ch == '+' || _ch == '-')
                                 {
                                     NextChar();
                                 }
-
                                 ValidateDigit();
                                 do
                                 {
@@ -2369,43 +2088,45 @@ namespace System.Web.Http.Query
                 _token.id = ReclassifyToken(_token);
             }
 
-            [SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Justification = "Legacy code.")]
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Legacy code.")]
-            TokenId ReclassifyToken(Token token)
+            static TokenId ReclassifyToken(Token token)
             {
                 if (token.id == TokenId.Identifier)
                 {
+                    if (token.text == "or")
+                    {
+                        return TokenId.Or;
+                    }
                     if (token.text == "add")
                     {
-                        return TokenId.Plus;
+                        return TokenId.Add;
                     }
                     else if (token.text == "and")
                     {
-                        return TokenId.DoubleAmphersand;
+                        return TokenId.And;
                     }
                     else if (token.text == "div")
                     {
-                        return TokenId.Slash;
+                        return TokenId.Divide;
                     }
                     else if (token.text == "sub")
                     {
-                        return TokenId.Minus;
+                        return TokenId.Sub;
                     }
                     else if (token.text == "mul")
                     {
-                        return TokenId.Asterisk;
+                        return TokenId.Multiply;
                     }
                     else if (token.text == "mod")
                     {
-                        return TokenId.Percent;
+                        return TokenId.Modulo;
                     }
                     else if (token.text == "ne")
                     {
-                        return TokenId.ExclamationEqual;
+                        return TokenId.NotEqual;
                     }
                     else if (token.text == "not")
                     {
-                        return TokenId.Exclamation;
+                        return TokenId.Not;
                     }
                     else if (token.text == "le")
                     {
@@ -2417,11 +2138,7 @@ namespace System.Web.Http.Query
                     }
                     else if (token.text == "eq")
                     {
-                        return TokenId.DoubleEqual;
-                    }
-                    else if (token.text == "eq")
-                    {
-                        return TokenId.DoubleEqual;
+                        return TokenId.Equal;
                     }
                     else if (token.text == "ge")
                     {

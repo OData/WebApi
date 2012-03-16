@@ -19,7 +19,7 @@ namespace System.Web.Http.ContentNegotiation
 
             Mock<IContentNegotiator> selector = new Mock<IContentNegotiator>();
             selector.Setup(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>()))
-                .Returns(new NegotiationResult(new XmlMediaTypeFormatter(), null));
+                .Returns(new ContentNegotiationResult(new XmlMediaTypeFormatter(), null));
 
             configuration.ServiceResolver.SetService(typeof(IContentNegotiator), selector.Object);
 

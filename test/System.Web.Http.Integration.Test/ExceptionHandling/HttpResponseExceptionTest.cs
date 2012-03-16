@@ -174,7 +174,7 @@ namespace System.Web.Http.ExceptionHandling
             _throwAt = throwAt;
         }
 
-        public override NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
+        public override ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
             ExceptionTestsUtility.CheckForThrow(_throwAt, "ContentNegotiatorNegotiate");
 

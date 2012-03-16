@@ -42,7 +42,7 @@ namespace System.Web.Http.Tracing.Tracers
                 n =>
                 n.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(),
                             It.IsAny<IEnumerable<MediaTypeFormatter>>())).Returns(
-                                new NegotiationResult(new JsonMediaTypeFormatter(), expectedMediaType));
+                                new ContentNegotiationResult(new JsonMediaTypeFormatter(), expectedMediaType));
 
             // Act
             var result = ((IContentNegotiator)_tracer).Negotiate(typeof(int), _request, new MediaTypeFormatter[0]);
@@ -60,7 +60,7 @@ namespace System.Web.Http.Tracing.Tracers
                 n =>
                 n.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(),
                             It.IsAny<IEnumerable<MediaTypeFormatter>>())).Returns(
-                                new NegotiationResult(expectedFormatter, null));
+                                new ContentNegotiationResult(expectedFormatter, null));
 
             // Act
             var result = ((IContentNegotiator)_tracer).Negotiate(typeof(int), _request, new MediaTypeFormatter[0]);
@@ -78,7 +78,7 @@ namespace System.Web.Http.Tracing.Tracers
                 n =>
                 n.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(),
                             It.IsAny<IEnumerable<MediaTypeFormatter>>())).Returns(
-                                new NegotiationResult(expectedFormatter, null));
+                                new ContentNegotiationResult(expectedFormatter, null));
 
             // Act
             var result = ((IContentNegotiator)_tracer).Negotiate(typeof(int), _request, new MediaTypeFormatter[0]);
@@ -96,7 +96,7 @@ namespace System.Web.Http.Tracing.Tracers
                 n =>
                 n.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(),
                             It.IsAny<IEnumerable<MediaTypeFormatter>>())).Returns(
-                                new NegotiationResult(expectedFormatter, null));
+                                new ContentNegotiationResult(expectedFormatter, null));
 
             // Act
             var result = ((IContentNegotiator)_tracer).Negotiate(typeof(int), _request, new MediaTypeFormatter[0]);
@@ -131,7 +131,7 @@ namespace System.Web.Http.Tracing.Tracers
                 n =>
                 n.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(),
                             It.IsAny<IEnumerable<MediaTypeFormatter>>())).Returns(
-                                new NegotiationResult(expectedFormatter, null));
+                                new ContentNegotiationResult(expectedFormatter, null));
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(_request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin },

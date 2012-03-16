@@ -23,6 +23,6 @@ namespace System.Net.Http.Formatting
         /// <param name="formatters">The set of <see cref="MediaTypeFormatter"/> objects from which to choose.</param>
         /// <returns>The result of the negotiation containing the most appropriate <see cref="MediaTypeFormatter"/> instance,
         /// or <c>null</c> if there is no appropriate formatter.</returns>
-        NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters);
+        ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters);
     }
 }

@@ -19,7 +19,7 @@ namespace System.Net.Http.Formatting
         /// <param name="formatters">The set of <see cref="MediaTypeFormatter"/> objects from which to choose.</param>
         /// <returns>The result of the negotiation containing the most appropriate <see cref="MediaTypeFormatter"/> instance,
         /// or <c>null</c> if there is no appropriate formatter.</returns>
-        public virtual NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
+        public virtual ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
             if (type == null)
             {
@@ -39,7 +39,7 @@ namespace System.Net.Http.Formatting
             if (formatter != null)
             {
                 formatter = formatter.GetPerRequestFormatterInstance(type, request, mediaType);
-                return new NegotiationResult(formatter, mediaType);
+                return new ContentNegotiationResult(formatter, mediaType);
             }
             return null;
         }

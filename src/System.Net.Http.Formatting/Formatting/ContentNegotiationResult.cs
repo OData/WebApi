@@ -7,7 +7,7 @@ namespace System.Net.Http.Formatting
     /// Represents the result of content negotiation performed using
     /// <see cref="IContentNegotiator.Negotiate(Type, HttpRequestMessage, IEnumerable{MediaTypeFormatter})"/>
     /// </summary>
-    public class NegotiationResult
+    public class ContentNegotiationResult
     {
         private MediaTypeFormatter _formatter;
 
@@ -16,7 +16,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         /// <param name="formatter">The formatter.</param>
         /// <param name="mediaType">The preferred media type. Can be <c>null</c>.</param>
-        public NegotiationResult(MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
+        public ContentNegotiationResult(MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
         {
             if (formatter == null)
             {

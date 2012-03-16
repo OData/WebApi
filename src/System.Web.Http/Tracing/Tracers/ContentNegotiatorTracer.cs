@@ -22,9 +22,9 @@ namespace System.Web.Http.Tracing.Tracers
             _traceWriter = traceWriter;
         }
 
-        public NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
+        public ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
-            NegotiationResult result = null;
+            ContentNegotiationResult result = null;
 
             _traceWriter.TraceBeginEnd(
                 request,

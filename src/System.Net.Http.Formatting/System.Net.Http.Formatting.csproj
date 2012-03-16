@@ -74,7 +74,7 @@
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
     <Compile Include="Formatting\FormDataCollection.cs" />
-    <Compile Include="Formatting\NegotiationResult.cs" />
+    <Compile Include="Formatting\ContentNegotiationResult.cs" />
     <Compile Include="FormUrlEncodedJson.cs" />
     <Compile Include="Formatting\SecureJsonTextReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />

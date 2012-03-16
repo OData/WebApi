@@ -84,7 +84,7 @@
     <Compile Include="DataSets\HttpUnitTestDataSets.cs" />
     <Compile Include="DataSets\Types\XmlSerializableType.cs" />
     <Compile Include="Formatting\FormDataCollectionTests.cs" />
-    <Compile Include="Formatting\NegotiationResultTest.cs" />
+    <Compile Include="Formatting\ContentNegotiationResultTest.cs" />
     <Compile Include="FormUrlEncodedJsonTests.cs" />
     <Compile Include="HttpClientExtensionsTest.cs" />
     <Compile Include="HttpContentExtensionsTest.cs" />

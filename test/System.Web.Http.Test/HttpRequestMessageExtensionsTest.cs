@@ -178,7 +178,7 @@ namespace System.Web.Http
             // Arrange
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
             _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters))
-                        .Returns(new NegotiationResult(formatter, null));
+                        .Returns(new ContentNegotiationResult(formatter, null));
             _config.ServiceResolver.SetService(typeof(IContentNegotiator), _negotiatorMock.Object);
 
             // Act

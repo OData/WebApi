@@ -171,7 +171,7 @@ namespace System.Web.Http
             IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;
 
             // Run content negotiation
-            NegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
+            ContentNegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
 
             if (result == null)
             {

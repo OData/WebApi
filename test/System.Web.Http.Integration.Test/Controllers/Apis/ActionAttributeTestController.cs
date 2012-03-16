@@ -12,6 +12,7 @@
         public void UpdateUsers(User user) { }
 
         [HttpDelete]
+        [ActionName("DeleteUsers")]
         public void RemoveUsers(string name) { }
 
         [HttpOptions]

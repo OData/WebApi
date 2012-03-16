@@ -166,7 +166,7 @@ namespace System.Web.Http
             ApiController api = new UsersRpcController();
             HttpRouteData route = new HttpRouteData(new HttpRoute());
             route.Values.Add("action", "Admin");
-            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(instance: api, routeData: route, request: new HttpRequestMessage() { Method = HttpMethod.Get });
+            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(instance: api, routeData: route, request: new HttpRequestMessage() { Method = HttpMethod.Post });
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(UsersRpcController));
 
             // Act
@@ -187,7 +187,7 @@ namespace System.Web.Http
             route.Values.Add("action", "EchoUser");
             route.Values.Add("firstName", "RouteFirstName");
             route.Values.Add("lastName", "RouteLastName");
-            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(instance: api, routeData: route, request: new HttpRequestMessage() { Method = HttpMethod.Get });
+            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(instance: api, routeData: route, request: new HttpRequestMessage() { Method = HttpMethod.Post });
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(UsersRpcController));
 
             // Act
@@ -210,7 +210,7 @@ namespace System.Web.Http
             Uri requestUri = new Uri("http://localhost/?firstName=QueryFirstName&lastName=QueryLastName");
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(instance: api, routeData: route, request: new HttpRequestMessage()
                 {
-                    Method = HttpMethod.Get,
+                    Method = HttpMethod.Post,
                     RequestUri = requestUri
                 });
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(UsersRpcController));

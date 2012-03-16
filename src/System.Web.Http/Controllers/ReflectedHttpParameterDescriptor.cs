@@ -71,7 +71,7 @@ namespace System.Web.Http.Controllers
 
         public override Collection<T> GetCustomAttributes<T>()
         {
-            return new Collection<T>(ParameterInfo.GetCustomAttributes<T>(false));
+            return new Collection<T>(ParameterInfo.GetCustomAttributes<T>(inherit: false));
         }
     }
 }

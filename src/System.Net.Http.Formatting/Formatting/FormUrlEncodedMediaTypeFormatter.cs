@@ -156,7 +156,7 @@ namespace System.Net.Http.Formatting
             Contract.Assert(bufferSize >= MinBufferSize, "buffer size cannot be less than MinBufferSize");
 
             byte[] data = new byte[bufferSize];
-            int bytesConsumed = 0;
+            
             int bytesRead;
             bool isFinal = false;
             List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
@@ -178,6 +178,7 @@ namespace System.Net.Http.Formatting
                     throw new IOException(Properties.Resources.ErrorReadingFormUrlEncodedStream, e);
                 }
 
+                int bytesConsumed = 0;
                 state = parser.ParseBuffer(data, bytesRead, ref bytesConsumed, isFinal);
                 if (state != ParserState.NeedMoreData && state != ParserState.Done)
                 {

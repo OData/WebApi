@@ -423,6 +423,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property or field &apos;{0}&apos; in type &apos;{1}&apos; is not accessible.
+        /// </summary>
+        internal static string InAccessiblePropertyOrField {
+            get {
+                return ResourceManager.GetString("InAccessiblePropertyOrField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operator &apos;{0}&apos; incompatible with operand type &apos;{1}&apos;.
         /// </summary>
         internal static string IncompatibleOperand {

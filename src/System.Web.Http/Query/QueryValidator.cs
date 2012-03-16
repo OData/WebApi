@@ -43,7 +43,7 @@ namespace System.Web.Http.Query
             {
                 if (!IsVisible(node.Member))
                 {
-                    throw Error.InvalidOperation(SRResources.UnknownPropertyOrField, node.Member.Name, node.Member.DeclaringType.Name);
+                    throw Error.InvalidOperation(SRResources.InAccessiblePropertyOrField, node.Member.Name, node.Member.DeclaringType.Name);
                 }
 
                 return base.VisitMember(node);
@@ -51,7 +51,27 @@ namespace System.Web.Http.Query
 
             private static bool IsVisible(MemberInfo member)
             {
-                // REVIEW: should i cache this ?
+                switch (member.MemberType)
+                {
+                    case MemberTypes.Field:
+                        FieldInfo field = member as FieldInfo;
+                        if (!field.IsPublic)
+                        {
+                            return false;
+                        }
+                        break;
+
+                    case MemberTypes.Property:
+                        PropertyInfo property = member as PropertyInfo;
+                        MethodInfo propertyGetter = property.GetGetMethod();
+
+                        if (propertyGetter == null || !propertyGetter.IsPublic)
+                        {
+                            return false;
+                        }
+                        break;
+                }
+
                 object[] attributes = member.GetCustomAttributes(inherit: true);
                 object[] parentAttributes = member.ReflectedType.GetCustomAttributes(inherit: true);
 

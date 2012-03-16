@@ -1,7 +1,8 @@
 ﻿using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Serialization;
-using System.Web.TestUtil;
 using System.Xml.Serialization;
+using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -18,7 +19,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.XmlIgnoreProperty == 0)),
-                "No property or field 'XmlIgnoreProperty' exists in type 'QueryValidatorSampleClass'");
+                "The property or field 'XmlIgnoreProperty' in type 'QueryValidatorSampleClass' is not accessible");
         }
 
         [Fact]
@@ -28,7 +29,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.IgnoreDataMemberProperty == 0)),
-                "No property or field 'IgnoreDataMemberProperty' exists in type 'QueryValidatorSampleClass'");
+                "The property or field 'IgnoreDataMemberProperty' in type 'QueryValidatorSampleClass' is not accessible");
         }
 
         [Fact]
@@ -38,7 +39,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.NonSerializedAttributeField == 0)),
-                "No property or field 'NonSerializedAttributeField' exists in type 'QueryValidatorSampleClass'");
+                "The property or field 'NonSerializedAttributeField' in type 'QueryValidatorSampleClass' is not accessible");
         }
 
         [Fact]
@@ -64,7 +65,39 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.NonDataMemberProperty == 0)),
-                "No property or field 'NonDataMemberProperty' exists in type 'QueryValidatorSampleDataContractClass'");
+                "The property or field 'NonDataMemberProperty' in type 'QueryValidatorSampleDataContractClass' is not accessible");
+        }
+
+        [Fact]
+        public void SetOnlyPropertyAccessCausesInvalidOperation()
+        {
+            Mock<IQueryable> query = new Mock<IQueryable>();
+            query
+                .Setup(q => q.Expression)
+                .Returns(
+                Expression.PropertyOrField(
+                    Expression.Constant(new QueryValidatorSampleClass()),
+                    "SetOnlyProperty"));
+
+            Assert.Throws<InvalidOperationException>(
+                () => _queryValidator.Validate(query.Object),
+                "The property or field 'SetOnlyProperty' in type 'QueryValidatorSampleClass' is not accessible");
+        }
+
+        [Fact]
+        public void NonPublicGetPropertyAccessCausesInvalidOperation()
+        {
+            Mock<IQueryable> query = new Mock<IQueryable>();
+            query
+                .Setup(q => q.Expression)
+                .Returns(
+                Expression.PropertyOrField(
+                    Expression.Constant(new QueryValidatorSampleClass()),
+                    "NonPublicGetProperty"));
+
+            Assert.Throws<InvalidOperationException>(
+                () => _queryValidator.Validate(query.Object),
+                "The property or field 'NonPublicGetProperty' in type 'QueryValidatorSampleClass' is not accessible");
         }
 
         public class QueryValidatorSampleClass
@@ -79,6 +112,10 @@ namespace System.Web.Http.Query
             public int NonSerializedAttributeField = 0;
 
             public int NormalProperty { get; set; }
+
+            public int SetOnlyProperty { set { } }
+
+            public int NonPublicGetProperty { set; private get; }
         }
 
         [DataContract]

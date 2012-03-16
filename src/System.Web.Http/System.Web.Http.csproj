@@ -99,6 +99,7 @@
     <Compile Include="ModelBinding\HttpRequestParameterBinding.cs" />
     <Compile Include="ModelBinding\JQueryMVCFormUrlEncodedFormatter.cs" />
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
+    <Compile Include="Query\ParseException.cs" />
     <Compile Include="Query\ServiceQueryPart.cs" />
     <Compile Include="ResultLimitAttribute.cs" />
     <Compile Include="Filters\QueryCompositionFilterAttribute.cs" />

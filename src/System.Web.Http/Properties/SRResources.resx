@@ -494,4 +494,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="JQuerySyntaxMissingClosingBracket" xml:space="preserve">
     <value>The key is invalid JQuery syntax because it is missing a closing bracket</value>
   </data>
+  <data name="HttpRequestMessageExtensions_NoContentNegotiator" xml:space="preserve">
+    <value>The provided configuration does not have an instance of the '{0}' service registered.</value>
+  </data>
 </root>

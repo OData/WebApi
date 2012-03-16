@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 
 namespace System.Net.Http.Formatting
@@ -18,10 +17,9 @@ namespace System.Net.Http.Formatting
         /// <param name="type">The type to be serialized.</param>
         /// <param name="request">The request.</param>
         /// <param name="formatters">The set of <see cref="MediaTypeFormatter"/> objects from which to choose.</param>
-        /// <param name="mediaType">The media type that is associated with the formatter chosen for serialization.</param>
-        /// <returns>The <see cref="MediaTypeFormatter"/> chosen for serialization or null if their is no appropriate formatter.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "This requirement is inherited from the interface.")]
-        public virtual MediaTypeFormatter Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters, out MediaTypeHeaderValue mediaType)
+        /// <returns>The result of the negotiation containing the most appropriate <see cref="MediaTypeFormatter"/> instance,
+        /// or <c>null</c> if there is no appropriate formatter.</returns>
+        public virtual NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
             if (type == null)
             {
@@ -36,12 +34,14 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("formatters");
             }
 
+            MediaTypeHeaderValue mediaType;
             MediaTypeFormatter formatter = RunNegotiation(type, request, formatters, out mediaType);
             if (formatter != null)
             {
                 formatter = formatter.GetPerRequestFormatterInstance(type, request, mediaType);
+                return new NegotiationResult(formatter, mediaType);
             }
-            return formatter;
+            return null;
         }
 
         private static MediaTypeFormatter RunNegotiation(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters, out MediaTypeHeaderValue mediaType)

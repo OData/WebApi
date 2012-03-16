@@ -423,6 +423,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The provided configuration does not have an instance of the &apos;{0}&apos; service registered..
+        /// </summary>
+        internal static string HttpRequestMessageExtensions_NoContentNegotiator {
+            get {
+                return ResourceManager.GetString("HttpRequestMessageExtensions_NoContentNegotiator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the &apos;Response&apos; property of this exception for details..
         /// </summary>
         internal static string HttpResponseExceptionMessage {

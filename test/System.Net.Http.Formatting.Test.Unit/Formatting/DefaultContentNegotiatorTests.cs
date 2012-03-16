@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -11,6 +12,9 @@ namespace System.Net.Http.Formatting
 {
     public class DefaultContentNegotiatorTests
     {
+        private readonly DefaultContentNegotiator _negotiator = new DefaultContentNegotiator();
+        private readonly HttpRequestMessage _request = new HttpRequestMessage();
+
         [Fact]
         public void TypeIsCorrect()
         {
@@ -20,56 +24,37 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void Negotiate_WhenTypeParameterIsNull_ThrowsException()
         {
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeHeaderValue mediaType;
-
-            Assert.ThrowsArgumentNull(() => selector.Negotiate(null, request, Enumerable.Empty<MediaTypeFormatter>(), out mediaType), "type");
+            Assert.ThrowsArgumentNull(() => _negotiator.Negotiate(null, _request, Enumerable.Empty<MediaTypeFormatter>()), "type");
         }
 
         [Fact]
         public void Negotiate_WhenRequestParameterIsNull_ThrowsException()
         {
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaType;
-
-            Assert.ThrowsArgumentNull(() => selector.Negotiate(typeof(string), null, Enumerable.Empty<MediaTypeFormatter>(), out mediaType), "request");
+            Assert.ThrowsArgumentNull(() => _negotiator.Negotiate(typeof(string), null, Enumerable.Empty<MediaTypeFormatter>()), "request");
         }
 
         [Fact]
         public void Negotiate_WhenFormattersParameterIsNull_ThrowsException()
         {
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeHeaderValue mediaType;
-
-            Assert.ThrowsArgumentNull(() => selector.Negotiate(typeof(string), request, null, out mediaType), "formatters");
+            Assert.ThrowsArgumentNull(() => _negotiator.Negotiate(typeof(string), _request, null), "formatters");
         }
 
         [Fact]
         public void Negotiate_ForEmptyFormatterCollection_ReturnsNull()
         {
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeHeaderValue mediaType;
+            var result = _negotiator.Negotiate(typeof(string), _request, Enumerable.Empty<MediaTypeFormatter>());
 
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, Enumerable.Empty<MediaTypeFormatter>(), out mediaType);
-
-            Assert.Null(formatter);
-            Assert.Null(mediaType);
+            Assert.Null(result);
         }
 
         [Fact]
         public void MediaTypeMappingTakesPrecedenceOverAcceptHeader()
         {
-            DefaultContentNegotiator negotiator = new DefaultContentNegotiator();
-            
             // Prepare the request message
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            request.Headers.Add("Browser", "IE");
-            request.Headers.Add("Cookie", "ABC");
-            
+            _request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+            _request.Headers.Add("Browser", "IE");
+            _request.Headers.Add("Cookie", "ABC");
+
             // Prepare the formatters
             List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>();
             formatters.Add(new JsonMediaTypeFormatter());
@@ -82,14 +67,12 @@ namespace System.Net.Http.Formatting
             formatters.Add(frmtr);
 
             // Act
-            MediaTypeHeaderValue mediaTypeToWrite = null;
-            MediaTypeFormatter formatterToWrite = negotiator.Negotiate(typeof(string), request, formatters, out mediaTypeToWrite);
-            
+            var result = _negotiator.Negotiate(typeof(string), _request, formatters);
+
             // Assert
-            Assert.NotNull(mediaTypeToWrite);
-            Assert.NotNull(formatterToWrite);
-            Assert.Equal("application/xml", mediaTypeToWrite.MediaType);
-            Assert.Equal(typeof(PlainTextFormatter), formatterToWrite.GetType());
+            Assert.NotNull(result);
+            Assert.Equal("application/xml", result.MediaType.MediaType);
+            Assert.IsType<PlainTextFormatter>(result.Formatter);
         }
 
         [Fact]
@@ -116,139 +99,102 @@ namespace System.Net.Http.Formatting
                     formatter2
                 });
 
-            HttpContent content = new StringContent("test");
-            content.Headers.ContentType = mediaType;
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = content
-            };
+            _request.Content = new StringContent("test", Encoding.Default, mediaType.MediaType);
 
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, collection, out mediaTypeReturned);
-            Assert.Same(formatter2, formatter);
-            Assert.MediaType.AreEqual(mediaType, mediaTypeReturned, "Expected the formatter's media type to be returned.");
+            var result = _negotiator.Negotiate(typeof(string), _request, collection);
+            Assert.Same(formatter2, result.Formatter);
+            Assert.MediaType.AreEqual(mediaType, result.MediaType, "Expected the formatter's media type to be returned.");
         }
 
         [Fact]
         public void Negotiate_SelectsJsonAsDefaultFormatter()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
+            _request.Content = new StringContent("test");
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            var result = _negotiator.Negotiate(typeof(string), _request, new MediaTypeFormatterCollection());
 
             // Assert
-            Assert.IsType<JsonMediaTypeFormatter>(formatter);
-            Assert.Equal(mediaTypeReturned.MediaType, MediaTypeConstants.ApplicationJsonMediaType.MediaType);
+            Assert.IsType<JsonMediaTypeFormatter>(result.Formatter);
+            Assert.Equal(MediaTypeConstants.ApplicationJsonMediaType.MediaType, result.MediaType.MediaType);
         }
 
         [Fact]
         public void Negotiate_SelectsXmlFormatter_ForXhrRequestThatAcceptsXml()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            request.Headers.Add("x-requested-with", "XMLHttpRequest");
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
+            _request.Content = new StringContent("test");
+            _request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+            _request.Headers.Add("x-requested-with", "XMLHttpRequest");
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            var result = _negotiator.Negotiate(typeof(string), _request, new MediaTypeFormatterCollection());
 
             // Assert
-            Assert.Equal("application/xml", mediaTypeReturned.MediaType);
-            Assert.IsType<XmlMediaTypeFormatter>(formatter);
+            Assert.Equal("application/xml", result.MediaType.MediaType);
+            Assert.IsType<XmlMediaTypeFormatter>(result.Formatter);
         }
 
         [Fact]
         public void Negotiate_SelectsJsonFormatter_ForXhrRequestThatDoesNotSpecifyAcceptHeaders()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            request.Headers.Add("x-requested-with", "XMLHttpRequest");
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
+            _request.Content = new StringContent("test");
+            _request.Headers.Add("x-requested-with", "XMLHttpRequest");
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            var result = _negotiator.Negotiate(typeof(string), _request, new MediaTypeFormatterCollection());
 
             // Assert
-            Assert.Equal("application/json", mediaTypeReturned.MediaType);
-            Assert.IsType<JsonMediaTypeFormatter>(formatter);
+            Assert.Equal("application/json", result.MediaType.MediaType);
+            Assert.IsType<JsonMediaTypeFormatter>(result.Formatter);
         }
 
         [Fact]
         public void Negotiate_SelectsJsonFormatter_ForXHRAndJsonValueResponse()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            request.Headers.Add("x-requested-with", "XMLHttpRequest");
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
+            _request.Content = new StringContent("test");
+            _request.Headers.Add("x-requested-with", "XMLHttpRequest");
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(JToken), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            var result = _negotiator.Negotiate(typeof(JToken), _request, new MediaTypeFormatterCollection());
 
-            Assert.Equal("application/json", mediaTypeReturned.MediaType);
-            Assert.IsType<JsonMediaTypeFormatter>(formatter);
+            Assert.Equal("application/json", result.MediaType.MediaType);
+            Assert.IsType<JsonMediaTypeFormatter>(result.Formatter);
         }
 
         [Fact]
         public void Negotiate_SelectsJsonFormatter_ForXHRAndMatchAllAcceptHeader()
         {
             // Accept
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            request.Headers.Add("x-requested-with", "XMLHttpRequest");
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
+            _request.Content = new StringContent("test");
+            _request.Headers.Add("x-requested-with", "XMLHttpRequest");
+            _request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            var result = _negotiator.Negotiate(typeof(string), _request, new MediaTypeFormatterCollection());
 
             // Assert
-            Assert.Equal("application/json", mediaTypeReturned.MediaType);
-            Assert.IsType<JsonMediaTypeFormatter>(formatter);
+            Assert.Equal("application/json", result.MediaType.MediaType);
+            Assert.IsType<JsonMediaTypeFormatter>(result.Formatter);
         }
 
         [Fact]
         public void Negotiate_UsesRequestedFormatterForXHRAndMatchAllPlusOtherAcceptHeader()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            request.Headers.Add("x-requested-with", "XMLHttpRequest");
-            request.Headers.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"); // XHR header sent by Firefox 3b5
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
-            MediaTypeHeaderValue mediaTypeReturned = null;
+            _request.Content = new StringContent("test");
+            _request.Headers.Add("x-requested-with", "XMLHttpRequest");
+            _request.Headers.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"); // XHR header sent by Firefox 3b5
 
             // Act
-            MediaTypeFormatter formatter = selector.Negotiate(typeof(string), request, new MediaTypeFormatterCollection(), out mediaTypeReturned);
+            var result = _negotiator.Negotiate(typeof(string), _request, new MediaTypeFormatterCollection());
 
             // Assert
-            Assert.Equal("application/xml", mediaTypeReturned.MediaType);
-            Assert.IsType<XmlMediaTypeFormatter>(formatter);
+            Assert.Equal("application/xml", result.MediaType.MediaType);
+            Assert.IsType<XmlMediaTypeFormatter>(result.Formatter);
         }
 
         private class PlainTextFormatter : MediaTypeFormatter
@@ -260,19 +206,20 @@ namespace System.Net.Http.Formatting
 
             public override bool CanWriteType(Type type)
             {
-                return true; 
+                return true;
             }
         }
 
         private class MyMediaTypeMapping : MediaTypeMapping
         {
-            public MyMediaTypeMapping(MediaTypeHeaderValue mediaType) : base(mediaType)
+            public MyMediaTypeMapping(MediaTypeHeaderValue mediaType)
+                : base(mediaType)
             {
             }
 
             public override double TryMatchMediaType(HttpRequestMessage request)
             {
-                if ( request.Headers.Contains("Cookie"))
+                if (request.Headers.Contains("Cookie"))
                 {
                     return 1.0;
                 }

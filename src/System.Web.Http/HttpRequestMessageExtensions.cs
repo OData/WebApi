@@ -109,7 +109,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
-        /// of <see cref="ObjectContent{T}"/> as the content. This forwards the call to
+        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found that this
+        /// method returns a response with status 406 NotAcceptable. This forwards the call to
         /// <see cref="CreateResponse{T}(HttpRequestMessage, HttpStatusCode, T, HttpConfiguration)"/> with a <c>null</c>
         /// configuration.
         /// </summary>
@@ -134,7 +135,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
-        /// of <see cref="ObjectContent{T}"/> as the content.
+        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found that this
+        /// method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
         /// This method will use the provided <paramref name="configuration"/> or it will get the 
@@ -163,21 +165,33 @@ namespace System.Web.Http
             IContentNegotiator contentNegotiator = configuration.ServiceResolver.GetContentNegotiator();
             if (contentNegotiator == null)
             {
-                // TODO ???
+                throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoContentNegotiator, typeof(IContentNegotiator).FullName);
             }
 
             IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;
 
             // Run content negotiation
-            MediaTypeHeaderValue mediaType;
-            MediaTypeFormatter formatter = contentNegotiator.Negotiate(typeof(T), request, formatters, out mediaType);
+            NegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
 
-            return new HttpResponseMessage
+            if (result == null)
             {
-                Content = new ObjectContent<T>(value, formatter, mediaType != null ? mediaType.ToString() : null),
-                StatusCode = statusCode,
-                RequestMessage = request
-            };
+                // no result from content negotiation indicates that 406 should be sent.
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.NotAcceptable,
+                    RequestMessage = request,
+                };
+            }
+            else
+            {
+                MediaTypeHeaderValue mediaType = result.MediaType;
+                return new HttpResponseMessage
+                {
+                    Content = new ObjectContent<T>(value, result.Formatter, mediaType != null ? mediaType.ToString() : null),
+                    StatusCode = statusCode,
+                    RequestMessage = request
+                };
+            }
         }
 
         /// <summary>

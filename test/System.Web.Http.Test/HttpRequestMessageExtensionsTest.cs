@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Security.Principal;
 using System.Threading;
 using System.Web.Http.Hosting;
@@ -21,6 +20,7 @@ namespace System.Web.Http
         private readonly HttpConfiguration _config = new HttpConfiguration();
         private readonly object _value = new object();
         private readonly Mock<IDisposable> _disposableMock = new Mock<IDisposable>();
+        private readonly Mock<IContentNegotiator> _negotiatorMock = new Mock<IContentNegotiator>();
         private readonly IDisposable _disposable;
 
         public HttpRequestMessageExtensionsTest()
@@ -147,24 +147,49 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void CreateResponse_WhenNoContentNegotiatorInstanceRegistered_Throws()
+        {
+            // Arrange
+            _config.ServiceResolver.SetServices(typeof(IContentNegotiator), new object[] { null });
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, _config),
+                "The provided configuration does not have an instance of the 'System.Net.Http.Formatting.IContentNegotiator' service registered.");
+        }
+
+        [Fact]
+        public void CreateResponse_WhenContentNegotiatorReturnsNullResult_Throws()
+        {
+            // Arrange
+            _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters)).Returns(value: null);
+            _config.ServiceResolver.SetServices(typeof(IContentNegotiator), _negotiatorMock.Object);
+
+            // Act
+            var response = HttpRequestMessageExtensions.CreateResponse<string>(_request, HttpStatusCode.OK, "", _config);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
+            Assert.Same(_request, response.RequestMessage);
+        }
+
+        [Fact]
         public void CreateResponse_PerformsContentNegotiationAndCreatesContentUsingResults()
         {
             // Arrange
-            Mock<IContentNegotiator> resolverMock = new Mock<IContentNegotiator>();
-            MediaTypeHeaderValue mediaType;
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
-            resolverMock.Setup(r => r.Negotiate(typeof(object), _request, _config.Formatters, out mediaType))
-                        .Returns(formatter);
-            _config.ServiceResolver.SetService(typeof(IContentNegotiator), resolverMock.Object);
+            _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters))
+                        .Returns(new NegotiationResult(formatter, null));
+            _config.ServiceResolver.SetService(typeof(IContentNegotiator), _negotiatorMock.Object);
 
             // Act
-            var response = HttpRequestMessageExtensions.CreateResponse<object>(_request, HttpStatusCode.NoContent, _value, _config);
+            var response = HttpRequestMessageExtensions.CreateResponse<string>(_request, HttpStatusCode.NoContent, "42", _config);
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
             Assert.Same(_request, response.RequestMessage);
-            var objectContent = Assert.IsAssignableFrom<ObjectContent>(response.Content);
-            Assert.Same(_value, objectContent.Value);
+            var objectContent = Assert.IsType<ObjectContent<string>>(response.Content);
+            Assert.Equal("42", objectContent.Value);
+            Assert.Same(formatter, objectContent.Formatter);
         }
 
         [Fact]

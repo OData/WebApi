@@ -18,8 +18,8 @@ namespace System.Web.Http.ContentNegotiation
             MediaTypeHeaderValue responseContentType = null;
 
             Mock<IContentNegotiator> selector = new Mock<IContentNegotiator>();
-            MediaTypeHeaderValue mediaType;
-            selector.Setup(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>(), out mediaType)).Returns(new XmlMediaTypeFormatter());
+            selector.Setup(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>()))
+                .Returns(new NegotiationResult(new XmlMediaTypeFormatter(), null));
 
             configuration.ServiceResolver.SetService(typeof(IContentNegotiator), selector.Object);
 
@@ -31,7 +31,7 @@ namespace System.Web.Http.ContentNegotiation
             responseContentType = response.Content.Headers.ContentType;
 
             // Assert
-            selector.Verify(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>(), out mediaType), Times.AtLeastOnce());
+            selector.Verify(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>()), Times.AtLeastOnce());
         }
     }
 }

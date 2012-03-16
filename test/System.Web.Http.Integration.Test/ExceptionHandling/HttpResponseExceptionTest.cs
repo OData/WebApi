@@ -174,11 +174,11 @@ namespace System.Web.Http.ExceptionHandling
             _throwAt = throwAt;
         }
 
-        public override MediaTypeFormatter Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters, out System.Net.Http.Headers.MediaTypeHeaderValue mediaType)
+        public override NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
             ExceptionTestsUtility.CheckForThrow(_throwAt, "ContentNegotiatorNegotiate");
 
-            return base.Negotiate(type, request, formatters, out mediaType);
+            return base.Negotiate(type, request, formatters);
         }
     }
 

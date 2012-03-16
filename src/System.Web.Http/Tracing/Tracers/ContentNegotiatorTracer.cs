@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Web.Http.Common;
 using System.Web.Http.Properties;
 
@@ -24,11 +22,9 @@ namespace System.Web.Http.Tracing.Tracers
             _traceWriter = traceWriter;
         }
 
-        public MediaTypeFormatter Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters, out MediaTypeHeaderValue mediaType)
+        public NegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
-            mediaType = null;
-            MediaTypeHeaderValue selectedMediaType = null;
-            MediaTypeFormatter selectedFormatter = null;
+            NegotiationResult result = null;
 
             _traceWriter.TraceBeginEnd(
                 request,
@@ -47,31 +43,29 @@ namespace System.Web.Http.Tracing.Tracers
 
                 execute: () =>
                 {
-                    selectedFormatter = _innerNegotiator.Negotiate(type, request, formatters, out selectedMediaType);
+                    result = _innerNegotiator.Negotiate(type, request, formatters);
                 },
 
                 endTrace: (tr) =>
                 {
                     tr.Message = Error.Format(
                         SRResources.TraceSelectedFormatter,
-                        selectedFormatter == null
+                        result == null
                             ? SRResources.TraceNoneObjectMessage
-                            : MediaTypeFormatterTracer.ActualMediaTypeFormatter(selectedFormatter).GetType().Name,
-                        selectedMediaType == null
+                            : MediaTypeFormatterTracer.ActualMediaTypeFormatter(result.Formatter).GetType().Name,
+                        result == null || result.MediaType == null
                             ? SRResources.TraceNoneObjectMessage
-                            : selectedMediaType.ToString());
+                            : result.MediaType.ToString());
                 },
 
-        errorTrace: null);
+                errorTrace: null);
 
-            mediaType = selectedMediaType;
-
-            if (selectedFormatter != null)
+            if (result != null)
             {
-                selectedFormatter = MediaTypeFormatterTracer.CreateTracer(selectedFormatter, _traceWriter, request);
+                result.Formatter = MediaTypeFormatterTracer.CreateTracer(result.Formatter, _traceWriter, request);
             }
 
-            return selectedFormatter;
+            return result;
         }
     }
 }

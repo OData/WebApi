@@ -105,9 +105,9 @@ namespace System.Net.Http.Formatting
         [Trait("Description", "TryMatchMediaType(HttpRequestMessage) returns 1.0 when the extension is in the Uri but differs in case")]
         public void TryMatchMediaTypeReturnsMatchWithExtensionInUriDifferCase(string uriPathExtension, string mediaType, string baseUriString)
         {
-            UriPathExtensionMapping mapping = new UriPathExtensionMapping(uriPathExtension.ToUpper(), mediaType);
+            UriPathExtensionMapping mapping = new UriPathExtensionMapping(uriPathExtension.ToUpperInvariant(), mediaType);
             Uri baseUri = new Uri(baseUriString);
-            Uri uri = new Uri(baseUri, "x." + uriPathExtension.ToLower());
+            Uri uri = new Uri(baseUri, "x." + uriPathExtension.ToLowerInvariant());
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             Assert.Equal(1.0, mapping.TryMatchMediaType(request));
         }

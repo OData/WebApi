@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="xunit">
       <HintPath>..\..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
     </Reference>

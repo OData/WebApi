@@ -17,17 +17,15 @@ namespace System.Net.Http.Formatting
     /// <see cref="MediaTypeFormatter"/> class to handle Json.
     /// </summary>
     public class JsonMediaTypeFormatter : MediaTypeFormatter
-    {
-        private const int DefaultMaxDepth = 1024;
-        private const int MinDepth = 1;
+    {   
         private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
         {
             MediaTypeConstants.ApplicationJsonMediaType,
             MediaTypeConstants.TextJsonMediaType
         };
         private JsonSerializer _jsonSerializer = CreateDefaultSerializer();
-        private int _maxDepth = DefaultMaxDepth;
-        private XmlDictionaryReaderQuotas _readerQuotas = CreateDefaultReaderQuotas();
+        private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
+        private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas(); 
 
         private ConcurrentDictionary<Type, DataContractJsonSerializer> _dataContractSerializerCache = new ConcurrentDictionary<Type, DataContractJsonSerializer>();
         private RequestHeaderMapping _requestHeaderMapping;
@@ -112,9 +110,9 @@ namespace System.Net.Http.Formatting
             }
             set
             {
-                if (value < MinDepth)
+                if (value < FormattingUtilities.DefaultMinDepth)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinDepth));
+                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, FormattingUtilities.DefaultMinDepth));
                 }
 
                 _maxDepth = value;
@@ -134,18 +132,6 @@ namespace System.Net.Http.Formatting
             // Setting this to None prevents Json.NET from loading malicious, unsafe, or security-sensitive types
             defaultSerializer.TypeNameHandling = TypeNameHandling.None;
             return defaultSerializer;
-        }
-
-        private static XmlDictionaryReaderQuotas CreateDefaultReaderQuotas()
-        {
-            return new XmlDictionaryReaderQuotas()
-            {
-                MaxArrayLength = int.MaxValue,
-                MaxBytesPerRead = int.MaxValue,
-                MaxDepth = DefaultMaxDepth,
-                MaxNameTableCharCount = int.MaxValue,
-                MaxStringContentLength = int.MaxValue
-            };
         }
 
         internal bool ContainsSerializerForType(Type type)

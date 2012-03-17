@@ -25,6 +25,8 @@ namespace System.Net.Http.Formatting
         };
 
         private ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
+        private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
+        private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlMediaTypeFormatter"/> class.
@@ -72,6 +74,27 @@ namespace System.Net.Http.Formatting
         /// Gets or sets a value indicating whether to indent elements when writing data. 
         /// </summary>
         public bool Indent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum depth allowed by this formatter.
+        /// </summary>
+        public int MaxDepth
+        {
+            get
+            {
+                return _maxDepth;
+            }
+            set
+            {
+                if (value < FormattingUtilities.DefaultMinDepth)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, FormattingUtilities.DefaultMinDepth));
+                }
+
+                _maxDepth = value;
+                _readerQuotas.MaxDepth = value;
+            }
+        }
 
         /// <summary>
         /// Registers the <see cref="XmlObjectSerializer"/> to use to read or write
@@ -231,7 +254,7 @@ namespace System.Net.Http.Formatting
 
                 object serializer = GetSerializerForType(type);
 
-                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, XmlDictionaryReaderQuotas.Max, null))
+                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, _readerQuotas, null))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)

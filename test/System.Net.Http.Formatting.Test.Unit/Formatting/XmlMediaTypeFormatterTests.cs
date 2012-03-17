@@ -51,6 +51,62 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        [Trait("Description", "MaxDepth return correct value.")]
+        public void MaxDepthReturnsCorrectValue()
+        {
+            Assert.Reflection.IntegerProperty(
+                new XmlMediaTypeFormatter(),
+                f => f.MaxDepth,
+                expectedDefaultValue: 1024,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
+                maxLegalValue: null,
+                illegalUpperValue: null,
+                roundTripTestValue: 10);
+        }
+
+        [Fact]
+        [Trait("Description", "Deeply nested object throws.")]
+        public void ReadDeeplyNestedObjectThrows()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 1 };
+
+            MemoryStream stream = new MemoryStream();
+            formatter.WriteToStreamAsync(typeof(SampleType), new SampleType() { Number = 1 }, stream, null, null).Wait();
+            stream.Position = 0;
+            Task task = formatter.ReadFromStreamAsync(typeof(SampleType), stream, null, null);
+            Assert.Throws<SerializationException>(() => task.Wait());
+        }
+
+        [Fact]
+        [Trait("Description", "Deeply nested object works.")]
+        public void ReadDeeplyNestedObjectWorks()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 5001, UseXmlSerializer = true };
+
+            StringContent content = new StringContent(GetDeeplyNestedObject(5000));
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+
+            Assert.IsType<Nest>(formatter.ReadFromStreamAsync(typeof(Nest), content.ReadAsStreamAsync().Result, content.Headers, null).Result);
+        }
+
+        static string GetDeeplyNestedObject(int depth)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < depth; i++)
+            {
+                sb.Insert(0, "<A>");
+                sb.Append("</A>");
+            }
+            sb.Insert(0, "<Nest xmlns=\"http://example.com\">");
+            sb.Append("</Nest>");
+            sb.Insert(0, "<?xml version=\"1.0\"?>");
+
+            return sb.ToString();
+        }
+
+        [Fact]
         [Trait("Description", "Indent property handles Get/Set correctly.")]
         public void IndentGetSet()
         {
@@ -355,6 +411,12 @@ namespace System.Net.Http.Formatting
         {
             [DataMember]
             public int Number { get; set; }
+        }
+
+        [XmlRoot("Nest", Namespace = "http://example.com")]
+        public class Nest
+        {
+            public Nest A { get; set; }
         }
 
         private bool IsSerializableWithXmlSerializer(Type type, object obj)

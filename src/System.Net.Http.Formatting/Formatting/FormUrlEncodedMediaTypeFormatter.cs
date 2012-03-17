@@ -24,6 +24,7 @@ namespace System.Net.Http.Formatting
         };
 
         private int _readBufferSize = DefaultBufferSize;
+        private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormUrlEncodedMediaTypeFormatter"/> class.
@@ -46,6 +47,26 @@ namespace System.Net.Http.Formatting
         public static MediaTypeHeaderValue DefaultMediaType
         {
             get { return MediaTypeConstants.ApplicationFormUrlEncodedMediaType; }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum depth allowed by this formatter.
+        /// </summary>
+        public int MaxDepth
+        {
+            get
+            {
+                return _maxDepth;
+            }
+            set
+            {
+                if (value < FormattingUtilities.DefaultMinDepth)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, FormattingUtilities.DefaultMinDepth));
+                }
+
+                _maxDepth = value;
+            }
         }
 
         /// <summary>
@@ -134,7 +155,7 @@ namespace System.Net.Http.Formatting
 
                 if (FormattingUtilities.IsJTokenType(type))
                 {
-                    return FormUrlEncodedJson.Parse(nameValuePairs);
+                    return FormUrlEncodedJson.Parse(nameValuePairs, _maxDepth);
                 }
                 
                 // Passed us an unsupported type. Should have called CanReadType() first.

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Xml;
 using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http
@@ -13,6 +14,16 @@ namespace System.Net.Http
     /// </summary>
     internal static class FormattingUtilities
     {
+        /// <summary>
+        /// The default max depth for our formatter is 1K
+        /// </summary>
+        public const int DefaultMaxDepth = 1024;
+
+        /// <summary>
+        /// The default min depth for our formatter is 1
+        /// </summary>
+        public const int DefaultMinDepth = 1;
+
         /// <summary>
         /// HTTP X-Requested-With header field name
         /// </summary>
@@ -139,6 +150,22 @@ namespace System.Net.Http
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Create a default reader quotas with a default depth quota of 1K
+        /// </summary>
+        /// <returns></returns>
+        public static XmlDictionaryReaderQuotas CreateDefaultReaderQuotas()
+        {
+            return new XmlDictionaryReaderQuotas()
+            {
+                MaxArrayLength = int.MaxValue,
+                MaxBytesPerRead = int.MaxValue,
+                MaxDepth = DefaultMaxDepth,
+                MaxNameTableCharCount = int.MaxValue,
+                MaxStringContentLength = int.MaxValue
+            };
         }
 
         /// <summary>

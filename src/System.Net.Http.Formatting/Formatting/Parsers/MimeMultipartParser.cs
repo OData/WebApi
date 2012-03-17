@@ -35,7 +35,7 @@ namespace System.Net.Http.Formatting.Parsers
             // The minimum length which would be an empty message terminated by CRLF
             if (maxMessageSize < MimeMultipartParser.MinMessageSize)
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MimeMultipartParser.MinMessageSize), "maxMessageSize");
+                throw new ArgumentOutOfRangeException("maxMessageSize", maxMessageSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MimeMultipartParser.MinMessageSize));
             }
 
             if (String.IsNullOrWhiteSpace(boundary))

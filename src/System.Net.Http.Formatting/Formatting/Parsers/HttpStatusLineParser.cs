@@ -31,7 +31,7 @@ namespace System.Net.Http.Formatting.Parsers
             // The minimum length which would be an empty header terminated by CRLF
             if (maxStatusLineSize < MinStatusLineSize)
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinStatusLineSize), "maxStatusLineSize");
+                throw new ArgumentOutOfRangeException("maxStatusLineSize", maxStatusLineSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinStatusLineSize));
             }
 
             if (httpResponse == null)

@@ -208,7 +208,7 @@ namespace System.Net.Http.Formatting.Parsers
             {
                 if (throwOnError)
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MimeMultipartParser.MinMessageSize), "maxMessageSize");
+                    throw new ArgumentOutOfRangeException("maxMessageSize", maxMessageSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MimeMultipartParser.MinMessageSize));
                 }
                 else
                 {

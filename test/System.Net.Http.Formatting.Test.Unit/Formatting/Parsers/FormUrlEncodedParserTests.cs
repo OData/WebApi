@@ -84,7 +84,7 @@ namespace System.Net.Http.Formatting.Parsers
         [Fact]
         public void FormUrlEncodedParserThrowsOnInvalidSize()
         {
-            Assert.ThrowsArgument(() => { new FormUrlEncodedParser(CreateCollection(), MinMessageSize - 1); }, "maxMessageSize");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => { new FormUrlEncodedParser(CreateCollection(), MinMessageSize - 1); }, "maxMessageSize", MinMessageSize.ToString(), MinMessageSize - 1);
 
             FormUrlEncodedParser parser = new FormUrlEncodedParser(CreateCollection(), MinMessageSize);
             Assert.NotNull(parser);

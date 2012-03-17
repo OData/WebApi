@@ -75,7 +75,8 @@ namespace System.Net.Http.Formatting.Parsers
             HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
             Assert.NotNull(statusLine);
 
-            Assert.ThrowsArgument(() => { new HttpStatusLineParser(statusLine, ParserData.MinStatusLineSize - 1); }, "maxStatusLineSize");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpStatusLineParser(statusLine, ParserData.MinStatusLineSize - 1),
+                "maxStatusLineSize", ParserData.MinStatusLineSize.ToString(), ParserData.MinStatusLineSize - 1);
 
             HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, ParserData.MinStatusLineSize);
             Assert.NotNull(parser);

@@ -104,7 +104,7 @@ namespace System.Net.Http
 
             if (maxDepth <= MinDepth)
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinDepth), "maxDepth");
+                throw new ArgumentOutOfRangeException("maxDepth", maxDepth, RS.Format(Properties.Resources.ArgumentMustBeGreaterThan, MinDepth));
             }
 
             JObject result = new JObject();

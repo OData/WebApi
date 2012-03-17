@@ -91,9 +91,11 @@ namespace System.Net.Http.Formatting.Parsers
             HttpUnsortedRequest result = new HttpUnsortedRequest();
             Assert.NotNull(result);
 
-            Assert.ThrowsArgument(() => { new HttpRequestHeaderParser(result, ParserData.MinRequestLineSize - 1, ParserData.MinHeaderSize); }, "maxRequestLineSize");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpRequestHeaderParser(result, ParserData.MinRequestLineSize - 1, ParserData.MinHeaderSize),
+                "maxRequestLineSize", ParserData.MinRequestLineSize.ToString(), ParserData.MinRequestLineSize - 1);
 
-            Assert.ThrowsArgument(() => { new HttpRequestHeaderParser(result, ParserData.MinRequestLineSize, ParserData.MinHeaderSize - 1); }, "maxHeaderSize");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpRequestHeaderParser(result, ParserData.MinRequestLineSize, ParserData.MinHeaderSize - 1),
+                "maxHeaderSize", ParserData.MinHeaderSize.ToString(), ParserData.MinHeaderSize - 1);
 
             HttpRequestHeaderParser parser = new HttpRequestHeaderParser(result, ParserData.MinRequestLineSize, ParserData.MinHeaderSize);
             Assert.NotNull(parser);

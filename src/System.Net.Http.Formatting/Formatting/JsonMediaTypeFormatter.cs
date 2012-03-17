@@ -19,6 +19,7 @@ namespace System.Net.Http.Formatting
     public class JsonMediaTypeFormatter : MediaTypeFormatter
     {
         private const int DefaultMaxDepth = 1024;
+        private const int MinDepth = 1;
         private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
         {
             MediaTypeConstants.ApplicationJsonMediaType,
@@ -111,6 +112,11 @@ namespace System.Net.Http.Formatting
             }
             set
             {
+                if (value < MinDepth)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinDepth));
+                }
+
                 _maxDepth = value;
                 _readerQuotas.MaxDepth = value;
             }

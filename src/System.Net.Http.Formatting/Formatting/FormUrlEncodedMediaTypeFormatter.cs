@@ -62,7 +62,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value < MinBufferSize)
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinBufferSize), "value");
+                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
                 }
 
                 _readBufferSize = value;

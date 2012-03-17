@@ -116,7 +116,7 @@ namespace System.Net.Http
 
             if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinBufferSize), "bufferSize");
+                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
             }
 
             return content.ReadAsStreamAsync().Then(stream =>

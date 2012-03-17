@@ -125,12 +125,12 @@ namespace System.Net.Http
                 content.ReadAsHttpRequestMessageAsync("i n v a l i d");
             }, "uriScheme");
 
-            Assert.ThrowsArgument(() =>
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() =>
             {
                 HttpContent content = new StringContent(String.Empty);
                 content.Headers.ContentType = ParserData.HttpRequestMediaType;
-                content.ReadAsHttpRequestMessageAsync(Uri.UriSchemeHttp, ParserData.MinHeaderSize - 1);
-            }, "bufferSize");
+                content.ReadAsHttpRequestMessageAsync(Uri.UriSchemeHttp, ParserData.MinBufferSize - 1);
+            }, "bufferSize", ParserData.MinBufferSize.ToString(), ParserData.MinBufferSize - 1);
         }
 
         [Fact]
@@ -148,12 +148,12 @@ namespace System.Net.Http
                 content.ReadAsHttpResponseMessageAsync();
             }, "content");
 
-            Assert.ThrowsArgument(() =>
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() =>
             {
                 HttpContent content = new StringContent(String.Empty);
                 content.Headers.ContentType = ParserData.HttpResponseMediaType;
-                content.ReadAsHttpResponseMessageAsync(ParserData.MinHeaderSize - 1);
-            }, "bufferSize");
+                content.ReadAsHttpResponseMessageAsync(ParserData.MinBufferSize - 1);
+            }, "bufferSize", ParserData.MinBufferSize.ToString(), ParserData.MinBufferSize - 1);
         }
 
         [Fact]

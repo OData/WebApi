@@ -83,6 +83,20 @@ namespace System.Net.Http.Formatting
             Assert.True(jsonFormatter.Indent);
         }
 
+        [Fact]
+        public void MaxDepth_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty(
+                new JsonMediaTypeFormatter(),
+                c => c.MaxDepth,
+                expectedDefaultValue: 1024,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
+                maxLegalValue: null,
+                illegalUpperValue: null,
+                roundTripTestValue: 256);
+        }
+
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
         [Trait("Description", "CanReadType() returns the expected results for all known value and reference types.")]

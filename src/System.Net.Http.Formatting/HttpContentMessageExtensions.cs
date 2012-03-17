@@ -122,7 +122,7 @@ namespace System.Net.Http
 
             if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinBufferSize), "bufferSize");
+                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
             }
 
             HttpMessageContent.ValidateHttpMessageContent(content, true, true);
@@ -195,7 +195,7 @@ namespace System.Net.Http
 
             if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.MinParameterSize, MinBufferSize), "bufferSize");
+                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
             }
 
             HttpMessageContent.ValidateHttpMessageContent(content, false, true);

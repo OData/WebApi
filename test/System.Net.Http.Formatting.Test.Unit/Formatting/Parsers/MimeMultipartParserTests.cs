@@ -130,7 +130,8 @@ namespace System.Net.Http.Formatting.Parsers
             MimeMultipartParser parser = new MimeMultipartParser(boundary, ParserData.MinMessageSize);
             Assert.NotNull(parser);
 
-            Assert.ThrowsArgument(() => { new MimeMultipartParser("-", ParserData.MinMessageSize - 1); }, "maxMessageSize");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new MimeMultipartParser("-", ParserData.MinMessageSize - 1),
+                "maxMessageSize", ParserData.MinMessageSize.ToString(), ParserData.MinMessageSize - 1);
 
             foreach (string empty in TestData.EmptyStrings)
             {

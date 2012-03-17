@@ -40,23 +40,17 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "ReadBufferSize return correct value.")]
-        public void ReadBufferSizeReturnsCorrectValue()
+        public void ReadBufferSize_RoundTrips()
         {
-            FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();
-            Assert.Equal(DefaultBufferSize, formatter.ReadBufferSize);
-            formatter.ReadBufferSize = MinBufferSize;
-            Assert.Equal(MinBufferSize, formatter.ReadBufferSize);
-        }
-
-        [Fact]
-        [Trait("Description", "ReadBufferSize throws on invalid value.")]
-        public void ReadBufferSizeThrowsOnInvalidValue()
-        {
-            FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();
-            Assert.ThrowsArgument(() => { formatter.ReadBufferSize = -1; }, "value");
-            Assert.ThrowsArgument(() => { formatter.ReadBufferSize = 0; }, "value");
-            Assert.ThrowsArgument(() => { formatter.ReadBufferSize = MinBufferSize - 1; }, "value");
+            Assert.Reflection.IntegerProperty(
+                new FormUrlEncodedMediaTypeFormatter(),
+                c => c.ReadBufferSize,
+                expectedDefaultValue: 32 * 1024,
+                minLegalValue: 256,
+                illegalLowerValue: 255,
+                maxLegalValue: null,
+                illegalUpperValue: null,
+                roundTripTestValue: 1024);
         }
 
         [Fact]

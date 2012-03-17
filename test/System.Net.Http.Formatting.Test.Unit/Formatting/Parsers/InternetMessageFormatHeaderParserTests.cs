@@ -99,10 +99,9 @@ namespace System.Net.Http.Formatting.Parsers
                 Assert.NotNull(parser);
             }
 
-            Assert.ThrowsArgument(() => { new InternetMessageFormatHeaderParser(headers.ElementAt(0), -1); }, "maxHeaderSize");
-            Assert.ThrowsArgument(() => { new InternetMessageFormatHeaderParser(headers.ElementAt(0), 0); }, "maxHeaderSize");
-            Assert.ThrowsArgument(() => { new InternetMessageFormatHeaderParser(headers.ElementAt(0), 1); }, "maxHeaderSize");
-
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new InternetMessageFormatHeaderParser(headers.ElementAt(0), ParserData.MinHeaderSize - 1),
+                "maxHeaderSize", ParserData.MinHeaderSize.ToString(), ParserData.MinHeaderSize - 1);
+            
             Assert.ThrowsArgumentNull(() => { new InternetMessageFormatHeaderParser(null, ParserData.MinHeaderSize); }, "headers");
         }
 

@@ -110,10 +110,9 @@ namespace System.Net.Http
             HttpContent content = CreateContent(boundary);
             Assert.NotNull(content);
 
-            Assert.ThrowsArgument(() =>
-            {
-                content.ReadAsMultipartAsync(new MemoryStreamProvider(), ParserData.MinBufferSize - 1);
-            }, "bufferSize");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(
+                () => content.ReadAsMultipartAsync(new MemoryStreamProvider(), ParserData.MinBufferSize - 1),
+                "bufferSize", ParserData.MinBufferSize.ToString(), ParserData.MinBufferSize - 1);
         }
 
         [Fact]

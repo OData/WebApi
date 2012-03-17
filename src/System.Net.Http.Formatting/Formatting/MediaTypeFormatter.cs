@@ -20,14 +20,13 @@ namespace System.Net.Http.Formatting
         private static readonly ConcurrentDictionary<Type, Type> _delegatingEnumerableCache = new ConcurrentDictionary<Type, Type>();
         private static ConcurrentDictionary<Type, ConstructorInfo> _delegatingEnumerableConstructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
 
-        private Encoding _encoding;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
         /// </summary>
         protected MediaTypeFormatter()
         {
             SupportedMediaTypes = new MediaTypeHeaderValueCollection();
+            SupportedEncodings = new Collection<Encoding>();
             MediaTypeMappings = new Collection<MediaTypeMapping>();
         }
 
@@ -36,6 +35,13 @@ namespace System.Net.Http.Formatting
         /// this <see cref="MediaTypeFormatter"/> instance.
         /// </summary>
         public Collection<MediaTypeHeaderValue> SupportedMediaTypes { get; private set; }
+
+        /// <summary>
+        /// Gets the mutable collection of character encodings supported by
+        /// this <see cref="MediaTypeFormatter"/> instance. The encodings are
+        /// used when reading or writing data. 
+        /// </summary>
+        public Collection<Encoding> SupportedEncodings { get; private set; }
 
         /// <summary>
         /// Gets the mutable collection of <see cref="MediaTypeMapping"/> elements used
@@ -48,24 +54,6 @@ namespace System.Net.Http.Formatting
         /// Gets or sets the <see cref="IRequiredMemberSelector"/> used to determine required members.
         /// </summary>
         public IRequiredMemberSelector RequiredMemberSelector { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="Encoding"/> to use when reading and writing data.
-        /// </summary>
-        /// <value>
-        /// The <see cref="Encoding"/> to use when reading and writing data.
-        /// </value>
-        protected virtual Encoding Encoding
-        {
-            get
-            {
-                return _encoding;
-            }
-            set
-            {
-                _encoding = value;
-            }
-        }
 
         /// <summary>
         /// Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="stream"/>
@@ -149,11 +137,37 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
-        /// Set the encoding to use <see cref="UTF8Encoding"/>.
+        /// Determines the best <see cref="Encoding"/> amongst the supported encodings
+        /// for reading a request entity body or for writing a response entity body.
         /// </summary>
-        protected void InitializeEncoding()
+        /// <param name="contentHeaders">The content headers provided as part of the request or response.</param>
+        /// <returns>The <see cref="Encoding"/> to use when reading the request or writing the response.</returns>
+        protected Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders)
         {
-            _encoding = new UTF8Encoding(false, true);
+            Encoding encoding = null;
+            if (contentHeaders != null && contentHeaders.ContentType != null)
+            {
+                string charset = contentHeaders.ContentType.CharSet;
+                if (!String.IsNullOrWhiteSpace(charset))
+                {
+                    encoding =
+                        SupportedEncodings.FirstOrDefault(
+                            enc => charset.Equals(enc.WebName, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+
+            if (encoding == null)
+            {
+                encoding = SupportedEncodings.FirstOrDefault();
+            }
+
+            if (encoding == null)
+            {
+                // No supported encoding was found so there is no way for us to start reading  or writing.
+                throw new IOException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
+            }
+
+            return encoding;
         }
 
         internal bool CanReadAs(Type type, MediaTypeHeaderValue mediaType)
@@ -233,10 +247,11 @@ namespace System.Net.Http.Formatting
                     ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping);
             }
 
-            // Match against the accept header.
+            // Sort accept headers in descending order based on q factor.
             IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderMediaTypes =
                 request.Headers.Accept.OrderByDescending(m => m, MediaTypeWithQualityHeaderValueComparer.QualityComparer);
 
+            // Match against the accept header.
             if (TryMatchSupportedMediaType(acceptHeaderMediaTypes, out mediaTypeMatch))
             {
                 return new ResponseMediaTypeMatch(
@@ -260,15 +275,47 @@ namespace System.Net.Http.Formatting
             // No match at all.
             // Pick the first supported media type and indicate we've matched only on type
             MediaTypeHeaderValue mediaType = SupportedMediaTypes.FirstOrDefault();
-            if (mediaType != null && Encoding != null)
+
+            // Determine the best character encoding
+            if (mediaType != null && SupportedEncodings.Any())
             {
                 mediaType = mediaType.Clone();
-                mediaType.CharSet = Encoding.WebName;
+                mediaType.CharSet = SelectResponseCharacterEncoding(request).WebName;
             }
 
             return new ResponseMediaTypeMatch(
                 new MediaTypeMatch(mediaType),
                 ResponseFormatterSelectionResult.MatchOnCanWriteType);
+        }
+
+        /// <summary>
+        /// Determine the best character encoding for writing the response. First we look
+        /// for accept-charset headers and if not found then we try to match
+        /// any charset encoding in the request (in case of PUT, POST, etc.)
+        /// If no encoding is found then we use the default for the formatter.
+        /// </summary>
+        /// <returns>The <see cref="Encoding"/> determined to be the best match.</returns>
+        internal Encoding SelectResponseCharacterEncoding(HttpRequestMessage request)
+        {
+            // Sort accept-charset headers in descending order based on q factor
+            IEnumerable<StringWithQualityHeaderValue> acceptCharsetValues =
+                request.Headers.AcceptCharset.OrderByDescending(m => m, StringWithQualityHeaderValueComparer.QualityComparer);
+
+            // Check for match based on accept-charset headers
+            foreach (StringWithQualityHeaderValue acceptCharset in acceptCharsetValues)
+            {
+                foreach (Encoding encoding in SupportedEncodings)
+                {
+                    if (acceptCharset.Value.Equals(encoding.WebName, StringComparison.OrdinalIgnoreCase) ||
+                        acceptCharset.Value.Equals("*", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return encoding;
+                    }
+                }
+            }
+
+            // Check for match based on any request entity body
+            return SelectCharacterEncoding(request.Content != null ? request.Content.Headers : null);
         }
 
         internal bool TryMatchSupportedMediaType(MediaTypeHeaderValue mediaType, out MediaTypeMatch mediaTypeMatch)
@@ -285,14 +332,7 @@ namespace System.Net.Http.Formatting
                                          ? mediaTypeWithQualityHeaderValue.Quality.Value
                                          : MediaTypeMatch.Match;
 
-                    MediaTypeHeaderValue effectiveMediaType = supportedMediaType;
-                    if (Encoding != null)
-                    {
-                        effectiveMediaType = supportedMediaType.Clone();
-                        effectiveMediaType.CharSet = Encoding.WebName;
-                    }
-
-                    mediaTypeMatch = new MediaTypeMatch(effectiveMediaType, quality);
+                    mediaTypeMatch = new MediaTypeMatch(supportedMediaType, quality);
                     return true;
                 }
             }
@@ -375,11 +415,6 @@ namespace System.Net.Http.Formatting
                 {
                     headers.ContentType = defaultMediaType.Clone();
                 }
-            }
-
-            if (headers.ContentType != null && headers.ContentType.CharSet == null && Encoding != null)
-            {
-                headers.ContentType.CharSet = Encoding.WebName;
             }
         }
 

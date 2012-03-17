@@ -231,9 +231,6 @@
   <data name="UndefinedMediaType" xml:space="preserve">
     <value>'undefined'</value>
   </data>
-  <data name="UnsupportedEncoding" xml:space="preserve">
-    <value>The character encoding used by '{0}' for writing data must be either '{1}' or '{2}'.'</value>
-  </data>
   <data name="UnsupportedIndent" xml:space="preserve">
     <value>Indentation is not supported by '{0}'.</value>
   </data>
@@ -279,5 +276,8 @@
   </data>
   <data name="UnMatchedBracketNotValid" xml:space="preserve">
     <value>There is an unmatched opened bracket for the '{0}' at position {1}.</value>
+  </data>
+  <data name="MediaTypeFormatterNoEncoding" xml:space="preserve">
+    <value>No encoding found for media type formatter '{0}'. There must be at least one supported encoding registered in order for the media type formatter to read or write content.</value>
   </data>
 </root>

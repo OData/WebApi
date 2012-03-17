@@ -2,7 +2,6 @@
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Xml.Serialization;
 using Microsoft.TestCommon;
 using Xunit;
@@ -39,15 +38,12 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CharacterEncoding property handles Get/Set correctly.")]
-        public void CharacterEncodingGetSet()
+        public void SupportEncoding_ContainDefaultEncodings()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-            Assert.IsType<UTF8Encoding>(xmlFormatter.CharacterEncoding);
-            xmlFormatter.CharacterEncoding = Encoding.Unicode;
-            Assert.Same(Encoding.Unicode, xmlFormatter.CharacterEncoding);
-            xmlFormatter.CharacterEncoding = Encoding.UTF8;
-            Assert.Same(Encoding.UTF8, xmlFormatter.CharacterEncoding);
+            Assert.Equal(2, xmlFormatter.SupportedEncodings.Count);
+            Assert.Equal("utf-8", xmlFormatter.SupportedEncodings[0].WebName);
+            Assert.Equal("utf-16", xmlFormatter.SupportedEncodings[1].WebName);
         }
 
         [Fact]
@@ -58,15 +54,6 @@ namespace System.Net.Http.Formatting
             Assert.False(xmlFormatter.Indent);
             xmlFormatter.Indent = true;
             Assert.True(xmlFormatter.Indent);
-        }
-
-        [Fact]
-        [Trait("Description", "CharacterEncoding property throws on invalid arguments")]
-        public void CharacterEncodingSetThrows()
-        {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-            Assert.ThrowsArgumentNull(() => { xmlFormatter.CharacterEncoding = null; }, "value");
-            Assert.ThrowsArgument(() => { xmlFormatter.CharacterEncoding = Encoding.UTF32; }, "value");
         }
 
         [Fact]
@@ -98,7 +85,7 @@ namespace System.Net.Http.Formatting
         [Trait("Description", "UseXmlSerializer property with Indent works when set to false.")]
         public void UseXmlSerializer_False_Indent()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false, Indent = true};
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false, Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
@@ -128,7 +115,7 @@ namespace System.Net.Http.Formatting
         [Trait("Description", "UseXmlSerializer property with Indent works when set to true.")]
         public void UseXmlSerializer_True_Indent()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true, Indent = true};
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true, Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));

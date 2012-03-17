@@ -1,4 +1,6 @@
-﻿
+﻿using System.Net.Http.Headers;
+using System.Text;
+
 namespace System.Net.Http.Formatting.Mocks
 {
     public class MockMediaTypeFormatter : MediaTypeFormatter
@@ -25,6 +27,11 @@ namespace System.Net.Http.Formatting.Mocks
             }
 
             return CanWriteTypeCallback != null ? CanWriteTypeCallback(type) : true;
+        }
+
+        new public Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders)
+        {
+            return base.SelectCharacterEncoding(contentHeaders);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -29,13 +28,6 @@ namespace System.Net.Http.Formatting
         private int _maxDepth = DefaultMaxDepth;
         private XmlDictionaryReaderQuotas _readerQuotas = CreateDefaultReaderQuotas();
 
-        // Encoders used for reading data based on charset parameter and default encoder doesn't match
-        private readonly Dictionary<string, Encoding> _decoders = new Dictionary<string, Encoding>(StringComparer.OrdinalIgnoreCase)
-        {
-            { Encoding.UTF8.WebName, new UTF8Encoding(false, true) },
-            { Encoding.Unicode.WebName, new UnicodeEncoding(false, true, true) },
-        };
-
         private ConcurrentDictionary<Type, DataContractJsonSerializer> _dataContractSerializerCache = new ConcurrentDictionary<Type, DataContractJsonSerializer>();
         private RequestHeaderMapping _requestHeaderMapping;
 
@@ -44,11 +36,15 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public JsonMediaTypeFormatter()
         {
-            InitializeEncoding();
+            // Set default supported media types
             foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
             {
                 SupportedMediaTypes.Add(value);
             }
+
+            // Set default supported character encodings
+            SupportedEncodings.Add(new UTF8Encoding(false, true));
+            SupportedEncodings.Add(new UnicodeEncoding(false, true, true));
 
             _requestHeaderMapping = new XHRRequestHeaderMapping();
             MediaTypeMappings.Add(_requestHeaderMapping);
@@ -69,36 +65,6 @@ namespace System.Net.Http.Formatting
         public static MediaTypeHeaderValue DefaultMediaType
         {
             get { return MediaTypeConstants.ApplicationJsonMediaType; }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="Encoding"/> to use when writing data.
-        /// </summary>
-        /// <remarks>The default encoding is <see cref="UTF8Encoding"/>.</remarks>
-        /// <value>
-        /// The <see cref="Encoding"/> to use when writing data.
-        /// </value>
-        public Encoding CharacterEncoding
-        {
-            get { return Encoding; }
-
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
-                Type valueType = value.GetType();
-                if (FormattingUtilities.Utf8EncodingType.IsAssignableFrom(valueType) || FormattingUtilities.Utf16EncodingType.IsAssignableFrom(valueType))
-                {
-                    Encoding = value;
-                    return;
-                }
-
-                throw new ArgumentException(
-                    RS.Format(Properties.Resources.UnsupportedEncoding, typeof(JsonMediaTypeFormatter).Name, FormattingUtilities.Utf8EncodingType.Name, FormattingUtilities.Utf16EncodingType.Name), "value");
-            }
         }
 
         /// <summary>
@@ -262,25 +228,14 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {
-                Encoding effectiveEncoding = Encoding;
-
-                if (contentHeaders != null)
+                // If content length is 0 then return default value for this type
+                if (contentHeaders != null && contentHeaders.ContentLength == 0)
                 {
-                    if (contentHeaders.ContentLength == 0)
-                    {
-                        return GetDefaultValueForType(type);
-                    }
-                    if (contentHeaders.ContentType != null)
-                    {
-                        string charset = contentHeaders.ContentType.CharSet;
-                        if (!String.IsNullOrWhiteSpace(charset) &&
-                            !String.Equals(charset, Encoding.WebName) &&
-                            !_decoders.TryGetValue(charset, out effectiveEncoding))
-                        {
-                            effectiveEncoding = Encoding;
-                        }
-                    }
+                    return GetDefaultValueForType(type);
                 }
+
+                // Get the character encoding for the content
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
 
                 if (UseDataContractJsonSerializer)
                 {
@@ -329,9 +284,11 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously(() =>
             {
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+
                 if (!UseDataContractJsonSerializer)
                 {
-                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, Encoding)) { CloseOutput = false })
+                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, effectiveEncoding)) { CloseOutput = false })
                     {
                         if (Indent)
                         {
@@ -351,8 +308,8 @@ namespace System.Net.Http.Formatting
 
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
                     // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
-                    using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(stream, Encoding, ownsStream: false))
-                    { 
+                    using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(stream, effectiveEncoding, ownsStream: false))
+                    {
                         dataContractSerializer.WriteObject(writer, value);
                     }
                 }

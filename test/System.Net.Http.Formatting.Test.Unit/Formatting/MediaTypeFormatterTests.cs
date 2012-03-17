@@ -1,8 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
@@ -272,6 +275,158 @@ namespace System.Net.Http.Formatting
             Assert.Equal(quality, match.MediaTypeMatch.Quality);
             Assert.NotNull(match.MediaTypeMatch.MediaType);
             Assert.Equal(mediaType.MediaType, match.MediaTypeMatch.MediaType.MediaType);
+        }
+
+        public static IEnumerable<object[]> SelectCharacterEncodingTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    null,
+                    new[] { "utf-8", "utf-16"},
+                    "utf-8"
+                };
+                yield return new object[]
+                {
+                    null,
+                    new[] { "utf-16", "utf-8"},
+                    "utf-16"
+                };
+                yield return new object[]
+                {
+                    "utf-32",
+                    new[] { "utf-8", "utf-16"},
+                    "utf-8"
+                };
+                yield return new object[]
+                {
+                    "utf-32",
+                    new[] { "utf-8", "utf-16", "utf-32"},
+                    "utf-32"
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> SelectResponseCharacterEncodingTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.7" },
+                    null,
+                    new[] { "utf-16", "utf-8"},
+                    "utf-8"
+                };
+                yield return new object[]
+                {
+                    new[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.9" },
+                    null,
+                    new[] { "utf-8", "utf-16"},
+                    "utf-16"
+                };
+                yield return new object[]
+                {
+                    new[] { "*;q=0.9", "utf-8;q=0.5", "utf-16;q=0.5" },
+                    null,
+                    new[] { "utf-8", "utf-16"},
+                    "utf-8"
+                };
+                yield return new object[]
+                {
+                    new string[] { },
+                    "utf-16",
+                    new[] { "utf-8", "utf-16"},
+                    "utf-16"
+                };
+                yield return new object[]
+                {
+                    new[] { "*;q=0.5" },
+                    "utf-16",
+                    new[] { "utf-8", "utf-16"},
+                    "utf-8"
+                };
+                yield return new object[]
+                {
+                    new[] { "*;q=0.5", "utf-16;q=0.7", "utf-8;q=0.8" },
+                    "utf-16",
+                    new[] { "utf-8", "utf-16"},
+                    "utf-8"
+                };
+            }
+        }
+
+        [Fact]
+        public void SelectCharacterEncoding_ThrowsIfNoSupportedEncodings()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
+            HttpContent content = new StringContent("Hello World", Encoding.UTF8, "text/plain");
+
+            // Act
+            Assert.Throws<IOException>(() => formatter.SelectCharacterEncoding(content.Headers));
+        }
+
+        [Theory]
+        [PropertyData("SelectCharacterEncodingTestData")]
+        public void SelectCharacterEncoding_ReturnsBestEncoding(string bodyEncoding, string[] supportedEncodings, string expectedEncoding)
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
+
+            foreach (string supportedEncoding in supportedEncodings)
+            {
+                formatter.SupportedEncodings.Add(Encoding.GetEncoding(supportedEncoding));
+            }
+
+            HttpContentHeaders contentHeaders = null;
+            if (bodyEncoding != null)
+            {
+                Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
+                HttpContent content = new StringContent("Hello World", bodyEnc, "text/plain");
+                contentHeaders = content.Headers;
+            }
+
+            // Act
+            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders);
+
+            // Assert
+            Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
+            Assert.Equal(expectedEnc, actualEncoding);
+        }
+
+        [Theory]
+        [PropertyData("SelectResponseCharacterEncodingTestData")]
+        public void SelectResponseCharacterEncoding_ReturnsBestEncodingBasedOnAcceptCharsetMatch(string[] acceptCharsetValues, string bodyEncoding, string[] supportedEncodings, string expectedEncoding)
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
+            HttpRequestMessage request = new HttpRequestMessage();
+            foreach (var acceptCharsetValue in acceptCharsetValues)
+            {
+                request.Headers.AcceptCharset.Add(StringWithQualityHeaderValue.Parse(acceptCharsetValue));
+            }
+
+            foreach (var supportedEncoding in supportedEncodings)
+            {
+                Encoding supportedEnc = Encoding.GetEncoding(supportedEncoding);
+                formatter.SupportedEncodings.Add(supportedEnc);
+            }
+
+            if (bodyEncoding != null)
+            {
+                Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
+                request.Method = HttpMethod.Post;
+                request.Content = new StringContent("Hello World", bodyEnc, "text/plain");
+            }
+
+            // Act
+            Encoding actualEncoding = formatter.SelectResponseCharacterEncoding(request);
+
+            // Assert
+            Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
+            Assert.Equal(expectedEnc, actualEncoding);
         }
 
         [Theory]

@@ -295,6 +295,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No encoding found for media type formatter &apos;{0}&apos;. There must be at least one supported encoding registered in order for the media type formatter to read or write content..
+        /// </summary>
+        internal static string MediaTypeFormatterNoEncoding {
+            get {
+                return ResourceManager.GetString("MediaTypeFormatterNoEncoding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to MIME multipart boundary cannot end with an empty space..
         /// </summary>
         internal static string MimeMultipartParserBadBoundary {
@@ -525,15 +534,6 @@ namespace System.Net.Http.Properties {
         internal static string UnMatchedBracketNotValid {
             get {
                 return ResourceManager.GetString("UnMatchedBracketNotValid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The character encoding used by &apos;{0}&apos; for writing data must be either &apos;{1}&apos; or &apos;{2}&apos;.&apos;.
-        /// </summary>
-        internal static string UnsupportedEncoding {
-            get {
-                return ResourceManager.GetString("UnsupportedEncoding", resourceCulture);
             }
         }
         

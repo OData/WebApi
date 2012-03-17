@@ -5,7 +5,6 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
-using System.Text;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -65,17 +64,13 @@ namespace System.Net.Http.Formatting
             Assert.Equal("application/json", mediaType.MediaType);
         }
 
-
         [Fact]
-        [Trait("Description", "CharacterEncoding property handles Get/Set correctly.")]
-        public void CharacterEncodingGetSet()
+        public void SupportEncoding_ContainDefaultEncodings()
         {
             JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter();
-            Assert.IsType<UTF8Encoding>(jsonFormatter.CharacterEncoding);
-            jsonFormatter.CharacterEncoding = Encoding.Unicode;
-            Assert.Same(Encoding.Unicode, jsonFormatter.CharacterEncoding);
-            jsonFormatter.CharacterEncoding = Encoding.UTF8;
-            Assert.Same(Encoding.UTF8, jsonFormatter.CharacterEncoding);
+            Assert.Equal(2, jsonFormatter.SupportedEncodings.Count);
+            Assert.Equal("utf-8", jsonFormatter.SupportedEncodings[0].WebName);
+            Assert.Equal("utf-16", jsonFormatter.SupportedEncodings[1].WebName);
         }
 
         [Fact]
@@ -86,15 +81,6 @@ namespace System.Net.Http.Formatting
             Assert.False(jsonFormatter.Indent);
             jsonFormatter.Indent = true;
             Assert.True(jsonFormatter.Indent);
-        }
-
-        [Fact]
-        [Trait("Description", "CharacterEncoding property throws on invalid arguments")]
-        public void CharacterEncodingSetThrows()
-        {
-            JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter();
-            Assert.ThrowsArgumentNull(() => { jsonFormatter.CharacterEncoding = null; }, "value");
-            Assert.ThrowsArgument(() => { jsonFormatter.CharacterEncoding = Encoding.UTF32; }, "value");
         }
 
         [Theory]
@@ -256,12 +242,12 @@ namespace System.Net.Http.Formatting
         [Trait("Description", "UseDataContractJsonSerializer property with Indent throws when set to true.")]
         public void UseDataContractJsonSerializer_True_Indent_Throws()
         {
-            JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true, Indent = true};
+            JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true, Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = new StringContent(String.Empty).Headers;
             Assert.Throws<NotSupportedException>(
-                ()=>jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), 
-                    new XmlMediaTypeFormatterTests.SampleType(), 
+                () => jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType),
+                    new XmlMediaTypeFormatterTests.SampleType(),
                     memoryStream, contentHeaders, transportContext: null));
         }
 

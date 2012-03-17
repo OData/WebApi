@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -25,32 +24,22 @@ namespace System.Net.Http.Formatting
             MediaTypeConstants.TextXmlMediaType
         };
 
-        // Encoders used for reading data based on charset parameter and default encoder doesn't match
-        private readonly Dictionary<string, Encoding> _decoders = new Dictionary<string, Encoding>(StringComparer.OrdinalIgnoreCase)
-        {
-            { Encoding.UTF8.WebName, new UTF8Encoding(false, true) },
-            { Encoding.Unicode.WebName, new UnicodeEncoding(false, true, true) },
-        };
-
         private ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
-        private XmlWriterSettings _writerSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlMediaTypeFormatter"/> class.
         /// </summary>
         public XmlMediaTypeFormatter()
         {
-            _writerSettings = new XmlWriterSettings()
-            {
-                OmitXmlDeclaration = true,
-                Encoding = new UTF8Encoding(false, true),
-                CloseOutput = false
-            };
-
+            // Set default supported media types
             foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
             {
                 SupportedMediaTypes.Add(value);
             }
+
+            // Set default supported character encodings
+            SupportedEncodings.Add(new UTF8Encoding(false, true));
+            SupportedEncodings.Add(new UnicodeEncoding(false, true, true));
         }
 
         /// <summary>
@@ -80,67 +69,9 @@ namespace System.Net.Http.Formatting
         public bool UseXmlSerializer { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="Encoding"/> to use when writing data.
-        /// </summary>
-        /// <remarks>The default encoding is <see cref="UTF8Encoding"/>.</remarks>
-        /// <value>
-        /// The <see cref="Encoding"/> to use when writing data.
-        /// </value>
-        public Encoding CharacterEncoding
-        {
-            get { return Encoding; }
-
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
-                Type valueType = value.GetType();
-                if (FormattingUtilities.Utf8EncodingType.IsAssignableFrom(valueType) || FormattingUtilities.Utf16EncodingType.IsAssignableFrom(valueType))
-                {
-                    Encoding = value;
-                    return;
-                }
-
-                throw new ArgumentException(
-                    RS.Format(Properties.Resources.UnsupportedEncoding, typeof(XmlMediaTypeFormatter).Name, FormattingUtilities.Utf8EncodingType.Name, FormattingUtilities.Utf16EncodingType.Name), "value");
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="Encoding"/> to use when reading and writing data.
-        /// </summary>
-        /// <value>
-        /// The <see cref="Encoding"/> to use when reading and writing data.
-        /// </value>
-        protected override Encoding Encoding
-        {
-            get
-            {
-                return _writerSettings.Encoding;
-            }
-            set
-            {
-                _writerSettings.Encoding = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether to indent elements when writing data. 
         /// </summary>
-        public bool Indent
-        {
-            get
-            {
-                return _writerSettings.Indent;
-            }
-            set
-            {
-                _writerSettings.Indent = value;
-            }
-        }
+        public bool Indent { get; set; }
 
         /// <summary>
         /// Registers the <see cref="XmlObjectSerializer"/> to use to read or write
@@ -289,25 +220,14 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {
-                Encoding effectiveEncoding = Encoding;
-
-                if (contentHeaders != null)
+                // If content length is 0 then return default value for this type
+                if (contentHeaders != null && contentHeaders.ContentLength == 0)
                 {
-                    if (contentHeaders.ContentLength == 0)
-                    {
-                        return GetDefaultValueForType(type);
-                    }
-                    if (contentHeaders.ContentType != null)
-                    {
-                        string charset = contentHeaders.ContentType.CharSet;
-                        if (!String.IsNullOrWhiteSpace(charset) &&
-                            !String.Equals(charset, Encoding.WebName) &&
-                            !_decoders.TryGetValue(charset, out effectiveEncoding))
-                        {
-                            effectiveEncoding = Encoding;
-                        }
-                    }
+                    return GetDefaultValueForType(type);
                 }
+
+                // Get the character encoding for the content
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
 
                 object serializer = GetSerializerForType(type);
 
@@ -366,10 +286,18 @@ namespace System.Net.Http.Formatting
                     value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
                 }
 
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+                XmlWriterSettings writerSettings = new XmlWriterSettings
+                {
+                    OmitXmlDeclaration = true,
+                    Indent = Indent,
+                    Encoding = effectiveEncoding,
+                    CloseOutput = false
+                };
+
                 object serializer = GetSerializerForType(type);
 
-                // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
-                using (XmlWriter writer = XmlWriter.Create(stream, _writerSettings))
+                using (XmlWriter writer = XmlWriter.Create(stream, writerSettings))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)

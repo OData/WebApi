@@ -1,7 +1,10 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
+using System.Net.Http.Internal;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Microsoft.TestCommon;
 using Xunit;
@@ -285,6 +288,52 @@ namespace System.Net.Http.Formatting
             result.WaitUntilCompleted();
             var value = Assert.IsType<SampleType>(result.Result);
             Assert.Equal(42, value.Number);
+        }
+
+        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
+        {
+            get { return MediaTypeFormatterTests.ReadAndWriteCorrectCharacterEncoding; }
+        }
+
+        [Theory]
+        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        public Task ReadXmlContentUsingCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
+        {
+            if (!isDefaultEncoding)
+            {
+                // XmlDictionaryReader/Writer only supports utf-8 and 16
+                return TaskHelpers.Completed();
+            }
+
+            // Arrange
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content + "</string>";
+            string mediaType = string.Format("application/xml; charset={0}", encoding);
+
+            // Act
+            return MediaTypeFormatterTests.ReadContentUsingCorrectCharacterEncodingHelper(
+                formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
+        }
+
+        [Theory]
+        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        public Task WriteXmlContentUsingCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
+        {
+            if (!isDefaultEncoding)
+            {
+                // XmlDictionaryReader/Writer only supports utf-8 and 16
+                return TaskHelpers.Completed();
+            }
+
+            // Arrange
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content +
+                                      "</string>";
+            string mediaType = string.Format("application/xml; charset={0}", encoding);
+
+            // Act
+            return MediaTypeFormatterTests.WriteContentUsingCorrectCharacterEncodingHelper(
+                formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
         public class TestXmlMediaTypeFormatter : XmlMediaTypeFormatter

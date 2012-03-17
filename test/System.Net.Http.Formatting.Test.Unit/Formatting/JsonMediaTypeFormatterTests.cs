@@ -5,6 +5,7 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
+using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -318,6 +319,39 @@ namespace System.Net.Http.Formatting
             string afterMessage = after.ToObject<string>();
 
             Assert.Equal(beforeMessage, afterMessage);
+        }
+
+        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
+        {
+            get { return MediaTypeFormatterTests.ReadAndWriteCorrectCharacterEncoding; }
+        }
+
+        [Theory]
+        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        public Task ReadJsonContentUsingCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
+        {
+            // Arrange
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
+            string formattedContent = "\"" + content + "\"";
+            string mediaType = string.Format("application/json; charset={0}", encoding);
+
+            // Act
+            return MediaTypeFormatterTests.ReadContentUsingCorrectCharacterEncodingHelper(
+                formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
+        }
+
+        [Theory]
+        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        public Task WriteJsonContentUsingCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
+        {
+            // Arrange
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
+            string formattedContent = "\"" + content + "\"";
+            string mediaType = string.Format("application/json; charset={0}", encoding);
+
+            // Act
+            return MediaTypeFormatterTests.WriteContentUsingCorrectCharacterEncodingHelper(
+                formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
         public class TestJsonMediaTypeFormatter : JsonMediaTypeFormatter

@@ -6,6 +6,7 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
@@ -590,6 +591,95 @@ namespace System.Net.Http.Formatting
             {
                 I = i + 1;
             }
+
+        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
+        {
+            get
+            {
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-8", "utf-8", true };
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-16", "utf-16", true };
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-32", "utf-32", false };
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using shift_jis", "shift_jis", false };
+                yield return new object[] { "This is a test æøå string written using iso-8859-1", "iso-8859-1", false };
+                yield return new object[] { "This is a test 레이저 단어 뜻 string written using iso-2022-kr", "iso-2022-kr", false };
+            }
+        }
+
+        public static Task ReadContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
+        {
+            // Arrange
+            Encoding enc = null;
+            if (isDefaultEncoding)
+            {
+                enc = formatter.SupportedEncodings.First((e) => e.WebName.Equals(encoding, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                enc = Encoding.GetEncoding(encoding);
+                formatter.SupportedEncodings.Add(enc);
+            }
+
+            byte[] data = enc.GetBytes(formattedContent);
+            MemoryStream memStream = new MemoryStream(data);
+
+            StringContent dummyContent = new StringContent(string.Empty);
+            HttpContentHeaders headers = dummyContent.Headers;
+            headers.Clear();
+            headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+
+            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
+
+            // Act
+            return formatter.ReadFromStreamAsync(typeof(string), memStream, headers, mockFormatterLogger).ContinueWith(
+                (readTask) =>
+                {
+                    string result = readTask.Result as string;
+
+                    // Assert
+                    Assert.True(readTask.IsCompleted);
+                    Assert.Equal(content, result);
+                });
+        }
+
+        public static Task WriteContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
+        {
+            // Arrange
+            Encoding enc = null;
+            if (isDefaultEncoding)
+            {
+                enc = formatter.SupportedEncodings.First((e) => e.WebName.Equals(encoding, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                enc = Encoding.GetEncoding(encoding);
+                formatter.SupportedEncodings.Add(enc);
+            }
+
+            byte[] preamble = enc.GetPreamble();
+            byte[] data = enc.GetBytes(formattedContent);
+            byte[] expectedData = new byte[preamble.Length + data.Length];
+            Buffer.BlockCopy(preamble, 0, expectedData, 0, preamble.Length);
+            Buffer.BlockCopy(data, 0, expectedData, preamble.Length, data.Length);
+
+            MemoryStream memStream = new MemoryStream();
+
+            StringContent dummyContent = new StringContent(string.Empty);
+            HttpContentHeaders headers = dummyContent.Headers;
+            headers.Clear();
+            headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+
+            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
+
+            // Act
+            return formatter.WriteToStreamAsync(typeof(string), content, memStream, headers, null).ContinueWith(
+                (writeTask) =>
+                {
+                    // Assert
+                    Assert.True(writeTask.IsCompleted);
+                    byte[] actualData = memStream.ToArray();
+
+                    Assert.Equal(expectedData, actualData);
+                });
         }
     }
 }

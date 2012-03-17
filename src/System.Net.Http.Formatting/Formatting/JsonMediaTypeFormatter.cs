@@ -44,8 +44,8 @@ namespace System.Net.Http.Formatting
             }
 
             // Set default supported character encodings
-            SupportedEncodings.Add(new UTF8Encoding(false, true));
-            SupportedEncodings.Add(new UnicodeEncoding(false, true, true));
+            SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
+            SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
 
             _requestHeaderMapping = new XHRRequestHeaderMapping();
             MediaTypeMappings.Add(_requestHeaderMapping);

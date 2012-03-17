@@ -138,7 +138,7 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Determines the best <see cref="Encoding"/> amongst the supported encodings
-        /// for reading a request entity body or for writing a response entity body.
+        /// for reading or writing an HTTP entity body based on the provided <paramref name="contentHeaders"/>.
         /// </summary>
         /// <param name="contentHeaders">The content headers provided as part of the request or response.</param>
         /// <returns>The <see cref="Encoding"/> to use when reading the request or writing the response.</returns>

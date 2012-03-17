@@ -84,7 +84,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinConcurrentRequests)
                 {
-                    throw Error.ArgumentTooSmall("value", value, MinConcurrentRequests);
+                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinConcurrentRequests);
                 }
                 _maxConcurrentRequests = value;
             }
@@ -135,7 +135,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinBufferSize)
                 {
-                    throw Error.ArgumentTooSmall("value", value, MinBufferSize);
+                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinBufferSize);
                 }
                 _maxBufferSize = value;
             }
@@ -155,7 +155,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinReceivedMessageSize)
                 {
-                    throw Error.ArgumentTooSmall("value", value, MinReceivedMessageSize);
+                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinReceivedMessageSize);
                 }
                 _maxReceivedMessageSize = value;
             }

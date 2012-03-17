@@ -79,7 +79,7 @@ namespace System.Web.Http.Common.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Value must be greater than or equal to {1}..
+        ///   Looks up a localized string similar to Value must be greater than or equal to {0}..
         /// </summary>
         internal static string ArgumentMustBeGreaterThanOrEqualTo {
             get {
@@ -88,7 +88,7 @@ namespace System.Web.Http.Common.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Value must be less than or equal to {1}..
+        ///   Looks up a localized string similar to Value must be less than or equal to {0}..
         /// </summary>
         internal static string ArgumentMustBeLessThanOrEqualTo {
             get {

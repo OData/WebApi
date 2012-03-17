@@ -143,9 +143,9 @@ namespace System.Web.Http.Common
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <param name="minValue">The minimum size of the argument.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentOutOfRangeException ArgumentTooSmall(string parameterName, object actualValue, object minValue)
+        public static ArgumentOutOfRangeException ArgumentGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
         {
-            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(SRResources.ArgumentMustBeGreaterThanOrEqualTo, actualValue, minValue));
+            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(SRResources.ArgumentMustBeGreaterThanOrEqualTo, minValue));
         }
 
         /// <summary>
@@ -155,9 +155,9 @@ namespace System.Web.Http.Common
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <param name="maxValue">The maximum size of the argument.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentOutOfRangeException ArgumentTooLarge(string parameterName, object actualValue, object maxValue)
+        public static ArgumentOutOfRangeException ArgumentMustBeLessThanOrEqualTo(string parameterName, object actualValue, object maxValue)
         {
-            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(SRResources.ArgumentMustBeLessThanOrEqualTo, actualValue, maxValue));
+            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(SRResources.ArgumentMustBeLessThanOrEqualTo, maxValue));
         }
 
         /// <summary>

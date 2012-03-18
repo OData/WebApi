@@ -54,7 +54,7 @@
             LogStandardErrorAsError="true" />
         <Exec
             Command='tools\NuGet.exe install Microsoft.Web.FxCop -Source "\\webstack-git\packages;https://go.microsoft.com/fwlink/?LinkID=230477" -ExcludeVersion -o packages > NUL'
-            LogStandardErrorAsError="true" />
+            LogStandardErrorAsError="true" Condition=" !Exists('packages\Microsoft.Web.FxCop') " />
     </Target>
 
     <Target Name="Build" DependsOnTargets="RestorePackages">

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace System.Net.Http.Formatting
 {
@@ -51,5 +52,19 @@ namespace System.Net.Http.Formatting
         /// Gets the quality of the match
         /// </summary>
         public double Quality { get; private set; }
+
+        /// <summary>
+        /// Set the character encoding on the media type. As we have already cloned the 
+        /// media type upon construction of this instance this is safe to do without 
+        /// any side effects.
+        /// </summary>
+        /// <param name="encoding">The <see cref="Encoding"/> to use.</param>
+        public void SetEncoding(Encoding encoding)
+        {
+            if (encoding != null && MediaType != null)
+            {
+                MediaType.CharSet = encoding.WebName;
+            }
+        }
     }
 }

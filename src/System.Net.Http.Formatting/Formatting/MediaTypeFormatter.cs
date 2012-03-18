@@ -163,7 +163,7 @@ namespace System.Net.Http.Formatting
 
             if (encoding == null)
             {
-                // No supported encoding was found so there is no way for us to start reading  or writing.
+                // No supported encoding was found so there is no way for us to start reading or writing.
                 throw new IOException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
             }
 
@@ -237,11 +237,18 @@ namespace System.Net.Http.Formatting
                 return null;
             }
 
+            // Determine the best character encoding if we have any registered encoders.
+            // Note that it is ok for a formatter not to register any encoders in case it doesn't 
+            // do any structured reading or writing.
+            Encoding characterEncodingMatch = SupportedEncodings.Any() ? SelectResponseCharacterEncoding(request) : null;
+
+            // Determine the best media type
             MediaTypeMatch mediaTypeMatch = null;
 
             // Match against media type mapping first
             if (TryMatchMediaTypeMapping(request, out mediaTypeMatch))
             {
+                mediaTypeMatch.SetEncoding(characterEncodingMatch);
                 return new ResponseMediaTypeMatch(
                     mediaTypeMatch,
                     ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping);
@@ -254,6 +261,7 @@ namespace System.Net.Http.Formatting
             // Match against the accept header.
             if (TryMatchSupportedMediaType(acceptHeaderMediaTypes, out mediaTypeMatch))
             {
+                mediaTypeMatch.SetEncoding(characterEncodingMatch);
                 return new ResponseMediaTypeMatch(
                     mediaTypeMatch,
                     ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader);
@@ -266,6 +274,7 @@ namespace System.Net.Http.Formatting
                 MediaTypeHeaderValue requestContentType = requestContent.Headers.ContentType;
                 if (requestContentType != null && TryMatchSupportedMediaType(requestContentType, out mediaTypeMatch))
                 {
+                    mediaTypeMatch.SetEncoding(characterEncodingMatch);
                     return new ResponseMediaTypeMatch(
                         mediaTypeMatch,
                         ResponseFormatterSelectionResult.MatchOnRequestContentType);
@@ -276,15 +285,10 @@ namespace System.Net.Http.Formatting
             // Pick the first supported media type and indicate we've matched only on type
             MediaTypeHeaderValue mediaType = SupportedMediaTypes.FirstOrDefault();
 
-            // Determine the best character encoding
-            if (mediaType != null && SupportedEncodings.Any())
-            {
-                mediaType = mediaType.Clone();
-                mediaType.CharSet = SelectResponseCharacterEncoding(request).WebName;
-            }
-
+            mediaTypeMatch = new MediaTypeMatch(mediaType);
+            mediaTypeMatch.SetEncoding(characterEncodingMatch);
             return new ResponseMediaTypeMatch(
-                new MediaTypeMatch(mediaType),
+                mediaTypeMatch,
                 ResponseFormatterSelectionResult.MatchOnCanWriteType);
         }
 

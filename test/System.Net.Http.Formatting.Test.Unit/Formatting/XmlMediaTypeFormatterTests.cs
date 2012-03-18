@@ -310,7 +310,7 @@ namespace System.Net.Http.Formatting
             string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content + "</string>";
             string mediaType = string.Format("application/xml; charset={0}", encoding);
 
-            // Act
+            // Act & assert
             return MediaTypeFormatterTests.ReadContentUsingCorrectCharacterEncodingHelper(
                 formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
@@ -331,7 +331,7 @@ namespace System.Net.Http.Formatting
                                       "</string>";
             string mediaType = string.Format("application/xml; charset={0}", encoding);
 
-            // Act
+            // Act & assert
             return MediaTypeFormatterTests.WriteContentUsingCorrectCharacterEncodingHelper(
                 formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }

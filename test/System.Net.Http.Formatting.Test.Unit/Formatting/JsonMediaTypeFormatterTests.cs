@@ -335,7 +335,7 @@ namespace System.Net.Http.Formatting
             string formattedContent = "\"" + content + "\"";
             string mediaType = string.Format("application/json; charset={0}", encoding);
 
-            // Act
+            // Act & assert
             return MediaTypeFormatterTests.ReadContentUsingCorrectCharacterEncodingHelper(
                 formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
@@ -349,7 +349,7 @@ namespace System.Net.Http.Formatting
             string formattedContent = "\"" + content + "\"";
             string mediaType = string.Format("application/json; charset={0}", encoding);
 
-            // Act
+            // Act & assert
             return MediaTypeFormatterTests.WriteContentUsingCorrectCharacterEncodingHelper(
                 formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }

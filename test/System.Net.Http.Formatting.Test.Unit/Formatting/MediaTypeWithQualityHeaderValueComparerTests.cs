@@ -150,9 +150,6 @@ namespace System.Net.Http.Formatting
             MediaTypeWithQualityHeaderValue mediaTypeHeaderValue2 = MediaTypeWithQualityHeaderValue.Parse(mediaType2);
 
             // Assert
-            int res1 = comparer.Compare(mediaTypeHeaderValue1, mediaTypeHeaderValue2);
-            int res2 = comparer.Compare(mediaTypeHeaderValue2, mediaTypeHeaderValue1);
-
             Assert.Equal(-1, comparer.Compare(mediaTypeHeaderValue1, mediaTypeHeaderValue2));
             Assert.Equal(1, comparer.Compare(mediaTypeHeaderValue2, mediaTypeHeaderValue1));
         }

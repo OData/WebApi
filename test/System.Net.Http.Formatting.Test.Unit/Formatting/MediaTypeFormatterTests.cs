@@ -591,6 +591,7 @@ namespace System.Net.Http.Formatting
             {
                 I = i + 1;
             }
+        }
 
         public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
         {

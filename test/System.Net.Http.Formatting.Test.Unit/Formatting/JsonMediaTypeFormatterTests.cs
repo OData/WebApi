@@ -5,6 +5,7 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;

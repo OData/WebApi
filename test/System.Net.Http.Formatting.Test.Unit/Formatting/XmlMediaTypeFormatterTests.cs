@@ -4,6 +4,7 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Microsoft.TestCommon;

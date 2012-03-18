@@ -627,6 +627,7 @@ namespace System.Net.Http.Formatting
             HttpContentHeaders headers = dummyContent.Headers;
             headers.Clear();
             headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+            headers.ContentLength = data.Length;
 
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
 
@@ -668,6 +669,7 @@ namespace System.Net.Http.Formatting
             HttpContentHeaders headers = dummyContent.Headers;
             headers.Clear();
             headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+            headers.ContentLength = expectedData.Length;
 
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
 

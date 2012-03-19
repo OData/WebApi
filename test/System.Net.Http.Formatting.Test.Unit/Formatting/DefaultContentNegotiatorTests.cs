@@ -155,12 +155,8 @@ namespace System.Net.Http.Formatting
         public void Negotiate_RespectsFormatterOrdering_ForXhrRequestThatDoesNotSpecifyAcceptHeaders()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage()
-            {
-                Content = new StringContent("test")
-            };
-            request.Headers.Add("x-requested-with", "XMLHttpRequest");
-            DefaultContentNegotiator selector = new DefaultContentNegotiator();
+            _request.Content = new StringContent("test");
+            _request.Headers.Add("x-requested-with", "XMLHttpRequest");
 
             MediaTypeFormatterCollection formatters = new MediaTypeFormatterCollection(new MediaTypeFormatter[]
             {
@@ -170,7 +166,7 @@ namespace System.Net.Http.Formatting
             });
 
             // Act
-            var result = selector.Negotiate(typeof(string), request, formatters);
+            var result = _negotiator.Negotiate(typeof(string), _request, formatters);
 
             // Assert
             Assert.Equal("application/json", result.MediaType.MediaType);

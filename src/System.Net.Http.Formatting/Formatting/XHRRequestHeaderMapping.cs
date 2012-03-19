@@ -12,7 +12,7 @@ namespace System.Net.Http.Formatting
         /// Initializes a new instance of <see cref="XHRRequestHeaderMapping" /> class
         /// </summary>
         public XHRRequestHeaderMapping() :
-            base(FormattingUtilities.HttpRequestedWithHeader, FormattingUtilities.HttpRequestedWithHeaderValue, StringComparison.OrdinalIgnoreCase, true, MediaTypeConstants.ApplicationJsonMediaType)
+            base(FormattingUtilities.HttpRequestedWithHeader, FormattingUtilities.HttpRequestedWithHeaderValue, StringComparison.OrdinalIgnoreCase, isValueSubstring: true, mediaType: MediaTypeConstants.ApplicationJsonMediaType)
         {
         }
 
@@ -24,7 +24,7 @@ namespace System.Net.Http.Formatting
         /// <returns>
         /// The quality of the match.
         /// A value of <c>0.0</c> signifies no match.
-        /// A value of <c>1.0</c> signifies a complete match.
+        /// A value of <c>1.0</c> signifies a complete match and that the request was made using XmlHttpRequest without an Accept header.
         /// </returns>
         public override double TryMatchMediaType(HttpRequestMessage request)
         {

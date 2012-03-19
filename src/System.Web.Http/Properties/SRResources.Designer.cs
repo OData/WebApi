@@ -423,11 +423,11 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property or field &apos;{0}&apos; in type &apos;{1}&apos; is not accessible.
+        ///   Looks up a localized string similar to The property or field &apos;{0}&apos; in type &apos;{1}&apos; is not accessible..
         /// </summary>
-        internal static string InAccessiblePropertyOrField {
+        internal static string InaccessiblePropertyOrField {
             get {
-                return ResourceManager.GetString("InAccessiblePropertyOrField", resourceCulture);
+                return ResourceManager.GetString("InaccessiblePropertyOrField", resourceCulture);
             }
         }
         

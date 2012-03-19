@@ -19,7 +19,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.XmlIgnoreProperty == 0)),
-                "The property or field 'XmlIgnoreProperty' in type 'QueryValidatorSampleClass' is not accessible");
+                "The property or field 'XmlIgnoreProperty' in type 'QueryValidatorSampleClass' is not accessible.");
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.IgnoreDataMemberProperty == 0)),
-                "The property or field 'IgnoreDataMemberProperty' in type 'QueryValidatorSampleClass' is not accessible");
+                "The property or field 'IgnoreDataMemberProperty' in type 'QueryValidatorSampleClass' is not accessible.");
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.NonSerializedAttributeField == 0)),
-                "The property or field 'NonSerializedAttributeField' in type 'QueryValidatorSampleClass' is not accessible");
+                "The property or field 'NonSerializedAttributeField' in type 'QueryValidatorSampleClass' is not accessible.");
         }
 
         [Fact]
@@ -48,6 +48,14 @@ namespace System.Web.Http.Query
             IQueryable<QueryValidatorSampleClass> query = new QueryValidatorSampleClass[0].AsQueryable();
 
             _queryValidator.Validate(query.Where((sample) => sample.NormalProperty == 0));
+        }
+
+        [Fact]
+        public void NormalFieldAccessDoesnotThrow()
+        {
+            IQueryable<QueryValidatorSampleClass> query = new QueryValidatorSampleClass[0].AsQueryable();
+
+            _queryValidator.Validate(query.Where((sample) => sample.PublicField == 0));
         }
 
         [Fact]
@@ -65,7 +73,17 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.NonDataMemberProperty == 0)),
-                "The property or field 'NonDataMemberProperty' in type 'QueryValidatorSampleDataContractClass' is not accessible");
+                "The property or field 'NonDataMemberProperty' in type 'QueryValidatorSampleDataContractClass' is not accessible.");
+        }
+
+        [Fact]
+        public void DataContractNonDataMemberFieldAccessCausesInvalidOperation()
+        {
+            IQueryable<QueryValidatorSampleDataContractClass> query = new QueryValidatorSampleDataContractClass[0].AsQueryable();
+
+            Assert.Throws<InvalidOperationException>(
+                () => _queryValidator.Validate(query.Where((sample) => sample.NonDataMemberField == 0)),
+                "The property or field 'NonDataMemberField' in type 'QueryValidatorSampleDataContractClass' is not accessible.");
         }
 
         [Fact]
@@ -81,7 +99,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Object),
-                "The property or field 'SetOnlyProperty' in type 'QueryValidatorSampleClass' is not accessible");
+                "The property or field 'SetOnlyProperty' in type 'QueryValidatorSampleClass' is not accessible.");
         }
 
         [Fact]
@@ -97,7 +115,7 @@ namespace System.Web.Http.Query
 
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Object),
-                "The property or field 'NonPublicGetProperty' in type 'QueryValidatorSampleClass' is not accessible");
+                "The property or field 'NonPublicGetProperty' in type 'QueryValidatorSampleClass' is not accessible.");
         }
 
         public class QueryValidatorSampleClass
@@ -116,6 +134,8 @@ namespace System.Web.Http.Query
             public int SetOnlyProperty { set { } }
 
             public int NonPublicGetProperty { set; private get; }
+
+            public int PublicField;
         }
 
         [DataContract]
@@ -125,6 +145,8 @@ namespace System.Web.Http.Query
             public int DataMemberProperty { get; set; }
 
             public int NonDataMemberProperty { get; set; }
+
+            public int NonDataMemberField;
         }
     }
 }

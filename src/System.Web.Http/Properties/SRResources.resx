@@ -482,8 +482,8 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ParseErrorInClause" xml:space="preserve">
     <value>Parse error in {0}. {1}</value>
   </data>
-  <data name="InAccessiblePropertyOrField" xml:space="preserve">
-    <value>The property or field '{0}' in type '{1}' is not accessible</value>
+  <data name="InaccessiblePropertyOrField" xml:space="preserve">
+    <value>The property or field '{0}' in type '{1}' is not accessible.</value>
   </data>
   <data name="ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods" xml:space="preserve">
     <value>Cannot call action method '{0}' on controller '{1}' because the action method is a generic method.</value>

@@ -5,9 +5,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Web.Helpers.Resources;
+using System.Web.WebPages;
 
 namespace System.Web.Helpers
 {
@@ -122,6 +124,7 @@ namespace System.Web.Helpers
             info.Add("Machine Name", Environment.MachineName);
             info.Add("OS Version", Environment.OSVersion.ToString());
             info.Add("ASP.NET Version", Environment.Version.ToString());
+            info.Add("ASP.NET WebPages Version", new AssemblyName(typeof(WebPage).Assembly.FullName).Version.ToString());
             info.Add("User Name", Environment.UserName);
             info.Add("User Interactive", Environment.UserInteractive.ToString());
             info.Add("Processor Count", Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture));

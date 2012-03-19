@@ -19,6 +19,7 @@ namespace System.Web.Helpers.Test
             VerifyKey(configInfo, "Machine Name");
             VerifyKey(configInfo, "OS Version");
             VerifyKey(configInfo, "ASP.NET Version");
+            VerifyKey(configInfo, "ASP.NET WebPages Version");
         }
 
         [Fact]

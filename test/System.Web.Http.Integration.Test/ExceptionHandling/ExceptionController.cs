@@ -49,6 +49,11 @@ namespace System.Web.Http
             return "bar";
         }
 
+        public T GenericAction<T>() where T : User
+        {
+            return null;
+        }
+
         [AuthorizationFilterThrows]
         public void AuthorizationFilter() { }
 

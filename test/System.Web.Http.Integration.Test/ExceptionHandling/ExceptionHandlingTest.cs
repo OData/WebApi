@@ -221,5 +221,35 @@ namespace System.Web.Http
                 }
             );
         }
+
+        [Fact]
+        public void GenericMethod_Throws_InvalidOperationException()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "Exception/{action}", new { controller = "Exception" });
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Ensure that the behavior is repeatable and other action is still callable after the error 
+            for (int i = 0; i < 10; i++)
+            {
+                // Make sure other action can be called
+                HttpResponseMessage response = client.GetAsync("http://localhost/Exception/GetString").Result;
+                Assert.True(response.IsSuccessStatusCode,
+                    string.Format("Successful status code was expected but got '{0}' instead. Error: {1}", response.StatusCode, response.Content.ReadAsStringAsync().Result));
+
+                // Make a request to generic method and verify the exception
+                response = client.PostAsync("http://localhost/Exception/GenericAction", null).Result;
+                Type controllerType = typeof(ExceptionController);
+                ExceptionSurrogate exception = response.Content.ReadAsAsync<ExceptionSurrogate>().Result;
+                Assert.Equal(typeof(InvalidOperationException).FullName, exception.ExceptionType);
+                Assert.Equal(
+                    string.Format(
+                        SRResources.ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods,
+                        controllerType.GetMethod("GenericAction"),
+                        controllerType.FullName),
+                    exception.Message);
+            }
+        }
     }
 }

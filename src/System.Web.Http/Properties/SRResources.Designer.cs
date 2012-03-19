@@ -711,6 +711,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot call action method &apos;{0}&apos; on controller &apos;{1}&apos; because the action method is a generic method..
+        /// </summary>
+        internal static string ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods {
+            get {
+                return ResourceManager.GetString("ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ResultLimitAttribute cannot be applied to action &apos;{0}&apos; because it&apos;s return type is not IEnumerable..
         /// </summary>
         internal static string ResultLimitFilter_InvalidReturnType {

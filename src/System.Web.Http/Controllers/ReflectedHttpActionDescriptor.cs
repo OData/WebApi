@@ -18,7 +18,7 @@ namespace System.Web.Http.Controllers
     {
         private readonly Lazy<Collection<HttpParameterDescriptor>> _parameters;
 
-        private ActionExecutor _actionExecutor;
+        private Lazy<ActionExecutor> _actionExecutor;
         private MethodInfo _methodInfo;
         private string _actionName;
         private Collection<HttpMethod> _supportedHttpMethods;
@@ -117,7 +117,7 @@ namespace System.Web.Http.Controllers
             }
 
             object[] argumentValues = PrepareParameters(arguments, controllerContext);
-            return _actionExecutor.Execute(controllerContext.Controller, argumentValues);
+            return _actionExecutor.Value.Execute(controllerContext.Controller, argumentValues);
         }
 
         public override Collection<IFilter> GetFilters()
@@ -133,7 +133,7 @@ namespace System.Web.Http.Controllers
         private void InitializeProperties(MethodInfo methodInfo)
         {
             _methodInfo = methodInfo;
-            _actionExecutor = new ActionExecutor(methodInfo);
+            _actionExecutor = new Lazy<ActionExecutor>(() => InitializeActionExecutor(_methodInfo));
             _attrCached = _methodInfo.GetCustomAttributes(inherit: true);
             CacheAttrsIActionMethodSelector = _attrCached.OfType<IActionMethodSelector>().ToArray();
             _actionName = GetActionName(_methodInfo, _attrCached);
@@ -236,6 +236,17 @@ namespace System.Web.Http.Controllers
             }
 
             return supportedHttpMethods;
+        }
+
+        private static ActionExecutor InitializeActionExecutor(MethodInfo methodInfo)
+        {
+            if (methodInfo.ContainsGenericParameters)
+            {
+                throw Error.InvalidOperation(SRResources.ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods,
+                                     methodInfo, methodInfo.ReflectedType.FullName);
+            }
+
+            return new ActionExecutor(methodInfo);
         }
 
         private sealed class ActionExecutor

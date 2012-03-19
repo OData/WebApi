@@ -164,7 +164,7 @@ namespace System.Net.Http.Formatting
             if (encoding == null)
             {
                 // No supported encoding was found so there is no way for us to start reading or writing.
-                throw new IOException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
+                throw new InvalidOperationException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
             }
 
             return encoding;

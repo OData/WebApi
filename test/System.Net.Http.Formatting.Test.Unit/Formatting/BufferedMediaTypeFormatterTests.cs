@@ -80,13 +80,13 @@ namespace System.Net.Http.Formatting
             {
                 return true;
             }
-            public override object OnReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+            public override object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
             {
                 byte data = (byte)stream.ReadByte();
                 return data;
             }
 
-            public override void OnWriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+            public override void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
             {
                 stream.WriteByte(123);
             }

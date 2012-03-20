@@ -36,14 +36,27 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        // Synchronous write
-        public virtual void OnWriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        /// <summary>
+        /// Writes synchronously to the buffered stream.
+        /// </summary>
+        /// <param name="type">The type of the object to write.</param>
+        /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+        /// <param name="stream">The <see cref="Stream"/> to which to write.</param>
+        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> if available. It may be <c>null</c>.</param>
+        public virtual void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
         {
             throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotWriteSync, this.GetType()));
         }
 
-        // Synchronous read. 
-        public virtual object OnReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        /// <summary>
+        /// Reads synchronously from the buffered stream.
+        /// </summary>
+        /// <param name="type">The type of the object to deserialize.</param>
+        /// <param name="stream">The <see cref="Stream"/> to read.</param>
+        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> if available. It may be <c>null</c>.</param>
+        /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
+        /// <returns>An object of the given type.</returns>
+        public virtual object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
             throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotReadSync, this.GetType()));
         }
@@ -69,7 +82,7 @@ namespace System.Net.Http.Formatting
 
                     try
                     {
-                        OnWriteToStream(type, value, bufferedStream, contentHeaders, transportContext);
+                        WriteToStream(type, value, bufferedStream, contentHeaders);
                     }
                     finally
                     {
@@ -102,7 +115,7 @@ namespace System.Net.Http.Formatting
                     // So when this reader is done, we close the stream to prevent subsequent readers from getting random bytes. 
                     using (Stream bufferedStream = GetBufferStream(stream))
                     {
-                        return OnReadFromStream(type, bufferedStream, contentHeaders, formatterLogger);
+                        return ReadFromStream(type, bufferedStream, contentHeaders, formatterLogger);
                     }
                 });
         }

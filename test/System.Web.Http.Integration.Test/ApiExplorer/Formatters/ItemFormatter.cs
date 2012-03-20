@@ -14,14 +14,14 @@ namespace System.Web.Http.ApiExplorer
             return typeof(System.Web.Http.ApiExplorer.ItemController.Item).IsAssignableFrom(type);
         }
 
-        public override object OnReadFromStream(Type type, IO.Stream stream, Net.Http.Headers.HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override object ReadFromStream(Type type, IO.Stream stream, Net.Http.Headers.HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
-            return base.OnReadFromStream(type, stream, contentHeaders, formatterLogger);
+            return base.ReadFromStream(type, stream, contentHeaders, formatterLogger);
         }
 
-        public override void OnWriteToStream(Type type, object value, IO.Stream stream, Net.Http.Headers.HttpContentHeaders contentHeaders, Net.TransportContext transportContext)
+        public override void WriteToStream(Type type, object value, IO.Stream stream, Net.Http.Headers.HttpContentHeaders contentHeaders)
         {
-            base.OnWriteToStream(type, value, stream, contentHeaders, transportContext);
+            base.WriteToStream(type, value, stream, contentHeaders);
         }
     }
 }

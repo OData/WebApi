@@ -56,7 +56,7 @@ namespace System.Web.Http.Tracing.Tracers
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
         }
 
-        public override object OnReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
             BufferedMediaTypeFormatter innerFormatter = InnerBufferedFormatter;
             MediaTypeHeaderValue contentType = contentHeaders == null ? null : contentHeaders.ContentType;
@@ -77,7 +77,7 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    value = innerFormatter.OnReadFromStream(type, stream, contentHeaders, formatterLogger);
+                    value = innerFormatter.ReadFromStream(type, stream, contentHeaders, formatterLogger);
                 },
                 endTrace: (tr) =>
                 {
@@ -90,7 +90,7 @@ namespace System.Web.Http.Tracing.Tracers
             return value;
         }
 
-        public override void OnWriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
         {
             BufferedMediaTypeFormatter innerFormatter = InnerBufferedFormatter;
 
@@ -114,7 +114,7 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    innerFormatter.OnWriteToStream(type, value, stream, contentHeaders, transportContext);
+                    innerFormatter.WriteToStream(type, value, stream, contentHeaders);
                 },
                 endTrace: null,
                 errorTrace: null);

@@ -289,7 +289,7 @@ namespace System.Web.Http.Query
         public void StringReplace()
         {
             VerifyQueryDeserialization(
-                "$filter=replace(ProductName, 'Abc', 'Def') eq \"FooDef\"",
+                "$filter=replace(ProductName, 'Abc', 'Def') eq 'FooDef'",
                 "Where(Param_0 => (Param_0.ProductName.Replace(\"Abc\", \"Def\") == \"FooDef\"))");
         }
 
@@ -297,11 +297,11 @@ namespace System.Web.Http.Query
         public void StringSubstring()
         {
             VerifyQueryDeserialization(
-                "$filter=substring(ProductName, 3) eq \"uctName\"",
+                "$filter=substring(ProductName, 3) eq 'uctName'",
                 "Where(Param_0 => (Param_0.ProductName.Substring(3) == \"uctName\"))");
 
             VerifyQueryDeserialization(
-                "$filter=substring(ProductName, 3, 4) eq \"uctN\"",
+                "$filter=substring(ProductName, 3, 4) eq 'uctN'",
                 "Where(Param_0 => (Param_0.ProductName.Substring(3, 4) == \"uctN\"))");
         }
 
@@ -536,6 +536,24 @@ namespace System.Web.Http.Query
                 "$filter=DecimalProp lt 4321.56M and DecimalProp gt 1234.56m",
                 "Where(Param_0 => ((Param_0.DecimalProp < 4321.56) AndAlso (Param_0.DecimalProp > 1234.56)))");
         }
+
+        [Theory]
+        [InlineData("'hello,world'", "hello,world")]
+        [InlineData("'''hello,world'", "'hello,world")]
+        [InlineData("'hello,world'''", "hello,world'")]
+        [InlineData("'hello,''wor''ld'", "hello,'wor'ld")]
+        [InlineData("'hello,''''''world'", "hello,'''world")]
+        [InlineData("'\"hello,world\"'", "\"hello,world\"")]
+        [InlineData("'\"hello,world'", "\"hello,world")]
+        [InlineData("'hello,world\"'", "hello,world\"")]
+        [InlineData("'hello,\"world'", "hello,\"world")]
+        [InlineData("'México D.F.'", "México D.F.")]
+        public void StringLiterals(string literal, string expected)
+        {
+            VerifyQueryDeserialization<Product>(
+                "$filter=ProductName eq " + literal,
+                String.Format("Where(Param_0 => (Param_0.ProductName == \"{0}\"))", expected));
+        }
         #endregion
 
         #region Negative tests
@@ -549,10 +567,10 @@ namespace System.Web.Http.Query
         {
             Assert.Throws<ParseException>(delegate
             {
-                string filter = string.Format("2 {0} 3", ch);
+                string filter = String.Format("2 {0} 3", ch);
                 VerifyQueryDeserialization<DataTypes>("$filter=" + Uri.EscapeDataString(filter), String.Empty);
             },
-            string.Format("Parse error in $filter. Syntax error '{0}' (at index 2)", ch));
+            String.Format("Parse error in $filter. Syntax error '{0}' (at index 2)", ch));
         }
 
         [Fact]
@@ -649,6 +667,28 @@ namespace System.Web.Http.Query
                 () => VerifyQueryDeserialization("$filter=" + clause, String.Empty),
                 String.Format("Parse error in $filter. ')' or operator expected (at index {0})", index));
         }
+
+        [Theory]
+        [InlineData("'hello,world", 12)]
+        [InlineData("'''hello,world", 14)]
+        [InlineData("'hello,world''", 14)]
+        [InlineData("'hello,''wor''ld", 16)]
+        public void UnterminatedStringLiterals(string clause, int index)
+        {
+            Assert.Throws<ParseException>(
+                () => VerifyQueryDeserialization("$filter=" + clause, String.Empty),
+                String.Format("Parse error in $filter. Unterminated string literal (at index {0})", index));
+        }
+
+        [Theory]
+        [InlineData("\"hello,world\"", 0)]
+        public void InvalidStringLiterals(string clause, int index)
+        {
+            Assert.Throws<ParseException>(
+                () => VerifyQueryDeserialization("$filter=" + clause, String.Empty),
+                String.Format("Parse error in $filter. Syntax error '\"' (at index {0})", index));
+        }
+
         #endregion
 
         [Fact(DisplayName = "ODataQueryDeserializer is internal.")]

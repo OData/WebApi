@@ -348,7 +348,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
     <value>Unterminated string literal</value>
   </data>
   <data name="UriQueryStringInvalid" xml:space="preserve">
-    <value>The query specified in the URI is not valid.</value>
+    <value>The query specified in the URI is not valid. {0}</value>
   </data>
   <data name="ValueProviderFactory_Cannot_Create" xml:space="preserve">
     <value>Could not create a '{0}' from '{1}'. Please ensure it derives from '{0}' and has a public parameterless constructor.</value>

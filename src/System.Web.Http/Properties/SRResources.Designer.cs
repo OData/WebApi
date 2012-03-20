@@ -1098,7 +1098,7 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The query specified in the URI is not valid..
+        ///   Looks up a localized string similar to The query specified in the URI is not valid. {0}.
         /// </summary>
         internal static string UriQueryStringInvalid {
             get {

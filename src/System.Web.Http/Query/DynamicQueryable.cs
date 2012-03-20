@@ -694,21 +694,9 @@ namespace System.Web.Http.Query
             Expression ParseStringLiteral()
             {
                 ValidateToken(TokenId.StringLiteral);
-                char quote = _token.text[0];
-                // Unwrap string (remove surrounding quotes) and unwrap backslashes.
-                string s = _token.text.Substring(1, _token.text.Length - 2).Replace("\\\\", "\\");
 
-                if (quote == '\'')
-                {
-                    // Unwrap single quotes.
-                    s = s.Replace("\\\'", "\'");
-                }
-                else
-                {
-                    // Unwrap double quotes.
-                    s = s.Replace("\\\"", "\"");
-                    // TODO : do we need this code anymore?
-                }
+                // Unwrap string (remove surrounding quotes)
+                string s = _token.text.Substring(1, _token.text.Length - 2).Replace("''", "'");
 
                 NextToken();
                 return CreateLiteral(s, s);
@@ -2001,7 +1989,6 @@ namespace System.Web.Http.Query
                         NextChar();
                         t = TokenId.Dot;
                         break;
-                    case '"':
                     case '\'':
                         char quote = _ch;
                         do
@@ -2009,11 +1996,6 @@ namespace System.Web.Http.Query
                             NextChar();
                             while (_textPos < _textLen && _ch != quote)
                             {
-                                if (_ch == '\\')
-                                {
-                                    NextChar();
-                                }
-
                                 NextChar();
                             }
 
@@ -2190,14 +2172,7 @@ namespace System.Web.Http.Query
             string GetIdentifier()
             {
                 ValidateToken(TokenId.Identifier, SRResources.IdentifierExpected);
-                string id = _token.text;
-
-                if (id.Length > 1 && id[0] == '@')
-                {
-                    id = id.Substring(1);
-                }
-
-                return id;
+                return _token.text;
             }
 
             void ValidateDigit()

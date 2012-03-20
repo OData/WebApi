@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Hosting;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -58,32 +59,36 @@ namespace System.Web.Http.Filters
         [Theory]
         [InlineData("$top=error")]
         [InlineData("$skip=-100")]
-        public void OnActionExecutingThrowsForIncorrectTopQuery(string query)
+        public void OnActionExecutingSetsHttpResponseMessageForIncorrectTopQuery(string query)
         {
             // Arrange
             const string baseAddress = "http://localhost/?{0}";
             var request = new HttpRequestMessage(HttpMethod.Get, String.Format(baseAddress, query));
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
             var actionContext = ContextUtil.GetHttpActionContext(request);
 
             // Act & Assert
-            Assert.Throws<HttpRequestException>(
-                () => _filter.OnActionExecuting(actionContext),
-                "The query specified in the URI is not valid.");
+            _filter.OnActionExecuting(actionContext);
+            Assert.NotNull(actionContext.Response);
+            Assert.Equal(Net.HttpStatusCode.BadRequest, actionContext.Response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid.", actionContext.Response.Content.ReadAsStringAsync().Result);
         }
 
         [Theory]
         [InlineData("$filter=error")]
-        public void OnActionExecutingThrowsForIncorrectFilterQuery(string query)
+        public void OnActionExecutingSetsHttpResponseMessageForIncorrectFilterQuery(string query)
         {
             // Arrange
             const string baseAddress = "http://localhost/?{0}";
             var request = new HttpRequestMessage(HttpMethod.Get, String.Format(baseAddress, query));
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
             var actionContext = ContextUtil.GetHttpActionContext(request);
 
             // Act & Assert
-            Assert.Throws<HttpRequestException>(
-                () => _filter.OnActionExecuting(actionContext),
-                "The query specified in the URI is not valid.");
+            _filter.OnActionExecuting(actionContext);
+            Assert.NotNull(actionContext.Response);
+            Assert.Equal(Net.HttpStatusCode.BadRequest, actionContext.Response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid.", actionContext.Response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http.Common;
 using System.Web.Http.Controllers;
@@ -33,14 +34,14 @@ namespace System.Web.Http.Filters
 
         public Type QueryElementType { get; private set; }
 
-        public override void OnActionExecuting(HttpActionContext actioncContext)
+        public override void OnActionExecuting(HttpActionContext actionContext)
         {
-            if (actioncContext == null)
+            if (actionContext == null)
             {
                 throw Error.ArgumentNull("actionContext");
             }
 
-            HttpRequestMessage request = actioncContext.ControllerContext.Request;
+            HttpRequestMessage request = actionContext.ControllerContext.Request;
             if (request != null && request.RequestUri != null && !String.IsNullOrWhiteSpace(request.RequestUri.Query))
             {
                 Uri requestUri = request.RequestUri;
@@ -61,7 +62,10 @@ namespace System.Web.Http.Filters
                 }
                 catch (ParseException e)
                 {
-                    throw new HttpRequestException(SRResources.UriQueryStringInvalid, e);
+                    actionContext.Response = request.CreateResponse(
+                        HttpStatusCode.BadRequest,
+                        Error.Format(SRResources.UriQueryStringInvalid, e.Message));
+                    return;
                 }
             }
         }

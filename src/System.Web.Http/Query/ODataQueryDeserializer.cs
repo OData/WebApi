@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Globalization;
 using System.Linq;
 using System.Web.Http.Common;
 using System.Web.Http.Internal;
@@ -122,7 +121,7 @@ namespace System.Web.Http.Query
                         catch (ParseException e)
                         {
                             throw new ParseException(
-                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$filter", e.Message));
+                                Error.Format(SRResources.ParseErrorInClause, "$filter", e.Message));
                         }
                         break;
                     case "orderby":
@@ -133,7 +132,7 @@ namespace System.Web.Http.Query
                         catch (ParseException e)
                         {
                             throw new ParseException(
-                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$orderby", e.Message));
+                                Error.Format(SRResources.ParseErrorInClause, "$orderby", e.Message));
                         }
                         break;
                     case "skip":
@@ -143,7 +142,7 @@ namespace System.Web.Http.Query
                             if (skipCount < 0)
                             {
                                 throw new ParseException(
-                                        string.Format(CultureInfo.InvariantCulture, SRResources.PositiveIntegerExpectedForODataQueryParameter, "$skip", part.Expression));
+                                        Error.Format(SRResources.PositiveIntegerExpectedForODataQueryParameter, "$skip", part.Expression));
                             }
 
                             query = DynamicQueryable.Skip(query, skipCount);
@@ -151,7 +150,7 @@ namespace System.Web.Http.Query
                         catch (FormatException e)
                         {
                             throw new ParseException(
-                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$skip", e.Message));
+                                Error.Format(SRResources.ParseErrorInClause, "$skip", e.Message));
                         }
                         break;
                     case "top":
@@ -161,7 +160,7 @@ namespace System.Web.Http.Query
                             if (topCount < 0)
                             {
                                 throw new ParseException(
-                                    string.Format(CultureInfo.InvariantCulture, SRResources.PositiveIntegerExpectedForODataQueryParameter, "$top", part.Expression));
+                                    Error.Format(SRResources.PositiveIntegerExpectedForODataQueryParameter, "$top", part.Expression));
                             }
 
                             query = DynamicQueryable.Take(query, topCount);
@@ -169,7 +168,7 @@ namespace System.Web.Http.Query
                         catch (FormatException e)
                         {
                             throw new ParseException(
-                                string.Format(CultureInfo.InvariantCulture, SRResources.ParseErrorInClause, "$top", e.Message));
+                                Error.Format(SRResources.ParseErrorInClause, "$top", e.Message));
                         }
                         break;
                 }

@@ -126,9 +126,6 @@
   <data name="CannotUseNullValueType" xml:space="preserve">
     <value>The '{0}' type cannot accept a null value for the value type '{1}'.</value>
   </data>
-  <data name="ContentDispositionInvalidFileName" xml:space="preserve">
-    <value>'{0}' did not contain a valid file name property: '{1}'.</value>
-  </data>
   <data name="ErrorReadingFormUrlEncodedStream" xml:space="preserve">
     <value>Error reading HTML form URL-encoded data stream.</value>
   </data>

@@ -21,15 +21,6 @@ namespace System.Net.Http
                 typeof(IMultipartStreamProvider));
         }
 
-
-        [Fact]
-        [Trait("Description", "MultipartFileStreamProvider default ctor.")]
-        public void DefaultConstructor()
-        {
-            MultipartFileStreamProvider instance = new MultipartFileStreamProvider();
-            Assert.NotNull(instance);
-        }
-
         [Fact]
         [Trait("Description", "MultipartFileStreamProvider ctor with invalid root paths.")]
         public void ConstructorInvalidRootPath()
@@ -62,7 +53,7 @@ namespace System.Net.Http
         [Trait("Description", "BodyPartFileNames empty.")]
         public void EmptyBodyPartFileNames()
         {
-            MultipartFileStreamProvider instance = new MultipartFileStreamProvider();
+            MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
             Assert.NotNull(instance.BodyPartFileNames);
             Assert.Equal(0, instance.BodyPartFileNames.Count());
         }
@@ -71,7 +62,7 @@ namespace System.Net.Http
         [Trait("Description", "GetStream(HttpContentHeaders) throws on null.")]
         public void GetStreamThrowsOnNull()
         {
-            MultipartFileStreamProvider instance = new MultipartFileStreamProvider();
+            MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
             Assert.ThrowsArgumentNull(() => { instance.GetStream(null); }, "headers");
         }
 
@@ -88,7 +79,7 @@ namespace System.Net.Http
                 content.Add(new StringContent("Not a file"), "notafile");
                 content.Add(new StringContent("This is a file"), "file", "filename");
 
-                MultipartFileStreamProvider instance = new MultipartFileStreamProvider();
+                MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
                 stream0 = instance.GetStream(content.ElementAt(0).Headers);
                 Assert.IsType<FileStream>(stream0);
                 stream1 = instance.GetStream(content.ElementAt(1).Headers);
@@ -96,7 +87,7 @@ namespace System.Net.Http
 
                 Assert.Equal(2, instance.BodyPartFileNames.Count());
                 Assert.Contains("BodyPart", instance.BodyPartFileNames.ElementAt(0));
-                Assert.True(instance.BodyPartFileNames.ElementAt(1).EndsWith("filename"));
+                Assert.Contains("BodyPart", instance.BodyPartFileNames.ElementAt(1));
             }
             finally
             {

@@ -88,7 +88,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ContentDispositionHeaderValueExtensions.cs" />
     <Compile Include="FormattingUtilities.cs" />
     <Compile Include="Formatting\JsonContractResolver.cs" />
     <Compile Include="Formatting\BufferedMediaTypeFormatter.cs" />

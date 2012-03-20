@@ -27,14 +27,6 @@ namespace System.Net.Http
         /// <summary>
         /// Initializes a new instance of the <see cref="MultipartFormDataStreamProvider"/> class.
         /// </summary>
-        public MultipartFormDataStreamProvider()
-            : this(Path.GetTempPath(), DefaultBufferSize)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultipartFormDataStreamProvider"/> class.
-        /// </summary>
         /// <param name="rootPath">The root path where the content of MIME multipart body parts are written to.</param>
         public MultipartFormDataStreamProvider(string rootPath)
             : this(rootPath, DefaultBufferSize)
@@ -87,24 +79,7 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="headers">Header fields describing the body part</param>
         /// <returns>The <see cref="Stream"/> instance where the message body part is written to.</returns>
-        public Stream GetStream(HttpContentHeaders headers)
-        {
-            if (headers == null)
-            {
-                throw new ArgumentNullException("headers");
-            }
-
-            return this.OnGetStream(headers);
-        }
-
-        /// <summary>
-        /// Override this method in a derived class to examine the headers provided by the MIME multipart parser
-        /// and decide whether it should return a file stream or a memory stream for the body part to be 
-        /// written to.
-        /// </summary>
-        /// <param name="headers">Header fields describing the body part</param>
-        /// <returns>The <see cref="Stream"/> instance where the message body part is written to.</returns>
-        protected virtual Stream OnGetStream(HttpContentHeaders headers)
+        public virtual Stream GetStream(HttpContentHeaders headers)
         {
             if (headers == null)
             {
@@ -120,7 +95,7 @@ namespace System.Net.Http
                     string localFilePath;
                     try
                     {
-                        string filename = this.GetLocalFileName(headers);
+                        string filename = GetLocalFileName(headers);
                         localFilePath = Path.Combine(_rootPath, Path.GetFileName(filename));
                     }
                     catch (Exception e)
@@ -165,26 +140,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException("headers");
             }
 
-            string filename = null;
-            try
-            {
-                ContentDispositionHeaderValue contentDisposition = headers.ContentDisposition;
-                if (contentDisposition != null)
-                {
-                    filename = contentDisposition.ExtractLocalFileName();
-                }
-            }
-            catch (Exception)
-            {
-                //// TODO: CSDMain 232171 -- review and fix swallowed exception
-            }
-
-            if (filename == null)
-            {
-                filename = String.Format(CultureInfo.InvariantCulture, "BodyPart_{0}", Guid.NewGuid());
-            }
-
-            return filename;
+            return String.Format(CultureInfo.InvariantCulture, "BodyPart_{0}", Guid.NewGuid());
         }
     }
 }

@@ -22,14 +22,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "MultipartFormDataStreamProvider default ctor.")]
-        public void DefaultConstructor()
-        {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider();
-            Assert.NotNull(instance);
-        }
-
-        [Fact]
         [Trait("Description", "MultipartFormDataStreamProvider ctor with invalid root paths.")]
         public void ConstructorInvalidRootPath()
         {
@@ -59,7 +51,7 @@ namespace System.Net.Http
         [Trait("Description", "BodyPartFileNames empty.")]
         public void EmptyBodyPartFileNames()
         {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider();
+            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
             Assert.NotNull(instance.BodyPartFileNames);
             Assert.Equal(0, instance.BodyPartFileNames.Count);
         }
@@ -68,7 +60,7 @@ namespace System.Net.Http
         [Trait("Description", "GetStream(HttpContentHeaders) throws on null.")]
         public void GetStreamThrowsOnNull()
         {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider();
+            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
             Assert.ThrowsArgumentNull(() => { instance.GetStream(null); }, "headers");
         }
 
@@ -76,7 +68,7 @@ namespace System.Net.Http
         [Trait("Description", "GetStream(HttpContentHeaders) throws on no Content-Disposition header.")]
         public void GetStreamThrowsOnNoContentDisposition()
         {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider();
+            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
             HttpContent content = new StringContent("text");
             Assert.Throws<IOException>(() => { instance.GetStream(content.Headers); }, RS.Format(Properties.Resources.MultipartFormDataStreamProviderNoContentDisposition, "Content-Disposition"));
         }
@@ -94,14 +86,14 @@ namespace System.Net.Http
                 content.Add(new StringContent("Not a file"), "notafile");
                 content.Add(new StringContent("This is a file"), "file", "filename");
 
-                MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider();
+                MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
                 stream0 = instance.GetStream(content.ElementAt(0).Headers);
                 Assert.IsType<MemoryStream>(stream0);
                 stream1 = instance.GetStream(content.ElementAt(1).Headers);
                 Assert.IsType<FileStream>(stream1);
 
                 Assert.Equal(1, instance.BodyPartFileNames.Count);
-                Assert.Equal(content.ElementAt(1).Headers.ContentDisposition.FileName, instance.BodyPartFileNames.Keys.ElementAt(0));
+                Assert.Contains("BodyPart", instance.BodyPartFileNames.Values.ElementAt(0));
             }
             finally
             {

@@ -106,15 +106,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; did not contain a valid file name property: &apos;{1}&apos;..
-        /// </summary>
-        internal static string ContentDispositionInvalidFileName {
-            get {
-                return ResourceManager.GetString("ContentDispositionInvalidFileName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error reading HTML form URL-encoded data stream..
         /// </summary>
         internal static string ErrorReadingFormUrlEncodedStream {

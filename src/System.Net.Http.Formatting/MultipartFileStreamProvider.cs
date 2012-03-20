@@ -22,14 +22,6 @@ namespace System.Net.Http
         /// <summary>
         /// Initializes a new instance of the <see cref="MultipartFileStreamProvider"/> class.
         /// </summary>
-        public MultipartFileStreamProvider()
-            : this(Path.GetTempPath(), DefaultBufferSize)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultipartFileStreamProvider"/> class.
-        /// </summary>
         /// <param name="rootPath">The root path where the content of MIME multipart body parts are written to.</param>
         public MultipartFileStreamProvider(string rootPath)
             : this(rootPath, DefaultBufferSize)
@@ -79,23 +71,7 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="headers">Header fields describing the body part</param>
         /// <returns>The <see cref="Stream"/> instance where the message body part is written to.</returns>
-        public Stream GetStream(HttpContentHeaders headers)
-        {
-            if (headers == null)
-            {
-                throw new ArgumentNullException("headers");
-            }
-
-            return OnGetStream(headers);
-        }
-
-        /// <summary>
-        /// Override this method in a derived class to examine the headers provided by the MIME multipart parser
-        /// and decides which <see cref="FileStream"/> to write the body part to.
-        /// </summary>
-        /// <param name="headers">Header fields describing the body part</param>
-        /// <returns>The <see cref="Stream"/> instance where the message body part is written to.</returns>
-        protected virtual Stream OnGetStream(HttpContentHeaders headers)
+        public virtual Stream GetStream(HttpContentHeaders headers)
         {
             if (headers == null)
             {
@@ -142,26 +118,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException("headers");
             }
 
-            string filename = null;
-            try
-            {
-                ContentDispositionHeaderValue contentDisposition = headers.ContentDisposition;
-                if (contentDisposition != null)
-                {
-                    filename = contentDisposition.ExtractLocalFileName();
-                }
-            }
-            catch (Exception)
-            {
-                //// TODO: CSDMain 232171 -- review and fix swallowed exception
-            }
-
-            if (filename == null)
-            {
-                filename = String.Format(CultureInfo.InvariantCulture, "BodyPart_{0}", Guid.NewGuid());
-            }
-
-            return filename;
+            return String.Format(CultureInfo.InvariantCulture, "BodyPart_{0}", Guid.NewGuid());
         }
     }
 }

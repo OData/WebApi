@@ -7,7 +7,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Microsoft.Web.Http.Data.Metadata;

@@ -3,7 +3,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Objects;
-using System.Web.Http.Common;
+using System.Web.Http;
 
 namespace Microsoft.Web.Http.Data.EntityFramework
 {

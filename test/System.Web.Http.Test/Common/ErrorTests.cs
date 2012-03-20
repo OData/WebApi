@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Web.Http.Common
+namespace System.Web.Http
 {
     public class ErrorTests
     {

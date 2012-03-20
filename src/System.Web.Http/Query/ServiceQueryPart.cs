@@ -1,5 +1,4 @@
-﻿using System.Web.Http.Common;
-using System.Web.Http.Properties;
+﻿using System.Web.Http.Properties;
 
 namespace System.Web.Http.Query
 {

@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Web.Http.Common;
 using System.Web.Http.Filters;
 using System.Web.Http.Internal;
 using System.Web.Http.Properties;

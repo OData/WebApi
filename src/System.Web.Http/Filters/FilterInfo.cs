@@ -1,6 +1,4 @@
-﻿using System.Web.Http.Common;
-
-namespace System.Web.Http.Filters
+﻿namespace System.Web.Http.Filters
 {
     public sealed class FilterInfo
     {

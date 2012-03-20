@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.Data.Objects;
-using System.Web.Http.Common;
+using System.Web.Http;
 
 namespace Microsoft.Web.Http.Data.EntityFramework
 {

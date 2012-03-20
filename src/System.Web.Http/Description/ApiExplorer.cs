@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Text.RegularExpressions;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Internal;

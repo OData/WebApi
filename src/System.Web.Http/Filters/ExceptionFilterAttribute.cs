@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Common;
 
 namespace System.Web.Http.Filters
 {

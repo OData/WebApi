@@ -502,15 +502,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The return value from a Catch() lambda cannot return null..
-        /// </summary>
-        internal static string TaskExtensions_Catch_CannotReturnNull {
-            get {
-                return ResourceManager.GetString("TaskExtensions_Catch_CannotReturnNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;undefined&apos;.
         /// </summary>
         internal static string UndefinedMediaType {

@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -260,7 +259,7 @@ namespace System.Net.Http
                 // exceptions so that the task finalizer doesn't tear down our app domain.
                 if (_streamTask != null && _streamTask.IsValueCreated && _streamTask.Value != null)
                 {
-                    _streamTask.Value.Catch(ex => TaskHelpers.Completed());
+                    _streamTask.Value.Catch(info => info.Handled());
                     _streamTask = null;
                 }
 

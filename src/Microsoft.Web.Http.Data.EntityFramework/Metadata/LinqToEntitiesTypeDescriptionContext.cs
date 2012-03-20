@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Metadata.Edm;
 using System.Globalization;
 using System.Linq;
-using System.Web.Http.Common;
+using System.Web.Http;
 
 namespace Microsoft.Web.Http.Data.EntityFramework.Metadata
 {

@@ -3,7 +3,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 using System.Web.Http.Query;

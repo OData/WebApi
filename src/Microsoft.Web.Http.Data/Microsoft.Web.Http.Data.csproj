@@ -68,11 +68,14 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\System.Web.Http.Common\TaskHelpers.cs">
-      <Link>TaskUtility\TaskHelpers.cs</Link>
+    <Compile Include="..\Common\Error.cs">
+      <Link>Common\Error.cs</Link>
     </Compile>
-    <Compile Include="..\System.Web.Http.Common\TaskHelpersExtensions.cs">
-      <Link>TaskUtility\TaskHelpersExtensions.cs</Link>
+    <Compile Include="..\Common\TaskHelpers.cs">
+      <Link>Common\TaskHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpersExtensions.cs">
+      <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
     <Compile Include="ChangeOperation.cs" />
     <Compile Include="ChangeSet.cs" />
@@ -113,10 +116,6 @@
       <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
       <Name>System.Net.Http.Formatting</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Web.Http.Common\System.Web.Http.Common.csproj">
-      <Project>{03A5E5F2-2E23-48F2-ABCC-6C41BAC9AC02}</Project>
-      <Name>System.Web.Http.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\System.Web.Http\System.Web.Http.csproj">
       <Project>{DDC1CE0C-486E-4E35-BB3B-EAB61F8F9440}</Project>
       <Name>System.Web.Http</Name>
@@ -124,6 +123,21 @@
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\CommonWebApiResources.Designer.cs">
+      <Link>Properties\CommonWebApiResources.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonWebApiResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Common\CommonWebApiResources.resx">
+      <Link>Properties\CommonWebApiResources.resx</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonWebApiResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource.resx">

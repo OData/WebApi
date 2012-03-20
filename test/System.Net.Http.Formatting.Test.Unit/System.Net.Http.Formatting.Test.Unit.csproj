@@ -89,6 +89,7 @@
     <Compile Include="FormUrlEncodedJsonTests.cs" />
     <Compile Include="HttpClientExtensionsTest.cs" />
     <Compile Include="HttpContentExtensionsTest.cs" />
+    <Compile Include="HttpRequestMessageCommonExtensionsTest.cs" />
     <Compile Include="Mocks\TestableHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriQueryDataSet.cs" />

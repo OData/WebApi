@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Web.Http.Common;
 using System.Web.Http.Internal;
 
 namespace System.Web.Http.ValueProviders.Providers

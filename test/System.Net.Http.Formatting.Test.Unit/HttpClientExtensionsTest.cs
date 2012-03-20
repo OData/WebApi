@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Formatting;
 using System.Net.Http.Formatting.Mocks;
-using System.Net.Http.Internal;
 using System.Net.Http.Mocks;
 using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

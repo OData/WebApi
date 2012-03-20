@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.ServiceModel;
 using System.Web.Http.SelfHost.ServiceModel.Channels;
 

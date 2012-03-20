@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Common;
 
 namespace System.Web.Http.Routing
 {

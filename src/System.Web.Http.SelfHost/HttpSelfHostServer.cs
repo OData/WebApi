@@ -9,7 +9,6 @@ using System.ServiceModel.Channels;
 using System.ServiceModel.Security;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Common;
 using System.Web.Http.Hosting;
 using System.Web.Http.SelfHost.Channels;
 using System.Web.Http.SelfHost.Properties;

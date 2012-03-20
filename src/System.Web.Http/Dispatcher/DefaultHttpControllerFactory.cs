@@ -5,7 +5,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;

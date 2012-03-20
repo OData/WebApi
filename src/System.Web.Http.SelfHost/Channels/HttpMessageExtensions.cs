@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using System.ServiceModel.Channels;
-using System.Web.Http.Common;
 
 namespace System.Web.Http.SelfHost.Channels
 {

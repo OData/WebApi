@@ -6,7 +6,7 @@ using System.Data.Objects;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.Common;
+using System.Web.Http;
 
 namespace Microsoft.Web.Http.Data.EntityFramework.Metadata
 {

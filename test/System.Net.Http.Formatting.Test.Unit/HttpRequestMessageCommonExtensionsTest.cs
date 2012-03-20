@@ -1,29 +1,27 @@
-﻿using System.Net;
-using System.Net.Http;
-using Microsoft.TestCommon;
+﻿using Microsoft.TestCommon;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Web.Http
+namespace System.Net.Http
 {
-    public class HttpRequestMessageCommonExtensionsTest
+    public class HttpRequestMessageExtensionsTest
     {
         [Fact]
         public void IsCorrectType()
         {
-            Assert.Type.HasProperties(typeof(HttpRequestMessageCommonExtensions), TypeAssert.TypeProperties.IsStatic | TypeAssert.TypeProperties.IsPublicVisibleClass);
+            Assert.Type.HasProperties(typeof(HttpRequestMessageExtensions), TypeAssert.TypeProperties.IsStatic | TypeAssert.TypeProperties.IsPublicVisibleClass);
         }
 
         [Fact]
         public void CreateResponseThrowsOnNull()
         {
-            Assert.ThrowsArgumentNull(() => HttpRequestMessageCommonExtensions.CreateResponse(null), "request");
+            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.CreateResponse(null), "request");
         }
 
         [Fact]
         public void CreateResponseWithStatusThrowsOnNull()
         {
-            Assert.ThrowsArgumentNull(() => HttpRequestMessageCommonExtensions.CreateResponse(null, HttpStatusCode.OK), "request");
+            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.CreateResponse(null, HttpStatusCode.OK), "request");
         }
 
         [Fact]

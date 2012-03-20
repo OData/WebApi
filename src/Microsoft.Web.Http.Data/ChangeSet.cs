@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.Common;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 
 namespace Microsoft.Web.Http.Data

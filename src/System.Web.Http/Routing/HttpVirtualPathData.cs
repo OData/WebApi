@@ -1,6 +1,4 @@
-﻿using System.Web.Http.Common;
-
-namespace System.Web.Http.Routing
+﻿namespace System.Web.Http.Routing
 {
     public class HttpVirtualPathData : IHttpVirtualPathData
     {

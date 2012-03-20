@@ -67,6 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthorizeAttributeTest.cs" />
+    <Compile Include="Common\ErrorTests.cs" />
+    <Compile Include="Common\TaskHelpersExtensionsTest.cs" />
+    <Compile Include="Common\TaskHelpersTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
@@ -228,10 +231,6 @@
     <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
       <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
       <Name>System.Net.Http.Formatting</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\System.Web.Http.Common\System.Web.Http.Common.csproj">
-      <Project>{03A5E5F2-2E23-48F2-ABCC-6C41BAC9AC02}</Project>
-      <Name>System.Web.Http.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http\System.Web.Http.csproj">
       <Project>{DDC1CE0C-486E-4E35-BB3B-EAB61F8F9440}</Project>

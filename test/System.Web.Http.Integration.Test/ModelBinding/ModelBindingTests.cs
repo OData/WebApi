@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost;
 
 namespace System.Web.Http.ModelBinding

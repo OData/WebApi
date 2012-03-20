@@ -228,10 +228,6 @@
   <data name="UnsupportedIndent" xml:space="preserve">
     <value>Indentation is not supported by '{0}'.</value>
   </data>
-  <data name="TaskExtensions_Catch_CannotReturnNull" xml:space="preserve">
-    <value>The return value from a Catch() lambda cannot return null.</value>
-    <comment>TaskExtensions_Catch_CannotReturnNull description</comment>
-  </data>
   <data name="MediaTypeFormatterCannotRead" xml:space="preserve">
     <value>The media type formatter of type '{0}' does not support reading since it does not implement the ReadFromStreamAsync method.</value>
   </data>

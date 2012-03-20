@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.Properties;
 
 namespace System.Web.Http.SelfHost.ServiceModel.Channels

@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http.Common;
 
 namespace System.Web.Http.ValueProviders.Providers
 {

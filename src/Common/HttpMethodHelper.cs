@@ -1,18 +1,18 @@
 ﻿using System.Net.Http;
 
-namespace System.Web.Http.Common
+namespace System.Web.Http
 {
     /// <summary>
     /// Various helper methods for the static members of <see cref="HttpMethod"/>. 
     /// </summary>
-    public static class HttpMethodHelper
+    internal static class HttpMethodHelper
     {
         /// <summary>
         /// Gets the static <see cref="HttpMethod"/> instance for any given HTTP method name.
         /// </summary>
         /// <param name="method">The HTTP request method.</param>
         /// <returns>An existing static <see cref="HttpMethod"/> or a new instance if the method was not found.</returns>
-        public static HttpMethod GetHttpMethod(string method)
+        internal static HttpMethod GetHttpMethod(string method)
         {
             if (String.IsNullOrEmpty(method))
             {

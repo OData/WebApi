@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Formatting;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;

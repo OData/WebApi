@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.Properties;
 
 namespace System.Web.Http.SelfHost.ServiceModel.Channels

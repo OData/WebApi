@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.Http.Common;
 using System.Web.Http.Metadata;
 
 namespace System.Web.Http.ModelBinding.Binders

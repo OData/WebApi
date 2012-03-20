@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Web.Http.Common;
+using System.Web.Http;
 
 namespace Microsoft.Web.Http.Data.Metadata
 {

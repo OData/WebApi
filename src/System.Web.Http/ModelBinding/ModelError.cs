@@ -1,6 +1,4 @@
-﻿using System.Web.Http.Common;
-
-namespace System.Web.Http.ModelBinding
+﻿namespace System.Web.Http.ModelBinding
 {
     [Serializable]
     public class ModelError

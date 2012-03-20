@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Web.Http.Common.Properties;
+using System.Web.Http.Properties;
 
-namespace System.Web.Http.Common
+namespace System.Web.Http
 {
     /// <summary>
     /// Utility class for creating and unwrapping <see cref="Exception"/> instances.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "This usage is okay.")]
-    public static class Error
+    internal static class Error
     {
         /// <summary>
         /// Formats the specified resource string using <see cref="M:CultureInfo.CurrentCulture"/>.
@@ -19,7 +19,7 @@ namespace System.Web.Http.Common
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <returns>The formatted string.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "0#", Justification = "Standard String.Format pattern and names.")]
-        public static string Format(string format, params object[] args)
+        internal static string Format(string format, params object[] args)
         {
             return String.Format(CultureInfo.CurrentCulture, format, args);
         }
@@ -30,7 +30,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentException Argument(string messageFormat, params object[] messageArgs)
+        internal static ArgumentException Argument(string messageFormat, params object[] messageArgs)
         {
             return new ArgumentException(Error.Format(messageFormat, messageArgs));
         }
@@ -42,7 +42,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentException Argument(string parameterName, string messageFormat, params object[] messageArgs)
+        internal static ArgumentException Argument(string parameterName, string messageFormat, params object[] messageArgs)
         {
             return new ArgumentException(Error.Format(messageFormat, messageArgs), parameterName);
         }
@@ -53,9 +53,9 @@ namespace System.Web.Http.Common
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentException ArgumentUriNotHttpOrHttpsScheme(string parameterName, Uri actualValue)
+        internal static ArgumentException ArgumentUriNotHttpOrHttpsScheme(string parameterName, Uri actualValue)
         {
-            return new ArgumentException(Error.Format(SRResources.ArgumentInvalidHttpUriScheme, actualValue, Uri.UriSchemeHttp, Uri.UriSchemeHttps), parameterName);
+            return new ArgumentException(Error.Format(CommonWebApiResources.ArgumentInvalidHttpUriScheme, actualValue, Uri.UriSchemeHttp, Uri.UriSchemeHttps), parameterName);
         }
 
         /// <summary>
@@ -64,9 +64,9 @@ namespace System.Web.Http.Common
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentException ArgumentUriNotAbsolute(string parameterName, Uri actualValue)
+        internal static ArgumentException ArgumentUriNotAbsolute(string parameterName, Uri actualValue)
         {
-            return new ArgumentException(Error.Format(SRResources.ArgumentInvalidAbsoluteUri, actualValue), parameterName);
+            return new ArgumentException(Error.Format(CommonWebApiResources.ArgumentInvalidAbsoluteUri, actualValue), parameterName);
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace System.Web.Http.Common
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentException ArgumentUriHasQueryOrFragment(string parameterName, Uri actualValue)
+        internal static ArgumentException ArgumentUriHasQueryOrFragment(string parameterName, Uri actualValue)
         {
-            return new ArgumentException(Error.Format(SRResources.ArgumentUriHasQueryOrFragment, actualValue), parameterName);
+            return new ArgumentException(Error.Format(CommonWebApiResources.ArgumentUriHasQueryOrFragment, actualValue), parameterName);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace System.Web.Http.Common
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly", Justification = "The purpose of this API is to return an error for properties")]
-        public static ArgumentNullException PropertyNull()
+        internal static ArgumentNullException PropertyNull()
         {
             return new ArgumentNullException("value");
         }
@@ -96,7 +96,7 @@ namespace System.Web.Http.Common
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentNullException ArgumentNull(string parameterName)
+        internal static ArgumentNullException ArgumentNull(string parameterName)
         {
             return new ArgumentNullException(parameterName);
         }
@@ -108,7 +108,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentNullException ArgumentNull(string parameterName, string messageFormat, params object[] messageArgs)
+        internal static ArgumentNullException ArgumentNull(string parameterName, string messageFormat, params object[] messageArgs)
         {
             return new ArgumentNullException(parameterName, Error.Format(messageFormat, messageArgs));
         }
@@ -118,9 +118,9 @@ namespace System.Web.Http.Common
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentException ArgumentNullOrEmpty(string parameterName)
+        internal static ArgumentException ArgumentNullOrEmpty(string parameterName)
         {
-            return Error.Argument(parameterName, SRResources.ArgumentNullOrEmpty, parameterName);
+            return Error.Argument(parameterName, CommonWebApiResources.ArgumentNullOrEmpty, parameterName);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentOutOfRangeException ArgumentOutOfRange(string parameterName, object actualValue, string messageFormat, params object[] messageArgs)
+        internal static ArgumentOutOfRangeException ArgumentOutOfRange(string parameterName, object actualValue, string messageFormat, params object[] messageArgs)
         {
             return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(messageFormat, messageArgs));
         }
@@ -143,9 +143,9 @@ namespace System.Web.Http.Common
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <param name="minValue">The minimum size of the argument.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentOutOfRangeException ArgumentGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
+        internal static ArgumentOutOfRangeException ArgumentGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
         {
-            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(SRResources.ArgumentMustBeGreaterThanOrEqualTo, minValue));
+            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(CommonWebApiResources.ArgumentMustBeGreaterThanOrEqualTo, minValue));
         }
 
         /// <summary>
@@ -155,16 +155,16 @@ namespace System.Web.Http.Common
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <param name="maxValue">The maximum size of the argument.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ArgumentOutOfRangeException ArgumentMustBeLessThanOrEqualTo(string parameterName, object actualValue, object maxValue)
+        internal static ArgumentOutOfRangeException ArgumentMustBeLessThanOrEqualTo(string parameterName, object actualValue, object maxValue)
         {
-            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(SRResources.ArgumentMustBeLessThanOrEqualTo, maxValue));
+            return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(CommonWebApiResources.ArgumentMustBeLessThanOrEqualTo, maxValue));
         }
 
         /// <summary>
         /// Creates an <see cref="KeyNotFoundException"/> with a message saying that the key was not found.
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static KeyNotFoundException KeyNotFound()
+        internal static KeyNotFoundException KeyNotFound()
         {
             return new KeyNotFoundException();
         }
@@ -175,7 +175,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static KeyNotFoundException KeyNotFound(string messageFormat, params object[] messageArgs)
+        internal static KeyNotFoundException KeyNotFound(string messageFormat, params object[] messageArgs)
         {
             return new KeyNotFoundException(Error.Format(messageFormat, messageArgs));
         }
@@ -186,7 +186,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static ObjectDisposedException ObjectDisposed(string messageFormat, params object[] messageArgs)
+        internal static ObjectDisposedException ObjectDisposed(string messageFormat, params object[] messageArgs)
         {
             // Pass in null, not disposedObject.GetType().FullName as per the above guideline
             return new ObjectDisposedException(null, Error.Format(messageFormat, messageArgs));
@@ -196,7 +196,7 @@ namespace System.Web.Http.Common
         /// Creates an <see cref="OperationCanceledException"/> initialized with the provided parameters.
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static OperationCanceledException OperationCanceled()
+        internal static OperationCanceledException OperationCanceled()
         {
             return new OperationCanceledException();
         }
@@ -207,7 +207,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static OperationCanceledException OperationCanceled(string messageFormat, params object[] messageArgs)
+        internal static OperationCanceledException OperationCanceled(string messageFormat, params object[] messageArgs)
         {
             return new OperationCanceledException(Error.Format(messageFormat, messageArgs));
         }
@@ -219,7 +219,7 @@ namespace System.Web.Http.Common
         /// <param name="invalidValue">The value of the argument that failed.</param>
         /// <param name="enumClass">A <see cref="Type"/> that represents the enumeration class with the valid values.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static InvalidEnumArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
+        internal static InvalidEnumArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
         {
             return new InvalidEnumArgumentException(parameterName, invalidValue, enumClass);
         }
@@ -230,7 +230,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static InvalidOperationException InvalidOperation(string messageFormat, params object[] messageArgs)
+        internal static InvalidOperationException InvalidOperation(string messageFormat, params object[] messageArgs)
         {
             return new InvalidOperationException(Error.Format(messageFormat, messageArgs));
         }
@@ -242,7 +242,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static InvalidOperationException InvalidOperation(Exception innerException, string messageFormat, params object[] messageArgs)
+        internal static InvalidOperationException InvalidOperation(Exception innerException, string messageFormat, params object[] messageArgs)
         {
             return new InvalidOperationException(Error.Format(messageFormat, messageArgs), innerException);
         }
@@ -253,7 +253,7 @@ namespace System.Web.Http.Common
         /// <param name="messageFormat">A composite format string explaining the reason for the exception.</param>
         /// <param name="messageArgs">An object array that contains zero or more objects to format.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        public static NotSupportedException NotSupported(string messageFormat, params object[] messageArgs)
+        internal static NotSupportedException NotSupported(string messageFormat, params object[] messageArgs)
         {
             return new NotSupportedException(Error.Format(messageFormat, messageArgs));
         }

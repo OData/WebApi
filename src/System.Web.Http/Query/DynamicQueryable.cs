@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.Common;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Query

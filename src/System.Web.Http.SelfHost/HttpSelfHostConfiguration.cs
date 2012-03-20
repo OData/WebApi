@@ -4,7 +4,6 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.Channels;
 using System.Web.Http.SelfHost.Properties;
 using System.Web.Http.SelfHost.ServiceModel;

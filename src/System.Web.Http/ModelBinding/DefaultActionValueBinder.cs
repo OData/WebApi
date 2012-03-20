@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.Metadata;

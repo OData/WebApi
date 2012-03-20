@@ -192,12 +192,12 @@ namespace System.Web.Http.Tracing
         {
             if (traceWriter == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("traceWriter");
+                throw System.Web.Http.Error.ArgumentNull("traceWriter");
             }
 
             if (exception == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("exception");
+                throw System.Web.Http.Error.ArgumentNull("exception");
             }
 
             traceWriter.Trace(
@@ -226,17 +226,17 @@ namespace System.Web.Http.Tracing
         {
             if (traceWriter == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("traceWriter");
+                throw System.Web.Http.Error.ArgumentNull("traceWriter");
             }
 
             if (exception == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("exception");
+                throw System.Web.Http.Error.ArgumentNull("exception");
             }
 
             if (messageFormat == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("messageFormat");
+                throw System.Web.Http.Error.ArgumentNull("messageFormat");
             }
 
             traceWriter.Trace(
@@ -246,7 +246,7 @@ namespace System.Web.Http.Tracing
                 (TraceRecord traceRecord) =>
                 {
                     traceRecord.Exception = exception;
-                    traceRecord.Message = System.Web.Http.Common.Error.Format(messageFormat, messageArguments);
+                    traceRecord.Message = System.Web.Http.Error.Format(messageFormat, messageArguments);
                 });
         }
 
@@ -265,12 +265,12 @@ namespace System.Web.Http.Tracing
         {
             if (traceWriter == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("traceWriter");
+                throw System.Web.Http.Error.ArgumentNull("traceWriter");
             }
 
             if (messageFormat == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("messageFormat");
+                throw System.Web.Http.Error.ArgumentNull("messageFormat");
             }
 
             traceWriter.Trace(
@@ -279,7 +279,7 @@ namespace System.Web.Http.Tracing
                 level,
                 (TraceRecord traceRecord) =>
                 {
-                    traceRecord.Message = System.Web.Http.Common.Error.Format(messageFormat, messageArguments);
+                    traceRecord.Message = System.Web.Http.Error.Format(messageFormat, messageArguments);
                 });
         }
 
@@ -312,12 +312,12 @@ namespace System.Web.Http.Tracing
         {
             if (traceWriter == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("traceWriter");
+                throw System.Web.Http.Error.ArgumentNull("traceWriter");
             }
 
             if (execute == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("execute");
+                throw System.Web.Http.Error.ArgumentNull("execute");
             }
 
             bool isTracing = false;
@@ -418,12 +418,12 @@ namespace System.Web.Http.Tracing
         {
             if (traceWriter == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("traceWriter");
+                throw System.Web.Http.Error.ArgumentNull("traceWriter");
             }
 
             if (execute == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("execute");
+                throw System.Web.Http.Error.ArgumentNull("execute");
             }
 
             bool isTracing = false;
@@ -578,12 +578,12 @@ namespace System.Web.Http.Tracing
         {
             if (traceWriter == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("traceWriter");
+                throw System.Web.Http.Error.ArgumentNull("traceWriter");
             }
 
             if (execute == null)
             {
-                throw System.Web.Http.Common.Error.ArgumentNull("execute");
+                throw System.Web.Http.Error.ArgumentNull("execute");
             }
 
             bool isTracing = false;

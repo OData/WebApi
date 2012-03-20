@@ -1,5 +1,4 @@
 ﻿using System.ServiceModel;
-using System.Web.Http.Common;
 
 namespace System.Web.Http.SelfHost.ServiceModel
 {

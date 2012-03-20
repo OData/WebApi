@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Web.Http.Common;
 
 namespace System.Web.Http.SelfHost.Channels
 {

@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.Properties;
 
 namespace System.Web.Http.SelfHost.Channels

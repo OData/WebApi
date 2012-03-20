@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data.Objects;
-using System.Web.Http.Common;
+using System.Web.Http;
 using Microsoft.Web.Http.Data.Metadata;
 
 namespace Microsoft.Web.Http.Data.EntityFramework.Metadata

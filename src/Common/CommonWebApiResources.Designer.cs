@@ -8,8 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace System.Web.Http.Common.Properties {
+namespace System.Web.Http.Properties {
     using System;
+    using System.Linq;
     
     
     /// <summary>
@@ -22,14 +23,14 @@ namespace System.Web.Http.Common.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class SRResources {
+    internal class CommonWebApiResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal SRResources() {
+        internal CommonWebApiResources() {
         }
         
         /// <summary>
@@ -39,7 +40,14 @@ namespace System.Web.Http.Common.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Web.Http.Common.Properties.SRResources", typeof(SRResources).Assembly);
+                    // Find the CommonResources.resources file's full resource name in this assembly
+                    string commonResourcesName = global::System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(s => s.EndsWith("CommonWebApiResources.resources", StringComparison.OrdinalIgnoreCase)).Single();
+
+                    // Trim off the ".resources"
+                    commonResourcesName = commonResourcesName.Substring(0, commonResourcesName.Length - 10);
+
+                    // Load the resource manager
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager(commonResourcesName, typeof(CommonWebApiResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

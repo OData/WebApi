@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Reflection;
-using System.Web.Http.Common;
 using System.Web.Http.Metadata;
 
 namespace System.Web.Http.Validation

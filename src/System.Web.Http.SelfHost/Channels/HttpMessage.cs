@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.ServiceModel.Channels;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.Properties;
 using System.Xml;
 

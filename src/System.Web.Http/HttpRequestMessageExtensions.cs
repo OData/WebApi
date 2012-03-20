@@ -7,7 +7,6 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Principal;
 using System.Threading;
-using System.Web.Http.Common;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;

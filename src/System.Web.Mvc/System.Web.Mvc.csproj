@@ -67,11 +67,11 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\System.Web.Http.Common\TaskHelpers.cs">
-      <Link>Async\TaskHelpers.cs</Link>
+    <Compile Include="..\Common\TaskHelpers.cs">
+      <Link>Common\TaskHelpers.cs</Link>
     </Compile>
-    <Compile Include="..\System.Web.Http.Common\TaskHelpersExtensions.cs">
-      <Link>Async\TaskHelpersExtensions.cs</Link>
+    <Compile Include="..\Common\TaskHelpersExtensions.cs">
+      <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
     <Compile Include="..\TransparentCommonAssemblyInfo.cs">
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>

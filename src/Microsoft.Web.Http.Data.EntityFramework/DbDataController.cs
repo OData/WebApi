@@ -6,7 +6,7 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Objects;
 using System.Linq;
-using System.Web.Http.Common;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using Microsoft.Web.Http.Data.EntityFramework.Metadata;
 

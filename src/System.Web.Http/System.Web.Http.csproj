@@ -66,6 +66,18 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Error.cs">
+      <Link>Common\Error.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\HttpMethodHelper.cs">
+      <Link>Common\HttpMethodHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpers.cs">
+      <Link>Common\TaskHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpersExtensions.cs">
+      <Link>Common\TaskHelpersExtensions.cs</Link>
+    </Compile>
     <Compile Include="AcceptVerbsAttribute.cs" />
     <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
@@ -149,6 +161,7 @@
     <Compile Include="ModelBinding\Binders\CompositeModelBinder.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />
     <Compile Include="Query\QueryValidator.cs" />
+    <Compile Include="RouteParameter.cs" />
     <Compile Include="Routing\BoundRouteTemplate.cs" />
     <Compile Include="Routing\IHttpVirtualPathData.cs" />
     <Compile Include="Routing\IHttpRouteData.cs" />
@@ -350,6 +363,21 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\CommonWebApiResources.Designer.cs">
+      <Link>Properties\CommonWebApiResources.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonWebApiResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Common\CommonWebApiResources.resx">
+      <Link>Properties\CommonWebApiResources.resx</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonWebApiResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Properties\SRResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
@@ -360,10 +388,6 @@
     <ProjectReference Include="..\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
       <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
       <Name>System.Net.Http.Formatting</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Web.Http.Common\System.Web.Http.Common.csproj">
-      <Project>{03A5E5F2-2E23-48F2-ABCC-6C41BAC9AC02}</Project>
-      <Name>System.Web.Http.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

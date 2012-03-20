@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Formatting;
-using System.Web.Http.Common;
 using System.Web.Http.ModelBinding;
 
 namespace System.Web.Http.Validation

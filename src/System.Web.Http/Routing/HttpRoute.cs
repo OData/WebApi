@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.Properties;

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Web.Http.Common;
 using System.Web.Http.SelfHost.Properties;
 
 namespace System.Web.Http.SelfHost.ServiceModel.Channels

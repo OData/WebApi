@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Common;
 using System.Web.Http.Controllers;
 
 namespace System.Web.Http

@@ -1,16 +1,14 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http.Common;
+using System.Web.Http;
 
-namespace System.Web.Http
+namespace System.Net.Http
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpRequestMessage"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class HttpRequestMessageCommonExtensions
+    public static class HttpRequestMessageExtensions
     {
         /// <summary>
         /// Creates an <see cref="HttpResponseMessage"/> wired up to the associated <see cref="HttpRequestMessage"/>.

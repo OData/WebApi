@@ -130,10 +130,6 @@
       <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
       <Name>System.Net.Http.Formatting</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\System.Web.Http.Common\System.Web.Http.Common.csproj">
-      <Project>{03A5E5F2-2E23-48F2-ABCC-6C41BAC9AC02}</Project>
-      <Name>System.Web.Http.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http.SelfHost\System.Web.Http.SelfHost.csproj">
       <Project>{66492E69-CE4C-4FB1-9B1F-88DEE09D06F1}</Project>
       <Name>System.Web.Http.SelfHost</Name>

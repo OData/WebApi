@@ -84,9 +84,9 @@ namespace System.Net.Http
                 stream1 = instance.GetStream(content.ElementAt(1).Headers);
                 Assert.IsType<FileStream>(stream1);
 
-                Assert.Equal(2, instance.BodyPartFileNames.Count());
-                Assert.Contains("BodyPart", instance.BodyPartFileNames.ElementAt(0));
-                Assert.Contains("BodyPart", instance.BodyPartFileNames.ElementAt(1));
+                Assert.Equal(2, instance.BodyPartFileNames.Count);
+                Assert.Contains("BodyPart", instance.BodyPartFileNames[0]);
+                Assert.Contains("BodyPart", instance.BodyPartFileNames[1]);
             }
             finally
             {

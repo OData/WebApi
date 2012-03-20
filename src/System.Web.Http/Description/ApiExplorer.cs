@@ -12,7 +12,6 @@ using System.Web.Http.Internal;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
-using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.Description
 {
@@ -343,7 +342,7 @@ namespace System.Web.Http.Description
         {
             ApiParameterDescription parameterDescription = new ApiParameterDescription();
             parameterDescription.ParameterDescriptor = parameter;
-            parameterDescription.Name = parameter.ParameterName;
+            parameterDescription.Name = parameter.Prefix ?? parameter.ParameterName;
             parameterDescription.Documentation = GetApiParameterDocumentation(parameter);
             parameterDescription.Source = ApiParameterSource.Unknown;
             return parameterDescription;
@@ -356,17 +355,9 @@ namespace System.Web.Http.Description
             {
                 parameterDescription.Source = ApiParameterSource.FromBody;
             }
-            else
+            else if (parameterBinding.WillReadUri())
             {
-                // TODO, 371284, Provide a better model for getting the HttpActionBinding from HttpControllerDescriptor, and ValueProviderFactory from the HttpParameterBinding.
-                ModelBinderParameterBinding modelParameterBinding = parameterBinding as ModelBinderParameterBinding;
-                if (modelParameterBinding != null)
-                {
-                    if (modelParameterBinding.ValueProviderFactories.All(factory => factory is IUriValueProviderFactory))
-                    {
-                        parameterDescription.Source = ApiParameterSource.FromUri;
-                    }
-                }
+                parameterDescription.Source = ApiParameterSource.FromUri;
             }
 
             return parameterDescription;
@@ -388,7 +379,7 @@ namespace System.Web.Http.Description
             IDocumentationProvider documentationProvider = DocumentationProvider ?? _config.ServiceResolver.GetDocumentationProvider();
             if (documentationProvider == null)
             {
-                return string.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.ParameterName);
+                return string.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.Prefix ?? parameterDescriptor.ParameterName);
             }
 
             return documentationProvider.GetDocumentation(parameterDescriptor);

@@ -33,7 +33,7 @@ namespace System.Web.Http
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
-            Assert.Equal<string>(expectedActionName, descriptor.ActionName);
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
         [Theory]
@@ -53,7 +53,7 @@ namespace System.Web.Http
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
-            Assert.Equal<string>(expectedActionName, descriptor.ActionName);
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
         [Theory]
@@ -70,7 +70,7 @@ namespace System.Web.Http
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
-            Assert.Equal<string>(expectedActionName, descriptor.ActionName);
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
         [Theory]
@@ -90,7 +90,7 @@ namespace System.Web.Http
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
-            Assert.Equal<string>(expectedActionName, descriptor.ActionName);
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
         [Theory]
@@ -110,7 +110,7 @@ namespace System.Web.Http
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
-            Assert.Equal<string>(expectedActionName, descriptor.ActionName);
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
         [Theory]
@@ -127,7 +127,27 @@ namespace System.Web.Http
             context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
             HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
 
-            Assert.Equal<string>(expectedActionName, descriptor.ActionName);
+            Assert.Equal(expectedActionName, descriptor.ActionName);
+        }
+
+        [Theory]
+        [InlineData("GET", "ParameterAttribute/2", "GetUser")]
+        [InlineData("GET", "ParameterAttribute?id=2", "GetUser")]
+        [InlineData("GET", "ParameterAttribute?myId=2", "GetUserByMyId")]
+        [InlineData("POST", "ParameterAttribute/3?name=user", "PostUserNameFromUri")]
+        [InlineData("POST", "ParameterAttribute/3", "PostUserNameFromBody")]
+        [InlineData("DELETE", "ParameterAttribute/3?name=user", "DeleteUserWithNullableIdAndName")]
+        [InlineData("DELETE", "ParameterAttribute?address=userStreet", "DeleteUser")]
+        public void ModelBindingParameterAttribute_AreAppliedWhenSelectingActions(string httpMethod, string requestUrl, string expectedActionName)
+        {
+            string routeUrl = "{controller}/{id}";
+            object routeDefault = new { id = RouteParameter.Optional };
+
+            HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
+            context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "ParameterAttribute", typeof(ParameterAttributeController));
+            HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
+
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
         [Fact]

@@ -96,6 +96,7 @@
     <Compile Include="Filters\EnumerableEvaluatorFilter.cs" />
     <Compile Include="Filters\EnumerableEvaluatorFilterProvider.cs" />
     <Compile Include="Filters\QueryCompositionFilterProvider.cs" />
+    <Compile Include="Internal\HttpParameterBindingExtensions.cs" />
     <Compile Include="Internal\UriQueryUtility.cs" />
     <Compile Include="ModelBinding\FormatterParameterBinding.cs" />
     <Compile Include="ModelBinding\CancellationTokenParameterBinding.cs" />

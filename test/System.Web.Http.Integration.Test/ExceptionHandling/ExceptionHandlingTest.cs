@@ -236,7 +236,7 @@ namespace System.Web.Http
                 // Make sure other action can be called
                 HttpResponseMessage response = client.GetAsync("http://localhost/Exception/GetString").Result;
                 Assert.True(response.IsSuccessStatusCode,
-                    string.Format("Successful status code was expected but got '{0}' instead. Error: {1}", response.StatusCode, response.Content.ReadAsStringAsync().Result));
+                    String.Format("Successful status code was expected but got '{0}' instead. Error: {1}", response.StatusCode, response.Content.ReadAsStringAsync().Result));
 
                 // Make a request to generic method and verify the exception
                 response = client.PostAsync("http://localhost/Exception/GenericAction", null).Result;
@@ -244,7 +244,7 @@ namespace System.Web.Http
                 ExceptionSurrogate exception = response.Content.ReadAsAsync<ExceptionSurrogate>().Result;
                 Assert.Equal(typeof(InvalidOperationException).FullName, exception.ExceptionType);
                 Assert.Equal(
-                    string.Format(
+                    String.Format(
                         SRResources.ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods,
                         controllerType.GetMethod("GenericAction"),
                         controllerType.FullName),

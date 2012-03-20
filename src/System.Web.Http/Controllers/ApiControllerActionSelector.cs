@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Web.Http.Internal;
+using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Controllers
@@ -114,13 +115,14 @@ namespace System.Web.Http.Controllers
                     MethodInfo method = validMethods[i];
                     HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(_controllerDescriptor, method);
                     _actionDescriptors[i] = actionDescriptor;
+                    HttpActionBinding actionBinding = controllerDescriptor.ActionValueBinder.GetBinding(actionDescriptor);
 
-                    // Build action parameter name mapping, only consider parameters that are simple types and doesn't have default values
+                    // Build action parameter name mapping, only consider parameters that are simple types, do not have default values and come from URI
                     _actionParameterNames.Add(
                         actionDescriptor,
-                        method.GetParameters()
-                            .Where(parameter => TypeHelper.IsSimpleType(parameter.ParameterType) && !parameter.IsOptional)
-                            .Select(parameter => parameter.Name));
+                        actionBinding.ParameterBindings
+                            .Where(binding => TypeHelper.IsSimpleUnderlyingType(binding.Descriptor.ParameterType) && !binding.HasDefaultValue() && binding.WillReadUri())
+                            .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName));
                 }
 
                 _actionNameMapping = _actionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Web.Http.Common;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Query
@@ -174,7 +175,7 @@ namespace System.Web.Http.Query
                 CloseParen,
                 Multiply,
                 Add,
-                Sub,
+                Subtract,
                 Comma,
                 Minus,
                 Dot,
@@ -352,7 +353,7 @@ namespace System.Web.Http.Query
             {
                 if (_symbols.ContainsKey(name))
                 {
-                    throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.DuplicateIdentifier, name));
+                    throw ParseError(Error.Format(SRResources.DuplicateIdentifier, name));
                 }
 
                 _symbols.Add(name, value);
@@ -367,7 +368,7 @@ namespace System.Web.Http.Query
                 {
                     if ((expr = PromoteExpression(expr, resultType, exact: true)) == null)
                     {
-                        throw ParseError(exprPos, string.Format(CultureInfo.CurrentCulture, SRResources.ExpressionTypeMismatch, GetTypeName(resultType)));
+                        throw ParseError(exprPos, Error.Format(SRResources.ExpressionTypeMismatch, GetTypeName(resultType)));
                     }
                 }
 
@@ -565,7 +566,7 @@ namespace System.Web.Http.Query
 
                 while (
                     _token.id == TokenId.Add ||
-                    _token.id == TokenId.Sub)
+                    _token.id == TokenId.Subtract)
                 {
                     Token op = _token;
                     NextToken();
@@ -577,7 +578,7 @@ namespace System.Web.Http.Query
                             CheckAndPromoteOperands(typeof(IAddSignatures), op.text, ref left, ref right, op.pos);
                             left = GenerateAdd(left, right);
                             break;
-                        case TokenId.Sub:
+                        case TokenId.Subtract:
                             CheckAndPromoteOperands(typeof(ISubtractSignatures), op.text, ref left, ref right, op.pos);
                             left = GenerateSubtract(left, right);
                             break;
@@ -711,7 +712,7 @@ namespace System.Web.Http.Query
                     ulong value;
                     if (!UInt64.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out value))
                     {
-                        throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.InvalidIntegerLiteral, text));
+                        throw ParseError(Error.Format(SRResources.InvalidIntegerLiteral, text));
                     }
 
                     NextToken();
@@ -743,7 +744,7 @@ namespace System.Web.Http.Query
                     long value;
                     if (!Int64.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value))
                     {
-                        throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.InvalidIntegerLiteral, text));
+                        throw ParseError(Error.Format(SRResources.InvalidIntegerLiteral, text));
                     }
 
                     NextToken();
@@ -804,7 +805,7 @@ namespace System.Web.Http.Query
 
                 if (value == null)
                 {
-                    throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.InvalidRealLiteral, text));
+                    throw ParseError(Error.Format(SRResources.InvalidRealLiteral, text));
                 }
 
                 NextToken();
@@ -863,7 +864,7 @@ namespace System.Web.Http.Query
                     return ParseMemberAccess(null, _it);
                 }
 
-                throw ParseError(string.Format(CultureInfo.CurrentCulture, SRResources.UnknownIdentifier, _token.text));
+                throw ParseError(Error.Format(SRResources.UnknownIdentifier, _token.text));
             }
 
             static MappedMemberInfo MapFunction(string functionName)
@@ -1031,7 +1032,7 @@ namespace System.Web.Http.Query
                             if (literalValue.Length % 2 != 0)
                             {
                                 // odd hex strings are not supported
-                                throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.InvalidHexLiteral));
+                                throw ParseError(errorPos, Error.Format(SRResources.InvalidHexLiteral));
                             }
                             byte[] bytes = new byte[literalValue.Length / 2];
                             for (int i = 0, j = 0; i < literalValue.Length; i += 2, j++)
@@ -1054,7 +1055,7 @@ namespace System.Web.Http.Query
                 }
                 else
                 {
-                    throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.InvalidTypeCreationExpression, typeIdentifier));
+                    throw ParseError(errorPos, Error.Format(SRResources.InvalidTypeCreationExpression, typeIdentifier));
                 }
 
                 return typeExpression;
@@ -1106,19 +1107,19 @@ namespace System.Web.Http.Query
                     {
                         case 0:
                             throw ParseError(errorPos,
-                                string.Format(CultureInfo.CurrentCulture, SRResources.NoApplicableMethod, mappedMemberName, GetTypeName(type)));
+                                Error.Format(SRResources.NoApplicableMethod, mappedMemberName, GetTypeName(type)));
                         case 1:
                             MethodInfo method = (MethodInfo)mb;
                             if (method.ReturnType == typeof(void))
                             {
                                 throw ParseError(errorPos,
-                                    string.Format(CultureInfo.CurrentCulture, SRResources.MethodIsVoid, mappedMemberName, GetTypeName(method.DeclaringType)));
+                                    Error.Format(SRResources.MethodIsVoid, mappedMemberName, GetTypeName(method.DeclaringType)));
                             }
 
                             return Expression.Call(instance, (MethodInfo)method, args);
                         default:
                             throw ParseError(errorPos,
-                                string.Format(CultureInfo.CurrentCulture, SRResources.AmbiguousMethodInvocation, mappedMemberName, GetTypeName(type)));
+                                Error.Format(SRResources.AmbiguousMethodInvocation, mappedMemberName, GetTypeName(type)));
                     }
                 }
                 else
@@ -1136,7 +1137,7 @@ namespace System.Web.Http.Query
                             }
                         }
                         throw ParseError(errorPos,
-                            string.Format(CultureInfo.CurrentCulture, SRResources.UnknownPropertyOrField, mappedMemberName, GetTypeName(type)));
+                            Error.Format(SRResources.UnknownPropertyOrField, mappedMemberName, GetTypeName(type)));
                     }
 
                     return member.MemberType == MemberTypes.Property ?
@@ -1166,7 +1167,7 @@ namespace System.Web.Http.Query
                     }
                     else
                     {
-                        throw ParseError(errorPos, string.Format(CultureInfo.CurrentCulture, SRResources.UnknownIdentifier, id));
+                        throw ParseError(errorPos, Error.Format(SRResources.UnknownIdentifier, id));
                     }
                 }
                 else
@@ -1184,7 +1185,7 @@ namespace System.Web.Http.Query
                         }
 
                         throw ParseError(errorPos,
-                            string.Format(CultureInfo.CurrentCulture, SRResources.UnknownPropertyOrField, id, GetTypeName(type)));
+                            Error.Format(SRResources.UnknownPropertyOrField, id, GetTypeName(type)));
                     }
 
                     return member.MemberType == MemberTypes.Property ?
@@ -1295,7 +1296,7 @@ namespace System.Web.Http.Query
                 if (FindMethod(signatures, "F", false, args, out method) != 1)
                 {
                     throw ParseError(errorPos,
-                        string.Format(CultureInfo.CurrentCulture, SRResources.IncompatibleOperand, opName, GetTypeName(args[0].Type)));
+                        Error.Format(SRResources.IncompatibleOperand, opName, GetTypeName(args[0].Type)));
                 }
 
                 expr = args[0];
@@ -1318,7 +1319,7 @@ namespace System.Web.Http.Query
             static Exception IncompatibleOperandsError(string opName, Expression left, Expression right, int pos)
             {
                 return ParseError(pos,
-                    string.Format(CultureInfo.CurrentCulture, SRResources.IncompatibleOperands, opName, GetTypeName(left.Type), GetTypeName(right.Type)));
+                    Error.Format(SRResources.IncompatibleOperands, opName, GetTypeName(left.Type), GetTypeName(right.Type)));
             }
 
             static MemberInfo FindPropertyOrField(Type type, string memberName, bool staticAccess)
@@ -2061,7 +2062,7 @@ namespace System.Web.Http.Query
                             t = TokenId.End;
                             break;
                         }
-                        throw ParseError(_textPos, string.Format(CultureInfo.CurrentCulture, SRResources.InvalidCharacter, _ch));
+                        throw ParseError(_textPos, Error.Format(SRResources.InvalidCharacter, _ch));
                 }
                 _token.id = t;
                 _token.text = _text.Substring(tokenPos, _textPos - tokenPos);
@@ -2092,7 +2093,7 @@ namespace System.Web.Http.Query
                     }
                     else if (token.text == "sub")
                     {
-                        return TokenId.Sub;
+                        return TokenId.Subtract;
                     }
                     else if (token.text == "mul")
                     {
@@ -2206,7 +2207,7 @@ namespace System.Web.Http.Query
 
             static Exception ParseError(int pos, string format, params object[] args)
             {
-                return new ParseException(string.Format(CultureInfo.CurrentCulture, format, args), pos);
+                return new ParseException(Error.Format(format, args), pos);
             }
 
             static Dictionary<string, object> CreateKeywords()

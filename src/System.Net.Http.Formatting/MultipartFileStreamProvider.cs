@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
@@ -12,6 +12,7 @@ namespace System.Net.Http
     /// </summary>
     public class MultipartFileStreamProvider : IMultipartStreamProvider
     {
+        private const int MinBufferSize = 1;
         private const int DefaultBufferSize = 0x1000;
 
         private List<string> _bodyPartFileNames = new List<string>();
@@ -40,27 +41,26 @@ namespace System.Net.Http
                 throw new ArgumentNullException("rootPath");
             }
 
-            if (bufferSize <= 0)
+            if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, Properties.Resources.NonZeroParameterSize);
+                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
             }
 
             _rootPath = Path.GetFullPath(rootPath);
+            _bufferSize = bufferSize;
         }
 
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> containing the files names of MIME 
+        /// Gets an <see cref="Collection{T}"/> containing the files names of MIME 
         /// body part written to file.
         /// </summary>
-        public IEnumerable<string> BodyPartFileNames
+        public Collection<string> BodyPartFileNames
         {
             get
             {
                 lock (_thisLock)
                 {
-                    return _bodyPartFileNames != null
-                               ? new List<string>(_bodyPartFileNames)
-                               : new List<string>();
+                    return new Collection<string>(_bodyPartFileNames);
                 }
             }
         }
@@ -89,11 +89,6 @@ namespace System.Net.Http
                 throw new InvalidOperationException(Properties.Resources.MultipartStreamProviderInvalidLocalFileName, e);
             }
 
-            if (!Directory.Exists(_rootPath))
-            {
-                Directory.CreateDirectory(_rootPath);
-            }
-
             // Add local file name 
             lock (_thisLock)
             {
@@ -110,8 +105,7 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="headers">The headers for the current MIME body part.</param>
         /// <returns>A relative filename with no path component.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        protected virtual string GetLocalFileName(HttpContentHeaders headers)
+        public virtual string GetLocalFileName(HttpContentHeaders headers)
         {
             if (headers == null)
             {

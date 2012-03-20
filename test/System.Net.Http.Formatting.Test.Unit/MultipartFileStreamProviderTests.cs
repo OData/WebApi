@@ -8,8 +8,9 @@ namespace System.Net.Http
 {
     public class MultipartFileStreamProviderTests
     {
-        const int defaultBufferSize = 0x1000;
-        const string validPath = @"c:\some\path";
+        private const int MinBufferSize = 1;
+        private const int DefaultBufferSize = 0x1000;
+        private const string ValidPath = @"c:\some\path";
 
         [Fact]
         [Trait("Description", "MultipartFileStreamProvider is public, visible type.")]
@@ -29,13 +30,13 @@ namespace System.Net.Http
 
             foreach (string path in TestData.NotSupportedFilePaths)
             {
-                Assert.Throws<NotSupportedException>(() => new MultipartFileStreamProvider(path, defaultBufferSize));
+                Assert.Throws<NotSupportedException>(() => new MultipartFileStreamProvider(path, DefaultBufferSize));
             }
 
             foreach (string path in TestData.InvalidNonNullFilePaths)
             {
                 // Note: Path.GetFileName doesn't set the argument name when throwing.
-                Assert.ThrowsArgument(() => { new MultipartFileStreamProvider(path, defaultBufferSize); }, null, allowDerivedExceptions: true);
+                Assert.ThrowsArgument(() => { new MultipartFileStreamProvider(path, DefaultBufferSize); }, null, allowDerivedExceptions: true);
             }
         }
 
@@ -43,11 +44,9 @@ namespace System.Net.Http
         [Trait("Description", "MultipartFileStreamProvider ctor with null path.")]
         public void ConstructorInvalidBufferSize()
         {
-            Assert.ThrowsArgumentOutOfRange(() => { new MultipartFileStreamProvider(validPath, -1); }, "bufferSize", exceptionMessage: null);
-            Assert.ThrowsArgumentOutOfRange(() => { new MultipartFileStreamProvider(validPath, 0); }, "bufferSize", exceptionMessage: null);
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new MultipartFileStreamProvider(ValidPath, MinBufferSize - 1),
+                "bufferSize", MinBufferSize.ToString(), MinBufferSize - 1);
         }
-
-
 
         [Fact]
         [Trait("Description", "BodyPartFileNames empty.")]
@@ -55,7 +54,7 @@ namespace System.Net.Http
         {
             MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
             Assert.NotNull(instance.BodyPartFileNames);
-            Assert.Equal(0, instance.BodyPartFileNames.Count());
+            Assert.Equal(0, instance.BodyPartFileNames.Count);
         }
 
         [Fact]
@@ -102,7 +101,5 @@ namespace System.Net.Http
                 }
             }
         }
-
-
     }
 }

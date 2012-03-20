@@ -180,9 +180,6 @@
   <data name="NonNullUriRequiredForMediaTypeMapping" xml:space="preserve">
     <value>A non-null request URI must be provided to determine if a '{0}' matches a given request or response message.</value>
   </data>
-  <data name="NonZeroParameterSize" xml:space="preserve">
-    <value>The parameter must be a non-zero positive integer.</value>
-  </data>
   <data name="NoReadSerializerAvailable" xml:space="preserve">
     <value>No MediaTypeFormatter is available to read an object of type '{0}' from content with media type '{1}'.</value>
   </data>

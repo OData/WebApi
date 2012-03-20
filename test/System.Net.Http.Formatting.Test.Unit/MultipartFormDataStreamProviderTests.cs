@@ -8,8 +8,9 @@ namespace System.Net.Http
 {
     public class MultipartFormDataStreamProviderTests
     {
-        const int defaultBufferSize = 0x1000;
-        const string validPath = @"c:\some\path";
+        private const int MinBufferSize = 1;
+        private const int DefaultBufferSize = 0x1000;
+        private const string ValidPath = @"c:\some\path";
 
         [Fact]
         [Trait("Description", "MultipartFormDataStreamProvider is public, visible type.")]
@@ -29,13 +30,13 @@ namespace System.Net.Http
 
             foreach (string path in TestData.NotSupportedFilePaths)
             {
-                Assert.Throws<NotSupportedException>(() => new MultipartFormDataStreamProvider(path, defaultBufferSize));
+                Assert.Throws<NotSupportedException>(() => new MultipartFormDataStreamProvider(path, DefaultBufferSize));
             }
 
             foreach (string path in TestData.InvalidNonNullFilePaths)
             {
                 // Note: Path.GetFileName doesn't set the argument name when throwing.
-                Assert.ThrowsArgument(() => { new MultipartFormDataStreamProvider(path, defaultBufferSize); }, null, allowDerivedExceptions: true);
+                Assert.ThrowsArgument(() => { new MultipartFormDataStreamProvider(path, DefaultBufferSize); }, null, allowDerivedExceptions: true);
             }
         }
 
@@ -43,8 +44,8 @@ namespace System.Net.Http
         [Trait("Description", "MultipartFormDataStreamProvider ctor with null path.")]
         public void ConstructorInvalidBufferSize()
         {
-            Assert.ThrowsArgumentOutOfRange(() => { new MultipartFormDataStreamProvider(validPath, -1); }, "bufferSize", exceptionMessage: null);
-            Assert.ThrowsArgumentOutOfRange(() => { new MultipartFormDataStreamProvider(validPath, 0); }, "bufferSize", exceptionMessage: null);
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new MultipartFileStreamProvider(ValidPath, MinBufferSize - 1),
+                "bufferSize", MinBufferSize.ToString(), MinBufferSize - 1);
         }
 
         [Fact]

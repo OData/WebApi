@@ -358,15 +358,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The parameter must be a non-zero positive integer..
-        /// </summary>
-        internal static string NonZeroParameterSize {
-            get {
-                return ResourceManager.GetString("NonZeroParameterSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No MediaTypeFormatter is available to read an object of type &apos;{0}&apos; from content with media type &apos;{1}&apos;..
         /// </summary>
         internal static string NoReadSerializerAvailable {

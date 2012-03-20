@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -11,8 +10,8 @@ namespace System.Web.Http.Tracing.Tracers
 {
     internal class BufferedMediaTypeFormatterTracer : BufferedMediaTypeFormatter, IFormatterTracer
     {
-        private const string OnReadFromStreamMethodName = "OnReadFromStream";
-        private const string OnWriteToStreamMethodName = "OnWriteToStream";
+        private const string OnReadFromStreamMethodName = "ReadFromStream";
+        private const string OnWriteToStreamMethodName = "WriteToStream";
 
         private MediaTypeFormatterTracer _innerTracer;
 
@@ -33,7 +32,7 @@ namespace System.Web.Http.Tracing.Tracers
 
         MediaTypeFormatter IFormatterTracer.InnerFormatter
         {
-            get { return _innerTracer.InnerFormatter;  }
+            get { return _innerTracer.InnerFormatter; }
         }
 
         public override bool CanReadType(Type type)
@@ -50,7 +49,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             return _innerTracer.GetPerRequestFormatterInstance(type, request, mediaType);
         }
-        
+
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, string mediaType)
         {
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);

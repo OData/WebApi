@@ -104,6 +104,7 @@ namespace System.Net.Http.Formatting
             sb.Insert(0, "<?xml version=\"1.0\"?>");
 
             return sb.ToString();
+
         }
 
         [Fact]

@@ -272,5 +272,7 @@
   </data>
   <data name="ArgumentMustBeGreaterThan" xml:space="preserve">
     <value>Value must be greater than {0}.</value>
+  <data name="ArgumentMustBeGreaterThanOrEqualTo" xml:space="preserve">
+    <value>Value must be greater than or equal to {0}.</value>
   </data>
 </root>

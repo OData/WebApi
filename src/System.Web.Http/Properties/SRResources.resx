@@ -488,4 +488,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="HttpActionDescriptor_NoConverterForGenericParamterTypeExists" xml:space="preserve">
     <value>No action result converter could be constructed for a generic parameter type '{0}'.</value>
   </data>
+  <data name="QueryableAttribute_InvalidResultLimit" xml:space="preserve">
+    <value>The value of the ResultLimit property on the Queryable filter applied to action '{0}' on controller '{1}' must be greater than or equal to 0.</value>
+  </data>
 </root>

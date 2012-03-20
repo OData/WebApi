@@ -86,7 +86,7 @@
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="Dispatcher\DefaultBuildManagerTest.cs" />
-    <Compile Include="Filters\QueryCompositionFilterAttributeTest.cs" />
+    <Compile Include="QueryableAttributeTest.cs" />
     <Compile Include="Filters\EnumerableEvaluatorFilterProviderTest.cs" />
     <Compile Include="Controllers\ApiControllerActionInvokerTest.cs" />
     <Compile Include="Controllers\ApiControllerActionSelectorTest.cs" />
@@ -95,7 +95,6 @@
     <Compile Include="Controllers\HttpControllerDescriptorTest.cs" />
     <Compile Include="Controllers\ReflectedHttpActionDescriptorTest.cs" />
     <Compile Include="Controllers\HttpActionContextTest.cs" />
-    <Compile Include="Filters\QueryCompositionFilterProviderTest.cs" />
     <Compile Include="Filters\EnumerableEvaluatorFilterTest.cs" />
     <Compile Include="Hosting\HttpRouteTest.cs" />
     <Compile Include="Internal\TypeActivatorTest.cs" />

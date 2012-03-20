@@ -102,7 +102,6 @@
     <Compile Include="Filters\HttpActionExecutedContext.cs" />
     <Compile Include="Filters\EnumerableEvaluatorFilter.cs" />
     <Compile Include="Filters\EnumerableEvaluatorFilterProvider.cs" />
-    <Compile Include="Filters\QueryCompositionFilterProvider.cs" />
     <Compile Include="Internal\HttpParameterBindingExtensions.cs" />
     <Compile Include="Internal\UriQueryUtility.cs" />
     <Compile Include="ModelBinding\FormatterParameterBinding.cs" />
@@ -122,7 +121,7 @@
     <Compile Include="Query\ParseException.cs" />
     <Compile Include="Query\ServiceQueryPart.cs" />
     <Compile Include="ResultLimitAttribute.cs" />
-    <Compile Include="Filters\QueryCompositionFilterAttribute.cs" />
+    <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerActivator.cs" />
     <Compile Include="Controllers\HttpControllerDescriptor.cs" />

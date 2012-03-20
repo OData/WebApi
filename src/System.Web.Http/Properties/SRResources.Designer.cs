@@ -684,6 +684,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of the ResultLimit property on the Queryable filter applied to action &apos;{0}&apos; on controller &apos;{1}&apos; must be greater than or equal to 0..
+        /// </summary>
+        internal static string QueryableAttribute_InvalidResultLimit {
+            get {
+                return ResourceManager.GetString("QueryableAttribute_InvalidResultLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The parameters dictionary contains a null entry for parameter &apos;{0}&apos; of non-nullable type &apos;{1}&apos; for method &apos;{2}&apos; in &apos;{3}&apos;. An optional parameter must be a reference type, a nullable type, or be declared as an optional parameter..
         /// </summary>
         internal static string ReflectedActionDescriptor_ParameterCannotBeNull {

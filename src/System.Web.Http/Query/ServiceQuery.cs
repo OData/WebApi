@@ -10,7 +10,7 @@ namespace System.Web.Http.Query
         /// <summary>
         /// Gets or sets a list of query parts.
         /// </summary>
-        public IEnumerable<ServiceQueryPart> QueryParts { get; set; }
+        public List<ServiceQueryPart> QueryParts { get; set; }
 
         public static bool IsSupportedQueryOperator(string queryOperator)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -49,29 +50,23 @@ namespace Microsoft.Web.Http.Data
 
         public override Collection<FilterInfo> GetFilterPipeline()
         {
-            Collection<FilterInfo> filters = new Collection<FilterInfo>(_innerDescriptor.GetFilterPipeline());
+            Collection<FilterInfo> originalFilters = _innerDescriptor.GetFilterPipeline();
+            Collection<FilterInfo> newFilters = new Collection<FilterInfo>();
 
-            // for any actions that support query composition, we need to add our
-            // query filter as well. This must be added immediately after the
-            // QueryCompositionFilterAttribute.
-            // TODO: once filter ordering is supported, there may be a better way
-            // than searching on type name like this.
-            bool addFilter = false;
-            int idx = 0;
-            for (idx = 0; idx < filters.Count; idx++)
+            // for any actions that support query composition, we need to replace it with our
+            // query filter.
+            foreach (FilterInfo filterInfo in originalFilters)
             {
-                if (filters[idx].Instance.GetType().Name == "QueryCompositionFilterAttribute")
+                FilterInfo newInfo = filterInfo;
+                QueryableAttribute queryableFilter = filterInfo.Instance as QueryableAttribute;
+                if (queryableFilter != null)
                 {
-                    addFilter = true;
-                    break;
+                    newInfo = new FilterInfo(new QueryFilterAttribute() { ResultLimit = queryableFilter.ResultLimit }, filterInfo.Scope);
                 }
-            }
-            if (addFilter)
-            {
-                filters.Insert(idx, new FilterInfo(new QueryFilterAttribute(), FilterScope.Action));
+                newFilters.Add(newInfo);
             }
 
-            return filters;
+            return newFilters;
         }
     }
 }

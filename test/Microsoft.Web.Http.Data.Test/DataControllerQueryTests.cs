@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -168,23 +167,6 @@ namespace Microsoft.Web.Http.Data.Test
 
             Product[] products = response.Content.ReadAsAsync<IQueryable<Product>>().Result.ToArray();
             Assert.Equal(8, products.Length);
-        }
-
-        /// <summary>
-        /// Verify that result limits are applied to IEnumerable returning actions as well.
-        /// </summary>
-        [Fact]
-        public void Query_ResultLimit_Enumerable()
-        {
-            HttpConfiguration config = GetTestConfiguration();
-            HttpServer server = GetTestCatalogServer(config);
-            HttpMessageInvoker invoker = new HttpMessageInvoker(server);
-
-            HttpRequestMessage request = TestHelpers.CreateTestMessage(TestConstants.CatalogUrl + "GetProductsEnumerable", HttpMethod.Get, config);
-            HttpResponseMessage response = invoker.SendAsync(request, CancellationToken.None).Result;
-
-            Product[] products = response.Content.ReadAsAsync<IEnumerable<Product>>().Result.ToArray();
-            Assert.Equal(5, products.Length);
         }
 
         /// <summary>

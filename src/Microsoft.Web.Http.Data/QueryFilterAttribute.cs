@@ -4,61 +4,63 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
 namespace Microsoft.Web.Http.Data
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    internal sealed class QueryFilterAttribute : ActionFilterAttribute
+    internal sealed class QueryFilterAttribute : QueryableAttribute
     {
         internal static readonly string TotalCountKey = "MS_InlineCountKey";
-        private static readonly MethodInfo _getTotalCountMethod = typeof(QueryFilterAttribute).GetMethod("GetTotalCount", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _getTotalCountMethod = typeof(QueryFilterAttribute).GetMethod("GetTotalCount", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        public override void OnActionExecuted(HttpActionExecutedContext context)
+        protected override IQueryable ApplyResultLimit(HttpActionExecutedContext actionExecutedContext, IQueryable query)
         {
-            if (context == null)
+            if (actionExecutedContext == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("actionExecutedContext");
+            }
+            if (query == null)
+            {
+                throw Error.ArgumentNull("query");
             }
 
-            bool inlineCount = false;
-            HttpRequestMessage request = context.Request;
-            if (request != null && request.RequestUri != null &&
-                !String.IsNullOrWhiteSpace(request.RequestUri.Query))
+            HttpRequestMessage request = actionExecutedContext.Request;
+            bool inlineCount = ShouldInlineCount(request);
+
+            HttpResponseMessage response = actionExecutedContext.Result;
+            if (response != null && inlineCount && query != null)
+            {
+                // Compute the total count and add the result as a request property. Later after all
+                // filters have run, DataController will transform the final result into a QueryResult
+                // which includes this value.
+                // TODO : use a compiled/cached delegate?
+                int totalCount = (int)_getTotalCountMethod.MakeGenericMethod(query.ElementType).Invoke(this, new object[] { query });
+                request.Properties.Add(QueryFilterAttribute.TotalCountKey, totalCount);
+            }
+
+            return base.ApplyResultLimit(actionExecutedContext, query);
+        }
+
+        private static bool ShouldInlineCount(HttpRequestMessage request)
+        {
+            if (request != null && request.RequestUri != null && !String.IsNullOrWhiteSpace(request.RequestUri.Query))
             {
                 // search the URI for an inline count request
                 var parsedQuery = request.RequestUri.ParseQueryString();
                 var inlineCountPart = parsedQuery["$inlinecount"];
                 if (inlineCountPart == "allpages")
                 {
-                    inlineCount = true;
+                    return true;
                 }
             }
-
-            HttpResponseMessage response = context.Result;
-            if (!inlineCount || response == null)
-            {
-                return;
-            }
-
-            IQueryable results;
-            ObjectContent objectContent = response.Content as ObjectContent;
-            if (objectContent != null && (results = objectContent.Value as IQueryable) != null)
-            {
-                // Compute the total count and add the result as a request property. Later after all
-                // filters have run, DataController will transform the final result into a QueryResult
-                // which includes this value.
-                // TODO : use a compiled/cached deletate?
-                int totalCount = (int)_getTotalCountMethod.MakeGenericMethod(results.ElementType).Invoke(null, new object[] { results, context.ActionContext });
-                request.Properties.Add(QueryFilterAttribute.TotalCountKey, totalCount);
-            }
+            return false;
         }
 
         /// <summary>
         /// Determine the total count for the specified query.
         /// </summary>
-        private static int GetTotalCount<T>(IQueryable<T> results, HttpActionContext context)
+        private int GetTotalCount<T>(IQueryable<T> results)
         {
             // A total count of -1 indicates that the count is the result count. This
             // is the default, unless we discover that skip/top operations will be
@@ -70,10 +72,10 @@ namespace Microsoft.Web.Http.Data
             {
                 totalCount = ((IQueryable<T>)totalCountQuery).Count();
             }
-            else if (context.ActionDescriptor.GetFilterPipeline().Any(p => p.Instance is ResultLimitAttribute))
+            else if (ResultLimit > 0)
             {
                 // The client query didn't specify any skip/top paging operations.
-                // However, this action has a ResultLimitFilter applied.
+                // However, this action has a ResultLimit applied.
                 // Therefore, we need to take the count now before that limit is applied.
                 totalCount = results.Count();
             }
@@ -94,6 +96,7 @@ namespace Microsoft.Web.Http.Data
             MethodCallExpression mce = query.Expression as MethodCallExpression;
             Expression countExpr = null;
 
+            // TODO what if the paging does not follow the exact Skip().Take() pattern?
             if (IsSequenceOperator("take", mce))
             {
                 // strip off the Take operator

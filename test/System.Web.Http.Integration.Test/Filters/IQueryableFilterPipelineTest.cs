@@ -29,10 +29,9 @@ namespace System.Web.Http.Filters
             var filters = actionDescriptor.GetFilterPipeline();
 
             // Assert
-            Assert.Equal(3, filters.Count);
+            Assert.Equal(2, filters.Count);
             Assert.IsType<EnumerableEvaluatorFilter>(filters[0].Instance);
             Assert.IsType<ResultLimitAttribute>(filters[1].Instance);
-            Assert.IsType<QueryCompositionFilterAttribute>(filters[2].Instance);
         }
 
         [Fact]

@@ -25,18 +25,13 @@ namespace Microsoft.Web.Http.Data.Test
             };
         }
 
-        [ResultLimit(9)]
+        [Queryable(ResultLimit = 9)]
         public IQueryable<Product> GetProducts()
         {
             return this.products.AsQueryable();
         }
 
-        [ResultLimit(5)]
-        public IEnumerable<Product> GetProductsEnumerable()
-        {
-            return this.products.AsQueryable();
-        }
-
+        [Queryable]
         public IQueryable<Order> GetOrders()
         {
             return new Order[] { 

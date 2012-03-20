@@ -274,12 +274,9 @@ namespace System.Net.Http.Formatting.Parsers
             {
                 string unescapedName = UriQueryUtility.UrlDecode(_name.ToString());
                 string escapedValue = _value.ToString();
+                string value = UriQueryUtility.UrlDecode(escapedValue);
 
-                nameValuePairs.Add(new KeyValuePair<string, string>(
-                                       unescapedName,
-                                       escapedValue.Equals(FormattingUtilities.JsonNullLiteral, StringComparison.Ordinal)
-                                           ? null
-                                           : UriQueryUtility.UrlDecode(escapedValue)));
+                nameValuePairs.Add(new KeyValuePair<string, string>(unescapedName, value));
 
                 Clear();
             }
@@ -291,7 +288,7 @@ namespace System.Net.Http.Formatting.Parsers
             public void CopyNameOnlyTo(ICollection<KeyValuePair<string, string>> nameValuePairs)
             {
                 string key = UriQueryUtility.UrlDecode(_name.ToString());
-                string value = null;
+                string value = string.Empty;
                 nameValuePairs.Add(new KeyValuePair<string, string>(key, value));
                 Clear();
             }

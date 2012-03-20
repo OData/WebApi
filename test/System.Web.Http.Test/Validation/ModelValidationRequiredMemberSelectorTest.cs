@@ -20,7 +20,8 @@ namespace System.Web.Http.Validation
         [InlineData("UselessInfo", false)]
         public void RequiredMembersRecognized(string propertyName, bool isRequired)
         {
-            IRequiredMemberSelector selector = new ModelValidationRequiredMemberSelector(new HttpConfiguration());
+            HttpConfiguration config = new HttpConfiguration();
+            IRequiredMemberSelector selector = new ModelValidationRequiredMemberSelector(config.ServiceResolver.GetModelMetadataProvider(), config.ServiceResolver.GetModelValidatorProviders());
             Assert.Equal(isRequired, selector.IsRequiredMember(typeof(PurchaseOrder).GetProperty(propertyName)));
         }
     }

@@ -1,13 +1,17 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Common;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
+using System.Web.Http.Metadata;
 using System.Web.Http.Tracing;
+using System.Web.Http.Validation;
 
 namespace System.Web.Http
 {
@@ -130,7 +134,7 @@ namespace System.Web.Http
             }
 
             // The first request initializes the server
-            Initialize();
+            EnsureInitialized();
 
             // Capture current synchronization context and add it as a parameter to the request
             SynchronizationContext context = SynchronizationContext.Current;
@@ -145,15 +149,7 @@ namespace System.Web.Http
             return base.SendAsync(request, cancellationToken);
         }
 
-        /// <summary>
-        /// Prepares the server for operation.
-        /// </summary>
-        /// <remarks>
-        /// This method must be called after all configuration is complete
-        /// but before the first request is processed.  It is idempotent and
-        /// will immediately return if initialization has been done before.
-        /// </remarks>
-        protected void Initialize()
+        private void EnsureInitialized()
         {
             if (!_initialized && !_disposed)
             {
@@ -161,6 +157,8 @@ namespace System.Web.Http
                 {
                     if (!_initialized)
                     {
+                        Initialize();
+
                         // Attach tracing before creating pipeline to allow injection of message handlers
                         ITraceManager traceManager = _configuration.ServiceResolver.GetTraceManager();
                         Contract.Assert(traceManager != null);
@@ -171,6 +169,29 @@ namespace System.Web.Http
 
                         _initialized = true;
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Prepares the server for operation.
+        /// </summary>
+        /// <remarks>
+        /// This method must be called after all configuration is complete
+        /// but before the first request is processed.
+        /// </remarks>
+        protected virtual void Initialize()
+        {
+            // Register the default IRequiredMemberSelector for formatters that haven't been assigned one
+            ModelMetadataProvider metadataProvider = _configuration.ServiceResolver.GetModelMetadataProvider();
+            IEnumerable<ModelValidatorProvider> validatorProviders = _configuration.ServiceResolver.GetModelValidatorProviders();
+            IRequiredMemberSelector defaultRequiredMemberSelector = new ModelValidationRequiredMemberSelector(metadataProvider, validatorProviders);
+
+            foreach (MediaTypeFormatter formatter in _configuration.Formatters)
+            {
+                if (formatter.RequiredMemberSelector == null)
+                {
+                    formatter.RequiredMemberSelector = defaultRequiredMemberSelector;
                 }
             }
         }

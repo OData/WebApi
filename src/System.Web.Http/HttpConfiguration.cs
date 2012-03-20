@@ -47,12 +47,6 @@ namespace System.Web.Http
 
             _routes = routes;
             _serviceResolver = new DependencyResolver(this);
-
-            IRequiredMemberSelector requiredMemberSelector = new ModelValidationRequiredMemberSelector(this);
-            foreach (MediaTypeFormatter formatter in _formatters)
-            {
-                formatter.RequiredMemberSelector = requiredMemberSelector;
-            }
         }
 
         /// <summary>

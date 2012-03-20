@@ -12,18 +12,24 @@ namespace System.Web.Http.Validation
     /// required ModelValidators associated with the member. This is the default implementation used by
     /// <see cref="HttpConfiguration"/>.
     /// </summary>
-    public class ModelValidationRequiredMemberSelector : IRequiredMemberSelector
+    public sealed class ModelValidationRequiredMemberSelector : IRequiredMemberSelector
     {
-        private readonly HttpConfiguration _configuration;
+        private readonly ModelMetadataProvider _metadataProvider;
+        private readonly List<ModelValidatorProvider> _validatorProviders;
 
-        public ModelValidationRequiredMemberSelector(HttpConfiguration configuration)
+        public ModelValidationRequiredMemberSelector(ModelMetadataProvider metadataProvider, IEnumerable<ModelValidatorProvider> validatorProviders)
         {
-            if (configuration == null)
+            if (metadataProvider == null)
             {
-                throw Error.ArgumentNull("dependencyResolver");
+                throw Error.ArgumentNull("metadataProvider");
+            }
+            if (validatorProviders == null)
+            {
+                throw Error.ArgumentNull("validatorProviders");
             }
 
-            _configuration = configuration;
+            _metadataProvider = metadataProvider;
+            _validatorProviders = validatorProviders.ToList();
         }
 
         public bool IsRequiredMember(MemberInfo member)
@@ -37,11 +43,9 @@ namespace System.Web.Http.Validation
             {
                 return false;
             }
-            ModelMetadataProvider metadataProvider = _configuration.ServiceResolver.GetModelMetadataProvider();
-            IEnumerable<ModelValidatorProvider> validatorProviders = _configuration.ServiceResolver.GetModelValidatorProviders();
 
-            ModelMetadata metadata = metadataProvider.GetMetadataForProperty(() => null, member.DeclaringType, member.Name);
-            IEnumerable<ModelValidator> validators = metadata.GetValidators(validatorProviders);
+            ModelMetadata metadata = _metadataProvider.GetMetadataForProperty(() => null, member.DeclaringType, member.Name);
+            IEnumerable<ModelValidator> validators = metadata.GetValidators(_validatorProviders);
             return validators.Any(validator => validator.IsRequired);
         }
     }

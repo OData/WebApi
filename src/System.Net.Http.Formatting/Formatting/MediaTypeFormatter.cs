@@ -70,7 +70,7 @@ namespace System.Net.Http.Formatting
         public virtual Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
             throw new NotSupportedException(
-                RS.Format(Properties.Resources.MediaTypeFormatterCannotRead, GetType()));
+                RS.Format(Properties.Resources.MediaTypeFormatterCannotRead, GetType().Name));
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace System.Net.Http.Formatting
         public virtual Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
         {
             throw new NotSupportedException(
-                RS.Format(Properties.Resources.MediaTypeFormatterCannotWrite, GetType()));
+                RS.Format(Properties.Resources.MediaTypeFormatterCannotWrite, GetType().Name));
         }
 
         private static bool TryGetDelegatingType(Type interfaceType, ref Type type)

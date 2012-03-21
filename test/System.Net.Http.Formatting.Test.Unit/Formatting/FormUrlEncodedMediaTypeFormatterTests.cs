@@ -68,10 +68,10 @@ namespace System.Net.Http.Formatting
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
 
-            Assert.True(formatter.CanReadType(type));            
+            Assert.True(formatter.CanReadType(type));
         }
 
-        
+
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
         [Trait("Description", "CanReadType(Type) returns false.")]
@@ -84,7 +84,7 @@ namespace System.Net.Http.Formatting
             // Ask a 2nd time to probe whether the cached result is treated the same
             Assert.False(formatter.CanReadType(variationType));
         }
-        
+
 
         [Fact]
         [Trait("Description", "CanWriteType(Type) throws on null.")]
@@ -123,7 +123,7 @@ namespace System.Net.Http.Formatting
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();
             Assert.Throws<NotSupportedException>(
                 () => formatter.WriteToStreamAsync(typeof(object), new object(), Stream.Null, null, null),
-                "The media type formatter of type 'System.Net.Http.Formatting.FormUrlEncodedMediaTypeFormatter' does not support writing since it does not implement the WriteToStreamAsync method.");
+                "The media type formatter of type 'FormUrlEncodedMediaTypeFormatter' does not support writing because it does not implement the WriteToStreamAsync method.");
         }
 
         public class TestFormUrlEncodedMediaTypeFormatter : FormUrlEncodedMediaTypeFormatter

@@ -45,7 +45,7 @@ namespace System.Net.Http.Formatting
         /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> if available. It may be <c>null</c>.</param>
         public virtual void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
         {
-            throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotWriteSync, this.GetType()));
+            throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotWriteSync, GetType().Name));
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace System.Net.Http.Formatting
         /// <returns>An object of the given type.</returns>
         public virtual object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
-            throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotReadSync, this.GetType()));
+            throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotReadSync, GetType().Name));
         }
 
         // Sealed because derived classes shouldn't override the async version. Override sync version instead.

@@ -542,7 +542,7 @@ namespace System.Net.Http.Formatting
             var formatter = new Mock<MediaTypeFormatter> { CallBase = true }.Object;
 
             Assert.Throws<NotSupportedException>(() => formatter.ReadFromStreamAsync(null, null, null, null),
-                "The media type formatter of type 'Castle.Proxies.MediaTypeFormatterProxy' does not support reading since it does not implement the ReadFromStreamAsync method.");
+                "The media type formatter of type 'MediaTypeFormatterProxy' does not support reading because it does not implement the ReadFromStreamAsync method.");
         }
 
         [Fact]
@@ -551,7 +551,7 @@ namespace System.Net.Http.Formatting
             var formatter = new Mock<MediaTypeFormatter> { CallBase = true }.Object;
 
             Assert.Throws<NotSupportedException>(() => formatter.WriteToStreamAsync(null, null, null, null, null),
-                "The media type formatter of type 'Castle.Proxies.MediaTypeFormatterProxy' does not support writing since it does not implement the WriteToStreamAsync method.");
+                "The media type formatter of type 'MediaTypeFormatterProxy' does not support writing because it does not implement the WriteToStreamAsync method.");
         }
 
         [Theory]

@@ -229,16 +229,16 @@
     <value>Indentation is not supported by '{0}'.</value>
   </data>
   <data name="MediaTypeFormatterCannotRead" xml:space="preserve">
-    <value>The media type formatter of type '{0}' does not support reading since it does not implement the ReadFromStreamAsync method.</value>
+    <value>The media type formatter of type '{0}' does not support reading because it does not implement the ReadFromStreamAsync method.</value>
   </data>
   <data name="MediaTypeFormatterCannotWrite" xml:space="preserve">
-    <value>The media type formatter of type '{0}' does not support writing since it does not implement the WriteToStreamAsync method.</value>
+    <value>The media type formatter of type '{0}' does not support writing because it does not implement the WriteToStreamAsync method.</value>
   </data>
   <data name="MediaTypeFormatterCannotReadSync" xml:space="preserve">
-    <value>The media type formatter of type '{0}' does not support reading since it does not implement the OnReadFromStream method.</value>
+    <value>The media type formatter of type '{0}' does not support reading because it does not implement the OnReadFromStream method.</value>
   </data>
   <data name="MediaTypeFormatterCannotWriteSync" xml:space="preserve">
-    <value>The media type formatter of type '{0}' does not support writing since it does not implement the OnWriteToStream method.</value>
+    <value>The media type formatter of type '{0}' does not support writing because it does not implement the OnWriteToStream method.</value>
   </data>
   <data name="JsonTooDeep" xml:space="preserve">
     <value>This reader's MaxDepth of {0} has been exceeded. Consider using a larger MaxDepth.</value>

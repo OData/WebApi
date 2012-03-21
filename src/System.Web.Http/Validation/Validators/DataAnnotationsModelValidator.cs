@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Security;
-using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 
 namespace System.Web.Http.Validation.Validators
@@ -41,19 +39,6 @@ namespace System.Web.Http.Validation.Validators
             return new DataAnnotationsModelValidator(metadata, validatorProviders, attribute);
         }
 
-        public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
-        {
-            IEnumerable<ModelClientValidationRule> results = base.GetClientValidationRules();
-
-            IClientValidatable clientValidatable = Attribute as IClientValidatable;
-            if (clientValidatable != null)
-            {
-                results = results.Concat(clientValidatable.GetClientValidationRules(Metadata, ValidatorProviders));
-            }
-
-            return results;
-        }
-
         // [SecuritySafeCritical] because is uses DataAnnotations type ValidationContext
         [SecuritySafeCritical]
         public override IEnumerable<ModelValidationResult> Validate(object container)
@@ -71,22 +56,6 @@ namespace System.Web.Http.Validation.Validators
             }
 
             return new ModelValidationResult[0];
-        }
-    }
-
-    // [SecuritySafeCritical] to allow derivation from DataAnnotationsModelValidator and to permit closed generic type subclasses
-    [SecuritySafeCritical]
-    public class DataAnnotationsModelValidator<TAttribute> : DataAnnotationsModelValidator
-        where TAttribute : ValidationAttribute
-    {
-        public DataAnnotationsModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders, TAttribute attribute)
-            : base(metadata, validatorProviders, attribute)
-        {
-        }
-
-        protected new TAttribute Attribute
-        {
-            get { return (TAttribute)base.Attribute; }
         }
     }
 }

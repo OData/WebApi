@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 
@@ -32,12 +29,6 @@ namespace System.Web.Http.Validation
         }
 
         protected internal ModelMetadata Metadata { get; private set; }
-
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method may perform non-trivial work.")]
-        public virtual IEnumerable<ModelClientValidationRule> GetClientValidationRules()
-        {
-            return Enumerable.Empty<ModelClientValidationRule>();
-        }
 
         public static ModelValidator GetModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
         {

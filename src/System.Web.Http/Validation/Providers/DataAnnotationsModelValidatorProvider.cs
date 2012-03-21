@@ -20,11 +20,7 @@ namespace System.Web.Http.Validation.Providers
     /// <summary>
     /// An implementation of <see cref="ModelValidatorProvider"/> which providers validators
     /// for attributes which derive from <see cref="ValidationAttribute"/>. It also provides
-    /// a validator for types which implement <see cref="IValidatableObject"/>. To support
-    /// client side validation, you can either register adapters through the static methods
-    /// on this class, or by having your validation attributes implement
-    /// <see cref="IClientValidatable"/>. The logic to support IClientValidatable
-    /// is implemented in <see cref="DataAnnotationsModelValidator"/>.
+    /// a validator for types which implement <see cref="IValidatableObject"/>.
     /// </summary>
     // [SecuritySafeCritical] because class constructor accesses DataAnnotations types
     [SecuritySafeCritical]
@@ -38,31 +34,15 @@ namespace System.Web.Http.Validation.Providers
         internal static DataAnnotationsModelValidationFactory DefaultAttributeFactory =
             (metadata, validationProviders, attribute) => new DataAnnotationsModelValidator(metadata, validationProviders, attribute);
 
-        internal static readonly Dictionary<Type, DataAnnotationsModelValidationFactory> AttributeFactories = new Dictionary<Type, DataAnnotationsModelValidationFactory>()
-        {
-            {
-                typeof(RangeAttribute),
-                (metadata, validatorProviders, attribute) => new RangeAttributeAdapter(metadata, validatorProviders, (RangeAttribute)attribute)
-                },
-            {
-                typeof(RegularExpressionAttribute),
-                (metadata, validatorProviders, attribute) => new RegularExpressionAttributeAdapter(metadata, validatorProviders, (RegularExpressionAttribute)attribute)
-                },
-            {
-                typeof(RequiredAttribute),
-                (metadata, validatorProviders, attribute) => new RequiredAttributeAdapter(metadata, validatorProviders, (RequiredAttribute)attribute)
-                },
-            {
-                typeof(StringLengthAttribute),
-                (metadata, validatorProviders, attribute) => new StringLengthAttributeAdapter(metadata, validatorProviders, (StringLengthAttribute)attribute)
-                },
-        };
+        internal static readonly Dictionary<Type, DataAnnotationsModelValidationFactory> AttributeFactories =
+            new Dictionary<Type, DataAnnotationsModelValidationFactory>();
 
         // Factories for IValidatableObject models
         internal static DataAnnotationsValidatableObjectAdapterFactory DefaultValidatableFactory =
             (metadata, validationProviders) => new ValidatableObjectAdapter(metadata, validationProviders);
 
-        internal static readonly Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory> ValidatableFactories = new Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory>();
+        internal static readonly Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory> ValidatableFactories =
+            new Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory>();
 
         public static bool AddImplicitRequiredAttributeForValueTypes
         {

@@ -83,7 +83,6 @@ namespace System.Web.Http.Services
 
             AddRange<ModelValidatorProvider>(
                 new DataAnnotationsModelValidatorProvider(),
-                new ClientDataTypeModelValidatorProvider(),
                 new DataMemberModelValidatorProvider());
 
             AddRange<ValueProviderFactory>(

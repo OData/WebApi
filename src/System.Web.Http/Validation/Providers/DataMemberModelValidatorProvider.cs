@@ -20,7 +20,7 @@ namespace System.Web.Http.Validation.Providers
                 bool isDataContract = GetTypeDescriptor(metadata.ContainerType).GetAttributes().OfType<DataContractAttribute>().Any();
                 if (isDataContract && dataMemberAttribute.IsRequired)
                 {
-                    return new[] { new RequiredMemberModelValidator(metadata, validatorProviders, metadata.PropertyName) };
+                    return new[] { new RequiredMemberModelValidator(metadata, validatorProviders) };
                 }
             }
             return new ModelValidator[0];

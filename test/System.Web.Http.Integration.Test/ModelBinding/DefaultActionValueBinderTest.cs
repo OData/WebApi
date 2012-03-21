@@ -866,18 +866,18 @@ namespace System.Web.Http.ModelBinding
             return item;
         }
 
-        // Demonstrates use of renaming parameters via prefix
-        public ActionValueItem GetFromNamed([FromUri(Prefix = "custID")] int id,
-                                     [FromUri(Prefix = "first")] string firstName,
-                                     [FromUri(Prefix = "last")] string lastName)
+        // Demonstrates use of renaming parameters via name
+        public ActionValueItem GetFromNamed([FromUri(Name = "custID")] int id,
+                                     [FromUri(Name = "first")] string firstName,
+                                     [FromUri(Name = "last")] string lastName)
         {
             return new ActionValueItem() { Id = id, FirstName = firstName, LastName = lastName };
         }
 
         // Demonstrates use of custom ValueProvider via attribute
-        public ActionValueItem GetFromCustom([ValueProvider(typeof(ActionValueControllerValueProviderFactory), Prefix = "id")] int id,
-                                      [ValueProvider(typeof(ActionValueControllerValueProviderFactory), Prefix = "customFirstName")] string firstName,
-                                      [ValueProvider(typeof(ActionValueControllerValueProviderFactory), Prefix = "customLastName")] string lastName)
+        public ActionValueItem GetFromCustom([ValueProvider(typeof(ActionValueControllerValueProviderFactory), Name = "id")] int id,
+                                      [ValueProvider(typeof(ActionValueControllerValueProviderFactory), Name = "customFirstName")] string firstName,
+                                      [ValueProvider(typeof(ActionValueControllerValueProviderFactory), Name = "customLastName")] string lastName)
         {
             return new ActionValueItem() { Id = id, FirstName = firstName, LastName = lastName };
         }

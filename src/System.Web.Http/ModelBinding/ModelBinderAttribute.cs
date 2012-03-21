@@ -37,7 +37,7 @@ namespace System.Web.Http.ModelBinding
         /// <summary>
         /// Gets or sets the name to consider as the parameter name during model binding
         /// </summary>
-        public string Prefix { get; set; } 
+        public string Name { get; set; } 
                
         public bool SuppressPrefixCheck { get; set; }
 

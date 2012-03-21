@@ -79,8 +79,8 @@ namespace System.Web.Http.Controllers
             get
             {
                 ModelBinderAttribute attribute = ModelBinderAttribute;
-                return attribute != null && !String.IsNullOrEmpty(attribute.Prefix)
-                           ? attribute.Prefix
+                return attribute != null && !String.IsNullOrEmpty(attribute.Name)
+                           ? attribute.Name
                            : null;
             }
         }

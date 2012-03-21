@@ -39,7 +39,7 @@ namespace System.Web.Http.ModelBinding
             return value;
         }
 
-        public int GetIntPrefixed([FromUri(Prefix = "somePrefix")] int value)
+        public int GetIntPrefixed([FromUri(Name = "somePrefix")] int value)
         {
             return value;
         }
@@ -131,7 +131,7 @@ namespace System.Web.Http.ModelBinding
             return value;
         }
 
-        public int PostIntUriPrefixed([FromUri(Prefix = "somePrefix")] int value)
+        public int PostIntUriPrefixed([FromUri(Name = "somePrefix")] int value)
         {
             return value;
         }

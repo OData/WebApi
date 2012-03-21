@@ -131,5 +131,25 @@ namespace System.Net.Http.Formatting
             Assert.Equal("", nvc.Get("KeyOnly"));            
             Assert.Equal("ValueOnly", nvc.Get(""));
         }
+
+        const string SPACE = " "; // single literal space character
+
+        [Theory]        
+        [InlineData("x=abc", "abc")] // normal
+        [InlineData("x", "")] // key only
+        [InlineData("x=", "")] // rhs only
+        [InlineData("x=%20", SPACE)] // escaped space
+        [InlineData("x=" + SPACE, SPACE)] // literal space
+        [InlineData("x=+", SPACE)] // 
+        [InlineData("x=null", "null")] // null literal, not escaped
+        [InlineData("x=undefined", "undefined")] // undefined literal, not escaped
+        [InlineData("x=\"null\"", "\"null\"")] // quoted null, preserved as is
+        public void Whitespace(string queryString, string expected)        
+        {
+            FormDataCollection fd = new FormDataCollection(queryString);
+
+            Assert.Equal(1, fd.Count());
+            Assert.Equal(expected, fd.Get("x"));
+        }
     }
 }

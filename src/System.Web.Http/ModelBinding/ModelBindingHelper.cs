@@ -77,23 +77,9 @@ namespace System.Web.Http.ModelBinding
 
         internal static void ReplaceEmptyStringWithNull(ModelMetadata modelMetadata, ref object model)
         {
-            // If the target type is a string, then don't change it. 
-            if (modelMetadata.ModelType == typeof(string))
-            {
-                return;
-            }
-
-            string str = model as string;
-            if ((str == null) || !modelMetadata.ConvertEmptyStringToNull) 
-            {
-                return;
-            }
-            
-            // Convert null literal into null object reference. 
-            // JQuery will serialize {a:null, b:"null"} as "a=null&b=null". The information loss
-            // means we can't 
-
-            if (string.Compare(str, "null", StringComparison.Ordinal) == 0)
+            if (model is string &&
+                modelMetadata.ConvertEmptyStringToNull &&
+                String.IsNullOrWhiteSpace(model as string))
             {
                 model = null;
             }

@@ -66,6 +66,32 @@ namespace System.Web.Http.ModelBinding
         }
 
         #region Query Strings
+                
+        [Fact]
+        public void BindValuesAsync_ConvertEmptyString()
+        {                    
+            HttpActionContext actionContext = ContextUtil.CreateActionContext(
+                ContextUtil.CreateControllerContext(new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri("http://localhost?A1=&A2=&A3=&A4=")
+                }),
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("GetTestEmptyString") });
+
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(actionContext, CancellationToken.None).Wait();
+
+            // Assert
+            ConvertEmptyStringContainer arg = (ConvertEmptyStringContainer) actionContext.ActionArguments["x"];
+
+            Assert.NotNull(arg);
+            Assert.Equal(string.Empty, arg.A1);
+            Assert.Null(arg.A2);
+            Assert.Null(arg.A3);
+            Assert.Null(arg.A4);
+        }
 
         [Fact]
         public void BindValuesAsync_Query_String_Values_To_Simple_Types()
@@ -929,6 +955,11 @@ namespace System.Web.Http.ModelBinding
             return new ActionValueItem() { Id = id, FirstName = firstName, LastName = lastName };
         }
 
+
+        public void GetTestEmptyString([FromUri] ConvertEmptyStringContainer x)
+        {
+        }
+
         // Demonstrates use of custom ValueProvider via attribute
         public ActionValueItem GetFromCustom([ValueProvider(typeof(ActionValueControllerValueProviderFactory), Name = "id")] int id,
                                       [ValueProvider(typeof(ActionValueControllerValueProviderFactory), Name = "customFirstName")] string firstName,
@@ -1041,5 +1072,21 @@ namespace System.Web.Http.ModelBinding
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+    }
+
+    // Test variants of converting empty string to null. 
+    // Pass each property the empty string. 
+    public class ConvertEmptyStringContainer
+    {
+        [DisplayFormat(ConvertEmptyStringToNull = false)]
+        public string A1 { get; set; } // ""
+
+        [DisplayFormat(ConvertEmptyStringToNull = true)]
+        public string A2 { get; set; } // Null
+
+        [DisplayFormat]
+        public string A3 { get; set; } // Null
+
+        public string A4 { get; set; } // Null
     }
 }

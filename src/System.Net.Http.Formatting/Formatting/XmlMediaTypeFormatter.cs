@@ -251,18 +251,30 @@ namespace System.Net.Http.Formatting
 
                 object serializer = GetSerializerForType(type);
 
-                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, _readerQuotas, null))
+                try
                 {
-                    XmlSerializer xmlSerializer = serializer as XmlSerializer;
-                    if (xmlSerializer != null)
+                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, _readerQuotas, null))
                     {
-                        return xmlSerializer.Deserialize(reader);
+                        XmlSerializer xmlSerializer = serializer as XmlSerializer;
+                        if (xmlSerializer != null)
+                        {
+                            return xmlSerializer.Deserialize(reader);
+                        }
+                        else
+                        {
+                            XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
+                            return xmlObjectSerializer.ReadObject(reader);
+                        }
                     }
-                    else
+                }
+                catch (Exception e)
+                {
+                    if (formatterLogger == null)
                     {
-                        XmlObjectSerializer xmlObjectSerializer = (XmlObjectSerializer)serializer;
-                        return xmlObjectSerializer.ReadObject(reader);
+                        throw;
                     }
+                    formatterLogger.LogError(String.Empty, e.Message);
+                    return GetDefaultValueForType(type);
                 }
             });
         }

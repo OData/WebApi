@@ -175,16 +175,28 @@ namespace System.Web.Http.SelfHost
     {
         public string PostNest(Nest a)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
             return "success from PostNest";
         }
 
         public string PostJToken(JToken token)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
             return "success from PostJToken";
         }
 
         public string PostNestedList(MyList a)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
             return "success from PostNestedList";
         }
     }

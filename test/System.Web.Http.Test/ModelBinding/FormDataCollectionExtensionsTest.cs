@@ -214,9 +214,9 @@ namespace System.Web.Http.ModelBinding
             HttpContent content = FormContent("X=3&Y=4");
             FormDataCollection fd = content.ReadAsAsync<FormDataCollection>().Result;
 
-            Assert.Equal(3, fd.ReadAs<int>("X"));
-            Assert.Equal("3", fd.ReadAs<string>("X"));
-            Assert.Equal(4, fd.ReadAs<int>("Y"));            
+            Assert.Equal(3, fd.ReadAs<int>("X", requiredMemberSelector: null, formatterLogger: null));
+            Assert.Equal("3", fd.ReadAs<string>("X", requiredMemberSelector: null, formatterLogger: null));
+            Assert.Equal(4, fd.ReadAs<int>("Y", requiredMemberSelector: null, formatterLogger: null));            
         }
     }
 }

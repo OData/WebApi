@@ -9,8 +9,9 @@ namespace System.Web.Http.Validation
     public class ModelStateFormatterLogger : IFormatterLogger
     {
         private readonly ModelStateDictionary _modelState;
+        private readonly string _prefix;
 
-        public ModelStateFormatterLogger(ModelStateDictionary modelState)
+        public ModelStateFormatterLogger(ModelStateDictionary modelState, string prefix)
         {
             if (modelState == null)
             {
@@ -18,6 +19,7 @@ namespace System.Web.Http.Validation
             }
 
             _modelState = modelState;
+            _prefix = prefix;
         }
 
         public void LogError(string errorPath, string errorMessage)
@@ -31,7 +33,8 @@ namespace System.Web.Http.Validation
                 throw Error.ArgumentNull("errorMessage");
             }
 
-            _modelState.AddModelError(errorPath, errorMessage);
+            string key = ModelBindingHelper.ConcatenateKeys(_prefix, errorPath);
+            _modelState.AddModelError(key, errorMessage);
         }
     }
 }

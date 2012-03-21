@@ -26,7 +26,6 @@ namespace System.Web.Http.Validation.Providers
     [SecuritySafeCritical]
     public class DataAnnotationsModelValidatorProvider : AssociatedValidatorProvider
     {
-        private static bool _addImplicitRequiredAttributeForValueTypes = true;
         private static ReaderWriterLockSlim _adaptersLock = new ReaderWriterLockSlim();
 
         // Factories for validation attributes
@@ -44,12 +43,6 @@ namespace System.Web.Http.Validation.Providers
         internal static readonly Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory> ValidatableFactories =
             new Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory>();
 
-        public static bool AddImplicitRequiredAttributeForValueTypes
-        {
-            get { return _addImplicitRequiredAttributeForValueTypes; }
-            set { _addImplicitRequiredAttributeForValueTypes = value; }
-        }
-
         // [SecuritySafeCritical] because it uses DataAnnotations type ValidationAttribute and IValidatableObject
         [SecuritySafeCritical]
         protected override IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders, IEnumerable<Attribute> attributes)
@@ -59,15 +52,6 @@ namespace System.Web.Http.Validation.Providers
             try
             {
                 List<ModelValidator> results = new List<ModelValidator>();
-
-                // Add an implied [Required] attribute for any non-nullable value type,
-                // unless they've configured us not to do that.
-                if (AddImplicitRequiredAttributeForValueTypes &&
-                    metadata.IsRequired &&
-                    !attributes.Any(a => a is RequiredAttribute))
-                {
-                    attributes = attributes.Concat(new[] { new RequiredAttribute() });
-                }
 
                 // Produce a validator for each validation attribute we find
                 foreach (ValidationAttribute attribute in attributes.OfType<ValidationAttribute>())

@@ -137,6 +137,7 @@ namespace System.Web.Http.ModelBinding.Binders
         public void EnsureModel_ModelIsNotNull_DoesNothing()
         {
             // Arrange
+            HttpActionContext actionContext = ContextUtil.CreateActionContext();
             ModelBindingContext bindingContext = new ModelBindingContext
             {
                 ModelMetadata = GetMetadataForObject(new Person())
@@ -152,7 +153,7 @@ namespace System.Web.Http.ModelBinding.Binders
 
             // Assert
             Assert.Same(originalModel, newModel);
-            mockTestableBinder.Verify(o => o.CreateModelPublic(null, bindingContext), Times.Never());
+            mockTestableBinder.Verify(o => o.CreateModelPublic(actionContext, bindingContext), Times.Never());
         }
 
         [Fact]
@@ -185,6 +186,7 @@ namespace System.Web.Http.ModelBinding.Binders
             // Arrange
             string[] expectedPropertyNames = new[] { "FirstName", "LastName" };
 
+            HttpActionContext actionContext = ContextUtil.CreateActionContext();
             ModelBindingContext bindingContext = new ModelBindingContext
             {
                 ModelMetadata = GetMetadataForType(typeof(PersonWithBindExclusion))
@@ -193,7 +195,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            IEnumerable<ModelMetadata> propertyMetadatas = testableBinder.GetMetadataForPropertiesPublic(null, bindingContext);
+            IEnumerable<ModelMetadata> propertyMetadatas = testableBinder.GetMetadataForPropertiesPublic(actionContext, bindingContext);
             string[] returnedPropertyNames = propertyMetadatas.Select(o => o.PropertyName).ToArray();
 
             // Assert
@@ -206,6 +208,7 @@ namespace System.Web.Http.ModelBinding.Binders
             // Arrange
             string[] expectedPropertyNames = new[] { "DateOfBirth", "DateOfDeath", "ValueTypeRequired", "FirstName", "LastName", "PropertyWithDefaultValue" };
 
+            HttpActionContext actionContext = ContextUtil.CreateActionContext();
             ModelBindingContext bindingContext = new ModelBindingContext
             {
                 ModelMetadata = GetMetadataForType(typeof(Person))
@@ -214,7 +217,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            IEnumerable<ModelMetadata> propertyMetadatas = testableBinder.GetMetadataForPropertiesPublic(null, bindingContext);
+            IEnumerable<ModelMetadata> propertyMetadatas = testableBinder.GetMetadataForPropertiesPublic(actionContext, bindingContext);
             string[] returnedPropertyNames = propertyMetadatas.Select(o => o.PropertyName).ToArray();
 
             // Assert
@@ -225,12 +228,17 @@ namespace System.Web.Http.ModelBinding.Binders
         public void GetRequiredPropertiesCollection_MixedAttributes()
         {
             // Arrange
-            Type modelType = typeof(ModelWithMixedBindingBehaviors);
+            HttpActionContext actionContext = ContextUtil.CreateActionContext();
+            ModelBindingContext bindingContext = new ModelBindingContext
+            {
+                ModelMetadata = GetMetadataForObject(new ModelWithMixedBindingBehaviors())
+            };
 
             // Act
             HashSet<string> requiredProperties;
+            Dictionary<string, ModelValidator> requiredValidators;
             HashSet<string> skipProperties;
-            MutableObjectModelBinder.GetRequiredPropertiesCollection(modelType, out requiredProperties, out skipProperties);
+            MutableObjectModelBinder.GetRequiredPropertiesCollection(actionContext, bindingContext, out requiredProperties, out requiredValidators, out skipProperties);
 
             // Assert
             Assert.Equal(new[] { "Required" }, requiredProperties.ToArray());
@@ -301,7 +309,7 @@ namespace System.Web.Http.ModelBinding.Binders
         }
 
         [Fact]
-        public void ProcessDto_BindRequiredFieldMissing_Throws()
+        public void ProcessDto_BindRequiredFieldMissing_RaisesModelError()
         {
             // Arrange
             ModelWithBindRequired model = new ModelWithBindRequired
@@ -326,12 +334,9 @@ namespace System.Web.Http.ModelBinding.Binders
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act & assert
-            Assert.Throws<InvalidOperationException>(
-                () => testableBinder.ProcessDto(context, bindingContext, dto),
-                @"A value for 'theModel.Age' is required but was not present in the request.");
+            testableBinder.ProcessDto(context, bindingContext, dto);
 
-            Assert.Equal("original value", model.Name);
-            Assert.Equal(-20, model.Age);
+            Assert.False(bindingContext.ModelState.IsValid);
         }
 
         [Fact]
@@ -339,7 +344,7 @@ namespace System.Web.Http.ModelBinding.Binders
         {
             // Arrange
             DateTime dob = new DateTime(2001, 1, 1);
-            Person model = new Person
+            PersonWithBindExclusion model = new PersonWithBindExclusion
             {
                 DateOfBirth = dob
             };
@@ -385,11 +390,12 @@ namespace System.Web.Http.ModelBinding.Binders
             ModelMetadata propertyMetadata = bindingContext.ModelMetadata.Properties.Single(o => o.PropertyName == "PropertyWithDefaultValue");
             ModelValidationNode validationNode = new ModelValidationNode(propertyMetadata, "foo");
             ComplexModelDtoResult dtoResult = new ComplexModelDtoResult(null /* model */, validationNode);
+            ModelValidator requiredValidator = context.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
 
             // Assert
             var person = Assert.IsType<Person>(bindingContext.Model);
@@ -413,7 +419,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(null, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(null, bindingContext, propertyMetadata, dtoResult, requiredValidator: null);
 
             // Assert
             // If didn't throw, success!
@@ -433,11 +439,12 @@ namespace System.Web.Http.ModelBinding.Binders
             ModelMetadata propertyMetadata = bindingContext.ModelMetadata.Properties.Single(o => o.PropertyName == "DateOfBirth");
             ModelValidationNode validationNode = new ModelValidationNode(propertyMetadata, "foo");
             ComplexModelDtoResult dtoResult = new ComplexModelDtoResult(new DateTime(2001, 1, 1), validationNode);
+            ModelValidator requiredValidator = context.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
 
             // Assert
             validationNode.Validate(context);
@@ -465,7 +472,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(null, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(null, bindingContext, propertyMetadata, dtoResult, requiredValidator: null);
 
             // Assert
             Assert.Equal(@"Date of death can't be before date of birth.
@@ -485,11 +492,12 @@ Parameter name: value", bindingContext.ModelState["foo"].Errors[0].Exception.Mes
             ModelMetadata propertyMetadata = bindingContext.ModelMetadata.Properties.Single(o => o.PropertyName == "DateOfBirth");
             ModelValidationNode validationNode = new ModelValidationNode(propertyMetadata, "foo");
             ComplexModelDtoResult dtoResult = new ComplexModelDtoResult(null /* model */, validationNode);
+            ModelValidator requiredValidator = context.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
 
             // Assert
             Assert.True(context.ModelState.IsValid);
@@ -511,11 +519,12 @@ Parameter name: value", bindingContext.ModelState["foo"].Errors[0].Exception.Mes
             ModelMetadata propertyMetadata = bindingContext.ModelMetadata.Properties.Single(o => o.PropertyName == "ValueTypeRequired");
             ModelValidationNode validationNode = new ModelValidationNode(propertyMetadata, "foo.ValueTypeRequired");
             ComplexModelDtoResult dtoResult = new ComplexModelDtoResult(null /* model */, validationNode);
+            ModelValidator requiredValidator = context.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
 
             // Assert
             Assert.False(bindingContext.ModelState.IsValid);
@@ -536,11 +545,12 @@ Parameter name: value", bindingContext.ModelState["foo"].Errors[0].Exception.Mes
             ModelMetadata propertyMetadata = bindingContext.ModelMetadata.Properties.Single(o => o.PropertyName == "NameNoAttribute");
             ModelValidationNode validationNode = new ModelValidationNode(propertyMetadata, "foo.NameNoAttribute");
             ComplexModelDtoResult dtoResult = new ComplexModelDtoResult(null /* model */, validationNode);
+            ModelValidator requiredValidator = context.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
 
             // Assert
             Assert.False(bindingContext.ModelState.IsValid);
@@ -563,11 +573,12 @@ Parameter name: value", bindingContext.ModelState["foo.NameNoAttribute"].Errors[
             ModelMetadata propertyMetadata = bindingContext.ModelMetadata.Properties.Single(o => o.PropertyName == "Name");
             ModelValidationNode validationNode = new ModelValidationNode(propertyMetadata, "foo.Name");
             ComplexModelDtoResult dtoResult = new ComplexModelDtoResult(null /* model */, validationNode);
+            ModelValidator requiredValidator = context.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
 
             TestableMutableObjectModelBinder testableBinder = new TestableMutableObjectModelBinder();
 
             // Act
-            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+            testableBinder.SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
 
             // Assert
             Assert.False(bindingContext.ModelState.IsValid);
@@ -723,14 +734,14 @@ Parameter name: value", bindingContext.ModelState["foo.NameNoAttribute"].Errors[
                 return GetMetadataForPropertiesPublic(context, bindingContext);
             }
 
-            public virtual void SetPropertyPublic(HttpActionContext context, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult)
+            public virtual void SetPropertyPublic(HttpActionContext context, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult, ModelValidator requiredValidator)
             {
-                base.SetProperty(context, bindingContext, propertyMetadata, dtoResult);
+                base.SetProperty(context, bindingContext, propertyMetadata, dtoResult, requiredValidator);
             }
 
-            protected override void SetProperty(HttpActionContext context, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult)
+            protected override void SetProperty(HttpActionContext actionContext, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult, ModelValidator requiredValidator)
             {
-                SetPropertyPublic(context, bindingContext, propertyMetadata, dtoResult);
+ 	            SetPropertyPublic(actionContext, bindingContext, propertyMetadata, dtoResult, requiredValidator);
             }
         }
     }

@@ -31,14 +31,14 @@ namespace System.Web.Http.ModelBinding
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Equal("Failed to bind customer.Name. The errors are:\nErrorMessage: The field Name must be a string with a maximum length of 6.", response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("Failed to bind customer.RequiredValue. The errors are:\nErrorMessage: The RequiredValue property is required.\nFailed to bind customer.Name. The errors are:\nErrorMessage: The field Name must be a string with a maximum length of 6.\n", response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]
         public void Body_Good_Input_Succeed()
         {
             // Arrange
-            string formUrlEncodedString = "Id=111&Name=John";
+            string formUrlEncodedString = "Id=111&Name=John&RequiredValue=9";
             StringContent stringContent = new StringContent(formUrlEncodedString, Encoding.UTF8, "application/x-www-form-urlencoded");
 
             HttpRequestMessage request = new HttpRequestMessage()

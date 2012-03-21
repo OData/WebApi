@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http.Formatting;
 using System.Text;
@@ -7,6 +8,8 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Properties;
+using System.Web.Http.Validation;
+using System.Web.Http.Validation.Providers;
 using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
 
@@ -110,12 +113,12 @@ namespace System.Web.Http.ModelBinding
                 
         public static object ReadAs(this FormDataCollection formData, Type type)
         {
-            return ReadAs(formData, type, string.Empty);
+            return ReadAs(formData, type, string.Empty, requiredMemberSelector: null, formatterLogger: null);
         }
 
-        public static T ReadAs<T>(this FormDataCollection formData, string modelName)
+        public static T ReadAs<T>(this FormDataCollection formData, string modelName, IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
         {
-            return (T)ReadAs(formData, typeof(T), modelName);
+            return (T)ReadAs(formData, typeof(T), modelName, requiredMemberSelector, formatterLogger);
         }
         
         /// <summary>
@@ -124,9 +127,11 @@ namespace System.Web.Http.ModelBinding
         /// <param name="formData">collection with parsed form url data</param>
         /// <param name="type">target type to read as</param>
         /// <param name="modelName">null or empty to read the entire form as a single object. This is common for body data. 
+        /// <param name="requiredMemberSelector">The <see cref="IRequiredMemberSelector"/> used to determine required members.</param>
+        /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// Or the name of a model to do a partial binding against the form data. This is common for extracting individual fields.</param>
         /// <returns>best attempt to bind the object. The best attempt may be null.</returns>
-        public static object ReadAs(this FormDataCollection formData, Type type, string modelName)
+        public static object ReadAs(this FormDataCollection formData, Type type, string modelName, IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
         {
             if (formData == null)
             {
@@ -144,6 +149,13 @@ namespace System.Web.Http.ModelBinding
 
             using (HttpConfiguration config = new HttpConfiguration())
             {
+                bool validateRequiredMembers = requiredMemberSelector != null && formatterLogger != null;
+                if (validateRequiredMembers)
+                {
+                    // Set a ModelValidatorProvider that understands the IRequiredMemberSelector
+                    config.ServiceResolver.SetService(typeof(ModelValidatorProvider), new RequiredMemberModelValidatorProvider(requiredMemberSelector));
+                }
+
                 // Looks like HttpActionContext is just a way of getting to the config, which we really
                 // just need to get a list of modelbinderPRoviders for composition. 
                 HttpControllerContext controllerContext = new HttpControllerContext() { Configuration = config };
@@ -169,10 +181,23 @@ namespace System.Web.Http.ModelBinding
                 IModelBinder binder = modelBinderProvider.GetBinder(actionContext, ctx);
 
                 bool haveResult = binder.BindModel(actionContext, ctx);
+
+                // Log model binding errors
+                if (validateRequiredMembers)
+                {
+                    Contract.Assert(formatterLogger != null);
+                    foreach (KeyValuePair<string, ModelState> modelStatePair in actionContext.ModelState)
+                    {
+                        foreach (ModelError modelError in modelStatePair.Value.Errors)
+                        {
+                            formatterLogger.LogError(modelStatePair.Key, modelError.ErrorMessage);
+                        }
+                    }
+                }
+
                 if (haveResult)
                 {
-                    object model = ctx.Model;
-                    return model;
+                    return ctx.Model;
                 }
                 return null;
             }

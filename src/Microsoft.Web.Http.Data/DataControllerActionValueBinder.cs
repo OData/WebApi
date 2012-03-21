@@ -56,7 +56,7 @@ namespace Microsoft.Web.Http.Data
             });
 
             JsonMediaTypeFormatter formatterJson = new JsonMediaTypeFormatter();
-            formatterJson.Serializer = new JsonSerializer() { PreserveReferencesHandling = PreserveReferencesHandling.Objects, TypeNameHandling = TypeNameHandling.All };
+            formatterJson.SerializerSettings = new JsonSerializerSettings() { PreserveReferencesHandling = PreserveReferencesHandling.Objects, TypeNameHandling = TypeNameHandling.All };
 
             XmlMediaTypeFormatter formatterXml = new XmlMediaTypeFormatter();
 

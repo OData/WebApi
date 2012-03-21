@@ -40,9 +40,20 @@ namespace System.Web.Http.ModelBinding
                 (obj) =>
                 {
                     FormDataCollection fd = (FormDataCollection)obj;
-                    object result = fd.ReadAs(type);
 
-                    return result;
+                    try
+                    {
+                        return fd.ReadAs(type, String.Empty, RequiredMemberSelector, formatterLogger);
+                    }
+                    catch (Exception e)
+                    {
+                        if (formatterLogger == null)
+                        {
+                            throw;
+                        }
+                        formatterLogger.LogError(String.Empty, e.Message);
+                        return GetDefaultValueForType(type);
+                    }
                 });
         }
     }

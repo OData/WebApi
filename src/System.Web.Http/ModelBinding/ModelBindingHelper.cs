@@ -43,6 +43,17 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
+        // Concatenate model keys, if suffix is an indexer, concat strings; otherwise insert a period between the two
+        internal static string ConcatenateKeys(string prefix, string suffix)
+        {
+            Contract.Assert(!String.IsNullOrEmpty(prefix));
+            if (String.IsNullOrEmpty(suffix))
+            {
+                return prefix;
+            }
+            return suffix.StartsWith("[", StringComparison.Ordinal) ? prefix + suffix : prefix + "." + suffix;
+        }
+
         internal static IModelBinder GetPossibleBinderInstance(Type closedModelType, Type openModelType, Type openBinderType)
         {
             Type[] typeArguments = TypeHelper.GetTypeArgumentsIfMatch(closedModelType, openModelType);

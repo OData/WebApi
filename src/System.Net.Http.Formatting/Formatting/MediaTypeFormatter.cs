@@ -497,8 +497,16 @@ namespace System.Net.Http.Formatting
                 });
         }
 
-        internal static object GetDefaultValueForType(Type type)
+        /// <summary>
+        /// Gets the default value for the specified type.
+        /// </summary>
+        protected internal static object GetDefaultValueForType(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
             if (type.IsValueType)
             {
                 return Activator.CreateInstance(type);

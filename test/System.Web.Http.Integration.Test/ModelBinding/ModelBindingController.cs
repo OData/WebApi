@@ -91,15 +91,15 @@ namespace System.Web.Http.ModelBinding
 
                 if (errorCount > 0)
                 {
-                    errors += String.Format("Failed to bind {0}. The errors are:", kv.Key);
+                    errors += String.Format("Failed to bind {0}. The errors are:\n", kv.Key);
                     for (int i = 0; i < errorCount; i++)
                     {
                         ModelError error = kv.Value.Errors[i];
-                        errors += "\nErrorMessage: " + error.ErrorMessage;
+                        errors += "ErrorMessage: " + error.ErrorMessage + "\n";
 
                         if (error.Exception != null)
                         {
-                            errors += "\nException" + error.Exception;
+                            errors += "Exception" + error.Exception + "\n";
                         }
                     }
                 }
@@ -175,6 +175,9 @@ namespace System.Web.Http.ModelBinding
         public string Name { get; set; }
 
         public int Id { get; set; }
+
+        [Required]
+        public int RequiredValue { get; set; }
     }
 
     public class ModelBindCustomer

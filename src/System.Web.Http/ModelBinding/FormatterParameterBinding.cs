@@ -58,7 +58,7 @@ namespace System.Web.Http.ModelBinding
 
             Type type = paramFromBody.ParameterType;
             HttpRequestMessage request = actionContext.ControllerContext.Request;
-            IFormatterLogger formatterLogger = new ModelStateFormatterLogger(actionContext.ModelState);
+            IFormatterLogger formatterLogger = new ModelStateFormatterLogger(actionContext.ModelState, paramFromBody.ParameterName);
             Task<object> task = ReadContentAsync(request, type, _formatters, formatterLogger);
 
             return task.Then(

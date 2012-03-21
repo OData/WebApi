@@ -156,7 +156,7 @@ namespace System.Net.Http.Formatting
         public void DerivedTypesArePreserved()
         {
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
-            formatter.Serializer.TypeNameHandling = TypeNameHandling.Objects;
+            formatter.SerializerSettings.TypeNameHandling = TypeNameHandling.Objects;
             string json = Serialize(new Derived(), typeof(Base), formatter);
             object deserializedObject = Deserialize(json, typeof(Base), formatter);
             Assert.IsType(typeof(Derived), deserializedObject);
@@ -225,7 +225,7 @@ namespace System.Net.Http.Formatting
 
         }
 
-        string Serialize(object o, Type type, MediaTypeFormatter formatter = null)
+        private static string Serialize(object o, Type type, MediaTypeFormatter formatter = null)
         {
             formatter = formatter ?? new JsonMediaTypeFormatter();
             MemoryStream ms = new MemoryStream();
@@ -235,7 +235,7 @@ namespace System.Net.Http.Formatting
             return new StreamReader(ms).ReadToEnd();
         }
 
-        object Deserialize(string json, Type type, MediaTypeFormatter formatter = null)
+        internal static object Deserialize(string json, Type type, MediaTypeFormatter formatter = null, IFormatterLogger formatterLogger = null)
         {
             formatter = formatter ?? new JsonMediaTypeFormatter();
             MemoryStream ms = new MemoryStream();
@@ -243,7 +243,7 @@ namespace System.Net.Http.Formatting
             ms.Write(bytes, 0, bytes.Length);
             ms.Flush();
             ms.Position = 0;
-            Task<object> readTask = formatter.ReadFromStreamAsync(type, ms, contentHeaders: null, formatterLogger: null);
+            Task<object> readTask = formatter.ReadFromStreamAsync(type, ms, contentHeaders: null, formatterLogger: formatterLogger);
             readTask.WaitUntilCompleted();
             if (readTask.IsFaulted)
             {

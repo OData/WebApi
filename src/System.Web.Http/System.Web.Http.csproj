@@ -314,6 +314,7 @@
     <Compile Include="Validation\Providers\AssociatedValidatorProvider.cs" />
     <Compile Include="Validation\Providers\DataAnnotationsModelValidatorProvider.cs" />
     <Compile Include="Validation\Providers\DataMemberModelValidatorProvider.cs" />
+    <Compile Include="Validation\Providers\RequiredMemberModelValidatorProvider.cs" />
     <Compile Include="Validation\Validators\RequiredMemberModelValidator.cs" />
     <Compile Include="Validation\Validators\ValidatableObjectAdapter.cs" />
     <Compile Include="Validation\Validators\DataAnnotationsModelValidator.cs" />

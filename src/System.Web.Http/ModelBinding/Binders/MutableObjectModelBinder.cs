@@ -119,8 +119,9 @@ namespace System.Web.Http.ModelBinding.Binders
         {
             // keep a set of the required properties so that we can cross-reference bound properties later
             HashSet<string> requiredProperties;
+            Dictionary<string, ModelValidator> requiredValidators;
             HashSet<string> skipProperties;
-            GetRequiredPropertiesCollection(bindingContext.ModelType, out requiredProperties, out skipProperties);
+            GetRequiredPropertiesCollection(actionContext, bindingContext, out requiredProperties, out requiredValidators, out skipProperties);
 
             return from propertyMetadata in bindingContext.ModelMetadata.Properties
                    let propertyName = propertyMetadata.PropertyName
@@ -135,18 +136,24 @@ namespace System.Web.Http.ModelBinding.Binders
             return (attr != null) ? attr.Value : null;
         }
 
-        internal static void GetRequiredPropertiesCollection(Type modelType, out HashSet<string> requiredProperties, out HashSet<string> skipProperties)
+        internal static void GetRequiredPropertiesCollection(HttpActionContext actionContext, ModelBindingContext bindingContext, out HashSet<string> requiredProperties, out Dictionary<string, ModelValidator> requiredValidators, out HashSet<string> skipProperties)
         {
             requiredProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            requiredValidators = new Dictionary<string, ModelValidator>(StringComparer.OrdinalIgnoreCase);
             skipProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             // Use attributes on the property before attributes on the type.
-            ICustomTypeDescriptor modelDescriptor = TypeDescriptorHelper.Get(modelType);
+            ICustomTypeDescriptor modelDescriptor = TypeDescriptorHelper.Get(bindingContext.ModelType);
             PropertyDescriptorCollection propertyDescriptors = modelDescriptor.GetProperties();
             HttpBindingBehaviorAttribute typeAttr = modelDescriptor.GetAttributes().OfType<HttpBindingBehaviorAttribute>().SingleOrDefault();
 
             foreach (PropertyDescriptor propertyDescriptor in propertyDescriptors)
             {
+                string propertyName = propertyDescriptor.Name;
+                ModelMetadata propertyMetadata = bindingContext.PropertyMetadata[propertyName];
+                ModelValidator requiredValidator = actionContext.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
+                requiredValidators[propertyName] = requiredValidator;
+
                 HttpBindingBehaviorAttribute propAttr = propertyDescriptor.Attributes.OfType<HttpBindingBehaviorAttribute>().SingleOrDefault();
                 HttpBindingBehaviorAttribute workingAttr = propAttr ?? typeAttr;
                 if (workingAttr != null)
@@ -154,13 +161,17 @@ namespace System.Web.Http.ModelBinding.Binders
                     switch (workingAttr.Behavior)
                     {
                         case HttpBindingBehavior.Required:
-                            requiredProperties.Add(propertyDescriptor.Name);
+                            requiredProperties.Add(propertyName);
                             break;
 
                         case HttpBindingBehavior.Never:
-                            skipProperties.Add(propertyDescriptor.Name);
+                            skipProperties.Add(propertyName);
                             break;
                     }
+                }
+                else if (requiredValidator != null)
+                {
+                    requiredProperties.Add(propertyName);
                 }
             }
         }
@@ -168,17 +179,16 @@ namespace System.Web.Http.ModelBinding.Binders
         internal void ProcessDto(HttpActionContext actionContext, ModelBindingContext bindingContext, ComplexModelDto dto)
         {
             HashSet<string> requiredProperties;
+            Dictionary<string, ModelValidator> requiredValidators;
             HashSet<string> skipProperties;
-            GetRequiredPropertiesCollection(bindingContext.ModelType, out requiredProperties, out skipProperties);
+            GetRequiredPropertiesCollection(actionContext, bindingContext, out requiredProperties, out requiredValidators, out skipProperties);
 
             // Are all of the required fields accounted for?
-            HashSet<string> missingRequiredProperties = new HashSet<string>(requiredProperties, StringComparer.Ordinal);
-            missingRequiredProperties.ExceptWith(dto.Results.Select(r => r.Key.PropertyName));
-            string missingPropertyName = missingRequiredProperties.FirstOrDefault();
-            if (missingPropertyName != null)
+            HashSet<string> missingRequiredProperties = new HashSet<string>(requiredProperties.Except(dto.Results.Select(r => r.Key.PropertyName)));
+            foreach (string missingRequiredProperty in missingRequiredProperties)
             {
-                string fullPropertyKey = ModelBindingHelper.CreatePropertyModelName(bindingContext.ModelName, missingPropertyName);
-                throw Error.InvalidOperation(SRResources.BindingBehavior_ValueNotFound, fullPropertyKey);
+                string key = ModelBindingHelper.CreatePropertyModelName(bindingContext.ValidationNode.ModelStateKey, missingRequiredProperty);
+                bindingContext.ModelState.AddModelError(key, Error.Format(SRResources.MissingRequiredMember, missingRequiredProperty));
             }
 
             // for each property that was bound, call the setter, recording exceptions as necessary
@@ -189,14 +199,14 @@ namespace System.Web.Http.ModelBinding.Binders
                 ComplexModelDtoResult dtoResult = entry.Value;
                 if (dtoResult != null)
                 {
-                    SetProperty(actionContext, bindingContext, propertyMetadata, dtoResult);
+                    SetProperty(actionContext, bindingContext, propertyMetadata, dtoResult, requiredValidators[propertyMetadata.PropertyName]);
                     bindingContext.ValidationNode.ChildNodes.Add(dtoResult.ValidationNode);
                 }
             }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We're recording this exception so that we can act on it later.")]
-        protected virtual void SetProperty(HttpActionContext actionContext, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult)
+        protected virtual void SetProperty(HttpActionContext actionContext, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult, ModelValidator requiredValidator)
         {
             PropertyDescriptor propertyDescriptor = TypeDescriptorHelper.Get(bindingContext.ModelType).GetProperties().Find(propertyMetadata.PropertyName, true /* ignoreCase */);
             if (propertyDescriptor == null || propertyDescriptor.IsReadOnly)
@@ -215,7 +225,6 @@ namespace System.Web.Http.ModelBinding.Binders
                 string modelStateKey = dtoResult.ValidationNode.ModelStateKey;
                 if (bindingContext.ModelState.IsValidField(modelStateKey))
                 {
-                    ModelValidator requiredValidator = actionContext.GetValidators(propertyMetadata).Where(v => v.IsRequired).FirstOrDefault();
                     if (requiredValidator != null)
                     {
                         foreach (ModelValidationResult validationResult in requiredValidator.Validate(bindingContext.Model))

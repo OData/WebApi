@@ -7,10 +7,18 @@ using Newtonsoft.Json.Serialization;
 
 namespace System.Net.Http.Formatting
 {
-    // Contract resolver to handle types that DCJS supports, but Json.NET doesn't support out of the box (like [Serializable])
+    // Default Contract resolver for JsonMediaTypeFormatter
+    // Handles types that DCJS supports, but Json.NET doesn't support out of the box (like [Serializable])
+    // Uses the IRequiredMemberSelector to choose required members
     internal class JsonContractResolver : DefaultContractResolver
     {
         private const BindingFlags AllInstanceMemberFlag = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private readonly MediaTypeFormatter _formatter;
+
+        public JsonContractResolver(MediaTypeFormatter formatter)
+        {
+            _formatter = formatter;
+        }
 
         protected override JsonObjectContract CreateObjectContract(Type type)
         {
@@ -25,14 +33,44 @@ namespace System.Net.Http.Formatting
                     contract.Properties.Add(property);
                 }
             }
+
             return contract;
         }
 
-        private static IEnumerable<JsonProperty> CreateSerializableJsonProperties(Type type)
+        // Determines whether a member is required or not and sets the appropriate JsonProperty settings
+        private void ConfigureProperty(MemberInfo member, JsonProperty property)
+        {
+            if (_formatter.RequiredMemberSelector != null && _formatter.RequiredMemberSelector.IsRequiredMember(member))
+            {
+                property.Required = Required.AllowNull;
+                property.DefaultValueHandling = DefaultValueHandling.Include;
+                property.NullValueHandling = NullValueHandling.Include;
+            }
+            else
+            {
+                property.Required = Required.Default;
+                property.DefaultValueHandling = DefaultValueHandling.Ignore;
+                property.NullValueHandling = NullValueHandling.Ignore;
+            }
+        }
+
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            JsonProperty property = base.CreateProperty(member, memberSerialization);
+            ConfigureProperty(member, property);
+            return property;
+        }
+
+        private IEnumerable<JsonProperty> CreateSerializableJsonProperties(Type type)
         {
             return type.GetFields(AllInstanceMemberFlag)
                 .Where(field => !field.IsNotSerialized)
-                .Select(field => PrivateMemberContractResolver.Instance.CreatePrivateProperty(field, MemberSerialization.OptOut));
+                .Select(field =>
+                {
+                    JsonProperty property = PrivateMemberContractResolver.Instance.CreatePrivateProperty(field, MemberSerialization.OptOut);
+                    ConfigureProperty(field, property);
+                    return property;
+                });
         }
 
         private static bool IsTypeNullable(Type type)
@@ -42,12 +80,12 @@ namespace System.Net.Http.Formatting
 
         private static bool IsTypeDataContract(Type type)
         {
-            return type.GetCustomAttributes(typeof(DataContractAttribute), false).Length > 0;
+            return type.GetCustomAttributes(typeof(DataContractAttribute), false).Any();
         }
 
         private static bool IsTypeJsonObject(Type type)
         {
-            return type.GetCustomAttributes(typeof(JsonObjectAttribute), false).Length > 0;
+            return type.GetCustomAttributes(typeof(JsonObjectAttribute), false).Any();
         }
 
         private class PrivateMemberContractResolver : DefaultContractResolver

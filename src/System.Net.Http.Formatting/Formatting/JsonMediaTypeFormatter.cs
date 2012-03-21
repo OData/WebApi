@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace System.Net.Http.Formatting
 {
@@ -22,7 +23,9 @@ namespace System.Net.Http.Formatting
             MediaTypeConstants.ApplicationJsonMediaType,
             MediaTypeConstants.TextJsonMediaType
         };
-        private JsonSerializer _jsonSerializer = CreateDefaultSerializer();
+
+        private JsonSerializerSettings _jsonSerializerSettings;
+        private readonly IContractResolver _defaultContractResolver;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
         private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas(); 
 
@@ -39,6 +42,10 @@ namespace System.Net.Http.Formatting
             {
                 SupportedMediaTypes.Add(value);
             }
+
+            // Initialize serializer
+            _defaultContractResolver = new JsonContractResolver(this);
+            _jsonSerializerSettings = CreateDefaultSerializerSettings();
 
             // Set default supported character encodings
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
@@ -66,14 +73,11 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="JsonSerializer"/> used for Json.
+        /// Gets or sets the <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.
         /// </summary>
-        public JsonSerializer Serializer
+        public JsonSerializerSettings SerializerSettings
         {
-            get
-            {
-                return _jsonSerializer;
-            }
+            get { return _jsonSerializerSettings; }
             set
             {
                 if (value == null)
@@ -81,7 +85,7 @@ namespace System.Net.Http.Formatting
                     throw new ArgumentNullException("value");
                 }
 
-                _jsonSerializer = value;
+                _jsonSerializerSettings = value;
             }
         }
 
@@ -120,17 +124,19 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
-        /// Creates a <see cref="JsonSerializer"/> with the default settings used by the <see cref="JsonMediaTypeFormatter"/>.
+        /// Creates a <see cref="JsonSerializerSettings"/> instance with the default settings used by the <see cref="JsonMediaTypeFormatter"/>.
         /// </summary>
-        public static JsonSerializer CreateDefaultSerializer()
+        public JsonSerializerSettings CreateDefaultSerializerSettings()
         {
-            JsonSerializer defaultSerializer = new JsonSerializer();
-            defaultSerializer.ContractResolver = new JsonContractResolver();
+            return new JsonSerializerSettings()
+            {
+                ContractResolver = _defaultContractResolver,
+                MissingMemberHandling = MissingMemberHandling.Ignore,
 
-            // Do not change this setting
-            // Setting this to None prevents Json.NET from loading malicious, unsafe, or security-sensitive types
-            defaultSerializer.TypeNameHandling = TypeNameHandling.None;
-            return defaultSerializer;
+                // Do not change this setting
+                // Setting this to None prevents Json.NET from loading malicious, unsafe, or security-sensitive types
+                TypeNameHandling = TypeNameHandling.None
+            };
         }
 
         internal bool ContainsSerializerForType(Type type)
@@ -228,20 +234,41 @@ namespace System.Net.Http.Formatting
                 // Get the character encoding for the content
                 Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
 
-                if (UseDataContractJsonSerializer)
+                try
                 {
-                    DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                    using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(stream, effectiveEncoding, _readerQuotas, null))
+                    if (UseDataContractJsonSerializer)
                     {
-                        return dataContractSerializer.ReadObject(reader);
+                        DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
+                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(stream, effectiveEncoding, _readerQuotas, null))
+                        {
+                            return dataContractSerializer.ReadObject(reader);
+                        }
+                    }
+                    else
+                    {
+                        using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
+                        {
+                            JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
+                            if (formatterLogger != null)
+                            {
+                                jsonSerializer.Error += (sender, e) =>
+                                {
+                                    formatterLogger.LogError(e.ErrorContext.Path, e.ErrorContext.Error.Message);
+                                    e.ErrorContext.Handled = true;
+                                };
+                            }
+                            return jsonSerializer.Deserialize(jsonTextReader, type);
+                        }
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
+                    if (formatterLogger == null)
                     {
-                        return _jsonSerializer.Deserialize(jsonTextReader, type);
+                        throw;
                     }
+                    formatterLogger.LogError(String.Empty, e.Message);
+                    return GetDefaultValueForType(type);
                 }
             });
         }
@@ -285,8 +312,8 @@ namespace System.Net.Http.Formatting
                         {
                             jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
                         }
-
-                        Serializer.Serialize(jsonTextWriter, value);
+                        JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
+                        jsonSerializer.Serialize(jsonTextWriter, value);
                         jsonTextWriter.Flush();
                     }
                 }

@@ -32,7 +32,7 @@ namespace System.Net.Http.Formatting
                     { false, "false" },
                     { AttributeTargets.Assembly | AttributeTargets.Constructor, "33" },
                     { ConsoleColor.DarkCyan, "3" },
-                    { new DateTimeOffset(1999, 5, 27, 4, 34, 45, TimeSpan.Zero), "\"\\/Date(927779685000+0000)\\/\"" },
+                    { new DateTimeOffset(1999, 5, 27, 4, 34, 45, TimeSpan.Zero), "\"1999-05-27T04:34:45+00:00\"" },
                     { new TimeSpan(5, 30, 0), "\"05:30:00\"" },
                     { new Uri("http://www.bing.com"), @"""http://www.bing.com/""" },
                     { new Guid("4ed1cd44-11d7-4b27-b623-0b8b553c8906"), "\"4ed1cd44-11d7-4b27-b623-0b8b553c8906\"" },

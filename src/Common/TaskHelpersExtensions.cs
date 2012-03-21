@@ -616,18 +616,30 @@ namespace System.Threading.Tasks
             _exception = _task.Exception.GetBaseException();  // Observe the exception early, to prevent tasks tearing down the app domain
         }
 
+        /// <summary>
+        /// The exception that was thrown to cause the Catch block to execute.
+        /// </summary>
         public Exception Exception
         {
             get { return _exception; }
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that re-throws the original exception.
+        /// </summary>
         public CatchResult Throw()
         {
             return new CatchResult { Task = _task };
         }
 
+        /// <summary>
+        /// Represents a result to be returned from a Catch handler.
+        /// </summary>
         internal struct CatchResult
         {
+            /// <summary>
+            /// Gets or sets the task to be returned to the caller.
+            /// </summary>
             internal TTask Task { get; set; }
         }
     }
@@ -641,18 +653,29 @@ namespace System.Threading.Tasks
         {
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that returns a completed (non-faulted) task.
+        /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
         public CatchResult Handled()
         {
             return _completed;
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that executes the given task and returns it, in whatever state it finishes.
+        /// </summary>
+        /// <param name="task">The task to return.</param>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
         public CatchResult Task(Task task)
         {
             return new CatchResult { Task = task };
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that throws the given exception.
+        /// </summary>
+        /// <param name="ex">The exception to throw.</param>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
         public CatchResult Throw(Exception ex)
         {
@@ -667,18 +690,30 @@ namespace System.Threading.Tasks
         {
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that returns a completed (non-faulted) task.
+        /// </summary>
+        /// <param name="returnValue">The return value of the task.</param>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
         public CatchResult Handled(T returnValue)
         {
             return new CatchResult { Task = TaskHelpers.FromResult(returnValue) };
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that executes the given task and returns it, in whatever state it finishes.
+        /// </summary>
+        /// <param name="task">The task to return.</param>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
         public CatchResult Task(Task<T> task)
         {
             return new CatchResult { Task = task };
         }
 
+        /// <summary>
+        /// Returns a <see cref="CatchResult"/> that throws the given exception.
+        /// </summary>
+        /// <param name="ex">The exception to throw.</param>
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This would result in poor usability.")]
         public CatchResult Throw(Exception ex)
         {

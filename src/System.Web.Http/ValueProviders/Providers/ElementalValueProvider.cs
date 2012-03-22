@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Web.Http.Internal;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
@@ -21,7 +20,7 @@ namespace System.Web.Http.ValueProviders.Providers
 
         public bool ContainsPrefix(string prefix)
         {
-            return ValueProviderUtil.IsPrefixMatch(Name, prefix);
+            return PrefixContainer.IsPrefixMatch(Name, prefix);
         }
 
         public ValueProviderResult GetValue(string key)

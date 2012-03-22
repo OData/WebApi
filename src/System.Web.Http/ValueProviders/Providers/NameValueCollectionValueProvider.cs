@@ -1,26 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Web.Http.Internal;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
     public class NameValueCollectionValueProvider : IEnumerableValueProvider
     {
         private readonly CultureInfo _culture;
-        private readonly Lazy<HashSet<string>> _prefixes;
+        private readonly Lazy<PrefixContainer> _prefixContainer;
         private readonly Lazy<NameValueCollection> _values;
 
         public NameValueCollectionValueProvider(NameValueCollection values, CultureInfo culture)
+            : this(() => values, culture)
         {
             if (values == null)
             {
                 throw Error.ArgumentNull("values");
             }
-
-            _values = new Lazy<NameValueCollection>(() => values, isThreadSafe: true);
-            _culture = culture;
-            _prefixes = new Lazy<HashSet<string>>(CalculatePrefixes, isThreadSafe: true);
         }
 
         public NameValueCollectionValueProvider(Func<NameValueCollection> valuesFactory, CultureInfo culture)
@@ -32,47 +28,17 @@ namespace System.Web.Http.ValueProviders.Providers
 
             _values = new Lazy<NameValueCollection>(valuesFactory, isThreadSafe: true);
             _culture = culture;
-            _prefixes = new Lazy<HashSet<string>>(CalculatePrefixes, isThreadSafe: true);
-        }
-
-        private HashSet<string> CalculatePrefixes()
-        {
-            HashSet<string> result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            if (_values.Value.Count > 0)
-            {
-                result.Add(String.Empty);
-            }
-
-            foreach (string key in _values.Value)
-            {
-                if (key != null)
-                {
-                    result.UnionWith(ValueProviderUtil.GetPrefixes(key));
-                }
-            }
-
-            return result;
+            _prefixContainer = new Lazy<PrefixContainer>(() => new PrefixContainer(_values.Value.AllKeys), isThreadSafe: true);
         }
 
         public virtual bool ContainsPrefix(string prefix)
         {
-            if (prefix == null)
-            {
-                throw Error.ArgumentNull("prefix");
-            }
-
-            return _prefixes.Value.Contains(prefix);
+            return _prefixContainer.Value.ContainsPrefix(prefix);
         }
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
-            if (prefix == null)
-            {
-                throw Error.ArgumentNull("prefix");
-            }
-
-            return ValueProviderUtil.GetKeysFromPrefix(_prefixes.Value, prefix);
+            return _prefixContainer.Value.GetKeysFromPrefix(prefix);
         }
 
         public virtual ValueProviderResult GetValue(string key)

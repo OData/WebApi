@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="AuthorizeAttributeTest.cs" />
     <Compile Include="Common\ErrorTests.cs" />
+    <Compile Include="Common\PrefixContainerTests.cs" />
     <Compile Include="Common\TaskHelpersExtensionsTest.cs" />
     <Compile Include="Common\TaskHelpersTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
@@ -96,7 +97,6 @@
     <Compile Include="Controllers\HttpActionContextTest.cs" />
     <Compile Include="Hosting\HttpRouteTest.cs" />
     <Compile Include="Internal\TypeActivatorTest.cs" />
-    <Compile Include="Internal\ValueProviderUtilTest.cs" />
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
     <Compile Include="Query\DataModel.cs" />

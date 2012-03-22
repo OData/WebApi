@@ -7,11 +7,11 @@ namespace System.Web.Mvc
 {
     public class NameValueCollectionValueProvider : IValueProvider, IUnvalidatedValueProvider, IEnumerableValueProvider
     {
-        private readonly HashSet<string> _prefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Lazy<PrefixContainer> _prefixContainer;
         private readonly Dictionary<string, ValueProviderResultPlaceholder> _values = new Dictionary<string, ValueProviderResultPlaceholder>(StringComparer.OrdinalIgnoreCase);
 
         public NameValueCollectionValueProvider(NameValueCollection collection, CultureInfo culture)
-            : this(collection, null /* unvalidatedCollection */, culture)
+            : this(collection, unvalidatedCollection: null, culture: culture)
         {
         }
 
@@ -22,40 +22,27 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("collection");
             }
 
-            AddValues(collection, unvalidatedCollection ?? collection, culture);
-        }
+            unvalidatedCollection = unvalidatedCollection ?? collection;
 
-        private void AddValues(NameValueCollection validatedCollection, NameValueCollection unvalidatedCollection, CultureInfo culture)
-        {
             // Need to read keys from the unvalidated collection, as M.W.I's granular request validation is a bit touchy
             // and validated entries at the time the key or value is looked at. For example, GetKey() will throw if the
             // value fails request validation, even though the value's not being looked at (M.W.I can't tell the difference).
 
-            if (unvalidatedCollection.Count > 0)
-            {
-                _prefixes.Add(String.Empty);
-            }
+            _prefixContainer = new Lazy<PrefixContainer>(() => new PrefixContainer(unvalidatedCollection.AllKeys), isThreadSafe: true);
 
             foreach (string key in unvalidatedCollection)
             {
                 if (key != null)
                 {
-                    _prefixes.UnionWith(ValueProviderUtil.GetPrefixes(key));
-
                     // need to look up values lazily, as eagerly looking at the collection might trigger validation
-                    _values[key] = new ValueProviderResultPlaceholder(key, validatedCollection, unvalidatedCollection, culture);
+                    _values[key] = new ValueProviderResultPlaceholder(key, collection, unvalidatedCollection, culture);
                 }
             }
         }
 
         public virtual bool ContainsPrefix(string prefix)
         {
-            if (prefix == null)
-            {
-                throw new ArgumentNullException("prefix");
-            }
-
-            return _prefixes.Contains(prefix);
+            return _prefixContainer.Value.ContainsPrefix(prefix);
         }
 
         public virtual ValueProviderResult GetValue(string key)
@@ -84,7 +71,7 @@ namespace System.Web.Mvc
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
-            return ValueProviderUtil.GetKeysFromPrefix(_prefixes, prefix);
+            return _prefixContainer.Value.GetKeysFromPrefix(prefix);
         }
 
         // Placeholder that can store a validated (in relation to request validation) or unvalidated

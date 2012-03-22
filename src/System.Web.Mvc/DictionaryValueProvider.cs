@@ -5,7 +5,7 @@ namespace System.Web.Mvc
 {
     public class DictionaryValueProvider<TValue> : IValueProvider, IEnumerableValueProvider
     {
-        private readonly HashSet<string> _prefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Lazy<PrefixContainer> _prefixContainer;
         private readonly Dictionary<string, ValueProviderResult> _values = new Dictionary<string, ValueProviderResult>(StringComparer.OrdinalIgnoreCase);
 
         public DictionaryValueProvider(IDictionary<string, TValue> dictionary, CultureInfo culture)
@@ -15,34 +15,19 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("dictionary");
             }
 
-            AddValues(dictionary, culture);
-        }
-
-        private void AddValues(IDictionary<string, TValue> dictionary, CultureInfo culture)
-        {
-            if (dictionary.Count > 0)
+            foreach (KeyValuePair<string, TValue> entry in dictionary)
             {
-                _prefixes.Add(String.Empty);
-            }
-
-            foreach (var entry in dictionary)
-            {
-                _prefixes.UnionWith(ValueProviderUtil.GetPrefixes(entry.Key));
-
                 object rawValue = entry.Value;
                 string attemptedValue = Convert.ToString(rawValue, culture);
                 _values[entry.Key] = new ValueProviderResult(rawValue, attemptedValue, culture);
             }
+
+            _prefixContainer = new Lazy<PrefixContainer>(() => new PrefixContainer(_values.Keys), isThreadSafe: true);
         }
 
         public virtual bool ContainsPrefix(string prefix)
         {
-            if (prefix == null)
-            {
-                throw new ArgumentNullException("prefix");
-            }
-
-            return _prefixes.Contains(prefix);
+            return _prefixContainer.Value.ContainsPrefix(prefix);
         }
 
         public virtual ValueProviderResult GetValue(string key)
@@ -59,7 +44,7 @@ namespace System.Web.Mvc
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
-            return ValueProviderUtil.GetKeysFromPrefix(_prefixes, prefix);
+            return _prefixContainer.Value.GetKeysFromPrefix(prefix);
         }
     }
 }

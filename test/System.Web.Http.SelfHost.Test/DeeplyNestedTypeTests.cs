@@ -24,7 +24,7 @@ namespace System.Web.Http.SelfHost
             baseAddress = String.Format("http://localhost/");
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
-            config.Routes.MapHttpRoute("Default", "{controller}/{action}", new {controller = "DeepNestedType"});
+            config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "DeepNestedType" });
 
             server = new HttpSelfHostServer(config);
 
@@ -115,14 +115,11 @@ namespace System.Web.Http.SelfHost
             request.RequestUri = new Uri(Path.Combine(baseAddress, "DeepNestedType/PostNestedList"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             request.Method = HttpMethod.Post;
+            request.Content = new StringContent(GetBigListInFormUrl(70000), Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            // Changing the number below to 70K will eat about 5GB memory and causing the process to spin. 
-            // We have a bug to track the fix.
-            request.Content = new StringContent(GetBigListInFormUrl(10000), Encoding.UTF8, "application/x-www-form-urlencoded");
-            
             // Act
             HttpResponseMessage response = httpClient.SendAsync(request).Result;
-            
+
             // Assert
             string expectedResponseValue = @"<string xmlns=""http://schemas.microsoft.com/2003/10/Serialization/"">success from PostNestedList</string>";
             Assert.NotNull(response.Content);

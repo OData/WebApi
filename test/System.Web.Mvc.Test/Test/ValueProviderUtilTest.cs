@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace System.Web.Mvc.Test
@@ -84,106 +82,8 @@ namespace System.Web.Mvc.Test
             // Assert
             Assert.True(retVal1);
             Assert.True(retVal2);
-        }
-
-        [Fact]
-        public void GetPrefixes()
-        {
-            // Arrange
-            string key = "foo.bar[baz].quux";
-            string[] expected = new string[]
-            {
-                "foo.bar[baz].quux",
-                "foo.bar[baz]",
-                "foo.bar",
-                "foo"
-            };
-
-            // Act
-            string[] result = ValueProviderUtil.GetPrefixes(key).ToArray();
-
-            // Assert
-            Assert.Equal(expected, result);
-        }
-
-        [Fact]
-        public void GetKeysFromPrefixWithDotsNotation()
-        {
-            // Arrange
-            IList<string> collection = new List<string>()
-            {
-                "foo.bar", "something.other", "foo.baz", "foot.hello", "fo.nothing", "foo"
-            };
-            string prefix = "foo";
-
-            // Act
-            IDictionary<string, string> result = ValueProviderUtil.GetKeysFromPrefix(collection, prefix);
-
-            // Assert
-            Assert.Equal(2, result.Count());
-            Assert.True(result.ContainsKey("bar"));
-            Assert.True(result.ContainsKey("baz"));
-            Assert.Equal("foo.bar", result["bar"]);
-            Assert.Equal("foo.baz", result["baz"]);
-        }
-
-        [Fact]
-        public void GetKeysFromPrefixWithBracketsNotation()
-        {
-            // Arrange
-            IList<string> collection = new List<string>()
-            {
-                "foo[bar]", "something[other]", "foo[baz]", "foot[hello]", "fo[nothing]", "foo"
-            };
-            string prefix = "foo";
-
-            // Act
-            IDictionary<string, string> result = ValueProviderUtil.GetKeysFromPrefix(collection, prefix);
-
-            // Assert
-            Assert.Equal(2, result.Count());
-            Assert.True(result.ContainsKey("bar"));
-            Assert.True(result.ContainsKey("baz"));
-            Assert.Equal("foo[bar]", result["bar"]);
-            Assert.Equal("foo[baz]", result["baz"]);
-        }
-
-        [Fact]
-        public void GetKeysFromPrefixWithDotsAndBracketsNotation()
-        {
-            // Arrange
-            IList<string> collection = new List<string>()
-            {
-                "foo[bar]", "something[other]", "foo.baz", "foot[hello]", "fo[nothing]", "foo"
-            };
-            string prefix = "foo";
-
-            // Act
-            IDictionary<string, string> result = ValueProviderUtil.GetKeysFromPrefix(collection, prefix);
-
-            // Assert
-            Assert.Equal(2, result.Count());
-            Assert.True(result.ContainsKey("bar"));
-            Assert.True(result.ContainsKey("baz"));
-            Assert.Equal("foo[bar]", result["bar"]);
-            Assert.Equal("foo.baz", result["baz"]);
-        }
-
-        [Fact]
-        public void GetKeysFromPrefixWithPrefixNotFound()
-        {
-            // Arrange
-            IList<string> collection = new List<string>()
-            {
-                "foo[bar]", "something[other]", "foo.baz", "foot[hello]", "fo[nothing]", "foo"
-            };
-            string prefix = "notfound";
-
-            // Act
-            IDictionary<string, string> result = ValueProviderUtil.GetKeysFromPrefix(collection, prefix);
-
-            // Assert
-            Assert.Empty(result);
+            Assert.True(ValueProviderUtil.CollectionContainsPrefix(collection, "hello.there[0]"));
+            Assert.False(ValueProviderUtil.CollectionContainsPrefix(collection, "hello.there.0"));
         }
     }
 }

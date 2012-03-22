@@ -1,58 +1,59 @@
-﻿// Combination of code from System.Web.Mvc and Microsoft.Web.Mvc
-
 using System.Collections.Generic;
 using System.Linq;
 
-namespace System.Web.Http.Internal
+namespace System.Web
 {
-    internal static class ValueProviderUtil
+    /// <summary>
+    /// This is a container for prefix values. It normalizes all the values into dotted-form and then stores
+    /// them in a sorted array. All queries for prefixes are also normalized to dotted-form, and searches
+    /// for ContainsPrefix are done with a binary search.
+    /// </summary>
+    internal class PrefixContainer
     {
-        internal static bool CollectionContainsPrefix(IEnumerable<string> collection, string prefix)
-        {
-            foreach (string key in collection)
-            {
-                if (key != null)
-                {
-                    if (prefix.Length == 0)
-                    {
-                        return true; // shortcut - non-null key matches empty prefix
-                    }
+        private readonly ICollection<string> _originalValues;
+        private readonly string[] _sortedValues;
 
-                    if (key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (key.Length == prefix.Length)
-                        {
-                            return true; // exact match
-                        }
-                        else
-                        {
-                            switch (key[prefix.Length])
-                            {
-                                case '.': // known separator characters
-                                case '[':
-                                    return true;
-                            }
-                        }
-                    }
-                }
+        internal PrefixContainer(ICollection<string> values)
+        {
+            if (values == null)
+            {
+                throw new ArgumentNullException("values");
             }
 
-            return false; // nothing found
+            _originalValues = values;
+            _sortedValues = values.Where(val => val != null).ToArray();
+            Array.Sort(_sortedValues, StringComparer.OrdinalIgnoreCase);
+        }
+
+        internal bool ContainsPrefix(string prefix)
+        {
+            if (prefix == null)
+            {
+                throw new ArgumentNullException("prefix");
+            }
+
+            if (prefix.Length == 0)
+            {
+                return _sortedValues.Length > 0; // only match empty string when we have some value
+            }
+
+            return Array.BinarySearch(_sortedValues, prefix, new PrefixComparer(prefix)) > -1;
         }
 
         // Given "foo.bar", "foo.hello", "something.other", foo[abc].baz and asking for prefix "foo" will return:
         // - "bar"/"foo.bar"
         // - "hello"/"foo.hello"
         // - "abc"/"foo[abc]"
-        internal static IDictionary<string, string> GetKeysFromPrefix(IEnumerable<string> collection, string prefix)
+        internal IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
             if (String.IsNullOrWhiteSpace(prefix))
             {
-                return collection.ToDictionary(value => value, StringComparer.OrdinalIgnoreCase);
+                return _originalValues.ToDictionary(value => value, StringComparer.OrdinalIgnoreCase);
             }
 
-            IDictionary<string, string> keys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var entry in collection)
+            IDictionary<string, string> result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entry in _originalValues)
             {
                 if (entry != null)
                 {
@@ -97,35 +98,15 @@ namespace System.Web.Http.Internal
                                 continue;
                         }
 
-                        if (!keys.ContainsKey(key))
+                        if (!result.ContainsKey(key))
                         {
-                            keys.Add(key, fullName);
+                            result.Add(key, fullName);
                         }
                     }
                 }
             }
 
-            return keys;
-        }
-
-        // Given "foo.bar[baz].quux", this method will return:
-        // - "foo.bar[baz].quux"
-        // - "foo.bar[baz]"
-        // - "foo.bar"
-        // - "foo"
-        internal static IEnumerable<string> GetPrefixes(string key)
-        {
-            yield return key;
-            for (int i = key.Length - 1; i >= 0; i--)
-            {
-                switch (key[i])
-                {
-                    case '.':
-                    case '[':
-                        yield return key.Substring(0, i);
-                        break;
-                }
-            }
+            return result;
         }
 
         internal static bool IsPrefixMatch(string prefix, string testString)
@@ -138,6 +119,11 @@ namespace System.Web.Http.Internal
             if (prefix.Length == 0)
             {
                 return true; // shortcut - non-null testString matches empty prefix
+            }
+
+            if (prefix.Length > testString.Length)
+            {
+                return false; // not long enough
             }
 
             if (!testString.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
@@ -159,6 +145,27 @@ namespace System.Web.Http.Internal
 
                 default:
                     return false; // not known delimiter
+            }
+        }
+
+        private class PrefixComparer : IComparer<String>
+        {
+            private string _prefix;
+
+            public PrefixComparer(string prefix)
+            {
+                _prefix = prefix;
+            }
+
+            public int Compare(string x, string y)
+            {
+                string testString = Object.ReferenceEquals(x, _prefix) ? y : x;
+                if (IsPrefixMatch(_prefix, testString))
+                {
+                    return 0;
+                }
+
+                return StringComparer.OrdinalIgnoreCase.Compare(x, y);
             }
         }
     }

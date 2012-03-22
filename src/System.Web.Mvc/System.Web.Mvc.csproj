@@ -67,6 +67,9 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Common\PrefixContainer.cs">
+      <Link>Common\PrefixContainer.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>
@@ -229,7 +232,7 @@
     <Compile Include="ValueProviderFactory.cs" />
     <Compile Include="ValueProviderFactoryCollection.cs" />
     <Compile Include="ValueProviderCollection.cs" />
-    <Compile Include="DictionaryValueProvider`1.cs" />
+    <Compile Include="DictionaryValueProvider.cs" />
     <Compile Include="NameValueCollectionValueProvider.cs" />
     <Compile Include="ValueProviderUtil.cs" />
     <Compile Include="IValueProvider.cs" />

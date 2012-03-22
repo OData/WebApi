@@ -75,6 +75,9 @@
     <Compile Include="..\Common\HttpMethodHelper.cs">
       <Link>Common\HttpMethodHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Common\PrefixContainer.cs">
+      <Link>Common\PrefixContainer.cs</Link>
+    </Compile>
     <Compile Include="..\Common\TaskHelpers.cs">
       <Link>Common\TaskHelpers.cs</Link>
     </Compile>
@@ -211,7 +214,6 @@
     <Compile Include="Controllers\IHttpController.cs" />
     <Compile Include="Internal\DataTypeUtil.cs" />
     <Compile Include="Internal\TypeDescriptorHelper.cs" />
-    <Compile Include="Internal\ValueProviderUtil.cs" />
     <Compile Include="Internal\CollectionModelBinderUtil.cs" />
     <Compile Include="Metadata\Providers\CachedAssociatedMetadataProvider.cs" />
     <Compile Include="Metadata\Providers\CachedDataAnnotationsMetadataAttributes.cs" />

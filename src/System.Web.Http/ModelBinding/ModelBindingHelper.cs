@@ -10,7 +10,7 @@ using System.Web.Http.Properties;
 
 namespace System.Web.Http.ModelBinding
 {
-    public static class ModelBindingHelper
+    internal static class ModelBindingHelper
     {
         internal static TModel CastOrDefault<TModel>(object model)
         {

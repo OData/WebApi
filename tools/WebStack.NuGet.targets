@@ -6,10 +6,11 @@
         <NuGetExePath>$(NuGetToolsPath)\NuGet.exe</NuGetExePath>
         <PackagesConfig>$([System.IO.Path]::Combine($(ProjectDir), "packages.config"))</PackagesConfig>
         <PackagesDir>$([System.IO.Path]::Combine($(SolutionDir), "packages"))</PackagesDir>
-        <PackageOutputDir Condition="$(PackageOutputDir) == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
+        <PackageOutputDir Condition="'$(PackageOutputDir)' == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
+        <PreReleasePackagesUrl Condition="'$(PreReleasePackagesUrl)' == ''">http://www.myget.org/F/f05dce941ae4485090b04586209c8b08/</PreReleasePackagesUrl>
 
         <!-- Package sources used to restore packages. By default will used the registered sources under %APPDATA%\NuGet\NuGet.Config -->
-        <PackageSources>"\\webstack-git\packages;https://go.microsoft.com/fwlink/?LinkID=230477"</PackageSources>
+        <PackageSources>"https://go.microsoft.com/fwlink/?LinkID=230477;$(PreReleasePackagesUrl)"</PackageSources>
 
         <!-- Enable the restore command to run before builds -->
         <RestorePackages Condition="$(RestorePackages) == ''">false</RestorePackages>

@@ -1,11 +1,11 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http.SelfHost;
 using Xunit;
 using Xunit.Extensions;
-using System.Collections.Generic;
 
 namespace System.Web.Http.ContentNegotiation
 {

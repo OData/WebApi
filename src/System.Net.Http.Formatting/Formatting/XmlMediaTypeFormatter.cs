@@ -25,7 +25,6 @@ namespace System.Net.Http.Formatting
         };
 
         private ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
-        private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
         private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace System.Net.Http.Formatting
         {
             get
             {
-                return _maxDepth;
+                return _readerQuotas.MaxDepth;
             }
             set
             {
@@ -91,7 +90,6 @@ namespace System.Net.Http.Formatting
                     throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, FormattingUtilities.DefaultMinDepth));
                 }
 
-                _maxDepth = value;
                 _readerQuotas.MaxDepth = value;
             }
         }

@@ -160,11 +160,11 @@ namespace System.Net.Http
         {
             return new XmlDictionaryReaderQuotas()
             {
-                MaxArrayLength = int.MaxValue,
-                MaxBytesPerRead = int.MaxValue,
+                MaxArrayLength = Int32.MaxValue,
+                MaxBytesPerRead = Int32.MaxValue,
                 MaxDepth = DefaultMaxDepth,
-                MaxNameTableCharCount = int.MaxValue,
-                MaxStringContentLength = int.MaxValue
+                MaxNameTableCharCount = Int32.MaxValue,
+                MaxStringContentLength = Int32.MaxValue
             };
         }
 

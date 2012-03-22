@@ -17,7 +17,6 @@ namespace System.Net.Http.Formatting
     public class XmlMediaTypeFormatterTests
     {
         [Fact]
-        [Trait("Description", "XmlMediaTypeFormatter is public, concrete, and unsealed.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(XmlMediaTypeFormatter), TypeAssert.TypeProperties.IsPublicVisibleClass);
@@ -25,7 +24,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "StandardXmlMediaTypes")]
-        [Trait("Description", "XmlMediaTypeFormatter() constructor sets standard Xml media types in SupportedMediaTypes.")]
         public void Constructor(MediaTypeHeaderValue mediaType)
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -33,7 +31,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "DefaultMediaType property returns application/xml.")]
         public void DefaultMediaTypeReturnsApplicationXml()
         {
             MediaTypeHeaderValue mediaType = XmlMediaTypeFormatter.DefaultMediaType;
@@ -51,7 +48,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MaxDepth return correct value.")]
         public void MaxDepthReturnsCorrectValue()
         {
             Assert.Reflection.IntegerProperty(
@@ -66,7 +62,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Deeply nested object throws.")]
         public void ReadDeeplyNestedObjectThrows()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 1 };
@@ -79,7 +74,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Deeply nested object works.")]
         public void ReadDeeplyNestedObjectWorks()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 5001, UseXmlSerializer = true };
@@ -108,7 +102,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Indent property handles Get/Set correctly.")]
         public void IndentGetSet()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -118,7 +111,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property should be false by default.")]
         public void UseXmlSerializer_Default()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -126,7 +118,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property works when set to false.")]
         public void UseXmlSerializer_False()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false };
@@ -143,7 +134,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property with Indent works when set to false.")]
         public void UseXmlSerializer_False_Indent()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false, Indent = true };
@@ -156,7 +146,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property works when set to true.")]
         public void UseXmlSerializer_True()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true };
@@ -173,7 +162,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property with Indent works when set to true.")]
         public void UseXmlSerializer_True_Indent()
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true, Indent = true };
@@ -187,7 +175,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanReadType() returns the same result as the XmlSerializer constructor.")]
         public void CanReadTypeReturnsSameResultAsXmlSerializerConstructor(Type variationType, object testData)
         {
             TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter() { UseXmlSerializer = true };
@@ -206,7 +193,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null type.")]
         public void SetSerializerThrowsWithNullType()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -215,7 +201,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null serializer.")]
         public void SetSerializerThrowsWithNullSerializer()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -223,7 +208,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer<T>(XmlSerializer) throws with null serializer.")]
         public void SetSerializer1ThrowsWithNullSerializer()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -231,7 +215,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlObjectSerializer) throws with null type.")]
         public void SetSerializer2ThrowsWithNullType()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -240,7 +223,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlObjectSerializer) throws with null serializer.")]
         public void SetSerializer2ThrowsWithNullSerializer()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -248,7 +230,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer<T>(XmlObjectSerializer) throws with null serializer.")]
         public void SetSerializer3ThrowsWithNullSerializer()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -256,7 +237,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "RemoveSerializer throws with null type.")]
         public void RemoveSerializerThrowsWithNullType()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -265,7 +245,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "ReadFromStreamAsync() returns all value and reference types serialized via WriteToStreamAsync using XmlSerializer.")]
         public void ReadFromStreamAsyncRoundTripsWriteToStreamAsyncUsingXmlSerializer(Type variationType, object testData)
         {
             TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
@@ -290,7 +269,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "ReadFromStream() returns all value and reference types serialized via WriteToStream using DataContractSerializer.")]
         public void ReadFromStreamAsyncRoundTripsWriteToStreamUsingDataContractSerializer(Type variationType, object testData)
         {
             TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();

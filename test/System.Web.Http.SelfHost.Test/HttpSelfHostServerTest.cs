@@ -78,7 +78,7 @@ namespace System.Web.Http.SelfHost
                         throw;
                     }
 
-                    Thread.Sleep(100);
+                    Thread.Sleep(200);
                 }
             }
         }
@@ -98,8 +98,8 @@ namespace System.Web.Http.SelfHost
         private string BaseUri(TransferMode transferMode)
         {
             return transferMode == TransferMode.Streamed
-                ? String.Format("http://{0}:8080/stream", machineName)
-                : String.Format("http://{0}:8080", machineName);
+                ? String.Format("http://{0}:8081/stream", machineName)
+                : String.Format("http://{0}:8081", machineName);
         }
 
         private HttpSelfHostServer GetServer(TransferMode transferMode)

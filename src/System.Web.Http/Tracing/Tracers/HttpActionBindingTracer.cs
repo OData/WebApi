@@ -10,7 +10,7 @@ using System.Web.Http.Properties;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class HttpActionBindingTracer : HttpActionBinding
+    internal class HttpActionBindingTracer : HttpActionBinding
     {
         private const string ExecuteBindingAsyncMethodName = "ExecuteBindingAsync";
 

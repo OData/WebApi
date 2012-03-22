@@ -248,9 +248,6 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ReflectedActionDescriptor_ParameterValueHasWrongType" xml:space="preserve">
     <value>The parameters dictionary contains an invalid entry for parameter '{0}' for method '{1}' in '{2}'. The dictionary contains a value of type '{3}', but the parameter requires a value of type '{4}'.</value>
   </data>
-  <data name="DictionaryMissingRequiredValue" xml:space="preserve">
-    <value>The '{0}' must contain an item named '{1}' with a value of type '{2}'.</value>
-  </data>
   <data name="Route_CannotHaveCatchAllInMultiSegment" xml:space="preserve">
     <value>A path segment that contains more than one section, such as a literal section or a parameter, cannot contain a catch-all parameter.</value>
   </data>

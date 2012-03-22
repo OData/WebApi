@@ -11,7 +11,7 @@ namespace System.Web.Http
     /// Extension methods for <see cref="IDictionary{TKey,TValue}"/>.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class DictionaryExtensions
+    internal static class DictionaryExtensions
     {
         /// <summary>
         /// Gets the value of <typeparamref name="T"/> associated with the specified key or <c>default</c> value if
@@ -63,7 +63,7 @@ namespace System.Web.Http
                 return value;
             }
 
-            throw Error.InvalidOperation(SRResources.DictionaryMissingRequiredValue, collection.GetType().Name, key, typeof(T).Name);
+            throw Error.InvalidOperation(CommonWebApiResources.DictionaryMissingRequiredValue, collection.GetType().Name, key, typeof(T).Name);
         }
 
         internal static IEnumerable<KeyValuePair<string, TValue>> FindKeysWithPrefix<TValue>(this IDictionary<string, TValue> dictionary, string prefix)

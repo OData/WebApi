@@ -1,9 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 
-namespace System.Web.Http.ModelBinding
+namespace System.Web.Http.Controllers
 {
     /// <summary>
     /// Describes how a parameter is bound. The binding should be static (based purely on the descriptor) and 

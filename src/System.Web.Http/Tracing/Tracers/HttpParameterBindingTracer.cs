@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
-using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Tracing.Tracers

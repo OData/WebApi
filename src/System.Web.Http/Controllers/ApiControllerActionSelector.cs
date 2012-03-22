@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Web.Http.Internal;
-using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Controllers

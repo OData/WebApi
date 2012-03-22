@@ -4,10 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 
-namespace System.Web.Http.ModelBinding
+namespace System.Web.Http.Controllers
 {
     /// <summary>
     /// This describes *how* the binding will happen. Does not actually bind. 

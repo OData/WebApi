@@ -105,7 +105,7 @@
     <Compile Include="ModelBinding\CancellationTokenParameterBinding.cs" />
     <Compile Include="ModelBinding\ErrorParameterBinding.cs" />
     <Compile Include="ModelBinding\FormDataCollectionExtensions.cs" />
-    <Compile Include="ModelBinding\HttpActionBinding.cs" />
+    <Compile Include="Controllers\HttpActionBinding.cs" />
     <Compile Include="Controllers\HttpActionDescriptor.cs" />
     <Compile Include="ActionNameAttribute.cs" />
     <Compile Include="Controllers\ReflectedHttpActionDescriptor.cs" />
@@ -209,7 +209,7 @@
     <Compile Include="Controllers\HttpActionContextExtensions.cs" />
     <Compile Include="ModelBinding\ModelBindingHelper.cs" />
     <Compile Include="Controllers\ApiControllerActionSelector.cs" />
-    <Compile Include="ModelBinding\HttpParameterBinding.cs" />
+    <Compile Include="Controllers\HttpParameterBinding.cs" />
     <Compile Include="Controllers\HttpParameterDescriptor.cs" />
     <Compile Include="Services\DefaultServiceResolver.cs" />
     <Compile Include="GlobalSuppressions.cs" />

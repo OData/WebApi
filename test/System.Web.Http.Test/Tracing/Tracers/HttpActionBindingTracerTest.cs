@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.Http.ModelBinding;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

@@ -113,7 +113,7 @@ namespace System.Net.Http.Formatting
         /// <param name="type">The type to potentially be wrapped. If the type is wrapped, it's changed in place.</param>
         /// <returns>Returns <c>true</c> if the type was wrapped; <c>false</c>, otherwise</returns>
         [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#", Justification = "This API is designed to morph the type parameter appropriately")]
-        protected internal static bool TryGetDelegatingTypeForIEnumerableGenericOrSame(ref Type type)
+        internal static bool TryGetDelegatingTypeForIEnumerableGenericOrSame(ref Type type)
         {
             return TryGetDelegatingType(FormattingUtilities.EnumerableInterfaceGenericType, ref type);
         }
@@ -124,12 +124,12 @@ namespace System.Net.Http.Formatting
         /// <param name="type">The type to potentially be wrapped. If the type is wrapped, it's changed in place.</param>
         /// <returns>Returns <c>true</c> if the type was wrapped; <c>false</c>, otherwise</returns>
         [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#", Justification = "This API is designed to morph the type parameter appropriately")]
-        protected internal static bool TryGetDelegatingTypeForIQueryableGenericOrSame(ref Type type)
+        internal static bool TryGetDelegatingTypeForIQueryableGenericOrSame(ref Type type)
         {
             return TryGetDelegatingType(FormattingUtilities.QueryableInterfaceGenericType, ref type);
         }
 
-        protected internal static ConstructorInfo GetTypeRemappingConstructor(Type type)
+        internal static ConstructorInfo GetTypeRemappingConstructor(Type type)
         {
             ConstructorInfo constructorInfo;
             _delegatingEnumerableConstructorCache.TryGetValue(type, out constructorInfo);

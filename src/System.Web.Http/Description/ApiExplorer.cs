@@ -182,11 +182,13 @@ namespace System.Web.Http.Description
             else
             {
                 // bound controller variable, {controller = "controllerName"}
-                controllerVariableValue = route.Defaults[ControllerVariableName] as string;
-                HttpControllerDescriptor controllerDescriptor;
-                if (controllerMappings.TryGetValue(controllerVariableValue, out controllerDescriptor) && ShouldExploreController(controllerVariableValue, controllerDescriptor, route))
+                if (route.Defaults.TryGetValue(ControllerVariableName, out controllerVariableValue))
                 {
-                    ExploreRouteActions(route, routeTemplate, controllerDescriptor, apiDescriptions);
+                    HttpControllerDescriptor controllerDescriptor;
+                    if (controllerMappings.TryGetValue(controllerVariableValue, out controllerDescriptor) && ShouldExploreController(controllerVariableValue, controllerDescriptor, route))
+                    {
+                        ExploreRouteActions(route, routeTemplate, controllerDescriptor, apiDescriptions);
+                    }
                 }
             }
         }

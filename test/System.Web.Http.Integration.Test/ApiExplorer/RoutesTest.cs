@@ -19,6 +19,17 @@ namespace System.Web.Http.ApiExplorer
             Assert.Equal(0, explorer.ApiDescriptions.Count);
         }
 
+        [Fact]
+        public void VerifyDescription_OnInvalidRoute()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Invalid", "badRouteWithNoControler");
+            IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
+
+            Assert.NotNull(explorer);
+            Assert.Equal(0, explorer.ApiDescriptions.Count);
+        }
+
         public static IEnumerable<object[]> VerifyDescription_OnDefaultRoute_PropertyData
         {
             get

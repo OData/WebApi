@@ -297,15 +297,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; must contain an item named &apos;{1}&apos; with a value of type &apos;{2}&apos;..
-        /// </summary>
-        internal static string DictionaryMissingRequiredValue {
-            get {
-                return ResourceManager.GetString("DictionaryMissingRequiredValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Digit expected.
         /// </summary>
         internal static string DigitExpected {

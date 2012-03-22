@@ -27,11 +27,6 @@ namespace System.Web.Http.Hosting
         public static readonly string SynchronizationContextKey = "MS_SynchronizationContext";
 
         /// <summary>
-        /// Provides a key for the current <see cref="IPrincipal"/> stored in <see cref="HttpRequestMessage.Properties"/>.
-        /// </summary>
-        public static readonly string UserPrincipalKey = "MS_UserPrincipal";
-
-        /// <summary>
         /// Provides a key for the collection of resources that should be disposed when a request is disposed.
         /// </summary>
         public static readonly string DisposableRequestResourcesKey = "MS_DisposableRequestResources";

@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
@@ -32,41 +31,6 @@ namespace System.Web.Http
             }
 
             return request.GetProperty<HttpConfiguration>(HttpPropertyKeys.HttpConfigurationKey);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="System.Security.Principal.IPrincipal"/> for the given request or null if not available.
-        /// </summary>
-        /// <param name="request">The HTTP request.</param>
-        /// <returns>The <see cref="System.Security.Principal.IPrincipal"/> or null.</returns>
-        public static IPrincipal GetUserPrincipal(this HttpRequestMessage request)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            return request.GetProperty<IPrincipal>(HttpPropertyKeys.UserPrincipalKey);
-        }
-
-        /// <summary>
-        /// Sets the <see cref="System.Security.Principal.IPrincipal"/> for the given request 
-        /// </summary>
-        /// <param name="request">The HTTP request.</param>
-        /// <param name="principal">The IPrincipal value to set to.</param>
-        public static void SetUserPrincipal(this HttpRequestMessage request, IPrincipal principal)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            if (principal == null)
-            {
-                throw Error.ArgumentNull("principal");
-            }
-
-            request.Properties[HttpPropertyKeys.UserPrincipalKey] = principal;
         }
 
         /// <summary>

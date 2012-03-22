@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
@@ -51,27 +50,6 @@ namespace System.Web.Http
 
             // Assert
             Assert.Same(_config, afterConfig);
-        }
-
-        [Fact]
-        public void GetUserPrincipalThrowsOnNull()
-        {
-            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.GetUserPrincipal(null), "request");
-        }
-
-        [Fact]
-        public void GetUserPrincipal()
-        {
-            // Arrange
-            Mock<IPrincipal> principalMock = new Mock<IPrincipal>();
-            IPrincipal beforePrincipal = principalMock.Object;
-            _request.Properties.Add(HttpPropertyKeys.UserPrincipalKey, beforePrincipal);
-
-            // Act
-            IPrincipal afterPrincipal = _request.GetUserPrincipal();
-
-            // Assert
-            Assert.Same(beforePrincipal, afterPrincipal);
         }
 
         [Fact]

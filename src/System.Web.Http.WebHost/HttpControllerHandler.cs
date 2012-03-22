@@ -339,12 +339,6 @@ namespace System.Web.Http.WebHost
                 AddHeaderToHttpRequestMessage(request, headerName, values);
             }
 
-            // Carry over properties
-            if (httpContextBase.User != null)
-            {
-                request.Properties.Add(HttpPropertyKeys.UserPrincipalKey, httpContextBase.User);
-            }
-
             // Add context to enable route lookup later on
             request.Properties.Add(HttpContextBaseKey, httpContextBase);
 

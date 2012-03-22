@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
@@ -161,6 +162,61 @@ namespace System.Web.Http
                     return reqTask.Result;
                 }
             );
+        }
+
+        [Fact, RestoreThreadPrincipal]
+        public Task SendAsync_SetsGenericPrincipalWhenThreadPrincipalIsNullAndCleansUpAfterward()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var request = new HttpRequestMessage();
+            var dispatcherMock = new Mock<HttpControllerDispatcher>();
+            var server = new HttpServer(config, dispatcherMock.Object);
+            var invoker = new HttpMessageInvoker(server);
+            IPrincipal callbackPrincipal = null;
+            Thread.CurrentPrincipal = null;
+            dispatcherMock.Protected()
+                          .Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
+                          .Callback(() => callbackPrincipal = Thread.CurrentPrincipal)
+                          .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+
+            // Act
+            return invoker.SendAsync(request, CancellationToken.None)
+                          .ContinueWith(req =>
+                          {
+                              // Assert
+                              Assert.NotNull(callbackPrincipal);
+                              Assert.False(callbackPrincipal.Identity.IsAuthenticated);
+                              Assert.Empty(callbackPrincipal.Identity.Name);
+                              Assert.Null(Thread.CurrentPrincipal);
+                          });
+        }
+
+        [Fact, RestoreThreadPrincipal]
+        public Task SendAsync_DoesNotChangeExistingThreadPrincipal()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var request = new HttpRequestMessage();
+            var dispatcherMock = new Mock<HttpControllerDispatcher>();
+            var server = new HttpServer(config, dispatcherMock.Object);
+            var invoker = new HttpMessageInvoker(server);
+            var principal = new GenericPrincipal(new GenericIdentity("joe"), new string[0]);
+            Thread.CurrentPrincipal = principal;
+            IPrincipal callbackPrincipal = null;
+            dispatcherMock.Protected()
+                          .Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None)
+                          .Callback(() => callbackPrincipal = Thread.CurrentPrincipal)
+                          .Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
+
+            // Act
+            return invoker.SendAsync(request, CancellationToken.None)
+                          .ContinueWith(req =>
+                          {
+                              // Assert
+                              Assert.Same(principal, callbackPrincipal);
+                              Assert.Same(principal, Thread.CurrentPrincipal);
+                          });
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
 using System.Web.Http;
 using Microsoft.Web.Http.Data.Test.Models;
 
@@ -56,12 +55,11 @@ namespace Microsoft.Web.Http.Data.Test
 
         }
 
-        [Authorize]
         public void UpdateProduct(Product product)
         {
             // demonstrate that the current ActionContext can be accessed by
             // controller actions
-            IPrincipal user = this.ActionContext.ControllerContext.Request.GetUserPrincipal();
+            string host = this.ActionContext.ControllerContext.Request.Headers.Host;
         }
 
         public void InsertOrderDetail(Order_Detail detail)

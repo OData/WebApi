@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -102,6 +104,15 @@ namespace System.Web.Http
         public UrlHelper Url
         {
             get { return ControllerContext.Url; }
+        }
+
+        /// <summary>
+        /// Returns the current principal associated with this request.
+        /// </summary>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "That would make for poor usability.")]
+        public IPrincipal User
+        {
+            get { return Thread.CurrentPrincipal; }
         }
 
         public virtual Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)

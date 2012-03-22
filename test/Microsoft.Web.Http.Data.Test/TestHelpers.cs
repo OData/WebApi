@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Data.EntityClient;
 using System.Net.Http;
-using System.Security.Principal;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
-using Moq;
 
 namespace Microsoft.Web.Http.Data.Test
 {
@@ -17,9 +15,6 @@ namespace Microsoft.Web.Http.Data.Test
             HttpRequestMessage requestMessage = new HttpRequestMessage(httpMethod, url);
             IHttpRouteData rd = config.Routes[0].GetRouteData("/", requestMessage);
             requestMessage.Properties.Add(HttpPropertyKeys.HttpRouteDataKey, rd);
-            var principalMock = new Mock<IPrincipal>();
-            principalMock.Setup(p => p.Identity.IsAuthenticated).Returns(true);
-            requestMessage.Properties.Add(HttpPropertyKeys.UserPrincipalKey, principalMock.Object);
             return requestMessage;
         }
 

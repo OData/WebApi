@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -72,16 +73,15 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Determines whether access for this particular <paramref name="request"/> is authorized. This method uses the user <see cref="IPrincipal"/>
-        /// returned via <see cref="M:HttpRequestMessageExtensions.GetUserPrincipal"/>. Authorization is denied if the user is not authenticated,
+        /// Determines whether access for this particular request is authorized. This method uses the user <see cref="IPrincipal"/>
+        /// returned via <see cref="System.Threading.Thread.CurrentPrincipal"/>. Authorization is denied if the user is not authenticated,
         /// the user is not in the authorized group of <see cref="P:Users"/> (if defined), or if the user is not in any of the authorized 
         /// <see cref="P:Roles"/> (if defined).
         /// </summary>
-        /// <param name="request">The request.</param>
         /// <returns><c>true</c> if access is authorized; otherwise <c>false</c>.</returns>
-        private bool AuthorizeCore(HttpRequestMessage request)
+        private bool AuthorizeCore()
         {
-            IPrincipal user = request.GetUserPrincipal();
+            IPrincipal user = Thread.CurrentPrincipal;
             if (user == null || !user.Identity.IsAuthenticated)
             {
                 return false;
@@ -126,7 +126,7 @@ namespace System.Web.Http
                 return;
             }
 
-            if (!AuthorizeCore(actionContext.ControllerContext.Request))
+            if (!AuthorizeCore())
             {
                 HandleUnauthorizedRequest(actionContext);
             }

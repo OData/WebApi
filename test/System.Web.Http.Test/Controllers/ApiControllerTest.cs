@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -13,6 +14,7 @@ using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
+using Microsoft.TestCommon;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -638,6 +640,21 @@ namespace System.Web.Http
             Assert.Same(globalFilterResponse, result.Result);
             Assert.Same(actionFilterResponse, resultSeenByGlobalFilter);
             Assert.Equal(new string[] { "actionFilter", "globalFilter" }, log.ToArray());
+        }
+
+        [Fact, RestoreThreadPrincipal]
+        public void User_ReturnsThreadPrincipal()
+        {
+            // Arrange
+            ApiController controller = new Mock<ApiController>().Object;
+            IPrincipal principal = new GenericPrincipal(new GenericIdentity("joe"), new string[0]);
+            Thread.CurrentPrincipal = principal;
+
+            // Act
+            IPrincipal result = controller.User;
+
+            // Assert
+            Assert.Same(result, principal);
         }
 
         private Mock<IAuthorizationFilter> CreateAuthorizationFilterMock(Func<HttpActionContext, CancellationToken, Func<Task<HttpResponseMessage>>, Task<HttpResponseMessage>> implementation)

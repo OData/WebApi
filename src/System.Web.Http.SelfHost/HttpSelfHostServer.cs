@@ -162,7 +162,7 @@ namespace System.Web.Http.SelfHost
 
                     if (windowsIdentity != null)
                     {
-                        request.Properties.Add(HttpPropertyKeys.UserPrincipalKey, new WindowsPrincipal(windowsIdentity));
+                        Thread.CurrentPrincipal = new WindowsPrincipal(windowsIdentity);
                     }
                 }
             }

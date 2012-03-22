@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
@@ -20,6 +21,7 @@ namespace System.Web.Http
     /// </summary>
     public class HttpServer : DelegatingHandler
     {
+        private static readonly Lazy<IPrincipal> _anonymousPrincipal = new Lazy<IPrincipal>(() => new GenericPrincipal(new GenericIdentity(String.Empty), new string[0]), isThreadSafe: true);
         private readonly HttpConfiguration _configuration;
         private readonly HttpMessageHandler _dispatcher;
         private bool _disposed;
@@ -145,7 +147,15 @@ namespace System.Web.Http
             // Add HttpConfiguration object as a parameter to the request 
             request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, _configuration);
 
-            return base.SendAsync(request, cancellationToken);
+            // Ensure we have a principal, even if the host didn't give us one
+            IPrincipal originalPrincipal = Thread.CurrentPrincipal;
+            if (originalPrincipal == null)
+            {
+                Thread.CurrentPrincipal = _anonymousPrincipal.Value;
+            }
+
+            return base.SendAsync(request, cancellationToken)
+                       .Finally(() => Thread.CurrentPrincipal = originalPrincipal);
         }
 
         private void EnsureInitialized()

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
-using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
@@ -14,16 +14,17 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http
 {
-    public class AuthorizeAttributeTest
+    public class AuthorizeAttributeTest : IDisposable
     {
         private readonly Mock<HttpActionDescriptor> _actionDescriptorMock = new Mock<HttpActionDescriptor>() { CallBase = true };
-        private readonly Collection<AllowAnonymousAttribute> _allowAnonymousAttributeCollection = new Collection<AllowAnonymousAttribute>(new AllowAnonymousAttribute[]  { new AllowAnonymousAttribute() } );
+        private readonly Collection<AllowAnonymousAttribute> _allowAnonymousAttributeCollection = new Collection<AllowAnonymousAttribute>(new AllowAnonymousAttribute[] { new AllowAnonymousAttribute() });
         private readonly MockableAuthorizeAttribute _attribute;
         private readonly Mock<MockableAuthorizeAttribute> _attributeMock = new Mock<MockableAuthorizeAttribute>() { CallBase = true };
         private readonly Mock<HttpControllerDescriptor> _controllerDescriptorMock = new Mock<HttpControllerDescriptor>() { CallBase = true };
         private readonly HttpControllerContext _controllerContext;
         private readonly HttpActionContext _actionContext;
         private readonly Mock<IPrincipal> _principalMock = new Mock<IPrincipal>();
+        private readonly IPrincipal _originalPrincipal;
         private readonly HttpRequestMessage _request = new HttpRequestMessage();
 
         public AuthorizeAttributeTest()
@@ -35,7 +36,13 @@ namespace System.Web.Http
             _controllerContext.ControllerDescriptor = _controllerDescriptorMock.Object;
             _controllerContext.Request = _request;
             _actionContext = ContextUtil.CreateActionContext(_controllerContext, _actionDescriptorMock.Object);
-            _request.Properties[HttpPropertyKeys.UserPrincipalKey] = _principalMock.Object;
+            _originalPrincipal = Thread.CurrentPrincipal;
+            Thread.CurrentPrincipal = _principalMock.Object;
+        }
+
+        public void Dispose()
+        {
+            Thread.CurrentPrincipal = _originalPrincipal;
         }
 
         [Fact]
@@ -89,9 +96,9 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void OnAuthorization_IfContextDoesNotContainPrincipal_DoesShortCircuitRequest()
+        public void OnAuthorization_IfThreadDoesNotContainPrincipal_DoesShortCircuitRequest()
         {
-            _request.Properties.Remove(HttpPropertyKeys.UserPrincipalKey);
+            Thread.CurrentPrincipal = null;
 
             _attribute.OnAuthorization(_actionContext);
 

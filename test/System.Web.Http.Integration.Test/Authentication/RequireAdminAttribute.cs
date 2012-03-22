@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -11,7 +12,7 @@ namespace System.Web.Http
         public override void OnAuthorization(HttpActionContext context)
         {
             // do authorization based on the principle.
-            IPrincipal principal = context.ControllerContext.Request.GetUserPrincipal() as IPrincipal;
+            IPrincipal principal = Thread.CurrentPrincipal;
             if (principal == null || !principal.IsInRole("Administrators"))
             {
                 context.Response = new HttpResponseMessage(HttpStatusCode.Unauthorized);

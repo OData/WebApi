@@ -4,14 +4,14 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Net.Http
+namespace System.Net.Http.Formatting
 {
     public class FormUrlEncodedJsonTests
     {
         [Fact]
         public void TypeIsCorrect()
         {
-            Assert.Type.HasProperties(typeof(FormUrlEncodedJson), TypeAssert.TypeProperties.IsPublicVisibleClass | TypeAssert.TypeProperties.IsStatic);
+            Assert.Type.HasProperties(typeof(FormUrlEncodedJson), TypeAssert.TypeProperties.IsClass | TypeAssert.TypeProperties.IsStatic);
         }
 
         [Fact]

@@ -88,7 +88,7 @@
     <Compile Include="Formatting\StringWithQualityHeaderValueComparerTests.cs" />
     <Compile Include="Formatting\FormDataCollectionTests.cs" />
     <Compile Include="Formatting\ContentNegotiationResultTest.cs" />
-    <Compile Include="FormUrlEncodedJsonTests.cs" />
+    <Compile Include="Formatting\FormUrlEncodedJsonTests.cs" />
     <Compile Include="HttpClientExtensionsTest.cs" />
     <Compile Include="HttpContentExtensionsTest.cs" />
     <Compile Include="HttpRequestMessageCommonExtensionsTest.cs" />

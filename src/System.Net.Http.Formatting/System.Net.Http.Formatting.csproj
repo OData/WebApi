@@ -85,7 +85,7 @@
     <Compile Include="Formatting\StringWithQualityHeaderValueComparer.cs" />
     <Compile Include="Formatting\FormDataCollection.cs" />
     <Compile Include="Formatting\ContentNegotiationResult.cs" />
-    <Compile Include="FormUrlEncodedJson.cs" />
+    <Compile Include="Formatting\FormUrlEncodedJson.cs" />
     <Compile Include="Formatting\SecureJsonTextReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Formatting\IFormatterLogger.cs" />

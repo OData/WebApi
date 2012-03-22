@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
-namespace System.Net.Http
+namespace System.Net.Http.Formatting
 {
     /// <summary>
     /// This class provides a low-level API for parsing HTML form URL-encoded data, also known as <c>application/x-www-form-urlencoded</c> 
@@ -14,7 +14,7 @@ namespace System.Net.Http
     /// <remarks>This is a low-level API intended for use by other APIs. It has been optimized for performance and 
     /// is not intended to be called directly from user code.</remarks>
     /// </summary>
-    public static class FormUrlEncodedJson
+    internal static class FormUrlEncodedJson
     {
         private const string ApplicationFormUrlEncoded = @"application/x-www-form-urlencoded";
         private const int MinDepth = 0;

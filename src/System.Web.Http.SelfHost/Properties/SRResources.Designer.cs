@@ -79,29 +79,11 @@ namespace System.Web.Http.SelfHost.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to allocate a managed memory buffer of {0} bytes. The amount of available memory may be low..
-        /// </summary>
-        internal static string BufferAllocationFailed {
-            get {
-                return ResourceManager.GetString("BufferAllocationFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The size quota for this stream ({0}) has been exceeded..
         /// </summary>
         internal static string BufferedOutputStreamQuotaExceeded {
             get {
                 return ResourceManager.GetString("BufferedOutputStreamQuotaExceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This buffer cannot be returned to the buffer manager because it is the wrong size..
-        /// </summary>
-        internal static string BufferIsNotRightSizeForBufferManager {
-            get {
-                return ResourceManager.GetString("BufferIsNotRightSizeForBufferManager", resourceCulture);
             }
         }
         

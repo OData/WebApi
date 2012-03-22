@@ -207,9 +207,6 @@
   <data name="BufferedOutputStreamQuotaExceeded" xml:space="preserve">
     <value>The size quota for this stream ({0}) has been exceeded.</value>
   </data>
-  <data name="BufferIsNotRightSizeForBufferManager" xml:space="preserve">
-    <value>This buffer cannot be returned to the buffer manager because it is the wrong size.</value>
-  </data>
   <data name="ReadNotSupported" xml:space="preserve">
     <value>Read not supported on this stream.</value>
   </data>
@@ -218,8 +215,5 @@
   </data>
   <data name="ValueMustBeNonNegative" xml:space="preserve">
     <value>Value must be non-negative.</value>
-  </data>
-  <data name="BufferAllocationFailed" xml:space="preserve">
-    <value>Failed to allocate a managed memory buffer of {0} bytes. The amount of available memory may be low.</value>
   </data>
 </root>

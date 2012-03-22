@@ -105,11 +105,9 @@
     <Compile Include="ServiceModel\Channels\CompletedAsyncResult.cs" />
     <Compile Include="ServiceModel\Channels\HttpTransportDefaults.cs" />
     <Compile Include="ServiceModel\Channels\IChannelAcceptor.cs" />
-    <Compile Include="ServiceModel\Channels\InternalBufferManager.cs" />
     <Compile Include="ServiceModel\Channels\LayeredChannel.cs" />
     <Compile Include="ServiceModel\Channels\LayeredChannelAcceptor.cs" />
     <Compile Include="ServiceModel\Channels\LayeredChannelListener.cs" />
-    <Compile Include="ServiceModel\Channels\SynchronizedPool.cs" />
     <Compile Include="ServiceModel\Channels\TransportDefaults.cs" />
     <Compile Include="ServiceModel\HostNameComparisonModeHelper.cs" />
     <Compile Include="ServiceModel\HttpClientCredentialTypeHelper.cs" />

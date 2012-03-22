@@ -1,13 +1,14 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.IO;
+using System.ServiceModel.Channels;
 using System.Web.Http.SelfHost.Properties;
 
 namespace System.Web.Http.SelfHost.ServiceModel.Channels
 {
     internal class BufferedOutputStream : Stream
     {
-        private InternalBufferManager _theBufferManager;
+        private BufferManager _bufferManager;
 
         private byte[][] _chunks;
 
@@ -31,15 +32,10 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             _chunks = new byte[4][];
         }
 
-        public BufferedOutputStream(int initialSize, int maxSize, InternalBufferManager bufferManager)
+        public BufferedOutputStream(int initialSize, int maxSize, BufferManager bufferManager)
             : this()
         {
             Reinitialize(initialSize, maxSize, bufferManager);
-        }
-
-        public BufferedOutputStream(int maxSize)
-            : this(0, maxSize, InternalBufferManager.Create(0, Int32.MaxValue))
-        {
         }
 
         public override bool CanRead
@@ -69,14 +65,14 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             set { throw Error.NotSupported(SRResources.SeekNotSupported); }
         }
 
-        public void Reinitialize(int initialSize, int maxSizeQuota, InternalBufferManager bufferManager)
+        public void Reinitialize(int initialSize, int maxSizeQuota, BufferManager bufferManager)
         {
             Reinitialize(initialSize, maxSizeQuota, maxSizeQuota, bufferManager);
         }
 
-        public void Reinitialize(int initialSize, int maxSizeQuota, int effectiveMaxSize, InternalBufferManager bufferManager)
+        public void Reinitialize(int initialSize, int maxSizeQuota, int effectiveMaxSize, BufferManager bufferManager)
         {
-            Debug.Assert(!_initialized, "Clear must be called before re-initializing stream");
+            Contract.Assert(!_initialized, "Clear must be called before re-initializing stream");
 
             if (bufferManager == null)
             {
@@ -85,7 +81,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
 
             _theMaxSizeQuota = maxSizeQuota;
             _maxSize = effectiveMaxSize;
-            _theBufferManager = bufferManager;
+            _bufferManager = bufferManager;
             _currentChunk = bufferManager.TakeBuffer(initialSize);
             _currentChunkSize = 0;
             _totalSize = 0;
@@ -121,7 +117,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             {
                 for (int i = 0; i < _chunkCount; i++)
                 {
-                    _theBufferManager.ReturnBuffer(_chunks[i]);
+                    _bufferManager.ReturnBuffer(_chunks[i]);
                     _chunks[i] = null;
                 }
             }
@@ -135,6 +131,8 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
 
         public override void Close()
         {
+            // Called directly or via base.Dispose, ensure all buffers are returned to the BufferManager
+            Clear();
         }
 
         public override void Flush()
@@ -171,8 +169,8 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Out parameter is fine here.")]
         public byte[] ToArray(out int bufferSize)
         {
-            Debug.Assert(_initialized, "No data to return from uninitialized stream");
-            Debug.Assert(!_bufferReturned, "ToArray cannot be called more than once");
+            Contract.Assert(_initialized, "No data to return from uninitialized stream");
+            Contract.Assert(!_bufferReturned, "ToArray cannot be called more than once");
 
             byte[] buffer;
             if (_chunkCount == 1)
@@ -183,7 +181,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             }
             else
             {
-                buffer = _theBufferManager.TakeBuffer(_totalSize);
+                buffer = _bufferManager.TakeBuffer(_totalSize);
                 int offset = 0;
                 int count = _chunkCount - 1;
                 for (int i = 0; i < count; i++)
@@ -213,8 +211,8 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
 
         public override void WriteByte(byte value)
         {
-            Debug.Assert(_initialized, "Cannot write to uninitialized stream");
-            Debug.Assert(!_bufferReturned, "Cannot write to stream once ToArray has been called.");
+            Contract.Assert(_initialized, "Cannot write to uninitialized stream");
+            Contract.Assert(!_bufferReturned, "Cannot write to stream once ToArray has been called.");
 
             if (_totalSize == _maxSize)
             {
@@ -236,8 +234,8 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
 
         private void WriteCore(byte[] buffer, int offset, int size)
         {
-            Debug.Assert(_initialized, "Cannot write to uninitialized stream");
-            Debug.Assert(!_bufferReturned, "Cannot write to stream once ToArray has been called.");
+            Contract.Assert(_initialized, "Cannot write to uninitialized stream");
+            Contract.Assert(!_bufferReturned, "Cannot write to stream once ToArray has been called.");
 
             if (size < 0)
             {
@@ -299,7 +297,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
                 newChunkSize = minimumChunkSize;
             }
 
-            byte[] newChunk = _theBufferManager.TakeBuffer(newChunkSize);
+            byte[] newChunk = _bufferManager.TakeBuffer(newChunkSize);
             if (_chunkCount == _chunks.Length)
             {
                 byte[][] newChunks = new byte[_chunks.Length * 2][];

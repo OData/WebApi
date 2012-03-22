@@ -247,12 +247,15 @@ namespace System.Web.Http.WebHost
             }
 
             Task responseTask = null;
+            bool isBuffered = false;
+
             if (response.Content != null)
             {
                 CopyHeaders(response.Content.Headers, httpContextBase);
 
-                // Turn off ASP output caching
-                httpResponseBase.BufferOutput = false;
+                // Select output buffering by the kind of content
+                isBuffered = IsOutputBufferingNecessary(response.Content);
+                httpResponseBase.BufferOutput = isBuffered;
 
                 responseTask = response.Content.CopyToAsync(httpResponseBase.OutputStream);
             }
@@ -261,13 +264,61 @@ namespace System.Web.Http.WebHost
                 responseTask = TaskHelpers.Completed();
             }
 
-            return responseTask.Finally(
+            return responseTask
+                .Catch((info) =>
+                {
+                    if (isBuffered)
+                    {
+                        // Failure during the CopyToAsync needs to stop any partial content from
+                        // reaching the client.  If it was during a buffered write, we will give
+                        // them InternalServerError with zero-length content.
+                        httpResponseBase.SuppressContent = true;
+                        httpResponseBase.Clear();
+                        httpResponseBase.ClearContent();
+                        httpResponseBase.ClearHeaders();
+                        httpResponseBase.StatusCode = (int)Net.HttpStatusCode.InternalServerError;
+                    }
+                    else
+                    {
+                        // Any failure in non-buffered mode has already written out StatusCode and possibly content.
+                        // This means the client will receive an OK but the content is incomplete.
+                        // The proper action here is to abort the connection, but HttpResponse.Abort is a 4.5 feature.
+                        // TODO: DevDiv bug #381233 -- call HttpResponse.Abort when it becomes available
+                        httpResponseBase.Close();
+                    }
+
+                    // We do not propagate any errors up, or we will get the
+                    // standard ASP.NET html page.   We want empty content or
+                    // a closed connection.
+                    return info.Handled();
+                })
+                .Finally(
                 () =>
                 {
                     request.DisposeRequestResources();
                     request.Dispose();
                     response.Dispose();
                 });
+        }
+
+        private static bool IsOutputBufferingNecessary(HttpContent httpContent)
+        {
+            // Never buffer StreamContent.  Either it's already buffered or
+            // is of indeterminate length.  Neither calls for us to buffer.
+            if (httpContent == null || httpContent is StreamContent)
+            {
+                return false;
+            }
+
+            // Any content that knows its ContentLength is assumed to have
+            // buffered it already.
+            long? contentLength = httpContent.Headers.ContentLength;
+            if (contentLength.HasValue && contentLength.Value >= 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]

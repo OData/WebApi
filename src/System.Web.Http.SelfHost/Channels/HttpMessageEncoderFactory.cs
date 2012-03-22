@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Threading.Tasks;
 using System.Web.Http.SelfHost.Properties;
 using System.Web.Http.SelfHost.ServiceModel.Channels;
 
@@ -134,12 +135,22 @@ namespace System.Web.Http.SelfHost.Channels
                     throw Error.Argument(String.Empty, SRResources.ParameterMustBeLessThanOrEqualSecondParameter, "messageOffset", "maxMessageSize");
                 }
 
+                // TODO: DevDiv2 bug #378887 -- find out how to eliminate this middle buffer
                 using (BufferManagerOutputStream stream = new BufferManagerOutputStream(MaxSentMessageSizeExceededResourceStringName, 0, maxMessageSize, bufferManager))
                 {
                     int num;
                     stream.Skip(messageOffset);
                     WriteMessage(message, stream);
-                    ArraySegment<byte> messageData = new ArraySegment<byte>(stream.ToArray(out num), 0, num - messageOffset);
+
+                    byte[] buffer = stream.ToArray(out num);
+                    ArraySegment<byte> messageData = new ArraySegment<byte>(buffer, 0, num - messageOffset);
+
+                    // ToArray transfers full ownership of buffer to us, meaning we are responsible for returning it to BufferManager.  
+                    // But we must delay that release until WCF has finished with the buffer we are returning from this method.
+                    HttpMessageEncodingRequestContext requestContext = HttpMessageEncodingRequestContext.GetContextFromMessage(message);
+                    Contract.Assert(requestContext != null);
+                    requestContext.BufferManager = bufferManager;
+                    requestContext.BufferToReturn = buffer;
 
                     return messageData;
                 }
@@ -166,7 +177,31 @@ namespace System.Web.Http.SelfHost.Channels
 
                 if (response.Content != null)
                 {
-                    response.Content.CopyToAsync(stream).Wait();
+                    HttpMessageEncodingRequestContext requestContext =
+                        HttpMessageEncodingRequestContext.GetContextFromMessage(message);
+                    try
+                    {
+                        response.Content.CopyToAsync(stream)
+                            .Catch((info) =>
+                                       {
+                                           if (requestContext != null)
+                                           {
+                                               requestContext.Exception = info.Exception;
+                                           }
+
+                                           return info.Throw();
+                                       })
+                            .Wait();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (requestContext != null)
+                        {
+                            requestContext.Exception = ex;
+                        }
+
+                        throw;
+                    }
                 }
             }
 

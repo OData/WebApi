@@ -7,11 +7,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
 using System.Web.Http.SelfHost.Properties;
+using System.Web.Http.SelfHost.ServiceModel.Channels;
 
 namespace System.Web.Http.SelfHost.Channels
 {
     internal class HttpMessageEncodingRequestContext : RequestContext
     {
+        private const string HttpMessageEncodingRequestContextPropertyName = "MS_HttpMessageEncodingRequestContextKey";
         private const string DefaultReasonPhrase = "OK";
 
         private RequestContext _innerContext;
@@ -25,6 +27,10 @@ namespace System.Web.Http.SelfHost.Channels
             _innerContext = innerContext;
             _requestConfigurationLock = new object();
         }
+
+        internal Exception Exception { get; set; }
+        internal BufferManager BufferManager { get; set; }
+        internal byte[] BufferToReturn { get; set; }
 
         public override Message RequestMessage
         {
@@ -55,13 +61,13 @@ namespace System.Web.Http.SelfHost.Channels
 
         public override IAsyncResult BeginReply(Message message, TimeSpan timeout, AsyncCallback callback, object state)
         {
-            message = ConfigureResponseMessage(message);
+            ConfigureResponseMessage(message);
             return _innerContext.BeginReply(message, timeout, callback, state);
         }
 
         public override IAsyncResult BeginReply(Message message, AsyncCallback callback, object state)
         {
-            message = ConfigureResponseMessage(message);
+            ConfigureResponseMessage(message);
             return _innerContext.BeginReply(message, callback, state);
         }
 
@@ -79,12 +85,20 @@ namespace System.Web.Http.SelfHost.Channels
 
         public override void EndReply(IAsyncResult result)
         {
-            _innerContext.EndReply(result);
+            try
+            {
+                _innerContext.EndReply(result);
+            }
+            catch (Exception ex)
+            {
+                Exception = ex;
+                throw;
+            }
         }
 
         public override void Reply(Message message, TimeSpan timeout)
         {
-            message = ConfigureResponseMessage(message);
+            ConfigureResponseMessage(message);
             _innerContext.Reply(message, timeout);
         }
 
@@ -92,6 +106,32 @@ namespace System.Web.Http.SelfHost.Channels
         {
             ConfigureResponseMessage(message);
             _innerContext.Reply(message);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // To avoid double buffering, we use the BufferedOutputStream's own buffer
+                // that it created through the BufferManager passed to WriteStream.
+                // We are responsible for returning that buffer to the BufferManager
+                // because we used BufferedOutputStream.ToArray to take ownership
+                // of its buffers.
+                if (BufferManager != null && BufferToReturn != null)
+                {
+                    BufferManager.ReturnBuffer(BufferToReturn);
+                    BufferToReturn = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        internal static HttpMessageEncodingRequestContext GetContextFromMessage(Message message)
+        {
+            HttpMessageEncodingRequestContext context = null;
+            message.Properties.TryGetValue<HttpMessageEncodingRequestContext>(HttpMessageEncodingRequestContextPropertyName, out context);
+            return context;
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Cleanup exceptions are ignored as they are not fatal to the host.")]
@@ -199,16 +239,13 @@ namespace System.Web.Http.SelfHost.Channels
             return message;
         }
 
-        private static Message ConfigureResponseMessage(Message message)
+        private void ConfigureResponseMessage(Message message)
         {
-            if (message == null)
-            {
-                return null;
-            }
+            Contract.Assert(message != null);
 
             HttpResponseMessageProperty responseProperty = new HttpResponseMessageProperty();
-
             HttpResponseMessage httpResponseMessage = message.ToHttpResponseMessage();
+
             if (httpResponseMessage == null)
             {
                 responseProperty.StatusCode = HttpStatusCode.InternalServerError;
@@ -240,7 +277,9 @@ namespace System.Web.Http.SelfHost.Channels
 
             message.Properties.Add(HttpResponseMessageProperty.Name, responseProperty);
 
-            return message;
+            // The current request context flows with the Message for later use
+            // by HttpMessageEncoder.WriteMessage
+            message.Properties.Add(HttpMessageEncodingRequestContextPropertyName, this);
         }
     }
 }

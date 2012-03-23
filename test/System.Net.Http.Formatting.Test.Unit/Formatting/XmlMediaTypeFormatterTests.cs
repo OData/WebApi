@@ -71,34 +71,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void ReadDeeplyNestedObjectWorks()
-        {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 5001, UseXmlSerializer = true };
-
-            StringContent content = new StringContent(GetDeeplyNestedObject(5000));
-
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
-
-            Assert.IsType<Nest>(formatter.ReadFromStreamAsync(typeof(Nest), content.ReadAsStreamAsync().Result, content.Headers, null).Result);
-        }
-
-        static string GetDeeplyNestedObject(int depth)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < depth; i++)
-            {
-                sb.Insert(0, "<A>");
-                sb.Append("</A>");
-            }
-            sb.Insert(0, "<Nest xmlns=\"http://example.com\">");
-            sb.Append("</Nest>");
-            sb.Insert(0, "<?xml version=\"1.0\"?>");
-
-            return sb.ToString();
-
-        }
-
-        [Fact]
         public void Indent_RoundTrips()
         {
             Assert.Reflection.BooleanProperty(
@@ -294,12 +266,6 @@ namespace System.Net.Http.Formatting
             {
                 return CanWriteType(type);
             }
-        }
-
-        [XmlRoot("Nest", Namespace = "http://example.com")]
-        public class Nest
-        {
-            public Nest A { get; set; }
         }
 
         private bool IsSerializableWithXmlSerializer(Type type, object obj)

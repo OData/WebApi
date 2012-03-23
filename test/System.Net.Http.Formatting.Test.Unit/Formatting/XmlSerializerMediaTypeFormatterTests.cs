@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +62,18 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void ReadDeeplyNestedObjectWorks()
+        {
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter() { MaxDepth = 5001 };
+
+            StringContent content = new StringContent(GetDeeplyNestedObject(5000));
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+
+            Assert.IsType<Nest>(formatter.ReadFromStreamAsync(typeof(Nest), content.ReadAsStreamAsync().Result, content.Headers, null).Result);
+        }
+
+        [Fact]
         public void UseXmlSerializer_RoundTrips()
         {
             Assert.Reflection.BooleanProperty(
@@ -72,7 +83,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property works when set to true.")]
         public void UseXmlSerializer_True()
         {
             XmlSerializerMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter();
@@ -89,7 +99,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseXmlSerializer property with Indent works when set to true.")]
         public void UseXmlSerializer_True_Indent()
         {
             XmlSerializerMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter { Indent = true };
@@ -103,7 +112,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanReadType() returns the same result as the XmlSerializer constructor.")]
         public void CanReadType_ReturnsSameResultAsXmlSerializerConstructor(Type variationType, object testData)
         {
             TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
@@ -122,7 +130,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null type.")]
         public void SetSerializer_ThrowsWithNullType()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -131,7 +138,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null serializer.")]
         public void SetSerializer_ThrowsWithNullSerializer()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -139,7 +145,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer<T>(XmlSerializer) throws with null serializer.")]
         public void SetSerializer1_ThrowsWithNullSerializer()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -147,7 +152,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlObjectSerializer) throws with null type.")]
         public void SetSerializer2_ThrowsWithNullType()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -156,7 +160,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer(Type, XmlObjectSerializer) throws with null serializer.")]
         public void SetSerializer2_ThrowsWithNullSerializer()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -164,7 +167,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SetSerializer<T>(XmlObjectSerializer) throws with null serializer.")]
         public void SetSerializer3_ThrowsWithNullSerializer()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -172,7 +174,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "RemoveSerializer throws with null type.")]
         public void RemoveSerializer_ThrowsWithNullType()
         {
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
@@ -181,7 +182,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "ReadFromStreamAsync() returns all value and reference types serialized via WriteToStreamAsync using XmlSerializer.")]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer(Type variationType, object testData)
         {
             TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
@@ -242,6 +242,21 @@ namespace System.Net.Http.Formatting
             return WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
+        static string GetDeeplyNestedObject(int depth)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < depth; i++)
+            {
+                sb.Insert(0, "<A>");
+                sb.Append("</A>");
+            }
+            sb.Insert(0, "<Nest xmlns=\"http://example.com\">");
+            sb.Append("</Nest>");
+            sb.Insert(0, "<?xml version=\"1.0\"?>");
+
+            return sb.ToString();
+        }
+
         public class TestXmlSerializerMediaTypeFormatter : XmlSerializerMediaTypeFormatter
         {
             public bool CanReadTypeCaller(Type type)
@@ -253,6 +268,12 @@ namespace System.Net.Http.Formatting
             {
                 return CanWriteType(type);
             }
+        }
+
+        [XmlRoot("Nest", Namespace = "http://example.com")]
+        public class Nest
+        {
+            public Nest A { get; set; }
         }
 
         private bool IsSerializableWithXmlSerializer(Type type, object obj)

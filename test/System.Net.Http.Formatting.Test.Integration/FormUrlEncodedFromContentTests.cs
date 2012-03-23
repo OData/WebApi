@@ -15,8 +15,8 @@ namespace System.Net.Http.Formatting
         #region Tests
 
         [Theory,
-            InlineData("abc", "{\"abc\":null}"),
-            InlineData("%2eabc%2e", "{\".abc.\":null}"),
+            InlineData("abc", "{\"abc\":\"\"}"),
+            InlineData("%2eabc%2e", "{\".abc.\":\"\"}"),
             InlineData("", "{}"),
             InlineData("a=1", "{\"a\":\"1\"}")]
         public void SimpleStringsTest(string encoded, string expectedResult)
@@ -100,8 +100,7 @@ namespace System.Net.Http.Formatting
             InlineData("[]=1"),
             InlineData("a[][]=0"),
             InlineData("a[][x]=0"),
-            InlineData("a&a[b]=1"),
-            InlineData("a&a=1")]
+            InlineData("a&a[b]=1")]
         public void InvalidObjectGraphsTest(string encoded)
         {
             ParseInvalidFormUrlEncoded(encoded);
@@ -120,11 +119,11 @@ namespace System.Net.Http.Formatting
         /// Tests for parsing form-urlencoded data originated from JS primitives.
         /// </summary>
         [Theory,
-            InlineData("abc", @"{""abc"":null}"),
-            InlineData("123", @"{""123"":null}"),
-            InlineData("true", @"{""true"":null}"),
+            InlineData("abc", @"{""abc"":""""}"),
+            InlineData("123", @"{""123"":""""}"),
+            InlineData("true", @"{""true"":""""}"),
             InlineData("", "{}"),
-            InlineData("%2fabc%2f", @"{""/abc/"":null}")]
+            InlineData("%2fabc%2f", @"{""/abc/"":""""}")]
         public void TestJValue(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);
@@ -268,11 +267,11 @@ namespace System.Net.Http.Formatting
                 yield return new[] { encoded, resultStr };
 
                 encoded = "a%5B%5D=1&a";
-                resultStr = @"{""a"":[""1"",null]}";
+                resultStr = @"{""a"":[""1"",""""]}";
                 yield return new[] { encoded, resultStr };
 
                 encoded = "a=1&a";
-                resultStr = @"{""a"":[""1"",null]}";
+                resultStr = @"{""a"":[""1"",""""]}";
                 yield return new[] { encoded, resultStr };
             }
         }

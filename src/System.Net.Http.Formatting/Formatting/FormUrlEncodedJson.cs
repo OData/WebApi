@@ -110,9 +110,16 @@ namespace System.Net.Http.Formatting
             JObject result = new JObject();
             foreach (var nameValuePair in nameValuePairs)
             {
-                if (nameValuePair.Key == null)
+                string key = nameValuePair.Key;
+                string value = nameValuePair.Value;
+                if (String.Compare(value, "null", StringComparison.Ordinal) == 0)
                 {
-                    if (String.IsNullOrEmpty(nameValuePair.Value))
+                    value = null;
+                }
+
+                if (key == null)
+                {
+                    if (String.IsNullOrEmpty(value))
                     {
                         if (throwOnError)
                         {
@@ -122,7 +129,7 @@ namespace System.Net.Http.Formatting
                         return null;
                     }
 
-                    string[] path = new string[] { nameValuePair.Value };
+                    string[] path = new string[] { value };
                     if (!Insert(result, path, null, throwOnError))
                     {
                         return null;
@@ -130,8 +137,8 @@ namespace System.Net.Http.Formatting
                 }
                 else
                 {
-                    string[] path = GetPath(nameValuePair.Key, maxDepth, throwOnError);
-                    if (path == null || !Insert(result, path, nameValuePair.Value, throwOnError))
+                    string[] path = GetPath(key, maxDepth, throwOnError);
+                    if (path == null || !Insert(result, path, value, throwOnError))
                     {
                         return null;
                     }

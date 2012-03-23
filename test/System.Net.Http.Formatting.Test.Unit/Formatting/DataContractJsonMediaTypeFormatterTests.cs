@@ -15,7 +15,15 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {
-    public class JsonMediaTypeFormatterTests : MediaTypeFormatterTestBase<JsonMediaTypeFormatter>
+    public class DataContractJsonMediaTypeFormatter : JsonMediaTypeFormatter
+    {
+        public DataContractJsonMediaTypeFormatter()
+        {
+            UseDataContractJsonSerializer = true;
+        }
+    }
+
+    public class DataContractJsonMediaTypeFormatterTests : MediaTypeFormatterTestBase<DataContractJsonMediaTypeFormatter>
     {
         public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
         {
@@ -62,7 +70,7 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void DefaultMediaType_ReturnsApplicationJson()
         {
-            MediaTypeHeaderValue mediaType = JsonMediaTypeFormatter.DefaultMediaType;
+            MediaTypeHeaderValue mediaType = DataContractJsonMediaTypeFormatter.DefaultMediaType;
             Assert.NotNull(mediaType);
             Assert.Equal("application/json", mediaType.MediaType);
         }
@@ -80,7 +88,7 @@ namespace System.Net.Http.Formatting
         public void MaxDepth_RoundTrips()
         {
             Assert.Reflection.IntegerProperty(
-                new JsonMediaTypeFormatter(),
+                new DataContractJsonMediaTypeFormatter(),
                 c => c.MaxDepth,
                 expectedDefaultValue: 1024,
                 minLegalValue: 1,
@@ -170,32 +178,30 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractJsonSerializer property works when set to false.")]
-        public void UseDataContractJsonSerializer_False()
+        public void UseDataContractJsonSerializer_True()
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
+            DataContractJsonMediaTypeFormatter jsonFormatter = new DataContractJsonMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
+            Assert.Task.Succeeds(jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             //Assert.True(serializedString.Contains("DataContractSampleType"),
             //    "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractJsonSerializer is set to true.");
-            Assert.False(serializedString.Contains("\r\n"), "Using JsonSerializer should emit data without indentation by default.");
+            Assert.False(serializedString.Contains("\r\n"), "Using DCJS should emit data without indentation by default.");
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractJsonSerializer property with Indent works when set to false.")]
-        public void UseDataContractJsonSerializer_False_Indent()
+        [Trait("Description", "UseDataContractJsonSerializer property with Indent throws when set to true.")]
+        public void UseDataContractJsonSerializer_True_Indent_Throws()
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
+            DataContractJsonMediaTypeFormatter jsonFormatter = new DataContractJsonMediaTypeFormatter { Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
-            memoryStream.Position = 0;
-            string serializedString = new StreamReader(memoryStream).ReadToEnd();
-            Console.WriteLine(serializedString);
-            Assert.True(serializedString.Contains("\r\n"), "Using JsonSerializer with Indent set to true should emit data with indentation.");
+            Assert.Throws<NotSupportedException>(
+                () => jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType),
+                    new XmlMediaTypeFormatterTests.SampleType(),
+                    memoryStream, contentHeaders, transportContext: null));
         }
 
         [Fact]
@@ -220,7 +226,7 @@ namespace System.Net.Http.Formatting
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // Arrange
-            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
+            DataContractJsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
             string formattedContent = "\"" + content + "\"";
             string mediaType = string.Format("application/json; charset={0}", encoding);
 
@@ -234,7 +240,7 @@ namespace System.Net.Http.Formatting
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // Arrange
-            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
+            DataContractJsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
             string formattedContent = "\"" + content + "\"";
             string mediaType = string.Format("application/json; charset={0}", encoding);
 
@@ -243,7 +249,7 @@ namespace System.Net.Http.Formatting
                 formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
-        public class TestJsonMediaTypeFormatter : JsonMediaTypeFormatter
+        public class TestJsonMediaTypeFormatter : DataContractJsonMediaTypeFormatter
         {
             public bool CanReadTypeProxy(Type type)
             {

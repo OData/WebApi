@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
+using System.Net.Http.Internal;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,15 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {
-    public class XmlMediaTypeFormatterTests : MediaTypeFormatterTestBase<XmlMediaTypeFormatter>
+    public class XmlSerializerMediaTypeFormatter : XmlMediaTypeFormatter
+    {
+        public XmlSerializerMediaTypeFormatter()
+        {
+            UseXmlSerializer = true;
+        }
+    }
+
+    public class XmlSerializerMediaTypeFormatterTests : MediaTypeFormatterTestBase<XmlSerializerMediaTypeFormatter>
     {
         public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
         {
@@ -33,76 +42,22 @@ namespace System.Net.Http.Formatting
 
         public override byte[] ExpectedSampleTypeByteRepresentation
         {
-            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<DataContractSampleType xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting\"><Number>42</Number></DataContractSampleType>"); }
+            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleType><Number>42</Number></SampleType>"); }
         }
 
         [Fact]
         public void DefaultMediaType_ReturnsApplicationXml()
         {
-            MediaTypeHeaderValue mediaType = XmlMediaTypeFormatter.DefaultMediaType;
+            MediaTypeHeaderValue mediaType = XmlSerializerMediaTypeFormatter.DefaultMediaType;
             Assert.NotNull(mediaType);
             Assert.Equal("application/xml", mediaType.MediaType);
-        }
-
-        [Fact]
-        public void MaxDepthReturnsCorrectValue()
-        {
-            Assert.Reflection.IntegerProperty(
-                new XmlMediaTypeFormatter(),
-                f => f.MaxDepth,
-                expectedDefaultValue: 1024,
-                minLegalValue: 1,
-                illegalLowerValue: 0,
-                maxLegalValue: null,
-                illegalUpperValue: null,
-                roundTripTestValue: 10);
-        }
-
-        [Fact]
-        public void ReadDeeplyNestedObjectThrows()
-        {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 1 };
-
-            MemoryStream stream = new MemoryStream();
-            formatter.WriteToStreamAsync(typeof(SampleType), new SampleType() { Number = 1 }, stream, null, null).Wait();
-            stream.Position = 0;
-            Task task = formatter.ReadFromStreamAsync(typeof(SampleType), stream, null, null);
-            Assert.Throws<SerializationException>(() => task.Wait());
-        }
-
-        [Fact]
-        public void ReadDeeplyNestedObjectWorks()
-        {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter() { MaxDepth = 5001, UseXmlSerializer = true };
-
-            StringContent content = new StringContent(GetDeeplyNestedObject(5000));
-
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
-
-            Assert.IsType<Nest>(formatter.ReadFromStreamAsync(typeof(Nest), content.ReadAsStreamAsync().Result, content.Headers, null).Result);
-        }
-
-        static string GetDeeplyNestedObject(int depth)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < depth; i++)
-            {
-                sb.Insert(0, "<A>");
-                sb.Append("</A>");
-            }
-            sb.Insert(0, "<Nest xmlns=\"http://example.com\">");
-            sb.Append("</Nest>");
-            sb.Insert(0, "<?xml version=\"1.0\"?>");
-
-            return sb.ToString();
-
         }
 
         [Fact]
         public void Indent_RoundTrips()
         {
             Assert.Reflection.BooleanProperty(
-                new XmlMediaTypeFormatter(),
+                new XmlSerializerMediaTypeFormatter(),
                 c => c.Indent,
                 expectedDefaultValue: false);
         }
@@ -111,95 +66,125 @@ namespace System.Net.Http.Formatting
         public void UseXmlSerializer_RoundTrips()
         {
             Assert.Reflection.BooleanProperty(
-                new XmlMediaTypeFormatter(),
+                new XmlSerializerMediaTypeFormatter(),
                 c => c.UseXmlSerializer,
-                expectedDefaultValue: false);
+                expectedDefaultValue: true);
         }
 
         [Fact]
-        public void UseXmlSerializer_False()
+        [Trait("Description", "UseXmlSerializer property works when set to true.")]
+        public void UseXmlSerializer_True()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false };
+            XmlSerializerMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
-            Assert.True(serializedString.Contains("DataContractSampleType"),
-                "SampleType should be serialized with data contract name DataContractSampleType because we're using DCS.");
+            Assert.False(serializedString.Contains("DataContractSampleType"),
+                "SampleType should not be serialized with data contract name DataContractSampleType because UseXmlSerializer is set to true.");
             Assert.False(serializedString.Contains("version=\"1.0\" encoding=\"utf-8\""),
-                    "Using DCS should not emit the xml declaration by default.");
-            Assert.False(serializedString.Contains("\r\n"), "Using DCS should emit data without indentation by default.");
+              "Using XmlSerializer should not emit the xml declaration by default.");
+            Assert.False(serializedString.Contains("\r\n"), "Using default XmlSerializer should emit data without indentation.");
         }
 
         [Fact]
-        public void UseXmlSerializer_False_Indent()
+        [Trait("Description", "UseXmlSerializer property with Indent works when set to true.")]
+        public void UseXmlSerializer_True_Indent()
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false, Indent = true };
+            XmlSerializerMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter { Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
-            Assert.True(serializedString.Contains("\r\n"), "Using DCS with indent set to true should emit data with indentation.");
+            Assert.True(serializedString.Contains("\r\n"), "Using default XmlSerializer with Indent set to true should emit data with indentation.");
+        }
+
+        [Theory]
+        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
+        [Trait("Description", "CanReadType() returns the same result as the XmlSerializer constructor.")]
+        public void CanReadType_ReturnsSameResultAsXmlSerializerConstructor(Type variationType, object testData)
+        {
+            TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
+
+            bool isSerializable = IsSerializableWithXmlSerializer(variationType, testData);
+            bool canSupport = formatter.CanReadTypeCaller(variationType);
+            if (isSerializable != canSupport)
+            {
+                Assert.Equal(isSerializable, canSupport);
+            }
+
+            // Ask a 2nd time to probe whether the cached result is treated the same
+            canSupport = formatter.CanReadTypeCaller(variationType);
+            Assert.Equal(isSerializable, canSupport);
+
         }
 
         [Fact]
+        [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null type.")]
         public void SetSerializer_ThrowsWithNullType()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(string));
             Assert.ThrowsArgumentNull(() => { formatter.SetSerializer(null, xmlSerializer); }, "type");
         }
 
         [Fact]
+        [Trait("Description", "SetSerializer(Type, XmlSerializer) throws with null serializer.")]
         public void SetSerializer_ThrowsWithNullSerializer()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.SetSerializer(typeof(string), (XmlSerializer)null); }, "serializer");
         }
 
         [Fact]
+        [Trait("Description", "SetSerializer<T>(XmlSerializer) throws with null serializer.")]
         public void SetSerializer1_ThrowsWithNullSerializer()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.SetSerializer<string>((XmlSerializer)null); }, "serializer");
         }
 
         [Fact]
+        [Trait("Description", "SetSerializer(Type, XmlObjectSerializer) throws with null type.")]
         public void SetSerializer2_ThrowsWithNullType()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             XmlObjectSerializer xmlObjectSerializer = new DataContractSerializer(typeof(string));
             Assert.ThrowsArgumentNull(() => { formatter.SetSerializer(null, xmlObjectSerializer); }, "type");
         }
 
         [Fact]
+        [Trait("Description", "SetSerializer(Type, XmlObjectSerializer) throws with null serializer.")]
         public void SetSerializer2_ThrowsWithNullSerializer()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.SetSerializer(typeof(string), (XmlObjectSerializer)null); }, "serializer");
         }
 
         [Fact]
+        [Trait("Description", "SetSerializer<T>(XmlObjectSerializer) throws with null serializer.")]
         public void SetSerializer3_ThrowsWithNullSerializer()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.SetSerializer<string>((XmlSerializer)null); }, "serializer");
         }
 
         [Fact]
+        [Trait("Description", "RemoveSerializer throws with null type.")]
         public void RemoveSerializer_ThrowsWithNullType()
         {
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.RemoveSerializer(null); }, "type");
         }
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
+        [Trait("Description", "ReadFromStreamAsync() returns all value and reference types serialized via WriteToStreamAsync using XmlSerializer.")]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer(Type variationType, object testData)
         {
-            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
+            TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
 
             bool canSerialize = IsSerializableWithXmlSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
@@ -220,31 +205,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        public void ReadFromStream_AsyncRoundTripsWriteToStreamUsingDataContractSerializer(Type variationType, object testData)
-        {
-            TestXmlMediaTypeFormatter formatter = new TestXmlMediaTypeFormatter();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-
-            bool canSerialize = IsSerializableWithDataContractSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
-            if (canSerialize)
-            {
-                formatter.SetSerializer(variationType, new DataContractSerializer(variationType));
-
-                object readObj = null;
-                Assert.Stream.WriteAndRead(
-                    stream =>
-                    {
-                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
-                        contentHeaders.ContentLength = stream.Length;
-                    },
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null))
-                    );
-                Assert.Equal(testData, readObj);
-            }
-        }
-
-        [Theory]
         [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
@@ -255,8 +215,8 @@ namespace System.Net.Http.Formatting
             }
 
             // Arrange
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
-            string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content + "</string>";
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
+            string formattedContent = "<string>" + content + "</string>";
             string mediaType = string.Format("application/xml; charset={0}", encoding);
 
             // Act & assert
@@ -274,16 +234,15 @@ namespace System.Net.Http.Formatting
             }
 
             // Arrange
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
-            string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content +
-                                      "</string>";
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
+            string formattedContent = "<string>" + content + "</string>";
             string mediaType = string.Format("application/xml; charset={0}", encoding);
 
             // Act & assert
             return WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
-        public class TestXmlMediaTypeFormatter : XmlMediaTypeFormatter
+        public class TestXmlSerializerMediaTypeFormatter : XmlSerializerMediaTypeFormatter
         {
             public bool CanReadTypeCaller(Type type)
             {
@@ -294,12 +253,6 @@ namespace System.Net.Http.Formatting
             {
                 return CanWriteType(type);
             }
-        }
-
-        [XmlRoot("Nest", Namespace = "http://example.com")]
-        public class Nest
-        {
-            public Nest A { get; set; }
         }
 
         private bool IsSerializableWithXmlSerializer(Type type, object obj)

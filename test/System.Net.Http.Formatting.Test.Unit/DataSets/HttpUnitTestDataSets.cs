@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
+using System.Text;
 
 namespace System.Net.Http.Formatting.DataSets
 {
@@ -41,6 +42,8 @@ namespace System.Net.Http.Formatting.DataSets
         public static TestData<string> LegalMediaTypeStrings { get { return HttpTestData.LegalMediaTypeStrings; } }
 
         public static TestData<string> IllegalMediaTypeStrings { get { return HttpTestData.IllegalMediaTypeStrings; } }
+
+        public static TestData<Encoding> StandardEncodings { get { return HttpTestData.StandardEncodings; } }
 
         public static TestData<MediaTypeHeaderValue> LegalMediaTypeHeaderValues { get { return HttpTestData.LegalMediaTypeHeaderValues; } }
 

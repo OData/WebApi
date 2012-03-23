@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.TestCommon;
 
 namespace System.Net.Http.Formatting.DataSets.Types
@@ -164,6 +165,25 @@ namespace System.Net.Http.Formatting.DataSets.Types
             "\0",
             "9\r\n"
         });
+
+        public static readonly TestData<Encoding> StandardEncodings = new RefTypeTestData<Encoding>(() => new List<Encoding>() 
+        { 
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true),
+            new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true),
+        });
+
+        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
+        {
+            get
+            {
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-8", "utf-8", true };
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-16", "utf-16", true };
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-32", "utf-32", false };
+                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using shift_jis", "shift_jis", false };
+                yield return new object[] { "This is a test æøå string written using iso-8859-1", "iso-8859-1", false };
+                yield return new object[] { "This is a test 레이저 단어 뜻 string written using iso-2022-kr", "iso-2022-kr", false };
+            }
+        }
 
         //// TODO: complete this list
         // Legal MediaTypeHeaderValues

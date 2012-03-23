@@ -58,8 +58,13 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="stream"/>
         /// </summary>
-        /// <remarks>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
-        /// supports reading.</remarks>
+        /// <remarks>
+        /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+        /// supports reading.</para>
+        /// <para>An implementation of this method should NOT close <paramref name="stream"/> upon completion. The stream will be closed independently when
+        /// the <see cref="HttpContent"/> instance is disposed.
+        /// </para>
+        /// </remarks>
         /// <param name="type">The type of the object to deserialize.</param>
         /// <param name="stream">The <see cref="Stream"/> to read.</param>
         /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> if available. It may be <c>null</c>.</param>
@@ -77,8 +82,13 @@ namespace System.Net.Http.Formatting
         /// Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
         /// to the given <paramref name="stream"/>.
         /// </summary>
-        /// <remarks>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
-        /// supports writing.</remarks>
+        /// <remarks>
+        /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+        /// supports reading.</para>
+        /// <para>An implementation of this method should NOT close <paramref name="stream"/> upon completion. The stream will be closed independently when
+        /// the <see cref="HttpContent"/> instance is disposed.
+        /// </para>
+        /// </remarks>
         /// <param name="type">The type of the object to write.</param>
         /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
         /// <param name="stream">The <see cref="Stream"/> to which to write.</param>

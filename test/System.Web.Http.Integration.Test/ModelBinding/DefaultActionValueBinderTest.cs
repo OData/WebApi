@@ -699,10 +699,10 @@ namespace System.Web.Http.ModelBinding
             string jsonString = "{\"Id\":\"7\",\"FirstName\":\"testFirstName\",\"LastName\":\"testLastName\"}";
             StringContent stringContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
-            HttpRequestMessage request = new HttpRequestMessage() 
-            { 
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
                 RequestUri = new Uri("http://localhost/ActionValueController/PostFromBody?id=123"),
-                Content = stringContent 
+                Content = stringContent
             };
 
             HttpActionContext context = ContextUtil.CreateActionContext(
@@ -835,10 +835,65 @@ namespace System.Web.Http.ModelBinding
         }
 
         #endregion Body
+
+        [Fact]
+        public void BindValuesAsync_FromUriAttribute_DecoratedOn_Type()
+        {
+            // Arrange
+            CancellationToken cancellationToken = new CancellationToken();
+            HttpActionContext actionContext = ContextUtil.CreateActionContext(
+                ContextUtil.CreateControllerContext(new HttpRequestMessage()
+                {
+                    Method = new HttpMethod("Patch"),
+                    RequestUri = new Uri("http://localhost?x=123&y=456&data.description=mypoint")
+                }),
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("Patch") });
+
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(actionContext, cancellationToken).Wait();
+
+            // Assert
+            Dictionary<string, object> expectedResult = new Dictionary<string, object>();
+            expectedResult["point"] = new Point { X = 123, Y = 456, Data = new Data { Description = "mypoint" } };
+            Assert.Equal(expectedResult, actionContext.ActionArguments, new DictionaryEqualityComparer());
+        }
+    }
+
+    [FromUri]
+    public class Point
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public Data Data { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            Point other = obj as Point;
+            if (other != null)
+            {
+                return other.X == X && other.Y == Y && other.Data.Description == other.Data.Description;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+    }
+
+    public class Data
+    {
+        public string Description { get; set; }
     }
 
     public class ActionValueController : ApiController
     {
+        // Demonstrates complex parameter that has FromUri declared on the type
+        public void Patch(Point point) { }
+
         // Demonstrates parameter that can come from route, query string, or defaults
         public ActionValueItem Get(int id = 0, string firstName = "DefaultFirstName", string lastName = "DefaultLastName")
         {
@@ -853,7 +908,7 @@ namespace System.Web.Http.ModelBinding
             return new ActionValueItem() { Id = id, FirstName = firstName, LastName = lastName };
         }
 
-        
+
         // Complex objects default to body. But we can bind from URI with an attribute.
         public ActionValueItem GetItem([FromUri] ActionValueItem item)
         {

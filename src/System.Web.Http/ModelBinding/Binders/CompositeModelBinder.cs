@@ -114,6 +114,13 @@ namespace System.Web.Http.ModelBinding.Binders
                 return false;
             }
 
+            // TODO, 386718, remove the following if statement when the bug is resolved
+            if (attr.BinderType == null)
+            {
+                provider = null;
+                return false;
+            }
+
             if (typeof(ModelBinderProvider).IsAssignableFrom(attr.BinderType))
             {
                 provider = (ModelBinderProvider)Activator.CreateInstance(attr.BinderType);

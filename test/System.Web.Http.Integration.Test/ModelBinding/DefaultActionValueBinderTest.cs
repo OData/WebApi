@@ -87,7 +87,7 @@ namespace System.Web.Http.ModelBinding
             ConvertEmptyStringContainer arg = (ConvertEmptyStringContainer) actionContext.ActionArguments["x"];
 
             Assert.NotNull(arg);
-            Assert.Equal(string.Empty, arg.A1);
+            Assert.Equal(String.Empty, arg.A1);
             Assert.Null(arg.A2);
             Assert.Null(arg.A3);
             Assert.Null(arg.A4);

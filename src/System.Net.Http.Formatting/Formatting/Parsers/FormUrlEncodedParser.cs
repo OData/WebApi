@@ -287,9 +287,9 @@ namespace System.Net.Http.Formatting.Parsers
             /// <param name="nameValuePairs">The collection to copy into.</param>
             public void CopyNameOnlyTo(ICollection<KeyValuePair<string, string>> nameValuePairs)
             {
-                string key = UriQueryUtility.UrlDecode(_name.ToString());
-                string value = string.Empty;
-                nameValuePairs.Add(new KeyValuePair<string, string>(key, value));
+                string unescapedName = UriQueryUtility.UrlDecode(_name.ToString());
+                string value = String.Empty;
+                nameValuePairs.Add(new KeyValuePair<string, string>(unescapedName, value));
                 Clear();
             }
 

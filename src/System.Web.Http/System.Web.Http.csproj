@@ -187,11 +187,11 @@
     <Compile Include="Routing\UrlHelper.cs" />
     <Compile Include="Services\DependencyResolver.cs" />
     <Compile Include="Dispatcher\HttpControllerTypeCache.cs" />
-    <Compile Include="Dispatcher\DefaultHttpControllerFactory.cs" />
+    <Compile Include="Dispatcher\DefaultHttpControllerSelector.cs" />
     <Compile Include="Dispatcher\DefaultBuildManager.cs" />
     <Compile Include="DependencyResolverExtensions.cs" />
     <Compile Include="Services\IDependencyResolver.cs" />
-    <Compile Include="Dispatcher\IHttpControllerFactory.cs" />
+    <Compile Include="Dispatcher\IHttpControllerSelector.cs" />
     <Compile Include="Filters\FilterAttribute.cs" />
     <Compile Include="Hosting\HttpPropertyKeys.cs" />
     <Compile Include="Hosting\HttpPipelineFactory.cs" />
@@ -283,7 +283,7 @@
     <Compile Include="Tracing\Tracers\AuthorizationFilterTracer.cs" />
     <Compile Include="Tracing\Tracers\BufferedMediaTypeFormatterTracer.cs" />
     <Compile Include="Tracing\Tracers\HttpControllerActivatorTracer.cs" />
-    <Compile Include="Tracing\Tracers\HttpControllerFactoryTracer.cs" />
+    <Compile Include="Tracing\Tracers\HttpControllerSelectorTracer.cs" />
     <Compile Include="Tracing\Tracers\ExceptionFilterAttributeTracer.cs" />
     <Compile Include="Tracing\Tracers\ExceptionFilterTracer.cs" />
     <Compile Include="Tracing\Tracers\FilterTracer.cs" />

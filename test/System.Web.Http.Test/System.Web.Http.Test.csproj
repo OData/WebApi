@@ -135,7 +135,7 @@
     <Compile Include="Tracing\Tracers\AuthorizationFilterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\ContentNegotiatorTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpControllerActivatorTracerTest.cs" />
-    <Compile Include="Tracing\Tracers\HttpControllerFactoryTracerTest.cs" />
+    <Compile Include="Tracing\Tracers\HttpControllerSelectorTracerTest.cs" />
     <Compile Include="Tracing\Tracers\ExceptionFilterAttributeTracerTest.cs" />
     <Compile Include="Tracing\Tracers\ExceptionFilterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\FilterTracerTest.cs" />

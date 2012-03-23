@@ -116,7 +116,7 @@ namespace System.Web.Http.SelfHost
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             request.Method = HttpMethod.Post;
 
-            // Changing the number below to 70K will eat about 5GB memory and causing the process to hang. 
+            // Changing the number below to 70K will eat about 5GB memory and causing the process to spin. 
             // We have a bug to track the fix.
             request.Content = new StringContent(GetBigListInFormUrl(10000), Encoding.UTF8, "application/x-www-form-urlencoded");
             

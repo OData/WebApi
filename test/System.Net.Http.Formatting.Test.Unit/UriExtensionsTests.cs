@@ -109,7 +109,7 @@ namespace System.Net.Http
             Assert.True(address.Uri.TryReadQueryAs(typeof(SimpleObject3), out value), "Expected 'true' reading valid data");
             so3 = (SimpleObject3)value;
             Assert.NotNull(so3);
-            Assert.Null(so3.c);
+            Assert.Equal("null", so3.c);
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace System.Net.Http
             address.Query = "c=null";
             Assert.True(address.Uri.TryReadQueryAs<SimpleObject3>(out so3), "Expected 'true' reading valid data");
             Assert.NotNull(so3);
-            Assert.Null(so3.c);
+            Assert.Equal("null", so3.c);
         }
 
 

@@ -30,7 +30,7 @@ namespace System.Net.Http.Formatting
             InlineData("b=true", "{\"b\":\"true\"}"),
             InlineData("c=hello", "{\"c\":\"hello\"}"),
             InlineData("d=", "{\"d\":\"\"}"),
-            InlineData("e=null", "{\"e\":null}")]
+            InlineData("e=null", "{\"e\":\"null\"}")]
         public void SimpleObjectsTest(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);
@@ -162,14 +162,14 @@ namespace System.Net.Http.Formatting
             InlineData("a[]=", @"{""a"":[""""]}"),
             InlineData("a[0][0][]=1", @"{""a"":[[[""1""]]]}"),
             InlineData("z[]=9&z[]=true&z[]=undefined&z[]=", @"{""z"":[""9"",""true"",""undefined"",""""]}"),
-            InlineData("z[]=9&z[]=true&z[]=undefined&z[]=null", @"{""z"":[""9"",""true"",""undefined"",null]}"),
-            InlineData("z[0][]=9&z[0][]=true&z[1][]=undefined&z[1][]=null", @"{""z"":[[""9"",""true""],[""undefined"",null]]}"),
+            InlineData("z[]=9&z[]=true&z[]=undefined&z[]=null", @"{""z"":[""9"",""true"",""undefined"",""null""]}"),
+            InlineData("z[0][]=9&z[0][]=true&z[1][]=undefined&z[1][]=null", @"{""z"":[[""9"",""true""],[""undefined"",""null""]]}"),
             InlineData("a[0][x]=2", @"{""a"":[{""x"":""2""}]}"),
             InlineData("a%5B%5D=2", @"{""a"":[""2""]}"),
             InlineData("a%5B%5D=", @"{""a"":[""""]}"),
             InlineData("z%5B%5D=9&z%5B%5D=true&z%5B%5D=undefined&z%5B%5D=", @"{""z"":[""9"",""true"",""undefined"",""""]}"),
-            InlineData("z%5B%5D=9&z%5B%5D=true&z%5B%5D=undefined&z%5B%5D=null", @"{""z"":[""9"",""true"",""undefined"",null]}"),
-            InlineData("z%5B0%5D%5B%5D=9&z%5B0%5D%5B%5D=true&z%5B1%5D%5B%5D=undefined&z%5B1%5D%5B%5D=null", @"{""z"":[[""9"",""true""],[""undefined"",null]]}")]
+            InlineData("z%5B%5D=9&z%5B%5D=true&z%5B%5D=undefined&z%5B%5D=null", @"{""z"":[""9"",""true"",""undefined"",""null""]}"),
+            InlineData("z%5B0%5D%5B%5D=9&z%5B0%5D%5B%5D=true&z%5B1%5D%5B%5D=undefined&z%5B1%5D%5B%5D=null", @"{""z"":[[""9"",""true""],[""undefined"",""null""]]}")]
         public void TestArray(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);
@@ -180,8 +180,8 @@ namespace System.Net.Http.Formatting
         /// </summary>
         [Theory,
             InlineData("z=9&z=true&z=undefined&z=", @"{""z"":[""9"",""true"",""undefined"",""""]}"),
-            InlineData("z=9&z=true&z=undefined&z=null", @"{""z"":[""9"",""true"",""undefined"",null]}"),
-            InlineData("z=9&z=true&z=undefined&z=null&a=hello", @"{""z"":[""9"",""true"",""undefined"",null],""a"":""hello""}")]
+            InlineData("z=9&z=true&z=undefined&z=null", @"{""z"":[""9"",""true"",""undefined"",""null""]}"),
+            InlineData("z=9&z=true&z=undefined&z=null&a=hello", @"{""z"":[""9"",""true"",""undefined"",""null""],""a"":""hello""}")]
         public void TestArrayCompat(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);

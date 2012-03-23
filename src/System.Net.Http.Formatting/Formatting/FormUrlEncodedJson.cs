@@ -112,10 +112,8 @@ namespace System.Net.Http.Formatting
             {
                 string key = nameValuePair.Key;
                 string value = nameValuePair.Value;
-                if (String.Compare(value, "null", StringComparison.Ordinal) == 0)
-                {
-                    value = null;
-                }
+                
+                // value is preserved, even if it's null, "undefined", "null", String.Empty, etc when converting to JToken. 
 
                 if (key == null)
                 {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
@@ -43,13 +44,11 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Get a controller factory, which instantiates a string name into an <see cref="IHttpController"/>.
-        /// This may be implemented by first getting the <see cref="Type"/> from the controller name, and 
-        /// then using a <see cref="IHttpControllerActivator"/>.
+        /// Get a controller selector, which selects a <see cref="HttpControllerDescriptor"/> given a <see cref="HttpRequestMessage"/>.
         /// </summary>
-        public static IHttpControllerFactory GetHttpControllerFactory(this DependencyResolver resolver)
+        public static IHttpControllerSelector GetHttpControllerSelector(this DependencyResolver resolver)
         {
-            return resolver.GetServiceOrThrow<IHttpControllerFactory>();
+            return resolver.GetServiceOrThrow<IHttpControllerSelector>();
         }
 
         /// <summary>

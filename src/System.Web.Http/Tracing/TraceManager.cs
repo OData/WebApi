@@ -24,8 +24,8 @@ namespace System.Web.Http.Tracing
             CreateActionSelectorTracer(configuration, traceWriter);
             CreateActionValueBinderTracer(configuration, traceWriter);
             CreateContentNegotiatorTracer(configuration, traceWriter);
-            CreateControllerActivatorTracer(configuration, traceWriter); 
-            CreateControllerFactoryTracer(configuration, traceWriter);
+            CreateControllerActivatorTracer(configuration, traceWriter);
+            CreateControllerSelectorTracer(configuration, traceWriter);
             CreateMessageHandlerTracers(configuration, traceWriter);
             CreateMediaTypeFormatterTracers(configuration, traceWriter);
         }
@@ -65,11 +65,11 @@ namespace System.Web.Http.Tracing
             configuration.ServiceResolver.SetService(typeof(IHttpControllerActivator), tracer);
         }
 
-        private static void CreateControllerFactoryTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
+        private static void CreateControllerSelectorTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
         {
-            IHttpControllerFactory factory = configuration.ServiceResolver.GetService(typeof(IHttpControllerFactory)) as IHttpControllerFactory;
-            HttpControllerFactoryTracer tracer = new HttpControllerFactoryTracer(factory, traceWriter);
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerFactory), tracer);
+            IHttpControllerSelector controllerSelector = configuration.ServiceResolver.GetService(typeof(IHttpControllerSelector)) as IHttpControllerSelector;
+            HttpControllerSelectorTracer tracer = new HttpControllerSelectorTracer(controllerSelector, traceWriter);
+            configuration.ServiceResolver.SetService(typeof(IHttpControllerSelector), tracer);
         }
 
         private static void CreateMediaTypeFormatterTracers(HttpConfiguration configuration, ITraceWriter traceWriter)
@@ -77,8 +77,8 @@ namespace System.Web.Http.Tracing
             for (int i = 0; i < configuration.Formatters.Count; i++)
             {
                 configuration.Formatters[i] = MediaTypeFormatterTracer.CreateTracer(
-                                                configuration.Formatters[i],             
-                                                traceWriter, 
+                                                configuration.Formatters[i],
+                                                traceWriter,
                                                 request: null);
             }
         }

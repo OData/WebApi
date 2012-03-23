@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
@@ -13,22 +14,24 @@ using System.Web.Http.Services;
 namespace System.Web.Http.Dispatcher
 {
     /// <summary>
-    /// Default <see cref="IHttpControllerFactory"/> instance creating new <see cref="IHttpController"/> instances.
-    /// A different implementation can be registered via the <see cref="DependencyResolver"/>.   
+    /// Default <see cref="IHttpControllerSelector"/> instance for choosing a <see cref="HttpControllerDescriptor"/> given a <see cref="HttpRequestMessage"/>
+    /// A different implementation can be registered via the <see cref="DependencyResolver"/>.
     /// </summary>
-    public class DefaultHttpControllerFactory : IHttpControllerFactory
+    public class DefaultHttpControllerSelector : IHttpControllerSelector
     {
         public static readonly string ControllerSuffix = "Controller";
+
+        private const string ControllerKey = "controller";
 
         private readonly HttpConfiguration _configuration;
         private readonly HttpControllerTypeCache _controllerTypeCache;
         private readonly Lazy<ConcurrentDictionary<string, HttpControllerDescriptor>> _controllerInfoCache;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultHttpControllerFactory"/> class.
+        /// Initializes a new instance of the <see cref="DefaultHttpControllerSelector"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public DefaultHttpControllerFactory(HttpConfiguration configuration)
+        public DefaultHttpControllerSelector(HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -41,23 +44,23 @@ namespace System.Web.Http.Dispatcher
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
-        public virtual IHttpController CreateController(HttpControllerContext controllerContext, string controllerName)
+        public virtual HttpControllerDescriptor SelectController(HttpRequestMessage request)
         {
-            if (controllerContext == null)
+            if (request == null)
             {
-                throw Error.ArgumentNull("controllerContext");
+                throw Error.ArgumentNull("request");
             }
 
+            string controllerName = GetControllerName(request);
             if (String.IsNullOrEmpty(controllerName))
             {
-                throw Error.ArgumentNullOrEmpty("controllerName");
+                throw new HttpResponseException(request.CreateResponse(HttpStatusCode.NotFound));
             }
 
             HttpControllerDescriptor controllerDescriptor;
             if (_controllerInfoCache.Value.TryGetValue(controllerName, out controllerDescriptor))
             {
-                // Create controller instance
-                return CreateInstance(controllerContext, controllerDescriptor);
+                return controllerDescriptor;
             }
 
             ICollection<Type> matchingTypes = _controllerTypeCache.GetControllerTypes(controllerName);
@@ -65,7 +68,7 @@ namespace System.Web.Http.Dispatcher
             {
                 case 0:
                     // no matching types
-                    throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                    throw new HttpResponseException(request.CreateResponse(
                         HttpStatusCode.NotFound,
                         Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName)));
 
@@ -78,22 +81,13 @@ namespace System.Web.Http.Dispatcher
                     _controllerInfoCache.Value.TryAdd(controllerName, controllerDescriptor);
 
                     // Create controller instance
-                    return CreateInstance(controllerContext, controllerDescriptor);
+                    return controllerDescriptor;
 
                 default:
                     // multiple matching types
-                    throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                    throw new HttpResponseException(request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                        CreateAmbiguousControllerExceptionMessage(controllerContext.RouteData.Route, controllerName, matchingTypes)));
-            }
-        }
-
-        public virtual void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
-        {
-            IDisposable disposable = controller as IDisposable;
-            if (disposable != null)
-            {
-                disposable.Dispose();
+                        CreateAmbiguousControllerExceptionMessage(request.GetRouteData().Route, controllerName, matchingTypes)));
             }
         }
 
@@ -102,21 +96,23 @@ namespace System.Web.Http.Dispatcher
             return _controllerInfoCache.Value.ToDictionary(c => c.Key, c => c.Value, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static IHttpController CreateInstance(HttpControllerContext controllerContext, HttpControllerDescriptor controllerDescriptor)
+        public virtual string GetControllerName(HttpRequestMessage request)
         {
-            Contract.Assert(controllerContext != null);
-            Contract.Assert(controllerDescriptor != null);
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
 
-            // Fill in controller descriptor on execution context
-            controllerContext.ControllerDescriptor = controllerDescriptor;
+            IHttpRouteData routeData = request.GetRouteData();
+            if (routeData == null)
+            {
+                return null;
+            }
 
-            // Invoke the controller activator
-            IHttpController instance = controllerDescriptor.HttpControllerActivator.Create(controllerContext, controllerDescriptor.ControllerType);
-
-            // Fill in controller instance on execution context
-            controllerContext.Controller = instance;
-
-            return instance;
+            // Look up controller in route data
+            string controllerName = null;
+            routeData.Values.TryGetValue(ControllerKey, out controllerName);
+            return controllerName;
         }
 
         private static string CreateAmbiguousControllerExceptionMessage(IHttpRoute route, string controllerName, ICollection<Type> matchingTypes)

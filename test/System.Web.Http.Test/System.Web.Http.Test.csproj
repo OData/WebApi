@@ -129,6 +129,7 @@
     <Compile Include="Tracing\Tracers\HttpActionInvokerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpActionSelectorTracerTest.cs" />
     <Compile Include="Tracing\Tracers\ActionValueBinderTracerTest.cs" />
+    <Compile Include="Tracing\Tracers\HttpControllerDescriptorTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpControllerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\AuthorizationFilterAttributeTracerTest.cs" />
     <Compile Include="Tracing\Tracers\AuthorizationFilterTracerTest.cs" />

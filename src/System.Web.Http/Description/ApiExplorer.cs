@@ -143,8 +143,8 @@ namespace System.Web.Http.Description
         private Collection<ApiDescription> InitializeApiDescriptions()
         {
             Collection<ApiDescription> apiDescriptions = new Collection<ApiDescription>();
-            IHttpControllerFactory controllerFactory = _config.ServiceResolver.GetHttpControllerFactory();
-            IDictionary<string, HttpControllerDescriptor> controllerMappings = controllerFactory.GetControllerMapping();
+            IHttpControllerSelector controllerSelector = _config.ServiceResolver.GetHttpControllerSelector();
+            IDictionary<string, HttpControllerDescriptor> controllerMappings = controllerSelector.GetControllerMapping();
             if (controllerMappings != null)
             {
                 foreach (var route in _config.Routes)

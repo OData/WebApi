@@ -15,8 +15,8 @@ namespace System.Web.Http.ApiExplorer
             ItemFormatter customFormatter = new ItemFormatter();
             config.Formatters.Add(customFormatter);
 
-            DefaultHttpControllerFactory controllerFactory = ApiExplorerHelper.GetStrictControllerFactory(config, typeof(ItemController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerFactory), controllerFactory);
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(ItemController));
+            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
 
             IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
             foreach (ApiDescription description in explorer.ApiDescriptions)
@@ -41,8 +41,8 @@ namespace System.Web.Http.ApiExplorer
             ItemFormatter customFormatter = new ItemFormatter();
             config.Formatters.Add(customFormatter);
 
-            DefaultHttpControllerFactory controllerFactory = ApiExplorerHelper.GetStrictControllerFactory(config, typeof(DocumentationController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerFactory), controllerFactory);
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(DocumentationController));
+            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
 
             AttributeDocumentationProvider documentationProvider = new AttributeDocumentationProvider();
             config.ServiceResolver.SetService(typeof(IDocumentationProvider), documentationProvider);

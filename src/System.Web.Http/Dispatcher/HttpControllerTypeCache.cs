@@ -58,7 +58,7 @@ namespace System.Web.Http.Dispatcher
         {
             List<Type> controllerTypes = HttpControllerTypeCacheUtil.GetFilteredTypesFromAssemblies(TypeCacheName, IsControllerType, _buildManager);
             var groupedByName = controllerTypes.GroupBy(
-                t => t.Name.Substring(0, t.Name.Length - DefaultHttpControllerFactory.ControllerSuffix.Length),
+                t => t.Name.Substring(0, t.Name.Length - DefaultHttpControllerSelector.ControllerSuffix.Length),
                 StringComparer.OrdinalIgnoreCase);
 
             return groupedByName.ToDictionary(
@@ -67,14 +67,13 @@ namespace System.Web.Http.Dispatcher
                 StringComparer.OrdinalIgnoreCase);
         }
 
-        // TODO: Shouldn't "Controller" suffix be matched case-SENsitive so that we don't match "testcontroller" but only "testController"?
         public static bool IsControllerType(Type t)
         {
             return
                 t != null &&
                 t.IsClass &&
                 t.IsPublic &&
-                t.Name.EndsWith(DefaultHttpControllerFactory.ControllerSuffix, StringComparison.OrdinalIgnoreCase) &&
+                t.Name.EndsWith(DefaultHttpControllerSelector.ControllerSuffix, StringComparison.OrdinalIgnoreCase) &&
                 !t.IsAbstract &&
                 TypeHelper.HttpControllerType.IsAssignableFrom(t);
         }

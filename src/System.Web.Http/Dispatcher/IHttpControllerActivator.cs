@@ -1,4 +1,5 @@
-﻿using System.Web.Http.Controllers;
+﻿using System.Net.Http;
+using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Dispatcher
 {
@@ -7,6 +8,6 @@ namespace System.Web.Http.Dispatcher
     /// </summary>
     public interface IHttpControllerActivator
     {
-        IHttpController Create(HttpControllerContext controllerContext, Type controllerType);
+        IHttpController Create(HttpRequestMessage request, HttpControllerDescriptor controllerDescriptor, Type controllerType);
     }
 }

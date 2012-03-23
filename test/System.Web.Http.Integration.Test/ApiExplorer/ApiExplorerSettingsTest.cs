@@ -25,8 +25,8 @@ namespace System.Web.Http.ApiExplorer
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
 
-            DefaultHttpControllerFactory controllerFactory = ApiExplorerHelper.GetStrictControllerFactory(config, controllerType);
-            config.ServiceResolver.SetService(typeof(IHttpControllerFactory), controllerFactory);
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, controllerType);
+            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
 
             IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
             ApiExplorerHelper.VerifyApiDescriptions(explorer.ApiDescriptions, expectedResults);
@@ -52,8 +52,8 @@ namespace System.Web.Http.ApiExplorer
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{id}", new { id = RouteParameter.Optional });
 
-            DefaultHttpControllerFactory controllerFactory = ApiExplorerHelper.GetStrictControllerFactory(config, controllerType);
-            config.ServiceResolver.SetService(typeof(IHttpControllerFactory), controllerFactory);
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, controllerType);
+            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
 
             IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
             ApiExplorerHelper.VerifyApiDescriptions(explorer.ApiDescriptions, expectedResults);

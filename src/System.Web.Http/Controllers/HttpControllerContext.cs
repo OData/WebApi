@@ -91,7 +91,6 @@ namespace System.Web.Http.Controllers
         /// <summary>
         /// Gets or sets the controller descriptor.
         /// </summary>
-        /// <remarks>This property must be filled in by the <see cref="Dispatcher.IHttpControllerFactory"/>.</remarks>
         /// <value>
         /// The controller descriptor.
         /// </value>
@@ -112,7 +111,6 @@ namespace System.Web.Http.Controllers
         /// <summary>
         /// Gets or sets the HTTP controller.
         /// </summary>
-        /// <remarks>This property must be filled in by the <see cref="Dispatcher.IHttpControllerFactory"/>.</remarks>
         /// <value>
         /// The HTTP controller.
         /// </value>

@@ -368,8 +368,8 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="TraceCancelledMessage" xml:space="preserve">
     <value>Cancelled</value>
   </data>
-  <data name="TraceControllerNameAndRouteMessage" xml:space="preserve">
-    <value>Controller name='{0}', route='{1}'</value>
+  <data name="TraceRouteMessage" xml:space="preserve">
+    <value>Route='{0}'</value>
   </data>
   <data name="TraceModelStateInvalidMessage" xml:space="preserve">
     <value>Model state is invalid. {0}</value>

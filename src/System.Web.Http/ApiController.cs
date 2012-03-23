@@ -120,7 +120,7 @@ namespace System.Web.Http
             if (_request != null)
             {
                 // if user has registered a controller factory which produces the same controller instance, we should throw here
-                throw Error.InvalidOperation(SRResources.CannotSupportSingletonInstance, typeof(ApiController).Name, typeof(IHttpControllerFactory).Name);
+                throw Error.InvalidOperation(SRResources.CannotSupportSingletonInstance, typeof(ApiController).Name, typeof(IHttpControllerActivator).Name);
             }
 
             Initialize(controllerContext);

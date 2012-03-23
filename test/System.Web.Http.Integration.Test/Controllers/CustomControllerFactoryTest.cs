@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.SelfHost;
@@ -7,7 +6,7 @@ using Xunit;
 
 namespace System.Web.Http.Controllers
 {
-    public class CustomControllerFactoryTest
+    public class CustomControllerDescriptorTest
     {
         [Fact]
         public void Body_WithSingletonControllerInstance_Fails()
@@ -18,7 +17,7 @@ namespace System.Web.Http.Controllers
             string requestUri = baseAddress + "/Test";
             HttpSelfHostConfiguration configuration = new HttpSelfHostConfiguration(baseAddress);
             configuration.Routes.MapHttpRoute("Default", "{controller}", new { controller = "Test" });
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerFactory), new MySingletonControllerFactory());
+            configuration.ServiceResolver.SetService(typeof(IHttpControllerSelector), new MySingletonControllerDescriptor());
             HttpSelfHostServer host = new HttpSelfHostServer(configuration);
             host.OpenAsync().Wait();
             HttpResponseMessage response = null;
@@ -44,23 +43,31 @@ namespace System.Web.Http.Controllers
             host.CloseAsync().Wait();
         }
 
-        private class MySingletonControllerFactory : IHttpControllerFactory
+        private class MySingletonControllerSelector : DefaultHttpControllerSelector
+        {
+            public MySingletonControllerSelector(HttpConfiguration configuration)
+                : base(configuration)
+            {
+            }
+
+            public override HttpControllerDescriptor SelectController(HttpRequestMessage request)
+            {
+                return new MySingletonControllerDescriptor();
+            }
+        }
+
+        private class MySingletonControllerDescriptor : HttpControllerDescriptor
         {
             private static TestController singleton = new TestController();
 
-            public IHttpController CreateController(HttpControllerContext controllerContext, string controllerName)
+            public override IHttpController CreateController(HttpRequestMessage request)
             {
                 return singleton;
             }
 
-            public void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
+            public override void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
             {
-                throw new NotImplementedException();
-            }
-
-            public IDictionary<string, HttpControllerDescriptor> GetControllerMapping()
-            {
-                throw new NotImplementedException();
+                // do nothing
             }
         }
 

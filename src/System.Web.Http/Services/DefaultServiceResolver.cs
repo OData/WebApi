@@ -46,7 +46,7 @@ namespace System.Web.Http.Services
 
             Add<IBuildManager>(new DefaultBuildManager());
 
-            Add<IHttpControllerFactory>(config => new DefaultHttpControllerFactory(config));
+            Add<IHttpControllerSelector>(config => new DefaultHttpControllerSelector(config));
 
             Add<IHttpControllerActivator>(config => new DefaultHttpControllerActivator(config));
 

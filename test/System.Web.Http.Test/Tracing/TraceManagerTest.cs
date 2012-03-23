@@ -26,7 +26,7 @@ namespace System.Web.Http.Tracing
         }
 
         [Theory]
-        [InlineData(typeof(IHttpControllerFactory))]
+        [InlineData(typeof(IHttpControllerSelector))]
         [InlineData(typeof(IHttpControllerActivator))]
         [InlineData(typeof(IHttpActionSelector))]
         [InlineData(typeof(IHttpActionInvoker))]
@@ -46,7 +46,7 @@ namespace System.Web.Http.Tracing
         }
 
         [Theory]
-        [InlineData(typeof(IHttpControllerFactory))]
+        [InlineData(typeof(IHttpControllerSelector))]
         [InlineData(typeof(IHttpControllerActivator))]
         [InlineData(typeof(IHttpActionSelector))]
         [InlineData(typeof(IHttpActionInvoker))]

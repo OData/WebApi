@@ -15,8 +15,8 @@ namespace System.Web.Http.ApiExplorer
             ItemFormatter customFormatter = new ItemFormatter();
             config.Formatters.Add(customFormatter);
 
-            DefaultHttpControllerFactory controllerFactory = ApiExplorerHelper.GetStrictControllerFactory(config, typeof(ItemController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerFactory), controllerFactory);
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(ItemController));
+            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
 
             IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
             ApiDescription description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "PostItem");
@@ -31,8 +31,8 @@ namespace System.Web.Http.ApiExplorer
             ItemFormatter customFormatter = new ItemFormatter();
             config.Formatters.Add(customFormatter);
 
-            DefaultHttpControllerFactory controllerFactory = ApiExplorerHelper.GetStrictControllerFactory(config, typeof(ItemController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerFactory), controllerFactory);
+            DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(ItemController));
+            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
 
             IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
             ApiDescription description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "PostItem");

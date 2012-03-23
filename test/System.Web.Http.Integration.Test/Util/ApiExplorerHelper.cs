@@ -36,17 +36,17 @@ namespace System.Web.Http.ApiExplorer
             }
         }
 
-        public static DefaultHttpControllerFactory GetStrictControllerFactory(HttpConfiguration config, params Type[] controllerTypes)
+        public static DefaultHttpControllerSelector GetStrictControllerSelector(HttpConfiguration config, params Type[] controllerTypes)
         {
             Dictionary<string, HttpControllerDescriptor> controllerMapping = new Dictionary<string, HttpControllerDescriptor>();
             foreach (Type controllerType in controllerTypes)
             {
-                string controllerName = controllerType.Name.Substring(0, controllerType.Name.Length - DefaultHttpControllerFactory.ControllerSuffix.Length);
+                string controllerName = controllerType.Name.Substring(0, controllerType.Name.Length - DefaultHttpControllerSelector.ControllerSuffix.Length);
                 var controllerDescriptor = new HttpControllerDescriptor(config, controllerName, controllerType);
                 controllerMapping.Add(controllerDescriptor.ControllerName, controllerDescriptor);
             }
 
-            Mock<DefaultHttpControllerFactory> factory = new Mock<DefaultHttpControllerFactory>(config);
+            Mock<DefaultHttpControllerSelector> factory = new Mock<DefaultHttpControllerSelector>(config);
             factory.Setup(f => f.GetControllerMapping()).Returns(controllerMapping);
             return factory.Object;
         }

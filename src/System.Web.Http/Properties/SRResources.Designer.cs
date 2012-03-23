@@ -891,15 +891,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Controller name=&apos;{0}&apos;, route=&apos;{1}&apos;.
-        /// </summary>
-        internal static string TraceControllerNameAndRouteMessage {
-            get {
-                return ResourceManager.GetString("TraceControllerNameAndRouteMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Parameter &apos;{0}&apos; bound to the value &apos;{1}&apos;.
         /// </summary>
         internal static string TraceEndParameterBind {
@@ -1022,6 +1013,15 @@ namespace System.Web.Http.Properties {
         internal static string TraceRequestCompleteMessage {
             get {
                 return ResourceManager.GetString("TraceRequestCompleteMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Route=&apos;{0}&apos;.
+        /// </summary>
+        internal static string TraceRouteMessage {
+            get {
+                return ResourceManager.GetString("TraceRouteMessage", resourceCulture);
             }
         }
         

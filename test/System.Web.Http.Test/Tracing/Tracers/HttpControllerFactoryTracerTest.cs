@@ -7,52 +7,54 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class HttpControllerFactoryTracerTest
+    public class HttpControllerSelectorTracerTest
     {
+        private static readonly IHttpController _controller = new Mock<IHttpController>().Object;
+        private static readonly HttpControllerContext _controllerContext = ContextUtil.CreateControllerContext(instance: _controller);
+        private static readonly HttpRequestMessage _request = _controllerContext.Request;
+
         [Fact]
-        public void CreateController_Invokes_Inner_And_Traces()
+        public void SelectController_Invokes_Inner_And_Traces()
         {
             // Arrange
-            Mock<ApiController> mockController = new Mock<ApiController>();
-            Mock<IHttpControllerFactory> mockFactory = new Mock<IHttpControllerFactory>() { CallBase = true };
-            mockFactory.Setup(b => b.CreateController(It.IsAny<HttpControllerContext>(), It.IsAny<string>())).Returns(mockController.Object);
-            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(request: new HttpRequestMessage());
+            Mock<HttpControllerDescriptor> mockControllerDescriptor = new Mock<HttpControllerDescriptor>(_controllerContext.Configuration, "AnyController", _controller.GetType());
+            Mock<IHttpControllerSelector> mockSelector = new Mock<IHttpControllerSelector>();
+            mockSelector.Setup(b => b.SelectController(It.IsAny<HttpRequestMessage>())).Returns(mockControllerDescriptor.Object);
             TestTraceWriter traceWriter = new TestTraceWriter();
-            HttpControllerFactoryTracer tracer = new HttpControllerFactoryTracer(mockFactory.Object, traceWriter);
+            HttpControllerSelectorTracer tracer = new HttpControllerSelectorTracer(mockSelector.Object, traceWriter);
 
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
-                new TraceRecord(controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "CreateController" },
-                new TraceRecord(controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.End, Operation = "CreateController" }
+                new TraceRecord(_request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "SelectController" },
+                new TraceRecord(_request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.End, Operation = "SelectController" }
             };
 
             // Act
-            IHttpController createdController = ((IHttpControllerFactory)tracer).CreateController(controllerContext, "anyName");
+            HttpControllerDescriptor controllerDescriptor = ((IHttpControllerSelector)tracer).SelectController(_request);
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
-            Assert.IsAssignableFrom<HttpControllerTracer>(createdController);
+            Assert.IsAssignableFrom<HttpControllerDescriptorTracer>(controllerDescriptor);
         }
 
         [Fact]
-        public void CreateController_Throws_And_Traces_When_Inner_Throws()
+        public void SelectController_Throws_And_Traces_When_Inner_Throws()
         {
             // Arrange
-            Mock<IHttpControllerFactory> mockFactory = new Mock<IHttpControllerFactory>() { CallBase = true };
+            Mock<IHttpControllerSelector> mockSelector = new Mock<IHttpControllerSelector>();
             InvalidOperationException exception = new InvalidOperationException("test");
-            mockFactory.Setup(b => b.CreateController(It.IsAny<HttpControllerContext>(), It.IsAny<string>())).Throws(exception);
-            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(request: new HttpRequestMessage());
+            mockSelector.Setup(b => b.SelectController(It.IsAny<HttpRequestMessage>())).Throws(exception);
             TestTraceWriter traceWriter = new TestTraceWriter();
-            HttpControllerFactoryTracer tracer = new HttpControllerFactoryTracer(mockFactory.Object, traceWriter);
+            HttpControllerSelectorTracer tracer = new HttpControllerSelectorTracer(mockSelector.Object, traceWriter);
 
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
-                new TraceRecord(controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "CreateController" },
-                new TraceRecord(controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Error) { Kind = TraceKind.End, Operation = "CreateController" }
+                new TraceRecord(_request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "SelectController" },
+                new TraceRecord(_request, TraceCategories.ControllersCategory, TraceLevel.Error) { Kind = TraceKind.End, Operation = "SelectController" }
             };
 
             // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => ((IHttpControllerFactory)tracer).CreateController(controllerContext, "anyName"));
+            Exception thrown = Assert.Throws<InvalidOperationException>(() => ((IHttpControllerSelector)tracer).SelectController(_request));
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());

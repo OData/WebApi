@@ -19,7 +19,7 @@ namespace System.Web.Http.Dispatcher
     {
         private const string ControllerKey = "controller";
 
-        private IHttpControllerFactory _controllerFactory;
+        private IHttpControllerSelector _controllerSelector;
         private readonly HttpConfiguration _configuration;
         private bool _disposed;
 
@@ -54,16 +54,16 @@ namespace System.Web.Http.Dispatcher
             get { return _configuration; }
         }
 
-        private IHttpControllerFactory ControllerFactory
+        private IHttpControllerSelector ControllerSelector
         {
             get
             {
-                if (_controllerFactory == null)
+                if (_controllerSelector == null)
                 {
-                    _controllerFactory = _configuration.ServiceResolver.GetHttpControllerFactory();
+                    _controllerSelector = _configuration.ServiceResolver.GetHttpControllerSelector();
                 }
 
-                return _controllerFactory;
+                return _controllerSelector;
             }
         }
 
@@ -135,36 +135,38 @@ namespace System.Web.Http.Dispatcher
                 }
             }
 
-            // Look up controller in route data
-            string controllerName;
-            if (!routeData.Values.TryGetValue(ControllerKey, out controllerName))
+            RemoveOptionalRoutingParameters(routeData.Values);
+
+            HttpControllerDescriptor httpControllerDescriptor = ControllerSelector.SelectController(request);
+            if (httpControllerDescriptor == null)
             {
                 // TODO, 328927, add an error message in the response body
                 return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.NotFound));
             }
 
-            RemoveOptionalRoutingParameters(routeData.Values);
+            IHttpController httpController = httpControllerDescriptor.CreateController(request);
 
-            // Create context
-            HttpControllerContext controllerContext = new HttpControllerContext(_configuration, routeData, request);
-
-            IHttpController httpController = ControllerFactory.CreateController(controllerContext, controllerName);
             if (httpController == null)
             {
                 // TODO, 328927, add an error message in the response body
                 return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.NotFound));
             }
 
+            // Create context
+            HttpControllerContext controllerContext = new HttpControllerContext(_configuration, routeData, request);
+            controllerContext.Controller = httpController;
+            controllerContext.ControllerDescriptor = httpControllerDescriptor;
+
             try
             {
                 return httpController.ExecuteAsync(controllerContext, cancellationToken).Finally(() =>
                 {
-                    ControllerFactory.ReleaseController(controllerContext, httpController);
+                    httpControllerDescriptor.ReleaseController(controllerContext, httpController);
                 });
             }
             catch
             {
-                ControllerFactory.ReleaseController(controllerContext, httpController);
+                httpControllerDescriptor.ReleaseController(controllerContext, httpController);
                 throw;
             }
         }

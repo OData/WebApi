@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
 using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Dispatcher
@@ -7,22 +8,14 @@ namespace System.Web.Http.Dispatcher
     /// <summary>
     /// Defines the methods that are required for an <see cref="IHttpController"/> factory.
     /// </summary>
-    public interface IHttpControllerFactory
+    public interface IHttpControllerSelector
     {
         /// <summary>
-        /// Creates the <see cref="IHttpController"/> using the specified context and controller name.
+        /// Selects a <see cref="HttpControllerDescriptor"/> for the given <see cref="HttpRequestMessage"/>.
         /// </summary>
-        /// <param name="controllerContext">The controller context.</param>
-        /// <param name="controllerName">Name of the controller.</param>
-        /// <returns>An <see cref="IHttpController"/> instance.</returns>
-        IHttpController CreateController(HttpControllerContext controllerContext, string controllerName);
-
-        /// <summary>
-        /// Releases an <see cref="IHttpController"/> instance.
-        /// </summary>
-        /// <param name="controllerContext">The controller context.</param>
-        /// <param name="controller">The controller.</param>
-        void ReleaseController(HttpControllerContext controllerContext, IHttpController controller);
+        /// <param name="request">The request message.</param>
+        /// <returns>An <see cref="HttpControllerDescriptor"/> instance.</returns>
+        HttpControllerDescriptor SelectController(HttpRequestMessage request);
 
         /// <summary>
         /// Returns a map, keyed by controller string, of all <see cref="HttpControllerDescriptor"/> that the factory can produce. 

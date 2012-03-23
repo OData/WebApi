@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Internal;
@@ -151,6 +152,32 @@ namespace System.Web.Http.Controllers
                     throw Error.PropertyNull();
                 }
                 _actionValueBinder = value;
+            }
+        }
+
+        /// <summary>
+        /// Creates a controller instance for the given <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="request">The request message</param>
+        /// <returns></returns>
+        public virtual IHttpController CreateController(HttpRequestMessage request)
+        {
+            // Invoke the controller activator
+            IHttpController instance = HttpControllerActivator.Create(request, this, ControllerType);
+            return instance;
+        }
+
+        /// <summary>
+        /// Releases an <see cref="IHttpController"/> instance.
+        /// </summary>
+        /// <param name="controllerContext">The controller context.</param>
+        /// <param name="controller">The controller.</param>
+        public virtual void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
+        {
+            IDisposable disposable = controller as IDisposable;
+            if (disposable != null)
+            {
+                disposable.Dispose();
             }
         }
 

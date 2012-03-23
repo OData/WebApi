@@ -1,4 +1,5 @@
-﻿using System.Web.Http.Controllers;
+﻿using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
 
@@ -21,12 +22,12 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "disposable controller is later released in ReleaseController")]
-        IHttpController IHttpControllerActivator.Create(HttpControllerContext controllerContext, Type controllerType)
+        IHttpController IHttpControllerActivator.Create(HttpRequestMessage request, HttpControllerDescriptor controllerDescriptor, Type controllerType)
         {
             IHttpController controller = null;
 
             _traceWriter.TraceBeginEnd(
-                controllerContext.Request,
+                request,
                 TraceCategories.ControllersCategory,
                 TraceLevel.Info,
                 _innerActivator.GetType().Name,
@@ -34,7 +35,7 @@ namespace System.Web.Http.Tracing.Tracers
                 beginTrace: null,
                 execute: () =>
                 {
-                    controller = _innerActivator.Create(controllerContext, controllerType);
+                    controller = _innerActivator.Create(request, controllerDescriptor, controllerType);
                 },
                 endTrace: (tr) =>
                 {

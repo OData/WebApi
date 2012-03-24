@@ -55,6 +55,7 @@
     <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20326.1\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.XML" />
@@ -97,6 +98,17 @@
     <Compile Include="Controllers\HttpActionContextTest.cs" />
     <Compile Include="Hosting\HttpRouteTest.cs" />
     <Compile Include="Internal\TypeActivatorTest.cs" />
+    <Compile Include="Metadata\AdditionalMetadata.cs" />
+    <Compile Include="Metadata\ModelMetadataTest.cs" />
+    <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Metadata\Providers\CachedAssociatedMetadataProviderTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadataProviderTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
     <Compile Include="Query\DataModel.cs" />
@@ -218,6 +230,18 @@
     <Compile Include="Validation\DefaultBodyModelValidatorTest.cs" />
     <Compile Include="Validation\ModelValidationNodeTest.cs" />
     <Compile Include="Validation\ModelValidationRequiredMemberSelectorTest.cs" />
+    <Compile Include="Validation\ModelValidationResultTest.cs" />
+    <Compile Include="Validation\ModelValidatorTest.cs" />
+    <Compile Include="Validation\Providers\AssociatedValidatorProviderTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Validation\Providers\DataAnnotationsModelValidatorProviderTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Validation\Providers\DataMemberModelValidatorProviderTest.cs" />
+    <Compile Include="Validation\Validators\DataAnnotationsModelValidatorTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ValueProviders\Providers\NameValueCollectionValueProviderTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderTest.cs" />
   </ItemGroup>

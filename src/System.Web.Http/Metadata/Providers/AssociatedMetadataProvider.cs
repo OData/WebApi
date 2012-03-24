@@ -24,14 +24,6 @@ namespace System.Web.Http.Metadata.Providers
 
         protected virtual IEnumerable<Attribute> FilterAttributes(Type containerType, PropertyDescriptor propertyDescriptor, IEnumerable<Attribute> attributes)
         {
-            // The Model property on ViewPage and ViewUserControl is marked as ReadOnly
-#if false
-            if (typeof(ViewPage).IsAssignableFrom(containerType) || typeof(ViewUserControl).IsAssignableFrom(containerType))
-            {
-                return attributes.Where(a => !(a is ReadOnlyAttribute));
-            }
-#endif
-
             return attributes;
         }
 

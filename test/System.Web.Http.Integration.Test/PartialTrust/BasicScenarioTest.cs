@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 
@@ -58,5 +59,4 @@ namespace System.Web.Http.PartialTrust
             return s;
         }
     }
-
 }

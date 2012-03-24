@@ -344,12 +344,6 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ValueProviderFactory_Cannot_Create" xml:space="preserve">
     <value>Could not create a '{0}' from '{1}'. Please ensure it derives from '{0}' and has a public parameterless constructor.</value>
   </data>
-  <data name="ResultLimitFilter_InvalidReturnType" xml:space="preserve">
-    <value>ResultLimitAttribute cannot be applied to action '{0}' because it's return type is not IEnumerable.</value>
-  </data>
-  <data name="ResultLimitFilter_OutOfRange" xml:space="preserve">
-    <value>The limit specified by the ResultLimitAttribute applied to action '{0}' must be greater than zero.</value>
-  </data>
   <data name="Validation_ValueNotFound" xml:space="preserve">
     <value>A value is required but was not present in the request.</value>
   </data>

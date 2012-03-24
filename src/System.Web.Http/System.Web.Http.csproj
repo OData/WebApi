@@ -120,7 +120,6 @@
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
     <Compile Include="Query\ParseException.cs" />
     <Compile Include="Query\ServiceQueryPart.cs" />
-    <Compile Include="ResultLimitAttribute.cs" />
     <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerActivator.cs" />

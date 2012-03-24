@@ -14,27 +14,6 @@ namespace System.Web.Http.Filters
     public class IQueryableFilterPipelineTest
     {
         [Fact]
-        public void IQueryableRelatedFiltersAreOrderedCorrectly()
-        {
-            // Arrange
-            Mock<HttpControllerDescriptor> controllerDescriptorMock = new Mock<HttpControllerDescriptor>() { CallBase = true };
-            controllerDescriptorMock.Object.Configuration = new HttpConfiguration();
-            controllerDescriptorMock.Object.ControllerType = typeof(IQueryableFilterPipelineTest);
-            Mock<HttpActionDescriptor> actionDescriptorMock = new Mock<HttpActionDescriptor>(controllerDescriptorMock.Object) { CallBase = true };
-            actionDescriptorMock.Setup(ad => ad.GetFilters()).Returns(new Collection<IFilter>(new IFilter[] { new ResultLimitAttribute(42) }));
-            actionDescriptorMock.Setup(ad => ad.ReturnType).Returns(typeof(IQueryable<string>));
-            HttpActionDescriptor actionDescriptor = actionDescriptorMock.Object;
-
-            // Act
-            var filters = actionDescriptor.GetFilterPipeline();
-
-            // Assert
-            Assert.Equal(2, filters.Count);
-            Assert.IsType<EnumerableEvaluatorFilter>(filters[0].Instance);
-            Assert.IsType<ResultLimitAttribute>(filters[1].Instance);
-        }
-
-        [Fact]
         public void EnumerableEvaluatorFilterExecutesQuerySoThatExceptionsCanBeCaughtByExceptionFilters()
         {
             // Arrange

@@ -6,12 +6,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using Xunit;
-using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.TestCommon
 {
     /// <summary>
-    /// MSTest utility for testing <see cref="HttpResponseMessage"/> instances.
+    /// Unit test utility for testing <see cref="HttpResponseMessage"/> instances.
     /// </summary>
     public class HttpAssert
     {
@@ -138,7 +137,11 @@ namespace Microsoft.TestCommon
             IEnumerable<string> headerValues = null;
             bool foundIt = headers.TryGetValues(name, out headerValues);
             Assert.True(foundIt);
-            MsTest.CollectionAssert.IsSubsetOf(values.ToList(), headerValues.ToList(), "Headers did not contain any or all of the expected headers.");
+
+            foreach (string value in values)
+            {
+                Assert.Contains(value, headerValues);
+            }
         }
 
         public bool IsKnownUnserializableType(Type type, Func<Type, bool> isTypeUnserializableCallback)

@@ -100,8 +100,6 @@
     <Compile Include="Description\IApiExplorer.cs" />
     <Compile Include="IncludeErrorDetailPolicy.cs" />
     <Compile Include="Filters\HttpActionExecutedContext.cs" />
-    <Compile Include="Filters\EnumerableEvaluatorFilter.cs" />
-    <Compile Include="Filters\EnumerableEvaluatorFilterProvider.cs" />
     <Compile Include="Internal\HttpParameterBindingExtensions.cs" />
     <Compile Include="Internal\UriQueryUtility.cs" />
     <Compile Include="ModelBinding\FormatterParameterBinding.cs" />

@@ -112,7 +112,6 @@
     <Compile Include="ExceptionHandling\ExceptionHandlingTest.cs" />
     <Compile Include="ExceptionHandling\HttpResponseExceptionTest.cs" />
     <Compile Include="ExceptionHandling\IncludeErrorDetailTest.cs" />
-    <Compile Include="Filters\IQueryableFilterPipelineTest.cs" />
     <Compile Include="ModelBinding\BodyBindingTests.cs" />
     <Compile Include="ModelBinding\CustomBindingTests.cs" />
     <Compile Include="ModelBinding\DefaultActionValueBinderTest.cs" />

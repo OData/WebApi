@@ -66,8 +66,7 @@ namespace System.Web.Http.Services
 
             AddRange<IFilterProvider>(
                 new ConfigurationFilterProvider(),
-                new ActionDescriptorFilterProvider(),
-                new EnumerableEvaluatorFilterProvider());
+                new ActionDescriptorFilterProvider());
 
             AddRange<ModelBinderProvider>(
                 new TypeMatchModelBinderProvider(),

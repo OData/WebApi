@@ -66,6 +66,7 @@
     <Compile Include="RouteCollectionExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routing\HostedUrlHelperTest.cs" />
+    <Compile Include="SuppressFormsAuthRedirectModuleTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

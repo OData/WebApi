@@ -45,6 +45,10 @@
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -75,6 +79,7 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="Routing\HostedHttpRouteCollection.cs" />
     <Compile Include="Routing\HostedHttpRoute.cs" />
     <Compile Include="Routing\HostedHttpRouteData.cs" />
@@ -92,6 +97,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Routing\HttpWebRoute.cs" />
+    <Compile Include="SuppressFormsAuthRedirectModule.cs" />
     <Compile Include="WebHostBuildManager.cs" />
     <Compile Include="Properties\SRResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -138,7 +144,9 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

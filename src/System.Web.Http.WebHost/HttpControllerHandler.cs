@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Http.WebHost.Properties;
@@ -19,6 +22,29 @@ namespace System.Web.Http.WebHost
     public class HttpControllerHandler : IHttpAsyncHandler
     {
         internal static readonly string HttpContextBaseKey = "MS_HttpContext";
+
+        private static readonly Lazy<Action<HttpContextBase>> _suppressRedirectAction =
+            new Lazy<Action<HttpContextBase>>(
+                () =>
+                {
+                    // If the behavior is explicitly disabled, do nothing
+                    if (!SuppressFormsAuthRedirectModule.GetEnabled(WebConfigurationManager.AppSettings))
+                    {
+                        return httpContext => { };
+                    }
+
+                    var srPropertyInfo = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthRedirectModule.SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
+
+                    // Use the property in .NET 4.5 if available
+                    if (srPropertyInfo != null)
+                    {
+                        Action<HttpResponseBase, bool> setter = (Action<HttpResponseBase, bool>)Delegate.CreateDelegate(typeof(HttpResponseBase), srPropertyInfo.GetSetMethod(), throwOnBindFailure: false);
+                        return httpContext => setter(httpContext.Response, true);
+                    }
+
+                    // Use SuppressFormsAuthRedirectModule to revert the redirection on .NET 4.0
+                    return httpContext => SuppressFormsAuthRedirectModule.DisableAuthenticationRedirect(httpContext);
+                });
 
         private static readonly Lazy<HttpMessageInvoker> _server =
             new Lazy<HttpMessageInvoker>(
@@ -230,6 +256,7 @@ namespace System.Web.Http.WebHost
             httpResponseBase.StatusCode = (int)response.StatusCode;
             httpResponseBase.StatusDescription = response.ReasonPhrase;
             httpResponseBase.TrySkipIisCustomErrors = true;
+            EnsureSuppressFormsAuthenticationRedirect(httpContextBase);
             CopyHeaders(response.Headers, httpContextBase);
             CacheControlHeaderValue cacheControl = response.Headers.CacheControl;
 
@@ -343,6 +370,22 @@ namespace System.Web.Http.WebHost
             request.Properties.Add(HttpContextBaseKey, httpContextBase);
 
             return request;
+        }
+
+        /// <summary>
+        /// Prevents the <see cref="T:System.Web.Security.FormsAuthenticationModule"/> from altering a 401 response to 302 by 
+        /// setting <see cref="P:System.Web.HttpResponseBase.SuppressFormsAuthenticationRedirect" /> to <c>true</c> if available.
+        /// </summary>
+        /// <param name="httpContextBase">The HTTP context base.</param>
+        internal static void EnsureSuppressFormsAuthenticationRedirect(HttpContextBase httpContextBase) 
+        {
+            Contract.Assert(httpContextBase != null);
+
+            // Only if the response is status code is 401
+            if (httpContextBase.Response.StatusCode == (int)HttpStatusCode.Unauthorized) 
+            {
+                _suppressRedirectAction.Value(httpContextBase);
+            }
         }
     }
 }

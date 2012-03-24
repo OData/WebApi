@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System.Collections;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
@@ -81,5 +83,55 @@ namespace System.Web.Http.WebHost
                     Assert.ThrowsObjectDisposed(() => response.StatusCode = HttpStatusCode.OK, typeof(HttpResponseMessage).FullName);
                 });
         }
+
+        [Fact]
+        public void SuppressFormsAuthenticationRedirect_DoesntRequireSuppressRedirect() {
+            // Arrange
+            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
+            IDictionary contextItems = new Hashtable();
+            contextMock.SetupGet(hcb => hcb.Response.StatusCode).Returns(200);
+            contextMock.SetupGet(hcb => hcb.Items).Returns(contextItems);
+
+            PropertyInfo suppressRedirect = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthRedirectModule.SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
+
+            // Act
+            HttpControllerHandler.EnsureSuppressFormsAuthenticationRedirect(contextMock.Object);
+
+            // Assert
+            if (suppressRedirect == null) {
+                // .NET 4.0
+                Assert.False(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
+            }
+            else {
+                // .NET 4.5
+                Assert.False((bool)suppressRedirect.GetValue(contextMock.Object, null));
+            }
+        }
+
+        [Fact]
+        public void SuppressFormsAuthenticationRedirect_RequireSuppressRedirect() {
+            // Arrange
+            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
+            IDictionary contextItems = new Hashtable();
+            contextMock.SetupGet(hcb => hcb.Response.StatusCode).Returns(401);
+            contextMock.SetupGet(hcb => hcb.Items).Returns(contextItems);
+
+            PropertyInfo suppressRedirect = typeof(HttpResponseBase).GetProperty(SuppressFormsAuthRedirectModule.SuppressFormsAuthenticationRedirectPropertyName, BindingFlags.Instance | BindingFlags.Public);
+
+            // Act
+            HttpControllerHandler.EnsureSuppressFormsAuthenticationRedirect(contextMock.Object);
+
+            // Assert
+            if (suppressRedirect == null) {
+                // .NET 4.0
+                Assert.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
+                Assert.True((bool)contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
+            }
+            else {
+                // .NET 4.5
+                Assert.True((bool)suppressRedirect.GetValue(contextMock.Object, null));
+            }
+        }
+
     }
 }

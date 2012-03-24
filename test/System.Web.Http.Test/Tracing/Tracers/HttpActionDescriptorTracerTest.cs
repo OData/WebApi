@@ -20,7 +20,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<IFilter> mockFilter = new Mock<IFilter>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Global);
             Collection<FilterInfo> filterCollection = new Collection<FilterInfo>(new FilterInfo[] { filter });
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");

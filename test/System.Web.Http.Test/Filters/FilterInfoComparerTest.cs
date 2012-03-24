@@ -28,8 +28,8 @@ namespace System.Web.Http.Filters
                     { new FilterInfo(f, FilterScope.Action), null, 1 },
                     { null, new FilterInfo(f, FilterScope.Action), -1 },
                     { new FilterInfo(f, FilterScope.Action), new FilterInfo(f, FilterScope.Action), 0 },
-                    { new FilterInfo(f, FilterScope.First), new FilterInfo(f, FilterScope.Action), -1 },
-                    { new FilterInfo(f, FilterScope.Action), new FilterInfo(f, FilterScope.First), 1 },
+                    { new FilterInfo(f, FilterScope.Controller), new FilterInfo(f, FilterScope.Action), -1 },
+                    { new FilterInfo(f, FilterScope.Action), new FilterInfo(f, FilterScope.Controller), 1 },
                 };
             }
         }

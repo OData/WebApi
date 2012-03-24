@@ -2,11 +2,11 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Tracing.Tracers
 {
@@ -131,7 +131,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<IFilter> mockFilter = new Mock<IFilter>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -146,7 +146,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<IActionFilter> mockFilter = new Mock<IActionFilter>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -161,7 +161,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<IExceptionFilter> mockFilter = new Mock<IExceptionFilter>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -176,7 +176,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<IAuthorizationFilter> mockFilter = new Mock<IAuthorizationFilter>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -191,7 +191,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<ActionFilterAttribute> mockFilter = new Mock<ActionFilterAttribute>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -206,7 +206,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<ExceptionFilterAttribute> mockFilter = new Mock<ExceptionFilterAttribute>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -221,7 +221,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<AuthorizationFilterAttribute> mockFilter = new Mock<AuthorizationFilterAttribute>();
-            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.First);
+            FilterInfo filter = new FilterInfo(mockFilter.Object, FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();
@@ -235,7 +235,7 @@ namespace System.Web.Http.Tracing.Tracers
         public void CreateFilterTracers_With_All_Filter_Interfaces_Returns_3_Wrapped_Filters()
         {
             // Arrange
-            FilterInfo filter = new FilterInfo(new TestFilterAllBehaviors(), FilterScope.First);
+            FilterInfo filter = new FilterInfo(new TestFilterAllBehaviors(), FilterScope.Action);
 
             // Act
             FilterInfo[] wrappedFilters = FilterTracer.CreateFilterTracers(filter, new TestTraceWriter()).ToArray();

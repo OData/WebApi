@@ -22,8 +22,8 @@ namespace System.Web.Http.SelfHost
 
         private const int PendingContextFactor = 100;
         private const int MinConcurrentRequests = 1;
-        private const int MinBufferSize = 0;
-        private const int MinReceivedMessageSize = 0;
+        private const int MinBufferSize = 1;
+        private const int MinReceivedMessageSize = 1;
 
         private Uri _baseAddress;
         private int _maxConcurrentRequests;
@@ -31,6 +31,7 @@ namespace System.Web.Http.SelfHost
         private bool _useWindowsAuth;
         private TransferMode _transferMode;
         private int _maxBufferSize = DefaultMaxBufferSize;
+        private bool _maxBufferSizeIsInitialized;
         private long _maxReceivedMessageSize = DefaultReceivedMessageSize;
         private HostNameComparisonMode _hostNameComparisonMode;
 
@@ -128,7 +129,20 @@ namespace System.Web.Http.SelfHost
         /// </value>
         public int MaxBufferSize
         {
-            get { return _maxBufferSize; }
+            get
+            {
+                if (_maxBufferSizeIsInitialized || TransferMode != TransferMode.Buffered)
+                {
+                    return _maxBufferSize;
+                }
+
+                long maxReceivedMessageSize = MaxReceivedMessageSize;
+                if (maxReceivedMessageSize > Int32.MaxValue)
+                {
+                    return Int32.MaxValue;
+                }
+                return (int)maxReceivedMessageSize;
+            }
 
             set
             {
@@ -136,6 +150,7 @@ namespace System.Web.Http.SelfHost
                 {
                     throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinBufferSize);
                 }
+                _maxBufferSizeIsInitialized = true;
                 _maxBufferSize = value;
             }
         }

@@ -106,11 +106,60 @@ namespace System.Web.Http.SelfHost
                 new HttpSelfHostConfiguration("http://localhost"),
                 c => c.MaxBufferSize,
                 expectedDefaultValue: 64 * 1024,
-                minLegalValue: 0,
-                illegalLowerValue: -1,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
                 maxLegalValue: null,
                 illegalUpperValue: null,
                 roundTripTestValue: 10);
+        }
+
+        [Theory]
+        [InlineData(1, 1)]
+        [InlineData(1024, 1024)]
+        [InlineData(Int32.MaxValue - 1, Int32.MaxValue - 1)]
+        [InlineData(Int32.MaxValue, Int32.MaxValue)]
+        [InlineData(Int64.MaxValue - 1, Int32.MaxValue)]
+        [InlineData(Int64.MaxValue, Int32.MaxValue)]
+        public void HttpSelfHostConfiguration_MaxBufferSize_TracksMaxReceivedMessageSizeWhenNotSet(long maxReceivedMessageSize, int expectedMaxBufferSize)
+        {
+            // Arrange
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost");
+            config.MaxReceivedMessageSize = maxReceivedMessageSize;
+
+            // Act & Assert
+            Assert.Equal(expectedMaxBufferSize, config.MaxBufferSize);
+        }
+
+        [Theory]
+        [InlineData(2, 1)]
+        [InlineData(1025, 1024)]
+        [InlineData(Int64.MaxValue, Int32.MaxValue)]
+        public void HttpSelfHostConfiguration_MaxBufferSize_DoesNotTrackMaxReceivedMessageSizeWhenSet(long maxReceivedMessageSize, int maxBufferSize)
+        {
+            // Arrange
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost");
+            config.MaxBufferSize = maxBufferSize;
+            config.MaxReceivedMessageSize = maxReceivedMessageSize;
+
+            // Act & Assert
+            Assert.Equal(maxBufferSize, config.MaxBufferSize);
+            Assert.Equal(maxReceivedMessageSize, config.MaxReceivedMessageSize);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(1024)]
+        [InlineData(Int64.MaxValue)]
+        public void HttpSelfHostConfiguration_MaxBufferSize_DoesNotTrackMaxReceivedMessageIfNotBuffered(long maxReceivedMessageSize)
+        {
+            // Arrange
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost");
+            config.TransferMode = TransferMode.Streamed;
+            config.MaxReceivedMessageSize = maxReceivedMessageSize;
+
+            // Act & Assert
+            Assert.Equal(maxReceivedMessageSize, config.MaxReceivedMessageSize);
+            Assert.Equal(64 * 1024, config.MaxBufferSize);
         }
 
         [Fact]
@@ -120,8 +169,8 @@ namespace System.Web.Http.SelfHost
                 new HttpSelfHostConfiguration("http://localhost"),
                 c => c.MaxReceivedMessageSize,
                 expectedDefaultValue: 64 * 1024,
-                minLegalValue: 0,
-                illegalLowerValue: -1,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
                 maxLegalValue: null,
                 illegalUpperValue: null,
                 roundTripTestValue: 10);

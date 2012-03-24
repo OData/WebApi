@@ -10,7 +10,6 @@ using Moq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Xml.Serialization;
 
 namespace System.Net.Http.Formatting
 {
@@ -191,7 +190,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public Task WriteToStreamAsync_WritesDataToButDoesNotCloseStream()
+        public Task WriteToStreamAsync_WritesDataButDoesNotCloseStream()
         {
             // Arrange
             TFormatter formatter = new TFormatter();
@@ -287,7 +286,6 @@ namespace System.Net.Http.Formatting
                     // Assert
                     Assert.True(writeTask.IsCompleted);
                     byte[] actualData = memStream.ToArray();
-
                     Assert.Equal(expectedData, actualData);
                 });
         }

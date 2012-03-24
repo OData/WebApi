@@ -7,7 +7,7 @@ namespace System.Net.Http.Internal
     /// in the <see cref="System.Xml.XmlDictionaryReader"/> insisting of closing the inner stream.
     /// The regular <see cref="System.Xml.XmlReader"/> does allow for not closing the inner stream but that 
     /// doesn't have the quota that we need for security reasons. Implementations of 
-    /// <see cref="System.Net.Http.Formatting.MediaTypeFormatters"/>
+    /// <see cref="System.Net.Http.Formatting.MediaTypeFormatter"/>
     /// should not close the input stream when reading or writing so hence this workaround.
     /// </summary>
     internal class XmlDictionaryReaderWrapperStream : DelegatingStream

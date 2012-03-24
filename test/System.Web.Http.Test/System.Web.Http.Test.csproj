@@ -149,7 +149,7 @@
     <Compile Include="ModelBinding\DefaultActionValueBinderTest.cs" />
     <Compile Include="Controllers\ApiControllerTest.cs" />
     <Compile Include="Controllers\Apis\UsersController.cs" />
-    <Compile Include="HttpBindingBehaviorAttributeTest.cs" />
+    <Compile Include="ModelBinding\HttpBindingBehaviorAttributeTest.cs" />
     <Compile Include="Internal\CollectionModelBinderUtilTest.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinderProviderTest.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinderTest.cs" />

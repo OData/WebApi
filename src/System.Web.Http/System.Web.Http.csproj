@@ -230,8 +230,8 @@
     <Compile Include="ModelBinding\Binders\ArrayModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinder.cs" />
     <Compile Include="ModelBinding\Binders\BinaryDataModelBinderProvider.cs" />
-    <Compile Include="HttpBindingBehavior.cs" />
-    <Compile Include="HttpBindingBehaviorAttribute.cs" />
+    <Compile Include="ModelBinding\HttpBindingBehavior.cs" />
+    <Compile Include="ModelBinding\HttpBindingBehaviorAttribute.cs" />
     <Compile Include="ModelBinding\Binders\CollectionModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\CollectionModelBinder.cs" />
     <Compile Include="ModelBinding\Binders\ComplexModelDto.cs" />

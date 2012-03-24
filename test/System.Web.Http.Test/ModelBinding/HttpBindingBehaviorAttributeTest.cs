@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace System.Web.Http
+namespace System.Web.Http.ModelBinding
 {
     public class HttpHttpBindingBehaviorAttributeTest
     {

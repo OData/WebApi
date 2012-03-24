@@ -1,6 +1,4 @@
-﻿// Taken from Microsoft.Web.Mvc
-
-namespace System.Web.Http
+﻿namespace System.Web.Http.ModelBinding
 {
     public enum HttpBindingBehavior
     {

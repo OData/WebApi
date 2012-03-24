@@ -174,11 +174,8 @@ namespace System.Web.Http.Controllers
         /// <param name="controller">The controller.</param>
         public virtual void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
         {
-            IDisposable disposable = controller as IDisposable;
-            if (disposable != null)
-            {
-                disposable.Dispose();
-            }
+            // just delegate the work to the activator
+            HttpControllerActivator.Release(controller, controllerContext);
         }
 
         /// <summary>

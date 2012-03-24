@@ -91,5 +91,19 @@ namespace System.Web.Http.Dispatcher
                 throw Error.InvalidOperation(ex, SRResources.DefaultControllerFactory_ErrorCreatingController, controllerType);
             }
         }
+
+        /// <summary>
+        /// Releases the <paramref name="controller"/> instance 
+        /// </summary>
+        /// <param name="controllerContext">The <see cref="HttpControllerContext"/> containing </param>
+        /// <param name="controller">The <see cref="IHttpController"/> that is to be released</param>
+        public void Release(IHttpController controller, HttpControllerContext controllerContext)
+        {
+            IDisposable disposable = controller as IDisposable;
+            if (disposable != null)
+            {
+                disposable.Dispose();
+            }
+        }
     }
 }

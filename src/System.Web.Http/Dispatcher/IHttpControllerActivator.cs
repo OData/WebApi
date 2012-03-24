@@ -9,5 +9,7 @@ namespace System.Web.Http.Dispatcher
     public interface IHttpControllerActivator
     {
         IHttpController Create(HttpRequestMessage request, HttpControllerDescriptor controllerDescriptor, Type controllerType);
+
+        void Release(IHttpController controller, HttpControllerContext controllerContext);
     }
 }

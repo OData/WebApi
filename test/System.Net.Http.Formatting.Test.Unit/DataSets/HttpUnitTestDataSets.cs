@@ -2,8 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
-using Microsoft.TestCommon;
 using System.Text;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http.Formatting.DataSets
 {

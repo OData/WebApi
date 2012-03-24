@@ -7,8 +7,6 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -28,20 +26,6 @@ namespace System.Net.Http.Formatting
         public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
         {
             get { return HttpTestData.ReadAndWriteCorrectCharacterEncoding; }
-        }
-
-        public static List<Type> JTokenTypes
-        {
-            get
-            {
-                return new List<Type>
-                {
-                    typeof(JToken),
-                    typeof(JValue),
-                    typeof(JArray),
-                    typeof(JObject)
-                };
-            }
         }
 
         public static IEnumerable<TestData> ValueAndRefTypeTestDataCollectionExceptULong
@@ -113,26 +97,6 @@ namespace System.Net.Http.Formatting
             // Ask a 2nd time to probe whether the cached result is treated the same
             canSupport = formatter.CanReadTypeProxy(variationType);
             Assert.False(isSerializable != canSupport && isSerializable, String.Format("2nd CanReadType returned wrong value for '{0}'.", variationType));
-        }
-
-        [Fact]
-        public void CanReadType_ReturnsTrueOnJtoken()
-        {
-            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            foreach (Type type in JTokenTypes)
-            {
-                Assert.True(formatter.CanReadTypeProxy(type), "formatter should have returned true.");
-            }
-        }
-
-        [Fact]
-        public void CanWriteType_ReturnsTrueOnJtoken()
-        {
-            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            foreach (Type type in JTokenTypes)
-            {
-                Assert.True(formatter.CanWriteTypeProxy(type), "formatter should have returned false.");
-            }
         }
 
         [Theory]

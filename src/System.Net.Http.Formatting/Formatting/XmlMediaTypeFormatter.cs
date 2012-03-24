@@ -251,7 +251,11 @@ namespace System.Net.Http.Formatting
 
                 object serializer = GetSerializerForType(type);
 
+<<<<<<< HEAD
                 try
+=======
+                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new XmlDictionaryReaderWrapperStream(stream), effectiveEncoding, _readerQuotas, null))
+>>>>>>> /bad-path/
                 {
                     using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, _readerQuotas, null))
                     {

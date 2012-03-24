@@ -17,7 +17,7 @@ namespace System.Net.Http.Formatting
     /// <see cref="MediaTypeFormatter"/> class to handle Json.
     /// </summary>
     public class JsonMediaTypeFormatter : MediaTypeFormatter
-    {   
+    {
         private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
         {
             MediaTypeConstants.ApplicationJsonMediaType,
@@ -27,7 +27,7 @@ namespace System.Net.Http.Formatting
         private JsonSerializerSettings _jsonSerializerSettings;
         private readonly IContractResolver _defaultContractResolver;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
-        private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas(); 
+        private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
 
         private ConcurrentDictionary<Type, DataContractJsonSerializer> _dataContractSerializerCache = new ConcurrentDictionary<Type, DataContractJsonSerializer>();
         private RequestHeaderMapping _requestHeaderMapping;
@@ -239,14 +239,14 @@ namespace System.Net.Http.Formatting
                     if (UseDataContractJsonSerializer)
                     {
                         DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(stream, effectiveEncoding, _readerQuotas, null))
+                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new XmlDictionaryReaderWrapperStream(stream), effectiveEncoding, _readerQuotas, null))
                         {
                             return dataContractSerializer.ReadObject(reader);
                         }
                     }
                     else
                     {
-                        using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth))
+                        using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth) { CloseInput = false })
                         {
                             JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
                             if (formatterLogger != null)
@@ -263,7 +263,6 @@ namespace System.Net.Http.Formatting
                 }
                 catch (Exception e)
                 {
-                    if (formatterLogger == null)
                     {
                         throw;
                     }
@@ -325,7 +324,6 @@ namespace System.Net.Http.Formatting
                     }
 
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                    // TODO: CSDMain 235508: Should formatters close write stream on completion or leave that to somebody else?
                     using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(stream, effectiveEncoding, ownsStream: false))
                     {
                         dataContractSerializer.WriteObject(writer, value);

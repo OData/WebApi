@@ -135,25 +135,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        [Fact]
-        public void ReadFromStreamAsync_RoundTripsJToken()
-        {
-            string beforeMessage = "Hello World";
-            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            JToken before = beforeMessage;
-            MemoryStream memStream = new MemoryStream();
-            JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriter(memStream));
-            before.WriteTo(jsonWriter);
-            jsonWriter.Flush();
-            memStream.Position = 0;
-
-            JToken after = Assert.Task.SucceedsWithResult<object>(formatter.ReadFromStreamAsync(typeof(JToken), memStream, null, null)) as JToken;
-            Assert.NotNull(after);
-            string afterMessage = after.ToObject<string>();
-
-            Assert.Equal(beforeMessage, afterMessage);
-        }
-
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
         [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong")]
@@ -204,27 +185,16 @@ namespace System.Net.Http.Formatting
                     memoryStream, contentHeaders, transportContext: null));
         }
 
-        [Fact]
-        [Trait("Description", "OnWriteToStreamAsync() roundtrips JsonValue.")]
-        public void WriteToStreamAsync_RoundTripsJToken()
-        {
-            string beforeMessage = "Hello World";
-            TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            JToken before = new JValue(beforeMessage);
-            MemoryStream memStream = new MemoryStream();
-
-            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(JToken), before, memStream, null, null));
-            memStream.Position = 0;
-            JToken after = JToken.Load(new JsonTextReader(new StreamReader(memStream)));
-            string afterMessage = after.ToObject<string>();
-
-            Assert.Equal(beforeMessage, afterMessage);
-        }
-
         [Theory]
         [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
+            if (!isDefaultEncoding)
+            {
+                // XmlDictionaryReader/Writer only supports utf-8 and 16
+                return TaskHelpers.Completed();
+            }
+
             // Arrange
             DataContractJsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
             string formattedContent = "\"" + content + "\"";
@@ -239,6 +209,14 @@ namespace System.Net.Http.Formatting
         [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
+            // DataContractJsonSerializer does not honor the value of byteOrderMark in the UnicodeEncoding ctor.
+            // It doesn't include the BOM when byteOrderMark is set to true.
+            if (!isDefaultEncoding || encoding != "utf-8")
+            {
+                // XmlDictionaryReader/Writer only supports utf-8 and 16
+                return TaskHelpers.Completed();
+            }
+
             // Arrange
             DataContractJsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
             string formattedContent = "\"" + content + "\"";

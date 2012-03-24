@@ -41,7 +41,7 @@ namespace System.Net.Http.Formatting
 
         public override byte[] ExpectedSampleTypeByteRepresentation
         {
-            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleType><Number>42</Number></SampleType>"); }
+            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleTypeOfXmlSerializerMediaTypeFormatter xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><Number>42</Number></SampleTypeOfXmlSerializerMediaTypeFormatter>"); }
         }
 
         [Fact]

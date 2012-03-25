@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Microsoft.TestCommon;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 

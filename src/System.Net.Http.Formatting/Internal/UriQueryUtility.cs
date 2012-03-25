@@ -1,6 +1,4 @@
-﻿using System.Collections.Specialized;
-using System.Diagnostics.Contracts;
-using System.Net.Http.Formatting;
+﻿using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace System.Net.Http.Internal

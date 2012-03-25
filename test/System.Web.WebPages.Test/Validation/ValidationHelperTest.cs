@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Web.WebPages.Html;
 using System.Web.WebPages.Scope;
-using System.Web.WebPages.TestUtils;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

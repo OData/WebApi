@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Web.WebPages.Resources;
-using System.Web.WebPages.TestUtils;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

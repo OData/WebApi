@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.Controllers;
-using System.Web.Http.ValueProviders;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

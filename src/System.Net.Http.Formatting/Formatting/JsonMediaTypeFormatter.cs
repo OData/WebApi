@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;

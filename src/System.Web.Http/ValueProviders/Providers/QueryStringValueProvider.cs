@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
-using System.Web.Http.Internal;
 using System.Web.Http.ModelBinding;
 
 namespace System.Web.Http.ValueProviders.Providers

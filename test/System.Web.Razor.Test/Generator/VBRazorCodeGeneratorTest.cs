@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Web.Razor.Generator;
-using System.Web.WebPages.TestUtils;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;

@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
-using System.Net.Http.Internal;
 using System.Threading.Tasks;
 
 namespace System.Net.Http

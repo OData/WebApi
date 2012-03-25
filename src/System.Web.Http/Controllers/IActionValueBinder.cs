@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace System.Web.Http.Controllers
+﻿namespace System.Web.Http.Controllers
 {
     public interface IActionValueBinder
     {

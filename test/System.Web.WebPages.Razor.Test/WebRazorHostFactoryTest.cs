@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Web.Configuration;
 using System.Web.WebPages.Razor.Configuration;
 using System.Web.WebPages.Razor.Resources;
-using System.Web.WebPages.TestUtils;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 

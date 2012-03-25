@@ -3,9 +3,9 @@ using System.Collections.Specialized;
 using System.Web;
 using System.Web.Security;
 using DotNetOpenAuth.AspNet;
+using Microsoft.TestCommon;
 using Moq;
 using Xunit;
-using Microsoft.TestCommon;
 
 namespace Microsoft.Web.WebPages.OAuth.Test
 {

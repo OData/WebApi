@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace System.Web.Http
 {

@@ -12,7 +12,6 @@ using System.Web.UI.WebControls;
 using System.Web.WebPages;
 using System.Xml;
 using Microsoft.Internal.Web.Utils;
-using DV = System.Web.UI.DataVisualization.Charting;
 
 namespace System.Web.Helpers
 {

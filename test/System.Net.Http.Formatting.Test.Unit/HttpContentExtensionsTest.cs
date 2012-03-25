@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;

@@ -6,7 +6,6 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Services;
-using System.Web.Http.Validation;
 
 namespace System.Web.Http
 {

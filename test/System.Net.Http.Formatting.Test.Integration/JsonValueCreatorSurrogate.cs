@@ -1,6 +1,6 @@
-﻿using System.Json;
+﻿using System.Collections.Generic;
+using System.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace System.Net.Http.Formatting
 {

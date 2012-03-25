@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.TestUtil;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

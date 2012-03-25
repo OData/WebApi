@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Web.Mvc.Async;
-using System.Web.TestUtil;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 

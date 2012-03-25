@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
-using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
 namespace System.Net.Http.Formatting

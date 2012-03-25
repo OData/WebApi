@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace System.Web.Http.Tracing
+﻿namespace System.Web.Http.Tracing
 {
     /// <summary>
     /// Category names traced by the default tracing implementation.

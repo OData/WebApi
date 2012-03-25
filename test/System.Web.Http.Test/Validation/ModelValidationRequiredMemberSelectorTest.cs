@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Formatting;
-using Xunit;
+using System.Runtime.Serialization;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 

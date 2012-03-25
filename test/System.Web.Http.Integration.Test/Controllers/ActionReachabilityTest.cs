@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http;
-using System.Web.Http.Dispatcher;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 

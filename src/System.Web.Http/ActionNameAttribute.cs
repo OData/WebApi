@@ -1,6 +1,4 @@
-﻿using System.Web.Http.Controllers;
-
-namespace System.Web.Http
+﻿namespace System.Web.Http
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public sealed class ActionNameAttribute : Attribute

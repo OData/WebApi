@@ -4,12 +4,12 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Filters;
 using Microsoft.Web.Http.Data.EntityFramework;
 using Microsoft.Web.Http.Data.EntityFramework.Metadata;
 using Microsoft.Web.Http.Data.Test.Models;
-using System.Web.Http;
-using System.Web.Http.Filters;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 

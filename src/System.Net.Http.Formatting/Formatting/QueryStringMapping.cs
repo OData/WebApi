@@ -1,6 +1,5 @@
 ﻿using System.Collections.Specialized;
 using System.Net.Http.Headers;
-using System.Net.Http.Internal;
 
 namespace System.Net.Http.Formatting
 {

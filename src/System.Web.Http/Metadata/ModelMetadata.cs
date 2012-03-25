@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
-using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.Validation;
 

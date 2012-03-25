@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http
 {

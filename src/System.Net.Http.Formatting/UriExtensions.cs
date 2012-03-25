@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Formatting;
-using System.Net.Http.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

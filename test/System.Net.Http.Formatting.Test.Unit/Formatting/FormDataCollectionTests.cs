@@ -1,16 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.IO;
+using System.Collections.Specialized;
 using System.Linq;
-using System.Net.Http.Formatting.DataSets;
-using System.Net.Http.Formatting.DataSets.Types;
-using System.Net.Http.Headers;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Collections.Specialized;
 
 namespace System.Net.Http.Formatting
 {

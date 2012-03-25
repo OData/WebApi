@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
-using Xunit.Sdk;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Async.Test

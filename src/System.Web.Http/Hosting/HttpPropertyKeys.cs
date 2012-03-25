@@ -1,5 +1,4 @@
 using System.Net.Http;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http.Routing;
 

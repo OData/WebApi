@@ -19,6 +19,8 @@ namespace System.Web.Http.Controllers
         private HttpActionDescriptor _actionDescriptor;
         private HttpParameterBinding[] _parameterBindings;
 
+        private ModelMetadataProvider _metadataProvider;
+
         public HttpActionBinding()
         {
         }
@@ -82,10 +84,14 @@ namespace System.Web.Http.Controllers
                 }
             }
 
-            ModelMetadataProvider metadataProvider = actionContext.ControllerContext.Configuration.ServiceResolver.GetModelMetadataProvider();
+            if (_metadataProvider == null)
+            {
+                HttpConfiguration config = actionContext.ControllerContext.Configuration;
+                _metadataProvider = config.ServiceResolver.GetModelMetadataProvider();
+            }
 
             // Execute all the binders.
-            IEnumerable<Task> tasks = from parameterBinder in ParameterBindings select parameterBinder.ExecuteBindingAsync(metadataProvider, actionContext, cancellationToken);
+            IEnumerable<Task> tasks = from parameterBinder in ParameterBindings select parameterBinder.ExecuteBindingAsync(_metadataProvider, actionContext, cancellationToken);
             return TaskHelpers.Iterate(tasks, cancellationToken);
         }
     }

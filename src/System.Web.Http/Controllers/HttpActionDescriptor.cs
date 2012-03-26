@@ -24,6 +24,8 @@ namespace System.Web.Http.Controllers
         private HttpControllerDescriptor _controllerDescriptor;
         private readonly Collection<HttpMethod> _supportedHttpMethods = new Collection<HttpMethod>();
 
+        private HttpActionBinding _actionBinding;
+
         protected HttpActionDescriptor()
         {
         }
@@ -51,6 +53,28 @@ namespace System.Web.Http.Controllers
                     throw Error.PropertyNull();
                 }
                 _configuration = value;
+            }
+        }
+
+        public virtual HttpActionBinding ActionBinding
+        {
+            get
+            {                
+                if (_actionBinding == null)
+                {
+                    IActionValueBinder actionValueBinder = _controllerDescriptor.ActionValueBinder;
+                    HttpActionBinding actionBinding = actionValueBinder.GetBinding(this);
+                    _actionBinding = actionBinding;
+                }
+                return _actionBinding;
+            }
+            set
+            {
+                if (value == null) 
+                {
+                    throw Error.PropertyNull();
+                }
+                _actionBinding = value;
             }
         }
 

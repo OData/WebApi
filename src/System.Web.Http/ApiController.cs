@@ -140,8 +140,7 @@ namespace System.Web.Http
             // Func<Task<HttpResponseMessage>>
             Task<HttpResponseMessage> result = InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, () =>
             {
-                IActionValueBinder actionValueBinder = controllerDescriptor.ActionValueBinder;
-                HttpActionBinding actionBinding = actionValueBinder.GetBinding(actionDescriptor);
+                HttpActionBinding actionBinding = actionDescriptor.ActionBinding;
                 Task bindTask = actionBinding.ExecuteBindingAsync(actionContext, cancellationToken);
                 return bindTask.Then<HttpResponseMessage>(() =>
                 {

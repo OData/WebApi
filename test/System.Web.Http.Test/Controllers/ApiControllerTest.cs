@@ -317,9 +317,16 @@ namespace System.Web.Http
                 log.Add("auth filters");
                 return cont();
             });
+
             var selectorMock = new Mock<IHttpActionSelector>();
-            selectorMock.Setup(s => s.SelectAction(controllerContext).GetFilterPipeline())
-                                .Returns(new Collection<FilterInfo>(new List<FilterInfo>() { new FilterInfo(actionFilterMock.Object, FilterScope.Action), new FilterInfo(authFilterMock.Object, FilterScope.Action) }));
+            
+            Mock<HttpActionDescriptor> actionDescriptorMock = new Mock<HttpActionDescriptor>();
+            actionDescriptorMock.Setup( ad => ad.ActionBinding).Returns(actionBindingMock.Object);
+            actionDescriptorMock.Setup( ad => ad.GetFilterPipeline()).
+                Returns(new Collection<FilterInfo>(new List<FilterInfo>() { new FilterInfo(actionFilterMock.Object, FilterScope.Action), new FilterInfo(authFilterMock.Object, FilterScope.Action) }));
+
+            selectorMock.Setup(s => s.SelectAction(controllerContext)).Returns(actionDescriptorMock.Object);
+
             ApiController controller = controllerMock.Object;
             var invokerMock = new Mock<IHttpActionInvoker>();
             invokerMock.Setup(i => i.InvokeActionAsync(It.IsAny<HttpActionContext>(), It.IsAny<CancellationToken>()))

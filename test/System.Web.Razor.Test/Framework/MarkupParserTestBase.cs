@@ -55,5 +55,15 @@ namespace System.Web.Razor.Test.Framework
         {
             return RunParse(document, parser => parser.ParseDocument, designTimeParser);
         }
+
+        protected virtual ParserResults ParseBlock(string document)
+        {
+            return ParseBlock(document, designTimeParser: false);
+        }
+
+        protected virtual ParserResults ParseBlock(string document, bool designTimeParser)
+        {
+            return RunParse(document, parser => parser.ParseBlock, designTimeParser);
+        }
     }
 }

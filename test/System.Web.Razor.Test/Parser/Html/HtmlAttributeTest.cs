@@ -264,5 +264,39 @@ namespace System.Web.Razor.Test.Parser.Html
             Assert.Equal(0, results.ParserErrors.Count);
             EvaluateParseTree(rewritten, new MarkupBlock(Factory.Markup(code)));
         }
+
+        [Fact]
+        public void ConditionalAttributesAreDisabledForDataAttributesInBlock()
+        {
+            ParseBlockTest("<span data-foo='@foo'></span>",
+                new MarkupBlock(
+                    Factory.Markup("<span"),
+                    new MarkupBlock(
+                        Factory.Markup(" data-foo='"),
+                        new ExpressionBlock(
+                            Factory.CodeTransition(),
+                            Factory.Code("foo")
+                                   .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                   .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                        Factory.Markup("'")),
+                    Factory.Markup("></span>").Accepts(AcceptedCharacters.None)));
+        }
+
+        [Fact]
+        public void ConditionalAttributesAreDisabledForDataAttributesInDocument()
+        {
+            ParseDocumentTest("<span data-foo='@foo'></span>",
+                new MarkupBlock(
+                    Factory.Markup("<span"),
+                    new MarkupBlock(
+                        Factory.Markup(" data-foo='"),
+                        new ExpressionBlock(
+                            Factory.CodeTransition(),
+                            Factory.Code("foo")
+                                   .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                   .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                        Factory.Markup("'")),
+                    Factory.Markup("></span>")));
+        }
     }
 }

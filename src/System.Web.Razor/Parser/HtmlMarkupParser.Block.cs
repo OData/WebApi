@@ -378,11 +378,15 @@ namespace System.Web.Razor.Parser
             }
         }
 
-        private void AttributePrefix(IEnumerable<HtmlSymbol> whitespace, IEnumerable<HtmlSymbol> name)
+        private void AttributePrefix(IEnumerable<HtmlSymbol> whitespace, IEnumerable<HtmlSymbol> nameSymbols)
         {
+            // First, determine if this is a 'data-' attribute (since those can't use conditional attributes)
+            LocationTagged<string> name = nameSymbols.GetContent(Span.Start);
+            bool attributeCanBeConditional = !name.Value.StartsWith("data-", StringComparison.OrdinalIgnoreCase);
+
             // Accept the whitespace and name
             Accept(whitespace);
-            Accept(name);
+            Accept(nameSymbols);
             Assert(HtmlSymbolType.Equals); // We should be at "="
             AcceptAndMoveNext();
             HtmlSymbolType quote = HtmlSymbolType.Unknown;
@@ -394,32 +398,46 @@ namespace System.Web.Razor.Parser
 
             // We now have the prefix: (i.e. '      foo="')
             LocationTagged<string> prefix = Span.GetContent();
-            Span.CodeGenerator = SpanCodeGenerator.Null; // The block code generator will render the prefix
-            Output(SpanKind.Markup);
 
-            // Read the values
-            while (!EndOfFile && !IsEndOfAttributeValue(quote, CurrentSymbol))
+            if (attributeCanBeConditional)
             {
-                AttributeValue(quote);
+                Span.CodeGenerator = SpanCodeGenerator.Null; // The block code generator will render the prefix
+                Output(SpanKind.Markup);
+
+                // Read the values
+                while (!EndOfFile && !IsEndOfAttributeValue(quote, CurrentSymbol))
+                {
+                    AttributeValue(quote);
+                }
+
+                // Capture the suffix
+                LocationTagged<string> suffix = new LocationTagged<string>(String.Empty, CurrentLocation);
+                if (quote != HtmlSymbolType.Unknown && At(quote))
+                {
+                    suffix = CurrentSymbol.GetContent();
+                    AcceptAndMoveNext();
+                }
+
+                if (Span.Symbols.Count > 0)
+                {
+                    Span.CodeGenerator = SpanCodeGenerator.Null; // Again, block code generator will render the suffix
+                    Output(SpanKind.Markup);
+                }
+
+                // Create the block code generator
+                Context.CurrentBlock.CodeGenerator = new AttributeBlockCodeGenerator(
+                    name, prefix, suffix);
             }
-
-            // Capture the suffix
-            LocationTagged<string> suffix = new LocationTagged<string>(String.Empty, CurrentLocation);
-            if (quote != HtmlSymbolType.Unknown && At(quote))
+            else
             {
-                suffix = CurrentSymbol.GetContent();
-                AcceptAndMoveNext();
-            }
-
-            if (Span.Symbols.Count > 0)
-            {
-                Span.CodeGenerator = SpanCodeGenerator.Null; // Again, block code generator will render the suffix
+                // Not a "conditional" attribute, so just read the value
+                SkipToAndParseCode(sym => IsEndOfAttributeValue(quote, sym));
+                if (quote != HtmlSymbolType.Unknown)
+                {
+                    Optional(quote);
+                }
                 Output(SpanKind.Markup);
             }
-
-            // Create the block code generator
-            Context.CurrentBlock.CodeGenerator = new AttributeBlockCodeGenerator(
-                name.GetContent(Span.Start), prefix, suffix);
         }
 
         private void AttributeValue(HtmlSymbolType quote)

@@ -9,7 +9,7 @@ namespace System.Web.Mvc
 
         private object _lockObject = new object();
         private bool _urlRewriterIsTurnedOnValue;
-        private bool _urlRewriterIsTurnedOnCalculated = false;
+        private volatile bool _urlRewriterIsTurnedOnCalculated = false;
 
         private static bool WasThisRequestRewritten(HttpContextBase httpContext)
         {

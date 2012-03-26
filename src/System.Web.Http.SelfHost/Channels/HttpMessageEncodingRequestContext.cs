@@ -17,14 +17,11 @@ namespace System.Web.Http.SelfHost.Channels
 
         private RequestContext _innerContext;
         private Message _configuredRequestMessage;
-        private bool _isRequestConfigured;
-        private object _requestConfigurationLock;
 
         public HttpMessageEncodingRequestContext(RequestContext innerContext)
         {
             Contract.Assert(innerContext != null, "The 'innerContext' parameter should not be null.");
             _innerContext = innerContext;
-            _requestConfigurationLock = new object();
         }
 
         internal Exception Exception { get; set; }
@@ -35,17 +32,9 @@ namespace System.Web.Http.SelfHost.Channels
         {
             get
             {
-                if (!_isRequestConfigured)
+                if (_configuredRequestMessage == null)
                 {
-                    lock (_requestConfigurationLock)
-                    {
-                        if (!_isRequestConfigured)
-                        {
-                            Message innerMessage = _innerContext.RequestMessage;
-                            _configuredRequestMessage = ConfigureRequestMessage(innerMessage);
-                            _isRequestConfigured = true;
-                        }
-                    }
+                    _configuredRequestMessage = ConfigureRequestMessage(_innerContext.RequestMessage);
                 }
 
                 return _configuredRequestMessage;

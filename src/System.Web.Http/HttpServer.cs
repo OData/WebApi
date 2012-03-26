@@ -25,8 +25,9 @@ namespace System.Web.Http
         private readonly HttpConfiguration _configuration;
         private readonly HttpMessageHandler _dispatcher;
         private bool _disposed;
-        private bool _initialized;
+        private bool _initialized = false;
         private object _initializationLock = new object();
+        private object _initializationTarget;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpServer"/> class with default configuration and dispatcher.
@@ -160,26 +161,20 @@ namespace System.Web.Http
 
         private void EnsureInitialized()
         {
-            if (!_initialized && !_disposed)
+            LazyInitializer.EnsureInitialized(ref _initializationTarget, ref _initialized, ref _initializationLock, () =>
             {
-                lock (_initializationLock)
-                {
-                    if (!_initialized)
-                    {
-                        Initialize();
+                Initialize();
 
-                        // Attach tracing before creating pipeline to allow injection of message handlers
-                        ITraceManager traceManager = _configuration.ServiceResolver.GetTraceManager();
-                        Contract.Assert(traceManager != null);
-                        traceManager.Initialize(_configuration);
+                // Attach tracing before creating pipeline to allow injection of message handlers
+                ITraceManager traceManager = _configuration.ServiceResolver.GetTraceManager();
+                Contract.Assert(traceManager != null);
+                traceManager.Initialize(_configuration);
 
-                        // Create pipeline
-                        InnerHandler = HttpPipelineFactory.Create(_configuration.MessageHandlers, _dispatcher);
+                // Create pipeline
+                InnerHandler = HttpPipelineFactory.Create(_configuration.MessageHandlers, _dispatcher);
 
-                        _initialized = true;
-                    }
-                }
-            }
+                return null;
+            });
         }
 
         /// <summary>

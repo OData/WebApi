@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.SelfHost.Properties;
 using System.Web.Http.SelfHost.ServiceModel.Channels;
@@ -230,10 +231,8 @@ namespace System.Web.Http.SelfHost.Channels
 
             private class ByteArrayBufferManagerContent : ByteArrayContent
             {
-                private bool _disposed;
                 private BufferManager _bufferManager;
                 private byte[] _content;
-                private object _disposingLock;
 
                 public ByteArrayBufferManagerContent(BufferManager bufferManager, byte[] content, int offset, int count)
                     : base(content, offset, count)
@@ -242,23 +241,19 @@ namespace System.Web.Http.SelfHost.Channels
 
                     _bufferManager = bufferManager;
                     _content = content;
-                    _disposingLock = new object();
                 }
 
                 protected override void Dispose(bool disposing)
                 {
                     try
                     {
-                        if (disposing && !_disposed)
+                        if (disposing)
                         {
-                            lock (_disposingLock)
+                            BufferManager oldBufferManager = Interlocked.Exchange(ref _bufferManager, null);
+                            if (oldBufferManager != null)
                             {
-                                if (!_disposed)
-                                {
-                                    _disposed = true;
-                                    _bufferManager.ReturnBuffer(_content);
-                                    _content = null;
-                                }
+                                oldBufferManager.ReturnBuffer(_content);
+                                _content = null;
                             }
                         }
                     }

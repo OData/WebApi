@@ -6,7 +6,7 @@ namespace System.Web.Mvc
     internal class MultiServiceResolver<TService> : IResolver<IEnumerable<TService>>
         where TService : class
     {
-        private IEnumerable<TService> _itemsFromService;
+        private Lazy<IEnumerable<TService>> _itemsFromService;
         private Func<IEnumerable<TService>> _itemsThunk;
         private Func<IDependencyResolver> _resolverThunk;
 
@@ -19,6 +19,7 @@ namespace System.Web.Mvc
 
             _itemsThunk = itemsThunk;
             _resolverThunk = () => DependencyResolver.Current;
+            _itemsFromService = new Lazy<IEnumerable<TService>>(() => _resolverThunk().GetServices<TService>());
         }
 
         internal MultiServiceResolver(Func<IEnumerable<TService>> itemsThunk, IDependencyResolver resolver)
@@ -32,20 +33,7 @@ namespace System.Web.Mvc
 
         public IEnumerable<TService> Current
         {
-            get
-            {
-                if (_itemsFromService == null)
-                {
-                    lock (_itemsThunk)
-                    {
-                        if (_itemsFromService == null)
-                        {
-                            _itemsFromService = _resolverThunk().GetServices<TService>();
-                        }
-                    }
-                }
-                return _itemsFromService.Concat(_itemsThunk());
-            }
+            get { return _itemsFromService.Value.Concat(_itemsThunk()); }
         }
     }
 }

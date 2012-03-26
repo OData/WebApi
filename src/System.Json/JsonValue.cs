@@ -21,10 +21,7 @@ namespace System.Json
     [DataContract]
     public class JsonValue : IEnumerable<KeyValuePair<string, JsonValue>>, IDynamicMetaObjectProvider
     {
-        private static object lockKey = new object();
-
-        // Double-checked locking pattern requires volatile for read/write synchronization
-        private static volatile JsonValue defaultInstance;
+        private static JsonValue defaultInstance = new JsonValue();
         private int changingListenersCount;
         private int changedListenersCount;
 
@@ -130,21 +127,7 @@ namespace System.Json
         /// </summary>
         private static JsonValue DefaultInstance
         {
-            get
-            {
-                if (defaultInstance == null)
-                {
-                    lock (lockKey)
-                    {
-                        if (defaultInstance == null)
-                        {
-                            defaultInstance = new JsonValue();
-                        }
-                    }
-                }
-
-                return defaultInstance;
-            }
+            get { return defaultInstance; }
         }
 
         /// <summary>

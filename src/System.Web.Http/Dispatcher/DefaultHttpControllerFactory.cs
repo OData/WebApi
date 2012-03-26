@@ -22,9 +22,7 @@ namespace System.Web.Http.Dispatcher
 
         private readonly HttpConfiguration _configuration;
         private readonly HttpControllerTypeCache _controllerTypeCache;
-        private readonly ConcurrentDictionary<string, HttpControllerDescriptor> _controllerInfoCache = new ConcurrentDictionary<string, HttpControllerDescriptor>();
-        private bool _isControllerInfoCacheInitialized;
-        private object _controllerInfoCacheLock = new object();
+        private readonly Lazy<ConcurrentDictionary<string, HttpControllerDescriptor>> _controllerInfoCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultHttpControllerFactory"/> class.
@@ -37,6 +35,7 @@ namespace System.Web.Http.Dispatcher
                 throw Error.ArgumentNull("resolver");
             }
 
+            _controllerInfoCache = new Lazy<ConcurrentDictionary<string, HttpControllerDescriptor>>(InitializeControllerInfoCache);
             _configuration = configuration;
             _controllerTypeCache = new HttpControllerTypeCache(_configuration);
         }
@@ -55,7 +54,7 @@ namespace System.Web.Http.Dispatcher
             }
 
             HttpControllerDescriptor controllerDescriptor;
-            if (_controllerInfoCache.TryGetValue(controllerName, out controllerDescriptor))
+            if (_controllerInfoCache.Value.TryGetValue(controllerName, out controllerDescriptor))
             {
                 // Create controller instance
                 return CreateInstance(controllerContext, controllerDescriptor);
@@ -76,7 +75,7 @@ namespace System.Web.Http.Dispatcher
 
                     // Add controller descriptor to cache
                     controllerDescriptor = new HttpControllerDescriptor(_configuration, controllerName, match);
-                    _controllerInfoCache.TryAdd(controllerName, controllerDescriptor);
+                    _controllerInfoCache.Value.TryAdd(controllerName, controllerDescriptor);
 
                     // Create controller instance
                     return CreateInstance(controllerContext, controllerDescriptor);
@@ -100,8 +99,7 @@ namespace System.Web.Http.Dispatcher
 
         public virtual IDictionary<string, HttpControllerDescriptor> GetControllerMapping()
         {
-            EnsureControllerInfoCacheInitialized();
-            return _controllerInfoCache.ToDictionary(c => c.Key, c => c.Value, StringComparer.OrdinalIgnoreCase);
+            return _controllerInfoCache.Value.ToDictionary(c => c.Key, c => c.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         private static IHttpController CreateInstance(HttpControllerContext controllerContext, HttpControllerDescriptor controllerDescriptor)
@@ -138,32 +136,39 @@ namespace System.Web.Http.Dispatcher
             return Error.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, route.RouteTemplate, typeList);
         }
 
-        private void EnsureControllerInfoCacheInitialized()
+        private ConcurrentDictionary<string, HttpControllerDescriptor> InitializeControllerInfoCache()
         {
-            if (!_isControllerInfoCacheInitialized)
-            {
-                lock (_controllerInfoCacheLock)
-                {
-                    if (!_isControllerInfoCacheInitialized)
-                    {
-                        Dictionary<string, ILookup<string, Type>> controllerTypeGroups = _controllerTypeCache.Cache;
-                        foreach (KeyValuePair<string, ILookup<string, Type>> controllerTypeGroup in controllerTypeGroups)
-                        {
-                            string controllerName = controllerTypeGroup.Key;
-                            foreach (var controllerTypesGroupedByNs in controllerTypeGroup.Value)
-                            {
-                                foreach (var controllerType in controllerTypesGroupedByNs)
-                                {
-                                    var controllerDescriptor = new HttpControllerDescriptor(_configuration, controllerName, controllerType);
-                                    _controllerInfoCache.TryAdd(controllerName, controllerDescriptor);
-                                }
-                            }
-                        }
+            var result = new ConcurrentDictionary<string, HttpControllerDescriptor>();
+            var duplicateControllers = new HashSet<string>();
+            Dictionary<string, ILookup<string, Type>> controllerTypeGroups = _controllerTypeCache.Cache;
 
-                        _isControllerInfoCacheInitialized = true;
+            foreach (KeyValuePair<string, ILookup<string, Type>> controllerTypeGroup in controllerTypeGroups)
+            {
+                string controllerName = controllerTypeGroup.Key;
+                foreach (IGrouping<string, Type> controllerTypesGroupedByNs in controllerTypeGroup.Value)
+                {
+                    foreach (Type controllerType in controllerTypesGroupedByNs)
+                    {
+                        if (result.Keys.Contains(controllerName))
+                        {
+                            duplicateControllers.Add(controllerName);
+                            break;
+                        }
+                        else
+                        {
+                            result.TryAdd(controllerName, new HttpControllerDescriptor(_configuration, controllerName, controllerType));
+                        }
                     }
                 }
             }
+
+            foreach (string duplicateController in duplicateControllers)
+            {
+                HttpControllerDescriptor descriptor;
+                result.TryRemove(duplicateController, out descriptor);
+            }
+
+            return result;
         }
     }
 }

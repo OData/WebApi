@@ -131,8 +131,7 @@ namespace System.Web.Mvc.Async
                             tokenSource.Cancel();
                         }
                     }
-                },
-                                               state: null, dueTime: timeout, period: Timeout.Infinite);
+                }, state: null, dueTime: timeout, period: Timeout.Infinite);
             }
 
             Task taskUser = dispatcher.Execute(controllerContext.Controller, parametersArray) as Task;

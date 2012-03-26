@@ -11,25 +11,22 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
     internal abstract class AsyncResult : IAsyncResult
     {
         private static AsyncCallback _asyncCompletionWrapperCallback;
-        private AsyncCallback _completionCallback;
+        private readonly AsyncCallback _completionCallback;
         private bool _completedSynchronously;
         private bool _endCalled;
         private Exception _exception;
         private bool _isCompleted;
         private AsyncCompletion _nextAsyncCompletion;
-        private object _state;
+        private readonly object _state;
         private Action _beforePrepareAsyncCompletionAction;
         private Func<IAsyncResult, bool> _checkSyncValidationFunc;
-
         private ManualResetEvent _manualResetEvent;
-
-        private readonly object _thisLock;
+        private readonly object _manualResetEventLock = new object();
 
         protected AsyncResult(AsyncCallback callback, object state)
         {
             _completionCallback = callback;
             _state = state;
-            _thisLock = new object();
         }
 
         /// <summary>
@@ -49,12 +46,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
         {
             get
             {
-                if (_manualResetEvent != null)
-                {
-                    return _manualResetEvent;
-                }
-
-                lock (ThisLock)
+                lock (_manualResetEventLock)
                 {
                     if (_manualResetEvent == null)
                     {
@@ -83,11 +75,6 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
 
         // used in conjunction with PrepareAsyncCompletion to allow for finally blocks
         protected Action<AsyncResult, Exception> OnCompleting { get; set; }
-
-        private object ThisLock
-        {
-            get { return _thisLock; }
-        }
 
         // subclasses like TraceAsyncResult can use this to wrap the callback functionality in a scope
         protected Action<AsyncCallback, IAsyncResult> VirtualCallback { get; set; }
@@ -123,7 +110,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             }
             else
             {
-                lock (ThisLock)
+                lock (_manualResetEventLock)
                 {
                     _isCompleted = true;
                     if (_manualResetEvent != null)

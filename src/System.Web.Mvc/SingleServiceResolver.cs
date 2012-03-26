@@ -6,7 +6,7 @@ namespace System.Web.Mvc
     internal class SingleServiceResolver<TService> : IResolver<TService>
         where TService : class
     {
-        private TService _currentValueFromResolver;
+        private Lazy<TService> _currentValueFromResolver;
         private Func<TService> _currentValueThunk;
         private TService _defaultValue;
         private Func<IDependencyResolver> _resolverThunk;
@@ -24,6 +24,7 @@ namespace System.Web.Mvc
             }
 
             _resolverThunk = () => DependencyResolver.Current;
+            _currentValueFromResolver = new Lazy<TService>(GetValueFromResolver);
             _currentValueThunk = currentValueThunk;
             _defaultValue = defaultValue;
             _callerMethodName = callerMethodName;
@@ -40,26 +41,19 @@ namespace System.Web.Mvc
 
         public TService Current
         {
-            get
-            {
-                if (_resolverThunk != null)
-                {
-                    lock (_currentValueThunk)
-                    {
-                        if (_resolverThunk != null)
-                        {
-                            _currentValueFromResolver = _resolverThunk().GetService<TService>();
-                            _resolverThunk = null;
+            get { return _currentValueFromResolver.Value ?? _currentValueThunk() ?? _defaultValue; }
+        }
 
-                            if (_currentValueFromResolver != null && _currentValueThunk() != null)
-                            {
-                                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, MvcResources.SingleServiceResolver_CannotRegisterTwoInstances, typeof(TService).Name.ToString(), _callerMethodName));
-                            }
-                        }
-                    }
-                }
-                return _currentValueFromResolver ?? _currentValueThunk() ?? _defaultValue;
+        private TService GetValueFromResolver()
+        {
+            TService result = _resolverThunk().GetService<TService>();
+
+            if (result != null && _currentValueThunk() != null)
+            {
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, MvcResources.SingleServiceResolver_CannotRegisterTwoInstances, typeof(TService).Name.ToString(), _callerMethodName));
             }
+
+            return result;
         }
     }
 }

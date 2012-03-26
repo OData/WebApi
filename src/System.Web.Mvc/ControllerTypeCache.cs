@@ -7,7 +7,7 @@ namespace System.Web.Mvc
     {
         private const string TypeCacheName = "MVC-ControllerTypeCache.xml";
 
-        private Dictionary<string, ILookup<string, Type>> _cache;
+        private volatile Dictionary<string, ILookup<string, Type>> _cache;
         private object _lockObj = new object();
 
         internal int Count

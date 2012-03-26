@@ -17,8 +17,7 @@ namespace System.Web.Http.Controllers
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
 
         private IActionResultConverter _converter;
-        private readonly object _thisLock = new object();
-        private Collection<FilterInfo> _filterPipeline;
+        private readonly Lazy<Collection<FilterInfo>> _filterPipeline;
 
         private HttpConfiguration _configuration;
         private HttpControllerDescriptor _controllerDescriptor;
@@ -28,9 +27,11 @@ namespace System.Web.Http.Controllers
 
         protected HttpActionDescriptor()
         {
+            _filterPipeline = new Lazy<Collection<FilterInfo>>(InitializeFilterPipeline);
         }
 
         protected HttpActionDescriptor(HttpControllerDescriptor controllerDescriptor)
+            : this()
         {
             if (controllerDescriptor == null)
             {
@@ -197,26 +198,20 @@ namespace System.Web.Http.Controllers
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Filter pipeline can be built dynamically")]
         public virtual Collection<FilterInfo> GetFilterPipeline()
         {
-            if (_filterPipeline == null)
-            {
-                lock (_thisLock)
-                {
-                    if (_filterPipeline == null)
-                    {
-                        IEnumerable<IFilterProvider> filterProviders = _configuration.ServiceResolver.GetFilterProviders();
+            return _filterPipeline.Value;
+        }
 
-                        IEnumerable<FilterInfo> filters = filterProviders.SelectMany(fp => fp.GetFilters(_configuration, this)).OrderBy(f => f, FilterInfoComparer.Instance);
+        private Collection<FilterInfo> InitializeFilterPipeline()
+        {
+            IEnumerable<IFilterProvider> filterProviders = _configuration.ServiceResolver.GetFilterProviders();
 
-                        // Need to discard duplicate filters from the end, so that most specific ones get kept (Action scope) and
-                        // less specific ones get removed (Global)
-                        filters = RemoveDuplicates(filters.Reverse()).Reverse();
+            IEnumerable<FilterInfo> filters = filterProviders.SelectMany(fp => fp.GetFilters(_configuration, this)).OrderBy(f => f, FilterInfoComparer.Instance);
 
-                        _filterPipeline = new Collection<FilterInfo>(filters.ToList());
-                    }
-                }
-            }
+            // Need to discard duplicate filters from the end, so that most specific ones get kept (Action scope) and
+            // less specific ones get removed (Global)
+            filters = RemoveDuplicates(filters.Reverse()).Reverse();
 
-            return _filterPipeline;
+            return new Collection<FilterInfo>(filters.ToList());
         }
 
         private static IEnumerable<FilterInfo> RemoveDuplicates(IEnumerable<FilterInfo> filters)

@@ -194,9 +194,9 @@ namespace System.Web.Http
                         TaskHelpers.Iterate(lazyTaskEnumeration, cancellationToken)
                                    .Then<HttpResponseMessage>(() =>
                                    {
-                                       if (executedContext.Result != null)
+                                       if (executedContext.Response != null)
                                        {
-                                           return TaskHelpers.FromResult<HttpResponseMessage>(executedContext.Result);
+                                           return TaskHelpers.FromResult<HttpResponseMessage>(executedContext.Response);
                                        }
                                        else
                                        {

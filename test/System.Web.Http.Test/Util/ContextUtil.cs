@@ -44,7 +44,7 @@ namespace System.Web.Http
         {
             HttpActionContext actionContext = CreateActionContext();
             actionContext.ControllerContext.Request = request;
-            HttpActionExecutedContext actionExecutedContext = new HttpActionExecutedContext(actionContext, null) { Result = response };
+            HttpActionExecutedContext actionExecutedContext = new HttpActionExecutedContext(actionContext, null) { Response = response };
             return actionExecutedContext;
         }
     }

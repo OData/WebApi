@@ -59,9 +59,11 @@ namespace System.Web.Http.Filters
                 {
                     // If we've already called OnActionExecuted, that means this catch is running because
                     // OnActionExecuted threw an exception, so we just want to re-throw the exception rather
-                    // that calling OnActionExecuted again.
+                    // that calling OnActionExecuted again. We also need to reset the response to forget about it
+                    // since a filter threw an exception.
                     if (calledOnActionExecuted)
                     {
+                        actionContext.Response = null;
                         return info.Throw();
                     }
 
@@ -75,13 +77,13 @@ namespace System.Web.Http.Filters
             Contract.Assert(actionContext != null);
             Contract.Assert(response != null || exception != null);
 
-            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception) { Result = response };
+            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
 
             OnActionExecuted(executedContext);
 
-            if (executedContext.Result != null)
+            if (executedContext.Response != null)
             {
-                return new Tuple<HttpResponseMessage, Exception>(executedContext.Result, null);
+                return new Tuple<HttpResponseMessage, Exception>(executedContext.Response, null);
             }
             if (executedContext.Exception != null)
             {

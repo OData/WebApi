@@ -41,7 +41,18 @@ namespace System.Web.Http.Filters
 
         public Exception Exception { get; set; }
 
-        public HttpResponseMessage Result { get; set; }
+        public HttpResponseMessage Response
+        {
+            get
+            {
+                return ActionContext != null ? ActionContext.Response : null;
+            }
+
+            set
+            {
+                ActionContext.Response = value;
+            }
+        }
 
         /// <summary>
         /// Gets the current <see cref="HttpRequestMessage"/>.

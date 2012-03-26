@@ -65,8 +65,8 @@ namespace System.Web.Http
             // Assert
             // TODO: we are depending on the correctness of QueryComposer here to test the filter which 
             // is sub-optimal. Reason being QueryComposer is a static class. cleanup with bug#325697 
-            Assert.NotNull(_actionExecutedContext.Result);
-            Assert.Equal(100, _actionExecutedContext.Result.Content.ReadAsAsync<IQueryable<int>>().Result.Count());
+            Assert.NotNull(_actionExecutedContext.Response);
+            Assert.Equal(100, _actionExecutedContext.Response.Content.ReadAsAsync<IQueryable<int>>().Result.Count());
         }
 
         [Fact]
@@ -90,8 +90,8 @@ namespace System.Web.Http
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, _actionExecutedContext.Result.StatusCode);
-            Assert.Contains("The query specified in the URI is not valid.", _actionExecutedContext.Result.Content.ReadAsStringAsync().Result);
+            Assert.Equal(HttpStatusCode.BadRequest, _actionExecutedContext.Response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid.", _actionExecutedContext.Response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -106,9 +106,9 @@ namespace System.Web.Http
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            Assert.Same(_response, _actionExecutedContext.Result);
+            Assert.Same(_response, _actionExecutedContext.Response);
             Assert.Same(content, _response.Content);
-            var resultContent = Assert.IsType<ObjectContent<IEnumerable<string>>>(_actionExecutedContext.Result.Content);
+            var resultContent = Assert.IsType<ObjectContent<IEnumerable<string>>>(_actionExecutedContext.Response.Content);
             Assert.Same(value, resultContent.Value);
         }
 
@@ -116,13 +116,13 @@ namespace System.Web.Http
         public void OnActionExecuted_ContextDoesNotHaveResponse_DoesNothing()
         {
             // Arrange
-            _actionExecutedContext.Result = null;
+            _actionExecutedContext.Response = null;
 
             // Act
             _filter.OnActionExecuted(_actionExecutedContext);
 
             // Assert
-            Assert.Null(_actionExecutedContext.Result);
+            Assert.Null(_actionExecutedContext.Response);
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace System.Web.Http
 
             // Act & Assert
             Assert.DoesNotThrow(() => _filter.OnActionExecuted(actionContext));
-            Assert.Null(actionContext.Result);
+            Assert.Null(actionContext.Response);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace System.Web.Http.Filters
             Assert.Null(actionExecutedContext.ActionContext);
             Assert.Null(actionExecutedContext.Exception);
             Assert.Null(actionExecutedContext.Request);
-            Assert.Null(actionExecutedContext.Result);
+            Assert.Null(actionExecutedContext.Response);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace System.Web.Http.Filters
             Assert.Same(context, actionContext.ActionContext);
             Assert.Same(exception, actionContext.Exception);
             Assert.Same(context.ControllerContext.Request, actionContext.Request);
-            Assert.Null(actionContext.Result);
+            Assert.Null(actionContext.Response);
         }
 
         [Fact]
@@ -77,8 +77,8 @@ namespace System.Web.Http.Filters
         public void Result_Property()
         {
             Assert.Reflection.Property<HttpActionExecutedContext, HttpResponseMessage>(
-                instance: new HttpActionExecutedContext(),
-                propertyGetter: aec => aec.Result,
+            instance: new HttpActionExecutedContext(actionContext: ContextUtil.CreateActionContext(), exception: null),
+                propertyGetter: aec => aec.Response,
                 expectedDefaultValue: null,
                 allowNull: true,
                 roundTripTestValue: new HttpResponseMessage());

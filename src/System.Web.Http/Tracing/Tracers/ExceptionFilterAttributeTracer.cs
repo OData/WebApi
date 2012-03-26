@@ -29,7 +29,7 @@ namespace System.Web.Http.Tracing
                 OnExceptionMethodName,
                 beginTrace: (tr) =>
                 {
-                    HttpResponseMessage response = actionExecutedContext.Result;
+                    HttpResponseMessage response = actionExecutedContext.Response;
                     if (response != null)
                     {
                         tr.Status = response.StatusCode;
@@ -44,7 +44,7 @@ namespace System.Web.Http.Tracing
                     Exception returnedException = actionExecutedContext.Exception;
                     tr.Level = returnedException == null ? TraceLevel.Info : TraceLevel.Error;
                     tr.Exception = returnedException;
-                    HttpResponseMessage response = actionExecutedContext.Result;
+                    HttpResponseMessage response = actionExecutedContext.Response;
                     if (response != null)
                     {
                         tr.Status = response.StatusCode;
@@ -52,7 +52,7 @@ namespace System.Web.Http.Tracing
                 },
                 errorTrace: (tr) =>
                 {
-                    HttpResponseMessage response = actionExecutedContext.Result;
+                    HttpResponseMessage response = actionExecutedContext.Response;
                     if (response != null)
                     {
                         tr.Status = response.StatusCode;

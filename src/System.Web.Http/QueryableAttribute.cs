@@ -51,7 +51,7 @@ namespace System.Web.Http
             Contract.Assert(actionExecutedContext.Request != null);
 
             HttpRequestMessage request = actionExecutedContext.Request;
-            HttpResponseMessage response = actionExecutedContext.Result;
+            HttpResponseMessage response = actionExecutedContext.Response;
 
             IQueryable query;
             if (response != null && response.TryGetContentValue(out query))
@@ -76,7 +76,7 @@ namespace System.Web.Http
                     }
                     catch (ParseException e)
                     {
-                        actionExecutedContext.Result = request.CreateResponse(
+                        actionExecutedContext.Response = request.CreateResponse(
                             HttpStatusCode.BadRequest,
                             Error.Format(SRResources.UriQueryStringInvalid, e.Message));
                         return;

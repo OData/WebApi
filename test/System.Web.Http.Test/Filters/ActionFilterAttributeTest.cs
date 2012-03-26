@@ -163,7 +163,7 @@ namespace System.Web.Http.Filters
             // Assert
             result.WaitUntilCompleted();
             filterMock.Verify(f => f.OnActionExecuted(It.Is<HttpActionExecutedContext>(ec =>
-                    Object.ReferenceEquals(ec.Result, response)
+                    Object.ReferenceEquals(ec.Response, response)
                     && ec.Exception == null
                     && Object.ReferenceEquals(ec.ActionContext, context)
             )));
@@ -186,7 +186,7 @@ namespace System.Web.Http.Filters
             result.WaitUntilCompleted();
             filterMock.Verify(f => f.OnActionExecuted(It.Is<HttpActionExecutedContext>(ec =>
                     Object.ReferenceEquals(ec.Exception, exception)
-                    && ec.Result == null
+                    && ec.Response == null
                     && Object.ReferenceEquals(ec.ActionContext, context)
             )));
         }
@@ -201,7 +201,7 @@ namespace System.Web.Http.Filters
             Exception exception = new Exception("{1EC330A2-33D0-4892-9335-2D833849D54E}");
             filterMock.Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>())).Callback<HttpActionExecutedContext>(ec =>
             {
-                ec.Result = null;
+                ec.Response = null;
             });
 
             // Act
@@ -223,7 +223,7 @@ namespace System.Web.Http.Filters
             HttpResponseMessage newResponse = new HttpResponseMessage();
             filterMock.Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>())).Callback<HttpActionExecutedContext>(ec =>
             {
-                ec.Result = newResponse;
+                ec.Response = newResponse;
             });
 
             // Act
@@ -267,7 +267,7 @@ namespace System.Web.Http.Filters
             HttpResponseMessage newResponse = new HttpResponseMessage();
             filterMock.Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>())).Callback<HttpActionExecutedContext>(ec =>
             {
-                ec.Result = newResponse;
+                ec.Response = newResponse;
             });
 
             // Act
@@ -289,7 +289,7 @@ namespace System.Web.Http.Filters
             HttpResponseMessage response = new HttpResponseMessage();
             filterMock.Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>())).Callback<HttpActionExecutedContext>(ec =>
             {
-                ec.Result = ec.Result;
+                ec.Response = ec.Response;
             });
 
             // Act
@@ -311,7 +311,7 @@ namespace System.Web.Http.Filters
             HttpResponseMessage response = new HttpResponseMessage();
             filterMock.Setup(f => f.OnActionExecuted(It.IsAny<HttpActionExecutedContext>())).Callback<HttpActionExecutedContext>(ec =>
             {
-                ec.Result = null;
+                ec.Response = null;
             });
 
             // Act

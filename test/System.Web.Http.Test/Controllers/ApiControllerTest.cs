@@ -625,14 +625,14 @@ namespace System.Web.Http
             var globalFilterMock = CreateExceptionFilterMock((ec, ct) =>
             {
                 log.Add("globalFilter");
-                resultSeenByGlobalFilter = ec.Result;
-                ec.Result = globalFilterResponse;
+                resultSeenByGlobalFilter = ec.Response;
+                ec.Response = globalFilterResponse;
                 return Task.Factory.StartNew(() => { });
             });
             var actionFilterMock = CreateExceptionFilterMock((ec, ct) =>
             {
                 log.Add("actionFilter");
-                ec.Result = actionFilterResponse;
+                ec.Response = actionFilterResponse;
                 return Task.Factory.StartNew(() => { });
             });
             var filters = new[] { globalFilterMock.Object, actionFilterMock.Object };

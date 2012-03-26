@@ -28,7 +28,7 @@ namespace Microsoft.Web.Http.Data
             HttpRequestMessage request = actionExecutedContext.Request;
             bool inlineCount = ShouldInlineCount(request);
 
-            HttpResponseMessage response = actionExecutedContext.Result;
+            HttpResponseMessage response = actionExecutedContext.Response;
             if (response != null && inlineCount && query != null)
             {
                 // Compute the total count and add the result as a request property. Later after all

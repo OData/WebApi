@@ -82,11 +82,11 @@ namespace System.Web.Http.Controllers
         {
             private readonly HttpControllerDescriptor _controllerDescriptor;
 
-            private readonly HttpActionDescriptor[] _actionDescriptors;
+            private readonly ReflectedHttpActionDescriptor[] _actionDescriptors;
 
-            private readonly IDictionary<HttpActionDescriptor, IEnumerable<string>> _actionParameterNames = new Dictionary<HttpActionDescriptor, IEnumerable<string>>();
+            private readonly IDictionary<ReflectedHttpActionDescriptor, IEnumerable<string>> _actionParameterNames = new Dictionary<ReflectedHttpActionDescriptor, IEnumerable<string>>();
 
-            private readonly ILookup<string, HttpActionDescriptor> _actionNameMapping;
+            private readonly ILookup<string, ReflectedHttpActionDescriptor> _actionNameMapping;
 
             // Selection commonly looks up an action by verb. 
             // Cache this mapping. These caches are completely optional and we still behave correctly if we cache miss. 
@@ -108,11 +108,11 @@ namespace System.Web.Http.Controllers
                 MethodInfo[] allMethods = _controllerDescriptor.ControllerType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
                 MethodInfo[] validMethods = Array.FindAll(allMethods, IsValidActionMethod);
 
-                _actionDescriptors = new HttpActionDescriptor[validMethods.Length];
+                _actionDescriptors = new ReflectedHttpActionDescriptor[validMethods.Length];
                 for (int i = 0; i < validMethods.Length; i++)
                 {
                     MethodInfo method = validMethods[i];
-                    HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(_controllerDescriptor, method);
+                    ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(_controllerDescriptor, method);
                     _actionDescriptors[i] = actionDescriptor;
                     HttpActionBinding actionBinding = controllerDescriptor.ActionValueBinder.GetBinding(actionDescriptor);
 
@@ -146,7 +146,7 @@ namespace System.Web.Http.Controllers
                 string actionName;
                 bool useActionName = controllerContext.RouteData.Values.TryGetValue(ActionRouteKey, out actionName);
 
-                ICollection<HttpActionDescriptor> actionsFoundByHttpMethods;
+                ReflectedHttpActionDescriptor[] actionsFoundByHttpMethods;
 
                 HttpMethod incomingMethod = controllerContext.Request.Method;
 
@@ -154,7 +154,7 @@ namespace System.Web.Http.Controllers
                 if (useActionName)
                 {
                     // We have an explicit {action} value, do traditional binding. Just lookup by actionName
-                    HttpActionDescriptor[] actionsFoundByName = _actionNameMapping[actionName].ToArray();
+                    ReflectedHttpActionDescriptor[] actionsFoundByName = _actionNameMapping[actionName].ToArray();
 
                     // Throws HttpResponseException with NotFound status because no action matches the Name
                     if (actionsFoundByName.Length == 0)
@@ -174,7 +174,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 // Throws HttpResponseException with MethodNotAllowed status because no action matches the Http Method
-                if (actionsFoundByHttpMethods.Count == 0)
+                if (actionsFoundByHttpMethods.Length == 0)
                 {
                     throw new HttpResponseException(controllerContext.Request.CreateResponse(
                         HttpStatusCode.MethodNotAllowed,
@@ -182,7 +182,7 @@ namespace System.Web.Http.Controllers
                 }
 
                 // If there are multiple candidates, then apply overload resolution logic.
-                if (actionsFoundByHttpMethods.Count > 1)
+                if (actionsFoundByHttpMethods.Length > 1)
                 {
                     actionsFoundByHttpMethods = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods).ToArray();
                 }
@@ -210,10 +210,10 @@ namespace System.Web.Http.Controllers
 
             public ILookup<string, HttpActionDescriptor> GetActionMapping()
             {
-                return _actionNameMapping;
+                return new LookupAdapter() { Source = _actionNameMapping };
             }
 
-            private IEnumerable<HttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, IEnumerable<HttpActionDescriptor> actionsFound)
+            private IEnumerable<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, IEnumerable<ReflectedHttpActionDescriptor> actionsFound)
             {
                 // TODO, DevDiv 320655, improve performance of this method.
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
@@ -359,6 +359,40 @@ namespace System.Web.Http.Controllers
                 }
 
                 return true;
+            }
+        }
+
+        // We need to expose ILookup<string, HttpActionDescriptor>, but we have a ILookup<string, ReflectedHttpActionDescriptor>
+        // ReflectedHttpActionDescriptor derives from HttpActionDescriptor, but ILookup doesn't support Covariance.
+        // Adapter class since ILookup doesn't support Covariance. 
+        // Fortunately, IGrouping, IEnumerable support Covariance, so it's easy to forward.
+        private class LookupAdapter : ILookup<string, HttpActionDescriptor>
+        {
+            public ILookup<string, ReflectedHttpActionDescriptor> Source;
+
+            public int Count
+            {
+                get { return Source.Count; }
+            }
+
+            public IEnumerable<HttpActionDescriptor> this[string key]
+            {
+                get { return Source[key]; }
+            }
+
+            public bool Contains(string key)
+            {
+                return Source.Contains(key);
+            }
+                        
+            public IEnumerator<IGrouping<string, HttpActionDescriptor>> GetEnumerator()
+            {
+                return Source.GetEnumerator();
+            }
+
+            Collections.IEnumerator Collections.IEnumerable.GetEnumerator()
+            {
+                return Source.GetEnumerator();
             }
         }
     }

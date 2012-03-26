@@ -176,17 +176,17 @@ namespace System.Net.Http.Formatting
             // Arrange
             TFormatter formatter = new TFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
+            mockStream.Setup(s => s.CanWrite).Returns(true);
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
 
             // Act 
-            return formatter.WriteToStreamAsync(typeof(object), null, mockStream.Object, contentHeaders, null).
-                ContinueWith(
-                    readTask =>
-                    {
-                        // Assert
-                        mockStream.Verify(s => s.Close(), Times.Never());
-                        mockStream.Verify(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
-                    });
+            return formatter.WriteToStreamAsync(typeof(object), null, mockStream.Object, contentHeaders, null).ContinueWith(
+                writeTask =>
+                {
+                    // Assert
+                    mockStream.Verify(s => s.Close(), Times.Never());
+                    mockStream.Verify(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
+                });
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace System.Net.Http.Formatting
             // Arrange
             TFormatter formatter = new TFormatter();
             SampleType sampleType = new SampleType { Number = 42 };
-            MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
+            MemoryStream memStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
 
             // Act

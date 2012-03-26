@@ -310,7 +310,9 @@ namespace System.Web.Http.Controllers
                 // Check cache for common verbs. 
                 for (int i = 0; i < _cacheListVerbKinds.Length; i++)
                 {
-                    if (verb == _cacheListVerbKinds[i])
+                    // verb selection on common verbs is normalized to have object reference identity. 
+                    // This is significantly more efficient than comparing the verbs based on strings. 
+                    if (Object.ReferenceEquals(verb, _cacheListVerbKinds[i]))
                     {
                         return _cacheListVerbs[i];
                     }

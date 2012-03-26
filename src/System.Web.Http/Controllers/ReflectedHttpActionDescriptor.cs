@@ -19,11 +19,8 @@ namespace System.Web.Http.Controllers
     /// </summary>
     public class ReflectedHttpActionDescriptor : HttpActionDescriptor
     {
-<<<<<<< HEAD
-=======
         private static readonly object[] _empty = new object[0];
 
->>>>>>> 736515d... perf improvements in action selection.
         private readonly Lazy<Collection<HttpParameterDescriptor>> _parameters;
 
         private Lazy<ActionExecutor> _actionExecutor;

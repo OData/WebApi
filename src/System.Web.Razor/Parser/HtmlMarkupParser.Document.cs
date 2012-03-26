@@ -23,8 +23,16 @@ namespace System.Web.Razor.Parser
                         SkipToAndParseCode(HtmlSymbolType.OpenAngle);
                         if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
                         {
-                            Optional(HtmlSymbolType.Text); // Tag Name, but we don't care what it is
+                            bool scriptTag = At(HtmlSymbolType.Text) &&
+                                             String.Equals(CurrentSymbol.Content, "script", StringComparison.OrdinalIgnoreCase);
+                            Optional(HtmlSymbolType.Text);
                             TagContent(); // Parse the tag, don't care about the content
+                            Optional(HtmlSymbolType.Solidus);
+                            Optional(HtmlSymbolType.CloseAngle);
+                            if (scriptTag)
+                            {
+                                SkipToEndScriptAndParseCode();
+                            }
                         }
                     }
                     AddMarkerSymbolIfNecessary();

@@ -680,6 +680,10 @@ namespace System.Web.Razor.Parser
                         Context.Source.Position = bookmark;
                         NextToken();
                     }
+                    else if (String.Equals(tagName, "script", StringComparison.OrdinalIgnoreCase))
+                    {
+                        SkipToEndScriptAndParseCode();
+                    }
                     else
                     {
                         // Push the tag on to the stack
@@ -688,6 +692,33 @@ namespace System.Web.Razor.Parser
                 }
             }
             return seenClose;
+        }
+
+        private void SkipToEndScriptAndParseCode()
+        {
+            // Special case for <script>: Skip to end of script tag and parse code
+            bool seenEndScript = false;
+            while (!seenEndScript && !EndOfFile)
+            {
+                SkipToAndParseCode(HtmlSymbolType.OpenAngle);
+                SourceLocation tagStart = CurrentLocation;
+                AcceptAndMoveNext();
+                AcceptWhile(HtmlSymbolType.WhiteSpace);
+                if (Optional(HtmlSymbolType.Solidus))
+                {
+                    AcceptWhile(HtmlSymbolType.WhiteSpace);
+                    if (At(HtmlSymbolType.Text) && String.Equals(CurrentSymbol.Content, "script", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // </script!
+                        SkipToAndParseCode(HtmlSymbolType.CloseAngle);
+                        if (!Optional(HtmlSymbolType.CloseAngle))
+                        {
+                            Context.OnError(tagStart, RazorResources.ParseError_UnfinishedTag, "script");
+                        }
+                        seenEndScript = true;
+                    }
+                }
+            }
         }
 
         private bool AcceptUntilAll(params HtmlSymbolType[] endSequence)

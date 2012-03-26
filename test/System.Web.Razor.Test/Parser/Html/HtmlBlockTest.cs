@@ -384,5 +384,20 @@ bork",
                         Factory.Code("if(true) {}").AsStatement()),
                     Factory.Markup(" Bar</div>").Accepts(AcceptedCharacters.None)));
         }
+
+        [Fact]
+        public void ParseBlockIgnoresTagsInContentsOfScriptTag()
+        {
+            ParseBlockTest(@"<script>foo<bar baz='@boz'></script>",
+                new MarkupBlock(
+                    Factory.Markup("<script>foo<bar baz='"),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("boz")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords, acceptTrailingDot: false)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.Markup("'></script>")
+                           .Accepts(AcceptedCharacters.None)));
+        }
     }
 }

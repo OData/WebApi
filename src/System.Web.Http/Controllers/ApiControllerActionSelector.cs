@@ -267,7 +267,7 @@ namespace System.Web.Http.Controllers
                 // remove all methods which are opting out of this request
                 // to opt out, at least one attribute defined on the method must return false
 
-                List<ReflectedHttpActionDescriptor> matchesWithSelectionAttributes = new List<ReflectedHttpActionDescriptor>();
+                List<ReflectedHttpActionDescriptor> matchesWithSelectionAttributes = null;
                 List<ReflectedHttpActionDescriptor> matchesWithoutSelectionAttributes = new List<ReflectedHttpActionDescriptor>();
 
                 foreach (ReflectedHttpActionDescriptor actionDescriptor in descriptorsFound)
@@ -282,6 +282,10 @@ namespace System.Web.Http.Controllers
                         bool match = Array.TrueForAll(attrs, selector => selector.IsValidForRequest(controllerContext, actionDescriptor.MethodInfo));
                         if (match)
                         {
+                            if (matchesWithSelectionAttributes == null)
+                            {
+                                matchesWithSelectionAttributes = new List<ReflectedHttpActionDescriptor>();
+                            }
                             matchesWithSelectionAttributes.Add(actionDescriptor);
                         }
                     }
@@ -289,7 +293,14 @@ namespace System.Web.Http.Controllers
 
                 // if a matching action method had a selection attribute, consider it more specific than a matching action method
                 // without a selection attribute
-                return (matchesWithSelectionAttributes.Count > 0) ? matchesWithSelectionAttributes : matchesWithoutSelectionAttributes;
+                if ((matchesWithSelectionAttributes != null) && (matchesWithSelectionAttributes.Count > 0))
+                {
+                    return matchesWithSelectionAttributes;
+                }
+                else
+                {
+                    return matchesWithoutSelectionAttributes;
+                }                
             }
 
             // This is called when we don't specify an Action name

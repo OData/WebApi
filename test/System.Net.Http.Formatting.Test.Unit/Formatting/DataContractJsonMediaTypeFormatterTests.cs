@@ -131,8 +131,6 @@ namespace System.Net.Http.Formatting
             Assert.Task.Succeeds(jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
-            //Assert.True(serializedString.Contains("DataContractSampleType"),
-            //    "SampleType should be serialized with data contract name DataContractSampleType because UseDataContractJsonSerializer is set to true.");
             Assert.False(serializedString.Contains("\r\n"), "Using DCJS should emit data without indentation by default.");
         }
 

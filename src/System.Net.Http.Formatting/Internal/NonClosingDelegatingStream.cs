@@ -10,9 +10,9 @@ namespace System.Net.Http.Internal
     /// <see cref="System.Net.Http.Formatting.MediaTypeFormatter"/>
     /// should not close the input stream when reading or writing so hence this workaround.
     /// </summary>
-    internal class XmlDictionaryReaderWrapperStream : DelegatingStream
+    internal class NonClosingDelegatingStream : DelegatingStream
     {
-        public XmlDictionaryReaderWrapperStream(Stream innerStream)
+        public NonClosingDelegatingStream(Stream innerStream)
             : base(innerStream)
         {
         }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.IO;
+﻿using System.IO;
 
 namespace System.Net.Http.Internal
 {
@@ -13,7 +12,10 @@ namespace System.Net.Http.Internal
 
         protected DelegatingStream(Stream innerStream)
         {
-            Contract.Assert(innerStream != null);
+            if (innerStream == null)
+            {
+                throw new ArgumentNullException("innerStream");
+            }
             _innerStream = innerStream;
         }
 

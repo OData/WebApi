@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Http.Internal;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -251,13 +252,9 @@ namespace System.Net.Http.Formatting
 
                 object serializer = GetSerializerForType(type);
 
-<<<<<<< HEAD
                 try
-=======
-                using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new XmlDictionaryReaderWrapperStream(stream), effectiveEncoding, _readerQuotas, null))
->>>>>>> /bad-path/
                 {
-                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(stream, effectiveEncoding, _readerQuotas, null))
+                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(stream), effectiveEncoding, _readerQuotas, null))
                     {
                         XmlSerializer xmlSerializer = serializer as XmlSerializer;
                         if (xmlSerializer != null)

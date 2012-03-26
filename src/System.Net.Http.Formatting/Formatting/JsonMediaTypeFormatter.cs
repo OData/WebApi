@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Http.Internal;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -239,7 +240,7 @@ namespace System.Net.Http.Formatting
                     if (UseDataContractJsonSerializer)
                     {
                         DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new XmlDictionaryReaderWrapperStream(stream), effectiveEncoding, _readerQuotas, null))
+                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new NonClosingDelegatingStream(stream), effectiveEncoding, _readerQuotas, null))
                         {
                             return dataContractSerializer.ReadObject(reader);
                         }

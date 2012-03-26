@@ -5,7 +5,6 @@ using Xunit;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-
     public class HttpControllerDescriptorTracerTest
     {
         private static readonly HttpControllerContext _controllerContext = ContextUtil.CreateControllerContext(instance: _controller);
@@ -65,7 +64,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<HttpControllerDescriptor> mockControllerDescriptor = CreateMockControllerDescriptor();
-            mockControllerDescriptor.Setup(b => b.ReleaseController(It.IsAny<HttpControllerContext>(), It.IsAny<IHttpController>())).Verifiable();
+            mockControllerDescriptor.Setup(b => b.ReleaseController(It.IsAny<IHttpController>(), It.IsAny<HttpControllerContext>())).Verifiable();
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpControllerDescriptorTracer tracer = GetHttpControllerDescriptorTracer(mockControllerDescriptor.Object, traceWriter);
 
@@ -76,7 +75,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            tracer.ReleaseController(_controllerContext, _controller);
+            tracer.ReleaseController(_controller, _controllerContext);
 
             // Assert
             mockControllerDescriptor.Verify();
@@ -88,7 +87,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<HttpControllerDescriptor> mockControllerDescriptor = CreateMockControllerDescriptor();
-            mockControllerDescriptor.Setup(b => b.ReleaseController(It.IsAny<HttpControllerContext>(), It.IsAny<IHttpController>())).Throws(_exception).Verifiable();
+            mockControllerDescriptor.Setup(b => b.ReleaseController(It.IsAny<IHttpController>(), It.IsAny<HttpControllerContext>())).Throws(_exception).Verifiable();
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpControllerDescriptorTracer tracer = GetHttpControllerDescriptorTracer(mockControllerDescriptor.Object, traceWriter);
 
@@ -99,7 +98,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReleaseController(_controllerContext, _controller));
+            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReleaseController(_controller, _controllerContext));
 
             // Assert
             mockControllerDescriptor.Verify();

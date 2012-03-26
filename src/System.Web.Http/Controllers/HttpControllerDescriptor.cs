@@ -172,7 +172,7 @@ namespace System.Web.Http.Controllers
         /// </summary>
         /// <param name="controllerContext">The controller context.</param>
         /// <param name="controller">The controller.</param>
-        public virtual void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
+        public virtual void ReleaseController(IHttpController controller, HttpControllerContext controllerContext)
         {
             // just delegate the work to the activator
             HttpControllerActivator.Release(controller, controllerContext);

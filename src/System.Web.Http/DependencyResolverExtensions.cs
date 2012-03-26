@@ -44,7 +44,7 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Get a controller selector, which selects a <see cref="HttpControllerDescriptor"/> given a <see cref="HttpRequestMessage"/>.
+        /// Get a controller selector, which selects an <see cref="HttpControllerDescriptor"/> given an <see cref="HttpRequestMessage"/>.
         /// </summary>
         public static IHttpControllerSelector GetHttpControllerSelector(this DependencyResolver resolver)
         {

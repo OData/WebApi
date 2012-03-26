@@ -53,7 +53,7 @@ namespace System.Web.Http.Tracing.Tracers
             return controller;
         }
 
-        public override void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
+        public override void ReleaseController(IHttpController controller, HttpControllerContext controllerContext)
         {
             _traceWriter.TraceBeginEnd(
                 controllerContext.Request,
@@ -68,7 +68,7 @@ namespace System.Web.Http.Tracing.Tracers
                 execute: () =>
                 {
                     IHttpController actualController = HttpControllerTracer.ActualController(controller);
-                    _innerDescriptor.ReleaseController(controllerContext, actualController);
+                    _innerDescriptor.ReleaseController(actualController, controllerContext);
                 },
                 endTrace: null,
                 errorTrace: null);

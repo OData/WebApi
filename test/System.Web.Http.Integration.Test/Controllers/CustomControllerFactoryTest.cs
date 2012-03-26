@@ -65,7 +65,7 @@ namespace System.Web.Http.Controllers
                 return singleton;
             }
 
-            public override void ReleaseController(HttpControllerContext controllerContext, IHttpController controller)
+            public override void ReleaseController(IHttpController controller, HttpControllerContext controllerContext)
             {
                 // do nothing
             }

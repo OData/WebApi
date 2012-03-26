@@ -161,12 +161,12 @@ namespace System.Web.Http.Dispatcher
             {
                 return httpController.ExecuteAsync(controllerContext, cancellationToken).Finally(() =>
                 {
-                    httpControllerDescriptor.ReleaseController(controllerContext, httpController);
+                    httpControllerDescriptor.ReleaseController(httpController, controllerContext);
                 });
             }
             catch
             {
-                httpControllerDescriptor.ReleaseController(controllerContext, httpController);
+                httpControllerDescriptor.ReleaseController(httpController, controllerContext);
                 throw;
             }
         }

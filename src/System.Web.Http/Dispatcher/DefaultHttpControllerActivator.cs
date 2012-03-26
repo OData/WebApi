@@ -45,6 +45,11 @@ namespace System.Web.Http.Dispatcher
                 throw Error.ArgumentNull("request");
             }
 
+            if (controllerDescriptor == null)
+            {
+                throw Error.ArgumentNull("controllerDescriptor");
+            }
+
             if (controllerType == null)
             {
                 throw Error.ArgumentNull("controllerType");

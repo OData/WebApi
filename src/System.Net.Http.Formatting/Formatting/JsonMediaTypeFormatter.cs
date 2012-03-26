@@ -264,6 +264,7 @@ namespace System.Net.Http.Formatting
                 }
                 catch (Exception e)
                 {
+                    if (formatterLogger == null)
                     {
                         throw;
                     }

@@ -172,6 +172,24 @@ namespace System.Web
         }
 
         [Fact]
+        public void GetKeysFromPrefix_AllValues()
+        {
+            // Arrange
+            var container = new PrefixContainer(new[] { "foo[bar]baz", "something[other]", "foo.baz", "foot[hello]", "fo[nothing]", "foo" });
+            string prefix = "";
+
+            // Act
+            IDictionary<string, string> result = container.GetKeysFromPrefix(prefix);
+
+            // Assert
+            Assert.Equal(4, result.Count());
+            Assert.Equal("foo", result["foo"]);
+            Assert.Equal("something", result["something"]);
+            Assert.Equal("foot", result["foot"]);
+            Assert.Equal("fo", result["fo"]);
+        }
+
+        [Fact]
         public void GetKeysFromPrefix_PrefixNotFound()
         {
             // Arrange

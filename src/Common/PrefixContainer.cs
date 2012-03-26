@@ -46,67 +46,101 @@ namespace System.Web
         // - "abc"/"foo[abc]"
         internal IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
-            if (String.IsNullOrWhiteSpace(prefix))
-            {
-                return _originalValues.ToDictionary(value => value, StringComparer.OrdinalIgnoreCase);
-            }
-
             IDictionary<string, string> result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var entry in _originalValues)
             {
                 if (entry != null)
                 {
-                    string key = null;
-                    string fullName = null;
-
                     if (entry.Length == prefix.Length)
                     {
                         // No key in this entry
                         continue;
                     }
 
-                    if (entry.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    if (prefix.Length == 0)
                     {
-                        int keyPosition = prefix.Length + 1;
-                        switch (entry[prefix.Length])
-                        {
-                            case '.':
-                                int dotPosition = entry.IndexOf('.', keyPosition);
-                                if (dotPosition == -1)
-                                {
-                                    dotPosition = entry.Length;
-                                }
-
-                                key = entry.Substring(keyPosition, dotPosition - keyPosition);
-                                fullName = entry.Substring(0, dotPosition);
-                                break;
-
-                            case '[':
-                                int bracketPosition = entry.IndexOf(']', keyPosition);
-                                if (bracketPosition == -1)
-                                {
-                                    // Malformed for dictionary
-                                    continue;
-                                }
-
-                                key = entry.Substring(keyPosition, bracketPosition - keyPosition);
-                                fullName = entry.Substring(0, bracketPosition + 1);
-                                break;
-
-                            default:
-                                continue;
-                        }
-
-                        if (!result.ContainsKey(key))
-                        {
-                            result.Add(key, fullName);
-                        }
+                        GetKeyFromEmptyPrefix(entry, result);
+                    }
+                    else if (entry.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        GetKeyFromNonEmptyPrefix(prefix, entry, result);
                     }
                 }
             }
 
             return result;
+        }
+
+        private static void GetKeyFromEmptyPrefix(string entry, IDictionary<string, string> results)
+        {
+            string key;
+            int dotPosition = entry.IndexOf('.');
+            int bracketPosition = entry.IndexOf('[');
+            int delimiterPosition = -1;
+
+            if (dotPosition == -1)
+            {
+                if (bracketPosition != -1)
+                {
+                    delimiterPosition = bracketPosition;
+                }
+            }
+            else
+            {
+                if (bracketPosition == -1)
+                {
+                    delimiterPosition = dotPosition;
+                }
+                else
+                {
+                    delimiterPosition = Math.Min(dotPosition, bracketPosition);
+                }
+            }
+
+            key = delimiterPosition == -1 ? entry : entry.Substring(0, delimiterPosition);
+            results[key] = key;
+        }
+
+        private static void GetKeyFromNonEmptyPrefix(string prefix, string entry, IDictionary<string, string> results)
+        {
+            string key = null;
+            string fullName = null;
+            int keyPosition = prefix.Length + 1;
+
+            switch (entry[prefix.Length])
+            {
+                case '.':
+                    int dotPosition = entry.IndexOf('.', keyPosition);
+                    if (dotPosition == -1)
+                    {
+                        dotPosition = entry.Length;
+                    }
+
+                    key = entry.Substring(keyPosition, dotPosition - keyPosition);
+                    fullName = entry.Substring(0, dotPosition);
+                    break;
+
+                case '[':
+                    int bracketPosition = entry.IndexOf(']', keyPosition);
+                    if (bracketPosition == -1)
+                    {
+                        // Malformed for dictionary
+                        return;
+                    }
+
+                    key = entry.Substring(keyPosition, bracketPosition - keyPosition);
+                    fullName = entry.Substring(0, bracketPosition + 1);
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (!results.ContainsKey(key))
+            {
+                results.Add(key, fullName);
+            }
         }
 
         internal static bool IsPrefixMatch(string prefix, string testString)

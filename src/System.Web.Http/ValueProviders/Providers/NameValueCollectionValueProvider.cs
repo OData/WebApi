@@ -38,6 +38,11 @@ namespace System.Web.Http.ValueProviders.Providers
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
+            if (prefix == null)
+            {
+                throw Error.ArgumentNull("prefix");
+            }
+
             return _prefixContainer.Value.GetKeysFromPrefix(prefix);
         }
 

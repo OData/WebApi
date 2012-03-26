@@ -113,11 +113,9 @@ namespace System.Web.Http.ValueProviders.Providers
             IDictionary<string, string> result = valueProvider.GetKeysFromPrefix("");
 
             // Assert
-            Assert.Equal(4, result.Count);
-            Assert.Equal("", result[""]);
+            Assert.Equal(2, result.Count);
             Assert.Equal("foo", result["foo"]);
             Assert.Equal("bar", result["bar"]);
-            Assert.Equal("bar.baz", result["bar.baz"]);
         }
 
         [Fact]

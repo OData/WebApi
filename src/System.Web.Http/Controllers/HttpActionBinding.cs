@@ -73,6 +73,11 @@ namespace System.Web.Http.Controllers
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
         public virtual Task ExecuteBindingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {
+            if (_parameterBindings.Length == 0)
+            {
+                return TaskHelpers.Completed();
+            }
+
             // First, make sure the actionBinding is valid before trying to execute it. This keeps us in a known state in case of errors.
             foreach (HttpParameterBinding parameterBinder in ParameterBindings)
             {

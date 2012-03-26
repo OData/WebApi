@@ -191,6 +191,12 @@ namespace System.Web.Http.Controllers
 
         private object[] PrepareParameters(IDictionary<string, object> parameters, HttpControllerContext controllerContext)
         {
+            // This is on a hotpath, so a quick check to avoid the allocation if we have no parameters. 
+            if (_parameters.Value.Count == 0)
+            {
+                return _empty;
+            }
+
             ParameterInfo[] parameterInfos = MethodInfo.GetParameters();
             var rawParameterValues = from parameterInfo in parameterInfos
                                      select ExtractParameterFromDictionary(parameterInfo, parameters, controllerContext);

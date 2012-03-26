@@ -24,6 +24,7 @@ namespace System.Web.Http.Controllers
         public HttpActionBinding()
         {
         }
+
         public HttpActionBinding(HttpActionDescriptor actionDescriptor, HttpParameterBinding[] bindings)
         {
             ActionDescriptor = actionDescriptor;

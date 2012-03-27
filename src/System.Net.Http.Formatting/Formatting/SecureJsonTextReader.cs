@@ -29,9 +29,9 @@ namespace System.Net.Http.Formatting
 
         public override bool Read()
         {
-            if (this.Depth > _maxDepth)
+            if (Depth > _maxDepth)
             {
-                throw new JsonReaderException(RS.Format(Properties.Resources.JsonTooDeep, _maxDepth));
+                throw new JsonReaderQuotaException(RS.Format(Properties.Resources.JsonTooDeep, _maxDepth));
             }
             return base.Read();
         }

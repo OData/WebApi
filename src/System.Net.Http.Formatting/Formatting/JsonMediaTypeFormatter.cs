@@ -254,8 +254,19 @@ namespace System.Net.Http.Formatting
                             {
                                 jsonSerializer.Error += (sender, e) =>
                                 {
-                                    formatterLogger.LogError(e.ErrorContext.Path, e.ErrorContext.Error.Message);
-                                    e.ErrorContext.Handled = true;
+                                    Exception exception = e.ErrorContext.Error;
+
+                                    // reader quota exceptions are fatal and cannot be recovered from
+                                    // we need to shortcircuit any further deserialization
+                                    if (exception is JsonReaderQuotaException)
+                                    {
+                                        e.ErrorContext.Handled = false;
+                                    }
+                                    else
+                                    {
+                                        formatterLogger.LogError(e.ErrorContext.Path, exception.Message);
+                                        e.ErrorContext.Handled = true;
+                                    }
                                 };
                             }
                             return jsonSerializer.Deserialize(jsonTextReader, type);

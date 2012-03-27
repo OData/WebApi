@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Reflection;
+using System.Text;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
-using System.Reflection;
 
 namespace System.Net.Http.Formatting
 {
@@ -57,6 +57,30 @@ namespace System.Net.Http.Formatting
             Assert.DoesNotThrow(() => JsonNetSerializationTest.Deserialize(json, type, formatter, mockLogger.Object));
             Assert.Equal(expectedErrors, errors);
         }
+
+        [Fact]
+        public void HittingMaxDepthRaisesOnlyOneValidationError()
+        {
+            // Arrange
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
+            int errors = 0;
+            Mock<IFormatterLogger> mockLogger = new Mock<IFormatterLogger>();
+            mockLogger.Setup(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>())).Callback(() => errors++);
+
+            StringBuilder sb = new StringBuilder("{'A':null}");
+            for (int i = 0; i < 5000; i++)
+            {
+                sb.Insert(0, "{'A':");
+                sb.Append('}');
+            }
+            string json = sb.ToString();
+
+            // Act
+            Assert.DoesNotThrow(() => JsonNetSerializationTest.Deserialize(json, typeof(Nest), formatter, mockLogger.Object));
+
+            // Assert
+            Assert.Equal(1, errors);
+        }
     }
 
     // this IRMS treats all member names that start with "Required" as required
@@ -88,5 +112,10 @@ namespace System.Net.Http.Formatting
                 throw new NotImplementedException();
             }
         }
+    }
+
+    public class Nest
+    {
+        public Nest A { get; set; }
     }
 }

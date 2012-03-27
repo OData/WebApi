@@ -15,9 +15,9 @@ namespace System.Net.Http
     internal static class FormattingUtilities
     {
         /// <summary>
-        /// The default max depth for our formatter is 1K
+        /// The default max depth for our formatter is 256
         /// </summary>
-        public const int DefaultMaxDepth = 1024;
+        public const int DefaultMaxDepth = 256;
 
         /// <summary>
         /// The default min depth for our formatter is 1
@@ -33,11 +33,6 @@ namespace System.Net.Http
         /// HTTP X-Requested-With header field value
         /// </summary>
         public const string HttpRequestedWithHeaderValue = @"xmlhttprequest";
-
-        /// <summary>
-        /// JSON literal for 'null'
-        /// </summary>
-        public const string JsonNullLiteral = "null";
 
         /// <summary>
         /// HTTP Host header field name

@@ -74,7 +74,7 @@ namespace System.Net.Http.Formatting
             Assert.Reflection.IntegerProperty(
                 new DataContractJsonMediaTypeFormatter(),
                 c => c.MaxDepth,
-                expectedDefaultValue: 1024,
+                expectedDefaultValue: 256,
                 minLegalValue: 1,
                 illegalLowerValue: 0,
                 maxLegalValue: null,

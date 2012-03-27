@@ -50,7 +50,7 @@ namespace System.Net.Http.Formatting
             Assert.Reflection.IntegerProperty(
                 new XmlMediaTypeFormatter(),
                 f => f.MaxDepth,
-                expectedDefaultValue: 1024,
+                expectedDefaultValue: 256,
                 minLegalValue: 1,
                 illegalLowerValue: 0,
                 maxLegalValue: null,

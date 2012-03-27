@@ -200,7 +200,7 @@ namespace System.Net.Http.Formatting
             }
             string json = sb.ToString();
 
-            Assert.Throws(typeof(JsonReaderException), () => Deserialize(json, typeof(object)));
+            Assert.Throws(typeof(JsonReaderQuotaException), () => Deserialize(json, typeof(object)));
         }
 
         [Theory]

@@ -28,7 +28,8 @@
 
         <!-- Enable NuGet package restore for all projects -->
         <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(WebStackRootPath)</SolutionDir>
-        <RestorePackages>true</RestorePackages>
+        <RestorePackages Condition=" '$(RestorePackages)' == '' ">$(EnableNuGetPackageRestore)</RestorePackages>
+        <RestorePackages Condition=" '$(RestorePackages)' == '' ">false</RestorePackages>
 
         <!-- Use CustomAfterMicrosoftCommonTargets property (defined in Microsoft.Common.targets) to
              inject post-Common targets files without requiring the inclusion -->

@@ -60,9 +60,12 @@ namespace System.Web.Http.ModelBinding
             provider.BindValuesAsync(context, cancellationToken).Wait();
 
             // Assert
-            Dictionary<string, object> expectedResult = new Dictionary<string, object>();
-            expectedResult["item"] = cust;
-            Assert.Equal(expectedResult, context.ActionArguments, new DictionaryEqualityComparer());
+            var result = context.ActionArguments;
+            Assert.Equal(1, result.Count);
+            var item = Assert.IsType<ActionValueItem>(result["item"]);
+            Assert.Equal(cust.FirstName, item.FirstName);
+            Assert.Equal(cust.LastName, item.LastName);
+            Assert.Equal(cust.Id, item.Id);
         }
 
         #region Query Strings

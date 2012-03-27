@@ -56,8 +56,9 @@ namespace System.Web.Http
         public void OnActionExecutedAppendsQueryToResponse()
         {
             // Arrange
+            var content = new ObjectContent<IQueryable<int>>(Enumerable.Range(1, 1000).AsQueryable(), new JsonMediaTypeFormatter());
             _request.RequestUri = new Uri(String.Format("http://localhost/?{0}", "$top=100"));
-            _response.Content = new ObjectContent<IQueryable<int>>(Enumerable.Range(1, 1000).AsQueryable(), new JsonMediaTypeFormatter());
+            _response.Content = content;
 
             // Act
             _filter.OnActionExecuted(_actionExecutedContext);
@@ -66,7 +67,8 @@ namespace System.Web.Http
             // TODO: we are depending on the correctness of QueryComposer here to test the filter which 
             // is sub-optimal. Reason being QueryComposer is a static class. cleanup with bug#325697 
             Assert.NotNull(_actionExecutedContext.Response);
-            Assert.Equal(100, _actionExecutedContext.Response.Content.ReadAsAsync<IQueryable<int>>().Result.Count());
+            Assert.Same(content, _actionExecutedContext.Response.Content);
+            Assert.Equal(100, ((IQueryable<int>)content.Value).Count());
         }
 
         [Fact]

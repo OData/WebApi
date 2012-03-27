@@ -113,10 +113,10 @@ namespace System.Net.Http
                 throw new ArgumentNullException("formatters");
             }
 
-            ObjectContent obj = content as ObjectContent;
-            if (obj != null)
+            ObjectContent objectContent = content as ObjectContent;
+            if (objectContent != null && objectContent.Value != null && type.IsAssignableFrom(objectContent.Value.GetType()))
             {
-                return TaskHelpers.FromResult((T)obj.Value);
+                return TaskHelpers.FromResult((T)objectContent.Value);
             }
 
             MediaTypeFormatter formatter = null;

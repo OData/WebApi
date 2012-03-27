@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="WebStack.tasks.targets"/>
+
+    <ItemGroup>
+        <WebStackNuGetPackages Include="DotNetOpenAuth.AspNet"/>
+        <WebStackNuGetPackages Include="DotNetOpenAuth.Core"/>
+        <WebStackNuGetPackages Include="DotNetOpenAuth.OAuth.Consumer"/>
+        <WebStackNuGetPackages Include="DotNetOpenAuth.OAuth.Core"/>
+        <WebStackNuGetPackages Include="DotNetOpenAuth.OpenId.Core"/>
+        <WebStackNuGetPackages Include="DotNetOpenAuth.OpenId.RelyingParty"/>
+        <WebStackNuGetPackages Include="EntityFramework"/>
+        <WebStackNuGetPackages Include="Microsoft.Web.FxCop"/>
+        <WebStackNuGetPackages Include="Microsoft.Web.Infrastructure"/>
+        <WebStackNuGetPackages Include="Moq"/>
+        <WebStackNuGetPackages Include="Newtonsoft.Json"/>
+        <WebStackNuGetPackages Include="Nuget.Core"/>
+        <WebStackNuGetPackages Include="StyleCop"/>
+        <WebStackNuGetPackages Include="xunit"/>
+        <WebStackNuGetPackages Include="xunit.extensions"/>
+    </ItemGroup>
+
     <PropertyGroup>
         <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(MSBuildProjectDirectory)\..\</SolutionDir>
         <NuGetToolsPath>$([System.IO.Path]::Combine($(SolutionDir), "Tools"))</NuGetToolsPath>
@@ -8,6 +28,7 @@
         <PackagesDir>$([System.IO.Path]::Combine($(SolutionDir), "packages"))</PackagesDir>
         <PackageOutputDir Condition="'$(PackageOutputDir)' == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
         <PreReleasePackagesUrl Condition="'$(PreReleasePackagesUrl)' == ''">http://www.myget.org/F/f05dce941ae4485090b04586209c8b08/</PreReleasePackagesUrl>
+        <CompactMessage Condition=" '$(CompactMessage)' == '' ">true</CompactMessage>
 
         <!-- Package sources used to restore packages. By default will used the registered sources under %APPDATA%\NuGet\NuGet.Config -->
         <PackageSources>"https://go.microsoft.com/fwlink/?LinkID=230477;$(PreReleasePackagesUrl)"</PackageSources>
@@ -23,6 +44,11 @@
         <BuildCommand>"$(NuGetExePath)" pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols</BuildCommand>
 
         <!-- Make the build depend on restore packages -->
+        <BuildDependsOn Condition="$(RestorePackages) != 'true'">
+            VerifyPackages;
+            $(BuildDependsOn);
+        </BuildDependsOn>
+
         <BuildDependsOn Condition="$(RestorePackages) == 'true'">
             RestorePackages;
             $(BuildDependsOn);
@@ -34,6 +60,10 @@
             BuildPackage;
         </BuildDependsOn>
     </PropertyGroup>
+
+    <Target Name="VerifyPackages">
+        <CheckForPackages Packages="@(WebStackNuGetPackages)" PackagesDir="$(PackagesDir)" CompactMessage="$(CompactMessage)" />
+    </Target>
 
     <Target Name="CheckPrerequisites">
         <DownloadNuGet OutputFilename="$(NuGetExePath)" Condition="!Exists('$(NuGetExePath)')" />

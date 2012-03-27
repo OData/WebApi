@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Microsoft.TestCommon;
 using Xunit;
@@ -122,6 +123,29 @@ namespace System.Web.Http
             // Assert
             Assert.Equal(typeof(T), resultValue.GetType());
             Assert.Equal(value, resultValue);
+        }
+
+        [Fact]
+        public void FindKeysWithPrefixRecognizesRootChilden()
+        {
+            // Arrange
+            IDictionary<string, int> dict = new Dictionary<string, int>()
+            {
+                { "[0]", 1 },
+                { "Name", 2 },
+                { "Address.Street", 3 },
+                { "", 4 }
+            };
+
+            // Act
+            List<int> results = DictionaryExtensions.FindKeysWithPrefix<int>(dict, "").Select(kvp => kvp.Value).ToList();
+
+            // Assert
+            Assert.Equal(4, results.Count);
+            Assert.Contains(1, results);
+            Assert.Contains(2, results);
+            Assert.Contains(3, results);
+            Assert.Contains(4, results);
         }
     }
 }

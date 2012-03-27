@@ -98,13 +98,21 @@ namespace System.Web.Http
                     continue;
                 }
 
-                char charAfterPrefix = key[prefix.Length];
-                switch (charAfterPrefix)
+                // Everything is prefixed by the empty string
+                if (prefix.Length == 0)
                 {
-                    case '[':
-                    case '.':
-                        yield return entry;
-                        break;
+                    yield return entry;
+                }
+                else
+                {
+                    char charAfterPrefix = key[prefix.Length];
+                    switch (charAfterPrefix)
+                    {
+                        case '[':
+                        case '.':
+                            yield return entry;
+                            break;
+                    }
                 }
             }
         }

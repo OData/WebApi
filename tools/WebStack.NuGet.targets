@@ -45,6 +45,16 @@
               Condition="Exists('$(PackagesConfig)')" />
     </Target>
 
+    <Target Name="RestoreBinaryDependencies">
+        <Exec
+            Command='"$(NuGetExePath)" install StyleCop -source $(PackageSources) -o "$(PackagesDir)" -Version 4.7.10.0 > NUL'
+            LogStandardErrorAsError="true" />
+        <Exec
+            Command='"$(NuGetExePath)" install Microsoft.Web.FxCop -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
+            LogStandardErrorAsError="true"
+            Condition=" !Exists('packages\Microsoft.Web.FxCop') " />
+    </Target>
+
     <Target Name="BuildPackage" DependsOnTargets="CheckPrerequisites">
         <Exec Command="$(BuildCommand)"
               LogStandardErrorAsError="true" />

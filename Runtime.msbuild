@@ -49,12 +49,9 @@
             BuildInParallel="false"
             Targets="RestorePackages" />
         <!-- Hand restore packages with binaries that this MSBuild process needs -->
-        <Exec
-            Command='tools\NuGet.exe install StyleCop -Source "\\webstack-git\packages;https://go.microsoft.com/fwlink/?LinkID=230477" -Version 4.7.10.0 -o packages > NUL'
-            LogStandardErrorAsError="true" />
-        <Exec
-            Command='tools\NuGet.exe install Microsoft.Web.FxCop -Source "\\webstack-git\packages;https://go.microsoft.com/fwlink/?LinkID=230477" -ExcludeVersion -o packages > NUL'
-            LogStandardErrorAsError="true" Condition=" !Exists('packages\Microsoft.Web.FxCop') " />
+        <MSBuild
+            Projects="tools\WebStack.NuGet.targets"
+            Targets="RestoreBinaryDependencies" />
     </Target>
 
     <Target Name="Build" DependsOnTargets="RestorePackages">

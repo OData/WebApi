@@ -18,10 +18,10 @@ namespace System.Web.Http.Dispatcher
         HttpControllerDescriptor SelectController(HttpRequestMessage request);
 
         /// <summary>
-        /// Returns a map, keyed by controller string, of all <see cref="HttpControllerDescriptor"/> that the factory can produce. 
+        /// Returns a map, keyed by controller string, of all <see cref="HttpControllerDescriptor"/> that the selector can select. 
         /// This is primarily called by <see cref="System.Web.Http.Description.IApiExplorer"/> to discover all the possible controllers in the system.
         /// </summary>
-        /// <returns>A map of all <see cref="HttpControllerDescriptor"/> that the factory can produce, or null if the factory does not have a well-defined mapping of <see cref="HttpControllerDescriptor"/>.</returns>
+        /// <returns>A map of all <see cref="HttpControllerDescriptor"/> that the selector can select, or null if the selector does not have a well-defined mapping of <see cref="HttpControllerDescriptor"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is better handled as a method.")]
         IDictionary<string, HttpControllerDescriptor> GetControllerMapping();
     }

@@ -52,7 +52,7 @@
         <Exec
             Command='"$(NuGetExePath)" install Microsoft.Web.FxCop -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
             LogStandardErrorAsError="true"
-            Condition=" !Exists('packages\Microsoft.Web.FxCop') " />
+            Condition=" !Exists('$(PackagesDir)\Microsoft.Web.FxCop') " />
     </Target>
 
     <Target Name="BuildPackage" DependsOnTargets="CheckPrerequisites">

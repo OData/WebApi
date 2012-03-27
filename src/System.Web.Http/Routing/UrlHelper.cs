@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Routing
@@ -45,23 +46,25 @@ namespace System.Web.Http.Routing
             return GetHttpRouteHelper(ControllerContext, routeName, routeValues);
         }
 
+        [SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification = "It is safe to pass string here")]
         public string Link(string routeName, object routeValues)
         {
             string link = Route(routeName, routeValues);
-            if (link != null)
+            if (!String.IsNullOrEmpty(link))
             {
-                link = ControllerContext.Request.RequestUri.GetLeftPart(UriPartial.Authority) + link;
+                link = new Uri(ControllerContext.Request.RequestUri, link).AbsoluteUri;
             }
 
             return link;
         }
 
+        [SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification = "It is safe to pass string here")]
         public string Link(string routeName, IDictionary<string, object> routeValues)
         {
             string link = Route(routeName, routeValues);
-            if (link != null)
+            if (!String.IsNullOrEmpty(link))
             {
-                link = ControllerContext.Request.RequestUri.GetLeftPart(UriPartial.Authority) + link;
+                link = new Uri(ControllerContext.Request.RequestUri, link).AbsoluteUri;
             }
 
             return link;

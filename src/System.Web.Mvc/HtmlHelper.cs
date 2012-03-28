@@ -359,6 +359,12 @@ namespace System.Web.Mvc
                 case HttpVerbs.Put:
                     httpMethod = "PUT";
                     break;
+                case HttpVerbs.Patch:
+                    httpMethod = "PATCH";
+                    break;
+                case HttpVerbs.Options:
+                    httpMethod = "OPTIONS";
+                    break;
                 default:
                     throw new ArgumentException(MvcResources.HtmlHelper_InvalidHttpVerb, "httpVerb");
             }

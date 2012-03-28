@@ -45,6 +45,8 @@ namespace System.Web.Mvc
             AddEntryToList(verbs, HttpVerbs.Put, verbList, "PUT");
             AddEntryToList(verbs, HttpVerbs.Delete, verbList, "DELETE");
             AddEntryToList(verbs, HttpVerbs.Head, verbList, "HEAD");
+            AddEntryToList(verbs, HttpVerbs.Patch, verbList, "PATCH");
+            AddEntryToList(verbs, HttpVerbs.Options, verbList, "OPTIONS");
 
             return verbList.ToArray();
         }

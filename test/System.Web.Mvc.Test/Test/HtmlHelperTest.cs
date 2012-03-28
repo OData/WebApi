@@ -544,17 +544,17 @@ location2");
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride((HttpVerbs)10000),
-                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, and Put.
+                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.
 Parameter name: httpVerb"
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride(HttpVerbs.Get),
-                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, and Put.
+                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.
 Parameter name: httpVerb"
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride(HttpVerbs.Post),
-                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, and Put.
+                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.
 Parameter name: httpVerb"
                 );
             Assert.Throws<ArgumentException>(

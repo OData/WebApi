@@ -96,6 +96,8 @@
     <Compile Include="ChildActionValueProvider.cs" />
     <Compile Include="ChildActionValueProviderFactory.cs" />
     <Compile Include="HttpHeadAttribute.cs" />
+    <Compile Include="HttpOptionsAttribute.cs" />
+    <Compile Include="HttpPatchAttribute.cs" />
     <Compile Include="IEnumerableValueProvider.cs" />
     <Compile Include="DataTypeUtil.cs" />
     <Compile Include="Html\DisplayNameExtensions.cs" />

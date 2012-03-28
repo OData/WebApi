@@ -58,6 +58,10 @@ namespace Microsoft.Web.Mvc.Resources
                     return request.IsHttpMethod("DELETE", allowOverride);
                 case HttpVerbs.Head:
                     return request.IsHttpMethod("HEAD", allowOverride);
+                case HttpVerbs.Patch:
+                    return request.IsHttpMethod("PATCH", allowOverride);
+                case HttpVerbs.Options:
+                    return request.IsHttpMethod("OPTIONS", allowOverride);
                 default:
                     // CODEREVIEW: does this look reasonable?
                     return request.IsHttpMethod(httpMethod.ToString().ToUpperInvariant(), allowOverride);

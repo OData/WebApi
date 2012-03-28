@@ -277,7 +277,7 @@
     <value>The requested resource can only be accessed via SSL.</value>
   </data>
   <data name="HtmlHelper_InvalidHttpVerb" xml:space="preserve">
-    <value>The specified HttpVerbs value is not supported. The supported values are Delete, Head, and Put.</value>
+    <value>The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.</value>
   </data>
   <data name="HtmlHelper_InvalidHttpMethod" xml:space="preserve">
     <value>The GET and POST HTTP methods are not supported.</value>

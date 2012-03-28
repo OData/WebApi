@@ -101,6 +101,7 @@
     <Compile Include="Test\FilterInfoTest.cs" />
     <Compile Include="Test\AllowHtmlAttributeTest.cs" />
     <Compile Include="Test\HtmlHelper`1Test.cs" />
+    <Compile Include="Test\HttpHeadAttributeTest.cs" />
     <Compile Include="Test\MockableUnvalidatedRequestValues.cs" />
     <Compile Include="Test\DescriptorUtilTest.cs" />
     <Compile Include="Razor\Test\MvcVBRazorCodeParserTest.cs" />

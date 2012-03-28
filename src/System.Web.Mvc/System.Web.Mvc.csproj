@@ -95,6 +95,7 @@
     <Compile Include="CompareAttribute.cs" />
     <Compile Include="ChildActionValueProvider.cs" />
     <Compile Include="ChildActionValueProviderFactory.cs" />
+    <Compile Include="HttpHeadAttribute.cs" />
     <Compile Include="IEnumerableValueProvider.cs" />
     <Compile Include="DataTypeUtil.cs" />
     <Compile Include="Html\DisplayNameExtensions.cs" />

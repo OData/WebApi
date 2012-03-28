@@ -148,12 +148,17 @@ namespace System.Web.Mvc.Html
                                  CreateHtmlAttributes("text-box multi-line")).ToHtmlString();
         }
 
-        private static IDictionary<string, object> CreateHtmlAttributes(string className)
+        private static IDictionary<string, object> CreateHtmlAttributes(string className, string inputType = null)
         {
-            return new Dictionary<string, object>()
+            var htmlAttributes = new Dictionary<string, object>()
             {
                 { "class", className }
             };
+            if (inputType != null)
+            {
+                htmlAttributes.Add("type", inputType);
+            }
+            return htmlAttributes;
         }
 
         internal static string ObjectTemplate(HtmlHelper html)
@@ -218,9 +223,51 @@ namespace System.Web.Mvc.Html
 
         internal static string StringTemplate(HtmlHelper html)
         {
-            return html.TextBox(String.Empty,
-                                html.ViewContext.ViewData.TemplateInfo.FormattedModelValue,
-                                CreateHtmlAttributes("text-box single-line")).ToHtmlString();
+            return HtmlInputTemplateHelper(html);
+        }
+
+        internal static string PhoneNumberInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "tel");
+        }
+
+        internal static string UrlInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "url");
+        }
+
+        internal static string EmailAddressInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "email");
+        }
+
+        internal static string DateTimeInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "datetime");
+        }
+
+        internal static string DateInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "date");
+        }
+
+        internal static string TimeInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "time");
+        }
+
+        internal static string NumberInputTemplate(HtmlHelper html)
+        {
+            return HtmlInputTemplateHelper(html, inputType: "number");
+        }
+
+        private static string HtmlInputTemplateHelper(HtmlHelper html, string inputType = null)
+        {
+            return html.TextBox(
+                    name: String.Empty,
+                    value: html.ViewContext.ViewData.TemplateInfo.FormattedModelValue,
+                    htmlAttributes: CreateHtmlAttributes(className: "text-box single-line", inputType: inputType))
+                .ToHtmlString();
         }
 
         internal static List<SelectListItem> TriStateValues(bool? value)

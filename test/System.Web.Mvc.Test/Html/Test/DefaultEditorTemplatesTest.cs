@@ -559,6 +559,104 @@ Value!")));
                 DefaultEditorTemplates.StringTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
+        // PhoneNumberInputTemplate
+
+        [Fact]
+        public void PhoneNumberInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""tel"" value=""Value"" />",
+                DefaultEditorTemplates.PhoneNumberInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""tel"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.PhoneNumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // UrlInputTemplate
+
+        [Fact]
+        public void UrlInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""url"" value=""Value"" />",
+                DefaultEditorTemplates.UrlInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""url"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.UrlInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // EmailAddressInputTemplate
+
+        [Fact]
+        public void EmailAddressTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""email"" value=""Value"" />",
+                DefaultEditorTemplates.EmailAddressInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""email"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.EmailAddressInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // DateTimeInputTemplate
+
+        [Fact]
+        public void DateTimeInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""datetime"" value=""Value"" />",
+                DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""datetime"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // DateInputTemplate
+
+        [Fact]
+        public void DateInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""date"" value=""Value"" />",
+                DefaultEditorTemplates.DateInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""date"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.DateInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // TimeInputTemplate
+
+        [Fact]
+        public void TimeInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""time"" value=""Value"" />",
+                DefaultEditorTemplates.TimeInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""time"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.TimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // NumberInputTemplate
+
+        [Fact]
+        public void NumberInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""number"" value=""Value"" />",
+                DefaultEditorTemplates.NumberInputTemplate(MakeHtmlHelper<string>("Value")));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""number"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.NumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
         // Helpers
 
         private HtmlHelper MakeHtmlHelper<TModel>(object model)

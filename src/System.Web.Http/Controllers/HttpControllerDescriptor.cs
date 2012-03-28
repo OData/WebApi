@@ -162,6 +162,11 @@ namespace System.Web.Http.Controllers
         /// <returns></returns>
         public virtual IHttpController CreateController(HttpRequestMessage request)
         {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             // Invoke the controller activator
             IHttpController instance = HttpControllerActivator.Create(request, this, ControllerType);
             return instance;
@@ -174,6 +179,16 @@ namespace System.Web.Http.Controllers
         /// <param name="controller">The controller.</param>
         public virtual void ReleaseController(IHttpController controller, HttpControllerContext controllerContext)
         {
+            if (controller == null)
+            {
+                throw Error.ArgumentNull("controller");
+            }
+
+            if (controllerContext == null)
+            {
+                throw Error.ArgumentNull("controllerContext");
+            }
+
             // just delegate the work to the activator
             HttpControllerActivator.Release(controller, controllerContext);
         }

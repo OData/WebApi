@@ -104,6 +104,16 @@ namespace System.Web.Http.Dispatcher
         /// <param name="controller">The <see cref="IHttpController"/> that is to be released</param>
         public void Release(IHttpController controller, HttpControllerContext controllerContext)
         {
+            if (controller == null)
+            {
+                throw Error.ArgumentNull("controller");
+            }
+
+            if (controllerContext == null)
+            {
+                throw Error.ArgumentNull("controllerContext");
+            }
+
             IDisposable disposable = controller as IDisposable;
             if (disposable != null)
             {

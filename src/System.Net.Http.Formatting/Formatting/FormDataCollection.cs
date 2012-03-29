@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Formatting.Internal;
 using System.Net.Http.Formatting.Parsers;
-using System.Net.Http.Internal;
-using System.Runtime.Serialization;
-using System.Text;
 using System.Threading;
 
 namespace System.Net.Http.Formatting
-{    
+{
     /// <summary>
     /// Represent the form data.
     /// - This has 100% fidelity (including ordering, which is important for deserializing ordered array). 
@@ -20,13 +18,13 @@ namespace System.Net.Http.Formatting
     {
         private readonly IEnumerable<KeyValuePair<string, string>> _pairs;
         private NameValueCollection _nameValueCollection;
-                
+
         /// <summary>
         /// Initialize a form collection around incoming data. 
         /// The key value enumeration should be immutable. 
         /// </summary>
         /// <param name="pairs">incoming set of key value pairs. Ordering is preserved.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the convention for representing FormData")]        
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the convention for representing FormData")]
         public FormDataCollection(IEnumerable<KeyValuePair<string, string>> pairs)
         {
             if (pairs == null)
@@ -35,7 +33,7 @@ namespace System.Net.Http.Formatting
             }
             _pairs = pairs;
         }
-        
+
         /// <summary>
         /// Initialize a form collection from a query string. 
         /// Uri and FormURl body have the same schema. 
@@ -90,19 +88,19 @@ namespace System.Net.Http.Formatting
 
             return result;
         }
-        
+
         /// <summary>
         /// Get the collection as a NameValueCollection.
         /// Beware this loses some ordering. Values are ordered within a key,
         /// but keys are no longer ordered against each other.         
         /// </summary>
         public NameValueCollection ReadAsNameValueCollection()
-        {            
+        {
             if (_nameValueCollection == null)
             {
                 // Initialize in a private collection to be thread-safe, and swap the finished object.
                 // Ok to double initialize this. 
-                NameValueCollection newCollection = HttpValueCollection.Build(this);
+                NameValueCollection newCollection = HttpValueCollection.Create(this);
                 Interlocked.Exchange(ref _nameValueCollection, newCollection);
             }
             return _nameValueCollection;
@@ -133,121 +131,6 @@ namespace System.Net.Http.Formatting
         {
             IEnumerable ie = _pairs;
             return ie.GetEnumerator();
-        }
-
-        // NameValueCollection to represent FormData, has a useful ToString method.
-        [Serializable]
-        private class HttpValueCollection : NameValueCollection
-        {
-            private HttpValueCollection()
-                : base(StringComparer.Ordinal) // case-sensitive keys
-            {
-            }
-
-            // Use a builder function instead of a ctor to avoid virtual calls from the ctor. 
-            public static NameValueCollection Build(IEnumerable<KeyValuePair<string, string>> pairs)
-            {
-                var nvc = new HttpValueCollection();
-
-                // Ordering example:
-                //   k=A&j=B&k=C --> k:[A,C];j=[B].                
-                foreach (KeyValuePair<string, string> kv in pairs)
-                {
-                    string key = kv.Key;
-                    if (key == null)
-                    {
-                        key = string.Empty;
-                    }
-                    string value = kv.Value;
-                    if (value == null)
-                    {
-                        value = string.Empty;
-                    }
-                    nvc.Add(key, value);
-                }
-
-                nvc.IsReadOnly = false;
-                return nvc;
-            }
-
-            protected HttpValueCollection(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-            }
-
-            public override string ToString()
-            {
-                return ToString(true);
-            }
-
-            private string ToString(bool urlencoded)
-            {
-                int n = Count;
-                if (n == 0)
-                {
-                    return String.Empty;
-                }
-
-                StringBuilder s = new StringBuilder();
-                string key, keyPrefix, item;
-
-                for (int i = 0; i < n; i++)
-                {
-                    key = GetKey(i);
-
-                    if (urlencoded)
-                    {
-                        key = UriQueryUtility.UrlEncode(key);
-                    }
-
-                    keyPrefix = (!String.IsNullOrEmpty(key)) ? (key + "=") : String.Empty;
-
-                    ArrayList values = (ArrayList)BaseGet(i);
-                    int numValues = (values != null) ? values.Count : 0;
-
-                    if (s.Length > 0)
-                    {
-                        s.Append('&');
-                    }
-
-                    if (numValues == 1)
-                    {
-                        s.Append(keyPrefix);
-                        item = (string)values[0];
-                        if (urlencoded)
-                        {
-                            item = UriQueryUtility.UrlEncode(item);
-                        }
-
-                        s.Append(item);
-                    }
-                    else if (numValues == 0)
-                    {
-                        s.Append(keyPrefix);
-                    }
-                    else
-                    {
-                        for (int j = 0; j < numValues; j++)
-                        {
-                            if (j > 0)
-                            {
-                                s.Append('&');
-                            }
-
-                            s.Append(keyPrefix);
-                            item = (string)values[j];
-                            if (urlencoded)
-                            {
-                                item = UriQueryUtility.UrlEncode(item);
-                            }
-
-                            s.Append(item);
-                        }
-                    }
-                }
-
-                return s.ToString();
-            }
         }
     }
 }

@@ -106,6 +106,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified value is not a valid cookie name..
+        /// </summary>
+        internal static string CookieInvalidName {
+            get {
+                return ResourceManager.GetString("CookieInvalidName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error reading HTML form URL-encoded data stream..
         /// </summary>
         internal static string ErrorReadingFormUrlEncodedStream {

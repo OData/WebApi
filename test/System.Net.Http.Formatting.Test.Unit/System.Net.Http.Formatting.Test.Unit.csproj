@@ -92,9 +92,12 @@
     <Compile Include="Formatting\FormDataCollectionTests.cs" />
     <Compile Include="Formatting\ContentNegotiationResultTest.cs" />
     <Compile Include="Formatting\FormUrlEncodedJsonTests.cs" />
+    <Compile Include="Headers\CookieStateTest.cs" />
+    <Compile Include="Headers\CookieHeaderValueTest.cs" />
     <Compile Include="HttpClientExtensionsTest.cs" />
     <Compile Include="HttpContentExtensionsTest.cs" />
     <Compile Include="HttpRequestMessageCommonExtensionsTest.cs" />
+    <Compile Include="Internal\HttpValueCollectionTest.cs" />
     <Compile Include="Internal\NonClosingDelegatingStreamTest.cs" />
     <Compile Include="Internal\DelegatingStreamTest.cs" />
     <Compile Include="Mocks\MockNonClosingDelegatingStream.cs" />

@@ -273,4 +273,7 @@
   <data name="ArgumentMustBeGreaterThan" xml:space="preserve">
     <value>Value must be greater than {0}.</value>
   </data>
+  <data name="CookieInvalidName" xml:space="preserve">
+    <value>The specified value is not a valid cookie name.</value>
+  </data>
 </root>

@@ -88,6 +88,7 @@
     <Compile Include="DataSets\HttpUnitTestDataSets.cs" />
     <Compile Include="DataSets\Types\XmlSerializableType.cs" />
     <Compile Include="Formatting\DataContractJsonMediaTypeFormatterTests.cs" />
+    <Compile Include="Formatting\SerializerConsistencyTests.cs" />
     <Compile Include="Formatting\XmlSerializerMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterTestBase.cs" />
     <Compile Include="Formatting\StringWithQualityHeaderValueComparerTests.cs" />

@@ -31,6 +31,15 @@ namespace System.Web.Http.ValueProviders.Providers
             _prefixContainer = new Lazy<PrefixContainer>(() => new PrefixContainer(_values.Value.AllKeys), isThreadSafe: true);
         }
 
+        // For unit testing purposes
+        internal CultureInfo Culture
+        {
+            get
+            {
+                return _culture;
+            }
+        }
+
         public virtual bool ContainsPrefix(string prefix)
         {
             return _prefixContainer.Value.ContainsPrefix(prefix);

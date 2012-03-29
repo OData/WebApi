@@ -243,7 +243,9 @@
     <Compile Include="Validation\Validators\DataAnnotationsModelValidatorTest.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ValueProviders\Providers\RouteDataValueProviderFactoryTest.cs" />
     <Compile Include="ValueProviders\Providers\NameValueCollectionValueProviderTest.cs" />
+    <Compile Include="ValueProviders\Providers\QueryStringValueProviderFactoryTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderTest.cs" />
   </ItemGroup>
   <ItemGroup>

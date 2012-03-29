@@ -7,7 +7,12 @@ namespace System.Web.Http.ValueProviders.Providers
     {
         public override IValueProvider GetValueProvider(HttpActionContext actionContext)
         {
-            return new QueryStringValueProvider(actionContext, CultureInfo.CurrentCulture);
+            if (actionContext == null)
+            {
+                throw Error.ArgumentNull("actionContext");
+            }
+
+            return new QueryStringValueProvider(actionContext, CultureInfo.InvariantCulture);
         }
     }
 }

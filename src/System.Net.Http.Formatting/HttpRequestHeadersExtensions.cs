@@ -15,7 +15,7 @@ namespace System.Net.Http
         private const string Cookie = "Cookie";
 
         /// <summary>
-        /// Returns any cookie headers present in the request. Each <c>Cookie</c> header is 
+        /// Gets any cookie headers present in the request. Each <c>Cookie</c> header is 
         /// represented as one <see cref="CookieHeaderValue"/> instance. A <see cref="CookieHeaderValue"/>
         /// contains information about the domain, path, and other cookie information as well as one or
         /// more <see cref="CookieState"/> instances. Each <see cref="CookieState"/> instance contains
@@ -48,7 +48,6 @@ namespace System.Net.Http
                     CookieHeaderValue cookieHeaderValue;
                     if (CookieHeaderValue.TryParse(cookieHeader, out cookieHeaderValue))
                     {
-                        cookieHeaderValue["foo"].Values["foo"] = "hi";
                         result.Add(cookieHeaderValue);
                     }
                 }

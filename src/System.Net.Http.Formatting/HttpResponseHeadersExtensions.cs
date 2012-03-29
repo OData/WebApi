@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http.Headers;
 using System.Web.Http;
@@ -7,7 +6,7 @@ using System.Web.Http;
 namespace System.Net.Http
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="HttpRequestHeaders"/> class.
+    /// Provides extension methods for the <see cref="HttpResponseHeaders"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpResponseHeadersExtensions
@@ -15,7 +14,7 @@ namespace System.Net.Http
         private const string SetCookie = "Set-Cookie";
 
         /// <summary>
-        /// Returns any cookie headers present in the request. Each <c>Cookie</c> header is 
+        /// Adds cookies to a response. Each <c>Set-Cookie</c> header is 
         /// represented as one <see cref="CookieHeaderValue"/> instance. A <see cref="CookieHeaderValue"/>
         /// contains information about the domain, path, and other cookie information as well as one or
         /// more <see cref="CookieState"/> instances. Each <see cref="CookieState"/> instance contains
@@ -27,32 +26,27 @@ namespace System.Net.Http
         /// with names <c>state1</c> and <c>state2</c> respectively. Further, each cookie state contains two name/value
         /// pairs (name1/value1 and name2/value2) and (name3/value3 and name4/value4).
         /// <code>
-        /// Cookie: state1:name1=value1&amp;name2=value2; state2:name3=value3&amp;name4=value4; domain=domain1; path=path1;
+        /// Set-Cookie: state1:name1=value1&amp;name2=value2; state2:name3=value3&amp;name4=value4; domain=domain1; path=path1;
         /// </code>
         /// </summary>
-        /// <param name="headers">The request headers</param>
-        /// <returns>A collection of <see cref="CookieHeaderValue"/> instances.</returns>
-        public static Collection<CookieHeaderValue> GetCookies(this HttpRequestHeaders headers)
+        /// <param name="headers">The response headers</param>
+        /// <param name="cookies">The cookie values to add to the response.</param>
+        public static void AddCookies(this HttpResponseHeaders headers, IEnumerable<CookieHeaderValue> cookies)
         {
             if (headers == null)
             {
-                throw Error.ArgumentNull("request");
+                throw Error.ArgumentNull("response");
             }
 
-            Collection<CookieHeaderValue> result = new Collection<CookieHeaderValue>();
-            IEnumerable<string> cookieHeaders;
-            if (headers.TryGetValues(SetCookie, out cookieHeaders))
+            if (cookies == null)
             {
-                foreach (string cookieHeader in cookieHeaders)
-                {
-                    CookieHeaderValue cookieHeaderValue;
-                    if (CookieHeaderValue.TryParse(cookieHeader, out cookieHeaderValue))
-                    {
-                        result.Add(cookieHeaderValue);
-                    }
-                }
+                throw Error.ArgumentNull("cookies");
             }
-            return result;
+
+            foreach (CookieHeaderValue cookie in cookies)
+            {
+                headers.Add(SetCookie, cookie.ToString());
+            }
         }
     }
 }

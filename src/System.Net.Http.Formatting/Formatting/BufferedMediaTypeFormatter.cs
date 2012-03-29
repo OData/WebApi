@@ -38,6 +38,10 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Writes synchronously to the buffered stream.
         /// </summary>
+        /// <remarks>
+        /// An implementation of this method should NOT close <paramref name="stream"/> upon completion. The stream will be closed independently when
+        /// the <see cref="HttpContent"/> instance is disposed.
+        /// </remarks>
         /// <param name="type">The type of the object to write.</param>
         /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
         /// <param name="stream">The <see cref="Stream"/> to which to write.</param>
@@ -50,6 +54,10 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Reads synchronously from the buffered stream.
         /// </summary>
+        /// <remarks>
+        /// An implementation of this method should NOT close <paramref name="stream"/> upon completion. The stream will be closed independently when
+        /// the <see cref="HttpContent"/> instance is disposed.
+        /// </remarks>
         /// <param name="type">The type of the object to deserialize.</param>
         /// <param name="stream">The <see cref="Stream"/> to read.</param>
         /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> if available. It may be <c>null</c>.</param>

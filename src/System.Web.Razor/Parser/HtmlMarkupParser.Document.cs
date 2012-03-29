@@ -29,7 +29,6 @@ namespace System.Web.Razor.Parser
             }
         }
 
-
         /// <summary>
         /// Reads the content of a tag (if present) in the MarkupDocument (or MarkupSection) context,
         /// where we don't care about maintaining a stack of tags.

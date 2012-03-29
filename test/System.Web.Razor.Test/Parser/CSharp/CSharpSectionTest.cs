@@ -245,7 +245,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
                         Factory.MetaCode("section foo {")
                                .AutoCompleteWith(null, atEndOfSpan: true),
                         new MarkupBlock(
-                            Factory.Markup(" <script>(function foo() ", "{", " return 1; ", "}", ")();</script> ")),
+                            Factory.Markup(" <script>(function foo() { return 1; })();</script> ")),
                         Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
                     Factory.EmptyHtml()));
         }

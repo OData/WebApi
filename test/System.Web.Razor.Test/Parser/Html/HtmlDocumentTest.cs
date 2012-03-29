@@ -219,6 +219,27 @@ namespace System.Web.Razor.Test.Parser.Html
         }
 
         [Fact]
+        public void ParseSectionIgnoresTagsInContentsOfScriptTag()
+        {
+            ParseDocumentTest(@"@section Foo { <script>foo<bar baz='@boz'></script> }",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("Foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section Foo {"),
+                        new MarkupBlock(
+                            Factory.Markup(" <script>foo<bar baz='"),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("boz")
+                                       .AsImplicitExpression(CSharpCodeParser.DefaultKeywords, acceptTrailingDot: false)
+                                       .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                            Factory.Markup("'></script> ")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
         public void ParseBlockCanParse1000NestedElements()
         {
             string content = Nested1000.ReadAllText();

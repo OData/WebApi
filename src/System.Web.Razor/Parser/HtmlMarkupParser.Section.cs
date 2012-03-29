@@ -46,12 +46,8 @@ namespace System.Web.Razor.Parser
             do
             {
                 SkipToAndParseCode(sym => sym.Type == HtmlSymbolType.OpenAngle || AtEnd(nestingSequenceComponents));
-                if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
-                {
-                    Optional(HtmlSymbolType.Text); // Tag Name, but we don't care what it is
-                    TagContent(); // Parse the tag, don't care about the content
-                }
-                else if (!EndOfFile && AtEnd(nestingSequenceComponents))
+                ScanTagInDocumentContext();
+                if (!EndOfFile && AtEnd(nestingSequenceComponents))
                 {
                     break;
                 }
@@ -81,10 +77,8 @@ namespace System.Web.Razor.Parser
                 {
                     RazorComment();
                 }
-                else if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
+                else if (ScanTagInDocumentContext())
                 {
-                    Optional(HtmlSymbolType.Text); // Tag Name, but we don't care what it is
-                    TagContent(); // Parse the tag, don't care about the content
                     continue;
                 }
 

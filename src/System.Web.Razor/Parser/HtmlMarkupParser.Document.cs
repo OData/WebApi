@@ -21,24 +21,37 @@ namespace System.Web.Razor.Parser
                     while (!EndOfFile)
                     {
                         SkipToAndParseCode(HtmlSymbolType.OpenAngle);
-                        if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
-                        {
-                            bool scriptTag = At(HtmlSymbolType.Text) &&
-                                             String.Equals(CurrentSymbol.Content, "script", StringComparison.OrdinalIgnoreCase);
-                            Optional(HtmlSymbolType.Text);
-                            TagContent(); // Parse the tag, don't care about the content
-                            Optional(HtmlSymbolType.Solidus);
-                            Optional(HtmlSymbolType.CloseAngle);
-                            if (scriptTag)
-                            {
-                                SkipToEndScriptAndParseCode();
-                            }
-                        }
+                        ScanTagInDocumentContext();
                     }
                     AddMarkerSymbolIfNecessary();
                     Output(SpanKind.Markup);
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Reads the content of a tag (if present) in the MarkupDocument (or MarkupSection) context,
+        /// where we don't care about maintaining a stack of tags.
+        /// </summary>
+        /// <returns>A boolean indicating if we scanned at least one tag.</returns>
+        private bool ScanTagInDocumentContext()
+        {
+            if (Optional(HtmlSymbolType.OpenAngle) && !At(HtmlSymbolType.Solidus))
+            {
+                bool scriptTag = At(HtmlSymbolType.Text) &&
+                                 String.Equals(CurrentSymbol.Content, "script", StringComparison.OrdinalIgnoreCase);
+                Optional(HtmlSymbolType.Text);
+                TagContent(); // Parse the tag, don't care about the content
+                Optional(HtmlSymbolType.Solidus);
+                Optional(HtmlSymbolType.CloseAngle);
+                if (scriptTag)
+                {
+                    SkipToEndScriptAndParseCode();
+                }
+                return true;
+            }
+            return false;
         }
     }
 }

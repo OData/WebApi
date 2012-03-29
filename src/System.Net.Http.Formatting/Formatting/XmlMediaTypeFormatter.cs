@@ -314,7 +314,7 @@ namespace System.Net.Http.Formatting
                     isRemapped = MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
                 }
 
-                if (isRemapped)
+                if (isRemapped && value != null)
                 {
                     value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
                 }

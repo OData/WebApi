@@ -333,7 +333,10 @@ namespace System.Net.Http.Formatting
                 {
                     if (MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type))
                     {
-                        value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
+                        if (value != null)
+                        {
+                            value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
+                        }
                     }
 
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);

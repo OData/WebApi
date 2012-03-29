@@ -57,8 +57,8 @@ namespace System.Net.Http.Headers
         }
 
         /// <summary>
-        /// The cookie state can be manipulated either as a single string or as a <see cref="NameValueCollection"/>. 
-        /// The single string is carried within the <paramref name="Values"/>.
+        /// If the cookie data is a simple string value then set or retrieve it using the <see cref="M:Value"/> property.
+        /// If the cookie data is structured then use the <see cref="M:Values"/> property.
         /// </summary>
         public string Value
         {
@@ -81,6 +81,10 @@ namespace System.Net.Http.Headers
             }
         }
 
+        /// <summary>
+        /// If the cookie data is structured then use the <see cref="M:Values"/> property for setting and getting individual values.
+        /// If the cookie data is a simple string value then set or retrieve it using the <see cref="M:Value"/> property.
+        /// </summary>
         public NameValueCollection Values
         {
             get
@@ -91,6 +95,12 @@ namespace System.Net.Http.Headers
                 }
                 return _values;
             }
+        }
+
+        public string this[string name]
+        {
+            get { return Values[name]; }
+            set { Values[name] = value; }
         }
 
         public override string ToString()

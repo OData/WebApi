@@ -208,7 +208,7 @@ namespace System.Net.Http.Headers
         {
             if (String.IsNullOrWhiteSpace(segment))
             {
-                return false;
+                return true;
             }
 
             string[] nameValue = segment.Split(nameValueSeparator, 2);

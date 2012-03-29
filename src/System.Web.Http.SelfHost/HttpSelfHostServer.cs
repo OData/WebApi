@@ -32,12 +32,6 @@ namespace System.Web.Http.SelfHost
         private static readonly TimeSpan _acceptTimeout = TimeSpan.MaxValue;
         private static readonly TimeSpan _receiveTimeout = TimeSpan.MaxValue;
 
-        /// <summary>
-        /// Provides a key for the current <see cref="T:System.ServiceModel.Security.SecurityMessageProperty"/> stored in <see cref="M:HttpRequestMessage.Properties"/>.
-        /// Do not change this key as this is being used by WCF. 
-        /// </summary>
-        public static readonly string SecurityKey = "Security";
-
         private ConcurrentBag<IReplyChannel> _channels = new ConcurrentBag<IReplyChannel>();
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -151,8 +145,8 @@ namespace System.Web.Http.SelfHost
             }
 
             // create principal information and add it the request for the windows auth case
-            SecurityMessageProperty property;
-            if (request.Properties.TryGetValue<SecurityMessageProperty>(SecurityKey, out property))
+            SecurityMessageProperty property = request.GetSecurityMessageProperty();
+            if (property != null)
             {
                 ServiceSecurityContext context = property.ServiceSecurityContext;
                 if (context != null && context.PrimaryIdentity != null)

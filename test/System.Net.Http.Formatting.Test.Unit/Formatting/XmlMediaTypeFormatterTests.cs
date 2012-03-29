@@ -89,13 +89,11 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [InlineData(typeof(IQueryable<string>), true)]
-        [InlineData(typeof(IQueryable<string>), false)]
-        [InlineData(typeof(IEnumerable<string>), true)]
-        [InlineData(typeof(IEnumerable<string>), false)]
-        public void UseXmlFormatterWithNull(Type type, bool useXmlSerializer)
+        [InlineData(typeof(IQueryable<string>))]
+        [InlineData(typeof(IEnumerable<string>))]
+        public void UseXmlFormatterWithNull(Type type)
         {
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = useXmlSerializer };
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false };
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));

@@ -17,8 +17,8 @@ namespace System.Web.Http
             // here you can see the requestor's identity via the request message
             // convert the Generic Identity to some IPrincipal object, and set it in the request's property
             // later the authorization filter will use the role information to authorize request.
-            SecurityMessageProperty property;
-            if (request.Properties.TryGetValue<SecurityMessageProperty>(HttpSelfHostServer.SecurityKey, out property))
+            SecurityMessageProperty property = request.GetSecurityMessageProperty();
+            if (property != null)
             {
                 ServiceSecurityContext context = property.ServiceSecurityContext;
 

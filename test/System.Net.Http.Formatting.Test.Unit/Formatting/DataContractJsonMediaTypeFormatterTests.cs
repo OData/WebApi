@@ -100,6 +100,20 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
+        [InlineData(typeof(IQueryable<string>))]
+        [InlineData(typeof(IEnumerable<string>))]
+        public void UseJsonFormatterWithNull(Type type)
+        {
+            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true };
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            Assert.True(serializedString.Contains("null"), "Using Json formatter to serialize null should emit 'null'.");
+        }
+
+        [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
         [TestDataSet(typeof(JsonMediaTypeFormatterTests), "ValueAndRefTypeTestDataCollectionExceptULong")]
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync(Type variationType, object testData)

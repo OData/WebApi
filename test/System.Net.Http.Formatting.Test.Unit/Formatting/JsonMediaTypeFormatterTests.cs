@@ -199,13 +199,11 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [InlineData(typeof(IQueryable<string>), true)]
-        [InlineData(typeof(IQueryable<string>), false)]
-        [InlineData(typeof(IEnumerable<string>), true)]
-        [InlineData(typeof(IEnumerable<string>), false)]
-        public void UseJsonFormatterWithNull(Type type, bool useDataContractJsonSerializer)
+        [InlineData(typeof(IQueryable<string>))]
+        [InlineData(typeof(IEnumerable<string>))]
+        public void UseJsonFormatterWithNull(Type type)
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = useDataContractJsonSerializer};
+            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false};
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));

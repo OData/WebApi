@@ -86,6 +86,23 @@ namespace System.Net.Http.Formatting
                 expectedDefaultValue: true);
         }
 
+        [Theory]
+        [InlineData(typeof(IQueryable<string>))]
+        [InlineData(typeof(IEnumerable<string>))]
+        public void UseXmlFormatterWithNull(Type type)
+        {
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = true };
+            MemoryStream memoryStream = new MemoryStream();
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));
+            memoryStream.Position = 0;
+            string serializedString = new StreamReader(memoryStream).ReadToEnd();
+            Assert.True(serializedString.Contains("nil=\"true\""),
+                "Null value should be serialized as nil.");
+            Assert.True(serializedString.ToLower().Contains("arrayofstring"),
+                "It should be serialized out as an array of string.");
+        }
+
         [Fact]
         public void UseXmlSerializer_True()
         {

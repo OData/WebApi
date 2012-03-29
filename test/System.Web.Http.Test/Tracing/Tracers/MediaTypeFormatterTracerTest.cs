@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
@@ -32,7 +33,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Task<object> task = tracer.ReadFromStreamAsync(typeof (string), new MemoryStream(), request.Content.Headers, null);
+            Task<object> task = tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content.Headers, null);
             string result = task.Result as string;
 
             // Assert
@@ -91,7 +92,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Task<object> task = tracer.ReadFromStreamAsync(typeof (string), new MemoryStream(), request.Content.Headers, null);
+            Task<object> task = tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content.Headers, null);
 
             // Assert
             Exception thrown = Assert.Throws<InvalidOperationException>(() => task.Wait());
@@ -235,7 +236,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = new Mock<BufferedMediaTypeFormatter>() {CallBase = true}.Object;
+            MediaTypeFormatter formatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true }.Object;
 
             // Act
             MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
@@ -243,6 +244,88 @@ namespace System.Web.Http.Tracing.Tracers
             // Assert
             Assert.IsAssignableFrom<IFormatterTracer>(tracingFormatter);
             Assert.IsAssignableFrom<BufferedMediaTypeFormatter>(tracingFormatter);
+        }
+
+        [Theory]
+        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
+        public void CreateTracer_Loads_SupportedEncodings_From_InnerFormatter(Type formatterType)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
+            Mock<Encoding> encoding = new Mock<Encoding>();
+            formatter.SupportedEncodings.Clear();
+            formatter.SupportedEncodings.Add(encoding.Object);
+
+            // Act
+            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
+
+            // Assert
+            Assert.Equal(formatter.SupportedEncodings, tracingFormatter.SupportedEncodings);
+        }
+
+        [Theory]
+        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
+        public void CreateTracer_Loads_SupportedMediaTypes_From_InnerFormatter(Type formatterType)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
+
+            MediaTypeHeaderValue mediaTypeHeaderValue = new MediaTypeHeaderValue("application/dummy");
+            formatter.SupportedMediaTypes.Clear();
+            formatter.SupportedMediaTypes.Add(mediaTypeHeaderValue);
+
+            // Act
+            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
+
+            // Assert
+            Assert.Equal(formatter.SupportedMediaTypes, tracingFormatter.SupportedMediaTypes);
+        }
+
+        [Theory]
+        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
+        public void CreateTracer_Loads_MediaTypeMappings_From_InnerFormatter(Type formatterType)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
+
+            Mock<MediaTypeMapping> mediaTypeMapping = new Mock<MediaTypeMapping>(new MediaTypeHeaderValue("application/dummy"));
+            formatter.MediaTypeMappings.Clear();
+            formatter.MediaTypeMappings.Add(mediaTypeMapping.Object);
+
+            // Act
+            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
+
+            // Assert
+            Assert.Equal(formatter.MediaTypeMappings, tracingFormatter.MediaTypeMappings);
+        }
+
+        [Theory]
+        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
+        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
+        public void CreateTracer_Loads_RequiredMemberSelector_From_InnerFormatter(Type formatterType)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
+
+            Mock<IRequiredMemberSelector> requiredMemberSelector = new Mock<IRequiredMemberSelector>();
+            formatter.RequiredMemberSelector = requiredMemberSelector.Object;
+
+            // Act
+            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
+
+            // Assert
+            Assert.Equal(formatter.RequiredMemberSelector, tracingFormatter.RequiredMemberSelector);
         }
     }
 }

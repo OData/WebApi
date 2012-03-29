@@ -80,7 +80,7 @@ namespace System.Web.Http.Tracing.Tracers
                 tracer = new MediaTypeFormatterTracer(formatter, traceWriter, request);
             }
 
-            // Copy SupportedMediaTypes and MediaTypeMappings because they are publically visible
+            // Copy SupportedMediaTypes and MediaTypeMappings and SupportedEncodings because they are publically visible
             tracer.SupportedMediaTypes.Clear();
             foreach (MediaTypeHeaderValue mediaType in formatter.SupportedMediaTypes)
             {
@@ -92,6 +92,15 @@ namespace System.Web.Http.Tracing.Tracers
             {
                 tracer.MediaTypeMappings.Add(mapping);
             }
+
+            tracer.SupportedEncodings.Clear();
+            foreach (var encoding in formatter.SupportedEncodings)
+            {
+                tracer.SupportedEncodings.Add(encoding);
+            }
+
+            // Copy IRequiredMemberSelector
+            tracer.RequiredMemberSelector = formatter.RequiredMemberSelector;
 
             return tracer;
         }
@@ -119,7 +128,7 @@ namespace System.Web.Http.Tracing.Tracers
                 {
                     if (formatter == null)
                     {
-                         tr.Message = SRResources.TraceGetPerRequestNullFormatterEndMessage;
+                        tr.Message = SRResources.TraceGetPerRequestNullFormatterEndMessage;
                     }
                     else
                     {
@@ -134,10 +143,10 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 errorTrace: null);
 
-                if (formatter != null && !(formatter is IFormatterTracer))
-                {
-                    formatter = MediaTypeFormatterTracer.CreateTracer(formatter, TraceWriter, request);
-                }
+            if (formatter != null && !(formatter is IFormatterTracer))
+            {
+                formatter = MediaTypeFormatterTracer.CreateTracer(formatter, TraceWriter, request);
+            }
 
             return formatter;
         }

@@ -104,7 +104,7 @@ namespace System.Net.Http.Formatting
         [InlineData(typeof(IEnumerable<string>))]
         public void UseJsonFormatterWithNull(Type type)
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = true };
+            JsonMediaTypeFormatter xmlFormatter = new DataContractJsonMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
             Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));

@@ -5,6 +5,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace System.Web.Http.SelfHost
 {
@@ -128,6 +130,52 @@ namespace System.Web.Http.SelfHost
             Assert.Equal(expectedResponseValue, response.Content.ReadAsStringAsync().Result);
         }
 
+        [Fact]
+        public void PostBigArrayWorks()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.RequestUri = new Uri(Path.Combine(baseAddress, "DeepNestedType/PostXElement"));
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+            request.Method = HttpMethod.Post;
+
+            // once we have the knob to disable validation, we should change it to 5000 to show that we can easily do this.
+            request.Content = new StringContent(GetBigArray(100), Encoding.UTF8, "application/xml");
+
+            // Act
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+            // Assert
+            string expectedResponseValue = @"<string xmlns=""http://schemas.microsoft.com/2003/10/Serialization/"">success from PostXElement</string>";
+            Assert.NotNull(response.Content);
+            Assert.NotNull(response.Content.Headers.ContentType);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal(expectedResponseValue, response.Content.ReadAsStringAsync().Result);
+        }
+
+        /*
+        <?xml version="1.0"?>
+        <ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <string />
+        <string />
+        <string />
+        </ArrayOfString>
+        */
+            private string GetBigArray(int arraySize)
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < arraySize; i++)
+                {
+                    sb.Append("<string/>");
+                }
+            
+                sb.Insert(0, "<ArrayOfString>");
+                sb.Append("</ArrayOfString>");
+                sb.Insert(0, "<?xml version=\"1.0\"?>");
+            
+                return sb.ToString();
+            }
+
         private string GetNestedObjectInXml(int depth)
         {
             StringBuilder sb = new StringBuilder();
@@ -195,6 +243,16 @@ namespace System.Web.Http.SelfHost
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
             }
             return "success from PostNestedList";
+        }
+
+        public string PostXElement(XElement input)
+        {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+            }
+
+            return "success from PostXElement";
         }
     }
 

@@ -80,7 +80,6 @@ namespace System.Web.Http.Dispatcher
                     controllerDescriptor = new HttpControllerDescriptor(_configuration, controllerName, match);
                     _controllerInfoCache.Value.TryAdd(controllerName, controllerDescriptor);
 
-                    // Create controller instance
                     return controllerDescriptor;
 
                 default:

@@ -19,7 +19,7 @@ namespace System.Net.Http.Formatting
         {
             get
             {
-                if (this.ValueType == typeof(string))
+                if (ValueType == typeof(string))
                 {
                     return FixUpInvalidUnicodeString(base.Value as string);
                 }

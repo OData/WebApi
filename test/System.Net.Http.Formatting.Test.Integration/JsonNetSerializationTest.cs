@@ -188,7 +188,7 @@ namespace System.Net.Http.Formatting
         public void DeserializingDeepArraysThrows()
         {
             StringBuilder sb = new StringBuilder();
-            int depth = 1500;
+            int depth = 500;
             for (int i = 0; i < depth; i++)
             {
                 sb.Append("[");

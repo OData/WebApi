@@ -48,14 +48,12 @@ namespace System.Net.Http.Formatting
         {
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
             formatter.RequiredMemberSelector = new SimpleRequiredMemberSelector();
-
-            int errors = 0;
-            Mock<IFormatterLogger> mockLogger = new Mock<IFormatterLogger>();
-            mockLogger.Setup(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>())).Callback(() => errors++);
+            Mock<IFormatterLogger> mockLogger = new Mock<IFormatterLogger>() { };
 
 
-            Assert.DoesNotThrow(() => JsonNetSerializationTest.Deserialize(json, type, formatter, mockLogger.Object));
-            Assert.Equal(expectedErrors, errors);
+            JsonNetSerializationTest.Deserialize(json, type, formatter, mockLogger.Object);
+
+            mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(expectedErrors));
         }
 
         [Fact]
@@ -63,9 +61,7 @@ namespace System.Net.Http.Formatting
         {
             // Arrange
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
-            int errors = 0;
             Mock<IFormatterLogger> mockLogger = new Mock<IFormatterLogger>();
-            mockLogger.Setup(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>())).Callback(() => errors++);
 
             StringBuilder sb = new StringBuilder("{'A':null}");
             for (int i = 0; i < 5000; i++)
@@ -76,10 +72,10 @@ namespace System.Net.Http.Formatting
             string json = sb.ToString();
 
             // Act
-            Assert.DoesNotThrow(() => JsonNetSerializationTest.Deserialize(json, typeof(Nest), formatter, mockLogger.Object));
+            JsonNetSerializationTest.Deserialize(json, typeof(Nest), formatter, mockLogger.Object);
 
             // Assert
-            Assert.Equal(1, errors);
+            mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
         }
     }
 

@@ -276,4 +276,7 @@
   <data name="CookieInvalidName" xml:space="preserve">
     <value>The specified value is not a valid cookie name.</value>
   </data>
+  <data name="CookieNull" xml:space="preserve">
+    <value>Cookie cannot be null.</value>
+  </data>
 </root>

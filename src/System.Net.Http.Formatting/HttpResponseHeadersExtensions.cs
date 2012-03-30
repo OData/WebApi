@@ -35,7 +35,7 @@ namespace System.Net.Http
         {
             if (headers == null)
             {
-                throw Error.ArgumentNull("response");
+                throw Error.ArgumentNull("headers");
             }
 
             if (cookies == null)
@@ -45,7 +45,12 @@ namespace System.Net.Http
 
             foreach (CookieHeaderValue cookie in cookies)
             {
-                headers.Add(SetCookie, cookie.ToString());
+                if (cookie == null)
+                {
+                    throw Error.Argument("cookies", Properties.Resources.CookieNull);
+                }
+
+                headers.TryAddWithoutValidation(SetCookie, cookie.ToString());
             }
         }
     }

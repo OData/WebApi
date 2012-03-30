@@ -115,6 +115,15 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cookie cannot be null..
+        /// </summary>
+        internal static string CookieNull {
+            get {
+                return ResourceManager.GetString("CookieNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error reading HTML form URL-encoded data stream..
         /// </summary>
         internal static string ErrorReadingFormUrlEncodedStream {

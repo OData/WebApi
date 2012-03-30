@@ -72,6 +72,8 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HttpRequestHeadersExtensionsTest.cs" />
+    <Compile Include="HttpResponseHeadersExtensionsTest.cs" />
     <Compile Include="DataSets\Types\DataContractEnum.cs" />
     <Compile Include="DataSets\Types\DataContractType.cs" />
     <Compile Include="DataSets\Types\DerivedDataContractType.cs" />

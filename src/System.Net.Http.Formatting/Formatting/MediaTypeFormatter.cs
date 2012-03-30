@@ -151,8 +151,9 @@ namespace System.Net.Http.Formatting
         /// for reading or writing an HTTP entity body based on the provided <paramref name="contentHeaders"/>.
         /// </summary>
         /// <param name="contentHeaders">The content headers provided as part of the request or response.</param>
+        /// <param name="isWritePath">True if this is in the write path; otherwise false.</param>
         /// <returns>The <see cref="Encoding"/> to use when reading the request or writing the response.</returns>
-        protected Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders)
+        protected Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders, bool isWritePath)
         {
             Encoding encoding = null;
             if (contentHeaders != null && contentHeaders.ContentType != null)
@@ -166,15 +167,29 @@ namespace System.Net.Http.Formatting
                 }
             }
 
+            // We didn't find a character encoding match based on the content headers.
+            // Instead we try getting the default character encoding.
             if (encoding == null)
             {
                 encoding = SupportedEncodings.FirstOrDefault();
-            }
-
-            if (encoding == null)
-            {
-                // No supported encoding was found so there is no way for us to start reading or writing.
-                throw new InvalidOperationException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
+                if (encoding != null)
+                {
+                    // If we found a default encoding then we need to set the content type charset parameter 
+                    // value but first we clone the content type as to not step on any user provided value.
+                    // We only do this in the write path so that the outgoing charset parameter is correct.
+                    // There is no reason to set it in the read path.
+                    if (isWritePath && contentHeaders != null && contentHeaders.ContentType != null)
+                    {
+                        MediaTypeHeaderValue clone = contentHeaders.ContentType.Clone();
+                        clone.CharSet = encoding.WebName;
+                        contentHeaders.ContentType = clone;
+                    }
+                }
+                else
+                {
+                    // No supported encoding was found so there is no way for us to start reading or writing.
+                    throw new InvalidOperationException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
+                }
             }
 
             return encoding;
@@ -329,7 +344,7 @@ namespace System.Net.Http.Formatting
             }
 
             // Check for match based on any request entity body
-            return SelectCharacterEncoding(request.Content != null ? request.Content.Headers : null);
+            return SelectCharacterEncoding(request.Content != null ? request.Content.Headers : null, isWritePath: true);
         }
 
         internal bool TryMatchSupportedMediaType(MediaTypeHeaderValue mediaType, out MediaTypeMatch mediaTypeMatch)

@@ -248,7 +248,7 @@ namespace System.Net.Http.Formatting
                 }
 
                 // Get the character encoding for the content
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders, isWritePath: false);
 
                 object serializer = GetSerializerForType(type);
 
@@ -319,7 +319,7 @@ namespace System.Net.Http.Formatting
                     value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
                 }
 
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders, isWritePath: true);
                 XmlWriterSettings writerSettings = new XmlWriterSettings
                 {
                     OmitXmlDeclaration = true,

@@ -366,35 +366,89 @@ namespace System.Net.Http.Formatting
             HttpContent content = new StringContent("Hello World", Encoding.UTF8, "text/plain");
 
             // Act
-            Assert.Throws<InvalidOperationException>(() => formatter.SelectCharacterEncoding(content.Headers));
+            Assert.Throws<InvalidOperationException>(() => formatter.SelectCharacterEncoding(content.Headers, isWritePath: false));
         }
 
         [Theory]
         [PropertyData("SelectCharacterEncodingTestData")]
         public void SelectCharacterEncoding_ReturnsBestEncoding(string bodyEncoding, string[] supportedEncodings, string expectedEncoding)
         {
+            bool isWritePath = false;
+            for (int index = 0; index < 2; index++)
+            {
+                // Arrange
+                MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
+
+                foreach (string supportedEncoding in supportedEncodings)
+                {
+                    formatter.SupportedEncodings.Add(Encoding.GetEncoding(supportedEncoding));
+                }
+
+                HttpContentHeaders contentHeaders = null;
+                if (bodyEncoding != null)
+                {
+                    Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
+                    HttpContent content = new StringContent("Hello World", bodyEnc, "text/plain");
+                    contentHeaders = content.Headers;
+                }
+
+                // Act
+                Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders, isWritePath: isWritePath);
+
+                // Assert
+                Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
+                Assert.Equal(expectedEnc, actualEncoding);
+
+                isWritePath = !isWritePath;
+            }
+        }
+
+        [Theory]
+        [InlineData("utf-8")]
+        [InlineData("utf-16")]
+        [InlineData("utf-32")]
+        public void SelectCharacterEncoding_AddsDefaultEncodingInWritePath(string defaultEncoding)
+        {
             // Arrange
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
+            formatter.SupportedEncodings.Clear();
+            formatter.SupportedEncodings.Add(Encoding.GetEncoding(defaultEncoding));
 
-            foreach (string supportedEncoding in supportedEncodings)
-            {
-                formatter.SupportedEncodings.Add(Encoding.GetEncoding(supportedEncoding));
-            }
-
-            HttpContentHeaders contentHeaders = null;
-            if (bodyEncoding != null)
-            {
-                Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
-                HttpContent content = new StringContent("Hello World", bodyEnc, "text/plain");
-                contentHeaders = content.Headers;
-            }
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            MediaTypeHeaderValue inputContentType = new MediaTypeHeaderValue("text/plain");
+            inputContentType.CharSet = null;
+            contentHeaders.ContentType = inputContentType;
 
             // Act
-            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders);
+            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders, isWritePath: true);
 
-            // Assert
-            Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
-            Assert.Equal(expectedEnc, actualEncoding);
+            // Assert that the content type has been cloned and updated with charset parameter
+            Assert.NotSame(inputContentType, contentHeaders.ContentType);
+            Assert.Equal(defaultEncoding, contentHeaders.ContentType.CharSet);
+        }
+
+        [Theory]
+        [InlineData("utf-8")]
+        [InlineData("utf-16")]
+        [InlineData("utf-32")]
+        public void SelectCharacterEncoding_DoesNotAddDefaultEncodingInReadPath(string defaultEncoding)
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
+            formatter.SupportedEncodings.Clear();
+            formatter.SupportedEncodings.Add(Encoding.GetEncoding(defaultEncoding));
+
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            MediaTypeHeaderValue inputContentType = new MediaTypeHeaderValue("text/plain");
+            inputContentType.CharSet = null;
+            contentHeaders.ContentType = inputContentType;
+
+            // Act
+            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders, isWritePath: false);
+
+            // Assert that the content type has not been cloned and not updated with charset parameter
+            Assert.Same(inputContentType, contentHeaders.ContentType);
+            Assert.Null(contentHeaders.ContentType.CharSet);
         }
 
         [Theory]

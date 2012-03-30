@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
-using Microsoft.TestCommon;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Web.Http
+namespace System.Net.Http
 {
     public class HttpRequestMessageExtensionsTest
     {
@@ -31,15 +29,10 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void IsCorrectType()
-        {
-            Assert.Type.HasProperties(typeof(HttpRequestMessageExtensions), TypeAssert.TypeProperties.IsStatic | TypeAssert.TypeProperties.IsPublicVisibleClass);
-        }
-
-        [Fact]
         public void GetConfigurationThrowsOnNull()
         {
-            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.GetConfiguration(null), "request");
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.GetConfiguration(), "request");
         }
 
         [Fact]
@@ -58,7 +51,8 @@ namespace System.Web.Http
         [Fact]
         public void GetSynchronizationContextThrowsOnNull()
         {
-            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.GetSynchronizationContext(null), "request");
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.GetSynchronizationContext(), "request");
         }
 
         [Fact]
@@ -103,14 +97,15 @@ namespace System.Web.Http
         [Fact]
         public void CreateResponse_DoingConneg_OnNullRequest_ThrowsException()
         {
+            HttpRequestMessage request = null;
             Assert.ThrowsArgumentNull(() =>
             {
-                HttpRequestMessageExtensions.CreateResponse(null, HttpStatusCode.OK, _value);
+                request.CreateResponse(HttpStatusCode.OK, _value);
             }, "request");
 
             Assert.ThrowsArgumentNull(() =>
             {
-                HttpRequestMessageExtensions.CreateResponse(null, HttpStatusCode.OK, _value, configuration: null);
+                request.CreateResponse(HttpStatusCode.OK, _value, configuration: null);
             }, "request");
         }
 
@@ -121,7 +116,7 @@ namespace System.Web.Http
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, configuration: null);
+                _request.CreateResponse(HttpStatusCode.OK, _value, configuration: null);
             }, "The request does not have an associated configuration object or the provided configuration was null.");
         }
 
@@ -136,7 +131,7 @@ namespace System.Web.Http
             _config.Services = servicesMock.Object;
 
             // Act
-            HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, _config);
+            _request.CreateResponse(HttpStatusCode.OK, _value, _config);
 
             // Assert
             servicesMock.Verify();
@@ -149,7 +144,7 @@ namespace System.Web.Http
             _config.Services.Clear(typeof(IContentNegotiator));
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, _config),
+            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, _config),
                 "The provided configuration does not have an instance of the 'System.Net.Http.Formatting.IContentNegotiator' service registered.");
         }
 
@@ -161,7 +156,7 @@ namespace System.Web.Http
             _config.Services.Replace(typeof(IContentNegotiator), _negotiatorMock.Object);
 
             // Act
-            var response = HttpRequestMessageExtensions.CreateResponse<string>(_request, HttpStatusCode.OK, "", _config);
+            var response = _request.CreateResponse<string>(HttpStatusCode.OK, "", _config);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
@@ -178,7 +173,7 @@ namespace System.Web.Http
             _config.Services.Replace(typeof(IContentNegotiator), _negotiatorMock.Object);
 
             // Act
-            var response = HttpRequestMessageExtensions.CreateResponse<string>(_request, HttpStatusCode.NoContent, "42", _config);
+            var response = _request.CreateResponse<string>(HttpStatusCode.NoContent, "42", _config);
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -335,8 +330,8 @@ namespace System.Web.Http
         [Fact]
         public void RegisterForDispose_WhenRequestParameterIsNull_Throws()
         {
-            Assert.ThrowsArgumentNull(
-                () => HttpRequestMessageExtensions.RegisterForDispose(request: null, resource: null), "request");
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.RegisterForDispose(resource: null), "request");
         }
 
         [Fact]
@@ -375,7 +370,8 @@ namespace System.Web.Http
         [Fact]
         public void DisposeRequestResources_WhenRequestParameterIsNull_Throws()
         {
-            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.DisposeRequestResources(request: null), "request");
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.DisposeRequestResources(), "request");
         }
 
         [Fact]

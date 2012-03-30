@@ -263,7 +263,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Tracing\HttpRequestMessageExtensions.cs" />
     <Compile Include="Tracing\IFormatterTracer.cs" />
     <Compile Include="Tracing\ITraceManager.cs" />
     <Compile Include="Tracing\ITraceWriter.cs" />

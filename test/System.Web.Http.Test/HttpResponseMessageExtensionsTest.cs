@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Net.Http;
 using System.Net.Http.Formatting;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
-namespace System.Web.Http
+namespace System.Net.Http
 {
     public class HttpResponseMessageExtensionsTest
     {

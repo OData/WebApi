@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
-using System.Net.Http;
+using System.Web.Http;
 
-namespace System.Web.Http
+namespace System.Net.Http
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpResponseMessageExtensions

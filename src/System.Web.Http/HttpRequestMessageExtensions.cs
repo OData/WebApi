@@ -1,17 +1,16 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Net;
-using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Web.Http;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
-namespace System.Web.Http
+namespace System.Net.Http
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpRequestMessage"/> class.
@@ -352,6 +351,30 @@ namespace System.Web.Http
                 }
                 resourcesToDispose.Clear();
             }
+        }
+
+        /// <summary>
+        /// Retrieves the <see cref="Guid"/> which has been assigned as the
+        /// correlation id associated with the given <paramref name="request"/>.
+        /// The value will be created and set the first time this method is called.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/></param>
+        /// <returns>The <see cref="Guid"/> associated with that request.</returns>
+        public static Guid GetCorrelationId(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            Guid correlationId;
+            if (!request.Properties.TryGetValue<Guid>(HttpPropertyKeys.RequestCorrelationKey, out correlationId))
+            {
+                correlationId = Guid.NewGuid();
+                request.Properties.Add(HttpPropertyKeys.RequestCorrelationKey, correlationId);
+            }
+
+            return correlationId;
         }
     }
 }

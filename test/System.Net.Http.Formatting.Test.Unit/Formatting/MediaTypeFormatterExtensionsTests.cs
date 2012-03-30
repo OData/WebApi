@@ -34,22 +34,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "AddUriPathExtensionMapping(MediaTypeFormatter, string, MediaTypeHeaderValue) throws for null 'this'.")]
-        public void AddUriPathExtensionMappingThrowsWithNullThis()
-        {
-            MediaTypeFormatter formatter = null;
-            Assert.ThrowsArgumentNull(() => formatter.AddUriPathExtensionMapping("xml", new MediaTypeHeaderValue("application/xml")), "formatter");
-        }
-
-        [Fact]
-        [Trait("Description", "AddUriPathExtensionMapping(MediaTypeFormatter, string, string) throws for null 'this'.")]
-        public void AddUriPathExtensionMapping1ThrowsWithNullThis()
-        {
-            MediaTypeFormatter formatter = null;
-            Assert.ThrowsArgumentNull(() => formatter.AddUriPathExtensionMapping("xml", "application/xml"), "formatter");
-        }
-
-        [Fact]
         [Trait("Description", "AddMediaRangeMapping(MediaTypeFormatter, MediaTypeHeaderValue, MediaTypeHeaderValue) throws for null 'this'.")]
         public void AddMediaRangeMappingThrowsWithNullThis()
         {

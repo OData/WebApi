@@ -53,8 +53,6 @@ namespace System.Net.Http.Formatting.DataSets
 
         public static TestData<QueryStringMapping> QueryStringMappings { get { return HttpTestData.QueryStringMappings; } }
 
-        public static TestData<UriPathExtensionMapping> UriPathExtensionMappings { get { return HttpTestData.UriPathExtensionMappings; } }
-
         public static TestData<MediaRangeMapping> MediaRangeMappings { get { return HttpTestData.MediaRangeMappings; } }
 
         public static TestData<string> LegalUriPathExtensions { get { return HttpTestData.LegalUriPathExtensions; } }

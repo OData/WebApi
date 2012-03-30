@@ -125,7 +125,6 @@
     <Compile Include="Formatting\ParsedMediaTypeHeaderValueTests.cs" />
     <Compile Include="Formatting\QueryStringMappingTests.cs" />
     <Compile Include="Formatting\RequestHeaderMappingTests.cs" />
-    <Compile Include="Formatting\UriPathExtensionMappingTests.cs" />
     <Compile Include="Formatting\XmlMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\Parsers\FormUrlEncodedParserTests.cs" />
     <Compile Include="HttpContentCollectionExtensionsTests.cs" />

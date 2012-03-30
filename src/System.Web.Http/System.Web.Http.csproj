@@ -179,6 +179,7 @@
     <Compile Include="Routing\HttpRouteValueDictionary.cs" />
     <Compile Include="Routing\HttpVirtualPathData.cs" />
     <Compile Include="Routing\IHttpRouteConstraint.cs" />
+    <Compile Include="Routing\MediaTypeFormatterExtensions.cs" />
     <Compile Include="Routing\PathContentSegment.cs" />
     <Compile Include="Routing\PathLiteralSubsegment.cs" />
     <Compile Include="Routing\PathParameterSubsegment.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="Routing\PathSeparatorSegment.cs" />
     <Compile Include="Routing\PathSubsegment.cs" />
     <Compile Include="NonActionAttribute.cs" />
+    <Compile Include="Routing\UriPathExtensionMapping.cs" />
     <Compile Include="Routing\UrlHelper.cs" />
     <Compile Include="Services\DependencyResolver.cs" />
     <Compile Include="Dispatcher\HttpControllerTypeCache.cs" />

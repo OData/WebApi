@@ -212,19 +212,12 @@ namespace System.Net.Http.Formatting.DataSets.Types
         // Collection of legal instances of all standard MediaTypeMapping types
         public static readonly TestData<MediaTypeMapping> StandardMediaTypeMappings = new RefTypeTestData<MediaTypeMapping>(() =>
             QueryStringMappings.Cast<MediaTypeMapping>().Concat(
-                UriPathExtensionMappings.Cast<MediaTypeMapping>().Concat(
-                    MediaRangeMappings.Cast<MediaTypeMapping>())).ToList()
+                    MediaRangeMappings.Cast<MediaTypeMapping>()).ToList()
         );
 
         public static readonly TestData<QueryStringMapping> QueryStringMappings = new RefTypeTestData<QueryStringMapping>(() => new List<QueryStringMapping>() 
         { 
             new QueryStringMapping("format", "json", new MediaTypeHeaderValue("application/json"))
-        });
-
-        public static readonly TestData<UriPathExtensionMapping> UriPathExtensionMappings = new RefTypeTestData<UriPathExtensionMapping>(() => new List<UriPathExtensionMapping>() 
-        { 
-            new UriPathExtensionMapping("xml", new MediaTypeHeaderValue("application/xml")),
-            new UriPathExtensionMapping("json", new MediaTypeHeaderValue("application/json")),
         });
 
         public static readonly TestData<MediaRangeMapping> MediaRangeMappings = new RefTypeTestData<MediaRangeMapping>(() => new List<MediaRangeMapping>() 

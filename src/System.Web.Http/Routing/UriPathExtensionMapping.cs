@@ -1,23 +1,32 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
+using System.Web.Http;
+using System.Web.Http.Routing;
 
 namespace System.Net.Http.Formatting
 {
     /// <summary>
-    /// Class that provides <see cref="MediaTypeHeaderValue"/>s from path extensions appearing
-    /// in a <see cref="Uri"/>.
+    /// Class that provides <see cref="MediaTypeHeaderValue"/>'s from path extension appearing in <see cref="IHttpRouteData"/>.
+    /// It uses the value of the {ext} URL parameter from <see cref="IHttpRouteData"/> for a match.
     /// </summary>
+    /// <example>
+    /// This sample shows how to use the UriPathExtensionMapping to map urls ending with ".json" to "application/json"
+    /// <code>
+    /// config.Routes.MapHttpRoute("Default", "{controller}");
+    /// config.Routes.MapHttpRoute("DefaultWithExt", "{controller}.{ext}");
+    /// config.Formatters.JsonFormatter.AddUriPathExtensionMapping("json", "application/json");
+    /// </code>
+    /// </example>
     public class UriPathExtensionMapping : MediaTypeMapping
     {
-        private static readonly Type _uriPathExtensionMappingType = typeof(UriPathExtensionMapping);
+        public static readonly string UriPathExtensionKey = "ext";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UriPathExtensionMapping"/> class.
         /// </summary>
         /// <param name="uriPathExtension">The extension corresponding to <paramref name="mediaType"/>.
         /// This value should not include a dot or wildcards.</param>
-        /// <param name="mediaType">The media type that will be returned
-        /// if <paramref name="uriPathExtension"/> is matched.</param>
+        /// <param name="mediaType">The media type that will be returned if <paramref name="uriPathExtension"/> is matched.</param>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "There is no meaningful System.Uri representation for a path suffix such as '.xml'")]
         public UriPathExtensionMapping(string uriPathExtension, string mediaType)
             : base(mediaType)
@@ -30,8 +39,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         /// <param name="uriPathExtension">The extension corresponding to <paramref name="mediaType"/>.
         /// This value should not include a dot or wildcards.</param>
-        /// <param name="mediaType">The <see cref="MediaTypeHeaderValue"/> that will be returned
-        /// if <paramref name="uriPathExtension"/> is matched.</param>
+        /// <param name="mediaType">The <see cref="MediaTypeHeaderValue"/> that will be returned if <paramref name="uriPathExtension"/> is matched.</param>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "There is no meaningful System.Uri representation for a path suffix such as '.xml'")]
         public UriPathExtensionMapping(string uriPathExtension, MediaTypeHeaderValue mediaType)
             : base(mediaType)
@@ -47,11 +55,10 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Returns a value indicating whether this <see cref="UriPathExtensionMapping"/>
-        /// instance can provide a <see cref="MediaTypeHeaderValue"/> for the <see cref="Uri"/> 
-        /// of <paramref name="request"/>.
+        /// instance can provide a <see cref="MediaTypeHeaderValue"/> for the given <paramref name="request"/>.
         /// </summary>
         /// <param name="request">The <see cref="HttpRequestMessage"/> to check.</param>
-        /// <returns>If this instance can match a file extension in <paramref name="request"/>
+        /// <returns>If this <paramref name="request"/>'s route data contains a match for <see cref="UriPathExtension"/>
         /// it returns <c>1.0</c> otherwise <c>0.0</c>.</returns>
         public override double TryMatchMediaType(HttpRequestMessage request)
         {
@@ -60,30 +67,24 @@ namespace System.Net.Http.Formatting
                 throw new ArgumentNullException("request");
             }
 
-            string extension = GetUriPathExtensionOrNull(request.RequestUri);
-            return String.Equals(extension, UriPathExtension, StringComparison.OrdinalIgnoreCase) ? MediaTypeMatch.Match : MediaTypeMatch.NoMatch;
+            string extension = GetUriPathExtensionOrNull(request);
+            return String.Equals(extension, UriPathExtension, StringComparison.OrdinalIgnoreCase) ? 1.0 : 0.0;
         }
 
-        private static string GetUriPathExtensionOrNull(Uri uri)
+        private static string GetUriPathExtensionOrNull(HttpRequestMessage request)
         {
-            if (uri == null)
-            {
-                throw new InvalidOperationException(RS.Format(Properties.Resources.NonNullUriRequiredForMediaTypeMapping, _uriPathExtensionMappingType.Name));
-            }
+            IHttpRouteData routeData = request.GetRouteData();
 
-            string uriPathExtension = null;
-            int numberOfSegments = uri.Segments.Length;
-            if (numberOfSegments > 0)
+            if (routeData != null)
             {
-                string lastSegment = uri.Segments[numberOfSegments - 1];
-                int indexAfterFirstPeriod = lastSegment.IndexOf('.') + 1;
-                if (indexAfterFirstPeriod > 0 && indexAfterFirstPeriod < lastSegment.Length)
+                string extension;
+                if (routeData.Values.TryGetValue(UriPathExtensionKey, out extension))
                 {
-                    uriPathExtension = lastSegment.Substring(indexAfterFirstPeriod);
+                    return extension;
                 }
             }
 
-            return uriPathExtension;
+            return null;
         }
 
         private void Initialize(string uriPathExtension)

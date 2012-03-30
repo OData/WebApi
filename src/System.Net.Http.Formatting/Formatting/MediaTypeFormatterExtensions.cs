@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 
 namespace System.Net.Http.Formatting
@@ -59,51 +58,6 @@ namespace System.Net.Http.Formatting
             }
 
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-        }
-
-        /// <summary>
-        /// Updates the given <paramref name="formatter"/>'s set of <see cref="MediaTypeMapping"/> elements
-        /// so that it associates the <paramref name="mediaType"/> with <see cref="Uri"/>s ending with
-        /// the given <paramref name="uriPathExtension"/>.
-        /// </summary>
-        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="UriPathExtensionMapping"/> item.</param>
-        /// <param name="uriPathExtension">The string of the <see cref="Uri"/> path extension.</param>
-        /// <param name="mediaType">The <see cref="MediaTypeHeaderValue"/> to associate with <see cref="Uri"/>s
-        /// ending with <paramref name="uriPathExtension"/>.</param>
-        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "There is no meaningful System.Uri representation for a path suffix such as '.xml'")]
-        public static void AddUriPathExtensionMapping(
-            this MediaTypeFormatter formatter,
-            string uriPathExtension,
-            MediaTypeHeaderValue mediaType)
-        {
-            if (formatter == null)
-            {
-                throw new ArgumentNullException("formatter");
-            }
-
-            UriPathExtensionMapping mapping = new UriPathExtensionMapping(uriPathExtension, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-        }
-
-        /// <summary>
-        /// Updates the given <paramref name="formatter"/>'s set of <see cref="MediaTypeMapping"/> elements
-        /// so that it associates the <paramref name="mediaType"/> with <see cref="Uri"/>s ending with
-        /// the given <paramref name="uriPathExtension"/>.
-        /// </summary>
-        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="UriPathExtensionMapping"/> item.</param>
-        /// <param name="uriPathExtension">The string of the <see cref="Uri"/> path extension.</param>
-        /// <param name="mediaType">The string media type to associate with <see cref="Uri"/>s
-        /// ending with <paramref name="uriPathExtension"/>.</param>
-        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "There is no meaningful System.Uri representation for a path suffix such as '.xml'")]
-        public static void AddUriPathExtensionMapping(this MediaTypeFormatter formatter, string uriPathExtension, string mediaType)
-        {
-            if (formatter == null)
-            {
-                throw new ArgumentNullException("formatter");
-            }
-
-            UriPathExtensionMapping mapping = new UriPathExtensionMapping(uriPathExtension, mediaType);
             formatter.MediaTypeMappings.Add(mapping);
         }
 

@@ -114,6 +114,8 @@
     <Compile Include="Query\DataModel.cs" />
     <Compile Include="Query\ODataQueryDeserializerTests.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
+    <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
+    <Compile Include="Routing\UriPathExtensionMappingTests.cs" />
     <Compile Include="Routing\UrlHelperTest.cs" />
     <Compile Include="Services\DependencyResolverTests.cs" />
     <Compile Include="Tracing\FormattingUtilitiesTest.cs" />
@@ -267,6 +269,10 @@
     <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
       <Project>{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}</Project>
       <Name>Microsoft.TestCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Net.Http.Formatting.Test.Unit\System.Net.Http.Formatting.Test.Unit.csproj">
+      <Project>{7AF77741-9158-4D5F-8782-8F21FADF025F}</Project>
+      <Name>System.Net.Http.Formatting.Test.Unit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Xml;
+using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http.Formatting
 {
@@ -100,6 +103,16 @@ namespace System.Net.Http.Formatting
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns true if the type should be excluded from validation.
+        /// </summary>
+        /// <param name="type">.NET type to validate</param>
+        /// <returns>True if the type should be excluded.</returns>
+        public static bool IsTypeExcludedFromValidation(Type type)
+        {
+            return (type.IsAssignableFrom(typeof(JToken)) || type == typeof(XElement) || type == typeof(XElement));
         }
 
         /// <summary>

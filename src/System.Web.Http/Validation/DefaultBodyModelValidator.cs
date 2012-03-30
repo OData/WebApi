@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.Metadata;
@@ -37,6 +38,12 @@ namespace System.Web.Http.Validation
             if (actionContext == null)
             {
                 throw Error.ArgumentNull("actionContext");
+            }
+
+            if (MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type))
+            {
+                // no validation for some DOM like types
+                return true;
             }
 
             ModelMetadata metadata = metadataProvider.GetMetadataForType(() => model, type);

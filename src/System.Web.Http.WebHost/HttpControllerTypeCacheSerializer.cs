@@ -3,10 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.Properties;
+using System.Web.Http.Dispatcher;
+using System.Web.Http.WebHost.Properties;
 using System.Xml;
 
-namespace System.Web.Http.Dispatcher
+namespace System.Web.Http.WebHost
 {
     // Processes files with this format:
     //
@@ -38,7 +39,7 @@ namespace System.Web.Http.Dispatcher
         internal DateTime? CurrentDateOverride { get; set; }
 
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This is an instance method for consistency with the SerializeTypes() method.")]
-        public List<Type> DeserializeTypes(TextReader input)
+        public ICollection<Type> DeserializeTypes(TextReader input)
         {
             // DevDiv: 314059: TypeCacheSerializer should use regular serialization instead of DOM
             XmlDocument doc = new XmlDocument();

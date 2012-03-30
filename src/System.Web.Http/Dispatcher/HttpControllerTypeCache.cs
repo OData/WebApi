@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.Internal;
 
 namespace System.Web.Http.Dispatcher
 {
@@ -9,11 +8,9 @@ namespace System.Web.Http.Dispatcher
     /// </summary>
     internal sealed class HttpControllerTypeCache
     {
-        private const string TypeCacheName = "MS-ControllerTypeCache.xml";
-        private const string WildcardNamespace = ".*";
-
         private readonly HttpConfiguration _configuration;
-        private readonly IBuildManager _buildManager;
+        private readonly IAssembliesResolver _assembliesResolver;
+        private readonly IHttpControllerTypeResolver _controllersResolver;
         private readonly Dictionary<string, ILookup<string, Type>> _cache;
 
         public HttpControllerTypeCache(HttpConfiguration configuration)
@@ -24,7 +21,8 @@ namespace System.Web.Http.Dispatcher
             }
 
             _configuration = configuration;
-            _buildManager = _configuration.ServiceResolver.GetBuildManager();
+            _assembliesResolver = _configuration.ServiceResolver.GetAssembliesResolver();
+            _controllersResolver = _configuration.ServiceResolver.GetHttpControllerTypeResolver();
             _cache = InitializeCache();
         }
 
@@ -56,7 +54,7 @@ namespace System.Web.Http.Dispatcher
 
         private Dictionary<string, ILookup<string, Type>> InitializeCache()
         {
-            List<Type> controllerTypes = HttpControllerTypeCacheUtil.GetFilteredTypesFromAssemblies(TypeCacheName, IsControllerType, _buildManager);
+            List<Type> controllerTypes = _controllersResolver.GetControllerTypes(_assembliesResolver).ToList();
             var groupedByName = controllerTypes.GroupBy(
                 t => t.Name.Substring(0, t.Name.Length - DefaultHttpControllerSelector.ControllerSuffix.Length),
                 StringComparer.OrdinalIgnoreCase);
@@ -65,17 +63,6 @@ namespace System.Web.Http.Dispatcher
                 g => g.Key,
                 g => g.ToLookup(t => t.Namespace ?? String.Empty, StringComparer.OrdinalIgnoreCase),
                 StringComparer.OrdinalIgnoreCase);
-        }
-
-        public static bool IsControllerType(Type t)
-        {
-            return
-                t != null &&
-                t.IsClass &&
-                t.IsPublic &&
-                t.Name.EndsWith(DefaultHttpControllerSelector.ControllerSuffix, StringComparison.OrdinalIgnoreCase) &&
-                !t.IsAbstract &&
-                TypeHelper.HttpControllerType.IsAssignableFrom(t);
         }
     }
 }

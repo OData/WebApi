@@ -44,7 +44,9 @@ namespace System.Web.Http.Services
 
             _configuration = configuration;
 
-            Add<IBuildManager>(new DefaultBuildManager());
+            Add<IAssembliesResolver>(new DefaultAssembliesResolver());
+
+            Add<IHttpControllerTypeResolver>(new DefaultHttpControllerTypeResolver());
 
             Add<IHttpControllerSelector>(config => new DefaultHttpControllerSelector(config));
 

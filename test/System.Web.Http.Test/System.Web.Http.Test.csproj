@@ -87,8 +87,8 @@
     <Compile Include="HttpServerTest.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
-    <Compile Include="Dispatcher\DefaultBuildManagerTest.cs" />
     <Compile Include="QueryableAttributeTest.cs" />
+    <Compile Include="Dispatcher\DefaultAssembliesResolverTest.cs" />
     <Compile Include="Controllers\ApiControllerActionInvokerTest.cs" />
     <Compile Include="Controllers\ApiControllerActionSelectorTest.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorTest.cs" />

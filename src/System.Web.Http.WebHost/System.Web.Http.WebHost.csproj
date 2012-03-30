@@ -59,6 +59,7 @@
       <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20326.1\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">
@@ -80,6 +81,8 @@
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
     <Compile Include="PreApplicationStartCode.cs" />
+    <Compile Include="HttpControllerTypeCacheSerializer.cs" />
+    <Compile Include="WebHostHttpControllerTypeResolver.cs" />
     <Compile Include="Routing\HostedHttpRouteCollection.cs" />
     <Compile Include="Routing\HostedHttpRoute.cs" />
     <Compile Include="Routing\HostedHttpRouteData.cs" />
@@ -98,7 +101,7 @@
     </Compile>
     <Compile Include="Routing\HttpWebRoute.cs" />
     <Compile Include="SuppressFormsAuthRedirectModule.cs" />
-    <Compile Include="WebHostBuildManager.cs" />
+    <Compile Include="WebHostAssembliesResolver.cs" />
     <Compile Include="Properties\SRResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -130,6 +133,7 @@
     <EmbeddedResource Include="Properties\SRResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

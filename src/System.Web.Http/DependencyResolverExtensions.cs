@@ -62,9 +62,14 @@ namespace System.Web.Http
             return resolver.GetServiceOrThrow<IHttpControllerActivator>();
         }
 
-        public static IBuildManager GetBuildManager(this DependencyResolver resolver)
+        public static IAssembliesResolver GetAssembliesResolver(this DependencyResolver resolver)
         {
-            return resolver.GetServiceOrThrow<IBuildManager>();
+            return resolver.GetServiceOrThrow<IAssembliesResolver>();
+        }
+
+        public static IHttpControllerTypeResolver GetHttpControllerTypeResolver(this DependencyResolver resolver)
+        {
+            return resolver.GetServiceOrThrow<IHttpControllerTypeResolver>();
         }
 
         public static IHttpActionSelector GetActionSelector(this DependencyResolver resolver)

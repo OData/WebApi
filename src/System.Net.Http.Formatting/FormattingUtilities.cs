@@ -39,7 +39,7 @@ namespace System.Net.Http
         };
 
         // Valid header token characters are within the range 0x20 < c < 0x7F excluding the following characters
-        private static string _nonTokenChars = "()<>@,;:\\\"/[]?={}";
+        private const string NonTokenChars = "()<>@,;:\\\"/[]?={}";
 
         /// <summary>
         /// The default max depth for our formatter is 256
@@ -212,7 +212,7 @@ namespace System.Net.Http
 
         public static bool ValidateHeaderToken(string token)
         {
-            return token != null && !token.Any(c => c < 0x21 || c > 0x7E || _nonTokenChars.IndexOf(c) != -1);
+            return token != null && !token.Any(c => c < 0x21 || c > 0x7E || NonTokenChars.IndexOf(c) != -1);
         }
 
         public static string DateToString(DateTimeOffset dateTime)

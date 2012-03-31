@@ -40,7 +40,7 @@ namespace System.Web.Http.Validation
                 throw Error.ArgumentNull("actionContext");
             }
 
-            if (MediaTypeFormatterCollection.IsTypeExcludedFromValidation(type))
+            if (model != null && MediaTypeFormatterCollection.IsTypeExcludedFromValidation(model.GetType()))
             {
                 // no validation for some DOM like types
                 return true;

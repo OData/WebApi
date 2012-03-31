@@ -106,13 +106,14 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
-        /// Returns true if the type should be excluded from validation.
+        /// Returns true if the type is one of those loosely defined types that should be excluded from validation
         /// </summary>
-        /// <param name="type">.NET type to validate</param>
-        /// <returns>True if the type should be excluded.</returns>
+        /// <param name="type">.NET <see cref="Type"/> to validate</param>
+        /// <returns><c>true</c> if the type should be excluded.</returns>
         public static bool IsTypeExcludedFromValidation(Type type)
         {
-            return (type.IsAssignableFrom(typeof(JToken)) || type == typeof(XElement) || type == typeof(XElement));
+            return FormattingUtilities.IsJTokenType(type) || typeof(XObject).IsAssignableFrom(type) || typeof(XmlNode).IsAssignableFrom(type) 
+                || typeof(FormDataCollection).IsAssignableFrom(type);
         }
 
         /// <summary>

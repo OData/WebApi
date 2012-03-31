@@ -139,7 +139,6 @@ namespace System.Web.Http.SelfHost
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             request.Method = HttpMethod.Post;
 
-            // once we have the knob to disable validation, we should change it to 5000 to show that we can easily do this.
             request.Content = new StringContent(GetBigArray(5000), Encoding.UTF8, "application/xml");
 
             // Act

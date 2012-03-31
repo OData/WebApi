@@ -373,8 +373,7 @@ namespace System.Net.Http.Formatting
         [PropertyData("SelectCharacterEncodingTestData")]
         public void SelectCharacterEncoding_ReturnsBestEncoding(string bodyEncoding, string[] supportedEncodings, string expectedEncoding)
         {
-            bool isWritePath = false;
-            for (int index = 0; index < 2; index++)
+            foreach (bool isWritePath in new bool[] { false, true }) 
             {
                 // Arrange
                 MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
@@ -398,8 +397,6 @@ namespace System.Net.Http.Formatting
                 // Assert
                 Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
                 Assert.Equal(expectedEnc, actualEncoding);
-
-                isWritePath = !isWritePath;
             }
         }
 

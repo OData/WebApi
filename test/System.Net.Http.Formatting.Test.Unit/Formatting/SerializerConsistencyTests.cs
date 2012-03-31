@@ -120,7 +120,7 @@ namespace System.Net.Formatting.Tests
         }
     }
 
-    // public class, public fields
+    // public class, public properties
     public class NormalClass
     {
         public string FirstName { get; set; }
@@ -240,37 +240,42 @@ namespace System.Net.Formatting.Tests
         // tSourceRead - the type that we read back as. This should be more general because we need to instantiate it.
         public static void Test(object source, Type tSourceWrite, Type tSourceRead)
         {
-            MediaTypeFormatter mXml = new MediaTypeFormatterCollection().XmlFormatter;
-            MediaTypeFormatter mJson = new MediaTypeFormatterCollection().JsonFormatter;
+            // Apply consistency chceks. This interleaves the results between the formatters. 
+            // It doesn't actually matter specifically what the formatter does, it just matters that they're consistent.
+            // This will test various transitions between C#->JSON, JSON->C#, C#->XML, and XML->C#. 
+            // We can't compare C# objects, but we can compare the textual representation from XML and JSON. 
+            MediaTypeFormatter xmlFormatter = new MediaTypeFormatterCollection().XmlFormatter;
+            MediaTypeFormatter jsonFor = new MediaTypeFormatterCollection().JsonFormatter;
 
-            MemoryStream blobXml = null;
-            MemoryStream blobJson = null;
-
-            blobJson = Write(source, tSourceWrite, mJson); // C# --> JSON
-            blobXml = Write(source, tSourceWrite, mXml); // C# --> XML
+            MemoryStream blobJson = Write(source, tSourceWrite, jsonFor); // C# --> JSON
+            MemoryStream blobXml = Write(source, tSourceWrite, xmlFormatter); // C# --> XML
             
-            object obj1;
-            object obj2;
-            obj2 = Read(blobJson, tSourceRead, mJson); // C# --> JSON --> C#
-            obj1 = Read(blobXml, tSourceRead, mXml); // C# --> XML --> C#            
+            object obj2 = Read(blobJson, tSourceRead, jsonFor); // C# --> JSON --> C#
+            object obj1 = Read(blobXml, tSourceRead, xmlFormatter); // C# --> XML --> C#            
             
             // We were able to round trip the source object through both formatters.
             // Now see if the resulting object is the same.
 
             // Check C# --> XML --> C#
 
-            var blobXml2 = Write(obj1, tSourceRead, mXml);  // C# --> XML
-            var blobJson2 = Write(obj1, tSourceRead, mJson); // C# --> JSON
+            var blobXml2 = Write(obj1, tSourceRead, xmlFormatter);  // C# --> XML --> C# --> XML
+            var blobJson2 = Write(obj1, tSourceRead, jsonFor); // C# --> XML --> C# --> JSON
 
-            Compare(blobXml, blobXml2);
+            // Ensure that C#->XMl and  C#->XML->C#->XML give us the same result..
+            Compare(blobXml, blobXml2); 
+
+            // Ensure that C#->Json and C#->XML->C#->Json give us the same result 
             Compare(blobJson, blobJson2);
 
             // Check C# --> JSON --> C#
 
-            var blobXml3 = Write(obj2, tSourceRead, mXml);  // C# --> XML
-            var blobJson3 = Write(obj2, tSourceRead, mJson); // C# --> JSON
+            var blobXml3 = Write(obj2, tSourceRead, xmlFormatter);  // C# --> JSON --> C# --> XML
+            var blobJson3 = Write(obj2, tSourceRead, jsonFor); // C# --> JSON --> C# --> JSON
 
+            // Ensure that C#->XML and C#->JSON->C#->XML are the same
             Compare(blobXml, blobXml3);
+
+            // Ensure that C#->JSon and C#->JSON->C#->JSON are the same.
             Compare(blobJson, blobJson3);
         }
 
@@ -295,9 +300,7 @@ namespace System.Net.Formatting.Tests
             bool f = formatter.CanReadType(tSource);
             Assert.True(f);
 
-            HttpContentHeaders hd = null;
-            IFormatterLogger logger = null;
-            object o = formatter.ReadFromStreamAsync(tSource, ms, hd, logger).Result;
+            object o = formatter.ReadFromStreamAsync(tSource, ms, contentHeaders : null, formatterLogger : null).Result;
             Assert.True(tSource.IsAssignableFrom(o.GetType()));
 
             return o;
@@ -310,8 +313,7 @@ namespace System.Net.Formatting.Tests
 
             MemoryStream ms = new MemoryStream();
 
-            HttpContentHeaders hd = null;
-            formatter.WriteToStreamAsync(tSource, obj, ms, hd, null).Wait();
+            formatter.WriteToStreamAsync(tSource, obj, ms, contentHeaders:null, transportContext: null).Wait();
 
             ms.Position = 0;
             return ms;

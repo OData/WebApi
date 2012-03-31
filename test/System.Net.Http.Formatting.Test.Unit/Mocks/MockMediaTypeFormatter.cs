@@ -29,9 +29,9 @@ namespace System.Net.Http.Formatting.Mocks
             return CanWriteTypeCallback != null ? CanWriteTypeCallback(type) : true;
         }
 
-        new public Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders, bool isWritePath)
+        new public Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders)
         {
-            return base.SelectCharacterEncoding(contentHeaders, isWritePath);
+            return base.SelectCharacterEncoding(contentHeaders);
         }
     }
 }

@@ -151,13 +151,13 @@ namespace System.Net.Http.Formatting
         /// for reading or writing an HTTP entity body based on the provided <paramref name="contentHeaders"/>.
         /// </summary>
         /// <param name="contentHeaders">The content headers provided as part of the request or response.</param>
-        /// <param name="isWritePath">True if this is in the write path; otherwise false.</param>
         /// <returns>The <see cref="Encoding"/> to use when reading the request or writing the response.</returns>
-        protected Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders, bool isWritePath)
+        protected Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders)
         {
             Encoding encoding = null;
             if (contentHeaders != null && contentHeaders.ContentType != null)
             {
+                // Find encoding based on content type charset parameter
                 string charset = contentHeaders.ContentType.CharSet;
                 if (!String.IsNullOrWhiteSpace(charset))
                 {
@@ -167,29 +167,17 @@ namespace System.Net.Http.Formatting
                 }
             }
 
-            // We didn't find a character encoding match based on the content headers.
-            // Instead we try getting the default character encoding.
             if (encoding == null)
             {
+                // We didn't find a character encoding match based on the content headers.
+                // Instead we try getting the default character encoding.
                 encoding = SupportedEncodings.FirstOrDefault();
-                if (encoding != null)
-                {
-                    // If we found a default encoding then we need to set the content type charset parameter 
-                    // value but first we clone the content type as to not step on any user provided value.
-                    // We only do this in the write path so that the outgoing charset parameter is correct.
-                    // There is no reason to set it in the read path.
-                    if (isWritePath && contentHeaders != null && contentHeaders.ContentType != null)
-                    {
-                        MediaTypeHeaderValue clone = contentHeaders.ContentType.Clone();
-                        clone.CharSet = encoding.WebName;
-                        contentHeaders.ContentType = clone;
-                    }
-                }
-                else
-                {
-                    // No supported encoding was found so there is no way for us to start reading or writing.
-                    throw new InvalidOperationException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
-                }
+            }
+
+            if (encoding == null)
+            {
+                // No supported encoding was found so there is no way for us to start reading or writing.
+                throw new InvalidOperationException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
             }
 
             return encoding;
@@ -344,7 +332,7 @@ namespace System.Net.Http.Formatting
             }
 
             // Check for match based on any request entity body
-            return SelectCharacterEncoding(request.Content != null ? request.Content.Headers : null, isWritePath: true);
+            return SelectCharacterEncoding(request.Content != null ? request.Content.Headers : null);
         }
 
         internal bool TryMatchSupportedMediaType(MediaTypeHeaderValue mediaType, out MediaTypeMatch mediaTypeMatch)
@@ -437,12 +425,23 @@ namespace System.Net.Http.Formatting
                 headers.ContentType = parsedMediaType;
             }
 
+            // If content type is not set then set it based on supported media types.
             if (headers.ContentType == null)
             {
                 MediaTypeHeaderValue defaultMediaType = SupportedMediaTypes.FirstOrDefault();
                 if (defaultMediaType != null)
                 {
                     headers.ContentType = defaultMediaType.Clone();
+                }
+            }
+
+            // If content type charset parameter is not set then set it based on the supported encodings.
+            if (headers.ContentType != null && headers.ContentType.CharSet == null)
+            {
+                Encoding defaultEncoding = SupportedEncodings.FirstOrDefault();
+                if (defaultEncoding != null)
+                {
+                    headers.ContentType.CharSet = defaultEncoding.WebName;
                 }
             }
         }

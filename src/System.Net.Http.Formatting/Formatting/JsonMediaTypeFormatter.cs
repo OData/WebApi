@@ -233,7 +233,7 @@ namespace System.Net.Http.Formatting
                 }
 
                 // Get the character encoding for the content
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders, isWritePath: false);
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
 
                 try
                 {
@@ -314,7 +314,7 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously(() =>
             {
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders, isWritePath: true);
+                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
 
                 if (!UseDataContractJsonSerializer)
                 {

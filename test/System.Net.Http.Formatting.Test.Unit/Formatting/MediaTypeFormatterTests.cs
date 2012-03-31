@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
@@ -17,6 +15,8 @@ namespace System.Net.Http.Formatting
 {
     public class MediaTypeFormatterTests
     {
+        private const string TestMediaType = "text/test";
+
         [Fact]
         [Trait("Description", "MediaTypeFormatter is public, abstract, and unsealed.")]
         public void TypeIsCorrect()
@@ -366,86 +366,35 @@ namespace System.Net.Http.Formatting
             HttpContent content = new StringContent("Hello World", Encoding.UTF8, "text/plain");
 
             // Act
-            Assert.Throws<InvalidOperationException>(() => formatter.SelectCharacterEncoding(content.Headers, isWritePath: false));
+            Assert.Throws<InvalidOperationException>(() => formatter.SelectCharacterEncoding(content.Headers));
         }
 
         [Theory]
         [PropertyData("SelectCharacterEncodingTestData")]
         public void SelectCharacterEncoding_ReturnsBestEncoding(string bodyEncoding, string[] supportedEncodings, string expectedEncoding)
         {
-            foreach (bool isWritePath in new bool[] { false, true }) 
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
+
+            foreach (string supportedEncoding in supportedEncodings)
             {
-                // Arrange
-                MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
-
-                foreach (string supportedEncoding in supportedEncodings)
-                {
-                    formatter.SupportedEncodings.Add(Encoding.GetEncoding(supportedEncoding));
-                }
-
-                HttpContentHeaders contentHeaders = null;
-                if (bodyEncoding != null)
-                {
-                    Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
-                    HttpContent content = new StringContent("Hello World", bodyEnc, "text/plain");
-                    contentHeaders = content.Headers;
-                }
-
-                // Act
-                Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders, isWritePath: isWritePath);
-
-                // Assert
-                Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
-                Assert.Equal(expectedEnc, actualEncoding);
+                formatter.SupportedEncodings.Add(Encoding.GetEncoding(supportedEncoding));
             }
-        }
 
-        [Theory]
-        [InlineData("utf-8")]
-        [InlineData("utf-16")]
-        [InlineData("utf-32")]
-        public void SelectCharacterEncoding_AddsDefaultEncodingInWritePath(string defaultEncoding)
-        {
-            // Arrange
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
-            formatter.SupportedEncodings.Clear();
-            formatter.SupportedEncodings.Add(Encoding.GetEncoding(defaultEncoding));
-
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            MediaTypeHeaderValue inputContentType = new MediaTypeHeaderValue("text/plain");
-            inputContentType.CharSet = null;
-            contentHeaders.ContentType = inputContentType;
+            HttpContentHeaders contentHeaders = null;
+            if (bodyEncoding != null)
+            {
+                Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
+                HttpContent content = new StringContent("Hello World", bodyEnc, "text/plain");
+                contentHeaders = content.Headers;
+            }
 
             // Act
-            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders, isWritePath: true);
+            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders);
 
-            // Assert that the content type has been cloned and updated with charset parameter
-            Assert.NotSame(inputContentType, contentHeaders.ContentType);
-            Assert.Equal(defaultEncoding, contentHeaders.ContentType.CharSet);
-        }
-
-        [Theory]
-        [InlineData("utf-8")]
-        [InlineData("utf-16")]
-        [InlineData("utf-32")]
-        public void SelectCharacterEncoding_DoesNotAddDefaultEncodingInReadPath(string defaultEncoding)
-        {
-            // Arrange
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter { CallBase = true };
-            formatter.SupportedEncodings.Clear();
-            formatter.SupportedEncodings.Add(Encoding.GetEncoding(defaultEncoding));
-
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            MediaTypeHeaderValue inputContentType = new MediaTypeHeaderValue("text/plain");
-            inputContentType.CharSet = null;
-            contentHeaders.ContentType = inputContentType;
-
-            // Act
-            Encoding actualEncoding = formatter.SelectCharacterEncoding(contentHeaders, isWritePath: false);
-
-            // Assert that the content type has not been cloned and not updated with charset parameter
-            Assert.Same(inputContentType, contentHeaders.ContentType);
-            Assert.Null(contentHeaders.ContentType.CharSet);
+            // Assert
+            Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
+            Assert.Equal(expectedEnc, actualEncoding);
         }
 
         [Theory]
@@ -633,6 +582,90 @@ namespace System.Net.Http.Formatting
             TestStruct result = (TestStruct)MediaTypeFormatter.GetDefaultValueForType(typeof(TestStruct));
 
             Assert.Equal(s, result);
+        }
+
+        [Fact]
+        public void SetDefaultContentHeaders_ThrowsOnNullType()
+        {
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            Assert.ThrowsArgumentNull(() => formatter.SetDefaultContentHeaders(null, contentHeaders, TestMediaType), "type");
+        }
+
+        [Fact]
+        public void SetDefaultContentHeaders_ThrowsOnNullHeaders()
+        {
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            Type type = typeof(object);
+            Assert.ThrowsArgumentNull(() => formatter.SetDefaultContentHeaders(type, null, TestMediaType), "headers");
+        }
+
+        [Fact]
+        public void SetDefaultContentHeaders_UsesNonNullMediaType()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            Type type = typeof(object);
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+
+            // Act
+            formatter.SetDefaultContentHeaders(type, contentHeaders, TestMediaType);
+
+            // Assert
+            Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
+        }
+
+        [Fact]
+        public void SetDefaultContentHeaders_UsesDefaultSupportedMediaType()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(TestMediaType));
+            Type type = typeof(object);
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+
+            // Act
+            formatter.SetDefaultContentHeaders(type, contentHeaders, null);
+
+            // Assert
+            Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
+        }
+
+        [Fact]
+        public void SetDefaultContentHeaders_UsesDefaultSupportedEncoding()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            Encoding encoding = new UnicodeEncoding();
+            formatter.SupportedEncodings.Add(encoding);
+            Type type = typeof(object);
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+
+            // Act
+            formatter.SetDefaultContentHeaders(type, contentHeaders, TestMediaType);
+
+            // Assert
+            Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
+            Assert.Equal(encoding.WebName, contentHeaders.ContentType.CharSet);
+        }
+
+        [Fact]
+        public void SetDefaultContentHeaders_UsesDefaultSupportedMediaTypeAndEncoding()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(TestMediaType));
+            Encoding encoding = new UnicodeEncoding();
+            formatter.SupportedEncodings.Add(encoding);
+            Type type = typeof(object);
+            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+
+            // Act
+            formatter.SetDefaultContentHeaders(type, contentHeaders, null);
+
+            // Assert
+            Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
+            Assert.Equal(encoding.WebName, contentHeaders.ContentType.CharSet);
         }
 
         public struct TestStruct

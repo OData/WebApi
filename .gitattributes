@@ -1,49 +1,43 @@
-*.doc  diff=astextplain
-*.DOC	diff=astextplain
-*.docx	diff=astextplain
-*.DOCX	diff=astextplain
-*.dot	diff=astextplain
-*.DOT	diff=astextplain
-*.pdf	diff=astextplain
-*.PDF	diff=astextplain
-*.rtf	diff=astextplain
-*.RTF	diff=astextplain
+*.doc diff=astextplain
+*.DOC diff=astextplain
+*.docx diff=astextplain
+*.DOCX diff=astextplain
+*.dot diff=astextplain
+*.DOT diff=astextplain
+*.pdf diff=astextplain
+*.PDF diff=astextplain
+*.rtf diff=astextplain
+*.RTF diff=astextplain
 
-*.jpg  	binary
-*.png 	binary
-*.gif 	binary
+*.bmp binary
+*.gif binary
+*.jpg binary
+*.png binary
 
+*.ascx text
+*.cmd text
+*.coffee text
+*.config text
 *.cs text diff=csharp 
-*.vb text
-*.c text
-*.cpp text
-*.cxx text
-*.h text
-*.hxx text
-*.py text
-*.rb text
-*.java text
+*.css text
+*.cshtml text
+*.htm text
 *.html text
 *.htm text
-*.css text
-*.scss text
-*.sass text
-*.less text
 *.js text
-*.lisp text
-*.clj text
-*.sql text
-*.php text
-*.lua text
-*.m text
-*.asm text
-*.erl text
-*.fs text
-*.fsx text
-*.hs text
+*.msbuild text
+*.resx text
+*.ruleset text
+*.Stylecop text
+*.targets text
+*.tt text
+*.txt text
+*.vb text
+*.vbhtml text
+*.xml text
+*.xunit text
 
 *.csproj text merge=union 
 *.vbproj text merge=union 
-*.fsproj text merge=union 
-*.dbproj text merge=union 
+
 *.sln text eol=crlf merge=union 

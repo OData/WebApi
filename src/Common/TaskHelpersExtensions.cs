@@ -21,6 +21,11 @@ namespace System.Threading.Tasks
         /// </summary>
         internal static Task Catch(this Task task, Func<CatchInfo, CatchInfo.CatchResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (task.Status == TaskStatus.RanToCompletion)
+            {
+                return task;
+            }
+
             return task.CatchImpl(() => continuation(new CatchInfo(task)).Task.ToTask<AsyncVoid>(), cancellationToken);
         }
 
@@ -35,6 +40,10 @@ namespace System.Threading.Tasks
         /// </summary>
         internal static Task<TResult> Catch<TResult>(this Task<TResult> task, Func<CatchInfo<TResult>, CatchInfo<TResult>.CatchResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (task.Status == TaskStatus.RanToCompletion)
+            {
+                return task;
+            }
             return task.CatchImpl(() => continuation(new CatchInfo<TResult>(task)).Task, cancellationToken);
         }
 
@@ -46,6 +55,8 @@ namespace System.Threading.Tasks
             // Stay on the same thread if we can
             if (task.IsCompleted)
             {
+                Contract.Assert(task.IsFaulted || task.IsCanceled); // caller ensures 
+
                 if (task.IsFaulted)
                 {
                     try
@@ -69,12 +80,8 @@ namespace System.Threading.Tasks
                 {
                     return TaskHelpers.Canceled<TResult>();
                 }
-                if (task.Status == TaskStatus.RanToCompletion)
-                {
-                    TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
-                    tcs.TrySetFromTask(task);
-                    return tcs.Task;
-                }
+
+                Contract.Assert(task.Status != TaskStatus.RanToCompletion);                
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily
@@ -230,37 +237,46 @@ namespace System.Threading.Tasks
         /// Calls the given continuation, after the given task has completed, regardless of the state
         /// the task ended in. Intended to roughly emulate C# 5's support for "finally" in async methods.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         internal static Task Finally(this Task task, Action continuation)
         {
-            return task.FinallyImpl<AsyncVoid>(continuation);
+            // Stay on the same thread if we can
+            if (task.IsCompleted)
+            {                
+                try
+                {
+                    continuation();
+                    return task;
+                }
+                catch (Exception ex)
+                {
+                    return TaskHelpers.FromError(ex);
+                }                
+            }
+
+            // Split into a continuation method so that we don't create a closure unnecessarily
+            return FinallyImplContinuation<AsyncVoid>(task, continuation);
         }
 
         /// <summary>
         /// Calls the given continuation, after the given task has completed, regardless of the state
         /// the task ended in. Intended to roughly emulate C# 5's support for "finally" in async methods.
         /// </summary>
-        internal static Task<TResult> Finally<TResult>(this Task<TResult> task, Action continuation)
-        {
-            return task.FinallyImpl<TResult>(continuation);
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        private static Task<TResult> FinallyImpl<TResult>(this Task task, Action continuation)
+        internal static Task<TResult> Finally<TResult>(this Task<TResult> task, Action continuation)
         {
             // Stay on the same thread if we can
             if (task.IsCompleted)
-            {
-                TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+            {               
                 try
                 {
                     continuation();
-                    tcs.TrySetFromTask(task);
+                    return task;
                 }
                 catch (Exception ex)
                 {
-                    tcs.TrySetException(ex);
-                }
-                return tcs.Task;
+                    return TaskHelpers.FromError<TResult>(ex);
+                }                
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily

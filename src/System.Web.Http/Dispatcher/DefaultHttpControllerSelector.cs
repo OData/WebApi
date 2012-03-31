@@ -35,7 +35,7 @@ namespace System.Web.Http.Dispatcher
         {
             if (configuration == null)
             {
-                throw Error.ArgumentNull("resolver");
+                throw Error.ArgumentNull("configuration");
             }
 
             _controllerInfoCache = new Lazy<ConcurrentDictionary<string, HttpControllerDescriptor>>(InitializeControllerInfoCache);
@@ -64,29 +64,23 @@ namespace System.Web.Http.Dispatcher
             }
 
             ICollection<Type> matchingTypes = _controllerTypeCache.GetControllerTypes(controllerName);
-            switch (matchingTypes.Count)
+
+            // ControllerInfoCache is already initialized.
+            Contract.Assert(matchingTypes.Count != 1);
+
+            if (matchingTypes.Count == 0)
             {
-                case 0:
-                    // no matching types
-                    throw new HttpResponseException(request.CreateResponse(
-                        HttpStatusCode.NotFound,
-                        Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName)));
-
-                case 1:
-                    // single matching type
-                    Type match = matchingTypes.First();
-
-                    // Add controller descriptor to cache
-                    controllerDescriptor = new HttpControllerDescriptor(_configuration, controllerName, match);
-                    _controllerInfoCache.Value.TryAdd(controllerName, controllerDescriptor);
-
-                    return controllerDescriptor;
-
-                default:
-                    // multiple matching types
-                    throw new HttpResponseException(request.CreateResponse(
-                        HttpStatusCode.InternalServerError,
-                        CreateAmbiguousControllerExceptionMessage(request.GetRouteData().Route, controllerName, matchingTypes)));
+                // no matching types
+                throw new HttpResponseException(request.CreateResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName)));
+            }
+            else
+            {
+                // multiple matching types
+                throw new HttpResponseException(request.CreateResponse(
+                    HttpStatusCode.InternalServerError,
+                    CreateAmbiguousControllerExceptionMessage(request.GetRouteData().Route, controllerName, matchingTypes)));
             }
         }
 
@@ -133,13 +127,14 @@ namespace System.Web.Http.Dispatcher
 
         private ConcurrentDictionary<string, HttpControllerDescriptor> InitializeControllerInfoCache()
         {
-            var result = new ConcurrentDictionary<string, HttpControllerDescriptor>();
+            var result = new ConcurrentDictionary<string, HttpControllerDescriptor>(StringComparer.OrdinalIgnoreCase);
             var duplicateControllers = new HashSet<string>();
             Dictionary<string, ILookup<string, Type>> controllerTypeGroups = _controllerTypeCache.Cache;
 
             foreach (KeyValuePair<string, ILookup<string, Type>> controllerTypeGroup in controllerTypeGroups)
             {
                 string controllerName = controllerTypeGroup.Key;
+
                 foreach (IGrouping<string, Type> controllerTypesGroupedByNs in controllerTypeGroup.Value)
                 {
                     foreach (Type controllerType in controllerTypesGroupedByNs)

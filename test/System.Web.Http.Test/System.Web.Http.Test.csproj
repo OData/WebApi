@@ -81,6 +81,7 @@
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
     <Compile Include="DictionaryExtensionsTest.cs" />
+    <Compile Include="Dispatcher\DefaultHttpControllerSelectorTest.cs" />
     <Compile Include="Filters\HttpFilterCollectionTest.cs" />
     <Compile Include="HttpResponseMessageExtensionsTest.cs" />
     <Compile Include="HttpResponseExceptionTest.cs" />

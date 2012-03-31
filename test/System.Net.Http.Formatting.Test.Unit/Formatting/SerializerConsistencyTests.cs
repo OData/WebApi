@@ -68,9 +68,40 @@ namespace System.Net.Formatting.Tests
         [Fact(Skip = "failing")]
         public void DerivedProperties()
         {
+            // If the static type is the base object, will we see the runtime type and pick derived properties
             BaseClass source = new DerivedClass { Property = "base", DerivedProperty = "derived" };
+            source.SetField("private");
             SerializerConsistencyHepers.Test(source, typeof(BaseClass));
         }
+
+        [Fact]
+        public void InheritedProperties()
+        {
+            // Will we pick up inherited properties from a base object?
+            BaseClass source = new DerivedClass { Property = "base", DerivedProperty = "derived" };
+            source.SetField("private");
+            SerializerConsistencyHepers.Test(source, typeof(DerivedClass));
+        }
+
+        [Fact(Skip = "failing")]
+        public void NewPropertiesHideBaseClass()
+        {
+            DerivedClassWithNew source = new DerivedClassWithNew { Property = "derived" };
+            BaseClass baseClass = (BaseClass)source;
+            baseClass.Property = "base";
+
+            SerializerConsistencyHepers.Test(source, typeof(DerivedClassWithNew));
+        }
+
+        [Fact]
+        public void NullEmptyWhitespaceString()
+        {
+            NormalClass source = new NormalClass { FirstName = string.Empty, LastName = null, Item = "   " };
+
+            SerializerConsistencyHepers.Test(source);
+        }
+
+        
 
         [Fact]
         public void Dictionary()
@@ -118,6 +149,25 @@ namespace System.Net.Formatting.Tests
             // So explicitly call out IEnumerable<T>
             SerializerConsistencyHepers.Test(l, typeof(IEnumerable<int>));
         }
+
+        [Fact]
+        public void StaticProps()
+        {
+            ClassWithStaticProperties source = new ClassWithStaticProperties();
+
+            SerializerConsistencyHepers.Test(source);
+        }
+
+        [Fact(Skip = "failing")]
+        public void ExplicitInterfaceProps()
+        {
+            ClassWithExplicitInterface source = new ClassWithExplicitInterface { PublicProp = "public" };
+            Interface1 i1 = source;
+            i1.Foo = "interface!";
+
+            SerializerConsistencyHepers.Test(source);
+            SerializerConsistencyHepers.Test(source, typeof(Interface1));
+        }
     }
 
     // public class, public properties
@@ -126,6 +176,47 @@ namespace System.Net.Formatting.Tests
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Item { get; set; }
+    }
+
+    public class ClassWithStaticProperties
+    {
+        public string InstanceProp { get; set; }
+        public static string StaticProp
+        {
+            get
+            {
+                Assert.True(false, "serializers should never call static properties");
+                return string.Empty;
+            }
+            set
+            {
+                Assert.True(false, "serializers should never call static properties");
+                throw new InvalidOperationException(); // assert already threw
+            }
+        }
+    }
+
+    public interface Interface1
+    {
+        string Foo { get; set; }
+    }
+    public class ClassWithExplicitInterface : Interface1
+    {
+        private string _value;
+
+        public string PublicProp { get; set; }
+
+        string Interface1.Foo
+        {
+            get
+            {
+                return _value;
+            }
+            set
+            {
+                _value = value; ;
+            }
+        }
     }
 
     [DataContract]
@@ -163,12 +254,24 @@ namespace System.Net.Formatting.Tests
 
     public class BaseClass
     {
+        private string PrivateField;
         public string Property { get; set; }
+
+        public void SetField(string field)
+        {
+            PrivateField = field;
+        }
     }
 
     public class DerivedClass : BaseClass
     {
         public string DerivedProperty { get; set; }
+    }
+
+    public class DerivedClassWithNew : BaseClass
+    {
+        // shadows base class property
+        public new string Property { get; set; }
     }
 
     // Does a serializer see this implements IEnumerable? And does it treat it specially?

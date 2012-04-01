@@ -77,6 +77,7 @@ namespace System.Net.Http.Formatting
                     readTask =>
                     {
                         // Assert
+                        Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
                         mockStream.Verify(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never());
                         mockStream.Verify(s => s.ReadByte(), Times.Never());
                         mockStream.Verify(s => s.BeginRead(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
@@ -99,6 +100,7 @@ namespace System.Net.Http.Formatting
                     readTask =>
                     {
                         // Assert
+                        Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
                         mockStream.Verify(s => s.Close(), Times.Never());
                     });
         }
@@ -136,9 +138,11 @@ namespace System.Net.Http.Formatting
                 readTask =>
                 {
                     // Assert
+                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
+                    Assert.True(memStream.CanRead);
+
                     var value = Assert.IsType<SampleType>(readTask.Result);
                     Assert.Equal(42, value.Number);
-                    Assert.True(memStream.CanRead);
                 });
         }
 
@@ -156,9 +160,11 @@ namespace System.Net.Http.Formatting
                 readTask =>
                 {
                     // Assert
+                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
+                    Assert.True(memStream.CanRead);
+
                     var value = Assert.IsType<SampleType>(readTask.Result);
                     Assert.Equal(42, value.Number);
-                    Assert.True(memStream.CanRead);
                 });
         }
 
@@ -184,6 +190,7 @@ namespace System.Net.Http.Formatting
                 writeTask =>
                 {
                     // Assert
+                    Assert.Equal(TaskStatus.RanToCompletion, writeTask.Status);
                     mockStream.Verify(s => s.Close(), Times.Never());
                     mockStream.Verify(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
                 });
@@ -203,9 +210,11 @@ namespace System.Net.Http.Formatting
                 writeTask =>
                 {
                     // Assert
+                    Assert.Equal(TaskStatus.RanToCompletion, writeTask.Status);
+                    Assert.True(memStream.CanRead);
+
                     byte[] actualSampleTypeByteRepresentation = memStream.ToArray();
                     Assert.Equal(ExpectedSampleTypeByteRepresentation, actualSampleTypeByteRepresentation);
-                    Assert.True(memStream.CanRead);
                 });
         }
 
@@ -245,7 +254,7 @@ namespace System.Net.Http.Formatting
                     string result = readTask.Result as string;
 
                     // Assert
-                    Assert.True(readTask.IsCompleted);
+                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
                     Assert.Equal(content, result);
                 });
         }
@@ -284,7 +293,7 @@ namespace System.Net.Http.Formatting
                 (writeTask) =>
                 {
                     // Assert
-                    Assert.True(writeTask.IsCompleted);
+                    Assert.Equal(TaskStatus.RanToCompletion, writeTask.Status);
                     byte[] actualData = memStream.ToArray();
                     Assert.Equal(expectedData, actualData);
                 });
@@ -322,7 +331,7 @@ namespace System.Net.Http.Formatting
                     string result = readTask.Result as string;
 
                     // Assert
-                    Assert.True(readTask.IsCompleted);
+                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
                     Assert.Equal(content, result);
                 });
         }
@@ -362,7 +371,7 @@ namespace System.Net.Http.Formatting
                 (writeTask) =>
                 {
                     // Assert
-                    Assert.True(writeTask.IsCompleted);
+                    Assert.Equal(TaskStatus.RanToCompletion, writeTask.Status);
                     byte[] actualData = memStream.ToArray();
 
                     Assert.Equal(expectedData, actualData);

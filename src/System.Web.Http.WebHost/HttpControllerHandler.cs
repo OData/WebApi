@@ -138,7 +138,7 @@ namespace System.Web.Http.WebHost
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Object gets passed to a task")]
         protected virtual IAsyncResult BeginProcessRequest(HttpContextBase httpContextBase, AsyncCallback callback, object state)
         {
-            HttpRequestMessage request = ConvertRequest(httpContextBase);
+            HttpRequestMessage request = httpContextBase.GetHttpRequestMessage() ?? ConvertRequest(httpContextBase);
 
             // Add route data
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
@@ -356,7 +356,7 @@ namespace System.Web.Http.WebHost
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]
-        private static HttpRequestMessage ConvertRequest(HttpContextBase httpContextBase)
+        internal static HttpRequestMessage ConvertRequest(HttpContextBase httpContextBase)
         {
             Contract.Assert(httpContextBase != null);
 
@@ -384,12 +384,12 @@ namespace System.Web.Http.WebHost
         /// setting <see cref="P:System.Web.HttpResponseBase.SuppressFormsAuthenticationRedirect" /> to <c>true</c> if available.
         /// </summary>
         /// <param name="httpContextBase">The HTTP context base.</param>
-        internal static void EnsureSuppressFormsAuthenticationRedirect(HttpContextBase httpContextBase) 
+        internal static void EnsureSuppressFormsAuthenticationRedirect(HttpContextBase httpContextBase)
         {
             Contract.Assert(httpContextBase != null);
 
             // Only if the response is status code is 401
-            if (httpContextBase.Response.StatusCode == (int)HttpStatusCode.Unauthorized) 
+            if (httpContextBase.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
             {
                 _suppressRedirectAction.Value(httpContextBase);
             }

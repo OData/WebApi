@@ -123,7 +123,6 @@ namespace System.Web.Http.Description
                 throw Error.ArgumentNull("actionDescriptor");
             }
 
-            bool isActionVariableSpecified = _actionVariableRegex.IsMatch(route.RouteTemplate) || route.Defaults.ContainsKey(ActionVariableName);
             IList<HttpMethod> supportedMethods = new List<HttpMethod>();
             IList<HttpMethod> actionHttpMethods = actionDescriptor.SupportedHttpMethods;
             HttpMethodConstraint httpMethodConstraint = route.Constraints.Values.FirstOrDefault(c => typeof(HttpMethodConstraint).IsAssignableFrom(c.GetType())) as HttpMethodConstraint;

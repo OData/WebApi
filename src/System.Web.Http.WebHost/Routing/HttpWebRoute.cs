@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
+using System.Web.Http.Routing;
 using System.Web.Routing;
 
 namespace System.Web.Http.WebHost.Routing
@@ -42,6 +44,24 @@ namespace System.Web.Http.WebHost.Routing
         {
         }
 
+        protected override bool ProcessConstraint(HttpContextBase httpContext, object constraint, string parameterName, RouteValueDictionary values, RouteDirection routeDirection)
+        {
+            IHttpRouteConstraint httpRouteConstraint = constraint as IHttpRouteConstraint;
+            if (httpRouteConstraint != null)
+            {
+                HttpRequestMessage request = httpContext.GetHttpRequestMessage();
+                if (request == null)
+                {
+                    request = HttpControllerHandler.ConvertRequest(httpContext);
+                    httpContext.SetHttpRequestMessage(request);
+                }
+
+                return httpRouteConstraint.Match(request, new HostedHttpRoute(this), parameterName, values, ConvertRouteDirection(routeDirection));
+            }
+
+            return base.ProcessConstraint(httpContext, constraint, parameterName, values, routeDirection);
+        }
+
         public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
         {
             // Only perform URL generation if the "httproute" key was specified. This allows these
@@ -69,6 +89,21 @@ namespace System.Web.Http.WebHost.Routing
                 }
             }
             return newRouteValues;
+        }
+
+        private static HttpRouteDirection ConvertRouteDirection(RouteDirection routeDirection)
+        {
+            if (routeDirection == RouteDirection.IncomingRequest)
+            {
+                return HttpRouteDirection.UriResolution;
+            }
+
+            if (routeDirection == RouteDirection.UrlGeneration)
+            {
+                return HttpRouteDirection.UriGeneration;
+            }
+
+            throw Error.InvalidEnumArgument("routeDirection", (int)routeDirection, typeof(RouteDirection));
         }
     }
 }

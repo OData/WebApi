@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="HttpControllerTypeCacheSerializer.cs" />
+    <Compile Include="Routing\HttpContextBaseExtensions.cs" />
     <Compile Include="WebHostHttpControllerTypeResolver.cs" />
     <Compile Include="Routing\HostedHttpRouteCollection.cs" />
     <Compile Include="Routing\HostedHttpRoute.cs" />

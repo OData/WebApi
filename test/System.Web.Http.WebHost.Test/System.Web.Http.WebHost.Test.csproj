@@ -72,6 +72,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
+      <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
+      <Name>System.Net.Http.Formatting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http.WebHost\System.Web.Http.WebHost.csproj">
       <Project>{A0187BC2-8325-4BB2-8697-7F955CF4173E}</Project>
       <Name>System.Web.Http.WebHost</Name>

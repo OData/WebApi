@@ -278,11 +278,18 @@ namespace System.Web.Http.WebHost
 
             if (response.Content != null)
             {
-                CopyHeaders(response.Content.Headers, httpContextBase);
-
-                // Select output buffering by the kind of content
+                // Select output buffering based on the kind of HttpContent.  
+                // This is done before CopyHeaders because the ContentLength
+                // property getter will evaluate the content length and set
+                // the Content-Length header if it has not already been set.
+                // Doing this before CopyHeaders ensures the headers contain a 
+                // valid Content-Length before they are copied to HttpContextBase.
+                // Unless HttpContextBase headers contain a positive Content-Length,
+                // the Transfer-Encoding for streamed output will be chunked.
                 isBuffered = IsOutputBufferingNecessary(response.Content);
                 httpResponseBase.BufferOutput = isBuffered;
+
+                CopyHeaders(response.Content.Headers, httpContextBase);
 
                 responseTask = response.Content.CopyToAsync(httpResponseBase.OutputStream);
             }
@@ -328,24 +335,24 @@ namespace System.Web.Http.WebHost
                 });
         }
 
-        private static bool IsOutputBufferingNecessary(HttpContent httpContent)
+        /// <summary>
+        /// Determines whether the given <see cref="HttpContent"/> should use a buffered response.
+        /// </summary>
+        /// <param name="httpContent">The <see cref="HttpContent"/> of the response.</param>
+        /// <returns>A value of <c>true</c> indicates buffering should be used, otherwise a streamed response should be used.</returns>
+        internal static bool IsOutputBufferingNecessary(HttpContent httpContent)
         {
-            // Never buffer StreamContent.  Either it's already buffered or
-            // is of indeterminate length.  Neither calls for us to buffer.
-            if (httpContent == null || httpContent is StreamContent)
-            {
-                return false;
-            }
+            Contract.Assert(httpContent != null);
 
-            // Any content that knows its ContentLength is assumed to have
-            // buffered it already.
+            // Any HttpContent that knows its length is presumably already buffered internally.
             long? contentLength = httpContent.Headers.ContentLength;
             if (contentLength.HasValue && contentLength.Value >= 0)
             {
                 return false;
             }
 
-            return true;
+            // Content length is null or -1 (meaning not known).  Buffer any HttpContent except StreamContent.
+            return !(httpContent is StreamContent);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]

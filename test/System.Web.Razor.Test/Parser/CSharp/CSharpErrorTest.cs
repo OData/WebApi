@@ -595,6 +595,26 @@ blah",
                                ));
         }
 
+        [Fact]
+        public void ParseBlockCorrectlyRecoversFromMissingCloseParenInExpressionWithinCode()
+        {
+            ParseBlockTest(@"{String.Format(<html></html>}",
+                new StatementBlock(
+                    Factory.MetaCode("{").Accepts(AcceptedCharacters.None),
+                    Factory.Code("String.Format(")
+                           .AsStatement(),
+                    new MarkupBlock(
+                        Factory.Markup("<html></html>").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyCSharp().AsStatement(),
+                    Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                expectedErrors: new [] {
+                    new RazorError(
+                        String.Format(RazorResources.ParseError_Expected_CloseBracket_Before_EOF, "(", ")"),
+                        14, 0, 14)
+                });
+
+        }
+
         private void RunUnterminatedSimpleKeywordBlock(string keyword)
         {
             SingleSpanBlockTest(keyword + " (foo) { var foo = bar; if(foo != null) { bar(); } ", BlockType.Statement, SpanKind.Code,

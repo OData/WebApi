@@ -541,8 +541,16 @@ namespace System.Web.Razor.Parser
                 if (At(CSharpSymbolType.LeftBrace) || At(CSharpSymbolType.LeftParenthesis) || At(CSharpSymbolType.LeftBracket))
                 {
                     Accept(read);
-                    Balance(BalancingModes.AllowCommentsAndTemplates);
-                    Optional(CSharpSymbolType.RightBrace);
+                    if (Balance(BalancingModes.AllowCommentsAndTemplates | BalancingModes.BacktrackOnFailure))
+                    {
+                        Optional(CSharpSymbolType.RightBrace);
+                    }
+                    else
+                    {
+                        // Recovery
+                        AcceptUntil(CSharpSymbolType.LessThan, CSharpSymbolType.RightBrace);
+                        return;
+                    }
                 }
                 else if (At(CSharpSymbolType.Transition) && (NextIs(CSharpSymbolType.LessThan, CSharpSymbolType.Colon)))
                 {

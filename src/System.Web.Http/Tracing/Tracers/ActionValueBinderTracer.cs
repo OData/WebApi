@@ -34,8 +34,12 @@ namespace System.Web.Http.Tracing.Tracers
                                             : (HttpParameterBinding)new HttpParameterBindingTracer(parameterBinding, _traceWriter);
             }
 
-            HttpActionBinding newActionBinding = new HttpActionBinding(actionDescriptor, newParameterBindings);
-            return newActionBinding;
+            // Replace the inner HttpActionBinding's parameter bindings with our tracing versions.
+            // This allows each individual parameter binding to trace.
+            actionBinding.ParameterBindings = newParameterBindings;
+
+            // Then create an HttpActionBindingTracer to wrap the actual HttpActionBinding
+            return new HttpActionBindingTracer(actionBinding, _traceWriter);
         }
     }
 }

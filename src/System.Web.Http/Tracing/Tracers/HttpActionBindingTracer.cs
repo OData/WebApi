@@ -16,6 +16,18 @@ namespace System.Web.Http.Tracing.Tracers
         {
             _innerBinding = innerBinding;
             _traceWriter = traceWriter;
+
+            // Properties that cannot be delegated to the inner must be replicated.
+            // They must also avoid an ArgumentNullException for null values.
+            if (_innerBinding.ParameterBindings != null)
+            {
+                ParameterBindings = _innerBinding.ParameterBindings;
+            }
+
+            if (_innerBinding.ActionDescriptor != null)
+            {
+                ActionDescriptor = _innerBinding.ActionDescriptor;
+            }
         }
 
         public override Task ExecuteBindingAsync(Controllers.HttpActionContext actionContext, CancellationToken cancellationToken)

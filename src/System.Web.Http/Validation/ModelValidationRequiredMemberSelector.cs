@@ -38,6 +38,12 @@ namespace System.Web.Http.Validation
                 throw Error.ArgumentNull("member");
             }
 
+            // Optimization : avoid computing validators if there are no validator providers
+            if (_validatorProviders == null || !_validatorProviders.Any())
+            {
+                return false;
+            }
+
             if (!(member is PropertyInfo))
             {
                 return false;

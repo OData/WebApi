@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
@@ -46,8 +47,21 @@ namespace System.Web.Http.Validation
                 return true;
             }
 
+            IEnumerable<ModelValidatorProvider> validatorProviders = actionContext.GetValidatorProviders();
+            // Optimization : avoid validating the object graph if there are no validator providers
+            if (validatorProviders == null || !validatorProviders.Any())
+            {
+                return true;
+            }
+
             ModelMetadata metadata = metadataProvider.GetMetadataForType(() => model, type);
-            ValidationContext validationContext = new ValidationContext() { ActionContext = actionContext, MetadataProvider = metadataProvider, Visited = new HashSet<object>() };
+            ValidationContext validationContext = new ValidationContext()
+            {
+                MetadataProvider = metadataProvider,
+                ValidatorProviders = validatorProviders,
+                ModelState = actionContext.ModelState,
+                Visited = new HashSet<object>()
+            };
             return ValidateNodeAndChildren(metadata, validationContext, container: null, prefix: keyPrefix);
         }
 
@@ -58,7 +72,7 @@ namespace System.Web.Http.Validation
 
             if (model == null)
             {
-                return ShallowValidate(metadata, validationContext.ActionContext, container, prefix);
+                return ShallowValidate(metadata, validationContext, container, prefix);
             }
 
             // Check to avoid infinite recursion. This can happen with cycles in an object graph.
@@ -81,7 +95,7 @@ namespace System.Web.Http.Validation
             if (isValid)
             {
                 // Don't bother to validate this node if children failed.
-                isValid = ShallowValidate(metadata, validationContext.ActionContext, container, prefix);
+                isValid = ShallowValidate(metadata, validationContext, container, prefix);
             }
 
             // Pop the object so that it can be validated again in a different path
@@ -124,14 +138,14 @@ namespace System.Web.Http.Validation
 
         // Validates a single node (not including children)
         // Returns true if validation passes successfully
-        private static bool ShallowValidate(ModelMetadata metadata, HttpActionContext actionContext, object container, string key)
+        private static bool ShallowValidate(ModelMetadata metadata, ValidationContext validationContext, object container, string key)
         {
             bool isValid = true;
-            foreach (ModelValidator validator in metadata.GetValidators(actionContext.GetValidatorProviders()))
+            foreach (ModelValidator validator in metadata.GetValidators(validationContext.ValidatorProviders))
             {
                 foreach (ModelValidationResult error in validator.Validate(container))
                 {
-                    actionContext.ModelState.AddModelError(key, error.Message);
+                    validationContext.ModelState.AddModelError(key, error.Message);
                     isValid = false;
                 }
             }
@@ -160,7 +174,8 @@ namespace System.Web.Http.Validation
         private class ValidationContext
         {
             public ModelMetadataProvider MetadataProvider { get; set; }
-            public HttpActionContext ActionContext { get; set; }
+            public IEnumerable<ModelValidatorProvider> ValidatorProviders { get; set; }
+            public ModelStateDictionary ModelState { get; set; }
             public HashSet<object> Visited { get; set; }
         }
     }

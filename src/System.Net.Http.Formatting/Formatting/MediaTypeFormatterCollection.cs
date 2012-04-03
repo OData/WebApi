@@ -2,9 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Web.Http;
 using System.Xml;
 using System.Xml.Linq;
-using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http.Formatting
 {
@@ -86,16 +86,45 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
             if (mediaType == null)
             {
-                throw new ArgumentNullException("mediaType");
+                throw Error.ArgumentNull("mediaType");
             }
 
             foreach (MediaTypeFormatter formatter in this.Items)
             {
                 if (formatter.CanReadAs(type, mediaType))
+                {
+                    return formatter;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Helper to search a collection for a formatter that can write the .NET type in the given mediaType.
+        /// </summary>
+        /// <param name="type">.NET type to read</param>
+        /// <param name="mediaType">media type to match on.</param>
+        /// <returns>Formatter that can write the type. Null if no formatter found.</returns>
+        public MediaTypeFormatter FindWriter(Type type, MediaTypeHeaderValue mediaType)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+            if (mediaType == null)
+            {
+                throw Error.ArgumentNull("mediaType");
+            }
+
+            foreach (MediaTypeFormatter formatter in Items)
+            {
+                MediaTypeHeaderValue match;
+                if (formatter.CanWriteAs(type, mediaType, out match))
                 {
                     return formatter;
                 }

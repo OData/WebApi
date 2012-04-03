@@ -88,11 +88,6 @@ namespace System.Web.Http
         /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
         public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value)
         {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
             return request.CreateResponse<T>(statusCode, value, configuration: null);
         }
 
@@ -155,6 +150,123 @@ namespace System.Web.Http
                     RequestMessage = request
                 };
             }
+        }
+
+        /// <summary>
+        /// Helper method that creates a <see cref="HttpResponseMessage"/> with an <see cref="ObjectContent{T}"/> instance containing the provided
+        /// <paramref name="value"/>. The given <paramref name="mediaType"/> is used to find an instance of <see cref="MediaTypeFormatter"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <param name="mediaType">The media type used to look up an instance of <see cref="MediaTypeFormatter"/>.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the <paramref name="request"/> does not have an associated
+        /// <see cref="HttpConfiguration"/> instance or if the configuration does not have a formatter matching <paramref name="mediaType"/>.</exception>
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, string mediaType)
+        {
+            return request.CreateResponse(statusCode, value, new MediaTypeHeaderValue(mediaType));
+        }
+
+        /// <summary>
+        /// Helper method that creates a <see cref="HttpResponseMessage"/> with an <see cref="ObjectContent{T}"/> instance containing the provided
+        /// <paramref name="value"/>. The given <paramref name="mediaType"/> is used to find an instance of <see cref="MediaTypeFormatter"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <param name="mediaType">The media type used to look up an instance of <see cref="MediaTypeFormatter"/>.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the <paramref name="request"/> does not have an associated
+        /// <see cref="HttpConfiguration"/> instance or if the configuration does not have a formatter matching <paramref name="mediaType"/>.</exception>
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, MediaTypeHeaderValue mediaType)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (mediaType == null)
+            {
+                throw Error.ArgumentNull("mediaType");
+            }
+
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
+            {
+                throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoConfiguration);
+            }
+
+            MediaTypeFormatter formatter = configuration.Formatters.FindWriter(typeof(T), mediaType);
+            if (formatter == null)
+            {
+                throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoMatchingFormatter, mediaType, typeof(T).Name);
+            }
+
+            return request.CreateResponse(statusCode, value, formatter, mediaType);
+        }
+
+        /// <summary>
+        /// Helper method that creates a <see cref="HttpResponseMessage"/> with an <see cref="ObjectContent{T}"/> instance containing the provided
+        /// <paramref name="value"/> and the given <paramref name="formatter"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <param name="formatter">The formatter to use.</param>
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, MediaTypeFormatter formatter)
+        {
+            return request.CreateResponse(statusCode, value, formatter, (MediaTypeHeaderValue)null);
+        }
+
+        /// <summary>
+        /// Helper method that creates a <see cref="HttpResponseMessage"/> with an <see cref="ObjectContent{T}"/> instance containing the provided
+        /// <paramref name="value"/> and the given <paramref name="formatter"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <param name="formatter">The formatter to use.</param>
+        /// <param name="mediaType">The media type override to set on the response's content. Can be <c>null</c>.</param>
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, MediaTypeFormatter formatter, string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeader = mediaType != null ? new MediaTypeHeaderValue(mediaType) : null;
+            return request.CreateResponse(statusCode, value, formatter, mediaTypeHeader);
+        }
+
+        /// <summary>
+        /// Helper method that creates a <see cref="HttpResponseMessage"/> with an <see cref="ObjectContent{T}"/> instance containing the provided
+        /// <paramref name="value"/> and the given <paramref name="formatter"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <param name="formatter">The formatter to use.</param>
+        /// <param name="mediaType">The media type override to set on the response's content. Can be <c>null</c>.</param>
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+            if (formatter == null)
+            {
+                throw Error.ArgumentNull("formatter");
+            }
+
+            HttpResponseMessage response = request.CreateResponse(statusCode);
+            // TODO pass in full mediaType when OC gets the right ctor overload.
+            string mediaTypeValue = mediaType != null ? mediaType.MediaType : null;
+            response.Content = new ObjectContent<T>(value, formatter, mediaTypeValue);
+            return response;
         }
 
         /// <summary>

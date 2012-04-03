@@ -479,4 +479,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="MissingRequiredMember" xml:space="preserve">
     <value>The {0} property is required.</value>
   </data>
+  <data name="HttpRequestMessageExtensions_NoMatchingFormatter" xml:space="preserve">
+    <value>Could not find a formatter matching the media type '{0}' that can write an instance of '{1}'.</value>
+  </data>
 </root>

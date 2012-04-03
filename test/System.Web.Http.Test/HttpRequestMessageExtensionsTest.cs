@@ -2,6 +2,8 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Formatting.Mocks;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
@@ -88,7 +90,17 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void CreateResponse_OnNullRequest_ThrowsException()
+        public void GetRouteData_WhenRequestIsNull_Throws()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act
+            Assert.ThrowsArgumentNull(() => request.GetRouteData(), "request");
+        }
+
+        [Fact]
+        public void CreateResponse_DoingConneg_OnNullRequest_ThrowsException()
         {
             Assert.ThrowsArgumentNull(() =>
             {
@@ -102,7 +114,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void CreateResponse_OnNullConfiguration_ThrowsException()
+        public void CreateResponse_DoingConneg_OnNullConfiguration_ThrowsException()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -111,7 +123,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void CreateResponse_RetrievesContentNegotiatorFromServiceResolver()
+        public void CreateResponse_DoingConneg_RetrievesContentNegotiatorFromServiceResolver()
         {
             // Arrange
             Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
@@ -125,7 +137,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void CreateResponse_WhenNoContentNegotiatorInstanceRegistered_Throws()
+        public void CreateResponse_DoingConneg_WhenNoContentNegotiatorInstanceRegistered_Throws()
         {
             // Arrange
             _config.ServiceResolver.SetServices(typeof(IContentNegotiator), new object[] { null });
@@ -136,7 +148,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void CreateResponse_WhenContentNegotiatorReturnsNullResult_Throws()
+        public void CreateResponse_DoingConneg_WhenContentNegotiatorReturnsNullResult_Throws()
         {
             // Arrange
             _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters)).Returns(value: null);
@@ -151,7 +163,7 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void CreateResponse_PerformsContentNegotiationAndCreatesContentUsingResults()
+        public void CreateResponse_DoingConneg_PerformsContentNegotiationAndCreatesContentUsingResults()
         {
             // Arrange
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -168,6 +180,146 @@ namespace System.Web.Http
             var objectContent = Assert.IsType<ObjectContent<string>>(response.Content);
             Assert.Equal("42", objectContent.Value);
             Assert.Same(formatter, objectContent.Formatter);
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenRequestIsNull_Throws()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, _value, "foo/bar"), "request");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenMediaTypeHeaderIsNull_Throws()
+        {
+            Assert.ThrowsArgumentNull(() => _request.CreateResponse(HttpStatusCode.OK, _value, (MediaTypeHeaderValue)null), "mediaType");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsNull_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, (string)null), "The value cannot be null or empty.\r\nParameter name: mediaType");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsEmpty_Throws()
+        {
+            Assert.ThrowsArgumentNull(() => _request.CreateResponse(HttpStatusCode.OK, _value, (MediaTypeHeaderValue)null), "mediaType");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsInvalidFormat_Throws()
+        {
+            Assert.Throws<FormatException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, "foo/bar; param=value"), "The format of value 'foo/bar; param=value' is invalid.");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenRequestDoesNotHaveConfiguration_Throws()
+        {
+            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, mediaType: "foo/bar"),
+                "The request does not have an associated configuration object or the provided configuration was null.");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_WhenMediaTypeDoesNotMatch_Throws()
+        {
+            // Arrange
+            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+
+            // Act
+            Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, mediaType: "foo/bar"),
+                "Could not find a formatter matching the media type 'foo/bar' that can write an instance of 'Object'.");
+        }
+
+        [Fact]
+        public void CreateResponse_MatchingMediaType_FindsMatchingFormatterAndCreatesResponse()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            config.Formatters.Clear();
+            Mock<MediaTypeFormatter> formatterMock = new Mock<MediaTypeFormatter> { CallBase = true };
+            var formatter = formatterMock.Object;
+            formatterMock.Setup(f => f.CanWriteType(typeof(object))).Returns(true).Verifiable();
+            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
+            config.Formatters.Add(formatter);
+
+            // Act
+            var response = _request.CreateResponse(HttpStatusCode.Gone, _value, mediaType: "foo/bar");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Gone, response.StatusCode);
+            var content = Assert.IsType<ObjectContent<object>>(response.Content);
+            Assert.Same(_value, content.Value);
+            Assert.Same(formatter, content.Formatter);
+            Assert.Equal("foo/bar", content.Headers.ContentType.MediaType);
+            formatterMock.Verify();
+        }
+
+        [Fact]
+        public void CreateResponse_AcceptingFormatter_WhenRequestIsNull_Throws()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+
+            // Act
+            Assert.ThrowsArgumentNull(() => request.CreateResponse(HttpStatusCode.OK, _value, new MockMediaTypeFormatter()), "request");
+        }
+
+        [Fact]
+        public void CreateResponse_AcceptingFormatter_WhenFormatterIsNull_Throws()
+        {
+            // Act
+            Assert.ThrowsArgumentNull(() => _request.CreateResponse(HttpStatusCode.OK, _value, formatter: null), "formatter");
+        }
+
+        [Fact]
+        public void CreateResponse_AcceptingFormatter_CreatesResponseWithDefaultMediaType()
+        {
+            // Arrange
+            var formatter = new MockMediaTypeFormatter { CallBase = true };
+            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
+
+            // Act
+            var response = _request.CreateResponse(HttpStatusCode.MultipleChoices, _value, formatter, mediaType: (string)null);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.MultipleChoices, response.StatusCode);
+            var content = Assert.IsType<ObjectContent<object>>(response.Content);
+            Assert.Same(_value, content.Value);
+            Assert.Same(formatter, content.Formatter);
+            Assert.Equal("foo/bar", content.Headers.ContentType.MediaType);
+        }
+
+        [Fact]
+        public void CreateResponse_AcceptingFormatter_WithOverridenMediaTypeString_CreatesResponse()
+        {
+            // Arrange
+            var formatter = new MockMediaTypeFormatter { CallBase = true };
+            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
+
+            // Act
+            var response = _request.CreateResponse(HttpStatusCode.MultipleChoices, _value, formatter, mediaType: "bin/baz");
+
+            // Assert
+            Assert.Equal("bin/baz", response.Content.Headers.ContentType.MediaType);
+        }
+
+        [Fact]
+        public void CreateResponse_AcceptingFormatter_WithOverridenMediaTypeHeader_CreatesResponse()
+        {
+            // Arrange
+            var formatter = new MockMediaTypeFormatter { CallBase = true };
+            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("foo/bar"));
+
+            // Act
+            var response = _request.CreateResponse(HttpStatusCode.MultipleChoices, _value, formatter, mediaType: new MediaTypeHeaderValue("bin/baz"));
+
+            // Assert
+            Assert.Equal("bin/baz", response.Content.Headers.ContentType.MediaType);
         }
 
         [Fact]

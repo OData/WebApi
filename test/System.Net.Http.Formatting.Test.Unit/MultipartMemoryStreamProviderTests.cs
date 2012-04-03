@@ -1,57 +1,36 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
-using Microsoft.TestCommon;
+using System.Net.Http.Headers;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {
-    public class MultipartMemoryStreamProviderTests
+    public class MultipartMemoryStreamProviderTests : MultipartStreamProviderTestBase<MultipartMemoryStreamProvider>
     {
         [Fact]
-        [Trait("Description", "MultipartMemoryStreamProvider is internal type.")]
-        public void TypeIsCorrect()
+        public void GetStream_ReturnsNewMemoryStream()
         {
-            Assert.Type.HasProperties(
-                typeof(MultipartMemoryStreamProvider),
-                TypeAssert.TypeProperties.IsClass,
-                typeof(IMultipartStreamProvider));
-        }
+            // Arrange
+            MultipartMemoryStreamProvider instance = new MultipartMemoryStreamProvider();
+            HttpContent parent = new StringContent(String.Empty);
+            HttpContentHeaders headers = FormattingUtilities.CreateEmptyContentHeaders();
 
-        [Fact]
-        [Trait("Description", "MultipartMemoryStreamProvider default ctor.")]
-        public void DefaultConstructor()
-        {
-            MultipartMemoryStreamProvider instance = MultipartMemoryStreamProvider.Instance;
-            Assert.NotNull(instance);
-        }
+            // Act
+            Stream stream1 = instance.GetStream(parent, headers);
+            Stream stream2 = instance.GetStream(parent, headers);
 
-        [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) throws on null.")]
-        public void GetStreamThrowsOnNull()
-        {
-            MultipartMemoryStreamProvider instance = MultipartMemoryStreamProvider.Instance;
-            Assert.ThrowsArgumentNull(() => { instance.GetStream(null); }, "headers");
-        }
+            // Assert
+            Assert.IsType<MemoryStream>(stream1);
+            Assert.Equal(0, stream1.Length);
+            Assert.Equal(0, stream1.Position);
 
-        [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) throws on no Content-Disposition header.")]
-        public void GetStreamReturnsMemoryStream()
-        {
-            MultipartMemoryStreamProvider instance = MultipartMemoryStreamProvider.Instance;
-            HttpContent content = new StringContent("text");
+            Assert.IsType<MemoryStream>(stream2);
+            Assert.Equal(0, stream2.Length);
+            Assert.Equal(0, stream2.Position);
 
-            Stream stream = instance.GetStream(content.Headers);
-            Assert.NotNull(stream);
-
-            MemoryStream memStream = stream as MemoryStream;
-            Assert.NotNull(stream);
-
-            Assert.Equal(0, stream.Length);
-            Assert.Equal(0, stream.Position);
-
-            Assert.NotSame(memStream, instance.GetStream(content.Headers));
+            Assert.NotSame(stream1, stream2);
         }
     }
 }

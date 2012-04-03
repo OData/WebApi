@@ -31,14 +31,14 @@ namespace System.Net.Http.Formatting.Parsers
         private int _maxBodyPartHeaderSize;
 
         // Stream provider
-        private IMultipartStreamProvider _streamProvider;
+        private MultipartStreamProvider _streamProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MimeMultipartBodyPartParser"/> class.
         /// </summary>
         /// <param name="content">An existing <see cref="HttpContent"/> instance to use for the object's content.</param>
         /// <param name="streamProvider">A stream provider providing output streams for where to write body parts as they are parsed.</param>
-        public MimeMultipartBodyPartParser(HttpContent content, IMultipartStreamProvider streamProvider)
+        public MimeMultipartBodyPartParser(HttpContent content, MultipartStreamProvider streamProvider)
             : this(content, streamProvider, DefaultMaxMessageSize, DefaultMaxBodyPartHeaderSize)
         {
         }
@@ -52,7 +52,7 @@ namespace System.Net.Http.Formatting.Parsers
         /// <param name="maxBodyPartHeaderSize">The max length of the MIME header within each MIME body part.</param>
         public MimeMultipartBodyPartParser(
             HttpContent content,
-            IMultipartStreamProvider streamProvider,
+            MultipartStreamProvider streamProvider,
             long maxMessageSize,
             int maxBodyPartHeaderSize)
         {
@@ -83,7 +83,7 @@ namespace System.Net.Http.Formatting.Parsers
             try
             {
                 string boundary = ValidateArguments(content, DefaultMaxMessageSize, false);
-                return boundary != null ? true : false;
+                return boundary != null;
             }
             catch (Exception)
             {

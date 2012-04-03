@@ -4,91 +4,131 @@ using System.IO;
 using System.Linq;
 using Microsoft.TestCommon;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {
-    public class MultipartFileStreamProviderTests
+    public class MockMultipartFileStreamProvider : MultipartFileStreamProvider
+    {
+        public MockMultipartFileStreamProvider()
+            : base(Path.GetTempPath())
+        {
+        }
+
+        public MockMultipartFileStreamProvider(string rootPath)
+            : base(rootPath)
+        {
+        }
+
+        public MockMultipartFileStreamProvider(string rootPath, int bufferSize)
+            : base(rootPath, bufferSize)
+        {
+        }
+    }
+
+    public class MultipartFileStreamProviderTests : MultipartStreamProviderTestBase<MockMultipartFileStreamProvider>
     {
         private const int MinBufferSize = 1;
-        private const int DefaultBufferSize = 0x1000;
+        private const int ValidBufferSize = 0x111;
         private const string ValidPath = @"c:\some\path";
 
-        [Fact]
-        [Trait("Description", "MultipartFileStreamProvider is public, visible type.")]
-        public void TypeIsCorrect()
+        public static TheoryDataSet<string> NotSupportedFilePaths
         {
-            Assert.Type.HasProperties(
-                typeof(MultipartFileStreamProvider),
-                TypeAssert.TypeProperties.IsPublicVisibleClass,
-                typeof(IMultipartStreamProvider));
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "cc:\\a\\b",
+                    "123:\\a\\b",
+                    "c d:\\a\\b",
+                };
+            }
+        }
+
+        public static TheoryDataSet<string> InvalidFilePaths
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "",
+                    " ", 
+                    "  ",
+                    "\t\t \n ", 
+                    "c:\\a<b",
+                    "c:\\a>b",
+                    "c:\\a\"b",
+                    "c:\\a\tb",
+                    "c:\\a|b",
+                    "c:\\a\bb",
+                    "c:\\a\0b",
+                    "c :\\a\0b",
+                };
+            }
         }
 
         [Fact]
-        [Trait("Description", "MultipartFileStreamProvider ctor with invalid root paths.")]
-        public void ConstructorInvalidRootPath()
+        public void Constructor_ThrowsOnNullRootPath()
         {
             Assert.ThrowsArgumentNull(() => { new MultipartFileStreamProvider(null); }, "rootPath");
+        }
 
-            foreach (string path in TestData.NotSupportedFilePaths)
-            {
-                Assert.Throws<NotSupportedException>(() => new MultipartFileStreamProvider(path, DefaultBufferSize));
-            }
+        [Theory]
+        [PropertyData("NotSupportedFilePaths")]
+        public void Constructor_ThrowsOnNotSupportedRootPath(string notSupportedPath)
+        {
+            Assert.Throws<NotSupportedException>(() => new MultipartFileStreamProvider(notSupportedPath, ValidBufferSize));
+        }
 
-            foreach (string path in TestData.InvalidNonNullFilePaths)
-            {
-                // Note: Path.GetFileName doesn't set the argument name when throwing.
-                Assert.ThrowsArgument(() => { new MultipartFileStreamProvider(path, DefaultBufferSize); }, null, allowDerivedExceptions: true);
-            }
+        [Theory]
+        [PropertyData("InvalidFilePaths")]
+        public void Constructor_ThrowsOnInvalidRootPath(string invalidPath)
+        {
+            Assert.ThrowsArgument(() => new MultipartFileStreamProvider(invalidPath, ValidBufferSize), null);
         }
 
         [Fact]
-        [Trait("Description", "MultipartFileStreamProvider ctor with null path.")]
-        public void ConstructorInvalidBufferSize()
+        public void Constructor_InvalidBufferSize()
         {
             Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new MultipartFileStreamProvider(ValidPath, MinBufferSize - 1),
                 "bufferSize", MinBufferSize.ToString(), MinBufferSize - 1);
         }
 
         [Fact]
-        [Trait("Description", "BodyPartFileNames empty.")]
-        public void EmptyBodyPartFileNames()
+        public void FileData_IsEmpty()
         {
-            MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
-            Assert.NotNull(instance.BodyPartFileNames);
-            Assert.Equal(0, instance.BodyPartFileNames.Count);
+            MultipartFileStreamProvider provider = new MultipartFileStreamProvider(ValidPath, ValidBufferSize);
+            Assert.Empty(provider.FileData);
         }
 
         [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) throws on null.")]
-        public void GetStreamThrowsOnNull()
-        {
-            MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
-            Assert.ThrowsArgumentNull(() => { instance.GetStream(null); }, "headers");
-        }
-
-        [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) validation.")]
-        public void GetStreamValidation()
+        public void GetStream()
         {
             Stream stream0 = null;
             Stream stream1 = null;
 
             try
             {
+                string tempPath = Path.GetTempPath();
                 MultipartFormDataContent content = new MultipartFormDataContent();
-                content.Add(new StringContent("Not a file"), "notafile");
-                content.Add(new StringContent("This is a file"), "file", "filename");
+                content.Add(new StringContent("Content 1"), "NoFile");
+                content.Add(new StringContent("Content 2"), "File", "Filename");
 
-                MultipartFileStreamProvider instance = new MultipartFileStreamProvider(Path.GetTempPath());
-                stream0 = instance.GetStream(content.ElementAt(0).Headers);
+                MultipartFileStreamProvider provider = new MultipartFileStreamProvider(tempPath);
+                stream0 = provider.GetStream(content, content.ElementAt(0).Headers);
+                stream1 = provider.GetStream(content, content.ElementAt(1).Headers);
+
                 Assert.IsType<FileStream>(stream0);
-                stream1 = instance.GetStream(content.ElementAt(1).Headers);
                 Assert.IsType<FileStream>(stream1);
 
-                Assert.Equal(2, instance.BodyPartFileNames.Count);
-                Assert.Contains("BodyPart", instance.BodyPartFileNames[0]);
-                Assert.Contains("BodyPart", instance.BodyPartFileNames[1]);
+                Assert.Equal(2, provider.FileData.Count);
+                string partialFileName = String.Format("{0}BodyPart_", tempPath);
+                Assert.Contains(partialFileName, provider.FileData[0].LocalFileName);
+                Assert.Contains(partialFileName, provider.FileData[1].LocalFileName);
+
+                Assert.Same(content.ElementAt(0).Headers.ContentDisposition, provider.FileData[0].Headers.ContentDisposition);
+                Assert.Same(content.ElementAt(1).Headers.ContentDisposition, provider.FileData[1].Headers.ContentDisposition);
             }
             finally
             {

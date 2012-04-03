@@ -88,6 +88,9 @@
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
+    <Compile Include="MultipartRelatedStreamProvider.cs" />
+    <Compile Include="MultipartFileData.cs" />
+    <Compile Include="MultipartStreamProvider.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
     <Compile Include="Handlers\HttpProgressEventArgs.cs" />
     <Compile Include="Handlers\ProgressContent.cs" />
@@ -141,7 +144,6 @@
     <Compile Include="Formatting\XHRRequestHeaderMapping.cs" />
     <Compile Include="Formatting\XmlMediaTypeFormatter.cs" />
     <Compile Include="Formatting\Parsers\FormUrlEncodedParser.cs" />
-    <Compile Include="HttpContentCollectionExtensions.cs" />
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="HttpContentMessageExtensions.cs" />
     <Compile Include="HttpContentMultipartExtensions.cs" />
@@ -154,7 +156,6 @@
     <Compile Include="HttpUnsortedHeaders.cs" />
     <Compile Include="HttpUnsortedRequest.cs" />
     <Compile Include="HttpUnsortedResponse.cs" />
-    <Compile Include="IMultipartStreamProvider.cs" />
     <Compile Include="Internal\AsyncResultWithExtraData.cs" />
     <Compile Include="Internal\DelegatingStream.cs" />
     <Compile Include="Formatting\Parsers\InternetMessageFormatHeaderParser.cs" />

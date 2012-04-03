@@ -76,6 +76,9 @@
     <Compile Include="Handlers\ProgressStreamTest.cs" />
     <Compile Include="Handlers\ProgressWriteAsyncResultTest.cs" />
     <Compile Include="Handlers\HttpProgressEventArgsTest.cs" />
+    <Compile Include="MultipartRelatedStreamProviderTests.cs" />
+    <Compile Include="MultipartStreamProviderTestBase.cs" />
+    <Compile Include="MultipartFileDataTest.cs" />
     <Compile Include="HttpRequestHeadersExtensionsTest.cs" />
     <Compile Include="HttpResponseHeadersExtensionsTest.cs" />
     <Compile Include="DataSets\Types\DataContractEnum.cs" />
@@ -132,7 +135,6 @@
     <Compile Include="Formatting\RequestHeaderMappingTests.cs" />
     <Compile Include="Formatting\XmlMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\Parsers\FormUrlEncodedParserTests.cs" />
-    <Compile Include="HttpContentCollectionExtensionsTests.cs" />
     <Compile Include="HttpContentMessageExtensionsTests.cs" />
     <Compile Include="HttpContentMultipartExtensionsTests.cs" />
     <Compile Include="HttpMessageContentTests.cs" />

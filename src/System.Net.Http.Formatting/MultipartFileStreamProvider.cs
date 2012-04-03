@@ -1,6 +1,5 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -10,18 +9,18 @@ using System.Web.Http;
 namespace System.Net.Http
 {
     /// <summary>
-    /// An <see cref="IMultipartStreamProvider"/> suited for writing each MIME body parts of the MIME multipart
+    /// A <see cref="MultipartStreamProvider"/> suited for writing each MIME body parts of the MIME multipart
     /// message to a file using a <see cref="FileStream"/>.
     /// </summary>
-    public class MultipartFileStreamProvider : IMultipartStreamProvider
+    public class MultipartFileStreamProvider : MultipartStreamProvider
     {
         private const int MinBufferSize = 1;
         private const int DefaultBufferSize = 0x1000;
 
-        private List<string> _bodyPartFileNames = new List<string>();
-        private readonly object _thisLock = new object();
         private string _rootPath;
         private int _bufferSize = DefaultBufferSize;
+
+        private Collection<MultipartFileData> _fileData = new Collection<MultipartFileData>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MultipartFileStreamProvider"/> class.
@@ -36,12 +35,12 @@ namespace System.Net.Http
         /// Initializes a new instance of the <see cref="MultipartFileStreamProvider"/> class.
         /// </summary>
         /// <param name="rootPath">The root path where the content of MIME multipart body parts are written to.</param>
-        /// <param name="bufferSize">The number of bytes buffered for writes to the file.</param>
+        /// <param name="bufferSize">The number of bytes buffered for writes to a file.</param>
         public MultipartFileStreamProvider(string rootPath, int bufferSize)
         {
-            if (String.IsNullOrWhiteSpace(rootPath))
+            if (rootPath == null)
             {
-                throw new ArgumentNullException("rootPath");
+                throw Error.ArgumentNull("rootPath");
             }
 
             if (bufferSize < MinBufferSize)
@@ -54,31 +53,40 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Gets an <see cref="Collection{T}"/> containing the files names of MIME 
-        /// body part written to file.
+        /// Gets a collection containing the local files names and associated HTTP content headers of MIME 
+        /// body parts written to file.
         /// </summary>
-        public Collection<string> BodyPartFileNames
+        public Collection<MultipartFileData> FileData
         {
-            get
-            {
-                lock (_thisLock)
-                {
-                    return new Collection<string>(_bodyPartFileNames);
-                }
-            }
+            get { return _fileData; }
         }
 
         /// <summary>
-        /// This body part stream provider examines the headers provided by the MIME multipart parser
-        /// and decides which <see cref="FileStream"/> to write the body part to.
+        /// Gets the root path where the content of MIME multipart body parts are written to.
         /// </summary>
-        /// <param name="headers">Header fields describing the body part</param>
-        /// <returns>The <see cref="Stream"/> instance where the message body part is written to.</returns>
-        public virtual Stream GetStream(HttpContentHeaders headers)
+        protected string RootPath
         {
+            get { return _rootPath; }
+        }
+
+        /// <summary>
+        /// Gets the number of bytes buffered for writes to a file.
+        /// </summary>
+        protected int BufferSize
+        {
+            get { return _bufferSize; }
+        }
+
+        public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
+        {
+            if (parent == null)
+            {
+                throw Error.ArgumentNull("parent");
+            }
+
             if (headers == null)
             {
-                throw new ArgumentNullException("headers");
+                throw Error.ArgumentNull("headers");
             }
 
             string localFilePath;
@@ -93,10 +101,8 @@ namespace System.Net.Http
             }
 
             // Add local file name 
-            lock (_thisLock)
-            {
-                _bodyPartFileNames.Add(localFilePath);
-            }
+            MultipartFileData fileData = new MultipartFileData(headers, localFilePath);
+            _fileData.Add(fileData);
 
             return File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous);
         }
@@ -112,7 +118,7 @@ namespace System.Net.Http
         {
             if (headers == null)
             {
-                throw new ArgumentNullException("headers");
+                throw Error.ArgumentNull("headers");
             }
 
             return String.Format(CultureInfo.InvariantCulture, "BodyPart_{0}", Guid.NewGuid());

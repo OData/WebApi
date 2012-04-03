@@ -1,4 +1,5 @@
-﻿using System.Web.Http.Dispatcher;
+﻿using System.Web.Http.Dependencies;
+using System.Web.Http.Dispatcher;
 
 namespace System.Web.Http.Controllers
 {
@@ -6,7 +7,7 @@ namespace System.Web.Http.Controllers
     /// Provides a mechanism for a <see cref="IHttpController"/> implementation to indicate 
     /// what kind of <see cref="IHttpControllerActivator"/>, <see cref="IHttpActionSelector"/>, <see cref="IActionValueBinder"/>
     /// and <see cref="IHttpActionInvoker"/> to use for that controller. The types are 
-    /// first looked up in the <see cref="Services.DependencyResolver"/> and if not found there
+    /// first looked up in the <see cref="IDependencyResolver"/> and if not found there
     /// then created directly.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]

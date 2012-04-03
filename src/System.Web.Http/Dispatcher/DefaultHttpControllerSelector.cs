@@ -9,13 +9,12 @@ using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
-using System.Web.Http.Services;
 
 namespace System.Web.Http.Dispatcher
 {
     /// <summary>
     /// Default <see cref="IHttpControllerSelector"/> instance for choosing a <see cref="HttpControllerDescriptor"/> given a <see cref="HttpRequestMessage"/>
-    /// A different implementation can be registered via the <see cref="DependencyResolver"/>.
+    /// A different implementation can be registered via the <see cref="HttpConfiguration.Services"/>.
     /// </summary>
     public class DefaultHttpControllerSelector : IHttpControllerSelector
     {

@@ -33,7 +33,7 @@ namespace System.Web.Http.ModelBinding.Binders
             // or use the set of providers we were given.
             IEnumerable<ModelBinderProvider> providers = _providers != null
                                                              ? _providers
-                                                             : actionContext.ControllerContext.Configuration.ServiceResolver.GetModelBinderProviders().Where((p) => !typeof(CompositeModelBinderProvider).IsAssignableFrom(p.GetType()));
+                                                             : actionContext.ControllerContext.Configuration.Services.GetModelBinderProviders().Where((p) => !typeof(CompositeModelBinderProvider).IsAssignableFrom(p.GetType()));
 
             return new CompositeModelBinder(providers);
         }

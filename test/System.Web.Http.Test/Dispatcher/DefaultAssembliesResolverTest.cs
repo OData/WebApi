@@ -25,7 +25,7 @@ namespace System.Web.Http.Dispatcher
         [Fact]
         public void Class_IsDefaultIAssembliesResolver()
         {
-            var serviceResolver = new DefaultServiceResolver(new HttpConfiguration());
+            var serviceResolver = new DefaultServices(new HttpConfiguration());
 
             Assert.IsType<DefaultAssembliesResolver>(serviceResolver.GetService(typeof(IAssembliesResolver)));
         }

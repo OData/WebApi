@@ -17,7 +17,7 @@ namespace System.Web.Http.Controllers
             string requestUri = baseAddress + "/Test";
             HttpSelfHostConfiguration configuration = new HttpSelfHostConfiguration(baseAddress);
             configuration.Routes.MapHttpRoute("Default", "{controller}", new { controller = "Test" });
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerSelector), new MySingletonControllerDescriptor());
+            configuration.Services.Replace(typeof(IHttpControllerSelector), new MySingletonControllerSelector(configuration));
             HttpSelfHostServer host = new HttpSelfHostServer(configuration);
             host.OpenAsync().Wait();
             HttpResponseMessage response = null;

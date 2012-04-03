@@ -25,7 +25,7 @@ namespace System.Web.Http.ModelBinding.Binders
                 ModelName = "someName"
             };
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(ComplexModelDto), mockDtoBinder.Object) { SuppressPrefixCheck = true });
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(ComplexModelDto), mockDtoBinder.Object) { SuppressPrefixCheck = true });
 
             mockDtoBinder
                 .Setup(o => o.BindModel(context, It.IsAny<ModelBindingContext>()))

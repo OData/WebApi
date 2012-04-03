@@ -21,7 +21,7 @@ namespace System.Web.Http.ModelBinding
 
         protected virtual IBodyModelValidator GetBodyModelValidator(HttpActionDescriptor actionDescriptor)
         {
-            return actionDescriptor.Configuration.ServiceResolver.GetBodyModelValidator();
+            return actionDescriptor.Configuration.Services.GetBodyModelValidator();
         }
 
         /// <summary>

@@ -19,7 +19,7 @@ namespace System.Web.Http.Tracing
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            ITraceManager traceManager = config.ServiceResolver.GetService(typeof (ITraceManager)) as ITraceManager;
+            ITraceManager traceManager = config.Services.GetService(typeof (ITraceManager)) as ITraceManager;
 
             // Assert
             Assert.IsType<TraceManager>(traceManager);
@@ -36,13 +36,13 @@ namespace System.Web.Http.Tracing
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
-            object defaultService = config.ServiceResolver.GetService(serviceType);
+            object defaultService = config.Services.GetService(serviceType);
 
             // Act
             new TraceManager().Initialize(config);
 
             // Assert
-            Assert.Same(defaultService.GetType(), config.ServiceResolver.GetService(serviceType).GetType());
+            Assert.Same(defaultService.GetType(), config.Services.GetService(serviceType).GetType());
         }
 
         [Theory]
@@ -57,14 +57,14 @@ namespace System.Web.Http.Tracing
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
             Mock<ITraceWriter> traceWriter = new Mock<ITraceWriter>() { CallBase = true };
-            config.ServiceResolver.SetService(typeof(ITraceWriter), traceWriter.Object);
-            object defaultService = config.ServiceResolver.GetService(serviceType);
+            config.Services.Replace(typeof(ITraceWriter), traceWriter.Object);
+            object defaultService = config.Services.GetService(serviceType);
 
             // Act
             new TraceManager().Initialize(config);
 
             // Assert
-            Assert.NotSame(defaultService.GetType(), config.ServiceResolver.GetService(serviceType).GetType());
+            Assert.NotSame(defaultService.GetType(), config.Services.GetService(serviceType).GetType());
         }
 
         [Fact]
@@ -88,7 +88,7 @@ namespace System.Web.Http.Tracing
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
             Mock<ITraceWriter> traceWriter = new Mock<ITraceWriter>() { CallBase = true };
-            config.ServiceResolver.SetService(typeof(ITraceWriter), traceWriter.Object);
+            config.Services.Replace(typeof(ITraceWriter), traceWriter.Object);
             Mock<DelegatingHandler> mockHandler = new Mock<DelegatingHandler>() { CallBase = true };
             config.MessageHandlers.Add(mockHandler.Object);
 
@@ -122,7 +122,7 @@ namespace System.Web.Http.Tracing
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
             Mock<ITraceWriter> traceWriter = new Mock<ITraceWriter>() { CallBase = true };
-            config.ServiceResolver.SetService(typeof(ITraceWriter), traceWriter.Object);
+            config.Services.Replace(typeof(ITraceWriter), traceWriter.Object);
 
             // Act
             new TraceManager().Initialize(config);

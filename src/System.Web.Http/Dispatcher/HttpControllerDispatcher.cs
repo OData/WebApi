@@ -60,7 +60,7 @@ namespace System.Web.Http.Dispatcher
             {
                 if (_controllerSelector == null)
                 {
-                    _controllerSelector = _configuration.ServiceResolver.GetHttpControllerSelector();
+                    _controllerSelector = _configuration.Services.GetHttpControllerSelector();
                 }
 
                 return _controllerSelector;

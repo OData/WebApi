@@ -9,9 +9,7 @@ namespace System.Web.Http.Dispatcher
     internal sealed class HttpControllerTypeCache
     {
         private readonly HttpConfiguration _configuration;
-        private readonly IAssembliesResolver _assembliesResolver;
-        private readonly IHttpControllerTypeResolver _controllersResolver;
-        private readonly Dictionary<string, ILookup<string, Type>> _cache;
+        private readonly Lazy<Dictionary<string, ILookup<string, Type>>> _cache;
 
         public HttpControllerTypeCache(HttpConfiguration configuration)
         {
@@ -21,14 +19,12 @@ namespace System.Web.Http.Dispatcher
             }
 
             _configuration = configuration;
-            _assembliesResolver = _configuration.ServiceResolver.GetAssembliesResolver();
-            _controllersResolver = _configuration.ServiceResolver.GetHttpControllerTypeResolver();
-            _cache = InitializeCache();
+            _cache = new Lazy<Dictionary<string, ILookup<string, Type>>>(InitializeCache);
         }
 
         internal Dictionary<string, ILookup<string, Type>> Cache
         {
-            get { return _cache; }
+            get { return _cache.Value; }
         }
 
         public ICollection<Type> GetControllerTypes(string controllerName)
@@ -41,7 +37,7 @@ namespace System.Web.Http.Dispatcher
             HashSet<Type> matchingTypes = new HashSet<Type>();
 
             ILookup<string, Type> namespaceLookup;
-            if (_cache.TryGetValue(controllerName, out namespaceLookup))
+            if (_cache.Value.TryGetValue(controllerName, out namespaceLookup))
             {
                 foreach (var namespaceGroup in namespaceLookup)
                 {
@@ -54,7 +50,10 @@ namespace System.Web.Http.Dispatcher
 
         private Dictionary<string, ILookup<string, Type>> InitializeCache()
         {
-            List<Type> controllerTypes = _controllersResolver.GetControllerTypes(_assembliesResolver).ToList();
+            IAssembliesResolver assembliesResolver = _configuration.Services.GetAssembliesResolver();
+            IHttpControllerTypeResolver controllersResolver = _configuration.Services.GetHttpControllerTypeResolver();
+
+            ICollection<Type> controllerTypes = controllersResolver.GetControllerTypes(assembliesResolver);
             var groupedByName = controllerTypes.GroupBy(
                 t => t.Name.Substring(0, t.Name.Length - DefaultHttpControllerSelector.ControllerSuffix.Length),
                 StringComparer.OrdinalIgnoreCase);

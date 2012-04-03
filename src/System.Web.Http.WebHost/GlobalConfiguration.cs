@@ -14,8 +14,8 @@ namespace System.Web.Http
             () =>
             {
                 HttpConfiguration config = new HttpConfiguration(new HostedHttpRouteCollection(RouteTable.Routes));
-                config.ServiceResolver.SetService(typeof(IAssembliesResolver), new WebHostAssembliesResolver());
-                config.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), new WebHostHttpControllerTypeResolver());
+                config.Services.Replace(typeof(IAssembliesResolver), new WebHostAssembliesResolver());
+                config.Services.Replace(typeof(IHttpControllerTypeResolver), new WebHostHttpControllerTypeResolver());
                 return config;
             });
 

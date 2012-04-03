@@ -26,7 +26,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return actionContext.ControllerContext.Configuration.ServiceResolver.GetModelMetadataProvider();
+            return actionContext.ControllerContext.Configuration.Services.GetModelMetadataProvider();
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return actionContext.ControllerContext.Configuration.ServiceResolver.GetModelValidatorProviders();
+            return actionContext.ControllerContext.Configuration.Services.GetModelValidatorProviders();
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace System.Web.Http.Controllers
             }
             else
             {
-                binder = actionContext.ControllerContext.Configuration.ServiceResolver.GetModelBinderProviders()
+                binder = actionContext.ControllerContext.Configuration.Services.GetModelBinderProviders()
                     .Select(p => p.GetBinder(actionContext, bindingContext))
                     .Where(b => b != null)
                     .FirstOrDefault();

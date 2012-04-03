@@ -79,8 +79,8 @@ namespace System.Web.Http.Dispatcher
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IAssembliesResolver> assemblyResolver = new Mock<IAssembliesResolver>();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
-            configuration.ServiceResolver.SetService(typeof(IAssembliesResolver), assemblyResolver.Object);
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.Services.Replace(typeof(IAssembliesResolver), assemblyResolver.Object);
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
 
             controllerTypeResolver.Setup(c => c.GetControllerTypes(assemblyResolver.Object)).Returns(new Collection<Type> { GetMockControllerType("Sample") }).Verifiable();
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
@@ -105,7 +105,7 @@ namespace System.Web.Http.Dispatcher
         {
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
 
             Type controllerType = GetMockControllerType("Sample");
             controllerTypeResolver
@@ -132,7 +132,7 @@ namespace System.Web.Http.Dispatcher
         {
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
 
             Type controllerType = GetMockControllerType("Sample");
             controllerTypeResolver
@@ -159,7 +159,7 @@ namespace System.Web.Http.Dispatcher
         {
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
 
             Type controllerType = GetMockControllerType("Sample");
             controllerTypeResolver
@@ -235,7 +235,7 @@ namespace System.Web.Http.Dispatcher
         {
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
 
             controllerTypeResolver
                 .Setup(c => c.GetControllerTypes(It.IsAny<IAssembliesResolver>()))
@@ -263,7 +263,7 @@ namespace System.Web.Http.Dispatcher
         {
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
-            configuration.ServiceResolver.SetService(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
 
             controllerTypeResolver
                 .Setup(c => c.GetControllerTypes(It.IsAny<IAssembliesResolver>()))

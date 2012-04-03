@@ -1,19 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dependencies;
 using System.Web.Http.ValueProviders;
+using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.ModelBinding
-{    
+{
     public class ModelBinderAttributeTest
     {
         [Fact]
         public void Empty_BinderType()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.ServiceResolver.SetServices(typeof(ModelBinderProvider), new CustomModelBinderProvider());
+            config.Services.Replace(typeof(ModelBinderProvider), new CustomModelBinderProvider());
 
             ModelBinderAttribute attr = new ModelBinderAttribute();
 
@@ -45,16 +47,38 @@ namespace System.Web.Http.ModelBinding
         }
 
         [Fact]
-        public void BinderType_From_ServiceResolver()
+        public void BinderType_From_DependencyResolver()
         {
-            // To test ServiceResolver, the registered type and actual type should be different. 
+            // To test dependency resolver, the registered type and actual type should be different. 
             HttpConfiguration config = new HttpConfiguration();
-            config.ServiceResolver.SetService(typeof(CustomModelBinderProvider), new SecondCustomModelBinderProvider());
+            var mockDependencyResolver = new Mock<IDependencyResolver>();
+            mockDependencyResolver.Setup(r => r.GetService(typeof(CustomModelBinderProvider)))
+                               .Returns(new SecondCustomModelBinderProvider());
+            config.DependencyResolver = mockDependencyResolver.Object;
 
             ModelBinderAttribute attr = new ModelBinderAttribute(typeof(CustomModelBinderProvider));
 
             ModelBinderProvider provider = attr.GetModelBinderProvider(config);
             Assert.IsType<SecondCustomModelBinderProvider>(provider);
+        }
+
+        [Fact]
+        public void BinderType_From_DependencyResolver_ReleasedWhenConfigIsDisposed()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            var mockDependencyResolver = new Mock<IDependencyResolver>();
+            SecondCustomModelBinderProvider provider = new SecondCustomModelBinderProvider();
+            mockDependencyResolver.Setup(r => r.GetService(typeof(CustomModelBinderProvider))).Returns(provider);
+            config.DependencyResolver = mockDependencyResolver.Object;
+            ModelBinderAttribute attr = new ModelBinderAttribute(typeof(CustomModelBinderProvider));
+            attr.GetModelBinderProvider(config);
+
+            // Act
+            config.Dispose();
+
+            // Assert
+            mockDependencyResolver.Verify(dr => dr.Dispose(), Times.Once());
         }
 
         [Fact]
@@ -92,6 +116,5 @@ namespace System.Web.Http.ModelBinding
                 throw new NotImplementedException();
             }
         }
- 
     }
 }

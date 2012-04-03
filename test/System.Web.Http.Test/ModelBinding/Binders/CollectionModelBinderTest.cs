@@ -30,7 +30,7 @@ namespace System.Web.Http.ModelBinding
                 }
             };
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
 
             mockIntBinder
                 .Setup(o => o.BindModel(context, It.IsAny<ModelBindingContext>()))
@@ -67,7 +67,7 @@ namespace System.Web.Http.ModelBinding
             };
 
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
 
             mockIntBinder
                 .Setup(o => o.BindModel(context, It.IsAny<ModelBindingContext>()))
@@ -105,7 +105,7 @@ namespace System.Web.Http.ModelBinding
             };
 
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
 
             mockIntBinder
                 .Setup(o => o.BindModel(context, It.IsAny<ModelBindingContext>()))
@@ -140,7 +140,7 @@ namespace System.Web.Http.ModelBinding
                 }
             };
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
 
             mockIntBinder
                 .Setup(o => o.BindModel(context, It.IsAny<ModelBindingContext>()))
@@ -193,7 +193,7 @@ namespace System.Web.Http.ModelBinding
                 ValueProvider = new SimpleHttpValueProvider()
             };
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), null); // completely remove from resolution?
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), null); // completely remove from resolution?
 
             // Act
             List<int> boundCollection = CollectionModelBinder<int>.BindSimpleCollection(context, bindingContext, new int[1], culture);
@@ -216,7 +216,7 @@ namespace System.Web.Http.ModelBinding
                 ValueProvider = new SimpleHttpValueProvider()
             };
             HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.ServiceResolver.SetService(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
+            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(int), mockIntBinder.Object));
 
             ModelValidationNode childValidationNode = null;
             mockIntBinder

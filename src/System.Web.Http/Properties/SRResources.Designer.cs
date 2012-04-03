@@ -270,6 +270,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The service type {0} is not supported..
+        /// </summary>
+        internal static string DefaultServices_InvalidServiceType {
+            get {
+                return ResourceManager.GetString("DefaultServices_InvalidServiceType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; list is invalid because it contains one or more null items..
         /// </summary>
         internal static string DelegatingHandlerArrayContainsNullItem {
@@ -284,15 +293,6 @@ namespace System.Web.Http.Properties {
         internal static string DelegatingHandlerArrayHasNonNullInnerHandler {
             get {
                 return ResourceManager.GetString("DelegatingHandlerArrayHasNonNullInnerHandler", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The type {0} does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator..
-        /// </summary>
-        internal static string DependencyResolver_DoesNotImplementICommonServiceLocator {
-            get {
-                return ResourceManager.GetString("DependencyResolver_DoesNotImplementICommonServiceLocator", resourceCulture);
             }
         }
         

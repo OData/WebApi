@@ -16,9 +16,9 @@ namespace System.Web.Http.ApiExplorer
             config.Formatters.Add(customFormatter);
 
             DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(ItemController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-            IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
+            IApiExplorer explorer = config.Services.GetApiExplorer();
             ApiDescription description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "PostItem");
             Assert.True(description.SupportedRequestBodyFormatters.Any(formatter => formatter == customFormatter), "Did not find the custom formatter on the SupportedRequestBodyFormatters.");
         }
@@ -32,9 +32,9 @@ namespace System.Web.Http.ApiExplorer
             config.Formatters.Add(customFormatter);
 
             DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(ItemController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-            IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
+            IApiExplorer explorer = config.Services.GetApiExplorer();
             ApiDescription description = explorer.ApiDescriptions.FirstOrDefault(desc => desc.ActionDescriptor.ActionName == "PostItem");
             Assert.True(description.SupportedResponseFormatters.Any(formatter => formatter == customFormatter), "Did not find the custom formatter on the SupportedResponseFormatters.");
         }

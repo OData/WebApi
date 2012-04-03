@@ -37,8 +37,8 @@ namespace System.Web.Http.ModelBinding
         /// <summary>
         /// Gets or sets the name to consider as the parameter name during model binding
         /// </summary>
-        public string Name { get; set; } 
-               
+        public string Name { get; set; }
+
         public bool SuppressPrefixCheck { get; set; }
 
         // This will get called by a parameter binding, which will cache the results. 
@@ -46,21 +46,19 @@ namespace System.Web.Http.ModelBinding
         {
             if (BinderType != null)
             {
-                object value = configuration.ServiceResolver.GetService(BinderType);
-                if (value == null)
-                {
-                    value = Activator.CreateInstance(BinderType);
-                }
+                object value = configuration.DependencyResolver.GetService(BinderType)
+                            ?? Activator.CreateInstance(BinderType);
+
                 if (value != null)
                 {
                     VerifyBinderType(value.GetType());
                     ModelBinderProvider result = (ModelBinderProvider)value;
                     return result;
-                }                
+                }
             }
 
             // Create default over config
-            IEnumerable<ModelBinderProvider> providers = configuration.ServiceResolver.GetModelBinderProviders();
+            IEnumerable<ModelBinderProvider> providers = configuration.Services.GetModelBinderProviders();
 
             if (providers.Count() == 1)
             {
@@ -69,16 +67,16 @@ namespace System.Web.Http.ModelBinding
 
             return new CompositeModelBinderProvider(providers);
         }
-        
+
         /// <summary>
         /// Value providers that will be fed to the model binder.
         /// </summary>
         public virtual IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpConfiguration configuration)
         {
             // By default, just get all registered value provider factories
-            return configuration.ServiceResolver.GetValueProviderFactories();
+            return configuration.Services.GetValueProviderFactories();
         }
-        
+
         private static void VerifyBinderType(Type attemptedType)
         {
             Type required = typeof(ModelBinderProvider);

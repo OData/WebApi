@@ -17,19 +17,8 @@ namespace System.Web.Http.Dispatcher
     /// </summary>
     public class DefaultHttpControllerActivator : IHttpControllerActivator
     {
-        private readonly HttpConfiguration _configuration;
         private Tuple<HttpControllerDescriptor, Func<IHttpController>> _fastCache;
         private object _cacheKey = new object();
-
-        public DefaultHttpControllerActivator(HttpConfiguration configuration)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            _configuration = configuration;
-        }
 
         /// <summary>
         /// Creates the <see cref="IHttpController"/> specified by <paramref name="controllerType"/> using the given <paramref name="request"/>
@@ -61,8 +50,8 @@ namespace System.Web.Http.Dispatcher
                 // HttpControllerDescriptor.Properties cache
                 if (_fastCache == null)
                 {
-                    // If service resolver returns controller object then keep asking it whenever we need a new instance
-                    IHttpController instance = (IHttpController)_configuration.ServiceResolver.GetService(controllerType);
+                    // If dependency resolver returns controller object then keep asking it whenever we need a new instance
+                    IHttpController instance = (IHttpController)request.GetDependencyScope().GetService(controllerType);
                     if (instance != null)
                     {
                         return instance;
@@ -93,7 +82,7 @@ namespace System.Web.Http.Dispatcher
             }
             catch (Exception ex)
             {
-                throw Error.InvalidOperation(ex, SRResources.DefaultControllerFactory_ErrorCreatingController, controllerType);
+                throw Error.InvalidOperation(ex, SRResources.DefaultControllerFactory_ErrorCreatingController, controllerType.Name);
             }
         }
 

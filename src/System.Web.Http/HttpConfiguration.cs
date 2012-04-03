@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Services;
@@ -15,11 +16,12 @@ namespace System.Web.Http
     public class HttpConfiguration : IDisposable
     {
         private readonly HttpRouteCollection _routes;
-        private readonly DependencyResolver _serviceResolver;
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
         private readonly MediaTypeFormatterCollection _formatters = DefaultFormatters();
         private readonly Collection<DelegatingHandler> _messageHandlers = new Collection<DelegatingHandler>();
         private readonly HttpFilterCollection _filters = new HttpFilterCollection();
+
+        private IDependencyResolver _dependencyResolver = EmptyResolver.Instance;
         private bool _disposed;
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace System.Web.Http
             }
 
             _routes = routes;
-            _serviceResolver = new DependencyResolver(this);
+            Services = new DefaultServices(this);
         }
 
         /// <summary>
@@ -99,15 +101,28 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets the <see cref="DependencyResolver"/> used to resolve services to use by this <see cref="HttpServer"/>.
+        /// Gets or sets the dependency resolver associated with this <see cref="HttpConfiguration"/>.
         /// </summary>
-        /// <value>
-        /// The <see cref="DependencyResolver"/>.
-        /// </value>
-        public DependencyResolver ServiceResolver
+        public IDependencyResolver DependencyResolver
         {
-            get { return _serviceResolver; }
+            get { return _dependencyResolver; }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _dependencyResolver = value;
+            }
         }
+
+        /// <summary>
+        /// Gets the container of default services associated with this <see cref="HttpConfiguration"/>.
+        /// Only supports the list of service types documented on <see cref="DefaultServices"/>. For general
+        /// purpose types, please use <see cref="DependencyResolver"/>.
+        /// </summary>
+        public DefaultServices Services { get; internal set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether error details should be included in error messages.
@@ -150,8 +165,6 @@ namespace System.Web.Http
             }
         }
 
-        #region IDisposable
-
         public void Dispose()
         {
             Dispose(true);
@@ -166,10 +179,10 @@ namespace System.Web.Http
                 if (disposing)
                 {
                     _routes.Dispose();
+                    Services.Dispose();
+                    DependencyResolver.Dispose();
                 }
             }
         }
-
-        #endregion
     }
 }

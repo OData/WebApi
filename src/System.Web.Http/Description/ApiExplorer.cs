@@ -142,7 +142,7 @@ namespace System.Web.Http.Description
         private Collection<ApiDescription> InitializeApiDescriptions()
         {
             Collection<ApiDescription> apiDescriptions = new Collection<ApiDescription>();
-            IHttpControllerSelector controllerSelector = _config.ServiceResolver.GetHttpControllerSelector();
+            IHttpControllerSelector controllerSelector = _config.Services.GetHttpControllerSelector();
             IDictionary<string, HttpControllerDescriptor> controllerMappings = controllerSelector.GetControllerMapping();
             if (controllerMappings != null)
             {
@@ -365,7 +365,7 @@ namespace System.Web.Http.Description
 
         private string GetApiDocumentation(HttpActionDescriptor actionDescriptor)
         {
-            IDocumentationProvider documentationProvider = DocumentationProvider ?? _config.ServiceResolver.GetDocumentationProvider();
+            IDocumentationProvider documentationProvider = DocumentationProvider ?? _config.Services.GetDocumentationProvider();
             if (documentationProvider == null)
             {
                 return string.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, actionDescriptor.ActionName);
@@ -376,7 +376,7 @@ namespace System.Web.Http.Description
 
         private string GetApiParameterDocumentation(HttpParameterDescriptor parameterDescriptor)
         {
-            IDocumentationProvider documentationProvider = DocumentationProvider ?? _config.ServiceResolver.GetDocumentationProvider();
+            IDocumentationProvider documentationProvider = DocumentationProvider ?? _config.Services.GetDocumentationProvider();
             if (documentationProvider == null)
             {
                 return string.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.Prefix ?? parameterDescriptor.ParameterName);

@@ -255,25 +255,25 @@ namespace System.Web.Http.Controllers
                 }
             }
 
-            // For everything still null we call the dependency resolver as normal.
+            // For everything still null we fall back to the default service list.
             if (_controllerActivator == null)
             {
-                _controllerActivator = Configuration.ServiceResolver.GetHttpControllerActivator();
+                _controllerActivator = Configuration.Services.GetHttpControllerActivator();
             }
 
             if (_actionSelector == null)
             {
-                _actionSelector = Configuration.ServiceResolver.GetActionSelector();
+                _actionSelector = Configuration.Services.GetActionSelector();
             }
 
             if (_actionInvoker == null)
             {
-                _actionInvoker = Configuration.ServiceResolver.GetActionInvoker();
+                _actionInvoker = Configuration.Services.GetActionInvoker();
             }
 
             if (_actionValueBinder == null)
             {
-                _actionValueBinder = Configuration.ServiceResolver.GetActionValueBinder();
+                _actionValueBinder = Configuration.Services.GetActionValueBinder();
             }
         }
 
@@ -292,8 +292,8 @@ namespace System.Web.Http.Controllers
             Contract.Assert(configuration != null);
             if (serviceType != null)
             {
-                return (TBase)configuration.ServiceResolver.GetService(serviceType) ??
-                       (TBase)Activator.CreateInstance(serviceType);
+                return (TBase)configuration.DependencyResolver.GetService(serviceType)
+                    ?? (TBase)Activator.CreateInstance(serviceType);
             }
 
             return null;

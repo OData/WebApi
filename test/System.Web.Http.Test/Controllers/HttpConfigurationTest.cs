@@ -1,4 +1,6 @@
-﻿using Microsoft.TestCommon;
+﻿using System.Web.Http.Services;
+using Microsoft.TestCommon;
+using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -22,7 +24,8 @@ namespace System.Web.Http
             Assert.Empty(configuration.MessageHandlers);
             Assert.Empty(configuration.Properties);
             Assert.Empty(configuration.Routes);
-            Assert.NotNull(configuration.ServiceResolver);
+            Assert.NotNull(configuration.DependencyResolver);
+            Assert.NotNull(configuration.Services);
             Assert.Equal("/", configuration.VirtualPathRoot);
         }
 
@@ -43,6 +46,31 @@ namespace System.Web.Http
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Dispose();
             configuration.Dispose();
+        }
+
+        [Fact]
+        public void Dispose_DisposesOfServices()
+        {
+            // Arrange
+            var configuration = new HttpConfiguration();
+            var services = new Mock<DefaultServices> { CallBase = true };
+            configuration.Services = services.Object;
+
+            // Act
+            configuration.Dispose();
+
+            // Assert
+            services.Verify(s => s.Dispose(), Times.Once());
+        }
+
+        [Fact]
+        public void DependencyResolver_GuardClauses()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+
+            // Act & assert
+            Assert.ThrowsArgumentNull(() => config.DependencyResolver = null, "value");
         }
     }
 }

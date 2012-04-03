@@ -82,6 +82,7 @@
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
     <Compile Include="DictionaryExtensionsTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerSelectorTest.cs" />
+    <Compile Include="Dispatcher\DefaultHttpControllerActivatorTest.cs" />
     <Compile Include="Filters\HttpFilterCollectionTest.cs" />
     <Compile Include="HttpResponseMessageExtensionsTest.cs" />
     <Compile Include="HttpResponseExceptionTest.cs" />
@@ -118,7 +119,7 @@
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Routing\UriPathExtensionMappingTests.cs" />
     <Compile Include="Routing\UrlHelperTest.cs" />
-    <Compile Include="Services\DependencyResolverTests.cs" />
+    <Compile Include="Services\DefaultServicesTests.cs" />
     <Compile Include="Tracing\FormattingUtilitiesTest.cs" />
     <Compile Include="Tracing\HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="Tracing\ITraceWriterExtensionsTest.cs" />

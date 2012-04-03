@@ -156,9 +156,6 @@
   <data name="DataAnnotationsModelMetadataProvider_UnreadableProperty" xml:space="preserve">
     <value>{0} has a DisplayColumn attribute for {1}, but property {1} does not have a public getter.</value>
   </data>
-  <data name="DependencyResolver_DoesNotImplementICommonServiceLocator" xml:space="preserve">
-    <value>The type {0} does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator.</value>
-  </data>
   <data name="ModelBinderProviderCollection_BinderForTypeNotFound" xml:space="preserve">
     <value>A binder for type {0} could not be located.</value>
   </data>
@@ -481,5 +478,8 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   </data>
   <data name="HttpRequestMessageExtensions_NoMatchingFormatter" xml:space="preserve">
     <value>Could not find a formatter matching the media type '{0}' that can write an instance of '{1}'.</value>
+  </data>
+  <data name="DefaultServices_InvalidServiceType" xml:space="preserve">
+    <value>The service type {0} is not supported.</value>
   </data>
 </root>

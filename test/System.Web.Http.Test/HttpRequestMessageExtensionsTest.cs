@@ -27,6 +27,7 @@ namespace System.Web.Http
         public HttpRequestMessageExtensionsTest()
         {
             _disposable = _disposableMock.Object;
+            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = _config;
         }
 
         [Fact]
@@ -45,7 +46,7 @@ namespace System.Web.Http
         public void GetConfiguration()
         {
             // Arrange
-            _request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, _config);
+            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = _config;
 
             // Act
             HttpConfiguration afterConfig = _request.GetConfiguration();
@@ -116,6 +117,8 @@ namespace System.Web.Http
         [Fact]
         public void CreateResponse_DoingConneg_OnNullConfiguration_ThrowsException()
         {
+            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = null;
+
             Assert.Throws<InvalidOperationException>(() =>
             {
                 HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, configuration: null);
@@ -126,21 +129,24 @@ namespace System.Web.Http
         public void CreateResponse_DoingConneg_RetrievesContentNegotiatorFromServiceResolver()
         {
             // Arrange
-            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
-            _config.ServiceResolver.SetResolver(resolverMock.Object);
+            Mock<DefaultServices> servicesMock = new Mock<DefaultServices> { CallBase = true };
+            servicesMock.Setup(s => s.GetService(typeof(IContentNegotiator)))
+                        .Returns(new Mock<IContentNegotiator>().Object)
+                        .Verifiable();
+            _config.Services = servicesMock.Object;
 
             // Act
             HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, _config);
 
             // Assert
-            resolverMock.Verify(r => r.GetService(typeof(IContentNegotiator)), Times.Once());
+            servicesMock.Verify();
         }
 
         [Fact]
         public void CreateResponse_DoingConneg_WhenNoContentNegotiatorInstanceRegistered_Throws()
         {
             // Arrange
-            _config.ServiceResolver.SetServices(typeof(IContentNegotiator), new object[] { null });
+            _config.Services.Clear(typeof(IContentNegotiator));
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => HttpRequestMessageExtensions.CreateResponse(_request, HttpStatusCode.OK, _value, _config),
@@ -152,7 +158,7 @@ namespace System.Web.Http
         {
             // Arrange
             _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters)).Returns(value: null);
-            _config.ServiceResolver.SetServices(typeof(IContentNegotiator), _negotiatorMock.Object);
+            _config.Services.Replace(typeof(IContentNegotiator), _negotiatorMock.Object);
 
             // Act
             var response = HttpRequestMessageExtensions.CreateResponse<string>(_request, HttpStatusCode.OK, "", _config);
@@ -169,7 +175,7 @@ namespace System.Web.Http
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
             _negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, _config.Formatters))
                         .Returns(new ContentNegotiationResult(formatter, null));
-            _config.ServiceResolver.SetService(typeof(IContentNegotiator), _negotiatorMock.Object);
+            _config.Services.Replace(typeof(IContentNegotiator), _negotiatorMock.Object);
 
             // Act
             var response = HttpRequestMessageExtensions.CreateResponse<string>(_request, HttpStatusCode.NoContent, "42", _config);
@@ -365,8 +371,7 @@ namespace System.Web.Http
         [Fact]
         public void DisposeRequestResources_WhenRequestParameterIsNull_Throws()
         {
-            Assert.ThrowsArgumentNull(
-                () => HttpRequestMessageExtensions.DisposeRequestResources(request: null), "request");
+            Assert.ThrowsArgumentNull(() => HttpRequestMessageExtensions.DisposeRequestResources(request: null), "request");
         }
 
         [Fact]

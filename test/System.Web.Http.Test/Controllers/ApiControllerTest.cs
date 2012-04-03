@@ -319,10 +319,10 @@ namespace System.Web.Http
             });
 
             var selectorMock = new Mock<IHttpActionSelector>();
-            
+
             Mock<HttpActionDescriptor> actionDescriptorMock = new Mock<HttpActionDescriptor>();
-            actionDescriptorMock.Setup( ad => ad.ActionBinding).Returns(actionBindingMock.Object);
-            actionDescriptorMock.Setup( ad => ad.GetFilterPipeline()).
+            actionDescriptorMock.Setup(ad => ad.ActionBinding).Returns(actionBindingMock.Object);
+            actionDescriptorMock.Setup(ad => ad.GetFilterPipeline()).
                 Returns(new Collection<FilterInfo>(new List<FilterInfo>() { new FilterInfo(actionFilterMock.Object, FilterScope.Action), new FilterInfo(authFilterMock.Object, FilterScope.Action) }));
 
             selectorMock.Setup(s => s.SelectAction(controllerContext)).Returns(actionDescriptorMock.Object);
@@ -347,13 +347,13 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void GetFilters_QueriesFilterProvidersFromServiceResolver()
+        public void GetFilters_QueriesFilterProvidersFromServices()
         {
             // Arrange
-            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
+            Mock<DefaultServices> servicesMock = new Mock<DefaultServices> { CallBase = true };
             Mock<IFilterProvider> filterProviderMock = new Mock<IFilterProvider>();
-            resolverMock.Setup(r => r.GetServices(typeof(IFilterProvider))).Returns(new object[] { filterProviderMock.Object }).Verifiable();
-            _configurationInstance.ServiceResolver.SetResolver(resolverMock.Object);
+            servicesMock.Setup(r => r.GetServices(typeof(IFilterProvider))).Returns(new object[] { filterProviderMock.Object }).Verifiable();
+            _configurationInstance.Services = servicesMock.Object;
 
             HttpActionDescriptor actionDescriptorMock = new Mock<HttpActionDescriptor>() { CallBase = true }.Object;
             actionDescriptorMock.Configuration = _configurationInstance;
@@ -362,17 +362,17 @@ namespace System.Web.Http
             actionDescriptorMock.GetFilterPipeline();
 
             // Assert
-            resolverMock.Verify();
+            servicesMock.Verify();
         }
 
         [Fact]
         public void GetFilters_UsesFilterProvidersToGetFilters()
         {
             // Arrange
-            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
+            Mock<DefaultServices> servicesMock = new Mock<DefaultServices> { CallBase = true };
             Mock<IFilterProvider> filterProviderMock = new Mock<IFilterProvider>();
-            resolverMock.Setup(r => r.GetServices(typeof(IFilterProvider))).Returns(new[] { filterProviderMock.Object });
-            _configurationInstance.ServiceResolver.SetResolver(resolverMock.Object);
+            servicesMock.Setup(r => r.GetServices(typeof(IFilterProvider))).Returns(new[] { filterProviderMock.Object });
+            _configurationInstance.Services = servicesMock.Object;
 
             HttpActionDescriptor actionDescriptorMock = new Mock<HttpActionDescriptor>() { CallBase = true }.Object;
             actionDescriptorMock.Configuration = _configurationInstance;
@@ -427,8 +427,8 @@ namespace System.Web.Http
             var globalFilter = new FilterInfo(new TestMultiFilter(), FilterScope.Global);
             var actionFilter = new FilterInfo(new TestMultiFilter(), FilterScope.Action);
             var controllerFilter = new FilterInfo(new TestMultiFilter(), FilterScope.Controller);
-            Mock<IDependencyResolver> resolverMock = BuildFilterProvidingDependencyResolver(_configurationInstance, actionDescriptorMock, globalFilter, actionFilter, controllerFilter);
-            _configurationInstance.ServiceResolver.SetResolver(resolverMock.Object);
+            Mock<DefaultServices> servicesMock = BuildFilterProvidingServicesMock(_configurationInstance, actionDescriptorMock, globalFilter, actionFilter, controllerFilter);
+            _configurationInstance.Services = servicesMock.Object;
 
             // Act
             var result = actionDescriptorMock.GetFilterPipeline().ToArray();
@@ -448,10 +448,10 @@ namespace System.Web.Http
             var multiGlobalFilter = new FilterInfo(new TestMultiFilter(), FilterScope.Global);
             var uniqueControllerFilter = new FilterInfo(new TestUniqueFilter(), FilterScope.Controller);
             var uniqueActionFilter = new FilterInfo(new TestUniqueFilter(), FilterScope.Action);
-            Mock<IDependencyResolver> resolverMock = BuildFilterProvidingDependencyResolver(
+            Mock<DefaultServices> servicesMock = BuildFilterProvidingServicesMock(
                 _configurationInstance, actionDescriptorMock,
                 multiActionFilter, multiGlobalFilter, uniqueControllerFilter, uniqueActionFilter);
-            _configurationInstance.ServiceResolver.SetResolver(resolverMock.Object);
+            _configurationInstance.Services = servicesMock.Object;
 
             // Act
             var result = actionDescriptorMock.GetFilterPipeline().ToArray();
@@ -696,13 +696,13 @@ namespace System.Web.Http
             return filterMock;
         }
 
-        private static Mock<IDependencyResolver> BuildFilterProvidingDependencyResolver(HttpConfiguration configuration, HttpActionDescriptor action, params FilterInfo[] filters)
+        private static Mock<DefaultServices> BuildFilterProvidingServicesMock(HttpConfiguration configuration, HttpActionDescriptor action, params FilterInfo[] filters)
         {
-            Mock<IDependencyResolver> resolverMock = new Mock<IDependencyResolver>();
-            Mock<IFilterProvider> filterProviderMock = new Mock<IFilterProvider>();
-            resolverMock.Setup(r => r.GetServices(typeof(IFilterProvider))).Returns(new[] { filterProviderMock.Object });
+            var servicesMock = new Mock<DefaultServices> { CallBase = true };
+            var filterProviderMock = new Mock<IFilterProvider>();
+            servicesMock.Setup(r => r.GetServices(typeof(IFilterProvider))).Returns(new[] { filterProviderMock.Object });
             filterProviderMock.Setup(fp => fp.GetFilters(configuration, action)).Returns(filters);
-            return resolverMock;
+            return servicesMock;
         }
 
         /// <summary>

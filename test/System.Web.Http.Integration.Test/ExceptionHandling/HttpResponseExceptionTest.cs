@@ -60,7 +60,7 @@ namespace System.Web.Http.ExceptionHandling
                 },
                 config =>
                 {
-                    config.ServiceResolver.SetService(typeof(IContentNegotiator), new CustomContentNegotiator(throwAt));
+                    config.Services.Replace(typeof(IContentNegotiator), new CustomContentNegotiator(throwAt));
 
                     config.MessageHandlers.Add(new CustomMessageHandler(throwAt));
                     config.Filters.Add(new CustomActionFilterAttribute(throwAt));

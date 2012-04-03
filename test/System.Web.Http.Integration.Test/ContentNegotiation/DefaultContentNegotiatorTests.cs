@@ -21,7 +21,7 @@ namespace System.Web.Http.ContentNegotiation
             selector.Setup(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>()))
                 .Returns(new ContentNegotiationResult(new XmlMediaTypeFormatter(), null));
 
-            configuration.ServiceResolver.SetService(typeof(IContentNegotiator), selector.Object);
+            configuration.Services.Replace(typeof(IContentNegotiator), selector.Object);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);

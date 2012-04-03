@@ -91,6 +91,7 @@
     <Compile Include="Controllers\ResponseMessageResultConverter.cs" />
     <Compile Include="Controllers\ValueResultConverter.cs" />
     <Compile Include="Controllers\VoidResultConverter.cs" />
+    <Compile Include="Dependencies\IDependencyScope.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolver.cs" />
     <Compile Include="Dispatcher\IAssembliesResolver.cs" />
     <Compile Include="HttpOptionsAttribute.cs" />
@@ -189,12 +190,12 @@
     <Compile Include="NonActionAttribute.cs" />
     <Compile Include="Routing\UriPathExtensionMapping.cs" />
     <Compile Include="Routing\UrlHelper.cs" />
-    <Compile Include="Services\DependencyResolver.cs" />
     <Compile Include="Dispatcher\HttpControllerTypeCache.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerSelector.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerTypeResolver.cs" />
-    <Compile Include="DependencyResolverExtensions.cs" />
-    <Compile Include="Services\IDependencyResolver.cs" />
+    <Compile Include="ServicesExtensions.cs" />
+    <Compile Include="Dependencies\EmptyResolver.cs" />
+    <Compile Include="Dependencies\IDependencyResolver.cs" />
     <Compile Include="Dispatcher\IHttpControllerSelector.cs" />
     <Compile Include="Filters\FilterAttribute.cs" />
     <Compile Include="Hosting\HttpPropertyKeys.cs" />
@@ -211,7 +212,7 @@
     <Compile Include="Controllers\ApiControllerActionSelector.cs" />
     <Compile Include="Controllers\HttpParameterBinding.cs" />
     <Compile Include="Controllers\HttpParameterDescriptor.cs" />
-    <Compile Include="Services\DefaultServiceResolver.cs" />
+    <Compile Include="Services\DefaultServices.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Controllers\IHttpController.cs" />
     <Compile Include="Internal\DataTypeUtil.cs" />

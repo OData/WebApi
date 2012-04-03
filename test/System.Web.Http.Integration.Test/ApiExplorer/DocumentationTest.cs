@@ -16,9 +16,9 @@ namespace System.Web.Http.ApiExplorer
             config.Formatters.Add(customFormatter);
 
             DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(ItemController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-            IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
+            IApiExplorer explorer = config.Services.GetApiExplorer();
             foreach (ApiDescription description in explorer.ApiDescriptions)
             {
                 Assert.Equal(
@@ -42,12 +42,12 @@ namespace System.Web.Http.ApiExplorer
             config.Formatters.Add(customFormatter);
 
             DefaultHttpControllerSelector controllerSelector = ApiExplorerHelper.GetStrictControllerSelector(config, typeof(DocumentationController));
-            config.ServiceResolver.SetService(typeof(IHttpControllerSelector), controllerSelector);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
             AttributeDocumentationProvider documentationProvider = new AttributeDocumentationProvider();
-            config.ServiceResolver.SetService(typeof(IDocumentationProvider), documentationProvider);
+            config.Services.Replace(typeof(IDocumentationProvider), documentationProvider);
 
-            IApiExplorer explorer = config.ServiceResolver.GetApiExplorer();
+            IApiExplorer explorer = config.Services.GetApiExplorer();
             foreach (ApiDescription description in explorer.ApiDescriptions)
             {
                 Assert.Equal(

@@ -31,6 +31,11 @@ namespace System.Web.Http.Hosting
         public static readonly string DisposableRequestResourcesKey = "MS_DisposableRequestResources";
 
         /// <summary>
+        /// Provides a key for the dependency scope for this request.
+        /// </summary>
+        public static readonly string DependencyScope = "MS_DependencyScope";
+
+        /// <summary>
         /// Provides a key for the <see cref="Guid"/> stored in <see cref="HttpRequestMessage.Properties"/>.
         /// This is the correlation id for that request.
         /// </summary>

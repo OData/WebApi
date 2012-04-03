@@ -16,7 +16,7 @@ namespace System.Web.Http.Validation
         public void RequiredMembersRecognized(string propertyName, bool isRequired)
         {
             HttpConfiguration config = new HttpConfiguration();
-            IRequiredMemberSelector selector = new ModelValidationRequiredMemberSelector(config.ServiceResolver.GetModelMetadataProvider(), config.ServiceResolver.GetModelValidatorProviders());
+            IRequiredMemberSelector selector = new ModelValidationRequiredMemberSelector(config.Services.GetModelMetadataProvider(), config.Services.GetModelValidatorProviders());
             Assert.Equal(isRequired, selector.IsRequiredMember(typeof(PurchaseOrder).GetProperty(propertyName)));
         }
     }

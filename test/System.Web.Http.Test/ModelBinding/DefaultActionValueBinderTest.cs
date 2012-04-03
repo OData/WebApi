@@ -279,7 +279,7 @@ namespace System.Web.Http.ModelBinding
         public void Check_CustomModelBinder_On_Parameter()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.ServiceResolver.SetServices(typeof(ValueProviderFactory), new ValueProviderFactory[] {
+            config.Services.ReplaceRange(typeof(ValueProviderFactory), new ValueProviderFactory[] {
                 new CustomValueProviderFactory(),
             });
 

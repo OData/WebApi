@@ -153,7 +153,7 @@ namespace System.Web.Http.ModelBinding
                 if (validateRequiredMembers)
                 {
                     // Set a ModelValidatorProvider that understands the IRequiredMemberSelector
-                    config.ServiceResolver.SetService(typeof(ModelValidatorProvider), new RequiredMemberModelValidatorProvider(requiredMemberSelector));
+                    config.Services.Replace(typeof(ModelValidatorProvider), new RequiredMemberModelValidatorProvider(requiredMemberSelector));
                 }
 
                 // Looks like HttpActionContext is just a way of getting to the config, which we really
@@ -161,10 +161,10 @@ namespace System.Web.Http.ModelBinding
                 HttpControllerContext controllerContext = new HttpControllerContext() { Configuration = config };
                 HttpActionContext actionContext = new HttpActionContext { ControllerContext = controllerContext };
 
-                ModelMetadataProvider metadataProvider = config.ServiceResolver.GetModelMetadataProvider();
+                ModelMetadataProvider metadataProvider = config.Services.GetModelMetadataProvider();
 
                 // Create default over config
-                IEnumerable<ModelBinderProvider> providers = config.ServiceResolver.GetModelBinderProviders();
+                IEnumerable<ModelBinderProvider> providers = config.Services.GetModelBinderProviders();
                 ModelBinderProvider modelBinderProvider = new CompositeModelBinderProvider(providers);
 
                 IValueProvider vp = formData.GetJQueryValueProvider();

@@ -166,7 +166,7 @@ namespace System.Web.Http
                 Initialize();
 
                 // Attach tracing before creating pipeline to allow injection of message handlers
-                ITraceManager traceManager = _configuration.ServiceResolver.GetTraceManager();
+                ITraceManager traceManager = _configuration.Services.GetTraceManager();
                 Contract.Assert(traceManager != null);
                 traceManager.Initialize(_configuration);
 
@@ -187,8 +187,8 @@ namespace System.Web.Http
         protected virtual void Initialize()
         {
             // Register the default IRequiredMemberSelector for formatters that haven't been assigned one
-            ModelMetadataProvider metadataProvider = _configuration.ServiceResolver.GetModelMetadataProvider();
-            IEnumerable<ModelValidatorProvider> validatorProviders = _configuration.ServiceResolver.GetModelValidatorProviders();
+            ModelMetadataProvider metadataProvider = _configuration.Services.GetModelMetadataProvider();
+            IEnumerable<ModelValidatorProvider> validatorProviders = _configuration.Services.GetModelValidatorProviders();
             IRequiredMemberSelector defaultRequiredMemberSelector = new ModelValidationRequiredMemberSelector(metadataProvider, validatorProviders);
 
             foreach (MediaTypeFormatter formatter in _configuration.Formatters)

@@ -93,7 +93,7 @@ namespace System.Web.Http.Controllers
             if (_metadataProvider == null)
             {
                 HttpConfiguration config = actionContext.ControllerContext.Configuration;
-                _metadataProvider = config.ServiceResolver.GetModelMetadataProvider();
+                _metadataProvider = config.Services.GetModelMetadataProvider();
             }
 
             // Execute all the binders.

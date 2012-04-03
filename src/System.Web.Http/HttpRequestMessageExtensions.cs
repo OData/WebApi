@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Web.Http.Dependencies;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
@@ -31,6 +32,31 @@ namespace System.Web.Http
             }
 
             return request.GetProperty<HttpConfiguration>(HttpPropertyKeys.HttpConfigurationKey);
+        }
+
+        /// <summary>
+        /// Gets the dependency resolver scope associated with this <see cref="HttpRequestMessage"/>.
+        /// Services which are retrieved from this scope will be released when the request is
+        /// cleaned up by the framework.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns>The <see cref="IDependencyScope"/> for the given request.</returns>
+        public static IDependencyScope GetDependencyScope(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            IDependencyScope result;
+            if (!request.Properties.TryGetValue<IDependencyScope>(HttpPropertyKeys.DependencyScope, out result))
+            {
+                result = request.GetConfiguration().DependencyResolver.BeginScope();
+                request.Properties[HttpPropertyKeys.DependencyScope] = result;
+                request.RegisterForDispose(result);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -120,7 +146,7 @@ namespace System.Web.Http
                 throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoConfiguration);
             }
 
-            IContentNegotiator contentNegotiator = configuration.ServiceResolver.GetContentNegotiator();
+            IContentNegotiator contentNegotiator = configuration.Services.GetContentNegotiator();
             if (contentNegotiator == null)
             {
                 throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoContentNegotiator, typeof(IContentNegotiator).FullName);
@@ -310,10 +336,10 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("request");
             }
 
-            List<IDisposable> trackedResources;
-            if (request.Properties.TryGetValue(HttpPropertyKeys.DisposableRequestResourcesKey, out trackedResources))
+            List<IDisposable> resourcesToDispose;
+            if (request.Properties.TryGetValue(HttpPropertyKeys.DisposableRequestResourcesKey, out resourcesToDispose))
             {
-                foreach (IDisposable resource in trackedResources)
+                foreach (IDisposable resource in resourcesToDispose)
                 {
                     try
                     {
@@ -324,7 +350,7 @@ namespace System.Web.Http
                         // ignore exceptions
                     }
                 }
-                trackedResources.Clear();
+                resourcesToDispose.Clear();
             }
         }
     }

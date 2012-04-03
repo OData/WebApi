@@ -111,7 +111,7 @@ namespace System.Web.Http.Description
         /// <param name="route">The route.</param>
         /// <param name="actionDescriptor">The action descriptor.</param>
         /// <returns>A collection of HttpMethods supported by the action.</returns>
-        public virtual IList<HttpMethod> GetHttpMethodsSupportedByAction(IHttpRoute route, HttpActionDescriptor actionDescriptor)
+        public virtual Collection<HttpMethod> GetHttpMethodsSupportedByAction(IHttpRoute route, HttpActionDescriptor actionDescriptor)
         {
             if (route == null)
             {
@@ -137,7 +137,7 @@ namespace System.Web.Http.Description
                 supportedMethods = httpMethodConstraint.AllowedMethods.Intersect(actionHttpMethods).ToList();
             }
 
-            return supportedMethods;
+            return new Collection<HttpMethod>(supportedMethods);
         }
 
         private Collection<ApiDescription> InitializeApiDescriptions()

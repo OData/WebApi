@@ -72,8 +72,7 @@ namespace System.Net.Http.Formatting
         /// <returns>Returns a formatter or null if not found.</returns>
         public MediaTypeFormatter Find(MediaTypeHeaderValue mediaType)
         {
-            var comparer = MediaTypeHeaderValueEqualityComparer.EqualityComparer;
-            MediaTypeFormatter formatter = Items.FirstOrDefault(f => f.SupportedMediaTypes.Any(mt => comparer.Equals(mt, mediaType)));
+            MediaTypeFormatter formatter = Items.FirstOrDefault(f => f.SupportedMediaTypes.Any(mt => mt.IsSubsetOf(mediaType)));
             return formatter;
         }
 

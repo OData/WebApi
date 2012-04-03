@@ -119,9 +119,8 @@
     <Compile Include="Formatting\MediaTypeFormatterCollectionTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterTests.cs" />
-    <Compile Include="Formatting\MediaTypeHeaderValueEqualityComparerTests.cs" />
     <Compile Include="Formatting\MediaTypeWithQualityHeaderValueComparerTests.cs" />
-    <Compile Include="Formatting\MediaTypeHeadeValueExtensionsTests.cs" />
+    <Compile Include="Formatting\MediaTypeHeaderValueExtensionsTests.cs" />
     <Compile Include="Formatting\ParsedMediaTypeHeaderValueTests.cs" />
     <Compile Include="Formatting\QueryStringMappingTests.cs" />
     <Compile Include="Formatting\RequestHeaderMappingTests.cs" />

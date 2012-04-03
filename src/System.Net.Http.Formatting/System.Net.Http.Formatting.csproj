@@ -86,6 +86,7 @@
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
     <Compile Include="Formatting\JsonReaderQuotaException.cs" />
+    <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
     <Compile Include="HttpResponseHeadersExtensions.cs" />
     <Compile Include="HttpRequestHeadersExtensions.cs" />
     <Compile Include="Formatting\StringWithQualityHeaderValueComparer.cs" />
@@ -122,8 +123,6 @@
     <Compile Include="Formatting\MediaTypeFormatterCollection.cs" />
     <Compile Include="Formatting\MediaTypeFormatterExtensions.cs" />
     <Compile Include="Formatting\MediaTypeWithQualityHeaderValueComparer.cs" />
-    <Compile Include="Formatting\MediaTypeHeaderValueEqualityComparer.cs" />
-    <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
     <Compile Include="Formatting\MediaTypeMapping.cs" />
     <Compile Include="Formatting\MediaTypeMatch.cs" />
     <Compile Include="Formatting\ParsedMediaTypeHeaderValue.cs" />

@@ -267,12 +267,8 @@ namespace System.Net.Http.Formatting
                     ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping);
             }
 
-            // Sort accept headers in descending order based on q factor.
-            IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaderMediaTypes =
-                request.Headers.Accept.OrderByDescending(m => m, MediaTypeWithQualityHeaderValueComparer.QualityComparer);
-
             // Match against the accept header.
-            if (TryMatchSupportedMediaType(acceptHeaderMediaTypes, out mediaTypeMatch))
+            if (TryMatchSupportedMediaType(request, out mediaTypeMatch))
             {
                 mediaTypeMatch.SetEncoding(characterEncodingMatch);
                 return new ResponseMediaTypeMatch(
@@ -337,11 +333,11 @@ namespace System.Net.Http.Formatting
 
         internal bool TryMatchSupportedMediaType(MediaTypeHeaderValue mediaType, out MediaTypeMatch mediaTypeMatch)
         {
-            Contract.Assert(mediaType != null, "mediaType cannot be null.");
+            Contract.Assert(mediaType != null);
 
             foreach (MediaTypeHeaderValue supportedMediaType in SupportedMediaTypes)
             {
-                if (MediaTypeHeaderValueEqualityComparer.EqualityComparer.Equals(supportedMediaType, mediaType))
+                if (supportedMediaType.IsSubsetOf(mediaType))
                 {
                     // If the incoming media type had an associated quality factor, propagate it to the match
                     MediaTypeWithQualityHeaderValue mediaTypeWithQualityHeaderValue = mediaType as MediaTypeWithQualityHeaderValue;
@@ -358,12 +354,17 @@ namespace System.Net.Http.Formatting
             return false;
         }
 
-        internal bool TryMatchSupportedMediaType(IEnumerable<MediaTypeHeaderValue> mediaTypes, out MediaTypeMatch mediaTypeMatch)
+        internal bool TryMatchSupportedMediaType(HttpRequestMessage request, out MediaTypeMatch mediaTypeMatch)
         {
-            Contract.Assert(mediaTypes != null, "mediaTypes cannot be null.");
-            foreach (MediaTypeHeaderValue mediaType in mediaTypes)
+            Contract.Assert(request != null);
+
+            // Sort accept headers in descending order based on q factor.
+            IEnumerable<MediaTypeWithQualityHeaderValue> acceptMediaTypeValues =
+                request.Headers.Accept.OrderByDescending(m => m, MediaTypeWithQualityHeaderValueComparer.QualityComparer);
+
+            foreach (MediaTypeHeaderValue acceptMediaTypeValue in acceptMediaTypeValues)
             {
-                if (TryMatchSupportedMediaType(mediaType, out mediaTypeMatch))
+                if (TryMatchSupportedMediaType(acceptMediaTypeValue, out mediaTypeMatch))
                 {
                     return true;
                 }

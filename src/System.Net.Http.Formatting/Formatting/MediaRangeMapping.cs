@@ -62,7 +62,7 @@ namespace System.Net.Http.Formatting
             {
                 foreach (MediaTypeWithQualityHeaderValue mediaType in acceptHeader)
                 {
-                    if (mediaType != null && MediaTypeHeaderValueEqualityComparer.EqualityComparer.Equals(MediaRange, mediaType))
+                    if (MediaRange.IsSubsetOf(mediaType))
                     {
                         return mediaType.Quality.HasValue ? mediaType.Quality.Value : MediaTypeMatch.Match;
                     }

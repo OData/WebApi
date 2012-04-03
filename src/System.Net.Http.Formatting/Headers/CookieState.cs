@@ -1,13 +1,14 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Net.Http.Formatting.Internal;
+using System.Web.Http;
 
 namespace System.Net.Http.Headers
 {
     public class CookieState : ICloneable
     {
         private string _name;
-        private NameValueCollection _values;
+        private NameValueCollection _values = HttpValueCollection.Create();
 
         public CookieState(string name)
             : this(name, String.Empty)
@@ -30,7 +31,7 @@ namespace System.Net.Http.Headers
 
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw Error.ArgumentNull("values");
             }
             Values.Add(values);
         }
@@ -57,8 +58,8 @@ namespace System.Net.Http.Headers
         }
 
         /// <summary>
-        /// If the cookie data is a simple string value then set or retrieve it using the <see cref="M:Value"/> property.
-        /// If the cookie data is structured then use the <see cref="M:Values"/> property.
+        /// If the cookie data is a simple string value then set or retrieve it using the <see cref="Value"/> property.
+        /// If the cookie data is structured then use the <see cref="Values"/> property.
         /// </summary>
         public string Value
         {
@@ -82,19 +83,12 @@ namespace System.Net.Http.Headers
         }
 
         /// <summary>
-        /// If the cookie data is structured then use the <see cref="M:Values"/> property for setting and getting individual values.
-        /// If the cookie data is a simple string value then set or retrieve it using the <see cref="M:Value"/> property.
+        /// If the cookie data is structured then use the <see cref="Values"/> property for setting and getting individual values.
+        /// If the cookie data is a simple string value then set or retrieve it using the <see cref="Value"/> property.
         /// </summary>
         public NameValueCollection Values
         {
-            get
-            {
-                if (_values == null)
-                {
-                    _values = HttpValueCollection.Create();
-                }
-                return _values;
-            }
+            get { return _values; }
         }
 
         public string this[string name]
@@ -117,7 +111,7 @@ namespace System.Net.Http.Headers
         {
             if (!FormattingUtilities.ValidateHeaderToken(name))
             {
-                throw new ArgumentException(Properties.Resources.CookieInvalidName, parameterName);
+                throw Error.Argument(parameterName, Properties.Resources.CookieInvalidName);
             }
         }
 
@@ -126,7 +120,7 @@ namespace System.Net.Http.Headers
             // Empty string is a valid cookie value
             if (value == null)
             {
-                throw new ArgumentNullException(parameterName);
+                throw Error.ArgumentNull(parameterName);
             }
         }
     }

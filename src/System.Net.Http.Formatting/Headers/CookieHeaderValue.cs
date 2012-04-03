@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Text;
+using System.Web.Http;
 
 namespace System.Net.Http.Headers
 {
@@ -48,7 +49,7 @@ namespace System.Net.Http.Headers
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw Error.ArgumentNull("source");
             }
 
             Expires = source.Expires;

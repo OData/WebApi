@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
@@ -9,6 +10,11 @@ namespace System.Web.Http.Validation
 {
     public sealed class ModelValidationNode
     {
+        // This is a cache of the validators. 
+        // Use an array instead of IEnumerable to ensure that we've actually computed the result. 
+        // Array also reduces the memory footprint of the cache compared to other collections.
+        private ModelValidator[] _validators; 
+
         public ModelValidationNode(ModelMetadata modelMetadata, string modelStateKey)
             : this(modelMetadata, modelStateKey, null)
         {
@@ -191,8 +197,13 @@ namespace System.Web.Http.Validation
                 return;
             }
 
+            if (_validators == null)
+            {
+                Interlocked.Exchange(ref _validators, ModelMetadata.GetValidators(actionContext.GetValidatorProviders()).ToArray());
+            }
+
             object container = TryConvertContainerToMetadataType(parentNode);
-            foreach (ModelValidator validator in ModelMetadata.GetValidators(actionContext.GetValidatorProviders()))
+            foreach (ModelValidator validator in _validators)
             {
                 foreach (ModelValidationResult validationResult in validator.Validate(container))
                 {

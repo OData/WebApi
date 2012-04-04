@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
+using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
 
@@ -16,6 +17,10 @@ namespace System.Web.Http.ModelBinding
     {
         private readonly IEnumerable<ValueProviderFactory> _valueProviderFactories;
         private readonly ModelBinderProvider _modelBinderProvider;
+
+        // Cache information for ModelBindingContext.
+        private ModelMetadata _metadataCache;
+        private ModelValidationNode _validationNodeCache;
 
         public ModelBinderParameterBinding(HttpParameterDescriptor descriptor,
             ModelBinderProvider modelBinderProvider,
@@ -48,20 +53,8 @@ namespace System.Web.Http.ModelBinding
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             string name = Descriptor.ParameterName;
-            Type type = Descriptor.ParameterType;
 
-            string prefix = Descriptor.Prefix;
-
-            IValueProvider vp = CreateValueProvider(this._valueProviderFactories, actionContext);
-
-            ModelBindingContext ctx = new ModelBindingContext()
-            {
-                ModelName = prefix ?? name,
-                FallbackToEmptyPrefix = prefix == null, // only fall back if prefix not specified
-                ModelMetadata = metadataProvider.GetMetadataForType(null, type),
-                ModelState = actionContext.ModelState,
-                ValueProvider = vp
-            };
+            ModelBindingContext ctx = GetModelBindingContext(metadataProvider, actionContext);
 
             IModelBinder binder = this._modelBinderProvider.GetBinder(actionContext, ctx);
 
@@ -70,6 +63,41 @@ namespace System.Web.Http.ModelBinding
             actionContext.ActionArguments.Add(name, model);
 
             return TaskHelpers.Completed();
+        }
+
+        private ModelBindingContext GetModelBindingContext(ModelMetadataProvider metadataProvider, HttpActionContext actionContext)
+        {
+            string name = Descriptor.ParameterName;
+            Type type = Descriptor.ParameterType;
+
+            string prefix = Descriptor.Prefix;
+
+            IValueProvider vp = CreateValueProvider(this._valueProviderFactories, actionContext);
+
+            if (_metadataCache == null)
+            {
+                Interlocked.Exchange(ref _metadataCache, metadataProvider.GetMetadataForType(null, type));
+            }
+
+            ModelBindingContext ctx = new ModelBindingContext()
+            {
+                ModelName = prefix ?? name,
+                FallbackToEmptyPrefix = prefix == null, // only fall back if prefix not specified
+                ModelMetadata = _metadataCache,
+                ModelState = actionContext.ModelState,
+                ValueProvider = vp
+            };
+            
+            if (_validationNodeCache == null)
+            {
+                Interlocked.Exchange(ref _validationNodeCache, ctx.ValidationNode);
+            }
+            else
+            {
+                ctx.ValidationNode = _validationNodeCache;
+            }
+
+            return ctx;
         }
 
         // Instantiate the value providers for the given action context.

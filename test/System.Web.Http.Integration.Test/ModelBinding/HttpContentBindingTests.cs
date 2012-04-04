@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Web.Http.SelfHost;
 using Xunit;
 using Xunit.Extensions;
@@ -30,7 +31,7 @@ namespace System.Web.Http.ModelBinding
         public void Action_Directly_Reads_HttpRequestMessage(string mediaType)
         {
             Order order = new Order() { OrderId = "99", OrderValue = 100.0 };
-            var formatter = new MediaTypeFormatterCollection().Find(mediaType);
+            var formatter = new MediaTypeFormatterCollection().FindWriter(typeof(Order), new MediaTypeHeaderValue(mediaType));
             HttpRequestMessage request = new HttpRequestMessage()
             {
                 Content = new ObjectContent<Order>(order, formatter, mediaType),

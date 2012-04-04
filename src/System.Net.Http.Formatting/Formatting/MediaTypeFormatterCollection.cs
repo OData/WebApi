@@ -60,22 +60,6 @@ namespace System.Net.Http.Formatting
             get { return Items.OfType<FormUrlEncodedMediaTypeFormatter>().FirstOrDefault(); }
         }
 
-        public MediaTypeFormatter Find(string mediaType)
-        {
-            MediaTypeHeaderValue val = MediaTypeHeaderValue.Parse(mediaType);
-            return Find(val);
-        }
-
-        /// <summary>
-        /// Find a formatter in this collection that matches the requested media type.
-        /// </summary>
-        /// <returns>Returns a formatter or null if not found.</returns>
-        public MediaTypeFormatter Find(MediaTypeHeaderValue mediaType)
-        {
-            MediaTypeFormatter formatter = Items.FirstOrDefault(f => f.SupportedMediaTypes.Any(mt => mt.IsSubsetOf(mediaType)));
-            return formatter;
-        }
-
         /// <summary>
         /// Helper to search a collection for a formatter that can read the .NET type in the given mediaType.
         /// </summary>

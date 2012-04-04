@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Text;
 using Xunit;
 using Xunit.Extensions;
@@ -70,7 +71,7 @@ namespace System.Web.Http.ModelBinding
                 Quantity = 1,
                 Customer = new ModelBindCustomer { Name = "Fred" }
             };
-            var formatter = new MediaTypeFormatterCollection().Find(mediaType);
+            var formatter = new MediaTypeFormatterCollection().FindWriter(typeof(ModelBindOrder), new MediaTypeHeaderValue(mediaType));
             HttpRequestMessage request = new HttpRequestMessage
             {
                 Content = new ObjectContent<ModelBindOrder>(expectedItem, formatter),
@@ -100,7 +101,7 @@ namespace System.Web.Http.ModelBinding
                 Quantity = 1,
                 Customer = new ModelBindCustomer { Name = "Fred" }
             };
-            var formatter = new MediaTypeFormatterCollection().Find(mediaType);
+            var formatter = new MediaTypeFormatterCollection().FindWriter(typeof(ModelBindOrder), new MediaTypeHeaderValue(mediaType));
             HttpRequestMessage request = new HttpRequestMessage
             {
                 Content = new ObjectContent<ModelBindOrder>(expectedItem, formatter),

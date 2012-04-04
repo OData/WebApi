@@ -404,7 +404,7 @@ namespace System.Threading.Tasks
                                     RunNext(engine);
                                     break;
                             }
-                        });
+                        }, TaskContinuationOptions.ExecuteSynchronously);
                     }
                     else
                     {

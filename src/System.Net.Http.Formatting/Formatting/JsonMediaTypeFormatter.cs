@@ -252,21 +252,13 @@ namespace System.Net.Http.Formatting
                             JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
                             if (formatterLogger != null)
                             {
+                                // Error must always be marked as handled
+                                // Failure to do so can cause the exception to be rethrown at every recursive level and overflow the stack for x64 CLR processes
                                 jsonSerializer.Error += (sender, e) =>
                                 {
                                     Exception exception = e.ErrorContext.Error;
-
-                                    // reader quota exceptions are fatal and cannot be recovered from
-                                    // we need to shortcircuit any further deserialization
-                                    if (exception is JsonReaderQuotaException)
-                                    {
-                                        e.ErrorContext.Handled = false;
-                                    }
-                                    else
-                                    {
-                                        formatterLogger.LogError(e.ErrorContext.Path, exception.Message);
-                                        e.ErrorContext.Handled = true;
-                                    }
+                                    formatterLogger.LogError(e.ErrorContext.Path, exception.Message);
+                                    e.ErrorContext.Handled = true;
                                 };
                             }
                             return jsonSerializer.Deserialize(jsonTextReader, type);

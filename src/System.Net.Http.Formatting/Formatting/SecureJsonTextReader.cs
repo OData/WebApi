@@ -29,11 +29,18 @@ namespace System.Net.Http.Formatting
 
         public override bool Read()
         {
+            int initialDepth = Depth;
+            bool didRead = base.Read();
             if (Depth > _maxDepth)
             {
+                // Advance the reader past the initial depth to avoid more exceptions from this violation
+                while (Depth > initialDepth)
+                {
+                    base.Read();
+                }
                 throw new JsonReaderQuotaException(RS.Format(Properties.Resources.JsonTooDeep, _maxDepth));
             }
-            return base.Read();
+            return didRead;
         }
 
         private static string FixUpInvalidUnicodeString(string s)

@@ -3,7 +3,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Properties;
 
-namespace System.Web.Http.Tracing
+namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="ActionFilterAttribute"/>.

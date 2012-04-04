@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Web.Http.Filters;
 
-namespace System.Web.Http.Tracing
+namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Base class and helper for the creation of filter tracers.

@@ -7,7 +7,7 @@ namespace System.Web.Http.Tracing.Tracers
     /// <summary>
     /// Tracer for <see cref=" HttpControllerDescriptor"/>
     /// </summary>
-    public class HttpControllerDescriptorTracer : HttpControllerDescriptor
+    internal class HttpControllerDescriptorTracer : HttpControllerDescriptor
     {
         private const string CreateControllerMethodName = "CreateController";
         private const string ReleaseControllerMethodName = "ReleaseController";

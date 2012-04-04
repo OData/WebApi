@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Web.Http.Filters;
 
-namespace System.Web.Http.Tracing
+namespace System.Web.Http.Tracing.Tracers
 {
     /// <summary>
     /// Tracer for <see cref="IExceptionFilter"/>.

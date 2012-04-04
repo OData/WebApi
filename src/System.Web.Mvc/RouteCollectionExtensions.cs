@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Routing;
 
@@ -162,8 +163,8 @@ namespace System.Web.Mvc
 
             Route route = new Route(url, new MvcRouteHandler())
             {
-                Defaults = new RouteValueDictionary(defaults),
-                Constraints = new RouteValueDictionary(constraints),
+                Defaults = CreateRouteValueDictionary(defaults),
+                Constraints = CreateRouteValueDictionary(constraints),
                 DataTokens = new RouteValueDictionary()
             };
 
@@ -175,6 +176,17 @@ namespace System.Web.Mvc
             routes.Add(name, route);
 
             return route;
+        }
+
+        private static RouteValueDictionary CreateRouteValueDictionary(object values)
+        {
+            var dictionary = values as IDictionary<string, object>;
+            if (dictionary != null)
+            {
+                return new RouteValueDictionary(dictionary);
+            }
+
+            return new RouteValueDictionary(values);
         }
 
         private sealed class IgnoreRouteInternal : Route

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Routing;
 using Moq;
@@ -231,12 +232,55 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void MapRoute4WithDefaultsAsDictionary()
+        {
+            // Arrange
+            RouteCollection routes = new RouteCollection();
+            var defaults = new Dictionary<string, object> { { "Foo", "DefaultFoo" } };
+
+            // Act
+            routes.MapRoute("RouteName", "SomeUrl", defaults);
+
+            // Assert
+            Route route = Assert.Single(routes.Cast<Route>());
+            Assert.NotNull(route);
+            Assert.Same(route, routes["RouteName"]);
+            Assert.Equal("SomeUrl", route.Url);
+            Assert.IsType<MvcRouteHandler>(route.RouteHandler);
+            Assert.Equal("DefaultFoo", route.Defaults["Foo"]);
+            Assert.Empty(route.Constraints);
+            Assert.Empty(route.DataTokens);
+        }
+
+        [Fact]
         public void MapRoute5()
         {
             // Arrange
             RouteCollection routes = new RouteCollection();
             var defaults = new { Foo = "DefaultFoo" };
             var constraints = new { Foo = "ConstraintFoo" };
+
+            // Act
+            routes.MapRoute("RouteName", "SomeUrl", defaults, constraints);
+
+            // Assert
+            Route route = Assert.Single(routes.Cast<Route>());
+            Assert.NotNull(route);
+            Assert.Same(route, routes["RouteName"]);
+            Assert.Equal("SomeUrl", route.Url);
+            Assert.IsType<MvcRouteHandler>(route.RouteHandler);
+            Assert.Equal("DefaultFoo", route.Defaults["Foo"]);
+            Assert.Equal("ConstraintFoo", route.Constraints["Foo"]);
+            Assert.Empty(route.DataTokens);
+        }
+
+        [Fact]
+        public void MapRoute5WithDefaultsAndConstraintsAsDictionary()
+        {
+            // Arrange
+            RouteCollection routes = new RouteCollection();
+            var defaults = new Dictionary<string, object> { { "Foo", "DefaultFoo" } };
+            var constraints = new Dictionary<string, object> { { "Foo", "ConstraintFoo" } };
 
             // Act
             routes.MapRoute("RouteName", "SomeUrl", defaults, constraints);

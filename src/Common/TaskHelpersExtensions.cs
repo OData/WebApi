@@ -21,6 +21,7 @@ namespace System.Threading.Tasks
         /// </summary>
         internal static Task Catch(this Task task, Func<CatchInfo, CatchInfo.CatchResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            // Fast path for successful tasks, to prevent an extra TCS allocation
             if (task.Status == TaskStatus.RanToCompletion)
             {
                 return task;
@@ -40,10 +41,12 @@ namespace System.Threading.Tasks
         /// </summary>
         internal static Task<TResult> Catch<TResult>(this Task<TResult> task, Func<CatchInfo<TResult>, CatchInfo<TResult>.CatchResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            // Fast path for successful tasks, to prevent an extra TCS allocation
             if (task.Status == TaskStatus.RanToCompletion)
             {
                 return task;
             }
+
             return task.CatchImpl(() => continuation(new CatchInfo<TResult>(task)).Task, cancellationToken);
         }
 
@@ -55,8 +58,6 @@ namespace System.Threading.Tasks
             // Stay on the same thread if we can
             if (task.IsCompleted)
             {
-                Contract.Assert(task.IsFaulted || task.IsCanceled); // caller ensures 
-
                 if (task.IsFaulted)
                 {
                     try
@@ -80,8 +81,12 @@ namespace System.Threading.Tasks
                 {
                     return TaskHelpers.Canceled<TResult>();
                 }
-
-                Contract.Assert(task.Status != TaskStatus.RanToCompletion);                
+                if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+                    tcs.TrySetFromTask(task);
+                    return tcs.Task;
+                }
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily
@@ -242,7 +247,7 @@ namespace System.Threading.Tasks
         {
             // Stay on the same thread if we can
             if (task.IsCompleted)
-            {                
+            {
                 try
                 {
                     continuation();
@@ -251,7 +256,7 @@ namespace System.Threading.Tasks
                 catch (Exception ex)
                 {
                     return TaskHelpers.FromError(ex);
-                }                
+                }
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily
@@ -267,7 +272,7 @@ namespace System.Threading.Tasks
         {
             // Stay on the same thread if we can
             if (task.IsCompleted)
-            {               
+            {
                 try
                 {
                     continuation();
@@ -276,7 +281,7 @@ namespace System.Threading.Tasks
                 catch (Exception ex)
                 {
                     return TaskHelpers.FromError<TResult>(ex);
-                }                
+                }
             }
 
             // Split into a continuation method so that we don't create a closure unnecessarily

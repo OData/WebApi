@@ -349,6 +349,15 @@ namespace System.Web.WebPages.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ExecutePageHierarchy cannot be invoked if PageContext is null..
+        /// </summary>
+        internal static string WebPage_ExecutePageHierarchyCannotBeInvoked {
+            get {
+                return ResourceManager.GetString("WebPage_ExecutePageHierarchyCannotBeInvoked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The following file could not be rendered because its extension &quot;{0}&quot; might not be supported: &quot;{1}&quot;..
         /// </summary>
         internal static string WebPage_FileNotSupported {

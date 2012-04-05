@@ -216,6 +216,9 @@
   <data name="WebPage_CannotRequestDirectly" xml:space="preserve">
     <value>The file "{0}" cannot be requested directly because it calls the "{1}" method.</value>
   </data>
+  <data name="WebPage_ExecutePageHierarchyCannotBeInvoked" xml:space="preserve">
+    <value>ExecutePageHierarchy cannot be invoked if PageContext is null.</value>
+  </data>
   <data name="WebPage_FileNotSupported" xml:space="preserve">
     <value>The following file could not be rendered because its extension "{0}" might not be supported: "{1}".</value>
   </data>

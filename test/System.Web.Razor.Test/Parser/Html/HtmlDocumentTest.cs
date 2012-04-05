@@ -193,18 +193,6 @@ namespace System.Web.Razor.Test.Parser.Html
         }
 
         [Fact]
-        public void ParseDocumentTreatsTwoAtSignsAsEscapeSequence()
-        {
-            HtmlParserTestUtils.RunSingleAtEscapeTest(ParseDocumentTest, lastSpanAcceptedCharacters: AcceptedCharacters.Any);
-        }
-
-        [Fact]
-        public void ParseDocumentTreatsPairsOfAtSignsAsEscapeSequence()
-        {
-            HtmlParserTestUtils.RunMultiAtEscapeTest(ParseDocumentTest, lastSpanAcceptedCharacters: AcceptedCharacters.Any);
-        }
-
-        [Fact]
         public void ParseDocumentIgnoresTagsInContentsOfScriptTag()
         {
             ParseDocumentTest(@"<script>foo<bar baz='@boz'></script>",

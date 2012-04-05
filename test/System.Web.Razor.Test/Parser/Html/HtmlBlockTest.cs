@@ -113,18 +113,6 @@ bork",
         }
 
         [Fact]
-        public void ParseBlockTreatsTwoAtSignsAsEscapeSequence()
-        {
-            HtmlParserTestUtils.RunSingleAtEscapeTest(ParseBlockTest);
-        }
-
-        [Fact]
-        public void ParseBlockTreatsPairsOfAtSignsAsEscapeSequence()
-        {
-            HtmlParserTestUtils.RunMultiAtEscapeTest(ParseBlockTest);
-        }
-
-        [Fact]
         public void ParseBlockStopsAtMatchingCloseTagToStartTag()
         {
             SingleSpanBlockTest("<a><b></b></a><c></c>", "<a><b></b></a>", BlockType.Markup, SpanKind.Markup, acceptedCharacters: AcceptedCharacters.None);

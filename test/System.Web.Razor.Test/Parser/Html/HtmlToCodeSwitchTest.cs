@@ -196,6 +196,67 @@ bork",
         }
 
         [Fact]
+        public void ParseDocumentGivesWhitespacePreceedingAtToCodeIfThereIsNoMarkupOnThatLine()
+        {
+            ParseDocumentTest(@"   <ul>
+    @foreach(var p in Products) {
+        <li>Product: @p.Name</li>
+    }
+    </ul>",
+                new MarkupBlock(
+                    Factory.Markup("   <ul>\r\n"),
+                    new StatementBlock(
+                        Factory.Code("    ").AsStatement(),
+                        Factory.CodeTransition(),
+                        Factory.Code("foreach(var p in Products) {\r\n").AsStatement(),
+                        new MarkupBlock(
+                            Factory.Markup("        <li>Product: "),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("p.Name")
+                                       .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                       .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                            Factory.Markup("</li>\r\n").Accepts(AcceptedCharacters.None)),
+                        Factory.Code("    }\r\n").AsStatement().Accepts(AcceptedCharacters.None)),
+                    Factory.Markup("    </ul>")));
+        }
+
+        [Fact]
+        public void SectionContextGivesWhitespacePreceedingAtToCodeIfThereIsNoMarkupOnThatLine()
+        {
+            ParseDocumentTest(@"@section foo {
+    <ul>
+        @foreach(var p in Products) {
+            <li>Product: @p.Name</li>
+        }
+    </ul>
+}",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section foo {").AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup("\r\n    <ul>\r\n"),
+                            new StatementBlock(
+                                Factory.Code("        ").AsStatement(),
+                                Factory.CodeTransition(),
+                                Factory.Code("foreach(var p in Products) {\r\n").AsStatement(),
+                                new MarkupBlock(
+                                    Factory.Markup("            <li>Product: "),
+                                    new ExpressionBlock(
+                                        Factory.CodeTransition(),
+                                        Factory.Code("p.Name")
+                                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                                    Factory.Markup("</li>\r\n").Accepts(AcceptedCharacters.None)),
+                                Factory.Code("        }\r\n").AsStatement().Accepts(AcceptedCharacters.None)),
+                            Factory.Markup("    </ul>\r\n")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
         public void CSharpCodeParserDoesNotAcceptLeadingOrTrailingWhitespaceInDesignMode()
         {
             ParseBlockTest(@"   <ul>
@@ -217,6 +278,73 @@ bork",
                         Factory.Code("\r\n    }").AsStatement().Accepts(AcceptedCharacters.None)),
                     Factory.Markup("\r\n    </ul>").Accepts(AcceptedCharacters.None)),
                 designTimeParser: true);
+        }
+
+        // Tests for "@@" escape sequence:
+        [Fact]
+        public void ParseBlockTreatsTwoAtSignsAsEscapeSequence()
+        {
+            HtmlParserTestUtils.RunSingleAtEscapeTest(ParseBlockTest);
+        }
+
+        [Fact]
+        public void ParseBlockTreatsPairsOfAtSignsAsEscapeSequence()
+        {
+            HtmlParserTestUtils.RunMultiAtEscapeTest(ParseBlockTest);
+        }
+
+        [Fact]
+        public void ParseDocumentTreatsTwoAtSignsAsEscapeSequence()
+        {
+            HtmlParserTestUtils.RunSingleAtEscapeTest(ParseDocumentTest, lastSpanAcceptedCharacters: AcceptedCharacters.Any);
+        }
+
+        [Fact]
+        public void ParseDocumentTreatsPairsOfAtSignsAsEscapeSequence()
+        {
+            HtmlParserTestUtils.RunMultiAtEscapeTest(ParseDocumentTest, lastSpanAcceptedCharacters: AcceptedCharacters.Any);
+        }
+
+        [Fact]
+        public void SectionBodyTreatsTwoAtSignsAsEscapeSequence()
+        {
+            ParseDocumentTest("@section Foo { <foo>@@bar</foo> }",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("Foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section Foo {").AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup(" <foo>"),
+                            Factory.Markup("@").Hidden(),
+                            Factory.Markup("@bar</foo> ")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void SectionBodyTreatsPairsOfAtSignsAsEscapeSequence()
+        {
+            ParseDocumentTest("@section Foo { <foo>@@@@@bar</foo> }",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("Foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("section Foo {").AutoCompleteWith(null, atEndOfSpan: true),
+                        new MarkupBlock(
+                            Factory.Markup(" <foo>"),
+                            Factory.Markup("@").Hidden(),
+                            Factory.Markup("@"),
+                            Factory.Markup("@").Hidden(),
+                            Factory.Markup("@"),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("bar")
+                                       .AsImplicitExpression(CSharpCodeParser.DefaultKeywords)
+                                       .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                            Factory.Markup("</foo> ")),
+                        Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
         }
     }
 }

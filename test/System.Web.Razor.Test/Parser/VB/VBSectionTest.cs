@@ -221,5 +221,55 @@ End Section",
                         Factory.MetaCode("End Section").Accepts(AcceptedCharacters.None)),
                     Factory.EmptyHtml()));
         }
+
+        // These are tests that are normally in HtmlToCodeSwitchTest, but we want to verify them for VB 
+        // since VB has slightly different section terminating behavior which follow slightly different
+        // code paths
+
+        [Fact]
+        public void SectionBodyTreatsTwoAtSignsAsEscapeSequence()
+        {
+            ParseDocumentTest(@"@Section Foo
+    <foo>@@bar</foo>
+End Section",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("Foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("Section Foo").AutoCompleteWith(null),
+                        new MarkupBlock(
+                            Factory.Markup("\r\n    <foo>"),
+                            Factory.Markup("@").Hidden(),
+                            Factory.Markup("@bar</foo>\r\n")),
+                        Factory.MetaCode("End Section").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
+
+        [Fact]
+        public void SectionBodyTreatsPairsOfAtSignsAsEscapeSequence()
+        {
+            ParseDocumentTest(@"@Section Foo
+    <foo>@@@@@bar</foo>
+End Section",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new SectionBlock(new SectionCodeGenerator("Foo"),
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("Section Foo").AutoCompleteWith(null),
+                        new MarkupBlock(
+                            Factory.Markup("\r\n    <foo>"),
+                            Factory.Markup("@").Hidden(),
+                            Factory.Markup("@"),
+                            Factory.Markup("@").Hidden(),
+                            Factory.Markup("@"),
+                            new ExpressionBlock(
+                                Factory.CodeTransition(),
+                                Factory.Code("bar")
+                                       .AsImplicitExpression(VBCodeParser.DefaultKeywords)
+                                       .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                            Factory.Markup("</foo>\r\n")),
+                        Factory.MetaCode("End Section").Accepts(AcceptedCharacters.None)),
+                    Factory.EmptyHtml()));
+        }
     }
 }

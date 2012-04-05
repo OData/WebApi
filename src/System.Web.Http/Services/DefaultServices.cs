@@ -103,16 +103,18 @@ namespace System.Web.Http.Services
             _defaultServices.Add(typeof(IHttpControllerTypeResolver), new List<object> { new DefaultHttpControllerTypeResolver() });
             _defaultServices.Add(typeof(ITraceManager), new List<object> { new TraceManager() });
             _defaultServices.Add(typeof(ITraceWriter), new List<object>());
+
+            // This is a priority list. So put the most common binders at the top. 
             _defaultServices.Add(typeof(ModelBinderProvider), new List<object>
                                                               {
+                                                                  new TypeConverterModelBinderProvider(),
                                                                   new TypeMatchModelBinderProvider(),
                                                                   new BinaryDataModelBinderProvider(),
                                                                   new KeyValuePairModelBinderProvider(),
                                                                   new ComplexModelDtoModelBinderProvider(),
                                                                   new ArrayModelBinderProvider(),
                                                                   new DictionaryModelBinderProvider(),
-                                                                  new CollectionModelBinderProvider(),
-                                                                  new TypeConverterModelBinderProvider(),
+                                                                  new CollectionModelBinderProvider(),                                                                  
                                                                   new MutableObjectModelBinderProvider()
                                                               });
             _defaultServices.Add(typeof(ModelMetadataProvider), new List<object> { new CachedDataAnnotationsModelMetadataProvider() });
@@ -121,10 +123,12 @@ namespace System.Web.Http.Services
                                                                      new DataAnnotationsModelValidatorProvider(),
                                                                      new DataMemberModelValidatorProvider()
                                                                  });
+            
+            // This is an ordered list,so put the most common providers at the top. 
             _defaultServices.Add(typeof(ValueProviderFactory), new List<object>
                                                                {
-                                                                   new RouteDataValueProviderFactory(),
-                                                                   new QueryStringValueProviderFactory()
+                                                                   new QueryStringValueProviderFactory(),
+                                                                   new RouteDataValueProviderFactory()                                                                   
                                                                });
 
             _serviceTypes = new HashSet<Type>(_defaultServices.Keys);

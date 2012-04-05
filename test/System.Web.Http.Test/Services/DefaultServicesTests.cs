@@ -65,14 +65,14 @@ namespace System.Web.Http.Services
 
             object[] modelBinderProviders = defaultServices.GetServices(typeof(ModelBinderProvider)).ToArray();
             Assert.Equal(9, modelBinderProviders.Length);
-            Assert.IsType<TypeMatchModelBinderProvider>(modelBinderProviders[0]);
-            Assert.IsType<BinaryDataModelBinderProvider>(modelBinderProviders[1]);
-            Assert.IsType<KeyValuePairModelBinderProvider>(modelBinderProviders[2]);
-            Assert.IsType<ComplexModelDtoModelBinderProvider>(modelBinderProviders[3]);
-            Assert.IsType<ArrayModelBinderProvider>(modelBinderProviders[4]);
-            Assert.IsType<DictionaryModelBinderProvider>(modelBinderProviders[5]);
-            Assert.IsType<CollectionModelBinderProvider>(modelBinderProviders[6]);
-            Assert.IsType<TypeConverterModelBinderProvider>(modelBinderProviders[7]);
+            Assert.IsType<TypeConverterModelBinderProvider>(modelBinderProviders[0]);
+            Assert.IsType<TypeMatchModelBinderProvider>(modelBinderProviders[1]);
+            Assert.IsType<BinaryDataModelBinderProvider>(modelBinderProviders[2]);
+            Assert.IsType<KeyValuePairModelBinderProvider>(modelBinderProviders[3]);
+            Assert.IsType<ComplexModelDtoModelBinderProvider>(modelBinderProviders[4]);
+            Assert.IsType<ArrayModelBinderProvider>(modelBinderProviders[5]);
+            Assert.IsType<DictionaryModelBinderProvider>(modelBinderProviders[6]);
+            Assert.IsType<CollectionModelBinderProvider>(modelBinderProviders[7]);            
             Assert.IsType<MutableObjectModelBinderProvider>(modelBinderProviders[8]);
 
             object[] validatorProviders = defaultServices.GetServices(typeof(ModelValidatorProvider)).ToArray();
@@ -81,9 +81,9 @@ namespace System.Web.Http.Services
             Assert.IsType<DataMemberModelValidatorProvider>(validatorProviders[1]);
 
             object[] valueProviderFactories = defaultServices.GetServices(typeof(ValueProviderFactory)).ToArray();
-            Assert.Equal(2, valueProviderFactories.Length);
-            Assert.IsType<RouteDataValueProviderFactory>(valueProviderFactories[0]);
-            Assert.IsType<QueryStringValueProviderFactory>(valueProviderFactories[1]);
+            Assert.Equal(2, valueProviderFactories.Length);            
+            Assert.IsType<QueryStringValueProviderFactory>(valueProviderFactories[0]);
+            Assert.IsType<RouteDataValueProviderFactory>(valueProviderFactories[1]);
         }
 
         // Add tests

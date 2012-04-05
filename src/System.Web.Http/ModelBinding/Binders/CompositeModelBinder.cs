@@ -18,11 +18,15 @@ namespace System.Web.Http.ModelBinding.Binders
     public class CompositeModelBinder : IModelBinder
     {
         public CompositeModelBinder(IEnumerable<ModelBinderProvider> modelBinderProviders)
+            : this(modelBinderProviders.ToArray())
         {
-            Providers = modelBinderProviders.ToList();
+        }
+        public CompositeModelBinder(ModelBinderProvider[] modelBinderProviders)
+        {
+            Providers = modelBinderProviders;
         }
 
-        private List<ModelBinderProvider> Providers { get; set; }
+        private ModelBinderProvider[] Providers { get; set; }
 
         public virtual bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {

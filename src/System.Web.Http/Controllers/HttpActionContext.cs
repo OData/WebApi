@@ -13,7 +13,7 @@ namespace System.Web.Http.Controllers
         private readonly Dictionary<string, object> _operationArguments = new Dictionary<string, object>();
         private HttpActionDescriptor _actionDescriptor;
         private HttpControllerContext _controllerContext;
-
+       
         public HttpActionContext(HttpControllerContext controllerContext, HttpActionDescriptor actionDescriptor)
         {
             if (controllerContext == null)

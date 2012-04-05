@@ -15,7 +15,7 @@ namespace System.Web.Http.ModelBinding
     /// </summary>
     public class ModelBinderParameterBinding : HttpParameterBinding
     {
-        private readonly IEnumerable<ValueProviderFactory> _valueProviderFactories;
+        private readonly ValueProviderFactory[] _valueProviderFactories;
         private readonly ModelBinderProvider _modelBinderProvider;
 
         // Cache information for ModelBindingContext.
@@ -37,7 +37,7 @@ namespace System.Web.Http.ModelBinding
             }
 
             _modelBinderProvider = modelBinderProvider;
-            _valueProviderFactories = valueProviderFactories;
+            _valueProviderFactories = valueProviderFactories.ToArray();
         }
 
         public IEnumerable<ValueProviderFactory> ValueProviderFactories
@@ -101,13 +101,14 @@ namespace System.Web.Http.ModelBinding
         }
 
         // Instantiate the value providers for the given action context.
-        private static IValueProvider CreateValueProvider(IEnumerable<ValueProviderFactory> factories, HttpActionContext actionContext)
+        private static IValueProvider CreateValueProvider(ValueProviderFactory[] factories, HttpActionContext actionContext)
         {
-            List<IValueProvider> providers = factories.Select<ValueProviderFactory, IValueProvider>(f => f.GetValueProvider(actionContext)).ToList();
-            if (providers.Count == 1)
+            if (factories.Length == 1)
             {
-                return providers[0];
+                return factories[0].GetValueProvider(actionContext);
             }
+
+            IValueProvider[] providers = Array.ConvertAll(factories, f => f.GetValueProvider(actionContext));            
             return new CompositeValueProvider(providers);
         }
     }

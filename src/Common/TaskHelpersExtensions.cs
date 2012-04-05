@@ -46,7 +46,6 @@ namespace System.Threading.Tasks
             {
                 return task;
             }
-
             return task.CatchImpl(() => continuation(new CatchInfo<TResult>(task)).Task, cancellationToken);
         }
 
@@ -81,8 +80,9 @@ namespace System.Threading.Tasks
                 {
                     return TaskHelpers.Canceled<TResult>();
                 }
+
                 if (task.Status == TaskStatus.RanToCompletion)
-                {
+                {                    
                     TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
                     tcs.TrySetFromTask(task);
                     return tcs.Task;
@@ -255,6 +255,7 @@ namespace System.Threading.Tasks
                 }
                 catch (Exception ex)
                 {
+                    MarkExceptionsObserved(task);
                     return TaskHelpers.FromError(ex);
                 }
             }
@@ -280,6 +281,7 @@ namespace System.Threading.Tasks
                 }
                 catch (Exception ex)
                 {
+                    MarkExceptionsObserved(task);
                     return TaskHelpers.FromError<TResult>(ex);
                 }
             }
@@ -308,14 +310,23 @@ namespace System.Threading.Tasks
                         }
                         catch (Exception ex)
                         {
+                            MarkExceptionsObserved(innerTask);
                             tcs.SetException(ex);
                         }
                     }, state: null);
                 }
                 else
                 {
-                    continuation();
-                    tcs.TrySetFromTask(innerTask);
+                    try
+                    {
+                        continuation();
+                        tcs.TrySetFromTask(innerTask);
+                    }
+                    catch (Exception ex)
+                    {
+                        MarkExceptionsObserved(innerTask);
+                        tcs.SetException(ex);
+                    }
                 }
 
                 return tcs.Task;
@@ -378,6 +389,21 @@ namespace System.Threading.Tasks
                     }
                 };
             }
+        }
+
+        /// <summary>
+        /// Marks a Task as "exception observed". The Task is required to have been completed first.
+        /// </summary>
+        /// <remarks>
+        /// Useful for 'finally' clauses, as if the 'finally' action throws we'll propagate the new
+        /// exception and lose track of the inner exception.
+        /// </remarks>
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "We only call the property getter for its side effect; we don't care about the value.")]
+        private static void MarkExceptionsObserved(this Task task)
+        {
+            Contract.Assert(task.IsCompleted);
+
+            Exception unused = task.Exception;
         }
 
         /// <summary>

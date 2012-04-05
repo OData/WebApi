@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
 namespace System.Threading.Tasks
 {
@@ -90,25 +89,82 @@ namespace System.Threading.Tasks
         /// <param name="asyncIterator">collection of tasks to wait on</param>
         /// <param name="cancellationToken">cancellation token</param>
         /// <returns>a task that signals completed when all the incoming tasks are finished.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is propagated in a Task.")]
         internal static Task Iterate(IEnumerable<Task> asyncIterator, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contract.Assert(asyncIterator != null);
 
-            return IterateEngine.Run(asyncIterator, cancellationToken);
+            IEnumerator<Task> enumerator = null;
+            try
+            {
+                enumerator = asyncIterator.GetEnumerator();
+                Task task = IterateImpl(enumerator, cancellationToken);
+                return (enumerator != null) ? task.Finally(enumerator.Dispose) : task;
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
         }
 
         /// <summary>
-        /// Return a task that runs all the tasks inside the iterator sequentially and collects the results.
-        /// It stops as soon as one of the tasks fails or cancels, or after all the tasks have run succesfully.
+        /// Provides the implementation of the Iterate method.
+        /// Contains special logic to help speed up common cases.
         /// </summary>
-        /// <param name="asyncIterator">collection of tasks to wait on</param>
-        /// <param name="cancellationToken">cancellation token</param>
-        /// <returns>A task that, upon successful completion, returns the list of results.</returns>
-        internal static Task<IEnumerable<TResult>> Iterate<TResult>(IEnumerable<Task<TResult>> asyncIterator, CancellationToken cancellationToken = default(CancellationToken))
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is propagated in a Task.")]
+        internal static Task IterateImpl(IEnumerator<Task> enumerator, CancellationToken cancellationToken)
         {
-            Contract.Assert(asyncIterator != null);
+            try
+            {
+                while (true)
+                {
+                    // short-circuit: iteration canceled
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return TaskHelpers.Canceled();
+                    }
 
-            return IterateEngine<TResult>.Run(asyncIterator, cancellationToken);
+                    // short-circuit: iteration complete
+                    if (!enumerator.MoveNext())
+                    {
+                        return TaskHelpers.Completed();
+                    }
+
+                    // fast case: Task completed synchronously & successfully
+                    Task currentTask = enumerator.Current;
+                    if (currentTask.Status == TaskStatus.RanToCompletion)
+                    {
+                        continue;
+                    }
+
+                    // fast case: Task completed synchronously & unsuccessfully
+                    if (currentTask.IsCanceled || currentTask.IsFaulted)
+                    {
+                        return currentTask;
+                    }
+
+                    // slow case: Task isn't yet complete
+                    return IterateImplIncompleteTask(enumerator, currentTask, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                return TaskHelpers.FromError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Fallback for IterateImpl when the antecedent Task isn't yet complete.
+        /// </summary>
+        internal static Task IterateImplIncompleteTask(IEnumerator<Task> enumerator, Task currentTask, CancellationToken cancellationToken)
+        {
+            // There's a race condition here, the antecedent Task could complete between
+            // the check in Iterate and the call to Then below. If this happens, we could
+            // end up growing the stack indefinitely. But the chances of (a) even having
+            // enough Tasks in the enumerator in the first place and of (b) *every* one
+            // of them hitting this race condition are so extremely remote that it's not
+            // worth worrying about.
+            return currentTask.Then(() => IterateImpl(enumerator, cancellationToken));
         }
 
         /// <summary>
@@ -323,98 +379,6 @@ namespace System.Threading.Tasks
                 TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
                 tcs.SetCanceled();
                 return tcs.Task;
-            }
-        }
-
-        // These classes are the engine that implements Iterate and Iterate<T>
-        private static class IterateEngine
-        {
-            public static Task Run(IEnumerable<Task> iterator, CancellationToken cancellationToken)
-            {
-                // WARNING: This code uses LINQ Select to ensure that we get deferred execution (i.e., we
-                // don't start running all the tasks all at once). If you touch this code, please ensure
-                // that this behavior is preserved.
-                return IterateEngine<AsyncVoid>.Run(iterator.Select(t => t.ToTask<AsyncVoid>()), cancellationToken);
-            }
-        }
-
-        private class IterateEngine<TResult>
-        {
-            private CancellationToken _cancellationToken;
-            private TaskCompletionSource<IEnumerable<TResult>> _completionSource;
-            private IEnumerator<Task<TResult>> _enumerator;
-            private List<TResult> _results;
-            private SynchronizationContext _syncContext;
-
-            public static Task<IEnumerable<TResult>> Run(IEnumerable<Task<TResult>> iterator, CancellationToken cancellationToken)
-            {
-                IterateEngine<TResult> engine = new IterateEngine<TResult>
-                {
-                    _cancellationToken = cancellationToken,
-                    _completionSource = new TaskCompletionSource<IEnumerable<TResult>>(),
-                    _enumerator = iterator.GetEnumerator(),
-                    _results = new List<TResult>(),
-                    _syncContext = SynchronizationContext.Current
-                };
-
-                RunNext(engine);
-                return engine._completionSource.Task.Finally(engine._enumerator.Dispose);
-            }
-
-            private static void RunNext(IterateEngine<TResult> engine)
-            {
-                if (engine._syncContext != null && engine._syncContext != SynchronizationContext.Current)
-                {
-                    engine._syncContext.Post(RunNextCallback, engine);
-                }
-                else
-                {
-                    RunNextCallback(engine);
-                }
-            }
-
-            // TODO: This class can become more efficient once we take a hard 4.5 dependency. In 4.0, ContinueWith
-            // does not offer you the ability to pass a state object; once it does, we can change the implementation
-            // of RunNextCallback to remove the closure around "engine".
-            [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-            [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This usage is known to be safe.")]
-            private static void RunNextCallback(object state)
-            {
-                IterateEngine<TResult> engine = (IterateEngine<TResult>)state;
-
-                try
-                {
-                    if (engine._cancellationToken.IsCancellationRequested)
-                    {
-                        engine._completionSource.TrySetCanceled();
-                    }
-                    else if (engine._enumerator.MoveNext())
-                    {
-                        engine._enumerator.Current.ContinueWith(previous =>
-                        {
-                            switch (previous.Status)
-                            {
-                                case TaskStatus.Faulted:
-                                case TaskStatus.Canceled:
-                                    engine._completionSource.TrySetFromTask(previous);
-                                    break;
-
-                                default:
-                                    engine._results.Add(previous.Result);
-                                    RunNext(engine);
-                                    break;
-                            }
-                        }, TaskContinuationOptions.ExecuteSynchronously);
-                    }
-                    else
-                    {
-                        engine._completionSource.TrySetResult(engine._results);
-                    }
-                }
-                catch (Exception e)
-                {
-                    engine._completionSource.TrySetException(e);
-                }
             }
         }
     }

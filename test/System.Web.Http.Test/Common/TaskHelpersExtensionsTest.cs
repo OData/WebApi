@@ -628,6 +628,52 @@ namespace System.Threading.Tasks
         }
 
         [Fact, ForceGC, PreserveSyncContext]
+        public void Finally_CompletedTaskOfFault_ExceptionInFinally()
+        {
+            Exception exception1 = new InvalidOperationException("From source");
+            Exception exception2 = new InvalidOperationException("FromFinally");
+
+            // When the finally clause throws, that's the exception that propagates. 
+            // Still ensure that the original exception from the try block is observed.
+
+            // Act 
+            Task faultedTask = TaskHelpers.FromError(exception1);
+            Task t =faultedTask.Finally(() => { throw exception2; });
+
+            // Assert
+            Assert.True(t.IsFaulted);
+            Assert.IsType<AggregateException>(t.Exception);
+            Assert.Equal(1, t.Exception.InnerExceptions.Count);
+            Assert.Equal(exception2, t.Exception.InnerException);
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Finally_IncompletedTask_ExceptionInFinally()
+        {
+            Exception exception1 = new InvalidOperationException("From source");
+            Exception exception2 = new InvalidOperationException("FromFinally");
+
+            // Like test Finally_CompletedTaskOfFault_ExceptionInFinally, but exercises when the original task doesn't complete synchronously
+
+            // Act 
+            Task incompleteTask = new Task(() => { throw exception1;  });
+            Task t = incompleteTask.Finally(() => { throw exception2; });
+
+            incompleteTask.Start();
+            
+            // Assert
+            return t.ContinueWith(prevTask =>
+                {
+                    Assert.Equal(t, prevTask);
+
+                    Assert.True(t.IsFaulted);
+                    Assert.IsType<AggregateException>(t.Exception);
+                    Assert.Equal(1, t.Exception.InnerExceptions.Count);
+                    Assert.Equal(exception2, t.Exception.InnerException);
+                });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Finally_NoInputValue_CompletedTaskOfCancellation_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -788,6 +834,52 @@ namespace System.Threading.Tasks
                                   Assert.Equal(originalThreadId, callbackThreadId);
                                   syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Never());
                               });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public void Finally_WithInputValue_CompletedTaskOfFault_ExceptionInFinally()
+        {
+            Exception exception1 = new InvalidOperationException("From source");
+            Exception exception2 = new InvalidOperationException("FromFinally");
+
+            // When the finally clause throws, that's the exception that propagates. 
+            // Still ensure that the original exception from the try block is observed.
+
+            // Act 
+            Task<int> faultedTask = TaskHelpers.FromError<int>(exception1);
+            Task<int> t = faultedTask.Finally(() => { throw exception2; });
+
+            // Assert
+            Assert.True(t.IsFaulted);
+            Assert.IsType<AggregateException>(t.Exception);
+            Assert.Equal(1, t.Exception.InnerExceptions.Count);
+            Assert.Equal(exception2, t.Exception.InnerException);
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Finally_WithInputValue_IncompletedTask_ExceptionInFinally()
+        {
+            Exception exception1 = new InvalidOperationException("From source");
+            Exception exception2 = new InvalidOperationException("FromFinally");
+
+            // Like test Finally_WithInputValue_CompletedTaskOfFault_ExceptionInFinally, but exercises when the original task doesn't complete synchronously
+
+            // Act 
+            Task<int> incompleteTask = new Task<int>(() => { throw exception1; });
+            Task<int> t = incompleteTask.Finally(() => { throw exception2; });
+
+            incompleteTask.Start();
+
+            // Assert
+            return t.ContinueWith(prevTask =>
+            {
+                Assert.Equal(t, prevTask);
+
+                Assert.True(t.IsFaulted);
+                Assert.IsType<AggregateException>(t.Exception);
+                Assert.Equal(1, t.Exception.InnerExceptions.Count);
+                Assert.Equal(exception2, t.Exception.InnerException);
+            });
         }
 
         [Fact, ForceGC, PreserveSyncContext]

@@ -105,7 +105,6 @@
     <Compile Include="Controllers\Apis\TestController.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UserAddress.cs" />
-    <Compile Include="Controllers\CustomControllerDescriptorTest.cs" />
     <Compile Include="Controllers\Helpers\ApiControllerHelper.cs" />
     <Compile Include="ExceptionHandling\DuplicateControllers.cs" />
     <Compile Include="ExceptionHandling\ExceptionController.cs" />

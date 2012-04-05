@@ -157,18 +157,7 @@ namespace System.Web.Http.Dispatcher
             controllerContext.Controller = httpController;
             controllerContext.ControllerDescriptor = httpControllerDescriptor;
 
-            try
-            {
-                return httpController.ExecuteAsync(controllerContext, cancellationToken).Finally(() =>
-                {
-                    httpControllerDescriptor.ReleaseController(httpController, controllerContext);
-                });
-            }
-            catch
-            {
-                httpControllerDescriptor.ReleaseController(httpController, controllerContext);
-                throw;
-            }
+            return httpController.ExecuteAsync(controllerContext, cancellationToken);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns HttpResponseMessage instance.")]

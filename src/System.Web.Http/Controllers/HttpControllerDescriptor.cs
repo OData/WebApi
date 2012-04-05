@@ -173,27 +173,6 @@ namespace System.Web.Http.Controllers
         }
 
         /// <summary>
-        /// Releases an <see cref="IHttpController"/> instance.
-        /// </summary>
-        /// <param name="controllerContext">The controller context.</param>
-        /// <param name="controller">The controller.</param>
-        public virtual void ReleaseController(IHttpController controller, HttpControllerContext controllerContext)
-        {
-            if (controller == null)
-            {
-                throw Error.ArgumentNull("controller");
-            }
-
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
-
-            // just delegate the work to the activator
-            HttpControllerActivator.Release(controller, controllerContext);
-        }
-
-        /// <summary>
         /// Returns the collection of <see cref="IFilter">filters</see> associated with this descriptor's controller.
         /// </summary>
         /// <remarks>The default implementation calls <see cref="GetCustomAttributes{IFilter}()"/>.</remarks>

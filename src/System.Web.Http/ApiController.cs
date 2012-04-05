@@ -124,8 +124,15 @@ namespace System.Web.Http
             }
 
             Initialize(controllerContext);
-            HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
 
+            // We can't be reused, and we know we're disposable, so make sure we go away when
+            // the request has been completed.
+            if (_request != null)
+            {
+                _request.RegisterForDispose(this);
+            }
+
+            HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
             HttpActionDescriptor actionDescriptor = controllerDescriptor.HttpActionSelector.SelectAction(controllerContext);
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
 

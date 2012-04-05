@@ -10,6 +10,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Routing;
@@ -664,6 +665,49 @@ namespace System.Web.Http
             Assert.Same(result, principal);
         }
 
+        [Fact]
+        public void ApiControllerCannotBeReused()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var singletonController = new Mock<ApiController> { CallBase = true }.Object;
+            var mockDescriptor = new Mock<HttpControllerDescriptor>(config, "MyMock", singletonController.GetType()) { CallBase = true };
+            mockDescriptor.Setup(d => d.CreateController(It.IsAny<HttpRequestMessage>())).Returns(singletonController);
+            var mockSelector = new Mock<DefaultHttpControllerSelector>(config) { CallBase = true };
+            mockSelector.Setup(s => s.SelectController(It.IsAny<HttpRequestMessage>())).Returns(mockDescriptor.Object);
+            config.Routes.MapHttpRoute("default", "", new { controller = "MyMock" });
+            config.Services.Replace(typeof(IHttpControllerSelector), mockSelector.Object);
+            var server = new HttpServer(config);
+            var invoker = new HttpMessageInvoker(server);
+
+            // Act
+            HttpResponseMessage response1 = invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "http://localhost/"), CancellationToken.None).Result;
+            HttpResponseMessage response2 = invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "http://localhost/"), CancellationToken.None).Result;
+
+            // Assert
+            Assert.NotEqual(HttpStatusCode.InternalServerError, response1.StatusCode);
+            Assert.Equal(HttpStatusCode.InternalServerError, response2.StatusCode);
+            Assert.Contains("Cannot reuse an 'ApiController' instance. 'ApiController' has to be constructed per incoming message.", response2.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ApiControllerPutsSelfInRequestResourcesToBeDisposed()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("default", "", new { controller = "SpyDispose" });
+            var server = new HttpServer(config);
+            var invoker = new HttpMessageInvoker(server);
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            invoker.SendAsync(request, CancellationToken.None).WaitUntilCompleted();
+
+            // Act
+            request.DisposeRequestResources();
+
+            // Assert
+            Assert.True(SpyDisposeController.DisposeWasCalled);
+        }
+
         private Mock<IAuthorizationFilter> CreateAuthorizationFilterMock(Func<HttpActionContext, CancellationToken, Func<Task<HttpResponseMessage>>, Task<HttpResponseMessage>> implementation)
         {
             Mock<IAuthorizationFilter> filterMock = new Mock<IAuthorizationFilter>();
@@ -725,6 +769,23 @@ namespace System.Web.Http
             {
                 get { return false; }
             }
+        }
+    }
+
+    public class SpyDisposeController : System.Web.Http.ApiController
+    {
+        public static bool DisposeWasCalled = false;
+
+        public SpyDisposeController()
+        {
+        }
+
+        public void Get() { }
+
+        protected override void Dispose(bool disposing)
+        {
+            DisposeWasCalled = true;
+            base.Dispose(disposing);
         }
     }
 }

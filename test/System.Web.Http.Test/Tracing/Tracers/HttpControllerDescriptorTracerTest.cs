@@ -59,54 +59,6 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(_exception, traceWriter.Traces[1].Exception);
         }
 
-        [Fact]
-        public void ReleaseController_Invokes_Inner_And_Traces()
-        {
-            // Arrange
-            Mock<HttpControllerDescriptor> mockControllerDescriptor = CreateMockControllerDescriptor();
-            mockControllerDescriptor.Setup(b => b.ReleaseController(It.IsAny<IHttpController>(), It.IsAny<HttpControllerContext>())).Verifiable();
-            TestTraceWriter traceWriter = new TestTraceWriter();
-            HttpControllerDescriptorTracer tracer = GetHttpControllerDescriptorTracer(mockControllerDescriptor.Object, traceWriter);
-
-            TraceRecord[] expectedTraces = new TraceRecord[]
-            {
-                new TraceRecord(_controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ReleaseController" },
-                new TraceRecord(_controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.End, Operation = "ReleaseController" }
-            };
-
-            // Act
-            tracer.ReleaseController(_controller, _controllerContext);
-
-            // Assert
-            mockControllerDescriptor.Verify();
-            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
-        }
-
-        [Fact]
-        public void ReleaseController_Throws_And_Traces_When_Inner_Throws()
-        {
-            // Arrange
-            Mock<HttpControllerDescriptor> mockControllerDescriptor = CreateMockControllerDescriptor();
-            mockControllerDescriptor.Setup(b => b.ReleaseController(It.IsAny<IHttpController>(), It.IsAny<HttpControllerContext>())).Throws(_exception).Verifiable();
-            TestTraceWriter traceWriter = new TestTraceWriter();
-            HttpControllerDescriptorTracer tracer = GetHttpControllerDescriptorTracer(mockControllerDescriptor.Object, traceWriter);
-
-            TraceRecord[] expectedTraces = new TraceRecord[]
-            {
-                new TraceRecord(_controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ReleaseController" },
-                new TraceRecord(_controllerContext.Request, TraceCategories.ControllersCategory, TraceLevel.Error) { Kind = TraceKind.End, Operation = "ReleaseController" }
-            };
-
-            // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReleaseController(_controller, _controllerContext));
-
-            // Assert
-            mockControllerDescriptor.Verify();
-            Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
-            Assert.Same(_exception, thrown);
-            Assert.Same(_exception, traceWriter.Traces[1].Exception);
-        }
-
         private static HttpControllerDescriptorTracer GetHttpControllerDescriptorTracer(HttpControllerDescriptor controllerDescriptor, ITraceWriter traceWriter)
         {
             return new HttpControllerDescriptorTracer(

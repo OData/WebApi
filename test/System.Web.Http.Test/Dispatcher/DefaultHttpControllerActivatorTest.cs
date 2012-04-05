@@ -74,39 +74,6 @@ namespace System.Web.Http.Dispatcher
             mockScope.Verify();
         }
 
-        // Release tests
-
-        [Fact]
-        public void Release_GuardClauses()
-        {
-            // Arrange
-            var controller = new SimpleController();
-            var config = new HttpConfiguration();
-            var context = new HttpControllerContext();
-            var activator = new DefaultHttpControllerActivator();
-
-            // Act & assert
-            Assert.ThrowsArgumentNull(() => activator.Release(controller: null, controllerContext: context), "controller");
-            Assert.ThrowsArgumentNull(() => activator.Release(controller, controllerContext: null), "controllerContext");
-        }
-
-        [Fact]
-        public void Release_CallsDisposeOnController()
-        {
-            // Arrange
-            var mockController = new Mock<IHttpController>();
-            var mockDisposable = mockController.As<IDisposable>();
-            var config = new HttpConfiguration();
-            var context = new HttpControllerContext();
-            var activator = new DefaultHttpControllerActivator();
-
-            // Act
-            activator.Release(mockController.Object, context);
-
-            // Assert
-            mockDisposable.Verify(d => d.Dispose());
-        }
-
         // Helper classes
 
         abstract class AbstractController : ApiController { }

@@ -225,6 +225,10 @@ namespace System.Web.Http
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenRequestDoesNotHaveConfiguration_Throws()
         {
+            // Arrange
+            _request.Properties[HttpPropertyKeys.HttpConfigurationKey] = null;
+
+            // Act
             Assert.Throws<InvalidOperationException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, mediaType: "foo/bar"),
                 "The request does not have an associated configuration object or the provided configuration was null.");
         }

@@ -19,6 +19,7 @@
 *.coffee text
 *.config text
 *.cs text diff=csharp 
+*.csproj text merge=union 
 *.css text
 *.cshtml text
 *.htm text
@@ -26,7 +27,7 @@
 *.htm text
 *.js text
 *.msbuild text
-*.resx text
+*.resx text merge=union
 *.ruleset text
 *.Stylecop text
 *.targets text
@@ -34,10 +35,8 @@
 *.txt text
 *.vb text
 *.vbhtml text
+*.vbproj text merge=union 
 *.xml text
 *.xunit text
-
-*.csproj text merge=union 
-*.vbproj text merge=union 
 
 *.sln text eol=crlf merge=union 

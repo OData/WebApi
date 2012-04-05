@@ -32,16 +32,6 @@ namespace System.Web.WebPages.Test
         }
 
         [Fact]
-        public void ExecutePageHierarchyThrowsIfPageContextIsNotSet()
-        {
-            // Arrange
-            var page = new Mock<WebPage>() { CallBase = true };
-
-            // Act and Assert
-            Assert.Throws<InvalidOperationException>(() => page.Object.ExecutePageHierarchy(), "ExecutePageHierarchy cannot be invoked if PageContext is null.");
-        }
-
-        [Fact]
         public void NormalizeLayoutPagePathTest()
         {
             var layoutPage = "Layout.cshtml";

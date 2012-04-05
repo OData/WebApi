@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.WebPages.Html;
-using System.Web.WebPages.Resources;
 using System.Web.WebPages.Scope;
 
 namespace System.Web.WebPages
@@ -66,11 +65,6 @@ namespace System.Web.WebPages
 
         public override void ExecutePageHierarchy()
         {
-            if (PageContext == null)
-            {
-                // The ExecutePageHierarchy in WebPageBase assumes a non-null PageContext. 
-                throw new InvalidOperationException(WebPageResources.WebPage_ExecutePageHierarchyCannotBeInvoked);
-            }
             using (ScopeStorage.CreateTransientScope(new ScopeStorageDictionary(ScopeStorage.CurrentScope, PageData)))
             {
                 ExecutePageHierarchy(_executors);

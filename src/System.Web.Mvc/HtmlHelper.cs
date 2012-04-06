@@ -106,19 +106,44 @@ namespace System.Web.Mvc
             return result;
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "For consistency, all helpers are instance methods.")]
         public MvcHtmlString AntiForgeryToken()
         {
-            return AntiForgeryToken(salt: null);
+            return new MvcHtmlString(AntiForgery.GetHtml().ToString());
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AdditionalDataProvider", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AntiForgeryConfig", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AntiForgeryToken", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "httpCookies", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Method is obsolete.")]
+        [Obsolete("This method is deprecated. Use the AntiForgeryToken() method instead. To specify custom data to be embedded within the token, use the static AntiForgeryConfig.AdditionalDataProvider property.", error: true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public MvcHtmlString AntiForgeryToken(string salt)
         {
-            return AntiForgeryToken(salt, domain: null, path: null);
+            if (!String.IsNullOrEmpty(salt))
+            {
+                throw new NotSupportedException("This method is deprecated. Use the AntiForgeryToken() method instead. To specify custom data to be embedded within the token, use the static AntiForgeryConfig.AdditionalDataProvider property.");
+            }
+
+            return AntiForgeryToken();
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AdditionalDataProvider", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AntiForgeryConfig", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AntiForgeryToken", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "httpCookies", Justification = "API name.")]
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Method is obsolete.")]
+        [Obsolete("This method is deprecated. Use the AntiForgeryToken() method instead. To specify a custom domain for the generated cookie, use the <httpCookies> configuration element. To specify custom data to be embedded within the token, use the static AntiForgeryConfig.AdditionalDataProvider property.", error: true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public MvcHtmlString AntiForgeryToken(string salt, string domain, string path)
         {
-            return new MvcHtmlString(AntiForgery.GetHtml(ViewContext.HttpContext, salt, domain, path).ToString());
+            if (!String.IsNullOrEmpty(salt) || !String.IsNullOrEmpty(domain) || !String.IsNullOrEmpty(path))
+            {
+                throw new NotSupportedException("This method is deprecated. Use the AntiForgeryToken() method instead. To specify a custom domain for the generated cookie, use the <httpCookies> configuration element. To specify custom data to be embedded within the token, use the static AntiForgeryConfig.AdditionalDataProvider property.");
+            }
+
+            return AntiForgeryToken();
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "For consistency, all helpers are instance methods.")]

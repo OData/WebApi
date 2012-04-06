@@ -176,7 +176,7 @@ namespace System.Web.Mvc
             InnerHtml = HttpUtility.HtmlEncode(innerText);
         }
 
-        internal IHtmlString ToHtmlString(TagRenderMode renderMode)
+        internal HtmlString ToHtmlString(TagRenderMode renderMode)
         {
             return new HtmlString(ToString(renderMode));
         }

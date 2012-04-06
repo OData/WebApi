@@ -5,8 +5,6 @@ namespace System.Web.Helpers.Test
 {
     public class AntiForgeryTest
     {
-        private static string _antiForgeryTokenCookieName = AntiForgeryData.GetAntiForgeryTokenName("/SomeAppPath");
-
         [Fact]
         public void GetHtml_ThrowsWhenNotCalledInWebContext()
         {
@@ -15,9 +13,10 @@ namespace System.Web.Helpers.Test
         }
 
         [Fact]
-        public void GetHtml_ThrowsOnNullContext()
+        public void GetTokens_ThrowsWhenNotCalledInWebContext()
         {
-            Assert.ThrowsArgumentNull(() => AntiForgery.GetHtml(null, null, null, null), "httpContext");
+            Assert.Throws<ArgumentException>(() => { string dummy1, dummy2; AntiForgery.GetTokens("dummy", out dummy1, out dummy2); },
+                                                    "An HttpContext is required to perform this operation. Check that this operation is being performed during a web request.");
         }
 
         [Fact]
@@ -25,12 +24,9 @@ namespace System.Web.Helpers.Test
         {
             Assert.Throws<ArgumentException>(() => AntiForgery.Validate(),
                                                     "An HttpContext is required to perform this operation. Check that this operation is being performed during a web request.");
-        }
 
-        [Fact]
-        public void Validate_ThrowsOnNullContext()
-        {
-            Assert.ThrowsArgumentNull(() => AntiForgery.Validate(httpContext: null, salt: null), "httpContext");
+            Assert.Throws<ArgumentException>(() => AntiForgery.Validate("cookie-token", "form-token"),
+                                                    "An HttpContext is required to perform this operation. Check that this operation is being performed during a web request.");
         }
     }
 }

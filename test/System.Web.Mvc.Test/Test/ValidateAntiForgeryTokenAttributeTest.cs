@@ -27,32 +27,17 @@ namespace System.Web.Mvc.Test
             Mock<AuthorizationContext> authorizationContextMock = new Mock<AuthorizationContext>();
             authorizationContextMock.SetupGet(ac => ac.HttpContext).Returns(context);
             bool validateCalled = false;
-            Action<HttpContextBase, string> validateMethod = (c, s) =>
+            Action validateMethod = () =>
             {
-                Assert.Same(context, c);
-                Assert.Equal("some salt", s);
                 validateCalled = true;
             };
-            ValidateAntiForgeryTokenAttribute attribute = new ValidateAntiForgeryTokenAttribute(validateMethod)
-            {
-                Salt = "some salt"
-            };
+            ValidateAntiForgeryTokenAttribute attribute = new ValidateAntiForgeryTokenAttribute(validateMethod);
 
             // Act
             attribute.OnAuthorization(authorizationContextMock.Object);
 
             // Assert
             Assert.True(validateCalled);
-        }
-
-        [Fact]
-        public void SaltProperty()
-        {
-            // Arrange
-            ValidateAntiForgeryTokenAttribute attribute = new ValidateAntiForgeryTokenAttribute();
-
-            // Act & Assert
-            MemberHelper.TestStringProperty(attribute, "Salt", String.Empty);
         }
 
         [Fact]

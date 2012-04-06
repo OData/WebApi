@@ -11,8 +11,8 @@ namespace System.Web.Http.Validation.Validators
     [SecuritySafeCritical]
     public class DataAnnotationsModelValidator : ModelValidator
     {
-        public DataAnnotationsModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
-            : base(metadata, validatorProviders)
+        public DataAnnotationsModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
+            : base(validatorProviders)
         {
             if (attribute == null)
             {
@@ -24,11 +24,6 @@ namespace System.Web.Http.Validation.Validators
 
         protected internal ValidationAttribute Attribute { get; private set; }
 
-        protected internal string ErrorMessage
-        {
-            get { return Attribute.FormatErrorMessage(Metadata.GetDisplayName()); }
-        }
-
         public override bool IsRequired
         {
             // [SecuritySafeCritical] because it uses DataAnnotations type RequiredAttribute
@@ -36,21 +31,21 @@ namespace System.Web.Http.Validation.Validators
             get { return Attribute is RequiredAttribute; }
         }
 
-        internal static ModelValidator Create(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
+        internal static ModelValidator Create(IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
         {
-            return new DataAnnotationsModelValidator(metadata, validatorProviders, attribute);
+            return new DataAnnotationsModelValidator(validatorProviders, attribute);
         }
 
         // [SecuritySafeCritical] because is uses DataAnnotations type ValidationContext
         [SecuritySafeCritical]
-        public override IEnumerable<ModelValidationResult> Validate(object container)
+        public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)
         {
             // Per the WCF RIA Services team, instance can never be null (if you have
             // no parent, you pass yourself for the "instance" parameter).
-            ValidationContext context = new ValidationContext(container ?? Metadata.Model, null, null);
-            context.DisplayName = Metadata.GetDisplayName();
+            ValidationContext context = new ValidationContext(container ?? metadata.Model, null, null);
+            context.DisplayName = metadata.GetDisplayName();
 
-            ValidationResult result = Attribute.GetValidationResult(Metadata.Model, context);
+            ValidationResult result = Attribute.GetValidationResult(metadata.Model, context);
 
             if (result != ValidationResult.Success)
             {

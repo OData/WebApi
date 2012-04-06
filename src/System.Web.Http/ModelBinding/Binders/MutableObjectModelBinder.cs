@@ -229,7 +229,7 @@ namespace System.Web.Http.ModelBinding.Binders
                 {
                     if (requiredValidator != null)
                     {
-                        foreach (ModelValidationResult validationResult in requiredValidator.Validate(bindingContext.Model))
+                        foreach (ModelValidationResult validationResult in requiredValidator.Validate(propertyMetadata, bindingContext.Model))
                         {
                             bindingContext.ModelState.AddModelError(modelStateKey, validationResult.Message);
                         }

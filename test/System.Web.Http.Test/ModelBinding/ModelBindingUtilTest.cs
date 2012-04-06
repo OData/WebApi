@@ -311,68 +311,6 @@ Parameter name: bindingContext");
 Parameter name: bindingContext");
         }
 
-        //[MetadataType(typeof(ModelWithBindAttribute_Buddy))]
-        //private class ModelWithBindAttribute
-        //{
-        //    [Bind]
-        //    private class ModelWithBindAttribute_Buddy
-        //    {
-        //    }
-        //}
-
-        //[ModelBinderProviderOptions(FrontOfList = true)]
-        //private class ProviderAtFront : ModelBinderProvider
-        //{
-        //    public override IModelBinder GetBinder(HttpExecutionContext context, ModelBindingContext bindingContext)
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
-
-        //[ModelBinder(typeof(CustomBinder))]
-        //private class ModelWithProviderAttribute_Binder
-        //{
-        //}
-
-        //[ModelBinder(typeof(CustomGenericBinder<>))]
-        //private class ModelWithProviderAttribute_Binder_Generic<T>
-        //{
-        //}
-
-        //[ModelBinder(typeof(CustomBinder), SuppressPrefixCheck = true)]
-        //private class ModelWithProviderAttribute_Binder_SuppressPrefix
-        //{
-        //}
-
-        //[ModelBinder(typeof(CustomProvider))]
-        //private class ModelWithProviderAttribute_Provider
-        //{
-        //}
-
-        //private class CustomProvider : ModelBinderProvider
-        //{
-        //    public override IModelBinder GetBinder(HttpExecutionContext context, ModelBindingContext bindingContext)
-        //    {
-        //        return new CustomBinder();
-        //    }
-        //}
-
-        //private class CustomBinder : IModelBinder
-        //{
-        //    public bool BindModel(HttpExecutionContext context, ModelBindingContext bindingContext)
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
-
-        //private class CustomGenericBinder<T> : IModelBinder
-        //{
-        //    public bool BindModel(HttpExecutionContext context, ModelBindingContext bindingContext)
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
-
         private static ModelMetadata GetMetadata(Type modelType)
         {
             EmptyModelMetadataProvider provider = new EmptyModelMetadataProvider();

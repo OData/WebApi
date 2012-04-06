@@ -8,18 +8,13 @@ namespace System.Web.Http.Validation
 {
     public abstract class ModelValidator
     {
-        protected ModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
+        protected ModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders)
         {
-            if (metadata == null)
-            {
-                throw Error.ArgumentNull("metadata");
-            }
             if (validatorProviders == null)
             {
                 throw Error.ArgumentNull("validatorProviders");
             }
 
-            Metadata = metadata;
             ValidatorProviders = validatorProviders;
         }
 
@@ -30,31 +25,29 @@ namespace System.Web.Http.Validation
             get { return false; }
         }
 
-        protected internal ModelMetadata Metadata { get; private set; }
-
-        public static ModelValidator GetModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
+        public static ModelValidator GetModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders)
         {
-            return new CompositeModelValidator(metadata, validatorProviders);
+            return new CompositeModelValidator(validatorProviders);
         }
 
-        public abstract IEnumerable<ModelValidationResult> Validate(object container);
+        public abstract IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container);
 
         private class CompositeModelValidator : ModelValidator
         {
-            public CompositeModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
-                : base(metadata, validatorProviders)
+            public CompositeModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders)
+                : base(validatorProviders)
             {
             }
 
-            public override IEnumerable<ModelValidationResult> Validate(object container)
+            public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)
             {
                 bool propertiesValid = true;
 
-                foreach (ModelMetadata propertyMetadata in Metadata.Properties)
+                foreach (ModelMetadata propertyMetadata in metadata.Properties)
                 {
                     foreach (ModelValidator propertyValidator in propertyMetadata.GetValidators(ValidatorProviders))
                     {
-                        foreach (ModelValidationResult propertyResult in propertyValidator.Validate(Metadata.Model))
+                        foreach (ModelValidationResult propertyResult in propertyValidator.Validate(metadata, container))
                         {
                             propertiesValid = false;
                             yield return new ModelValidationResult
@@ -68,9 +61,9 @@ namespace System.Web.Http.Validation
 
                 if (propertiesValid)
                 {
-                    foreach (ModelValidator typeValidator in Metadata.GetValidators(ValidatorProviders))
+                    foreach (ModelValidator typeValidator in metadata.GetValidators(ValidatorProviders))
                     {
-                        foreach (ModelValidationResult typeResult in typeValidator.Validate(container))
+                        foreach (ModelValidationResult typeResult in typeValidator.Validate(metadata, container))
                         {
                             yield return typeResult;
                         }

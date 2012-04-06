@@ -96,16 +96,6 @@ namespace System.Web.Http.Internal
             return TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
         }
 
-        internal static IEnumerable GetAsEnumerable(object o)
-        {
-            // string implements IEnumerable<char>, but we want to treat it as a primitive type. 
-            if (o.GetType() == typeof(string))
-            {
-                return null;
-            }
-            return o as IEnumerable;
-        }
-
         /// <summary>
         /// Fast implementation to get the subset of a given type.
         /// </summary>

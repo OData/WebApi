@@ -150,12 +150,6 @@
   <data name="Common_PropertyNotFound" xml:space="preserve">
     <value>The property {0}.{1} could not be found.</value>
   </data>
-  <data name="DataAnnotationsModelMetadataProvider_UnknownProperty" xml:space="preserve">
-    <value>{0} has a DisplayColumn attribute for {1}, but property {1} does not exist.</value>
-  </data>
-  <data name="DataAnnotationsModelMetadataProvider_UnreadableProperty" xml:space="preserve">
-    <value>{0} has a DisplayColumn attribute for {1}, but property {1} does not have a public getter.</value>
-  </data>
   <data name="ModelBinderProviderCollection_BinderForTypeNotFound" xml:space="preserve">
     <value>A binder for type {0} could not be located.</value>
   </data>

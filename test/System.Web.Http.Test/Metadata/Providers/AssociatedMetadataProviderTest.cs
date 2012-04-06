@@ -202,45 +202,6 @@ namespace System.Web.Http.Metadata.Providers
             Assert.True(parms.Attributes.Any(a => a is ReadOnlyAttribute));
         }
 
-        [AdditionalMetadata("ClassName", "ClassValue")]
-        class ClassWithAdditionalMetadata
-        {
-            [AdditionalMetadata("PropertyName", "PropertyValue")]
-            public int MyProperty { get; set; }
-        }
-
-        [Fact]
-        public void MetadataAwareAttributeCanModifyTypeMetadata()
-        {
-            // Arrange
-            TestableAssociatedMetadataProvider provider = new TestableAssociatedMetadataProvider();
-            provider.CreateMetadataReturnValue = new ModelMetadata(provider, null, null, typeof(ClassWithAdditionalMetadata), null);
-
-            // Act
-            ModelMetadata metadata = provider.GetMetadataForType(null, typeof(ClassWithAdditionalMetadata));
-
-            // Assert
-            var kvp = metadata.AdditionalValues.Single();
-            Assert.Equal("ClassName", kvp.Key);
-            Assert.Equal("ClassValue", kvp.Value);
-        }
-
-        [Fact]
-        public void MetadataAwareAttributeCanModifyPropertyMetadata()
-        {
-            // Arrange
-            TestableAssociatedMetadataProvider provider = new TestableAssociatedMetadataProvider();
-            provider.CreateMetadataReturnValue = new ModelMetadata(provider, typeof(ClassWithAdditionalMetadata), null, typeof(int), "MyProperty");
-
-            // Act
-            ModelMetadata metadata = provider.GetMetadataForProperty(null, typeof(ClassWithAdditionalMetadata), "MyProperty");
-
-            // Assert
-            var kvp = metadata.AdditionalValues.Single();
-            Assert.Equal("PropertyName", kvp.Key);
-            Assert.Equal("PropertyValue", kvp.Value);
-        }
-
         // Helpers
 
         [MetadataType(typeof(Metadata))]

@@ -22,10 +22,7 @@ namespace System.Web.Http.Validation
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => new TestableModelValidator(metadata: null, validatorProviders: _noValidatorProviders),
-                "metadata");
-            Assert.ThrowsArgumentNull(
-                () => new TestableModelValidator(metadata, validatorProviders: null),
+                () => new TestableModelValidator(validatorProviders: null),
                 "validatorProviders");
         }
 
@@ -36,10 +33,9 @@ namespace System.Web.Http.Validation
             ModelMetadata metadata = _metadataProvider.GetMetadataForProperty(() => 15, typeof(string), "Length");
 
             // Act
-            TestableModelValidator validator = new TestableModelValidator(metadata, _noValidatorProviders);
+            TestableModelValidator validator = new TestableModelValidator(_noValidatorProviders);
 
             // Assert
-            Assert.Same(metadata, validator.Metadata);
             Assert.Same(_noValidatorProviders, validator.ValidatorProviders);
         }
 
@@ -50,7 +46,7 @@ namespace System.Web.Http.Validation
             ModelMetadata metadata = _metadataProvider.GetMetadataForProperty(() => 15, typeof(string), "Length");
 
             // Act
-            TestableModelValidator validator = new TestableModelValidator(metadata, _noValidatorProviders);
+            TestableModelValidator validator = new TestableModelValidator(_noValidatorProviders);
 
             // Assert
             Assert.False(validator.IsRequired);
@@ -65,8 +61,8 @@ namespace System.Web.Http.Validation
             ModelMetadata metadata = new EmptyModelMetadataProvider().GetMetadataForType(() => model, typeof(ObservableModel));
 
             // Act
-            ModelValidator validator = ModelValidator.GetModelValidator(metadata, validatorProviders);
-            ModelValidationResult[] results = validator.Validate(model).ToArray();
+            ModelValidator validator = ModelValidator.GetModelValidator(validatorProviders);
+            ModelValidationResult[] results = validator.Validate(metadata, model).ToArray();
 
             // Assert
             Assert.False(model.PropertyWasRead());
@@ -76,17 +72,17 @@ namespace System.Web.Http.Validation
         {
             public override IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
             {
-                return new ModelValidator[] { new ObservableModelValidator(metadata, validatorProviders) };
+                return new ModelValidator[] { new ObservableModelValidator(validatorProviders) };
             }
 
             private class ObservableModelValidator : ModelValidator
             {
-                public ObservableModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
-                    : base(metadata, validatorProviders)
+                public ObservableModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders)
+                    : base(validatorProviders)
                 {
                 }
 
-                public override IEnumerable<ModelValidationResult> Validate(object container)
+                public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)
                 {
                     return Enumerable.Empty<ModelValidationResult>();
                 }
@@ -114,12 +110,12 @@ namespace System.Web.Http.Validation
 
         private class TestableModelValidator : ModelValidator
         {
-            public TestableModelValidator(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders)
-                : base(metadata, validatorProviders)
+            public TestableModelValidator(IEnumerable<ModelValidatorProvider> validatorProviders)
+                : base(validatorProviders)
             {
             }
 
-            public override IEnumerable<ModelValidationResult> Validate(object container)
+            public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)
             {
                 throw new NotImplementedException();
             }

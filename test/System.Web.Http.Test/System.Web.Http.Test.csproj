@@ -100,12 +100,8 @@
     <Compile Include="Controllers\HttpActionContextTest.cs" />
     <Compile Include="Hosting\HttpRouteTest.cs" />
     <Compile Include="Internal\TypeActivatorTest.cs" />
-    <Compile Include="Metadata\AdditionalMetadata.cs" />
     <Compile Include="Metadata\ModelMetadataTest.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Metadata\Providers\CachedAssociatedMetadataProviderTest.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadataProviderTest.cs">

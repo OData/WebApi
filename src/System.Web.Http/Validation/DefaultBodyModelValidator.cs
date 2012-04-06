@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -17,6 +18,14 @@ namespace System.Web.Http.Validation
     /// </summary>
     public class DefaultBodyModelValidator : IBodyModelValidator
     {
+        // Keyed on (Type, propertyName) tuple
+        private ConcurrentDictionary<Tuple<Type, string>, IEnumerable<ModelValidator>> _validatorCache = new ConcurrentDictionary<Tuple<Type, string>, IEnumerable<ModelValidator>>();
+
+        private interface IKeyBuilder
+        {
+            string AppendTo(string prefix);
+        }
+
         /// <summary>
         /// Determines whether the <paramref name="model"/> is valid and adds any validation errors to the <paramref name="actionContext"/>'s <see cref="ModelStateDictionary"/>
         /// </summary>
@@ -49,9 +58,9 @@ namespace System.Web.Http.Validation
                 return true;
             }
 
-            IEnumerable<ModelValidatorProvider> validatorProviders = actionContext.GetValidatorProviders();
+            ModelValidatorProvider[] validatorProviders = actionContext.GetValidatorProviders().ToArray();
             // Optimization : avoid validating the object graph if there are no validator providers
-            if (validatorProviders == null || !validatorProviders.Any())
+            if (validatorProviders == null || validatorProviders.Length == 0)
             {
                 return true;
             }
@@ -62,19 +71,22 @@ namespace System.Web.Http.Validation
                 MetadataProvider = metadataProvider,
                 ValidatorProviders = validatorProviders,
                 ModelState = actionContext.ModelState,
-                Visited = new HashSet<object>()
+                Visited = new HashSet<object>(),
+                KeyBuilders = new Stack<IKeyBuilder>(),
+                RootPrefix = keyPrefix
             };
-            return ValidateNodeAndChildren(metadata, validationContext, container: null, prefix: keyPrefix);
+            return ValidateNodeAndChildren(metadata, validationContext, container: null);
         }
 
-        private static bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container, string prefix)
+        private bool ValidateNodeAndChildren(ModelMetadata metadata, ValidationContext validationContext, object container)
         {            
             object model = metadata.Model;
             bool isValid = true;
 
-            if (model == null)
+            // Optimization: we don't need to recursively traverse the graph for null and primitive types
+            if (model == null || TypeHelper.IsSimpleType(model.GetType()))
             {
-                return ShallowValidate(metadata, validationContext, container, prefix);
+                return ShallowValidate(metadata, validationContext, container);
             }
 
             // Check to avoid infinite recursion. This can happen with cycles in an object graph.
@@ -85,19 +97,19 @@ namespace System.Web.Http.Validation
             validationContext.Visited.Add(model);
 
             // Validate the children first - depth-first traversal
-            IEnumerable enumerableModel = TypeHelper.GetAsEnumerable(model);
+            IEnumerable enumerableModel = model as IEnumerable;
             if (enumerableModel == null)
             {
-                isValid = ValidateProperties(metadata, validationContext, prefix);
+                isValid = ValidateProperties(metadata, validationContext);
             }
             else
             {
-                isValid = ValidateElements(enumerableModel, validationContext, prefix);
+                isValid = ValidateElements(enumerableModel, validationContext);
             }
             if (isValid)
             {
                 // Don't bother to validate this node if children failed.
-                isValid = ShallowValidate(metadata, validationContext, container, prefix);
+                isValid = ShallowValidate(metadata, validationContext, container);
             }
 
             // Pop the object so that it can be validated again in a different path
@@ -106,52 +118,77 @@ namespace System.Web.Http.Validation
             return isValid;
         }
 
-        private static bool ValidateProperties(ModelMetadata metadata, ValidationContext validationContext, string prefix)
+        private bool ValidateProperties(ModelMetadata metadata, ValidationContext validationContext)
         {
             bool isValid = true;
-            foreach (ModelMetadata childMetadata in metadata.Properties)
+            PropertyScope propertyScope = new PropertyScope();
+            validationContext.KeyBuilders.Push(propertyScope);
+            foreach (ModelMetadata childMetadata in validationContext.MetadataProvider.GetMetadataForProperties(metadata.Model, metadata.RealModelType))
             {
-                string childPrefix = ModelBindingHelper.CreatePropertyModelName(prefix, childMetadata.PropertyName);
-                if (!ValidateNodeAndChildren(childMetadata, validationContext, metadata.Model, childPrefix))
+                propertyScope.PropertyName = childMetadata.PropertyName;
+                if (!ValidateNodeAndChildren(childMetadata, validationContext, metadata.Model))
                 {
                     isValid = false;
                 }
             }
+            validationContext.KeyBuilders.Pop();
             return isValid;
         }
 
-        private static bool ValidateElements(IEnumerable model, ValidationContext validationContext, string prefix)
+        private bool ValidateElements(IEnumerable model, ValidationContext validationContext)
         {
             bool isValid = true;
-            int index = 0;
             Type elementType = GetElementType(model.GetType());
+            ModelMetadata elementMetadata = validationContext.MetadataProvider.GetMetadataForType(null, elementType);
 
+            ElementScope elementScope = new ElementScope() { Index = 0 };
+            validationContext.KeyBuilders.Push(elementScope);
             foreach (object element in model)
             {
-                string elementPrefix = ModelBindingHelper.CreateIndexModelName(prefix, index++);
-                ModelMetadata elementMetadata = validationContext.MetadataProvider.GetMetadataForType(() => element, elementType);
-                if (!ValidateNodeAndChildren(elementMetadata, validationContext, model, elementPrefix))
+                elementMetadata.Model = element;
+                if (!ValidateNodeAndChildren(elementMetadata, validationContext, model))
                 {
                     isValid = false;
                 }
+                elementScope.Index++;
             }
+            validationContext.KeyBuilders.Pop();
             return isValid;
         }
 
         // Validates a single node (not including children)
         // Returns true if validation passes successfully
-        private static bool ShallowValidate(ModelMetadata metadata, ValidationContext validationContext, object container, string key)
+        private bool ShallowValidate(ModelMetadata metadata, ValidationContext validationContext, object container)
         {
             bool isValid = true;
-            foreach (ModelValidator validator in metadata.GetValidators(validationContext.ValidatorProviders))
+            string key = null;
+            foreach (ModelValidator validator in GetValidators(validationContext.ValidatorProviders, metadata))
             {
-                foreach (ModelValidationResult error in validator.Validate(container))
+                foreach (ModelValidationResult error in validator.Validate(metadata, container))
                 {
+                    if (key == null)
+                    {
+                        key = validationContext.RootPrefix;
+                        foreach (IKeyBuilder keyBuilder in validationContext.KeyBuilders.Reverse())
+                        {
+                            key = keyBuilder.AppendTo(key);
+                        }
+                    }
                     validationContext.ModelState.AddModelError(key, error.Message);
                     isValid = false;
                 }
             }
             return isValid;
+        }
+
+        private IEnumerable<ModelValidator> GetValidators(IEnumerable<ModelValidatorProvider> validatorProviders, ModelMetadata metadata)
+        {
+            // If metadata is for a property then containerType != null && propertyName != null
+            // If metadata is for a type then containerType == null && propertyName == null, so we have to use modelType for the cache key.
+            Type typeForCache = metadata.ContainerType ?? metadata.ModelType;
+            return _validatorCache.GetOrAdd(
+                Tuple.Create(typeForCache, metadata.PropertyName),
+                key => metadata.GetValidators(validatorProviders).ToArray());
         }
 
         private static Type GetElementType(Type type)
@@ -173,12 +210,34 @@ namespace System.Web.Http.Validation
             return typeof(object);
         }
 
+        private class PropertyScope : IKeyBuilder
+        {
+            public string PropertyName { get; set; }
+
+            public string AppendTo(string prefix)
+            {
+                return ModelBindingHelper.CreatePropertyModelName(prefix, PropertyName);
+            }
+        }
+
+        private class ElementScope : IKeyBuilder
+        {
+            public int Index { get; set; }
+
+            public string AppendTo(string prefix)
+            {
+                return ModelBindingHelper.CreateIndexModelName(prefix, Index);
+            }
+        }
+
         private class ValidationContext
         {
             public ModelMetadataProvider MetadataProvider { get; set; }
             public IEnumerable<ModelValidatorProvider> ValidatorProviders { get; set; }
             public ModelStateDictionary ModelState { get; set; }
             public HashSet<object> Visited { get; set; }
+            public Stack<IKeyBuilder> KeyBuilders { get; set; }
+            public string RootPrefix { get; set; }
         }
     }
 }

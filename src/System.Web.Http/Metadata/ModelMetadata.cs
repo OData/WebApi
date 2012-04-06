@@ -12,8 +12,6 @@ namespace System.Web.Http.Metadata
 {
     public class ModelMetadata
     {
-        public const int DefaultOrder = 10000;
-
         private readonly Type _containerType;
         private readonly Type _modelType;
         private readonly string _propertyName;
@@ -24,16 +22,10 @@ namespace System.Web.Http.Metadata
         /// </summary>
         private Dictionary<string, object> _additionalValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         private bool _convertEmptyStringToNull = true;
-        private bool _isRequired;
         private object _model;
         private Func<object> _modelAccessor;
-        private int _order = DefaultOrder;
         private IEnumerable<ModelMetadata> _properties;
         private Type _realModelType;
-        private bool _requestValidationEnabled = true;
-        private bool _showForDisplay = true;
-        private bool _showForEdit = true;
-        private string _simpleDisplayText;
 
         public ModelMetadata(ModelMetadataProvider provider, Type containerType, Func<object> modelAccessor, Type modelType, string propertyName)
         {
@@ -49,7 +41,6 @@ namespace System.Web.Http.Metadata
             Provider = provider;
 
             _containerType = containerType;
-            _isRequired = !TypeHelper.TypeAllowsNullValue(modelType);
             _modelAccessor = modelAccessor;
             _modelType = modelType;
             _propertyName = propertyName;
@@ -71,18 +62,7 @@ namespace System.Web.Http.Metadata
             set { _convertEmptyStringToNull = value; }
         }
 
-        public virtual string DataTypeName { get; set; }
-
         public virtual string Description { get; set; }
-
-        public virtual string DisplayFormatString { get; set; }
-
-        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "The method is a delegating helper to choose among multiple property values")]
-        public virtual string DisplayName { get; set; }
-
-        public virtual string EditFormatString { get; set; }
-
-        public virtual bool HideSurroundingHtml { get; set; }
 
         public virtual bool IsComplexType
         {
@@ -95,12 +75,6 @@ namespace System.Web.Http.Metadata
         }
 
         public virtual bool IsReadOnly { get; set; }
-
-        public virtual bool IsRequired
-        {
-            get { return _isRequired; }
-            set { _isRequired = value; }
-        }
 
         public object Model
         {
@@ -127,21 +101,13 @@ namespace System.Web.Http.Metadata
             get { return _modelType; }
         }
 
-        public virtual string NullDisplayText { get; set; }
-
-        public virtual int Order
-        {
-            get { return _order; }
-            set { _order = value; }
-        }
-
         public virtual IEnumerable<ModelMetadata> Properties
         {
             get
             {
                 if (_properties == null)
                 {
-                    _properties = Provider.GetMetadataForProperties(Model, RealModelType).OrderBy(m => m.Order);
+                    _properties = Provider.GetMetadataForProperties(Model, RealModelType);
                 }
                 return _properties;
             }
@@ -174,81 +140,10 @@ namespace System.Web.Http.Metadata
             }
         }
 
-        public virtual bool RequestValidationEnabled
-        {
-            get { return _requestValidationEnabled; }
-            set { _requestValidationEnabled = value; }
-        }
-
-        public virtual string ShortDisplayName { get; set; }
-
-        public virtual bool ShowForDisplay
-        {
-            get { return _showForDisplay; }
-            set { _showForDisplay = value; }
-        }
-
-        public virtual bool ShowForEdit
-        {
-            get { return _showForEdit; }
-            set { _showForEdit = value; }
-        }
-
-        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This property delegates to the method when the user has not yet set a simple display text value.")]
-        public virtual string SimpleDisplayText
-        {
-            get
-            {
-                if (_simpleDisplayText == null)
-                {
-                    _simpleDisplayText = GetSimpleDisplayText();
-                }
-                return _simpleDisplayText;
-            }
-            set { _simpleDisplayText = value; }
-        }
-
-        public virtual string TemplateHint { get; set; }
-
-        public virtual string Watermark { get; set; }
-
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "The method is a delegating helper to choose among multiple property values")]
         public string GetDisplayName()
         {
-            return DisplayName ?? PropertyName ?? ModelType.Name;
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method is used to resolve the simple display text when it was not explicitly set through other means.")]
-        protected virtual string GetSimpleDisplayText()
-        {
-            if (Model == null)
-            {
-                return NullDisplayText;
-            }
-
-            string toStringResult = Convert.ToString(Model, CultureInfo.CurrentCulture);
-            if (toStringResult == null)
-            {
-                return String.Empty;
-            }
-
-            if (!toStringResult.Equals(Model.GetType().FullName, StringComparison.Ordinal))
-            {
-                return toStringResult;
-            }
-
-            ModelMetadata firstProperty = Properties.FirstOrDefault();
-            if (firstProperty == null)
-            {
-                return String.Empty;
-            }
-
-            if (firstProperty.Model == null)
-            {
-                return firstProperty.NullDisplayText;
-            }
-
-            return Convert.ToString(firstProperty.Model, CultureInfo.CurrentCulture);
+            return PropertyName ?? ModelType.Name;
         }
 
         public virtual IEnumerable<ModelValidator> GetValidators(IEnumerable<ModelValidatorProvider> validatorProviders)

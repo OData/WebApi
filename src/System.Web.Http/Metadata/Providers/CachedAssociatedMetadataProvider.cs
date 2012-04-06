@@ -10,47 +10,19 @@ namespace System.Web.Http.Metadata.Providers
     public abstract class CachedAssociatedMetadataProvider<TModelMetadata> : AssociatedMetadataProvider
         where TModelMetadata : ModelMetadata
     {
-        private static ConcurrentDictionary<Type, string> _typeIds = new ConcurrentDictionary<Type, string>();
-        private string _cacheKeyPrefix;
-        private CacheItemPolicy _cacheItemPolicy = new CacheItemPolicy { SlidingExpiration = TimeSpan.FromMinutes(20) };
-        private ObjectCache _prototypeCache;
-
-        protected internal CacheItemPolicy CacheItemPolicy
-        {
-            get { return _cacheItemPolicy; }
-            set { _cacheItemPolicy = value; }
-        }
-
-        protected string CacheKeyPrefix
-        {
-            get
-            {
-                if (_cacheKeyPrefix == null)
-                {
-                    _cacheKeyPrefix = "MetadataPrototypes::" + GetType().GUID.ToString("B");
-                }
-                return _cacheKeyPrefix;
-            }
-        }
-
-        protected internal ObjectCache PrototypeCache
-        {
-            get { return _prototypeCache ?? MemoryCache.Default; }
-            set { _prototypeCache = value; }
-        }
+        private ConcurrentDictionary<Type, ICustomTypeDescriptor> _typeDescriptorCache = new ConcurrentDictionary<Type, ICustomTypeDescriptor>();
+        private ConcurrentDictionary<Type, PropertyDescriptorCollection> _propertyCache = new ConcurrentDictionary<Type, PropertyDescriptorCollection>();
+        // Keyed on (Type, propertyName) tuple
+        private ConcurrentDictionary<Tuple<Type, string>, ModelMetadata> _prototypeCache = new ConcurrentDictionary<Tuple<Type, string>, ModelMetadata>();
 
         protected sealed override ModelMetadata CreateMetadata(IEnumerable<Attribute> attributes, Type containerType, Func<object> modelAccessor, Type modelType, string propertyName)
         {
             // If metadata is being created for a property then containerType != null && propertyName != null
             // If metadata is being created for a type then containerType == null && propertyName == null, so we have to use modelType for the cache key.
             Type typeForCache = containerType ?? modelType;
-            string cacheKey = GetCacheKey(typeForCache, propertyName);
-            TModelMetadata prototype = PrototypeCache.Get(cacheKey) as TModelMetadata;
-            if (prototype == null)
-            {
-                prototype = CreateMetadataPrototype(attributes, containerType, modelType, propertyName);
-                PrototypeCache.Add(cacheKey, prototype, CacheItemPolicy);
-            }
+            TModelMetadata prototype = _prototypeCache.GetOrAdd(
+                    Tuple.Create(typeForCache, propertyName),
+                    key => CreateMetadataPrototype(attributes, containerType, modelType, propertyName)) as TModelMetadata;
 
             return CreateMetadataFromPrototype(prototype, modelAccessor);
         }
@@ -60,12 +32,6 @@ namespace System.Web.Http.Metadata.Providers
 
         // New override for applying the prototype + modelAccess to yield the final metadata
         protected abstract TModelMetadata CreateMetadataFromPrototype(TModelMetadata prototype, Func<object> modelAccessor);
-
-        internal string GetCacheKey(Type type, string propertyName = null)
-        {
-            propertyName = propertyName ?? String.Empty;
-            return CacheKeyPrefix + GetTypeId(type) + propertyName;
-        }
 
         public sealed override ModelMetadata GetMetadataForProperty(Func<object> modelAccessor, Type containerType, string propertyName)
         {
@@ -87,10 +53,18 @@ namespace System.Web.Http.Metadata.Providers
             return base.GetMetadataForType(modelAccessor, modelType);
         }
 
-        private static string GetTypeId(Type type)
+        protected sealed override ICustomTypeDescriptor GetTypeDescriptor(Type type)
         {
-            // It's fine using a random Guid since we store the mapping for types to guids.
-            return _typeIds.GetOrAdd(type, _ => Guid.NewGuid().ToString("B"));
+            return _typeDescriptorCache.GetOrAdd(
+                type,
+                key => base.GetTypeDescriptor(type));
+        }
+
+        protected sealed override PropertyDescriptorCollection GetProperties(Type type)
+        {
+            return _propertyCache.GetOrAdd(
+                type,
+                key => base.GetProperties(type));
         }
     }
 }

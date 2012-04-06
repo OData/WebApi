@@ -14,10 +14,10 @@ using System.Web.Http.Validation.Validators;
 namespace System.Web.Http.Validation.Providers
 {
     // A factory for validators based on ValidationAttribute
-    public delegate ModelValidator DataAnnotationsModelValidationFactory(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute);
+    public delegate ModelValidator DataAnnotationsModelValidationFactory(IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute);
 
     // A factory for validators based on IValidatableObject
-    public delegate ModelValidator DataAnnotationsValidatableObjectAdapterFactory(ModelMetadata metadata, IEnumerable<ModelValidatorProvider> validatorProviders);
+    public delegate ModelValidator DataAnnotationsValidatableObjectAdapterFactory(IEnumerable<ModelValidatorProvider> validatorProviders);
 
     /// <summary>
     /// An implementation of <see cref="ModelValidatorProvider"/> which providers validators
@@ -32,14 +32,14 @@ namespace System.Web.Http.Validation.Providers
         // Factories for validation attributes
 
         internal DataAnnotationsModelValidationFactory DefaultAttributeFactory =
-            (metadata, validationProviders, attribute) => new DataAnnotationsModelValidator(metadata, validationProviders, attribute);
+            (validationProviders, attribute) => new DataAnnotationsModelValidator(validationProviders, attribute);
 
         internal Dictionary<Type, DataAnnotationsModelValidationFactory> AttributeFactories =
             new Dictionary<Type, DataAnnotationsModelValidationFactory>();
 
         // Factories for IValidatableObject models
         internal DataAnnotationsValidatableObjectAdapterFactory DefaultValidatableFactory =
-            (metadata, validationProviders) => new ValidatableObjectAdapter(metadata, validationProviders);
+            (validationProviders) => new ValidatableObjectAdapter(validationProviders);
 
         internal Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory> ValidatableFactories =
             new Dictionary<Type, DataAnnotationsValidatableObjectAdapterFactory>();
@@ -58,7 +58,7 @@ namespace System.Web.Http.Validation.Providers
                     {
                         factory = DefaultAttributeFactory;
                     }
-                    results.Add(factory(metadata, validatorProviders, attribute));
+                    results.Add(factory(validatorProviders, attribute));
                 }
 
                 // Produce a validator if the type supports IValidatableObject
@@ -69,7 +69,7 @@ namespace System.Web.Http.Validation.Providers
                     {
                         factory = DefaultValidatableFactory;
                     }
-                    results.Add(factory(metadata, validatorProviders));
+                    results.Add(factory(validatorProviders));
                 }
 
                 return results;
@@ -83,7 +83,7 @@ namespace System.Web.Http.Validation.Providers
             ValidateAttributeAdapterType(adapterType);
             ConstructorInfo constructor = GetAttributeAdapterConstructor(attributeType, adapterType);
 
-                AttributeFactories[attributeType] = (metadata, context, attribute) => (ModelValidator)constructor.Invoke(new object[] { metadata, context, attribute });
+                AttributeFactories[attributeType] = (context, attribute) => (ModelValidator)constructor.Invoke(new object[] { context, attribute });
             }
 
         public void RegisterAdapterFactory(Type attributeType, DataAnnotationsModelValidationFactory factory)
@@ -99,7 +99,7 @@ namespace System.Web.Http.Validation.Providers
             ValidateAttributeAdapterType(adapterType);
             ConstructorInfo constructor = GetAttributeAdapterConstructor(typeof(ValidationAttribute), adapterType);
 
-            DefaultAttributeFactory = (metadata, context, attribute) => (ModelValidator)constructor.Invoke(new object[] { metadata, context, attribute });
+            DefaultAttributeFactory = (context, attribute) => (ModelValidator)constructor.Invoke(new object[] { context, attribute });
         }
 
         public void RegisterDefaultAdapterFactory(DataAnnotationsModelValidationFactory factory)
@@ -113,7 +113,7 @@ namespace System.Web.Http.Validation.Providers
 
         private static ConstructorInfo GetAttributeAdapterConstructor(Type attributeType, Type adapterType)
         {
-            ConstructorInfo constructor = adapterType.GetConstructor(new[] { typeof(ModelMetadata), typeof(IEnumerable<ModelValidatorProvider>), attributeType });
+            ConstructorInfo constructor = adapterType.GetConstructor(new[] { typeof(IEnumerable<ModelValidatorProvider>), attributeType });
             if (constructor == null)
             {
                 throw Error.Argument("adapterType", SRResources.DataAnnotationsModelValidatorProvider_ConstructorRequirements, adapterType.Name, typeof(ModelMetadata).Name, "IEnumerable<" + typeof(ModelValidatorProvider).Name + ">", attributeType.Name);
@@ -173,7 +173,7 @@ namespace System.Web.Http.Validation.Providers
             ValidateValidatableAdapterType(adapterType);
             ConstructorInfo constructor = GetValidatableAdapterConstructor(adapterType);
 
-                ValidatableFactories[modelType] = (metadata, context) => (ModelValidator)constructor.Invoke(new object[] { metadata, context });
+                ValidatableFactories[modelType] = context => (ModelValidator)constructor.Invoke(new object[] { context });
             }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace System.Web.Http.Validation.Providers
             ValidateValidatableAdapterType(adapterType);
             ConstructorInfo constructor = GetValidatableAdapterConstructor(adapterType);
 
-            DefaultValidatableFactory = (metadata, context) => (ModelValidator)constructor.Invoke(new object[] { metadata, context });
+            DefaultValidatableFactory = context => (ModelValidator)constructor.Invoke(new object[] { context });
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace System.Web.Http.Validation.Providers
 
         private static ConstructorInfo GetValidatableAdapterConstructor(Type adapterType)
         {
-            ConstructorInfo constructor = adapterType.GetConstructor(new[] { typeof(ModelMetadata), typeof(IEnumerable<ModelValidatorProvider>) });
+            ConstructorInfo constructor = adapterType.GetConstructor(new[] { typeof(IEnumerable<ModelValidatorProvider>) });
             if (constructor == null)
             {
                 throw Error.Argument("adapterType", SRResources.DataAnnotationsModelValidatorProvider_ValidatableConstructorRequirements, adapterType.Name, typeof(ModelMetadata).Name, "IEnumerable<" + typeof(ModelValidatorProvider).Name + ">");

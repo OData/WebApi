@@ -26,7 +26,7 @@ namespace System.Web.Http.Validation.Providers
                 PropertyInfo metadataProperty = metadata.ContainerType.GetProperty(propertyName);
                 if (_requiredMemberSelector.IsRequiredMember(metadataProperty))
                 {
-                    return new ModelValidator[] { new RequiredMemberModelValidator(metadata, validatorProviders) };
+                    return new ModelValidator[] { new RequiredMemberModelValidator(validatorProviders) };
                 }
             }
             return new ModelValidator[0];

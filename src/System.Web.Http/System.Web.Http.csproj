@@ -221,7 +221,6 @@
     <Compile Include="Metadata\Providers\CachedAssociatedMetadataProvider.cs" />
     <Compile Include="Metadata\Providers\CachedDataAnnotationsMetadataAttributes.cs" />
     <Compile Include="Metadata\Providers\CachedModelMetadata.cs" />
-    <Compile Include="Metadata\IMetadataAware.cs" />
     <Compile Include="Metadata\ModelMetadata.cs" />
     <Compile Include="Metadata\ModelMetadataProvider.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProvider.cs" />

@@ -14,20 +14,7 @@ namespace System.Web.Http.Metadata.Providers
     // for reading the attribute values and creating the metadata class.
     public abstract class AssociatedMetadataProvider : ModelMetadataProvider
     {
-        private static void ApplyMetadataAwareAttributes(IEnumerable<Attribute> attributes, ModelMetadata result)
-        {
-            foreach (IMetadataAware awareAttribute in attributes.OfType<IMetadataAware>())
-            {
-                awareAttribute.OnMetadataCreated(result);
-            }
-        }
-
         protected abstract ModelMetadata CreateMetadata(IEnumerable<Attribute> attributes, Type containerType, Func<object> modelAccessor, Type modelType, string propertyName);
-
-        protected virtual IEnumerable<Attribute> FilterAttributes(Type containerType, PropertyDescriptor propertyDescriptor, IEnumerable<Attribute> attributes)
-        {
-            return attributes;
-        }
 
         public override IEnumerable<ModelMetadata> GetMetadataForProperties(object container, Type containerType)
         {
@@ -41,7 +28,7 @@ namespace System.Web.Http.Metadata.Providers
 
         private IEnumerable<ModelMetadata> GetMetadataForPropertiesImpl(object container, Type containerType)
         {
-            foreach (PropertyDescriptor property in GetTypeDescriptor(containerType).GetProperties())
+            foreach (PropertyDescriptor property in GetProperties(containerType))
             {
                 Func<object> modelAccessor = container == null ? null : GetPropertyValueAccessor(container, property);
                 yield return GetMetadataForProperty(modelAccessor, containerType, property);
@@ -59,8 +46,7 @@ namespace System.Web.Http.Metadata.Providers
                 throw Error.ArgumentNullOrEmpty("propertyName");
             }
 
-            ICustomTypeDescriptor typeDescriptor = GetTypeDescriptor(containerType);
-            PropertyDescriptor property = typeDescriptor.GetProperties().Find(propertyName, true);
+            PropertyDescriptor property = GetProperties(containerType).Find(propertyName, true);
             if (property == null)
             {
                 throw Error.Argument("propertyName", SRResources.Common_PropertyNotFound, containerType, propertyName);
@@ -71,10 +57,8 @@ namespace System.Web.Http.Metadata.Providers
 
         protected virtual ModelMetadata GetMetadataForProperty(Func<object> modelAccessor, Type containerType, PropertyDescriptor propertyDescriptor)
         {
-            IEnumerable<Attribute> attributes = FilterAttributes(containerType, propertyDescriptor, propertyDescriptor.Attributes.Cast<Attribute>());
-            ModelMetadata result = CreateMetadata(attributes, containerType, modelAccessor, propertyDescriptor.PropertyType, propertyDescriptor.Name);
-            ApplyMetadataAwareAttributes(attributes, result);
-            return result;
+            IEnumerable<Attribute> attributes = propertyDescriptor.Attributes.Cast<Attribute>();
+            return CreateMetadata(attributes, containerType, modelAccessor, propertyDescriptor.PropertyType, propertyDescriptor.Name);
         }
 
         public override ModelMetadata GetMetadataForType(Func<object> modelAccessor, Type modelType)
@@ -85,9 +69,7 @@ namespace System.Web.Http.Metadata.Providers
             }
 
             IEnumerable<Attribute> attributes = GetTypeDescriptor(modelType).GetAttributes().Cast<Attribute>();
-            ModelMetadata result = CreateMetadata(attributes, null /* containerType */, modelAccessor, modelType, null /* propertyName */);
-            ApplyMetadataAwareAttributes(attributes, result);
-            return result;
+            return CreateMetadata(attributes, null /* containerType */, modelAccessor, modelType, null /* propertyName */);
         }
 
         private static Func<object> GetPropertyValueAccessor(object container, PropertyDescriptor property)
@@ -98,6 +80,11 @@ namespace System.Web.Http.Metadata.Providers
         protected virtual ICustomTypeDescriptor GetTypeDescriptor(Type type)
         {
             return TypeDescriptorHelper.Get(type);
+        }
+
+        protected virtual PropertyDescriptorCollection GetProperties(Type type)
+        {
+            return GetTypeDescriptor(type).GetProperties();
         }
     }
 }

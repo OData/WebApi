@@ -38,7 +38,7 @@ namespace System.Web.Http.WebHost
                     // Use the property in .NET 4.5 if available
                     if (srPropertyInfo != null)
                     {
-                        Action<HttpResponseBase, bool> setter = (Action<HttpResponseBase, bool>)Delegate.CreateDelegate(typeof(HttpResponseBase), srPropertyInfo.GetSetMethod(), throwOnBindFailure: false);
+                        Action<HttpResponseBase, bool> setter = (Action<HttpResponseBase, bool>)Delegate.CreateDelegate(typeof(Action<HttpResponseBase, bool>), srPropertyInfo.GetSetMethod(), throwOnBindFailure: false);
                         return httpContext => setter(httpContext.Response, true);
                     }
 

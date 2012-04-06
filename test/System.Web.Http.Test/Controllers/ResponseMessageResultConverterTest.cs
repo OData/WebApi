@@ -30,6 +30,12 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
+        public void Convert_WhenContextIsNull_Throws()
+        {
+            Assert.ThrowsArgumentNull(() => _converter.Convert(controllerContext: null, actionResult: new HttpResponseMessage()), "controllerContext");
+        }
+
+        [Fact]
         public void Convert_WhenValueIsNull_Throws()
         {
             Assert.Throws<InvalidOperationException>(() => _converter.Convert(_context, null),

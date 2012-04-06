@@ -22,6 +22,12 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
+        public void Convert_WhenContextIsNull_Throws()
+        {
+            Assert.ThrowsArgumentNull(() => _objectValueConverter.Convert(controllerContext: null, actionResult: new object()), "controllerContext");
+        }
+
+        [Fact]
         public void Convert_WhenValueTypeIsNotCompatible_Throws()
         {
             Assert.Throws<InvalidCastException>(() => _animalValueConverter.Convert(_context, new object()),

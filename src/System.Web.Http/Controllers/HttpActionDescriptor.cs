@@ -27,6 +27,9 @@ namespace System.Web.Http.Controllers
 
         private HttpActionBinding _actionBinding;
 
+        private static readonly ResponseMessageResultConverter _responseMessageResultConverter = new ResponseMessageResultConverter();
+        private static readonly VoidResultConverter _voidResultConverter = new VoidResultConverter();
+
         protected HttpActionDescriptor()
         {
             _filterPipeline = new Lazy<Collection<FilterInfo>>(InitializeFilterPipeline);
@@ -62,7 +65,7 @@ namespace System.Web.Http.Controllers
         public virtual HttpActionBinding ActionBinding
         {
             get
-            {                
+            {
                 if (_actionBinding == null)
                 {
                     IActionValueBinder actionValueBinder = _controllerDescriptor.ActionValueBinder;
@@ -73,7 +76,7 @@ namespace System.Web.Http.Controllers
             }
             set
             {
-                if (value == null) 
+                if (value == null)
                 {
                     throw Error.PropertyNull();
                 }
@@ -165,11 +168,11 @@ namespace System.Web.Http.Controllers
 
             if (type == null)
             {
-                return new VoidResultConverter();
+                return _voidResultConverter;
             }
             else if (typeof(HttpResponseMessage).IsAssignableFrom(type))
             {
-                return new ResponseMessageResultConverter();
+                return _responseMessageResultConverter;
             }
             else
             {

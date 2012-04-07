@@ -1,4 +1,6 @@
-﻿//#define GENERATE_BASELINES
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+//#define GENERATE_BASELINES
 
 using System.CodeDom;
 using System.CodeDom.Compiler;

@@ -1,4 +1,6 @@
-﻿using System.Web.TestUtil;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.TestUtil;
 using Xunit;
 
 namespace System.Web.Http.Validation

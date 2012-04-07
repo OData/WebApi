@@ -1,4 +1,6 @@
-﻿using System.Web.Http.Dispatcher;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Http.Dispatcher;
 using System.Web.Http.WebHost;
 using System.Web.Http.WebHost.Routing;
 using System.Web.Routing;

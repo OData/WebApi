@@ -1,4 +1,6 @@
-﻿namespace System.Net.Http.Formatting
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Net.Http.Formatting
 {
     /// <summary>
     /// Interface to log events that occur during formatter reads.

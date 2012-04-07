@@ -1,3 +1,5 @@
+ï»¿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -59,14 +61,14 @@ namespace System.Web.Helpers.AntiXsrf.Test
                 + "01" // IsClaimsBased
                 + "6F1648E97249AA58754036A67E248CF044F07ECFB0ED387556CE029A4F9A40E0" // ClaimUid
                 + "05" // AdditionalData length header
-                + "E282AC3437"; // AdditionalData ("€47") as UTF8
+                + "E282AC3437"; // AdditionalData ("â‚¬47") as UTF8
 
             AntiForgeryToken token = new AntiForgeryToken()
             {
                 SecurityToken = _securityToken,
                 IsSessionToken = false,
                 ClaimUid = _claimUid,
-                AdditionalData = "€47"
+                AdditionalData = "â‚¬47"
             };
 
             // Act & assert - serialization
@@ -88,16 +90,16 @@ namespace System.Web.Helpers.AntiXsrf.Test
                 + "00" // IsSessionToken
                 + "00" // IsClaimsBased
                 + "08" // Username length header
-                + "4AC3A972C3B46D65" // Username ("Jérôme") as UTF8
+                + "4AC3A972C3B46D65" // Username ("JÃ©rÃ´me") as UTF8
                 + "05" // AdditionalData length header
-                + "E282AC3437"; // AdditionalData ("€47") as UTF8
+                + "E282AC3437"; // AdditionalData ("â‚¬47") as UTF8
 
             AntiForgeryToken token = new AntiForgeryToken()
             {
                 SecurityToken = _securityToken,
                 IsSessionToken = false,
-                Username = "Jérôme",
-                AdditionalData = "€47"
+                Username = "JÃ©rÃ´me",
+                AdditionalData = "â‚¬47"
             };
 
             // Act & assert - serialization

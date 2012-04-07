@@ -1,4 +1,6 @@
-﻿namespace System.Web.Http
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Http
 {
     /// <summary>
     /// Enum to indicate whether error details, such as exception messages and stack traces, should be included in error messages.

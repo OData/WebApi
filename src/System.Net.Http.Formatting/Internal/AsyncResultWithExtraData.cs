@@ -1,4 +1,6 @@
-﻿namespace System.Net.Http.Internal
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Net.Http.Internal
 {
     // Wrapper around async result to store additional data. This is useful to pass data between BeginXYZ / EndXYZ. 
     internal class AsyncResultWithExtraData<T> : IAsyncResult

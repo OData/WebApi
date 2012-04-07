@@ -1,4 +1,6 @@
-﻿namespace Microsoft.TestCommon
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace Microsoft.TestCommon
 {
     /// <summary>
     /// MSTest timeout constants for use with the <see cref="Microsoft.VisualStudio.TestTools.UnitTesting.TimeoutAttribute"/>.

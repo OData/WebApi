@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.ServiceModel.Channels;
 

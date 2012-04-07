@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Formatting.DataSets;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
 using Xunit;

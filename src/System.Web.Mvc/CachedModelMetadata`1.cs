@@ -1,4 +1,6 @@
-﻿namespace System.Web.Mvc
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Mvc
 {
     // This class assumes that model metadata is expensive to create, and allows the user to
     // stash a cache object that can be copied around as a prototype to make creation and

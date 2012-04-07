@@ -1,4 +1,6 @@
-﻿// Centralized all the supressions for the CSharpSymbolType and VBSymbolType enum members here for clarity. They are
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+// Centralized all the supressions for the CSharpSymbolType and VBSymbolType enum members here for clarity. They are
 // not in the CodeAnalysisDictionary because they are special case exclusions
 
 using System.Diagnostics.CodeAnalysis;

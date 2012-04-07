@@ -1,4 +1,6 @@
-﻿using System.Web.Http.Description;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
 using Xunit;

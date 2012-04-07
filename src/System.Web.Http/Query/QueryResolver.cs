@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Linq.Expressions;
 
 namespace System.Web.Http.Query
 {

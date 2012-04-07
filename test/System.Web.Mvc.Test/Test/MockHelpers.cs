@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using Moq;
 using Moq.Language.Flow;
 
 namespace System.Web.Mvc.Test

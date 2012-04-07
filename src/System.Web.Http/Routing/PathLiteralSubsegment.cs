@@ -1,4 +1,6 @@
-﻿namespace System.Web.Http.Routing
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Http.Routing
 {
     // Represents a literal subsegment of a ContentPathSegment
     internal sealed class PathLiteralSubsegment : PathSubsegment

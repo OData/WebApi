@@ -1,4 +1,6 @@
-﻿//#define PARSER_TRACE
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+//#define PARSER_TRACE
 
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -1,4 +1,6 @@
-﻿using System.Web.Razor.Generator;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Razor.Generator;
 using Xunit;
 
 namespace System.Web.Razor.Test.Generator

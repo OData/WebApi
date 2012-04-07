@@ -1,4 +1,6 @@
-﻿namespace System.Web.Mvc
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Mvc
 {
     // This interface is implemented by attributes which wish to contribute to the
     // ModelMetadata creation process without needing to write a custom metadata

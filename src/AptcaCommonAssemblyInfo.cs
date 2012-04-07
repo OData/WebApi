@@ -1,4 +1,6 @@
-﻿using System.Security;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Security;
 
 //// REVIEW: RonCain -- This version is used by the WebStackRuntime assemblies that use types
 //// from System.ComponentModelDataAnnotations which is not [SecurityTransparent]

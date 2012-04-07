@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.Web.Helpers.Facebook.#GetInitializationScripts()", Justification = "It is analogous to the get pattern users are familiar with")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.Web.Helpers.Facebook.#GetFacebookUserProfile()", Justification = "It is analogous to the get pattern users are familiar with")]

@@ -1,4 +1,6 @@
-﻿#if DEBUG
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+#if DEBUG
 
 using System.CodeDom;
 using System.CodeDom.Compiler;

@@ -1,4 +1,6 @@
-﻿using System.Web.Mvc;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Mvc;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
 using Xunit;

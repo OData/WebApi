@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Linq;
 using System.Web.Mvc;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

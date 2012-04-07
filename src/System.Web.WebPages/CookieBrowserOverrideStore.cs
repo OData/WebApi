@@ -1,4 +1,6 @@
-﻿namespace System.Web.WebPages
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.WebPages
 {
     /// <summary>
     /// The default BrowserOverrideStore. Gets overridden user agent for a request from a cookie.

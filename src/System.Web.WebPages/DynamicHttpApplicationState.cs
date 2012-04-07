@@ -1,4 +1,6 @@
-﻿using System.Dynamic;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Dynamic;
 using System.Web.WebPages.Resources;
 
 namespace System.Web.WebPages

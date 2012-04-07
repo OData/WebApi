@@ -1,4 +1,6 @@
-﻿using System.Web.Http.Controllers;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.ValueProviders;
 

@@ -1,4 +1,6 @@
-﻿namespace System.Web.WebPages
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.WebPages
 {
     // Implemented by classes that can create object instances from virtual path.
     // Those implementations can completely bypass the BuildManager (e.g. for dynamic language pages)

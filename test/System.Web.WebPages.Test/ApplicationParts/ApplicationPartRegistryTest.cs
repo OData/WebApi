@@ -1,4 +1,6 @@
-﻿using System.Web.WebPages.ApplicationParts;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.WebPages.ApplicationParts;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

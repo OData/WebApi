@@ -1,4 +1,6 @@
-﻿namespace System.Web.Mvc
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Mvc
 {
     // This attribute can be applied to a model property to specify that the particular property to
     // which it is applied should not go through request validation.

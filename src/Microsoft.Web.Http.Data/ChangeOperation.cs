@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Web.Http.Data
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace Microsoft.Web.Http.Data
 {
     /// <summary>
     /// Enumeration of the types of operations a <see cref="DataController"/> can perform.

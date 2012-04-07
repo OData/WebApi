@@ -1,4 +1,6 @@
-﻿namespace System.Web.Mvc
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Mvc
 {
     // represents a result that doesn't do anything, like a controller action returning null
     public class EmptyResult : ActionResult

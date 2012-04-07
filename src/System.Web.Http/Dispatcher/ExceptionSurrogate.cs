@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 

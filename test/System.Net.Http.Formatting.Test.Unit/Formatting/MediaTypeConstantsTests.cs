@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Formatting;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.TestCommon;

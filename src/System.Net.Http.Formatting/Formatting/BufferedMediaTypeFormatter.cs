@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;

@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Text;
 using System.Web.Razor.Utils;
 
 namespace System.Web.Razor.Test.Framework

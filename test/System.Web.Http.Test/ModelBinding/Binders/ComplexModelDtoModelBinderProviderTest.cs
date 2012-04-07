@@ -1,4 +1,6 @@
-﻿using System.Web.Http.Metadata.Providers;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Http.Metadata.Providers;
 using Xunit;
 
 namespace System.Web.Http.ModelBinding.Binders

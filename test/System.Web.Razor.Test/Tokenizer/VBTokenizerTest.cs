@@ -1,4 +1,6 @@
-﻿using System.Web.Razor.Tokenizer;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Razor.Tokenizer;
 using System.Web.Razor.Tokenizer.Symbols;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

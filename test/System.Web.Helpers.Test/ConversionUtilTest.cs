@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Drawing;
 using System.Globalization;
 using Xunit;
 

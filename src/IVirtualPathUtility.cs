@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Internal.Web.Utils
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace Microsoft.Internal.Web.Utils
 {
     internal interface IVirtualPathUtility
     {

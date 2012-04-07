@@ -1,4 +1,6 @@
-﻿namespace System.Web.Helpers.AntiXsrf
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Helpers.AntiXsrf
 {
     // Represents the security token for the Anti-XSRF system.
     // The token is a random 128-bit value that correlates the session with the request body.

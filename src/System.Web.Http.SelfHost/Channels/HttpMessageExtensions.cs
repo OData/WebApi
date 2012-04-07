@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http;
 using System.ServiceModel.Channels;
 
 namespace System.Web.Http.SelfHost.Channels

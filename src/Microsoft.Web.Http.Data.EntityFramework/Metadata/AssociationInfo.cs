@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Web.Http.Data.EntityFramework.Metadata
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace Microsoft.Web.Http.Data.EntityFramework.Metadata
 {
     /// <summary>
     /// Information about an Association

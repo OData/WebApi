@@ -1,4 +1,6 @@
-﻿namespace System.ComponentModel.DataAnnotations
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.ComponentModel.DataAnnotations
 {
     /// <summary>
     /// When applied to a member, this attribute indicates that the original value of

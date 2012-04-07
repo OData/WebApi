@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.IO;
 using Xunit;
 
 namespace System.Web.Mvc.Html.Test

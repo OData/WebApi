@@ -1,4 +1,6 @@
-﻿namespace System.Web.Razor
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Razor
 {
     public abstract class StateMachine<TReturn>
     {

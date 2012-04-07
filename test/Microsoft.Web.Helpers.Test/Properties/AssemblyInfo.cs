@@ -1,3 +1,5 @@
+ï»¿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -10,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MSIT")]
 [assembly: AssemblyProduct("Microsoft.Web.Helpers.Test")]
-[assembly: AssemblyCopyright("Copyright © MSIT 2010")]
+[assembly: AssemblyCopyright("Copyright ï¿½ MSIT 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

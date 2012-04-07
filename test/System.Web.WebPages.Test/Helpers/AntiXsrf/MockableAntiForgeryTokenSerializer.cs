@@ -1,4 +1,6 @@
-﻿namespace System.Web.Helpers.AntiXsrf.Test
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+namespace System.Web.Helpers.AntiXsrf.Test
 {
     // An IAntiForgeryTokenSerializer that can be passed to MoQ.
     public abstract class MockableAntiForgeryTokenSerializer : IAntiForgeryTokenSerializer

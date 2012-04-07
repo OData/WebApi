@@ -410,11 +410,15 @@ namespace System.Web.Http.Controllers
                 // Throw if a method declares a return type of Task and returns an instance of Task<Task> or Task<Task<T>>
                 // This most likely indicates that the developer forgot to call Unwrap() somewhere.
                 Contract.Assert(method.ReturnType == typeof(Task));
-                Type innerTaskType = TypeHelper.GetTaskInnerTypeOrNull(type);
-                if (innerTaskType != null && typeof(Task).IsAssignableFrom(innerTaskType))
+                // Fast path: check if type is exactly Task first.
+                if (type != typeof(Task))
                 {
-                    throw Error.InvalidOperation(SRResources.ActionExecutor_WrappedTaskInstance,
-                        method.Name, method.DeclaringType.Name, type.FullName);
+                    Type innerTaskType = TypeHelper.GetTaskInnerTypeOrNull(type);
+                    if (innerTaskType != null && typeof(Task).IsAssignableFrom(innerTaskType))
+                    {
+                        throw Error.InvalidOperation(SRResources.ActionExecutor_WrappedTaskInstance,
+                            method.Name, method.DeclaringType.Name, type.FullName);
+                    }
                 }
             }
         }

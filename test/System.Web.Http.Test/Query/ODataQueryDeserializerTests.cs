@@ -124,8 +124,6 @@ namespace System.Web.Http.Query
         }
 
         [Theory]
-        [InlineData("DateTimeProp eq datetime'2000-12-12T12:00'", "Where(Param_0 => (Param_0.DateTimeProp == 12/12/2000 12:00:00 PM))")]
-        [InlineData("DateTimeOffsetProp eq datetimeoffset'2002-10-10T17:00:00Z'", "Where(Param_0 => (Param_0.DateTimeOffsetProp == 10/10/2002 5:00:00 PM +00:00))")]
         [InlineData("DateTimeOffsetProp eq DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp == Param_0.DateTimeOffsetProp))")]
         [InlineData("DateTimeOffsetProp ne DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp != Param_0.DateTimeOffsetProp))")]
         [InlineData("DateTimeOffsetProp ge DateTimeOffsetProp", "Where(Param_0 => (Param_0.DateTimeOffsetProp >= Param_0.DateTimeOffsetProp))")]
@@ -429,20 +427,31 @@ namespace System.Web.Http.Query
                 "Where(Param_0 => (Param_0.GuidProp == 0efdaecf-a9f0-42f3-a384-1295917af95e))");
         }
 
-        [Fact]
-        public void DateTimeExpression()
+        [Theory]
+        [InlineData("DateTimeProp eq datetime'2000-12-12T12:00'", "Where(Param_0 => (Param_0.DateTimeProp == {0}))")]
+        [InlineData("DateTimeProp lt datetime'2000-12-12T12:00'", "Where(Param_0 => (Param_0.DateTimeProp < {0}))")]
+        public void DateTimeExpression(string clause, string expectedExpression)
         {
+            var dateTime = new DateTime(2000, 12, 12, 12, 0, 0);
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=DateTimeProp lt datetime'2000-12-12T12:00'",
-                "Where(Param_0 => (Param_0.DateTimeProp < 12/12/2000 12:00:00 PM))");
+                "$filter=" + clause,
+                Error.Format(expectedExpression, dateTime));
         }
 
-        [Fact]
-        public void DateTimeOffsetExpression()
+        [Theory]
+        [InlineData("DateTimeOffsetProp eq datetimeoffset'2002-10-10T17:00:00Z'", "Where(Param_0 => (Param_0.DateTimeOffsetProp == {0}))", 0)]
+        [InlineData("DateTimeOffsetProp ge datetimeoffset'2002-10-10T17:00:00Z'", "Where(Param_0 => (Param_0.DateTimeOffsetProp >= {0}))", 0)]
+        [InlineData("DateTimeOffsetProp le datetimeoffset'2002-10-10T17:00:00-07:00'", "Where(Param_0 => (Param_0.DateTimeOffsetProp <= {0}))", -7)]
+        [InlineData("DateTimeOffsetProp eq datetimeoffset'2002-10-10T17:00:00-0600'", "Where(Param_0 => (Param_0.DateTimeOffsetProp == {0}))", -6)]
+        [InlineData("DateTimeOffsetProp lt datetimeoffset'2002-10-10T17:00:00-05'", "Where(Param_0 => (Param_0.DateTimeOffsetProp < {0}))", -5)]
+        [InlineData("DateTimeOffsetProp ne datetimeoffset'2002-10-10T17:00:00%2B09:30'", "Where(Param_0 => (Param_0.DateTimeOffsetProp != {0}))", 9.5)]
+        [InlineData("DateTimeOffsetProp gt datetimeoffset'2002-10-10T17:00:00%2B0545'", "Where(Param_0 => (Param_0.DateTimeOffsetProp > {0}))", 5.75)]
+        public void DateTimeOffsetExpression(string clause, string expectedExpression, double offsetHours)
         {
+            var dateTimeOffset = new DateTimeOffset(2002, 10, 10, 17, 0, 0, TimeSpan.FromHours(offsetHours));
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=DateTimeOffsetProp ge datetimeoffset'2002-10-10T17:00:00Z'",
-                "Where(Param_0 => (Param_0.DateTimeOffsetProp >= 10/10/2002 5:00:00 PM +00:00))");
+                "$filter=" + clause,
+                Error.Format(expectedExpression, dateTimeOffset));
         }
 
         [Fact]

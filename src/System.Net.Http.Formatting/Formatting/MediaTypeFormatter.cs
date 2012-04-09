@@ -360,9 +360,7 @@ namespace System.Net.Http.Formatting
         {
             Contract.Assert(request != null);
 
-            // Sort accept headers in descending order based on q factor.
-            IEnumerable<MediaTypeWithQualityHeaderValue> acceptMediaTypeValues =
-                request.Headers.Accept.OrderByDescending(m => m, MediaTypeWithQualityHeaderValueComparer.QualityComparer);
+            IEnumerable<MediaTypeWithQualityHeaderValue> acceptMediaTypeValues = SortByQFactor(request.Headers.Accept);
 
             foreach (MediaTypeHeaderValue acceptMediaTypeValue in acceptMediaTypeValues)
             {
@@ -374,6 +372,21 @@ namespace System.Net.Http.Formatting
 
             mediaTypeMatch = null;
             return false;
+        }
+
+        private static IEnumerable<MediaTypeWithQualityHeaderValue> SortByQFactor(HttpHeaderValueCollection<MediaTypeWithQualityHeaderValue> acceptHeaders)
+        {
+            if (acceptHeaders.Count > 1)
+            {
+                // Sort accept headers (if more than 1) in descending order based on q factor
+                // Use OrderBy() instead of Array.Sort() as it performs fewer comparisons. In this case the comparisons
+                // are quite expensive so OrderBy() performs better.
+                return acceptHeaders.OrderByDescending(m => m, MediaTypeWithQualityHeaderValueComparer.QualityComparer);
+            }
+            else
+            {
+                return acceptHeaders;
+            }
         }
 
         internal bool TryMatchMediaTypeMapping(HttpRequestMessage request, out MediaTypeMatch mediaTypeMatch)

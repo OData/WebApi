@@ -38,6 +38,11 @@ namespace System.Net.Http.Formatting
             Contract.Assert(mediaType1 != null, "The 'mediaType1' parameter should not be null.");
             Contract.Assert(mediaType2 != null, "The 'mediaType2' parameter should not be null.");
 
+            if (Object.ReferenceEquals(mediaType1, mediaType2))
+            {
+                return 0;
+            }
+
             int returnValue = CompareBasedOnQualityFactor(mediaType1, mediaType2);
 
             if (returnValue == 0)

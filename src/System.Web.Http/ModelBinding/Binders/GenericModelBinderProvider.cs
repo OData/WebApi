@@ -79,14 +79,17 @@ namespace System.Web.Http.ModelBinding.Binders
 
         public bool SuppressPrefixCheck { get; set; }
 
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            ModelBindingHelper.ValidateBindingContext(bindingContext);
+            if (modelType == null)
+            {
+                throw new ArgumentNullException("modelType");
+            }
 
             Type[] typeArguments = null;
             if (ModelType.IsInterface)
             {
-                Type matchingClosedInterface = TypeHelper.ExtractGenericInterface(bindingContext.ModelType, ModelType);
+                Type matchingClosedInterface = TypeHelper.ExtractGenericInterface(modelType, ModelType);
                 if (matchingClosedInterface != null)
                 {
                     typeArguments = matchingClosedInterface.GetGenericArguments();
@@ -94,15 +97,12 @@ namespace System.Web.Http.ModelBinding.Binders
             }
             else
             {
-                typeArguments = TypeHelper.GetTypeArgumentsIfMatch(bindingContext.ModelType, ModelType);
+                typeArguments = TypeHelper.GetTypeArgumentsIfMatch(modelType, ModelType);
             }
 
             if (typeArguments != null)
             {
-                if (SuppressPrefixCheck || bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
-                {
-                    return _modelBinderFactory(typeArguments);
-                }
+                return _modelBinderFactory(typeArguments);                
             }
 
             return null;

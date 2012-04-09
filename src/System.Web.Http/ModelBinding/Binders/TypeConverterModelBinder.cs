@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Http.Controllers;
+using System.Web.Http.Internal;
 using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.ModelBinding.Binders
@@ -18,6 +19,11 @@ namespace System.Web.Http.ModelBinding.Binders
             if (valueProviderResult == null)
             {
                 return false; // no entry
+            }
+
+            if (!TypeHelper.HasStringConverter(bindingContext.ModelType))
+            {
+                return false; // this type cannot be converted
             }
 
             object newModel;

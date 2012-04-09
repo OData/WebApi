@@ -190,8 +190,7 @@ namespace System.Web.Http.ModelBinding
                     ValueProvider = vp
                 };
 
-                IModelBinder binder = modelBinderProvider.GetBinder(actionContext, ctx);
-
+                IModelBinder binder = modelBinderProvider.GetBinder(config, type);
                 bool haveResult = binder.BindModel(actionContext, ctx);
 
                 // Log model binding errors

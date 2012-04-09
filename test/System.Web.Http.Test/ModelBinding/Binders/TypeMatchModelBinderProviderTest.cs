@@ -21,10 +21,11 @@ namespace System.Web.Http.ModelBinding.Binders
             TypeMatchModelBinderProvider provider = new TypeMatchModelBinderProvider();
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
+            bool bound = binder.BindModel(null, bindingContext);
 
             // Assert
-            Assert.Null(binder);
+            Assert.False(bound);
         }
 
         [Fact]
@@ -40,7 +41,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TypeMatchModelBinderProvider provider = new TypeMatchModelBinderProvider();
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.IsType<TypeMatchModelBinder>(binder);

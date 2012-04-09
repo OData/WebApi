@@ -17,12 +17,17 @@ namespace System.Web.Http.ModelBinding.Binders
             new SimpleModelBinderProvider(typeof(Binary), new LinqBinaryExtensibleModelBinder())
         };
 
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            return (from provider in _providers
-                    let binder = provider.GetBinder(actionContext, bindingContext)
-                    where binder != null
-                    select binder).FirstOrDefault();
+            foreach (ModelBinderProvider provider in _providers)
+            {
+                IModelBinder binder = provider.GetBinder(configuration, modelType);
+                if (binder != null)
+                {
+                    return binder;
+                }
+            }
+            return null;
         }
 
         // This is essentially a clone of the ByteArrayModelBinder from core

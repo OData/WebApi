@@ -26,7 +26,7 @@ namespace System.Web.Http.ModelBinding.Binders
             DictionaryModelBinderProvider binderProvider = new DictionaryModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.IsType<DictionaryModelBinder<int, string>>(binder);
@@ -49,7 +49,7 @@ namespace System.Web.Http.ModelBinding.Binders
             DictionaryModelBinderProvider binderProvider = new DictionaryModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);
@@ -69,10 +69,11 @@ namespace System.Web.Http.ModelBinding.Binders
             DictionaryModelBinderProvider binderProvider = new DictionaryModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
+            bool bound = binder.BindModel(null, bindingContext);
 
             // Assert
-            Assert.Null(binder);
+            Assert.False(bound);
         }
     }
 }

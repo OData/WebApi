@@ -16,9 +16,37 @@ namespace System.Web.Http.ModelBinding.Binders
     {
         internal ModelMetadataProvider MetadataProvider { private get; set; }
 
+        internal static bool CanBindType(Type modelType)
+        {
+            // Simple types cannot use this binder
+            bool isComplexType = !TypeHelper.HasStringConverter(modelType);
+            if (!isComplexType)
+            {
+                return false;
+            }
+
+            if (modelType == typeof(ComplexModelDto))
+            {
+                // forbidden type - will cause a stack overflow if we try binding this type
+                return false;
+            }
+            return true;
+        }
+
         public virtual bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
             ModelBindingHelper.ValidateBindingContext(bindingContext);
+
+            if (!bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
+            {
+                // no values to bind
+                return false;
+            }
+
+            if (!CanBindType(bindingContext.ModelType))
+            {
+                return false;
+            }
 
             EnsureModel(actionContext, bindingContext);
             IEnumerable<ModelMetadata> propertyMetadatas = GetMetadataForProperties(actionContext, bindingContext);
@@ -78,8 +106,7 @@ namespace System.Web.Http.ModelBinding.Binders
                 ModelName = bindingContext.ModelName
             };
 
-            IModelBinder dtoBinder = actionContext.GetBinder(dtoBindingContext);
-            dtoBinder.BindModel(actionContext, dtoBindingContext);
+            actionContext.Bind(dtoBindingContext);
             return (ComplexModelDto)dtoBindingContext.Model;
         }
 

@@ -21,17 +21,13 @@ namespace System.Web.Http.Internal
                 ModelName = ModelBindingHelper.CreatePropertyModelName(parentBindingContext.ModelName, propertyName)
             };
 
-            IModelBinder binder;
-            if (actionContext.TryGetBinder(propertyBindingContext, out binder))
+            if (actionContext.Bind(propertyBindingContext))            
             {
-                if (binder.BindModel(actionContext, propertyBindingContext))
-                {
-                    object untypedModel = propertyBindingContext.Model;
-                    model = ModelBindingHelper.CastOrDefault<TModel>(untypedModel);
-                    parentBindingContext.ValidationNode.ChildNodes.Add(propertyBindingContext.ValidationNode);
-                    return true;
-                }
-            }
+                object untypedModel = propertyBindingContext.Model;
+                model = ModelBindingHelper.CastOrDefault<TModel>(untypedModel);
+                parentBindingContext.ValidationNode.ChildNodes.Add(propertyBindingContext.ValidationNode);
+                return true;
+            }            
 
             model = default(TModel);
             return false;

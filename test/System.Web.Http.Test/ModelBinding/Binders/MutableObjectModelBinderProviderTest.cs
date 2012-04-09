@@ -22,7 +22,7 @@ namespace System.Web.Http.ModelBinding.Binders
             MutableObjectModelBinderProvider binderProvider = new MutableObjectModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);
@@ -45,7 +45,7 @@ namespace System.Web.Http.ModelBinding.Binders
             MutableObjectModelBinderProvider binderProvider = new MutableObjectModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.NotNull(binder);
@@ -69,7 +69,7 @@ namespace System.Web.Http.ModelBinding.Binders
             MutableObjectModelBinderProvider binderProvider = new MutableObjectModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);
@@ -92,7 +92,7 @@ namespace System.Web.Http.ModelBinding.Binders
             MutableObjectModelBinderProvider binderProvider = new MutableObjectModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);

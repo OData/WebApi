@@ -44,19 +44,15 @@ namespace System.Web.Http.ModelBinding.Binders
                 };
 
                 bool didBind = false;
-                object boundValue = null;
-                IModelBinder childBinder;
-                if (actionContext.TryGetBinder(childBindingContext, out childBinder))
+                object boundValue = null;                
+                if (actionContext.Bind(childBindingContext))                
                 {
-                    didBind = childBinder.BindModel(actionContext, childBindingContext);
-                    if (didBind)
-                    {
-                        boundValue = childBindingContext.Model;
+                    didBind = true;
+                    boundValue = childBindingContext.Model;
 
-                        // merge validation up
-                        bindingContext.ValidationNode.ChildNodes.Add(childBindingContext.ValidationNode);
-                    }
-                }
+                    // merge validation up
+                    bindingContext.ValidationNode.ChildNodes.Add(childBindingContext.ValidationNode);
+                }                
 
                 // infinite size collection stops on first bind failure
                 if (!didBind && !indexNamesIsFinite)
@@ -73,6 +69,11 @@ namespace System.Web.Http.ModelBinding.Binders
         public virtual bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
             ModelBindingHelper.ValidateBindingContext(bindingContext);
+
+            if (!bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
+            {
+                return false;
+            }
 
             ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
             List<TElement> boundCollection = (valueProviderResult != null)
@@ -109,15 +110,11 @@ namespace System.Web.Http.ModelBinding.Binders
                 };
 
                 object boundValue = null;
-                IModelBinder childBinder;
-                if (actionContext.TryGetBinder(innerBindingContext, out childBinder))
+                if (actionContext.Bind(innerBindingContext))                
                 {
-                    if (childBinder.BindModel(actionContext, innerBindingContext))
-                    {
-                        boundValue = innerBindingContext.Model;
-                        bindingContext.ValidationNode.ChildNodes.Add(innerBindingContext.ValidationNode);
-                    }
-                }
+                    boundValue = innerBindingContext.Model;
+                    bindingContext.ValidationNode.ChildNodes.Add(innerBindingContext.ValidationNode);
+                }                
                 boundCollection.Add(ModelBindingHelper.CastOrDefault<TElement>(boundValue));
             }
 

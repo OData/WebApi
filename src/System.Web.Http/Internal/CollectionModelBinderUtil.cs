@@ -46,19 +46,91 @@ namespace System.Web.Http.Internal
             }
         }
 
+        // Instantiate a generic binder. 
         // supportedInterfaceType: type that is updatable by this binder
-        // newInstanceType: type that will be created by the binder if necessary
         // openBinderType: model binder type
         // modelMetadata: metadata for the model to bind
         //
-        // example: GetGenericBinder(typeof(IList<>), typeof(List<>), typeof(ListBinder<>), ...) means that the ListBinder<T>
+        // example: GetGenericBinder(typeof(IList<>), typeof(ListBinder<>), ...) means that the ListBinder<T>
         // type can update models that implement IList<T>, and if for some reason the existing model instance is not
         // updatable the binder will create a List<T> object and bind to that instead. This method will return a ListBinder<T>
         // or null, depending on whether the type and updatability checks succeed.
-        internal static IModelBinder GetGenericBinder(Type supportedInterfaceType, Type newInstanceType, Type openBinderType, ModelMetadata modelMetadata)
+        internal static IModelBinder GetGenericBinder(Type supportedInterfaceType, Type openBinderType, Type modelType)
         {
-            Type[] typeArguments = GetTypeArgumentsForUpdatableGenericCollection(supportedInterfaceType, newInstanceType, modelMetadata);
-            return (typeArguments != null) ? (IModelBinder)Activator.CreateInstance(openBinderType.MakeGenericType(typeArguments)) : null;
+            Type[] modelTypeArguments = GetGenericBinderTypeArgs(supportedInterfaceType, modelType);
+
+            if (modelTypeArguments == null)
+            {
+                return null;
+            }
+            var binder = (IModelBinder)Activator.CreateInstance(openBinderType.MakeGenericType(modelTypeArguments));
+            return binder;
+        }
+
+        // Get the generic arguments for hte binder, based on the model type. Or null if not compatible.
+        internal static Type[] GetGenericBinderTypeArgs(Type supportedInterfaceType, Type modelType)
+        {
+            if (!modelType.IsGenericType || modelType.IsGenericTypeDefinition)
+            {
+                // not a closed generic type
+                return null;
+            }
+
+            Type[] modelTypeArguments = modelType.GetGenericArguments();
+            if (modelTypeArguments.Length != supportedInterfaceType.GetGenericArguments().Length)
+            {
+                // wrong number of generic type arguments
+                return null;
+            }
+
+            return modelTypeArguments;
+        }
+
+        // Check if a binder can handle the model type.
+        // This may require per-request information (like model metadata's ReadOnly). This is the per-request counterpart to GetGenericBinderTypeArgs.
+        internal static bool IsModelCompatibleWithGenericBinder(Type supportedInterfaceType, Type newInstanceType, Type modelType, ModelMetadata modelMetadata)
+        {
+            Type[] modelTypeArguments = GetGenericBinderTypeArgs(supportedInterfaceType, modelType);
+
+            if (modelTypeArguments == null)
+            {
+                return false;
+            }
+
+            /*
+             * Is it possible just to change the reference rather than update the collection in-place?
+             */
+
+            if (!modelMetadata.IsReadOnly)            
+            {
+                Type closedNewInstanceType = newInstanceType.MakeGenericType(modelTypeArguments);
+                if (modelMetadata.ModelType.IsAssignableFrom(closedNewInstanceType))
+                {
+                    return true;
+                }
+            }
+
+            /*
+             * At this point, we know we can't change the reference, so we need to verify that
+             * the model instance can be updated in-place.
+             */
+
+            Type closedSupportedInterfaceType = supportedInterfaceType.MakeGenericType(modelTypeArguments);
+            if (!closedSupportedInterfaceType.IsInstanceOfType(modelMetadata.Model))
+            {
+                return false; // not instance of correct interface
+            }
+
+            Type closedCollectionType = TypeHelper.ExtractGenericInterface(closedSupportedInterfaceType, typeof(ICollection<>));
+            bool collectionInstanceIsReadOnly = (bool)closedCollectionType.GetProperty("IsReadOnly").GetValue(modelMetadata.Model, null);
+            if (collectionInstanceIsReadOnly)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.Web.Http.ValueProviders.ValueProviderResult.ConvertTo(System.Type)", Justification = "The ValueProviderResult already has the necessary context to perform a culture-aware conversion.")]

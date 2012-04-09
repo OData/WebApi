@@ -97,15 +97,15 @@ namespace System.Web.Http.ModelBinding
 
         private class CustomModelBinderProvider : ModelBinderProvider
         {
-            public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+            public override IModelBinder GetBinder(HttpConfiguration config, Type modelType)
             {
                 throw new NotImplementedException();
-            }
+            }            
         }
 
         private class SecondCustomModelBinderProvider : ModelBinderProvider
         {
-            public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+            public override IModelBinder GetBinder(HttpConfiguration config, Type modelType)
             {
                 throw new NotImplementedException();
             }

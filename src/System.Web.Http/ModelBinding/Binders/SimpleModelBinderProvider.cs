@@ -1,7 +1,5 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
-
+﻿using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
-
 namespace System.Web.Http.ModelBinding.Binders
 {
     // Returns a user-specified binder for a given type.
@@ -47,19 +45,49 @@ namespace System.Web.Http.ModelBinding.Binders
 
         public bool SuppressPrefixCheck { get; set; }
 
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            ModelBindingHelper.ValidateBindingContext(bindingContext);
-
-            if (bindingContext.ModelType == ModelType)
+            if (modelType == null)
             {
-                if (SuppressPrefixCheck || bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
-                {
-                    return _modelBinderFactory();
-                }
+                throw new ArgumentNullException("modelType");
             }
 
+            if (modelType == ModelType)
+            {
+                if (SuppressPrefixCheck)
+                {
+                    // If we're suppressing a prefix check, then we don't need any further info from the ActionContext
+                    // to know that we're using this binder. 
+                    return _modelBinderFactory();
+                }
+                else
+                {
+                    return new SimpleModelBinder(this);
+                }
+            }
             return null;
+        }
+
+        // Helper binder to do the prefix check before invoking into the user's binder. 
+        private class SimpleModelBinder : IModelBinder
+        {
+            private readonly SimpleModelBinderProvider _parent;
+
+            public SimpleModelBinder(SimpleModelBinderProvider parent)
+            {
+                _parent = parent;
+            }
+
+            public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
+            {
+                Contract.Assert(!_parent.SuppressPrefixCheck); // wouldn't have even created this binder 
+                if (bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
+                {
+                    IModelBinder binder = _parent._modelBinderFactory();
+                    return binder.BindModel(actionContext, bindingContext);
+                }
+                return false;
+            }
         }
     }
 }

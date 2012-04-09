@@ -80,8 +80,9 @@ namespace System.Web.Http.ModelBinding.Binders
             Assert.Equal(42, intDtoResult.Model);
             Assert.Equal("theModel.IntProperty", intDtoResult.ValidationNode.ModelStateKey);
 
-            ComplexModelDtoResult dateTimeDtoResult = dto.Results[dto.PropertyMetadata.Where(m => m.ModelType == typeof(DateTime)).First()];
-            Assert.Null(dateTimeDtoResult);
+            // Bind failed, so DateTime won't even be in the DTO dictionary
+            bool containsMissingKey = dto.Results.ContainsKey(dto.PropertyMetadata.Where(m => m.ModelType == typeof(DateTime)).First());
+            Assert.False(containsMissingKey);
         }
 
         private sealed class MyModel

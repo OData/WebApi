@@ -6,18 +6,15 @@ namespace System.Web.Http.ModelBinding.Binders
 {
     public sealed class ArrayModelBinderProvider : ModelBinderProvider
     {
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            ModelBindingHelper.ValidateBindingContext(bindingContext);
-
-            if (!bindingContext.ModelMetadata.IsReadOnly && bindingContext.ModelType.IsArray &&
-                bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
+            if (!modelType.IsArray)
             {
-                Type elementType = bindingContext.ModelType.GetElementType();
-                return (IModelBinder)Activator.CreateInstance(typeof(ArrayModelBinder<>).MakeGenericType(elementType));
+                return null;
             }
 
-            return null;
+            Type elementType = modelType.GetElementType();
+            return (IModelBinder)Activator.CreateInstance(typeof(ArrayModelBinder<>).MakeGenericType(elementType));
         }
     }
 }

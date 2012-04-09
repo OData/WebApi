@@ -11,6 +11,7 @@ using System.Web.Http.Validation;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
+using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.ModelBinding.Binders
 {
@@ -20,11 +21,15 @@ namespace System.Web.Http.ModelBinding.Binders
         public void BindModel()
         {
             // Arrange
+            Mock<IValueProvider> mockValueProvider = new Mock<IValueProvider>();
+            mockValueProvider.Setup(o => o.ContainsPrefix(It.IsAny<string>())).Returns(true);
+
             Mock<IModelBinder> mockDtoBinder = new Mock<IModelBinder>();
             ModelBindingContext bindingContext = new ModelBindingContext
             {
                 ModelMetadata = GetMetadataForObject(new Person()),
-                ModelName = "someName"
+                ModelName = "someName",
+                ValueProvider = mockValueProvider.Object
             };
             HttpActionContext context = ContextUtil.CreateActionContext();
             context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), new SimpleModelBinderProvider(typeof(ComplexModelDto), mockDtoBinder.Object) { SuppressPrefixCheck = true });

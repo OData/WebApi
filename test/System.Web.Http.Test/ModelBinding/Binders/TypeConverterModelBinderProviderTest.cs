@@ -17,7 +17,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TypeConverterModelBinderProvider provider = new TypeConverterModelBinderProvider();
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);
@@ -33,10 +33,11 @@ namespace System.Web.Http.ModelBinding.Binders
             TypeConverterModelBinderProvider provider = new TypeConverterModelBinderProvider();
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
+            bool bound = binder.BindModel(null, bindingContext);
 
             // Assert
-            Assert.Null(binder);
+            Assert.False(bound);
         }
 
         [Fact]
@@ -48,7 +49,7 @@ namespace System.Web.Http.ModelBinding.Binders
             TypeConverterModelBinderProvider provider = new TypeConverterModelBinderProvider();
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.IsType<TypeConverterModelBinder>(binder);

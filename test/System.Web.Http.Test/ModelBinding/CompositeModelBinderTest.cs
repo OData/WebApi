@@ -71,15 +71,8 @@ namespace System.Web.Http.ModelBinding
                         return true;
                     });
 
-            Mock<ModelBinderProvider> mockBinderProvider = new Mock<ModelBinderProvider>();
-            mockBinderProvider.Setup(o => o.GetBinder(actionContext, It.IsAny<ModelBindingContext>())).Returns((IModelBinder)mockIntBinder.Object).Verifiable();
-            List<ModelBinderProvider> binderProviders = new List<ModelBinderProvider>()
-            {
-                mockBinderProvider.Object
-            };
-
             //binderProviders.RegisterBinderForType(typeof(int), mockIntBinder.Object, false /* suppressPrefixCheck */);
-            CompositeModelBinder shimBinder = new CompositeModelBinder(binderProviders);
+            IModelBinder shimBinder = new CompositeModelBinder(mockIntBinder.Object);
 
             // Act
             bool isBound = shimBinder.BindModel(actionContext, bindingContext);
@@ -119,6 +112,11 @@ namespace System.Web.Http.ModelBinding
                 .Returns(
                     delegate(HttpActionContext cc, ModelBindingContext mbc)
                     {
+                        if (!String.IsNullOrEmpty(mbc.ModelName))
+                        {
+                            return false;
+                        }
+
                         Assert.Same(bindingContext.ModelMetadata, mbc.ModelMetadata);
                         Assert.Equal("", mbc.ModelName);
                         Assert.Same(bindingContext.ValueProvider, mbc.ValueProvider);
@@ -128,17 +126,8 @@ namespace System.Web.Http.ModelBinding
                         return true;
                     });
 
-            List<ModelBinderProvider> binderProviders = new List<ModelBinderProvider>()
-            {
-                new SimpleModelBinderProvider()
-                {
-                    Binder = mockIntBinder.Object,
-                    OnlyWithEmptyModelName = true
-                }
-            };
-
             //binderProviders.RegisterBinderForType(typeof(List<int>), mockIntBinder.Object, false /* suppressPrefixCheck */);
-            CompositeModelBinder shimBinder = new CompositeModelBinder(binderProviders);
+            IModelBinder shimBinder = new CompositeModelBinder(mockIntBinder.Object);
 
             // Act
             bool isBound = shimBinder.BindModel(actionContext, bindingContext);
@@ -158,14 +147,7 @@ namespace System.Web.Http.ModelBinding
             Mock<IModelBinder> mockListBinder = new Mock<IModelBinder>();
             mockListBinder.Setup(o => o.BindModel(actionContext, It.IsAny<ModelBindingContext>())).Returns(false).Verifiable();
 
-            Mock<ModelBinderProvider> mockBinderProvider = new Mock<ModelBinderProvider>();
-            mockBinderProvider.Setup(o => o.GetBinder(actionContext, It.IsAny<ModelBindingContext>())).Returns((IModelBinder)mockListBinder.Object).Verifiable();
-            List<ModelBinderProvider> binderProviders = new List<ModelBinderProvider>()
-            {
-                mockBinderProvider.Object
-            };
-
-            CompositeModelBinder shimBinder = new CompositeModelBinder(binderProviders);
+            IModelBinder shimBinder = (IModelBinder)mockListBinder.Object;
 
             ModelBindingContext bindingContext = new ModelBindingContext
             {
@@ -190,12 +172,13 @@ namespace System.Web.Http.ModelBinding
             // Arrange
             HttpActionContext actionContext = ContextUtil.CreateActionContext(GetHttpControllerContext());
             Mock<ModelBinderProvider> mockBinderProvider = new Mock<ModelBinderProvider>();
-            mockBinderProvider.Setup(o => o.GetBinder(actionContext, It.IsAny<ModelBindingContext>())).Returns((IModelBinder)null).Verifiable();
+            mockBinderProvider.Setup(o => o.GetBinder(It.IsAny<HttpConfiguration>(), It.IsAny<Type>())).Returns((IModelBinder)null).Verifiable();
             List<ModelBinderProvider> binderProviders = new List<ModelBinderProvider>()
             {
                 mockBinderProvider.Object
             };
-            CompositeModelBinder shimBinder = new CompositeModelBinder(binderProviders);
+            CompositeModelBinderProvider shimBinderProvider = new CompositeModelBinderProvider(binderProviders);
+            CompositeModelBinder shimBinder = new CompositeModelBinder(shimBinderProvider.GetBinder(null, null));
 
             ModelBindingContext bindingContext = new ModelBindingContext
             {
@@ -212,7 +195,7 @@ namespace System.Web.Http.ModelBinding
             Assert.Null(bindingContext.Model);
             Assert.True(bindingContext.ModelState.IsValid);
             mockBinderProvider.Verify();
-            mockBinderProvider.Verify(o => o.GetBinder(actionContext, It.IsAny<ModelBindingContext>()), Times.AtMostOnce());
+            mockBinderProvider.Verify(o => o.GetBinder(It.IsAny<HttpConfiguration>(), It.IsAny<Type>()), Times.AtMostOnce());
         }
 
         private static HttpControllerContext GetHttpControllerContext()
@@ -228,23 +211,6 @@ namespace System.Web.Http.ModelBinding
         {
             public string FirstName { get; set; }
             public string LastName { get; set; }
-        }
-
-        private class SimpleModelBinderProvider : ModelBinderProvider
-        {
-            public IModelBinder Binder { get; set; }
-
-            public bool OnlyWithEmptyModelName { get; set; }
-
-            public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
-            {
-                if (OnlyWithEmptyModelName && !String.IsNullOrEmpty(bindingContext.ModelName))
-                {
-                    return null;
-                }
-
-                return Binder;
-            }
         }
 
         private class SimpleValueProvider : Dictionary<string, object>, IValueProvider

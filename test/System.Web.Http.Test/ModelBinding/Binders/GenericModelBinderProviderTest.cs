@@ -126,7 +126,7 @@ Parameter name: modelType");
             ModelBindingContext bindingContext = GetBindingContext(typeof(object));
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);
@@ -143,7 +143,7 @@ Parameter name: modelType");
             ModelBindingContext bindingContext = GetBindingContext(typeof(object));
 
             // Act
-            IModelBinder binder = provider.GetBinder(null, bindingContext);
+            IModelBinder binder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(binder);
@@ -160,10 +160,11 @@ Parameter name: modelType");
             bindingContext.ValueProvider = new SimpleHttpValueProvider();
 
             // Act
-            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext);
+            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext.ModelType);
+            bool bound = returnedBinder.BindModel(null, bindingContext);
 
             // Assert
-            Assert.Null(returnedBinder);
+            Assert.False(bound);
         }
 
         [Fact]
@@ -186,7 +187,7 @@ Parameter name: modelType");
             ModelBindingContext bindingContext = GetBindingContext(typeof(List<int>));
 
             // Act
-            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext);
+            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Same(binderInstance, returnedBinder);
@@ -206,7 +207,7 @@ Parameter name: modelType");
             ModelBindingContext bindingContext = GetBindingContext(typeof(List<int>));
 
             // Act
-            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext);
+            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Same(binderInstance, returnedBinder);
@@ -224,7 +225,7 @@ Parameter name: modelType");
             ModelBindingContext bindingContext = GetBindingContext(typeof(List<int>));
 
             // Act
-            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext);
+            IModelBinder returnedBinder = provider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.IsType<CollectionModelBinder<int>>(returnedBinder);
@@ -239,7 +240,7 @@ Parameter name: modelType");
             // Act & assert
             Assert.ThrowsArgumentNull(
                 () => provider.GetBinder(null, null),
-                "bindingContext");
+                "modelType");
         }
 
         private static ModelBindingContext GetBindingContext(Type modelType)

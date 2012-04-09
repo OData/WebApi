@@ -64,13 +64,12 @@ namespace System.Web.Http.Controllers
         }
 
         /// <summary>
-        /// Gets the <see cref="ModelBindingContext"/> for this <see cref="HttpActionContext"/>.
+        /// Attempt to bind against the given ActionContext.
         /// </summary>
-        /// <param name="actionContext">The action context.</param>
+        /// <param name="actionContext">The execution context.</param>
         /// <param name="bindingContext">The binding context.</param>
-        /// <param name="binder">When this method returns, the value associated with the specified binding context, if the context is found; otherwise, the default value for the type of the value parameter.</param>
-        /// <returns><c>true</c> if <see cref="ModelBindingContext"/> was present; otherwise <c>false</c>.</returns>
-        public static bool TryGetBinder(this HttpActionContext actionContext, ModelBindingContext bindingContext, out IModelBinder binder)
+        /// <returns>True if the bind was successful, else false.</returns>
+        public static bool Bind(this HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
             if (actionContext == null)
             {
@@ -82,43 +81,31 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("bindingContext");
             }
 
-            binder = null;
+            Type modelType = bindingContext.ModelType;
+            HttpConfiguration config = actionContext.ControllerContext.Configuration;
+            
+            IModelBinder binder = null;
             ModelBinderProvider providerFromAttr;
-            if (ModelBindingHelper.TryGetProviderFromAttributes(bindingContext.ModelType, out providerFromAttr))
+            if (ModelBindingHelper.TryGetProviderFromAttributes(modelType, out providerFromAttr))
             {
-                binder = providerFromAttr.GetBinder(actionContext, bindingContext);
-            }
-            else
-            {
-                binder = actionContext.ControllerContext.Configuration.Services.GetModelBinderProviders()
-                    .Select(p => p.GetBinder(actionContext, bindingContext))
-                    .Where(b => b != null)
-                    .FirstOrDefault();
+                binder = providerFromAttr.GetBinder(config, modelType);
+                return binder.BindModel(actionContext, bindingContext);
             }
 
-            return binder != null;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="ModelBindingContext"/> for this <see cref="HttpActionContext"/>.
-        /// </summary>
-        /// <param name="actionContext">The execution context.</param>
-        /// <param name="bindingContext">The binding context.</param>
-        /// <returns>The <see cref="ModelBindingContext"/>.</returns>
-        public static IModelBinder GetBinder(this HttpActionContext actionContext, ModelBindingContext bindingContext)
-        {
-            if (actionContext == null)
+            foreach (ModelBinderProvider provider in config.Services.GetModelBinderProviders())
             {
-                throw Error.ArgumentNull("actionContext");
+                binder = provider.GetBinder(config, modelType);
+                if (binder != null)
+                {
+                    if (binder.BindModel(actionContext, bindingContext))
+                    {
+                        return true;
+                    }
+                }
             }
 
-            IModelBinder binder;
-            if (TryGetBinder(actionContext, bindingContext, out binder))
-            {
-                return binder;
-            }
-
-            throw Error.InvalidOperation(SRResources.ModelBinderProviderCollection_BinderForTypeNotFound, bindingContext.ModelType);
+            // Either we couldn't find a binder, or the binder couldn't bind. Distinction is not important.
+            return false;
         }
     }
 }

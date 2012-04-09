@@ -8,18 +8,9 @@ namespace System.Web.Http.ModelBinding.Binders
 {
     public sealed class DictionaryModelBinderProvider : ModelBinderProvider
     {
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            ModelBindingHelper.ValidateBindingContext(bindingContext);
-
-            if (bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName))
-            {
-                return CollectionModelBinderUtil.GetGenericBinder(typeof(IDictionary<,>), typeof(Dictionary<,>), typeof(DictionaryModelBinder<,>), bindingContext.ModelMetadata);
-            }
-            else
-            {
-                return null;
-            }
+            return CollectionModelBinderUtil.GetGenericBinder(typeof(IDictionary<,>), typeof(DictionaryModelBinder<,>), modelType);
         }
     }
 }

@@ -10,9 +10,9 @@ namespace System.Web.Http.ModelBinding.Binders
         // This is really just a simple binder.
         private static readonly SimpleModelBinderProvider _underlyingProvider = GetUnderlyingProvider();
 
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            return _underlyingProvider.GetBinder(actionContext, bindingContext);
+            return _underlyingProvider.GetBinder(configuration, modelType);
         }
 
         private static SimpleModelBinderProvider GetUnderlyingProvider()

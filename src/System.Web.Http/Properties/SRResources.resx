@@ -150,9 +150,6 @@
   <data name="Common_PropertyNotFound" xml:space="preserve">
     <value>The property {0}.{1} could not be found.</value>
   </data>
-  <data name="ModelBinderProviderCollection_BinderForTypeNotFound" xml:space="preserve">
-    <value>A binder for type {0} could not be located.</value>
-  </data>
   <data name="ModelBinderProviderCollection_InvalidBinderType" xml:space="preserve">
     <value>The type '{0}' does not subclass {1} or implement the interface {2}.</value>
   </data>

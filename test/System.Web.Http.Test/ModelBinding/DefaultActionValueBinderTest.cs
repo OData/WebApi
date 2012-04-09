@@ -293,7 +293,7 @@ namespace System.Web.Http.ModelBinding
             AssertIsModelBound(binding, 0);
 
             ModelBinderParameterBinding p = (ModelBinderParameterBinding) binding.ParameterBindings[0];
-            Assert.IsType<CustomModelBinderProvider>(p.ModelBinderProvider);
+            Assert.IsType<CustomModelBinder>(p.Binder);
 
             // Since the ModelBinderAttribute didn't specify the valueproviders, we should pull those from config.
             Assert.Equal(1, p.ValueProviderFactories.Count());
@@ -476,11 +476,20 @@ namespace System.Web.Http.ModelBinding
 
         class CustomModelBinderProvider : ModelBinderProvider
         {
-            public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+            public override IModelBinder GetBinder(HttpConfiguration config, Type modelType)
+            {
+                return new CustomModelBinder();
+            }
+        }
+
+        class CustomModelBinder : IModelBinder
+        {
+            public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
             {
                 throw new NotImplementedException();
             }
         }
+
         class CustomValueProviderFactory : ValueProviderFactory
         {
             public override IValueProvider GetValueProvider(HttpActionContext actionContext)

@@ -29,7 +29,7 @@ namespace System.Web.Http.ModelBinding.Binders
             BinaryDataModelBinderProvider binderProvider = new BinaryDataModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
             bool retVal = binder.BindModel(null, bindingContext);
 
             // Assert
@@ -53,7 +53,7 @@ namespace System.Web.Http.ModelBinding.Binders
             BinaryDataModelBinderProvider binderProvider = new BinaryDataModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
             bool retVal = binder.BindModel(null, bindingContext);
 
             // Assert
@@ -77,7 +77,7 @@ namespace System.Web.Http.ModelBinding.Binders
             BinaryDataModelBinderProvider binderProvider = new BinaryDataModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
             bool retVal = binder.BindModel(null, bindingContext);
 
             // Assert
@@ -102,7 +102,7 @@ namespace System.Web.Http.ModelBinding.Binders
             BinaryDataModelBinderProvider binderProvider = new BinaryDataModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
             bool retVal = binder.BindModel(null, bindingContext);
 
             // Assert
@@ -128,7 +128,7 @@ namespace System.Web.Http.ModelBinding.Binders
             BinaryDataModelBinderProvider binderProvider = new BinaryDataModelBinderProvider();
 
             // Act
-            IModelBinder binder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder binder = binderProvider.GetBinder(null, bindingContext.ModelType);
             bool retVal = binder.BindModel(null, bindingContext);
 
             // Assert
@@ -152,7 +152,7 @@ namespace System.Web.Http.ModelBinding.Binders
             BinaryDataModelBinderProvider binderProvider = new BinaryDataModelBinderProvider();
 
             // Act
-            IModelBinder modelBinder = binderProvider.GetBinder(null, bindingContext);
+            IModelBinder modelBinder = binderProvider.GetBinder(null, bindingContext.ModelType);
 
             // Assert
             Assert.Null(modelBinder);

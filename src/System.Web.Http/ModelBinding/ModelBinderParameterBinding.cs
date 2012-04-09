@@ -17,39 +17,42 @@ namespace System.Web.Http.ModelBinding
     /// </summary>
     public class ModelBinderParameterBinding : HttpParameterBinding
     {
-        private readonly ValueProviderFactory[] _valueProviderFactories;
-        private readonly ModelBinderProvider _modelBinderProvider;
+        private readonly ValueProviderFactory[] _valueProviderFactories;        
+        private readonly IModelBinder _binder;
 
         // Cache information for ModelBindingContext.
         private ModelMetadata _metadataCache;
         private ModelValidationNode _validationNodeCache;
 
         public ModelBinderParameterBinding(HttpParameterDescriptor descriptor,
-            ModelBinderProvider modelBinderProvider,
+            IModelBinder modelBinder,
             IEnumerable<ValueProviderFactory> valueProviderFactories)
             : base(descriptor)
         {
-            if (modelBinderProvider == null)
+            if (modelBinder == null)
             {
-                throw Error.ArgumentNull("modelBinderProvider");
+                throw Error.ArgumentNull("modelBinder");
             }
             if (valueProviderFactories == null)
             {
                 throw Error.ArgumentNull("valueProviderFactories");
             }
 
-            _modelBinderProvider = modelBinderProvider;
+            _binder = modelBinder;
             _valueProviderFactories = valueProviderFactories.ToArray();
-        }
 
+            HttpConfiguration config = descriptor.Configuration;
+            Type modelType = Descriptor.ParameterType;            
+        }
+        
         public IEnumerable<ValueProviderFactory> ValueProviderFactories
         {
             get { return _valueProviderFactories; }
         }
 
-        public ModelBinderProvider ModelBinderProvider
+        public IModelBinder Binder
         {
-            get { return _modelBinderProvider; }
+            get { return _binder; }
         }
 
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
@@ -58,9 +61,7 @@ namespace System.Web.Http.ModelBinding
 
             ModelBindingContext ctx = GetModelBindingContext(metadataProvider, actionContext);
 
-            IModelBinder binder = this._modelBinderProvider.GetBinder(actionContext, ctx);
-
-            bool haveResult = binder.BindModel(actionContext, ctx);
+            bool haveResult = _binder.BindModel(actionContext, ctx);
             object model = haveResult ? ctx.Model : Descriptor.DefaultValue;
             actionContext.ActionArguments.Add(name, model);
 

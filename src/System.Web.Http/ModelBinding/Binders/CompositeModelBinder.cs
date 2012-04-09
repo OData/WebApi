@@ -19,16 +19,16 @@ namespace System.Web.Http.ModelBinding.Binders
     /// </remarks>
     public class CompositeModelBinder : IModelBinder
     {
-        public CompositeModelBinder(IEnumerable<ModelBinderProvider> modelBinderProviders)
-            : this(modelBinderProviders.ToArray())
+        public CompositeModelBinder(IEnumerable<IModelBinder> binders)
+            : this(binders.ToArray())
         {
         }
-        public CompositeModelBinder(ModelBinderProvider[] modelBinderProviders)
+        public CompositeModelBinder(params IModelBinder[] binders)
         {
-            Providers = modelBinderProviders;
+            Binders = binders;
         }
 
-        private ModelBinderProvider[] Providers { get; set; }
+        private IModelBinder[] Binders { get; set; }
 
         public virtual bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
@@ -37,36 +37,32 @@ namespace System.Web.Http.ModelBinding.Binders
 
             ModelBindingContext newBindingContext = CreateNewBindingContext(bindingContext, bindingContext.ModelName);
 
-            IModelBinder binder = GetBinder(actionContext, newBindingContext);
-            if (binder == null && !String.IsNullOrEmpty(bindingContext.ModelName)
+            bool boundSuccessfully = TryBind(actionContext, newBindingContext);
+            if (!boundSuccessfully && !String.IsNullOrEmpty(bindingContext.ModelName)
                 && bindingContext.FallbackToEmptyPrefix)
             {
                 // fallback to empty prefix?
                 newBindingContext = CreateNewBindingContext(bindingContext, String.Empty /* modelName */);
-                binder = GetBinder(actionContext, newBindingContext);
+                boundSuccessfully = TryBind(actionContext, newBindingContext);
             }
 
-            if (binder != null)
+            if (!boundSuccessfully)
             {
-                bool boundSuccessfully = binder.BindModel(actionContext, newBindingContext);
-                if (boundSuccessfully)
-                {
-                    // run validation and return the model
-                    // If we fell back to an empty prefix above and are dealing with simple types,
-                    // propagate the non-blank model name through for user clarity in validation errors.
-                    // Complex types will reveal their individual properties as model names and do not require this.
-                    if (!newBindingContext.ModelMetadata.IsComplexType && String.IsNullOrEmpty(newBindingContext.ModelName))
-                    {
-                        newBindingContext.ValidationNode = new Validation.ModelValidationNode(newBindingContext.ModelMetadata, bindingContext.ModelName);
-                    }
-
-                    newBindingContext.ValidationNode.Validate(actionContext, null /* parentNode */);
-                    bindingContext.Model = newBindingContext.Model;
-                    return true;
-                }
+                return false; // something went wrong
             }
 
-            return false; // something went wrong
+            // run validation and return the model
+            // If we fell back to an empty prefix above and are dealing with simple types,
+            // propagate the non-blank model name through for user clarity in validation errors.
+            // Complex types will reveal their individual properties as model names and do not require this.
+            if (!newBindingContext.ModelMetadata.IsComplexType && String.IsNullOrEmpty(newBindingContext.ModelName))
+            {
+                newBindingContext.ValidationNode = new Validation.ModelValidationNode(newBindingContext.ModelMetadata, bindingContext.ModelName);
+            }
+
+            newBindingContext.ValidationNode.Validate(actionContext, null /* parentNode */);
+            bindingContext.Model = newBindingContext.Model;
+            return true;
         }
 
         //// REVIEW: from MVC Futures -- activate when Filters are in
@@ -78,24 +74,32 @@ namespace System.Web.Http.ModelBinding.Binders
         ////    }
         ////}
 
-        private IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        private bool TryBind(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
-            Contract.Assert(actionContext != null);
-            Contract.Assert(bindingContext != null);
-
-            //// REVIEW: this was in MVC Futures
-            ////EnsureNoBindAttribute(bindingContext.ModelType);
+            Type modelType = bindingContext.ModelType;
+            HttpConfiguration config = actionContext.ControllerContext.Configuration;
 
             ModelBinderProvider providerFromAttr;
-            if (TryGetProviderFromAttributes(bindingContext.ModelType, out providerFromAttr))
+            if (TryGetProviderFromAttributes(modelType, out providerFromAttr))
             {
-                return providerFromAttr.GetBinder(actionContext, bindingContext);
+                IModelBinder binder = providerFromAttr.GetBinder(config, modelType);
+                if (binder != null)
+                {
+                    return binder.BindModel(actionContext, bindingContext);
+                }
             }
 
-            return (from provider in Providers
-                    let binder = provider.GetBinder(actionContext, bindingContext)
-                    where binder != null
-                    select binder).FirstOrDefault();
+            foreach (var binder in Binders)
+            {
+                if (binder != null)
+                {
+                    if (binder.BindModel(actionContext, bindingContext))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private static ModelBindingContext CreateNewBindingContext(ModelBindingContext oldBindingContext, string modelName)

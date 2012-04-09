@@ -540,15 +540,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A binder for type {0} could not be located..
-        /// </summary>
-        internal static string ModelBinderProviderCollection_BinderForTypeNotFound {
-            get {
-                return ResourceManager.GetString("ModelBinderProviderCollection_BinderForTypeNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; does not subclass {1} or implement the interface {2}..
         /// </summary>
         internal static string ModelBinderProviderCollection_InvalidBinderType {

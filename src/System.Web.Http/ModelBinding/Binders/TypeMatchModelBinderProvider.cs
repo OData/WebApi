@@ -7,11 +7,11 @@ namespace System.Web.Http.ModelBinding.Binders
     // Returns a binder that can extract a ValueProviderResult.RawValue and return it directly.
     public sealed class TypeMatchModelBinderProvider : ModelBinderProvider
     {
-        public override IModelBinder GetBinder(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        private static readonly TypeMatchModelBinder _binder = new TypeMatchModelBinder();
+
+        public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
-            return (TypeMatchModelBinder.GetCompatibleValueProviderResult(bindingContext) != null)
-                       ? new TypeMatchModelBinder()
-                       : null /* no match */;
+            return _binder;
         }
     }
 }

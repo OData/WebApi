@@ -39,7 +39,7 @@ namespace System.Web.Http.ModelBinding.Binders
 
             // Extract all providers from the resolver except the the type of the executing one (else would cause recursion),
             // or use the set of providers we were given.            
-            IEnumerable<ModelBinderProvider> providers = actionContext.ControllerContext.Configuration.Services.GetModelBinderProviders().Where((p) => !typeof(CompositeModelBinderProvider).IsAssignableFrom(p.GetType()));
+            IEnumerable<ModelBinderProvider> providers = actionContext.ControllerContext.Configuration.Services.GetModelBinderProviders().Where(p => !(p is CompositeModelBinderProvider));
 
             return new CompositeModelBinder(providers);
         }

@@ -125,7 +125,7 @@ namespace System.Web.Http.Services
                                                                      new DataAnnotationsModelValidatorProvider(),
                                                                      new DataMemberModelValidatorProvider()
                                                                  });
-            
+
             // This is an ordered list,so put the most common providers at the top. 
             _defaultServices.Add(typeof(ValueProviderFactory), new List<object>
                                                                {
@@ -153,23 +153,7 @@ namespace System.Web.Http.Services
         /// <param name="service">The service instance.</param>
         public void Add(Type serviceType, object service)
         {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-            if (service == null)
-            {
-                throw Error.ArgumentNull("service");
-            }
-            if (!serviceType.IsAssignableFrom(service.GetType()))
-            {
-                throw Error.Argument("service", SRResources.Common_TypeMustDriveFromType, service.GetType().Name, serviceType.Name);
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            instances.Add(service);
-
-            ResetCache(serviceType);
+            Insert(serviceType, Int32.MaxValue, service);
         }
 
         /// <summary>
@@ -180,26 +164,7 @@ namespace System.Web.Http.Services
         /// <param name="services">The services to add.</param>
         public void AddRange(Type serviceType, IEnumerable<object> services)
         {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-            if (services == null)
-            {
-                throw Error.ArgumentNull("services");
-            }
-
-            object[] filteredServices = services.Where(svc => svc != null).ToArray();
-            object incorrectlyTypedService = filteredServices.FirstOrDefault(svc => !serviceType.IsAssignableFrom(svc.GetType()));
-            if (incorrectlyTypedService != null)
-            {
-                throw Error.Argument("services", SRResources.Common_TypeMustDriveFromType, incorrectlyTypedService.GetType().Name, serviceType.Name);
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            instances.AddRange(filteredServices);
-
-            ResetCache(serviceType);
+            InsertRange(serviceType, Int32.MaxValue, services);
         }
 
         /// <summary>
@@ -387,7 +352,8 @@ namespace System.Web.Http.Services
         /// Inserts a service into the collection at the specified index.
         /// </summary>
         /// <param name="serviceType">The service type.</param>
-        /// <param name="index">The zero-based index at which the service should be inserted.</param>
+        /// <param name="index">The zero-based index at which the service should be inserted.
+        /// If <see cref="Int32.MaxValue"/> is passed, ensures the element is added to the end.</param>
         /// <param name="service">The service to insert.</param>
         public void Insert(Type serviceType, int index, object service)
         {
@@ -405,6 +371,11 @@ namespace System.Web.Http.Services
             }
 
             List<object> instances = GetServiceInstances(serviceType);
+            if (index == Int32.MaxValue)
+            {
+                index = instances.Count;
+            }
+
             instances.Insert(index, service);
 
             ResetCache(serviceType);
@@ -414,7 +385,8 @@ namespace System.Web.Http.Services
         /// Inserts the elements of the collection into the service list at the specified index.
         /// </summary>
         /// <param name="serviceType">The service type.</param>
-        /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
+        /// <param name="index">The zero-based index at which the new elements should be inserted.
+        /// If <see cref="Int32.MaxValue"/> is passed, ensures the elements are added to the end.</param>
         /// <param name="services">The collection of services to insert.</param>
         public void InsertRange(Type serviceType, int index, IEnumerable<object> services)
         {
@@ -435,6 +407,11 @@ namespace System.Web.Http.Services
             }
 
             List<object> instances = GetServiceInstances(serviceType);
+            if (index == Int32.MaxValue)
+            {
+                index = instances.Count;
+            }
+
             instances.InsertRange(index, filteredServices);
 
             ResetCache(serviceType);
@@ -516,24 +493,14 @@ namespace System.Web.Http.Services
         /// <param name="service">The service instance.</param>
         public void Replace(Type serviceType, object service)
         {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
+            // Check this early, so we don't call RemoveAll before Insert would catch the null service.
             if (service == null)
             {
                 throw Error.ArgumentNull("service");
             }
-            if (!serviceType.IsAssignableFrom(service.GetType()))
-            {
-                throw Error.Argument("service", SRResources.Common_TypeMustDriveFromType, service.GetType().Name, serviceType.Name);
-            }
 
-            List<object> instances = GetServiceInstances(serviceType);
-            instances.Clear();
-            instances.Add(service);
-
-            ResetCache(serviceType);
+            RemoveAll(serviceType, _ => true);
+            Insert(serviceType, 0, service);
         }
 
         /// <summary>
@@ -544,27 +511,14 @@ namespace System.Web.Http.Services
         /// <param name="services">The service instances.</param>
         public void ReplaceRange(Type serviceType, IEnumerable<object> services)
         {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
+            // Check this early, so we don't call RemoveAll before InsertRange would catch the null services.
             if (services == null)
             {
                 throw Error.ArgumentNull("services");
             }
 
-            object[] filteredServices = services.Where(svc => svc != null).ToArray();
-            object incorrectlyTypedService = filteredServices.FirstOrDefault(svc => !serviceType.IsAssignableFrom(svc.GetType()));
-            if (incorrectlyTypedService != null)
-            {
-                throw Error.Argument("services", SRResources.Common_TypeMustDriveFromType, incorrectlyTypedService.GetType().Name, serviceType.Name);
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            instances.Clear();
-            instances.AddRange(filteredServices);
-
-            ResetCache(serviceType);
+            RemoveAll(serviceType, _ => true);
+            InsertRange(serviceType, 0, services);
         }
 
         // Removes the cached values for all service types. Called when the dependency scope

@@ -37,25 +37,22 @@ namespace System.Web.Http.Metadata.Providers
             provider.GetMetadataForProperties(model, typeof(PropertyModel)).ToList(); // Call ToList() to force the lazy evaluation to evaluate
 
             // Assert
-            CreateMetadataParams local =
-                provider.CreateMetadataLog.Single(m => m.ContainerType == typeof(PropertyModel) &&
+            CreateMetadataPrototypeParams local =
+                provider.CreateMetadataPrototypeLog.Single(m => m.ContainerType == typeof(PropertyModel) &&
                                                        m.PropertyName == "LocalAttributes");
             Assert.Equal(typeof(int), local.ModelType);
-            Assert.Equal(42, local.Model);
             Assert.True(local.Attributes.Any(a => a is RequiredAttribute));
 
-            CreateMetadataParams metadata =
-                provider.CreateMetadataLog.Single(m => m.ContainerType == typeof(PropertyModel) &&
+            CreateMetadataPrototypeParams metadata =
+                provider.CreateMetadataPrototypeLog.Single(m => m.ContainerType == typeof(PropertyModel) &&
                                                        m.PropertyName == "MetadataAttributes");
             Assert.Equal(typeof(string), metadata.ModelType);
-            Assert.Equal("hello", metadata.Model);
             Assert.True(metadata.Attributes.Any(a => a is RangeAttribute));
 
-            CreateMetadataParams mixed =
-                provider.CreateMetadataLog.Single(m => m.ContainerType == typeof(PropertyModel) &&
+            CreateMetadataPrototypeParams mixed =
+                provider.CreateMetadataPrototypeLog.Single(m => m.ContainerType == typeof(PropertyModel) &&
                                                        m.PropertyName == "MixedAttributes");
             Assert.Equal(typeof(double), mixed.ModelType);
-            Assert.Equal(21.12, mixed.Model);
             Assert.True(mixed.Attributes.Any(a => a is RequiredAttribute));
             Assert.True(mixed.Attributes.Any(a => a is RangeAttribute));
         }
@@ -70,8 +67,8 @@ namespace System.Web.Http.Metadata.Providers
             provider.GetMetadataForProperties(null, typeof(PropertyModel)).ToList(); // Call ToList() to force the lazy evaluation to evaluate
 
             // Assert
-            Assert.True(provider.CreateMetadataLog.Any());
-            foreach (var parms in provider.CreateMetadataLog)
+            Assert.True(provider.CreateMetadataFromPrototypeLog.Any());
+            foreach (var parms in provider.CreateMetadataFromPrototypeLog)
             {
                 Assert.Null(parms.Model);
             }
@@ -127,14 +124,14 @@ namespace System.Web.Http.Metadata.Providers
             // Arrange
             TestableAssociatedMetadataProvider provider = new TestableAssociatedMetadataProvider();
             ModelMetadata metadata = new ModelMetadata(provider, typeof(PropertyModel), null, typeof(int), "LocalAttributes");
-            provider.CreateMetadataReturnValue = metadata;
+            provider.CreateMetadataFromPrototypeReturnValue = metadata;
 
             // Act
             ModelMetadata result = provider.GetMetadataForProperty(null, typeof(PropertyModel), "LocalAttributes");
 
             // Assert
             Assert.Same(metadata, result);
-            Assert.True(provider.CreateMetadataLog.Single().Attributes.Any(a => a is RequiredAttribute));
+            Assert.True(provider.CreateMetadataPrototypeLog.Single(parameters => parameters.PropertyName == "LocalAttributes").Attributes.Any(a => a is RequiredAttribute));
         }
 
         [Fact]
@@ -143,14 +140,14 @@ namespace System.Web.Http.Metadata.Providers
             // Arrange
             TestableAssociatedMetadataProvider provider = new TestableAssociatedMetadataProvider();
             ModelMetadata metadata = new ModelMetadata(provider, typeof(PropertyModel), null, typeof(string), "MetadataAttributes");
-            provider.CreateMetadataReturnValue = metadata;
+            provider.CreateMetadataFromPrototypeReturnValue = metadata;
 
             // Act
             ModelMetadata result = provider.GetMetadataForProperty(null, typeof(PropertyModel), "MetadataAttributes");
 
             // Assert
             Assert.Same(metadata, result);
-            CreateMetadataParams parms = provider.CreateMetadataLog.Single(p => p.PropertyName == "MetadataAttributes");
+            CreateMetadataPrototypeParams parms = provider.CreateMetadataPrototypeLog.Single(p => p.PropertyName == "MetadataAttributes");
             Assert.True(parms.Attributes.Any(a => a is RangeAttribute));
         }
 
@@ -160,14 +157,14 @@ namespace System.Web.Http.Metadata.Providers
             // Arrange
             TestableAssociatedMetadataProvider provider = new TestableAssociatedMetadataProvider();
             ModelMetadata metadata = new ModelMetadata(provider, typeof(PropertyModel), null, typeof(double), "MixedAttributes");
-            provider.CreateMetadataReturnValue = metadata;
+            provider.CreateMetadataFromPrototypeReturnValue = metadata;
 
             // Act
             ModelMetadata result = provider.GetMetadataForProperty(null, typeof(PropertyModel), "MixedAttributes");
 
             // Assert
             Assert.Same(metadata, result);
-            CreateMetadataParams parms = provider.CreateMetadataLog.Single(p => p.PropertyName == "MixedAttributes");
+            CreateMetadataPrototypeParams parms = provider.CreateMetadataPrototypeLog.Single(p => p.PropertyName == "MixedAttributes");
             Assert.True(parms.Attributes.Any(a => a is RequiredAttribute));
             Assert.True(parms.Attributes.Any(a => a is RangeAttribute));
         }
@@ -191,14 +188,14 @@ namespace System.Web.Http.Metadata.Providers
         {
             TestableAssociatedMetadataProvider provider = new TestableAssociatedMetadataProvider();
             ModelMetadata metadata = new ModelMetadata(provider, null, null, typeof(TypeModel), null);
-            provider.CreateMetadataReturnValue = metadata;
+            provider.CreateMetadataFromPrototypeReturnValue = metadata;
 
             // Act
             ModelMetadata result = provider.GetMetadataForType(null, typeof(TypeModel));
 
             // Assert
             Assert.Same(metadata, result);
-            CreateMetadataParams parms = provider.CreateMetadataLog.Single(p => p.ModelType == typeof(TypeModel));
+            CreateMetadataPrototypeParams parms = provider.CreateMetadataPrototypeLog.Single(p => p.ModelType == typeof(TypeModel));
             Assert.True(parms.Attributes.Any(a => a is ReadOnlyAttribute));
         }
 
@@ -235,35 +232,50 @@ namespace System.Web.Http.Metadata.Providers
         {
         }
 
-        class TestableAssociatedMetadataProvider : AssociatedMetadataProvider
+        class TestableAssociatedMetadataProvider : AssociatedMetadataProvider<ModelMetadata>
         {
-            public List<CreateMetadataParams> CreateMetadataLog = new List<CreateMetadataParams>();
-            public ModelMetadata CreateMetadataReturnValue = null;
+            public List<CreateMetadataPrototypeParams> CreateMetadataPrototypeLog = new List<CreateMetadataPrototypeParams>();
+            public List<CreateMetadataFromPrototypeParams> CreateMetadataFromPrototypeLog = new List<CreateMetadataFromPrototypeParams>();
+            public ModelMetadata CreateMetadataPrototypeReturnValue = null;
+            public ModelMetadata CreateMetadataFromPrototypeReturnValue = null;
 
-            protected override ModelMetadata CreateMetadata(IEnumerable<Attribute> attributes, Type containerType,
-                                                            Func<object> modelAccessor, Type modelType,
-                                                            string propertyName)
+            protected override ModelMetadata CreateMetadataPrototype(IEnumerable<Attribute> attributes, Type containerType, Type modelType, string propertyName)
             {
-                CreateMetadataLog.Add(new CreateMetadataParams
+                CreateMetadataPrototypeLog.Add(new CreateMetadataPrototypeParams
                 {
                     Attributes = attributes,
                     ContainerType = containerType,
-                    Model = modelAccessor == null ? null : modelAccessor(),
                     ModelType = modelType,
                     PropertyName = propertyName
                 });
 
-                return CreateMetadataReturnValue;
+                return CreateMetadataPrototypeReturnValue;
+            }
+
+            protected override ModelMetadata CreateMetadataFromPrototype(ModelMetadata prototype, Func<object> modelAccessor)
+            {
+                CreateMetadataFromPrototypeLog.Add(new CreateMetadataFromPrototypeParams
+                {
+                    Prototype = prototype,
+                    Model = modelAccessor == null ? null : modelAccessor()
+                });
+
+                return CreateMetadataFromPrototypeReturnValue;
             }
         }
 
-        class CreateMetadataParams
+        class CreateMetadataPrototypeParams
         {
             public IEnumerable<Attribute> Attributes { get; set; }
             public Type ContainerType { get; set; }
-            public object Model { get; set; }
             public Type ModelType { get; set; }
             public string PropertyName { get; set; }
+        }
+
+        class CreateMetadataFromPrototypeParams
+        {
+            public ModelMetadata Prototype { get; set; }
+            public object Model { get; set; }
         }
     }
 

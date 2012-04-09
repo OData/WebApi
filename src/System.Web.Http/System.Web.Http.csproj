@@ -218,14 +218,13 @@
     <Compile Include="Internal\DataTypeUtil.cs" />
     <Compile Include="Internal\TypeDescriptorHelper.cs" />
     <Compile Include="Internal\CollectionModelBinderUtil.cs" />
-    <Compile Include="Metadata\Providers\CachedAssociatedMetadataProvider.cs" />
+    <Compile Include="Metadata\Providers\AssociatedMetadataProvider.cs" />
     <Compile Include="Metadata\Providers\CachedDataAnnotationsMetadataAttributes.cs" />
     <Compile Include="Metadata\Providers\CachedModelMetadata.cs" />
     <Compile Include="Metadata\ModelMetadata.cs" />
     <Compile Include="Metadata\ModelMetadataProvider.cs" />
-    <Compile Include="Metadata\Providers\AssociatedMetadataProvider.cs" />
     <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadata.cs" />
-    <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadataProvider.cs" />
+    <Compile Include="Metadata\Providers\DataAnnotationsModelMetadataProvider.cs" />
     <Compile Include="Metadata\Providers\EmptyMetadataProvider.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinder.cs" />

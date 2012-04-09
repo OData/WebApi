@@ -58,7 +58,7 @@ namespace System.Web.Http.Services
             Assert.IsType<DefaultHttpControllerSelector>(defaultServices.GetService(typeof(IHttpControllerSelector)));
             Assert.IsType<DefaultHttpControllerTypeResolver>(defaultServices.GetService(typeof(IHttpControllerTypeResolver)));
             Assert.IsType<TraceManager>(defaultServices.GetService(typeof(ITraceManager)));
-            Assert.IsType<CachedDataAnnotationsModelMetadataProvider>(defaultServices.GetService(typeof(ModelMetadataProvider)));
+            Assert.IsType<DataAnnotationsModelMetadataProvider>(defaultServices.GetService(typeof(ModelMetadataProvider)));
 
             object[] filterProviders = defaultServices.GetServices(typeof(IFilterProvider)).ToArray();
             Assert.Equal(2, filterProviders.Length);

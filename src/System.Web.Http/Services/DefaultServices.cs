@@ -119,7 +119,7 @@ namespace System.Web.Http.Services
                                                                   new CollectionModelBinderProvider(),                                                                  
                                                                   new MutableObjectModelBinderProvider()
                                                               });
-            _defaultServices.Add(typeof(ModelMetadataProvider), new List<object> { new CachedDataAnnotationsModelMetadataProvider() });
+            _defaultServices.Add(typeof(ModelMetadataProvider), new List<object> { new DataAnnotationsModelMetadataProvider() });
             _defaultServices.Add(typeof(ModelValidatorProvider), new List<object>
                                                                  {
                                                                      new DataAnnotationsModelValidatorProvider(),

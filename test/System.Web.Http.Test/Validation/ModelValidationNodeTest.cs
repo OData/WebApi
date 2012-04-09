@@ -285,7 +285,7 @@ namespace System.Web.Http.Validation
 
         private static ModelMetadata GetModelMetadata(object o)
         {
-            return new CachedDataAnnotationsModelMetadataProvider().GetMetadataForType(() => o, o.GetType());
+            return new DataAnnotationsModelMetadataProvider().GetMetadataForType(() => o, o.GetType());
         }
 
         private sealed class LoggingValidatableObject : IValidatableObject

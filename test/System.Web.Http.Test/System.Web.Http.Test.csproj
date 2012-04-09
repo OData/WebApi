@@ -89,6 +89,7 @@
     <Compile Include="HttpServerTest.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
+    <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs" />
     <Compile Include="QueryableAttributeTest.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolverTest.cs" />
     <Compile Include="Controllers\ApiControllerActionInvokerTest.cs" />
@@ -101,10 +102,7 @@
     <Compile Include="Hosting\HttpRouteTest.cs" />
     <Compile Include="Internal\TypeActivatorTest.cs" />
     <Compile Include="Metadata\ModelMetadataTest.cs" />
-    <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Metadata\Providers\CachedDataAnnotationsModelMetadataProviderTest.cs">
+    <Compile Include="Metadata\Providers\DataAnnotationsModelMetadataProviderTest.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />

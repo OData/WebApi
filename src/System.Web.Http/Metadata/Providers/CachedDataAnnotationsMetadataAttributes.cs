@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace System.Web.Http.Metadata.Providers
     // REVIEW: No access to HiddenInputAttribute
     public class CachedDataAnnotationsMetadataAttributes
     {
-        public CachedDataAnnotationsMetadataAttributes(Attribute[] attributes)
+        public CachedDataAnnotationsMetadataAttributes(IEnumerable<Attribute> attributes)
         {
             CacheAttributes(attributes);
         }
@@ -28,7 +29,7 @@ namespace System.Web.Http.Metadata.Providers
 
         // [SecuritySafeCritical] because it uses several DataAnnotations attribute types
         [SecuritySafeCritical]
-        private void CacheAttributes(Attribute[] attributes)
+        private void CacheAttributes(IEnumerable<Attribute> attributes)
         {
             Display = attributes.OfType<DisplayAttribute>().FirstOrDefault();
             DisplayFormat = attributes.OfType<DisplayFormatAttribute>().FirstOrDefault();

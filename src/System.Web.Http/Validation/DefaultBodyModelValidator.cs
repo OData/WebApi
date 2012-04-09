@@ -186,9 +186,16 @@ namespace System.Web.Http.Validation
             // If metadata is for a property then containerType != null && propertyName != null
             // If metadata is for a type then containerType == null && propertyName == null, so we have to use modelType for the cache key.
             Type typeForCache = metadata.ContainerType ?? metadata.ModelType;
-            return _validatorCache.GetOrAdd(
-                Tuple.Create(typeForCache, metadata.PropertyName),
-                key => metadata.GetValidators(validatorProviders).ToArray());
+            Tuple<Type, string> cacheKey = Tuple.Create(typeForCache, metadata.PropertyName);
+
+            // This retrieval is implemented as a TryGetValue/TryAdd instead of a GetOrAdd to avoid the performance cost of creating delegates
+            IEnumerable<ModelValidator> validators;
+            if (!_validatorCache.TryGetValue(cacheKey, out validators))
+            {
+                validators = metadata.GetValidators(validatorProviders).ToArray();
+                _validatorCache.TryAdd(cacheKey, validators);
+            }
+            return validators;
         }
 
         private static Type GetElementType(Type type)

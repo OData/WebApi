@@ -40,7 +40,7 @@ namespace System.Web.Http.ModelBinding.Binders
             mockTestableBinder.Setup(o => o.EnsureModelPublic(context, bindingContext)).Verifiable();
             mockTestableBinder.Setup(o => o.GetMetadataForPropertiesPublic(context, bindingContext)).Returns(new ModelMetadata[0]).Verifiable();
             TestableMutableObjectModelBinder testableBinder = mockTestableBinder.Object;
-            testableBinder.MetadataProvider = new CachedDataAnnotationsModelMetadataProvider();
+            testableBinder.MetadataProvider = new DataAnnotationsModelMetadataProvider();
 
             // Act
             bool retValue = testableBinder.BindModel(context, bindingContext);
@@ -590,19 +590,19 @@ Parameter name: value", bindingContext.ModelState["foo.NameNoAttribute"].Errors[
 
         private static ModelMetadata GetMetadataForCanUpdateProperty(string propertyName)
         {
-            CachedDataAnnotationsModelMetadataProvider metadataProvider = new CachedDataAnnotationsModelMetadataProvider();
+            DataAnnotationsModelMetadataProvider metadataProvider = new DataAnnotationsModelMetadataProvider();
             return metadataProvider.GetMetadataForProperty(null, typeof(MyModelTestingCanUpdateProperty), propertyName);
         }
 
         private static ModelMetadata GetMetadataForObject(object o)
         {
-            CachedDataAnnotationsModelMetadataProvider metadataProvider = new CachedDataAnnotationsModelMetadataProvider();
+            DataAnnotationsModelMetadataProvider metadataProvider = new DataAnnotationsModelMetadataProvider();
             return metadataProvider.GetMetadataForType(() => o, o.GetType());
         }
 
         private static ModelMetadata GetMetadataForType(Type t)
         {
-            CachedDataAnnotationsModelMetadataProvider metadataProvider = new CachedDataAnnotationsModelMetadataProvider();
+            DataAnnotationsModelMetadataProvider metadataProvider = new DataAnnotationsModelMetadataProvider();
             return metadataProvider.GetMetadataForType(null, t);
         }
 

@@ -10,13 +10,13 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Metadata.Providers
 {
-    public class CachedDataAnnotationsModelMetadataProviderTest : MarshalByRefObject
+    public class DataAnnotationsModelMetadataProviderTest : MarshalByRefObject
     {
         [Fact]
         public void GetMetadataForPropertiesSetTypesAndPropertyNames()
         {
             // Arrange
-            var provider = new CachedDataAnnotationsModelMetadataProvider();
+            var provider = new DataAnnotationsModelMetadataProvider();
 
             // Act
             IEnumerable<ModelMetadata> result = provider.GetMetadataForProperties("foo", typeof(string));
@@ -31,7 +31,7 @@ namespace System.Web.Http.Metadata.Providers
         public void GetMetadataForPropertySetsTypeAndPropertyName()
         {
             // Arrange
-            var provider = new CachedDataAnnotationsModelMetadataProvider();
+            var provider = new DataAnnotationsModelMetadataProvider();
 
             // Act
             ModelMetadata result = provider.GetMetadataForProperty(null, typeof(string), "Length");
@@ -45,7 +45,7 @@ namespace System.Web.Http.Metadata.Providers
         public void GetMetadataForTypeSetsTypeWithNullPropertyName()
         {
             // Arrange
-            var provider = new CachedDataAnnotationsModelMetadataProvider();
+            var provider = new DataAnnotationsModelMetadataProvider();
 
             // Act
             ModelMetadata result = provider.GetMetadataForType(null, typeof(string));
@@ -78,7 +78,7 @@ namespace System.Web.Http.Metadata.Providers
         public void ReadOnlyTests()
         {
             // Arrange
-            var provider = new CachedDataAnnotationsModelMetadataProvider();
+            var provider = new DataAnnotationsModelMetadataProvider();
 
             // Act & Assert
             Assert.False(provider.GetMetadataForProperty(null, typeof(ReadOnlyModel), "NoAttributes").IsReadOnly);
@@ -106,7 +106,7 @@ namespace System.Web.Http.Metadata.Providers
         public void DescriptionTests()
         {
             // Arrange
-            var provider = new CachedDataAnnotationsModelMetadataProvider();
+            var provider = new DataAnnotationsModelMetadataProvider();
 
             // Act & Assert
             Assert.Null(provider.GetMetadataForProperty(null, typeof(DisplayModel), "NoAttribute").Description);
@@ -116,5 +116,5 @@ namespace System.Web.Http.Metadata.Providers
     }
 
     [RunWith(typeof(PartialTrustRunner))]
-    public class CachedDataAnnotationsModelMetadataProviderPartialTrustTest : CachedDataAnnotationsModelMetadataProviderTest { }
+    public class CachedDataAnnotationsModelMetadataProviderPartialTrustTest : DataAnnotationsModelMetadataProviderTest { }
 }

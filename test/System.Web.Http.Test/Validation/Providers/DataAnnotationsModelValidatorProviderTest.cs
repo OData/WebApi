@@ -14,7 +14,7 @@ namespace System.Web.Http.Validation.Providers
 {
     public class DataAnnotationsModelValidatorProviderTest
     {
-        private static CachedDataAnnotationsModelMetadataProvider _metadataProvider = new CachedDataAnnotationsModelMetadataProvider();
+        private static DataAnnotationsModelMetadataProvider _metadataProvider = new DataAnnotationsModelMetadataProvider();
         private static IEnumerable<ModelValidatorProvider> _noValidatorProviders = Enumerable.Empty<ModelValidatorProvider>();
 
         // Validation attribute adapter registration

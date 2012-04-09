@@ -118,7 +118,7 @@ namespace System.Web.Http.Metadata
         public void PropertiesListGetsResetWhenModelGetsReset()
         { // Dev10 Bug #923263
             // Arrange
-            var provider = new CachedDataAnnotationsModelMetadataProvider();
+            var provider = new DataAnnotationsModelMetadataProvider();
             var metadata = new ModelMetadata(provider, null, () => new Class1(), typeof(Class1), null);
 
             // Act

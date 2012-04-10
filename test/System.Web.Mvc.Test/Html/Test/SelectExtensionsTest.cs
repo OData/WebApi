@@ -653,16 +653,19 @@ namespace System.Web.Mvc.Html.Test
 
             SelectList selectList = new SelectList(MultiSelectListTest.GetSampleAnonymousObjects(), "Letter", "FullWord", "C");
 
-            // Act
-            MvcHtmlString html = helper.DropDownListFor(m => m.ElementAt(0).foo, selectList);
+            using (HtmlHelperTest.ReplaceCulture("en-US", "en-US"))
+            {
+                // Act
+                MvcHtmlString html = helper.DropDownListFor(m => m.ElementAt(0).foo, selectList);
 
-            // Assert
-            Assert.Equal(
-                @"<select data-val=""true"" data-val-required=""The foo field is required."" id=""MyPrefix_foo"" name=""MyPrefix.foo""><option value=""A"">Alpha</option>
+                // Assert
+                Assert.Equal(
+                    @"<select data-val=""true"" data-val-required=""The foo field is required."" id=""MyPrefix_foo"" name=""MyPrefix.foo""><option value=""A"">Alpha</option>
 <option value=""B"">Bravo</option>
 <option selected=""selected"" value=""C"">Charlie</option>
 </select>",
-                html.ToHtmlString());
+                    html.ToHtmlString());
+            }
         }
 
         [Fact]

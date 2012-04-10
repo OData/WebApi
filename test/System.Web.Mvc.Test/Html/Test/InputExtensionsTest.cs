@@ -1251,11 +1251,14 @@ namespace System.Web.Mvc.Html.Test
             helper.ViewContext.UnobtrusiveJavaScriptEnabled = true;
             helper.ViewContext.FormContext = new FormContext();
 
-            // Act
-            MvcHtmlString html = helper.PasswordFor(m => m.contained.foo);
+            using (HtmlHelperTest.ReplaceCulture("en-US", "en-US"))
+            {
+                // Act
+                MvcHtmlString html = helper.PasswordFor(m => m.contained.foo);
 
-            // Assert
-            Assert.Equal(@"<input data-val=""true"" data-val-required=""The foo field is required."" id=""contained_foo"" name=""contained.foo"" type=""password"" />", html.ToHtmlString());
+                // Assert
+                Assert.Equal(@"<input data-val=""true"" data-val-required=""The foo field is required."" id=""contained_foo"" name=""contained.foo"" type=""password"" />", html.ToHtmlString());
+            }
         }
 
         [Fact]

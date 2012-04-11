@@ -47,8 +47,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Newtonsoft.Json.4.5.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -86,7 +85,6 @@
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
-    <Compile Include="Formatting\JsonReaderQuotaException.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
     <Compile Include="HttpResponseHeadersExtensions.cs" />
     <Compile Include="HttpRequestHeadersExtensions.cs" />
@@ -94,7 +92,6 @@
     <Compile Include="Formatting\FormDataCollection.cs" />
     <Compile Include="Formatting\ContentNegotiationResult.cs" />
     <Compile Include="Formatting\FormUrlEncodedJson.cs" />
-    <Compile Include="Formatting\SecureJsonTextReader.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Formatting\IFormatterLogger.cs" />
     <Compile Include="Formatting\IRequiredMemberSelector.cs" />

@@ -249,7 +249,7 @@ namespace System.Net.Http.Formatting
                     }
                     else
                     {
-                        using (JsonTextReader jsonTextReader = new SecureJsonTextReader(new StreamReader(stream, effectiveEncoding), _maxDepth) { CloseInput = false })
+                        using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(stream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
                         {
                             JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
                             if (formatterLogger != null)

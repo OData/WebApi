@@ -279,4 +279,7 @@
   <data name="CookieNull" xml:space="preserve">
     <value>Cookie cannot be null.</value>
   </data>
+  <data name="MaxHttpCollectionKeyLimitReached" xml:space="preserve">
+    <value>The number of keys in a NameValueCollection has exceeded the limit of '{0}'. You can adjust it by modifying the MaxHttpCollectionKeys property on the '{1}' class.</value>
+  </data>
 </root>

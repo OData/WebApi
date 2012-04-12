@@ -41,6 +41,20 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void MaxCollectionKeySize_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<MediaTypeFormatter, int>(
+                null, 
+                c => MediaTypeFormatter.MaxHttpCollectionKeys,
+                expectedDefaultValue: 1000,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
+                maxLegalValue: null,
+                illegalUpperValue: null,
+                roundTripTestValue: 125);
+        }
+
+        [Fact]
         [Trait("Description", "SupportedMediaTypes is a mutable collection.")]
         public void SupportedMediaTypesIsMutable()
         {

@@ -71,6 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MaxHttpCollectionKeyTests.cs" />
     <Compile Include="DeeplyNestedTypeTests.cs" />
     <Compile Include="HttpSelfHostConfigurationTest.cs" />
     <Compile Include="HttpSelfHostServerTest.cs" />

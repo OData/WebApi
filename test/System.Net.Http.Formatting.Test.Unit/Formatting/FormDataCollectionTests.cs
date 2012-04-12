@@ -97,15 +97,15 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void CaseSensitive()
+        public void CaseInSensitive()
         {
-            FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1&X=2"));
+            FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1&Y=2"));
 
             NameValueCollection nvc = form.ReadAsNameValueCollection();
 
             Assert.Equal(2, nvc.Count);
             Assert.Equal("1", nvc.Get("x"));
-            Assert.Equal("2", nvc.Get("X"));
+            Assert.Equal("2", nvc.Get("y"));
         }
 
         [Fact]

@@ -4,8 +4,10 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Net.Http.Formatting;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Web.Http.Properties;
 
 namespace System.Web.Http.Internal
 {
@@ -64,6 +66,8 @@ namespace System.Web.Http.Internal
 
                 while (i < l)
                 {
+                    ThrowIfMaxHttpCollectionKeysExceeded();
+
                     // find next & while noting first = on the way (and if there are more)
                     int si = i;
                     int ti = -1;
@@ -193,6 +197,14 @@ namespace System.Web.Http.Internal
                 }
 
                 return s.ToString();
+            }
+
+            private void ThrowIfMaxHttpCollectionKeysExceeded()
+            {
+                if (Count >= MediaTypeFormatter.MaxHttpCollectionKeys)
+                {
+                    throw Error.InvalidOperation(SRResources.MaxHttpCollectionKeyLimitReached, MediaTypeFormatter.MaxHttpCollectionKeys, typeof(MediaTypeFormatter));
+                }
             }
         }
 

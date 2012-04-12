@@ -3,6 +3,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -19,9 +21,15 @@ namespace System.Net.Http.Formatting
     /// </summary>
     public abstract class MediaTypeFormatter
     {
+        private const int DefaultMinHttpCollectionKeys = 1;
+        private const int DefaultMaxHttpCollectionKeys = 1000; // same default as ASPNET
+        private const string IWellKnownComparerTypeName = "System.IWellKnownStringEqualityComparer, mscorlib, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089";
+
         private static readonly ConcurrentDictionary<Type, Type> _delegatingEnumerableCache = new ConcurrentDictionary<Type, Type>();
         private static ConcurrentDictionary<Type, ConstructorInfo> _delegatingEnumerableConstructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
-
+        private static Lazy<int> _defaultMaxHttpCollectionKeys = new Lazy<int>(InitializeDefaultCollectionKeySize, true); // Max number of keys is 1000
+        private static int _maxHttpCollectionKeys = -1;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
         /// </summary>
@@ -30,6 +38,31 @@ namespace System.Net.Http.Formatting
             SupportedMediaTypes = new MediaTypeHeaderValueCollection();
             SupportedEncodings = new Collection<Encoding>();
             MediaTypeMappings = new Collection<MediaTypeMapping>();
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of keys stored in a NameValueCollection. 
+        /// </summary>
+        public static int MaxHttpCollectionKeys
+        {
+            get 
+            {
+                if (_maxHttpCollectionKeys < 0)
+                {
+                    _maxHttpCollectionKeys = _defaultMaxHttpCollectionKeys.Value;
+                }
+
+                return _maxHttpCollectionKeys;
+            }
+            set
+            {
+                if (value < DefaultMinHttpCollectionKeys)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, DefaultMinHttpCollectionKeys));
+                }
+
+                _maxHttpCollectionKeys = value;
+            }
         }
 
         /// <summary>
@@ -117,6 +150,29 @@ namespace System.Net.Http.Formatting
             }
 
             return false;
+        }
+
+        private static int InitializeDefaultCollectionKeySize()
+        {
+            // we first detect if we are running on 4.5, return Max value if we are.
+            Type comparerType = Type.GetType(IWellKnownComparerTypeName, throwOnError: false);
+
+            if (comparerType != null)
+            {
+                return Int32.MaxValue;
+            }
+
+            // we should try to read it from the AppSettings 
+            // if we found the aspnet settings configured, we will use that. Otherwise, we used the default 
+            NameValueCollection settings = ConfigurationManager.AppSettings;
+            int result;
+
+            if (settings == null || !Int32.TryParse(settings["aspnet:MaxHttpCollectionKeys"], out result) || result < 0)
+            {
+                result = DefaultMaxHttpCollectionKeys;
+            }
+
+            return result;
         }
 
         /// <summary>

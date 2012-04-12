@@ -476,4 +476,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="DefaultServices_InvalidServiceType" xml:space="preserve">
     <value>The service type {0} is not supported.</value>
   </data>
+  <data name="MaxHttpCollectionKeyLimitReached" xml:space="preserve">
+    <value>The number of keys in a NameValueCollection has exceeded the limit of '{0}'. You can adjust it by modifying the MaxHttpCollectionKeys property on the '{1}' class.</value>
+  </data>
 </root>

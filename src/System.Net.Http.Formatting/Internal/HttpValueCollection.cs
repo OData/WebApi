@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Net.Http.Internal;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Internal
 {
@@ -15,7 +16,7 @@ namespace System.Net.Http.Formatting.Internal
     internal class HttpValueCollection : NameValueCollection
     {
         private HttpValueCollection()
-            : base(StringComparer.Ordinal) // case-sensitive keys
+            : base(StringComparer.OrdinalIgnoreCase) // case-insensitive keys
         {
         }
 
@@ -30,9 +31,11 @@ namespace System.Net.Http.Formatting.Internal
             var nvc = new HttpValueCollection();
 
             // Ordering example:
-            //   k=A&j=B&k=C --> k:[A,C];j=[B].                
+            //   k=A&j=B&k=C --> k:[A,C];j=[B].
             foreach (KeyValuePair<string, string> kv in pairs)
             {
+                ThrowIfMaxHttpCollectionKeysExceeded(nvc.Count);
+
                 string key = kv.Key;
                 if (key == null)
                 {
@@ -48,6 +51,14 @@ namespace System.Net.Http.Formatting.Internal
 
             nvc.IsReadOnly = false;
             return nvc;
+        }
+
+        private static void ThrowIfMaxHttpCollectionKeysExceeded(int count)
+        {
+            if (count >= MediaTypeFormatter.MaxHttpCollectionKeys)
+            {
+                throw Error.InvalidOperation(System.Net.Http.Properties.Resources.MaxHttpCollectionKeyLimitReached, MediaTypeFormatter.MaxHttpCollectionKeys, typeof(MediaTypeFormatter));
+            }
         }
 
         protected HttpValueCollection(SerializationInfo info, StreamingContext context)

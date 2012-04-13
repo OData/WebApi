@@ -26,11 +26,11 @@ namespace System.Web.Http.Controllers
         }
 
         [Fact]
-        public void Convert_ReturnsResponseMessageWithRequestAssigned()
+        public void Convert_ReturnsResponseMessageWithRequestAssignedAndNoContentToReflectVoid()
         {
             var result = _converter.Convert(_context, null);
 
-            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
             Assert.Null(result.Content);
             Assert.Same(_request, result.RequestMessage);
         }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Net;
 using System.Net.Http;
 
 namespace System.Web.Http.Controllers
@@ -18,7 +19,7 @@ namespace System.Web.Http.Controllers
             }
 
             Contract.Assert(actionResult == null);
-            return controllerContext.Request.CreateResponse();
+            return controllerContext.Request.CreateResponse(HttpStatusCode.NoContent);
         }
     }
 }

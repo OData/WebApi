@@ -273,4 +273,19 @@
   <data name="MaxHttpCollectionKeyLimitReached" xml:space="preserve">
     <value>The number of keys in a NameValueCollection has exceeded the limit of '{0}'. You can adjust it by modifying the MaxHttpCollectionKeys property on the '{1}' class.</value>
   </data>
+  <data name="AsyncResult_CallbackThrewException" xml:space="preserve">
+    <value>Async Callback threw an exception.</value>
+  </data>
+  <data name="AsyncResult_CannotGetHandleAfterEnd" xml:space="preserve">
+    <value>The IAsyncResult implementation '{0}' tried to get a handle after End was called.</value>
+  </data>
+  <data name="AsyncResult_MultipleCompletes" xml:space="preserve">
+    <value>The IAsyncResult implementation '{0}' tried to complete a single operation multiple times. This could be caused by an incorrect application IAsyncResult implementation or other extensibility code, such as an IAsyncResult that returns incorrect CompletedSynchronously values or invokes the AsyncCallback multiple times.</value>
+  </data>
+  <data name="AsyncResult_MultipleEnds" xml:space="preserve">
+    <value>End cannot be called twice on an AsyncResult.</value>
+  </data>
+  <data name="AsyncResult_ResultMismatch" xml:space="preserve">
+    <value>An incorrect IAsyncResult was provided to an 'End' method. The IAsyncResult object passed to 'End' must be the one returned from the matching 'Begin' or passed to the callback provided to 'Begin'.</value>
+  </data>
 </root>

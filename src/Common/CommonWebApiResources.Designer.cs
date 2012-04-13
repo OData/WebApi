@@ -11,8 +11,8 @@
 namespace System.Web.Http.Properties {
     using System;
     using System.Linq;
+        
 
-    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -42,10 +42,10 @@ namespace System.Web.Http.Properties {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     // Find the CommonResources.resources file's full resource name in this assembly
                     string commonResourcesName = global::System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(s => s.EndsWith("CommonWebApiResources.resources", StringComparison.OrdinalIgnoreCase)).Single();
- 
+
                     // Trim off the ".resources"
                     commonResourcesName = commonResourcesName.Substring(0, commonResourcesName.Length - 10);
- 
+
                     // Load the resource manager
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager(commonResourcesName, typeof(CommonWebApiResources).Assembly);
                     resourceMan = temp;

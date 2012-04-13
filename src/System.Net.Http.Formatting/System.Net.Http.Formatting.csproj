@@ -89,6 +89,11 @@
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
+    <Compile Include="Handlers\HttpProgressEventArgs.cs" />
+    <Compile Include="Handlers\ProgressContent.cs" />
+    <Compile Include="Handlers\ProgressMessageHandler.cs" />
+    <Compile Include="Handlers\ProgressStream.cs" />
+    <Compile Include="Handlers\ProgressWriteAsyncResult.cs" />
     <Compile Include="HttpResponseHeadersExtensions.cs" />
     <Compile Include="HttpRequestHeadersExtensions.cs" />
     <Compile Include="Formatting\StringWithQualityHeaderValueComparer.cs" />
@@ -102,6 +107,7 @@
     <Compile Include="Headers\CookieState.cs" />
     <Compile Include="HttpClientExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
+    <Compile Include="Internal\AsyncResult.cs" />
     <Compile Include="Internal\HttpValueCollection.cs" />
     <Compile Include="Internal\NonClosingDelegatingStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

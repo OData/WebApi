@@ -71,6 +71,11 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\ProgressContentTest.cs" />
+    <Compile Include="Handlers\ProgressMessageHandlerTest.cs" />
+    <Compile Include="Handlers\ProgressStreamTest.cs" />
+    <Compile Include="Handlers\ProgressWriteAsyncResultTest.cs" />
+    <Compile Include="Handlers\HttpProgressEventArgsTest.cs" />
     <Compile Include="HttpRequestHeadersExtensionsTest.cs" />
     <Compile Include="HttpResponseHeadersExtensionsTest.cs" />
     <Compile Include="DataSets\Types\DataContractEnum.cs" />
@@ -99,11 +104,13 @@
     <Compile Include="HttpClientExtensionsTest.cs" />
     <Compile Include="HttpContentExtensionsTest.cs" />
     <Compile Include="HttpRequestMessageCommonExtensionsTest.cs" />
+    <Compile Include="Internal\AsyncResultTest.cs" />
     <Compile Include="Internal\HttpValueCollectionTest.cs" />
     <Compile Include="Internal\NonClosingDelegatingStreamTest.cs" />
     <Compile Include="Internal\DelegatingStreamTest.cs" />
     <Compile Include="Mocks\MockNonClosingDelegatingStream.cs" />
     <Compile Include="Mocks\MockDelegatingStream.cs" />
+    <Compile Include="Mocks\MockProgressEventHandler.cs" />
     <Compile Include="Mocks\TestableHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriQueryDataSet.cs" />

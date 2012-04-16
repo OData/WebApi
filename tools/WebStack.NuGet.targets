@@ -117,20 +117,10 @@
                         return true;
                     }
 
-                    Log.LogMessage("Determining latest version of NuGet.CommandLine...");
+                    Log.LogMessage("Downloading latest version of NuGet.CommandLine...");
                     WebClient webClient = new WebClient();
-                    XmlDocument xml = new XmlDocument();
-                    xml.LoadXml(webClient.DownloadString("http://nuget.org/v1/FeedService.svc/Packages()?$filter=tolower(Id)%20eq%20'nuget.commandline'&$top=1&$orderby=Version%20desc"));
-                    XmlNamespaceManager xns = new XmlNamespaceManager(xml.NameTable);
-                    xns.AddNamespace("atom", "http://www.w3.org/2005/Atom");
-                    xns.AddNamespace("d", "http://schemas.microsoft.com/ado/2007/08/dataservices");
-                    xns.AddNamespace("m", "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata");
-                    string version = xml.SelectSingleNode("//atom:entry/m:properties/d:Version", xns).InnerText;
-                    string zipUrl = xml.SelectSingleNode("//atom:entry/atom:content", xns).Attributes["src"].Value;
-
-                    Log.LogMessage("Downloading NuGet.CommandLine v{0}...", version);
                     zipTempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-                    webClient.DownloadFile(zipUrl, zipTempPath);
+                    webClient.DownloadFile("https://nuget.org/api/v2/Package/NuGet.CommandLine", zipTempPath);
 
                     Log.LogMessage("Copying to {0}...", OutputFilename);
                     using (Package package = Package.Open(zipTempPath)) {

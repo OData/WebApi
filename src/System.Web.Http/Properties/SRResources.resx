@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Common_TypeMustImplementInterface" xml:space="preserve">
-    <value>The type '{0}' does not implement the interface '{1}'.</value>
-  </data>
-  <data name="GenericModelBinderProvider_ParameterMustSpecifyOpenGenericType" xml:space="preserve">
-    <value>The type '{0}' is not an open generic type.</value>
-  </data>
-  <data name="GenericModelBinderProvider_TypeArgumentCountMismatch" xml:space="preserve">
-    <value>The open model type '{0}' has {1} generic type argument(s), but the open binder type '{2}' has {3} generic type argument(s). The binder type must not be an open generic type or must have the same number of generic arguments as the open model type.</value>
-  </data>
   <data name="ModelBinderUtil_ModelCannotBeNull" xml:space="preserve">
     <value>The binding context has a null Model, but this binder requires a non-null model of type '{0}'.</value>
   </data>

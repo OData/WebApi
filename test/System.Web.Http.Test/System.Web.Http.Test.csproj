@@ -188,9 +188,6 @@
     <Compile Include="ModelBinding\Binders\DictionaryModelBinderTest.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ModelBinding\Binders\GenericModelBinderProviderTest.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ModelBinding\Binders\KeyValuePairModelBinderProviderTest.cs">
       <SubType>Code</SubType>
     </Compile>

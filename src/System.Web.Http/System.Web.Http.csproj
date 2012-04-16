@@ -242,7 +242,6 @@
     <Compile Include="ModelBinding\ModelBinderAttribute.cs" />
     <Compile Include="ModelBinding\CustomModelBinderAttribute.cs" />
     <Compile Include="ModelBinding\ModelBindingContext.cs" />
-    <Compile Include="ModelBinding\Binders\GenericModelBinderProvider.cs" />
     <Compile Include="ModelBinding\IModelBinder.cs" />
     <Compile Include="ModelBinding\Binders\KeyValuePairModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\KeyValuePairModelBinder.cs" />

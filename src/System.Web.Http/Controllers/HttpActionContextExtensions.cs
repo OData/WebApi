@@ -103,7 +103,7 @@ namespace System.Web.Http.Controllers
         /// <summary>
         /// Attempt to bind against the given ActionContext.
         /// </summary>
-        /// <param name="actionContext">The execution context.</param>
+        /// <param name="actionContext">The action context.</param>
         /// <param name="bindingContext">The binding context.</param>
         /// <param name="binders">set of binders to use for binding</param>
         /// <returns>True if the bind was successful, else false.</returns>

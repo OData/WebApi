@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.IdentityModel.Selectors;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -22,7 +23,6 @@ namespace System.Web.Http.SelfHost
         private const int DefaultMaxBufferSize = 64 * 1024;
         private const int DefaultReceivedMessageSize = 64 * 1024;
 
-        private const int PendingContextFactor = 100;
         private const int MinConcurrentRequests = 1;
         private const int MinBufferSize = 1;
         private const int MinReceivedMessageSize = 1;
@@ -55,7 +55,7 @@ namespace System.Web.Http.SelfHost
             : base(new HttpRouteCollection(ValidateBaseAddress(baseAddress).AbsolutePath))
         {
             _baseAddress = ValidateBaseAddress(baseAddress);
-            _maxConcurrentRequests = GetDefaultMaxConcurrentRequests();
+            _maxConcurrentRequests = MultiplyByProcessorCount(DefaultMaxConcurrentRequests);
             _maxBufferSize = TransportDefaults.MaxBufferSize;
             _maxReceivedMessageSize = TransportDefaults.MaxReceivedMessageSize;
         }
@@ -328,15 +328,16 @@ namespace System.Web.Http.SelfHost
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail here so we have to catch all exceptions.")]
-        private static int GetDefaultMaxConcurrentRequests()
+        internal static int MultiplyByProcessorCount(int value)
         {
+            Contract.Assert(value > 0);
             try
             {
-                return Math.Max(Environment.ProcessorCount * DefaultMaxConcurrentRequests, DefaultMaxConcurrentRequests);
+                return Environment.ProcessorCount * value;
             }
             catch
             {
-                return DefaultMaxConcurrentRequests;
+                return value;
             }
         }
     }

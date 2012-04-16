@@ -275,7 +275,7 @@ namespace Microsoft.Web.WebPages.OAuth
                 return false;
             }
 
-            provider.DeleteOAuthAccount(providerName, providerName);
+            provider.DeleteOAuthAccount(providerName, providerUserId);
             return true;
         }
 

@@ -23,6 +23,7 @@ namespace System.Web.Http.ModelBinding.Binders
             : this(binders.ToArray())
         {
         }
+
         public CompositeModelBinder(params IModelBinder[] binders)
         {
             Binders = binders;
@@ -32,9 +33,6 @@ namespace System.Web.Http.ModelBinding.Binders
 
         public virtual bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
-            //// REVIEW: from MVC Futures
-            ////CheckPropertyFilter(bindingContext);
-
             ModelBindingContext newBindingContext = CreateNewBindingContext(bindingContext, bindingContext.ModelName);
 
             bool boundSuccessfully = TryBind(actionContext, newBindingContext);
@@ -42,7 +40,7 @@ namespace System.Web.Http.ModelBinding.Binders
                 && bindingContext.FallbackToEmptyPrefix)
             {
                 // fallback to empty prefix?
-                newBindingContext = CreateNewBindingContext(bindingContext, String.Empty /* modelName */);
+                newBindingContext = CreateNewBindingContext(bindingContext, modelName: String.Empty);
                 boundSuccessfully = TryBind(actionContext, newBindingContext);
             }
 
@@ -65,41 +63,9 @@ namespace System.Web.Http.ModelBinding.Binders
             return true;
         }
 
-        //// REVIEW: from MVC Futures -- activate when Filters are in
-        ////private static void CheckPropertyFilter(ModelBindingContext bindingContext)
-        ////{
-        ////    if (bindingContext.ModelType.GetProperties().Select(p => p.Name).Any(name => !bindingContext.PropertyFilter(name)))
-        ////    {
-        ////        throw Error.InvalidOperation(SRResources.ExtensibleModelBinderAdapter_PropertyFilterMustNotBeSet);
-        ////    }
-        ////}
-
         private bool TryBind(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
-            Type modelType = bindingContext.ModelType;
-            HttpConfiguration config = actionContext.ControllerContext.Configuration;
-
-            ModelBinderProvider providerFromAttr;
-            if (TryGetProviderFromAttributes(modelType, out providerFromAttr))
-            {
-                IModelBinder binder = providerFromAttr.GetBinder(config, modelType);
-                if (binder != null)
-                {
-                    return binder.BindModel(actionContext, bindingContext);
-                }
-            }
-
-            foreach (var binder in Binders)
-            {
-                if (binder != null)
-                {
-                    if (binder.BindModel(actionContext, bindingContext))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return actionContext.Bind(bindingContext, Binders);
         }
 
         private static ModelBindingContext CreateNewBindingContext(ModelBindingContext oldBindingContext, string modelName)
@@ -119,34 +85,6 @@ namespace System.Web.Http.ModelBinding.Binders
             }
 
             return newBindingContext;
-        }
-
-        private static bool TryGetProviderFromAttributes(Type modelType, out ModelBinderProvider provider)
-        {
-            ModelBinderAttribute attr = TypeDescriptorHelper.Get(modelType).GetAttributes().OfType<ModelBinderAttribute>().FirstOrDefault();
-            if (attr == null)
-            {
-                provider = null;
-                return false;
-            }
-
-            // TODO, 386718, remove the following if statement when the bug is resolved
-            if (attr.BinderType == null)
-            {
-                provider = null;
-                return false;
-            }
-
-            if (typeof(ModelBinderProvider).IsAssignableFrom(attr.BinderType))
-            {
-                provider = (ModelBinderProvider)Activator.CreateInstance(attr.BinderType);
-            }
-            else
-            {
-                throw Error.InvalidOperation(SRResources.ModelBinderProviderCollection_InvalidBinderType, attr.BinderType.Name, typeof(ModelBinderProvider).Name, typeof(IModelBinder).Name);
-            }
-
-            return true;
         }
     }
 }

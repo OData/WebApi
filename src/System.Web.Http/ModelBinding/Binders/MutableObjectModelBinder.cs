@@ -137,7 +137,7 @@ namespace System.Web.Http.ModelBinding.Binders
         }
 
         protected virtual void EnsureModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
-        {
+        {            
             if (bindingContext.Model == null)
             {
                 bindingContext.ModelMetadata.Model = CreateModel(actionContext, bindingContext);

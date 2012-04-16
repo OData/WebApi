@@ -39,10 +39,7 @@ namespace System.Web.Http.ModelBinding
             }
 
             _binder = modelBinder;
-            _valueProviderFactories = valueProviderFactories.ToArray();
-
-            HttpConfiguration config = descriptor.Configuration;
-            Type modelType = Descriptor.ParameterType;            
+            _valueProviderFactories = valueProviderFactories.ToArray();            
         }
         
         public IEnumerable<ValueProviderFactory> ValueProviderFactories

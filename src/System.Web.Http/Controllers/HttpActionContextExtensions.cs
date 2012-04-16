@@ -63,13 +63,51 @@ namespace System.Web.Http.Controllers
             return validatorProviders.SelectMany(provider => provider.GetValidators(metadata, validatorProviders));
         }
 
+        public static bool TryBindStrongModel<TModel>(this HttpActionContext actionContext, ModelBindingContext parentBindingContext, string propertyName, ModelMetadataProvider metadataProvider, out TModel model)
+        {
+            if (actionContext == null)
+            {
+                throw Error.ArgumentNull("actionContext");
+            }
+
+            ModelBindingContext propertyBindingContext = new ModelBindingContext(parentBindingContext)
+            {
+                ModelMetadata = metadataProvider.GetMetadataForType(null, typeof(TModel)),
+                ModelName = ModelBindingHelper.CreatePropertyModelName(parentBindingContext.ModelName, propertyName)
+            };
+
+            if (actionContext.Bind(propertyBindingContext))
+            {
+                object untypedModel = propertyBindingContext.Model;
+                model = ModelBindingHelper.CastOrDefault<TModel>(untypedModel);
+                parentBindingContext.ValidationNode.ChildNodes.Add(propertyBindingContext.ValidationNode);
+                return true;
+            }
+
+            model = default(TModel);
+            return false;
+        }
+
+        // Pulls binders from the config
+        public static bool Bind(this HttpActionContext actionContext, ModelBindingContext bindingContext)
+        {
+            Type modelType = bindingContext.ModelType;
+            HttpConfiguration config = actionContext.ControllerContext.Configuration;
+
+            IEnumerable<IModelBinder> binders = from provider in config.Services.GetModelBinderProviders()
+                                                select provider.GetBinder(config, modelType);
+
+            return Bind(actionContext, bindingContext, binders);
+        }
+
         /// <summary>
         /// Attempt to bind against the given ActionContext.
         /// </summary>
         /// <param name="actionContext">The execution context.</param>
         /// <param name="bindingContext">The binding context.</param>
+        /// <param name="binders">set of binders to use for binding</param>
         /// <returns>True if the bind was successful, else false.</returns>
-        public static bool Bind(this HttpActionContext actionContext, ModelBindingContext bindingContext)
+        public static bool Bind(this HttpActionContext actionContext, ModelBindingContext bindingContext, IEnumerable<IModelBinder> binders)
         {
             if (actionContext == null)
             {
@@ -84,17 +122,18 @@ namespace System.Web.Http.Controllers
             Type modelType = bindingContext.ModelType;
             HttpConfiguration config = actionContext.ControllerContext.Configuration;
             
-            IModelBinder binder = null;
             ModelBinderProvider providerFromAttr;
             if (ModelBindingHelper.TryGetProviderFromAttributes(modelType, out providerFromAttr))
             {
-                binder = providerFromAttr.GetBinder(config, modelType);
-                return binder.BindModel(actionContext, bindingContext);
+                IModelBinder binder = providerFromAttr.GetBinder(config, modelType);
+                if (binder != null)
+                {
+                    return binder.BindModel(actionContext, bindingContext);
+                }
             }
-
-            foreach (ModelBinderProvider provider in config.Services.GetModelBinderProviders())
-            {
-                binder = provider.GetBinder(config, modelType);
+            
+            foreach (IModelBinder binder in binders)
+            {                
                 if (binder != null)
                 {
                     if (binder.BindModel(actionContext, bindingContext))

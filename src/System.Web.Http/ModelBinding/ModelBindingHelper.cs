@@ -113,6 +113,13 @@ namespace System.Web.Http.ModelBinding
             Contract.Assert(modelType != null, "modelType cannot be null.");
             Contract.Assert(modelBinderAttribute != null, "modelBinderAttribute cannot be null");
 
+            // TODO, 386718, remove the following if statement when the bug is resolved
+            if (modelBinderAttribute.BinderType == null)
+            {
+                provider = null;
+                return false;
+            }
+
             if (typeof(ModelBinderProvider).IsAssignableFrom(modelBinderAttribute.BinderType))
             {
                 // REVIEW: DI?

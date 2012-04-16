@@ -11,6 +11,11 @@ namespace System.Web.Http.ModelBinding.Binders
     {
         public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
+            if (modelType == null)
+            {
+                throw Error.ArgumentNull("modelType");
+            }
+
             if (!TypeHelper.HasStringConverter(modelType))
             {
                 return null; // this type cannot be converted

@@ -8,6 +8,11 @@ namespace System.Web.Http.ModelBinding.Binders
     {
         public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
+            if (modelType == null)
+            {
+                throw Error.ArgumentNull("modelType");
+            }
+
             if (!modelType.IsArray)
             {
                 return null;

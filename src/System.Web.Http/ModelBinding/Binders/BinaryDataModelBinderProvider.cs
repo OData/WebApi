@@ -13,8 +13,8 @@ namespace System.Web.Http.ModelBinding.Binders
     {
         private static readonly ModelBinderProvider[] _providers = new ModelBinderProvider[]
         {
-            new SimpleModelBinderProvider(typeof(byte[]), new ByteArrayExtensibleModelBinder()),
-            new SimpleModelBinderProvider(typeof(Binary), new LinqBinaryExtensibleModelBinder())
+            new SimpleModelBinderProvider(typeof(byte[]), new ByteArrayModelBinder()),
+            new SimpleModelBinderProvider(typeof(Binary), new LinqBinaryModelBinder())
         };
 
         public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
@@ -29,9 +29,8 @@ namespace System.Web.Http.ModelBinding.Binders
             }
             return null;
         }
-
-        // This is essentially a clone of the ByteArrayModelBinder from core
-        private class ByteArrayExtensibleModelBinder : IModelBinder
+                
+        private class ByteArrayModelBinder : IModelBinder
         {
             [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to ignore when the data is corrupted")]
             [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.Web.Http.ValueProviders.ValueProviderResult.ConvertTo(System.Type)", Justification = "The ValueProviderResult already has the necessary context to perform a culture-aware conversion.")]
@@ -74,9 +73,8 @@ namespace System.Web.Http.ModelBinding.Binders
                 return originalModel;
             }
         }
-
-        // This is essentially a clone of the LinqBinaryModelBinder from core
-        private class LinqBinaryExtensibleModelBinder : ByteArrayExtensibleModelBinder
+                
+        private class LinqBinaryModelBinder : ByteArrayModelBinder
         {
             protected override object ConvertByteArray(byte[] originalModel)
             {

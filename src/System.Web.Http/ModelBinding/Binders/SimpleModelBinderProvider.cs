@@ -1,5 +1,8 @@
-﻿using System.Diagnostics.Contracts;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
+
 namespace System.Web.Http.ModelBinding.Binders
 {
     // Returns a user-specified binder for a given type.
@@ -49,7 +52,7 @@ namespace System.Web.Http.ModelBinding.Binders
         {
             if (modelType == null)
             {
-                throw new ArgumentNullException("modelType");
+                throw Error.ArgumentNull("modelType");
             }
 
             if (modelType == ModelType)

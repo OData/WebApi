@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
@@ -57,17 +58,23 @@ namespace System.Web.Http.Internal
         // or null, depending on whether the type and updatability checks succeed.
         internal static IModelBinder GetGenericBinder(Type supportedInterfaceType, Type openBinderType, Type modelType)
         {
+            Contract.Assert(supportedInterfaceType != null);
+            Contract.Assert(openBinderType != null);
+            Contract.Assert(modelType != null);
+
             Type[] modelTypeArguments = GetGenericBinderTypeArgs(supportedInterfaceType, modelType);
 
             if (modelTypeArguments == null)
             {
                 return null;
             }
-            var binder = (IModelBinder)Activator.CreateInstance(openBinderType.MakeGenericType(modelTypeArguments));
+
+            Type closedBinderType = openBinderType.MakeGenericType(modelTypeArguments);
+            var binder = (IModelBinder)Activator.CreateInstance(closedBinderType);
             return binder;
         }
 
-        // Get the generic arguments for hte binder, based on the model type. Or null if not compatible.
+        // Get the generic arguments for the binder, based on the model type. Or null if not compatible.
         internal static Type[] GetGenericBinderTypeArgs(Type supportedInterfaceType, Type modelType)
         {
             if (!modelType.IsGenericType || modelType.IsGenericTypeDefinition)
@@ -97,10 +104,7 @@ namespace System.Web.Http.Internal
                 return false;
             }
 
-            /*
-             * Is it possible just to change the reference rather than update the collection in-place?
-             */
-
+            // Is it possible just to change the reference rather than update the collection in-place?
             if (!modelMetadata.IsReadOnly)            
             {
                 Type closedNewInstanceType = newInstanceType.MakeGenericType(modelTypeArguments);
@@ -110,11 +114,8 @@ namespace System.Web.Http.Internal
                 }
             }
 
-            /*
-             * At this point, we know we can't change the reference, so we need to verify that
-             * the model instance can be updated in-place.
-             */
-
+            // At this point, we know we can't change the reference, so we need to verify that
+            // the model instance can be updated in-place.
             Type closedSupportedInterfaceType = supportedInterfaceType.MakeGenericType(modelTypeArguments);
             if (!closedSupportedInterfaceType.IsInstanceOfType(modelMetadata.Model))
             {
@@ -123,14 +124,8 @@ namespace System.Web.Http.Internal
 
             Type closedCollectionType = TypeHelper.ExtractGenericInterface(closedSupportedInterfaceType, typeof(ICollection<>));
             bool collectionInstanceIsReadOnly = (bool)closedCollectionType.GetProperty("IsReadOnly").GetValue(modelMetadata.Model, null);
-            if (collectionInstanceIsReadOnly)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+
+            return !collectionInstanceIsReadOnly;            
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.Web.Http.ValueProviders.ValueProviderResult.ConvertTo(System.Type)", Justification = "The ValueProviderResult already has the necessary context to perform a culture-aware conversion.")]
@@ -163,10 +158,7 @@ namespace System.Web.Http.Internal
         // newInstanceType: open type (like List<>) of object that will be created, must implement supportedInterfaceType
         internal static Type[] GetTypeArgumentsForUpdatableGenericCollection(Type supportedInterfaceType, Type newInstanceType, ModelMetadata modelMetadata)
         {
-            /*
-             * Check that we can extract proper type arguments from the model.
-             */
-
+            // Check that we can extract proper type arguments from the model.
             if (!modelMetadata.ModelType.IsGenericType || modelMetadata.ModelType.IsGenericTypeDefinition)
             {
                 // not a closed generic type
@@ -180,10 +172,7 @@ namespace System.Web.Http.Internal
                 return null;
             }
 
-            /*
-             * Is it possible just to change the reference rather than update the collection in-place?
-             */
-
+            // Is it possible just to change the reference rather than update the collection in-place?
             if (!modelMetadata.IsReadOnly)
             {
                 Type closedNewInstanceType = newInstanceType.MakeGenericType(modelTypeArguments);
@@ -193,11 +182,8 @@ namespace System.Web.Http.Internal
                 }
             }
 
-            /*
-             * At this point, we know we can't change the reference, so we need to verify that
-             * the model instance can be updated in-place.
-             */
-
+            // At this point, we know we can't change the reference, so we need to verify that
+            // the model instance can be updated in-place.
             Type closedSupportedInterfaceType = supportedInterfaceType.MakeGenericType(modelTypeArguments);
             if (!closedSupportedInterfaceType.IsInstanceOfType(modelMetadata.Model))
             {

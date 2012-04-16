@@ -81,15 +81,17 @@ namespace System.Web.Http.ModelBinding.Binders
 
         public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
+            // modelType is the type from the action signature that we're requested to bind against. 
+            // _modelType is the generic type that this binder provider knows about. 
             if (modelType == null)
             {
-                throw new ArgumentNullException("modelType");
+                throw Error.ArgumentNull("modelType");
             }
 
             Type[] typeArguments = null;
-            if (ModelType.IsInterface)
+            if (_modelType.IsInterface)
             {
-                Type matchingClosedInterface = TypeHelper.ExtractGenericInterface(modelType, ModelType);
+                Type matchingClosedInterface = TypeHelper.ExtractGenericInterface(modelType, _modelType);
                 if (matchingClosedInterface != null)
                 {
                     typeArguments = matchingClosedInterface.GetGenericArguments();
@@ -97,7 +99,7 @@ namespace System.Web.Http.ModelBinding.Binders
             }
             else
             {
-                typeArguments = TypeHelper.GetTypeArgumentsIfMatch(modelType, ModelType);
+                typeArguments = TypeHelper.GetTypeArgumentsIfMatch(modelType, _modelType);
             }
 
             if (typeArguments != null)

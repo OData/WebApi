@@ -16,14 +16,13 @@ namespace System.Web.Http.Tracing.Tracers
 
         private MediaTypeFormatterTracer _innerTracer;
 
-        public BufferedMediaTypeFormatterTracer(MediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
+        public BufferedMediaTypeFormatterTracer(BufferedMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
-        }
 
-        private BufferedMediaTypeFormatter InnerBufferedFormatter
-        {
-            get { return _innerTracer.InnerFormatter as BufferedMediaTypeFormatter; }
+            // copy non-overridable members from inner formatter
+            _innerTracer.CopyNonOverriableMembersFromInner(this);
+            BufferSize = innerFormatter.BufferSize;
         }
 
         HttpRequestMessage IFormatterTracer.Request
@@ -31,7 +30,7 @@ namespace System.Web.Http.Tracing.Tracers
             get { return _innerTracer.Request; }
         }
 
-        MediaTypeFormatter IFormatterTracer.InnerFormatter
+        public MediaTypeFormatter InnerFormatter
         {
             get { return _innerTracer.InnerFormatter; }
         }
@@ -58,7 +57,7 @@ namespace System.Web.Http.Tracing.Tracers
 
         public override object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
-            BufferedMediaTypeFormatter innerFormatter = InnerBufferedFormatter;
+            BufferedMediaTypeFormatter innerFormatter = InnerFormatter as BufferedMediaTypeFormatter;
             MediaTypeHeaderValue contentType = contentHeaders == null ? null : contentHeaders.ContentType;
             object value = null;
 
@@ -92,7 +91,7 @@ namespace System.Web.Http.Tracing.Tracers
 
         public override void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
         {
-            BufferedMediaTypeFormatter innerFormatter = InnerBufferedFormatter;
+            BufferedMediaTypeFormatter innerFormatter = InnerFormatter as BufferedMediaTypeFormatter;
 
             MediaTypeHeaderValue contentType = contentHeaders == null
                            ? null

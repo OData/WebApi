@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
@@ -18,6 +19,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpActionSelectorTracer(IHttpActionSelector innerSelector, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerSelector != null);
+            Contract.Assert(traceWriter != null);
+
             _innerSelector = innerSelector;
             _traceWriter = traceWriter;
         }

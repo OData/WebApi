@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -16,6 +17,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpActionBindingTracer(HttpActionBinding innerBinding, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerBinding != null);
+            Contract.Assert(traceWriter != null);
+
             _innerBinding = innerBinding;
             _traceWriter = traceWriter;
 

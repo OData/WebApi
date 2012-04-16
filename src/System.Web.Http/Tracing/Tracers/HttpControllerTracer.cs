@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpControllerTracer(HttpRequestMessage request, IHttpController innerController, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerController != null);
+            Contract.Assert(traceWriter != null);
+
             _innerController = innerController;
             _request = request;
             _traceWriter = traceWriter;

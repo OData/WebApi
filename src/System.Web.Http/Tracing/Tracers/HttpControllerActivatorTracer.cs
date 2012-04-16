@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -19,6 +20,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpControllerActivatorTracer(IHttpControllerActivator innerActivator, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerActivator != null);
+            Contract.Assert(traceWriter != null);
+
             _innerActivator = innerActivator;
             _traceWriter = traceWriter;
         }

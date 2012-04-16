@@ -49,7 +49,7 @@ namespace System.Web.Http.ModelBinding
             set;
         }
 
-        protected virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
+        public virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
         {
             HttpContent content = request.Content;
             if (content == null)

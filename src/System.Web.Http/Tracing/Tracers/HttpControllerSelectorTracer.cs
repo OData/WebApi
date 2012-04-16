@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -20,6 +21,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpControllerSelectorTracer(IHttpControllerSelector innerSelector, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerSelector != null);
+            Contract.Assert(traceWriter != null);
+
             _innerSelector = innerSelector;
             _traceWriter = traceWriter;
         }

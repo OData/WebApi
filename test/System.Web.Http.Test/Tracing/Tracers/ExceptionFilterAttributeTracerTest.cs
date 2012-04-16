@@ -15,6 +15,105 @@ namespace System.Web.Http.Tracing.Tracers
     public class ExceptionFilterAttributeTracerTest
     {
         [Fact]
+        public void Equals_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<ExceptionFilterAttribute> mockAttribute = new Mock<ExceptionFilterAttribute>();
+            mockAttribute.Setup(a => a.Equals(randomObject)).Returns(true).Verifiable();
+            ExceptionFilterAttributeTracer tracer = new ExceptionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.Equals(randomObject);
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void GetHashCode_Calls_Inner()
+        {
+            // Arrange
+            Mock<ExceptionFilterAttribute> mockAttribute = new Mock<ExceptionFilterAttribute>();
+            mockAttribute.Setup(a => a.GetHashCode()).Returns(1).Verifiable();
+            ExceptionFilterAttributeTracer tracer = new ExceptionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            int valueReturned = tracer.GetHashCode();
+
+            // Assert
+            Assert.Equal(1, valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void IsDefaultAttribute_Calls_Inner()
+        {
+            // Arrange
+            Mock<ExceptionFilterAttribute> mockAttribute = new Mock<ExceptionFilterAttribute>();
+            mockAttribute.Setup(a => a.IsDefaultAttribute()).Returns(true).Verifiable();
+            ExceptionFilterAttributeTracer tracer = new ExceptionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.IsDefaultAttribute();
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void Match_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<ExceptionFilterAttribute> mockAttribute = new Mock<ExceptionFilterAttribute>();
+            mockAttribute.Setup(a => a.Match(randomObject)).Returns(true).Verifiable();
+            ExceptionFilterAttributeTracer tracer = new ExceptionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.Match(randomObject);
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void TypeId_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<ExceptionFilterAttribute> mockAttribute = new Mock<ExceptionFilterAttribute>();
+            mockAttribute.Setup(a => a.TypeId).Returns(randomObject).Verifiable();
+            ExceptionFilterAttributeTracer tracer = new ExceptionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            object valueReturned = tracer.TypeId;
+
+            // Assert
+            Assert.Same(randomObject, valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void AllowMultiple_Calls_Inner()
+        {
+            // Arrange
+            Mock<ExceptionFilterAttribute> mockAttribute = new Mock<ExceptionFilterAttribute>();
+            mockAttribute.Setup(a => a.AllowMultiple).Returns(true).Verifiable();
+            ExceptionFilterAttributeTracer tracer = new ExceptionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.AllowMultiple;
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
         public void ExecuteExceptionFilterAsync_Traces()
         {
             // Arrange

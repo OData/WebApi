@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Properties;
@@ -19,6 +20,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public ContentNegotiatorTracer(IContentNegotiator innerNegotiator, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerNegotiator != null);
+            Contract.Assert(traceWriter != null);
+
             _innerNegotiator = innerNegotiator;
             _traceWriter = traceWriter;
         }

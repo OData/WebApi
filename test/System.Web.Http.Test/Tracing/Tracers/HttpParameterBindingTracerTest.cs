@@ -18,7 +18,53 @@ namespace System.Web.Http.Tracing.Tracers
     public class HttpParameterBindingTracerTest
     {
         [Fact]
-        public void ValueProviderFactories_Delegates_To_Inner()
+        public void ErrorMessage_Calls_Inner()
+        {
+            // Arrange
+            Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
+            mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
+            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
+            Mock<HttpParameterBinding> mockBinding = new Mock<HttpParameterBinding>(mockParamDescriptor.Object);
+            mockBinding.Setup(b => b.ErrorMessage).Returns("errorMessage").Verifiable();
+            HttpParameterBindingTracer tracer = new HttpParameterBindingTracer(mockBinding.Object, new TestTraceWriter());
+
+            // Act & Assert
+            Assert.Equal("errorMessage", tracer.ErrorMessage);
+            mockBinding.Verify();
+        }
+
+        [Fact]
+        public void WillReadBody_Calls_Inner()
+        {
+            // Arrange
+            Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
+            mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
+            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
+            Mock<HttpParameterBinding> mockBinding = new Mock<HttpParameterBinding>(mockParamDescriptor.Object);
+            mockBinding.Setup(b => b.WillReadBody).Returns(true).Verifiable();
+            HttpParameterBindingTracer tracer = new HttpParameterBindingTracer(mockBinding.Object, new TestTraceWriter());
+
+            // Act & Assert
+            Assert.True(tracer.WillReadBody);
+            mockBinding.Verify();
+        }
+
+        [Fact]
+        public void Descriptor_Uses_Inners()
+        {
+            // Arrange
+            Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
+            mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
+            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
+            Mock<HttpParameterBinding> mockBinding = new Mock<HttpParameterBinding>(mockParamDescriptor.Object) { CallBase = true };
+            HttpParameterBindingTracer tracer = new HttpParameterBindingTracer(mockBinding.Object, new TestTraceWriter());
+
+            // Act & Assert
+            Assert.Same(mockBinding.Object.Descriptor, tracer.Descriptor);
+        }
+
+        [Fact]
+        public void ValueProviderFactories_Calls_Inner()
         {
             // Arrange
             Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };

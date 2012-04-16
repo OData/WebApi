@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Web.Http.Hosting;
-using System.Collections.Generic;
 
 namespace System.Web.Http.Tracing.Tracers
 {

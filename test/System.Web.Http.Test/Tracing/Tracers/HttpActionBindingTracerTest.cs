@@ -41,6 +41,31 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
+        public void ActionDescriptor_Uses_Inners()
+        {
+            // Arrange
+            HttpActionBinding binding = new Mock<HttpActionBinding>() { CallBase = true }.Object;
+            binding.ActionDescriptor = _mockActionDescriptor.Object;
+            HttpActionBindingTracer tracer = new HttpActionBindingTracer(binding, new TestTraceWriter());
+
+            // Assert
+            Assert.Same(binding.ActionDescriptor, tracer.ActionDescriptor);
+        }
+
+        [Fact]
+        public void ParameterBindings_Uses_Inners()
+        {
+            // Arrange
+            HttpActionBinding binding = new Mock<HttpActionBinding>() { CallBase = true }.Object;
+            HttpParameterBinding[] parameterBindings = new HttpParameterBinding[0];
+            binding.ParameterBindings = parameterBindings;
+            HttpActionBindingTracer tracer = new HttpActionBindingTracer(binding, new TestTraceWriter());
+
+            // Assert
+            Assert.Same(parameterBindings, tracer.ParameterBindings);
+        }
+
+        [Fact]
         public void BindValuesAsync_Invokes_Inner_And_Traces()
         {
             // Arrange

@@ -16,9 +16,16 @@ namespace System.Web.Http.Tracing.Tracers
     internal class JsonMediaTypeFormatterTracer : JsonMediaTypeFormatter, IFormatterTracer
     {
         private MediaTypeFormatterTracer _innerTracer;
-        public JsonMediaTypeFormatterTracer(MediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
+        public JsonMediaTypeFormatterTracer(JsonMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
+
+            // copy values we cannot override
+            _innerTracer.CopyNonOverriableMembersFromInner(this);
+            MaxDepth = innerFormatter.MaxDepth;
+            Indent = innerFormatter.Indent;
+            UseDataContractJsonSerializer = innerFormatter.UseDataContractJsonSerializer;
+            SerializerSettings = innerFormatter.SerializerSettings;
         }
 
         HttpRequestMessage IFormatterTracer.Request
@@ -26,7 +33,7 @@ namespace System.Web.Http.Tracing.Tracers
             get { return _innerTracer.Request; }
         }
 
-        MediaTypeFormatter IFormatterTracer.InnerFormatter
+        public MediaTypeFormatter InnerFormatter
         {
             get { return _innerTracer.InnerFormatter; }
         }

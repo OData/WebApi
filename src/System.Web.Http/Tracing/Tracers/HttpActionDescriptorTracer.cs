@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -22,8 +25,39 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpActionDescriptorTracer(HttpControllerContext controllerContext, HttpActionDescriptor innerDescriptor, ITraceWriter traceWriter) : base(controllerContext.ControllerDescriptor)
         {
+            Contract.Assert(innerDescriptor != null);
+            Contract.Assert(traceWriter != null);
+
             _innerDescriptor = innerDescriptor;
             _traceWriter = traceWriter;
+        }
+
+        public override ConcurrentDictionary<object, object> Properties
+        {
+            get
+            {
+                return _innerDescriptor.Properties;
+            }
+        }
+
+        public override HttpActionBinding ActionBinding
+        {
+            get
+            {
+                return _innerDescriptor.ActionBinding;
+            }
+            set
+            {
+                _innerDescriptor.ActionBinding = value;
+            }
+        }
+
+        public override Collection<HttpMethod> SupportedHttpMethods
+        {
+            get
+            {
+                return _innerDescriptor.SupportedHttpMethods;
+            }
         }
 
         public override string ActionName

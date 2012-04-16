@@ -9,12 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
-using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class MediaTypeFormatterTracerTest
+    public class XmlMediaTypeFormatterTracerTest
     {
         [Fact]
         public void CanReadType_Calls_Inner()
@@ -22,9 +21,9 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
             Type randomType = typeof(string);
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>();
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>();
             mockFormatter.Setup(f => f.CanReadType(randomType)).Returns(true).Verifiable();
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, new TestTraceWriter(), request);
 
             // Act
             bool valueReturned = tracer.CanReadType(randomType);
@@ -40,9 +39,9 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
             Type randomType = typeof(string);
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>();
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>();
             mockFormatter.Setup(f => f.CanWriteType(randomType)).Returns(true).Verifiable();
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, new TestTraceWriter(), request);
 
             // Act
             bool valueReturned = tracer.CanWriteType(randomType);
@@ -59,18 +58,18 @@ namespace System.Web.Http.Tracing.Tracers
             HttpRequestMessage request = new HttpRequestMessage();
             Type randomType = typeof(string);
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("plain/text");
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>();
-            MediaTypeFormatter formatterObject = mockFormatter.Object;
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>();
+            XmlMediaTypeFormatter formatterObject = mockFormatter.Object;
 
             mockFormatter.Setup(f => f.GetPerRequestFormatterInstance(randomType, request, mediaType)).Returns(formatterObject).Verifiable();
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(formatterObject, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(formatterObject, new TestTraceWriter(), request);
 
             // Act
             MediaTypeFormatter valueReturned = tracer.GetPerRequestFormatterInstance(randomType, request, mediaType);
 
             // Assert
-            MediaTypeFormatterTracer tracerReturned = Assert.IsType<MediaTypeFormatterTracer>(valueReturned);
-            Assert.Same(formatterObject, tracerReturned.InnerFormatter);
+            XmlMediaTypeFormatterTracer tracerReturned = Assert.IsType<XmlMediaTypeFormatterTracer>(valueReturned);
+            Assert.Same(formatterObject, tracerReturned.InnerFormatter as XmlMediaTypeFormatter);
             mockFormatter.Verify();
         }
 
@@ -82,11 +81,11 @@ namespace System.Web.Http.Tracing.Tracers
             Type randomType = typeof(string);
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
             string mediaType = "plain/text";
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>();
-            MediaTypeFormatter formatterObject = mockFormatter.Object;
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>();
+            XmlMediaTypeFormatter formatterObject = mockFormatter.Object;
 
             mockFormatter.Setup(f => f.SetDefaultContentHeaders(randomType, contentHeaders, mediaType)).Verifiable();
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(formatterObject, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(formatterObject, new TestTraceWriter(), request);
 
             // Act
             tracer.SetDefaultContentHeaders(randomType, contentHeaders, mediaType);
@@ -100,12 +99,11 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/fake");          
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
-            MediaTypeFormatter innerFormatter = mockFormatter.Object;
+            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/fake");
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
             innerFormatter.SupportedMediaTypes.Clear();
             innerFormatter.SupportedMediaTypes.Add(mediaType);
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
 
             // Act & Assert
             Assert.Equal(innerFormatter.SupportedMediaTypes, tracer.SupportedMediaTypes);
@@ -118,11 +116,10 @@ namespace System.Web.Http.Tracing.Tracers
             HttpRequestMessage request = new HttpRequestMessage();
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/fake");
             Mock<MediaTypeMapping> mockMapping = new Mock<MediaTypeMapping>(mediaType);
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
-            MediaTypeFormatter innerFormatter = mockFormatter.Object;
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
             innerFormatter.MediaTypeMappings.Clear();
             innerFormatter.MediaTypeMappings.Add(mockMapping.Object);
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
 
             // Act & Assert
             Assert.Equal(innerFormatter.MediaTypeMappings, tracer.MediaTypeMappings);
@@ -134,11 +131,10 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
             Mock<Encoding> mockEncoding = new Mock<Encoding>();
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
-            MediaTypeFormatter innerFormatter = mockFormatter.Object;
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
             innerFormatter.SupportedEncodings.Clear();
             innerFormatter.SupportedEncodings.Add(mockEncoding.Object);
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
 
             // Act & Assert
             Assert.Equal(innerFormatter.SupportedEncodings, tracer.SupportedEncodings);
@@ -150,27 +146,65 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
             Mock<IRequiredMemberSelector> mockSelector = new Mock<IRequiredMemberSelector>();
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
-            MediaTypeFormatter innerFormatter = mockFormatter.Object;
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
             innerFormatter.RequiredMemberSelector = mockSelector.Object;
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
 
             // Act & Assert
             Assert.Equal(innerFormatter.RequiredMemberSelector, tracer.RequiredMemberSelector);
         }
 
         [Fact]
+        public void UseXmlSerializer_Uses_Inners()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
+            innerFormatter.UseXmlSerializer = !innerFormatter.UseXmlSerializer;
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+
+            // Act & Assert
+            Assert.Equal(innerFormatter.UseXmlSerializer, tracer.UseXmlSerializer);
+        }
+
+        [Fact]
+        public void MaxDepth_Uses_Inners()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
+            innerFormatter.MaxDepth = innerFormatter.MaxDepth + 1;
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+
+            // Act & Assert
+            Assert.Equal(innerFormatter.MaxDepth, tracer.MaxDepth);
+        }
+
+        [Fact]
+        public void Indent_Uses_Inners()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            XmlMediaTypeFormatter innerFormatter = new XmlMediaTypeFormatter();
+            innerFormatter.Indent = !innerFormatter.Indent;
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
+
+            // Act & Assert
+            Assert.Equal(innerFormatter.Indent, tracer.Indent);
+        }
+
+        [Fact]
         public void ReadFromStreamAsync_Traces()
         {
             // Arrange
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
                 f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).
                 Returns(TaskHelpers.FromResult<object>("sampleValue"));
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ReadFromStreamAsync" },
@@ -191,14 +225,14 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             InvalidOperationException exception = new InvalidOperationException("test");
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
                 f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ReadFromStreamAsync" },
@@ -219,7 +253,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             InvalidOperationException exception = new InvalidOperationException("test");
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
             tcs.TrySetException(exception);
 
@@ -229,7 +263,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "ReadFromStreamAsync" },
@@ -250,14 +284,14 @@ namespace System.Web.Http.Tracing.Tracers
         public void WriteToStreamAsync_Traces()
         {
             // Arrange
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
                 f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<TransportContext>())).
                 Returns(TaskHelpers.Completed());
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "WriteToStreamAsync" },
@@ -277,7 +311,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             InvalidOperationException exception = new InvalidOperationException("test");
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
                 f =>
                 f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
@@ -287,7 +321,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "WriteToStreamAsync" },
@@ -308,7 +342,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             InvalidOperationException exception = new InvalidOperationException("test");
-            Mock<MediaTypeFormatter> mockFormatter = new Mock<MediaTypeFormatter>() { CallBase = true };
+            Mock<XmlMediaTypeFormatter> mockFormatter = new Mock<XmlMediaTypeFormatter>() { CallBase = true };
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
             tcs.TrySetException(exception);
 
@@ -319,7 +353,7 @@ namespace System.Web.Http.Tracing.Tracers
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
-            MediaTypeFormatterTracer tracer = new MediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
+            XmlMediaTypeFormatterTracer tracer = new XmlMediaTypeFormatterTracer(mockFormatter.Object, traceWriter, request);
             TraceRecord[] expectedTraces = new TraceRecord[]
             {
                 new TraceRecord(request, TraceCategories.FormattingCategory, TraceLevel.Info) { Kind = TraceKind.Begin, Operation = "WriteToStreamAsync" },
@@ -336,119 +370,5 @@ namespace System.Web.Http.Tracing.Tracers
             Assert.Same(exception, traceWriter.Traces[1].Exception);
         }
 
-        [Theory]
-        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
-        public void CreateTracer_Returns_Tracing_Formatter(Type formatterType)
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
-
-            // Act
-            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-
-            // Assert
-            Assert.IsAssignableFrom<IFormatterTracer>(tracingFormatter);
-            Assert.IsAssignableFrom(formatterType, tracingFormatter);
-        }
-
-        [Fact]
-        public void CreateTracer_Returns_Tracing_BufferedFormatter()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true }.Object;
-
-            // Act
-            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-
-            // Assert
-            Assert.IsAssignableFrom<IFormatterTracer>(tracingFormatter);
-            Assert.IsAssignableFrom<BufferedMediaTypeFormatter>(tracingFormatter);
-        }
-
-        [Theory]
-        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
-        public void CreateTracer_Loads_SupportedEncodings_From_InnerFormatter(Type formatterType)
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
-            Mock<Encoding> encoding = new Mock<Encoding>();
-            formatter.SupportedEncodings.Clear();
-            formatter.SupportedEncodings.Add(encoding.Object);
-
-            // Act
-            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-
-            // Assert
-            Assert.Equal(formatter.SupportedEncodings, tracingFormatter.SupportedEncodings);
-        }
-
-        [Theory]
-        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
-        public void CreateTracer_Loads_SupportedMediaTypes_From_InnerFormatter(Type formatterType)
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
-
-            MediaTypeHeaderValue mediaTypeHeaderValue = new MediaTypeHeaderValue("application/dummy");
-            formatter.SupportedMediaTypes.Clear();
-            formatter.SupportedMediaTypes.Add(mediaTypeHeaderValue);
-
-            // Act
-            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-
-            // Assert
-            Assert.Equal(formatter.SupportedMediaTypes, tracingFormatter.SupportedMediaTypes);
-        }
-
-        [Theory]
-        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
-        public void CreateTracer_Loads_MediaTypeMappings_From_InnerFormatter(Type formatterType)
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
-
-            Mock<MediaTypeMapping> mediaTypeMapping = new Mock<MediaTypeMapping>(new MediaTypeHeaderValue("application/dummy"));
-            formatter.MediaTypeMappings.Clear();
-            formatter.MediaTypeMappings.Add(mediaTypeMapping.Object);
-
-            // Act
-            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-
-            // Assert
-            Assert.Equal(formatter.MediaTypeMappings, tracingFormatter.MediaTypeMappings);
-        }
-
-        [Theory]
-        [InlineDataAttribute(typeof(XmlMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(JsonMediaTypeFormatter))]
-        [InlineDataAttribute(typeof(FormUrlEncodedMediaTypeFormatter))]
-        public void CreateTracer_Loads_RequiredMemberSelector_From_InnerFormatter(Type formatterType)
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeFormatter formatter = (MediaTypeFormatter)Activator.CreateInstance(formatterType);
-
-            Mock<IRequiredMemberSelector> requiredMemberSelector = new Mock<IRequiredMemberSelector>();
-            formatter.RequiredMemberSelector = requiredMemberSelector.Object;
-
-            // Act
-            MediaTypeFormatter tracingFormatter = MediaTypeFormatterTracer.CreateTracer(formatter, new TestTraceWriter(), request);
-
-            // Assert
-            Assert.Equal(formatter.RequiredMemberSelector, tracingFormatter.RequiredMemberSelector);
-        }
     }
 }

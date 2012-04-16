@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -14,6 +16,241 @@ namespace System.Web.Http.Tracing.Tracers
 {
     public class HttpActionDescriptorTracerTest
     {
+        [Fact]
+        public void ActionName_Calls_Inner()
+        {
+            // Arrange
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.ActionName).Returns("actionName").Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same("actionName", tracer.ActionName);
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void SupportedHttpMethods_Calls_Inner()
+        {
+            // Arrange
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Collection<HttpMethod> methods = new Collection<HttpMethod>() { HttpMethod.Delete };
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.SupportedHttpMethods).Returns(methods).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Equal(methods, tracer.SupportedHttpMethods);
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void ActionBinding_Calls_Inner()
+        {
+            // Arrange
+            HttpActionBinding binding = new Mock<HttpActionBinding>().Object;
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.ActionBinding).Returns(binding).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(binding, tracer.ActionBinding);
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void ReturnType_Calls_Inner()
+        {
+            // Arrange
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.ReturnType).Returns(typeof(string)).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Equal(typeof(string), tracer.ReturnType);
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void ResultConverter_Calls_Inner()
+        {
+            // Arrange
+            IActionResultConverter resultConverter = new Mock<IActionResultConverter>().Object;
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.ResultConverter).Returns(resultConverter).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(resultConverter, tracer.ResultConverter);
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void Properties_Calls_Inner()
+        {
+            // Arrange
+            ConcurrentDictionary<object, object> properties = new ConcurrentDictionary<object, object>();
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.Properties).Returns(properties).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(properties, tracer.Properties);
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void GetCustomAttributes_Calls_Inner()
+        {
+            // Arrange
+            Collection<Attribute> customAttributes = new Collection<Attribute>();
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.GetCustomAttributes<Attribute>()).Returns(customAttributes).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(customAttributes, tracer.GetCustomAttributes<Attribute>());
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void GetParameters_Calls_Inner()
+        {
+            // Arrange
+            Collection<HttpParameterDescriptor> parameters = new Collection<HttpParameterDescriptor>();
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.GetParameters()).Returns(parameters).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(parameters, tracer.GetParameters());
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void GetFilters_Calls_Inner()
+        {
+            // Arrange
+            Collection<IFilter> filters = new Collection<IFilter>();
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.GetFilters()).Returns(filters).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act
+            tracer.GetFilters();
+
+            // Assert
+            mockDescriptor.Verify();
+        }
+
+        [Fact]
+        public void GetFilterPipeline_Calls_Inner()
+        {
+            // Arrange
+            Collection<FilterInfo> filters = new Collection<FilterInfo>();
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            mockDescriptor.Setup(d => d.GetFilterPipeline()).Returns(filters).Verifiable();
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act
+            tracer.GetFilterPipeline();
+
+            // Assert
+            mockDescriptor.Verify();
+        }
+        [Fact]
+        public void Configuration_Uses_Inners()
+        {
+            // Assert
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(actionDescriptor.Configuration, tracer.Configuration);
+        }
+
+        [Fact]
+        public void ControllerDescriptor_Uses_Inners()
+        {
+            // Assert
+            HttpControllerDescriptor controllerDescriptor = new Mock<HttpControllerDescriptor>().Object;
+            controllerDescriptor.Configuration = new HttpConfiguration();
+            Mock<HttpActionDescriptor> mockDescriptor = new Mock<HttpActionDescriptor>(controllerDescriptor);
+            HttpActionDescriptor actionDescriptor = mockDescriptor.Object;
+            HttpControllerContext controllerContext = new Mock<HttpControllerContext>().Object;
+            controllerContext.Configuration = controllerDescriptor.Configuration;
+            controllerContext.ControllerDescriptor = controllerDescriptor;
+            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, actionDescriptor, new TestTraceWriter());
+
+            // Act and Assert
+            Assert.Same(actionDescriptor.ControllerDescriptor, tracer.ControllerDescriptor);
+        }
+
         // This test verifies only one kind of filter is wrapped, proving
         // the static FilterTracer.CreateFilterTracer was called from GetFilterPipeline.  
         // Deeper testing of FilterTracer.CreateFilterTracer is in FilterTracerTest.

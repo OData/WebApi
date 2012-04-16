@@ -13,7 +13,7 @@ namespace System.Web.Http.Filters
     {
         private static readonly ConcurrentDictionary<Type, bool> _attributeUsageCache = new ConcurrentDictionary<Type, bool>();
 
-        public bool AllowMultiple
+        public virtual bool AllowMultiple
         {
             get { return AllowsMultiple(GetType()); }
         }

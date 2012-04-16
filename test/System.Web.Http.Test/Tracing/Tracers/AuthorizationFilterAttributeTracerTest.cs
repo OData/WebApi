@@ -15,6 +15,105 @@ namespace System.Web.Http.Tracing.Tracers
     public class AuthorizationFilterAttributeTracerTest
     {
         [Fact]
+        public void Equals_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<AuthorizationFilterAttribute> mockAttribute = new Mock<AuthorizationFilterAttribute>();
+            mockAttribute.Setup(a => a.Equals(randomObject)).Returns(true).Verifiable();
+            AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.Equals(randomObject);
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void GetHashCode_Calls_Inner()
+        {
+            // Arrange
+            Mock<AuthorizationFilterAttribute> mockAttribute = new Mock<AuthorizationFilterAttribute>();
+            mockAttribute.Setup(a => a.GetHashCode()).Returns(1).Verifiable();
+            AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            int valueReturned = tracer.GetHashCode();
+
+            // Assert
+            Assert.Equal(1, valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void IsDefaultAttribute_Calls_Inner()
+        {
+            // Arrange
+            Mock<AuthorizationFilterAttribute> mockAttribute = new Mock<AuthorizationFilterAttribute>();
+            mockAttribute.Setup(a => a.IsDefaultAttribute()).Returns(true).Verifiable();
+            AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.IsDefaultAttribute();
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void Match_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<AuthorizationFilterAttribute> mockAttribute = new Mock<AuthorizationFilterAttribute>();
+            mockAttribute.Setup(a => a.Match(randomObject)).Returns(true).Verifiable();
+            AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.Match(randomObject);
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void TypeId_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<AuthorizationFilterAttribute> mockAttribute = new Mock<AuthorizationFilterAttribute>();
+            mockAttribute.Setup(a => a.TypeId).Returns(randomObject).Verifiable();
+            AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            object valueReturned = tracer.TypeId;
+
+            // Assert
+            Assert.Same(randomObject, valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void AllowMultiple_Calls_Inner()
+        {
+            // Arrange
+            Mock<AuthorizationFilterAttribute> mockAttribute = new Mock<AuthorizationFilterAttribute>();
+            mockAttribute.Setup(a => a.AllowMultiple).Returns(true).Verifiable();
+            AuthorizationFilterAttributeTracer tracer = new AuthorizationFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.AllowMultiple;
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
         public void ExecuteAuthorizationFilterAsync_Traces()
         {
             // Arrange

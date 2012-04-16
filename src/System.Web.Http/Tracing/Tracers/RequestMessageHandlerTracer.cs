@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -19,6 +20,8 @@ namespace System.Web.Http.Tracing.Tracers
 
         public RequestMessageHandlerTracer(ITraceWriter traceWriter)
         {
+            Contract.Assert(traceWriter != null);
+
             _traceWriter = traceWriter;
         }
 

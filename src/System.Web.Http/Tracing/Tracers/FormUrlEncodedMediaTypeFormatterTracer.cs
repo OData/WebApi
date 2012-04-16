@@ -16,9 +16,14 @@ namespace System.Web.Http.Tracing.Tracers
     internal class FormUrlEncodedMediaTypeFormatterTracer : FormUrlEncodedMediaTypeFormatter, IFormatterTracer
     {
         private MediaTypeFormatterTracer _innerTracer;
-        public FormUrlEncodedMediaTypeFormatterTracer(MediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
+        public FormUrlEncodedMediaTypeFormatterTracer(FormUrlEncodedMediaTypeFormatter innerFormatter, ITraceWriter traceWriter, HttpRequestMessage request)
         {
             _innerTracer = new MediaTypeFormatterTracer(innerFormatter, traceWriter, request);
+
+            // copy non-overridable members from inner formatter
+            _innerTracer.CopyNonOverriableMembersFromInner(this);
+            MaxDepth = innerFormatter.MaxDepth;
+            ReadBufferSize = innerFormatter.ReadBufferSize;
         }
 
         HttpRequestMessage IFormatterTracer.Request
@@ -26,7 +31,7 @@ namespace System.Web.Http.Tracing.Tracers
             get { return _innerTracer.Request; }
         }
 
-        MediaTypeFormatter IFormatterTracer.InnerFormatter
+        public MediaTypeFormatter InnerFormatter
         {
             get { return _innerTracer.InnerFormatter; }
         }

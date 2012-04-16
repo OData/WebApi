@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Web.Http.Filters;
 
 namespace System.Web.Http.Tracing.Tracers
@@ -12,6 +13,9 @@ namespace System.Web.Http.Tracing.Tracers
     {
         public FilterTracer(IFilter innerFilter, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerFilter != null);
+            Contract.Assert(traceWriter != null);
+
             InnerFilter = innerFilter;
             TraceWriter = traceWriter;
         }

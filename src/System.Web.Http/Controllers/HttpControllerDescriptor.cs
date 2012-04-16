@@ -61,7 +61,7 @@ namespace System.Web.Http.Controllers
         /// <summary>
         /// Gets the properties associated with this instance.
         /// </summary>
-        public ConcurrentDictionary<object, object> Properties
+        public virtual ConcurrentDictionary<object, object> Properties
         {
             get { return _properties; }
         }

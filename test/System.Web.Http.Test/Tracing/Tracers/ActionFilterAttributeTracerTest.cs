@@ -15,6 +15,105 @@ namespace System.Web.Http.Tracing.Tracers
     public class ActionFilterAttributeTracerTest
     {
         [Fact]
+        public void Equals_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<ActionFilterAttribute> mockAttribute = new Mock<ActionFilterAttribute>();
+            mockAttribute.Setup(a => a.Equals(randomObject)).Returns(true).Verifiable();
+            ActionFilterAttributeTracer tracer = new ActionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.Equals(randomObject);
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void GetHashCode_Calls_Inner()
+        {
+            // Arrange
+            Mock<ActionFilterAttribute> mockAttribute = new Mock<ActionFilterAttribute>();
+            mockAttribute.Setup(a => a.GetHashCode()).Returns(1).Verifiable();
+            ActionFilterAttributeTracer tracer = new ActionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            int valueReturned = tracer.GetHashCode();
+
+            // Assert
+            Assert.Equal(1, valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void IsDefaultAttribute_Calls_Inner()
+        {
+            // Arrange
+            Mock<ActionFilterAttribute> mockAttribute = new Mock<ActionFilterAttribute>();
+            mockAttribute.Setup(a => a.IsDefaultAttribute()).Returns(true).Verifiable();
+            ActionFilterAttributeTracer tracer = new ActionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.IsDefaultAttribute();
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void Match_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<ActionFilterAttribute> mockAttribute = new Mock<ActionFilterAttribute>();
+            mockAttribute.Setup(a => a.Match(randomObject)).Returns(true).Verifiable();
+            ActionFilterAttributeTracer tracer = new ActionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.Match(randomObject);
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void TypeId_Calls_Inner()
+        {
+            // Arrange
+            object randomObject = new Object();
+            Mock<ActionFilterAttribute> mockAttribute = new Mock<ActionFilterAttribute>();
+            mockAttribute.Setup(a => a.TypeId).Returns(randomObject).Verifiable();
+            ActionFilterAttributeTracer tracer = new ActionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            object valueReturned = tracer.TypeId;
+
+            // Assert
+            Assert.Same(randomObject, valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
+        public void AllowMultiple_Calls_Inner()
+        {
+            // Arrange
+            Mock<ActionFilterAttribute> mockAttribute = new Mock<ActionFilterAttribute>();
+            mockAttribute.Setup(a => a.AllowMultiple).Returns(true).Verifiable();
+            ActionFilterAttributeTracer tracer = new ActionFilterAttributeTracer(mockAttribute.Object, new TestTraceWriter());
+
+            // Act
+            bool valueReturned = tracer.AllowMultiple;
+
+            // Assert
+            Assert.True(valueReturned);
+            mockAttribute.Verify();
+        }
+
+        [Fact]
         public void ExecuteActionFilterAsync_Traces_Executing_And_Executed()
         {
             // Arrange

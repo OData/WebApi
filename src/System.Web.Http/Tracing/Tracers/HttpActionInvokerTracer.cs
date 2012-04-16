@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace System.Web.Http.Tracing.Tracers
 
         public HttpActionInvokerTracer(IHttpActionInvoker innerInvoker, ITraceWriter traceWriter)
         {
+            Contract.Assert(innerInvoker != null);
+            Contract.Assert(traceWriter != null);
+
             _innerInvoker = innerInvoker;
             _traceWriter = traceWriter;
         }

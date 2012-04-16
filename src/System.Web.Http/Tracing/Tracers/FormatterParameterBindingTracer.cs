@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -26,14 +27,28 @@ namespace System.Web.Http.Tracing.Tracers
 
         public FormatterParameterBindingTracer(FormatterParameterBinding innerBinding, ITraceWriter traceWriter) : base(innerBinding.Descriptor, innerBinding.Formatters, innerBinding.BodyModelValidator)
         {
+            Contract.Assert(innerBinding != null);
+            Contract.Assert(traceWriter != null);
+
             _innerBinding = innerBinding;
             _traceWriter = traceWriter;
         }
 
-        protected override Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
+        public override string ErrorMessage
         {
-            // Intercept this method solely to wrap request-knowledgable formatter tracers
-            return base.ReadContentAsync(request, type, CreateFormatterTracers(request, formatters), formatterLogger);
+            get { return _innerBinding.ErrorMessage; }
+        }
+
+        public override bool WillReadBody
+        {
+            get { return _innerBinding.WillReadBody; }
+        }
+
+        public override Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
+        {
+            // Intercept this method solely to wrap formatters with request-aware formatter tracers
+            // There is no other interception point where a request and a formatter are paired.
+            return _innerBinding.ReadContentAsync(request, type, CreateFormatterTracers(request, formatters), formatterLogger);
         }
 
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)

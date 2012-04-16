@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
@@ -20,8 +23,50 @@ namespace System.Web.Http.Tracing.Tracers
         public HttpControllerDescriptorTracer(HttpConfiguration configuration, string controllerName, Type controllerType, HttpControllerDescriptor innerDescriptor, ITraceWriter traceWriter)
             : base(configuration, controllerName, controllerType)
         {
+            Contract.Assert(innerDescriptor != null);
+            Contract.Assert(traceWriter != null);
+
             _innerDescriptor = innerDescriptor;
             _traceWriter = traceWriter;
+
+            // capture values we cannot override
+            if (innerDescriptor.HttpControllerActivator != null)
+            {
+                HttpControllerActivator = innerDescriptor.HttpControllerActivator;
+            }
+
+            if (innerDescriptor.HttpActionInvoker != null)
+            {
+                HttpActionInvoker = innerDescriptor.HttpActionInvoker;
+            }
+
+            if (innerDescriptor.HttpActionSelector != null)
+            {
+                HttpActionSelector = innerDescriptor.HttpActionSelector;
+            }
+
+            if (innerDescriptor.ActionValueBinder != null)
+            {
+                ActionValueBinder = innerDescriptor.ActionValueBinder;
+            }
+        }
+
+        public override ConcurrentDictionary<object, object> Properties
+        {
+            get
+            {
+                return _innerDescriptor.Properties;
+            }
+        }
+
+        public override Collection<T> GetCustomAttributes<T>()
+        {
+            return _innerDescriptor.GetCustomAttributes<T>();
+        }
+
+        public override Collection<Filters.IFilter> GetFilters()
+        {
+            return _innerDescriptor.GetFilters();
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "This object is returned back to the caller")]

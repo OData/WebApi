@@ -15,7 +15,7 @@ namespace System.Web.Http.ModelBinding
     /// <summary>
     /// Describes a parameter that gets bound via ModelBinding.  
     /// </summary>
-    public class ModelBinderParameterBinding : HttpParameterBinding
+    public class ModelBinderParameterBinding : HttpParameterBinding, IValueProviderParameterBinding
     {
         private readonly ValueProviderFactory[] _valueProviderFactories;
         private readonly ModelBinderProvider _modelBinderProvider;

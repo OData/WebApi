@@ -27,7 +27,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         /// <param name="mediaType1">The first media type.</param>
         /// <param name="mediaType2">The second media type.</param>
-        /// <returns><c>true</c> if this is a superset of <paramref name="mediaType2"/>; false otherwise.</returns>
+        /// <returns><c>true</c> if this is a subset of <paramref name="mediaType2"/>; false otherwise.</returns>
         public static bool IsSubsetOf(this MediaTypeHeaderValue mediaType1, MediaTypeHeaderValue mediaType2)
         {
             Contract.Assert(mediaType1 != null);

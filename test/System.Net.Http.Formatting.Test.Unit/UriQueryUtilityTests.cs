@@ -3,8 +3,8 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http.Formatting;
-using System.Net.Http.Internal;
 using System.Text;
+using System.Web.Http;
 using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Net.Http.Internal;
 using System.Text;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Parsers
 {

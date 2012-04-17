@@ -84,6 +84,9 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\UriQueryUtility.cs">
+      <Link>Common\UriQueryUtility.cs</Link>
+    </Compile>
     <Compile Include="AcceptVerbsAttribute.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
@@ -107,7 +110,6 @@
     <Compile Include="IncludeErrorDetailPolicy.cs" />
     <Compile Include="Filters\HttpActionExecutedContext.cs" />
     <Compile Include="Internal\HttpParameterBindingExtensions.cs" />
-    <Compile Include="Internal\UriQueryUtility.cs" />
     <Compile Include="ModelBinding\FormatterParameterBinding.cs" />
     <Compile Include="ModelBinding\CancellationTokenParameterBinding.cs" />
     <Compile Include="ModelBinding\ErrorParameterBinding.cs" />

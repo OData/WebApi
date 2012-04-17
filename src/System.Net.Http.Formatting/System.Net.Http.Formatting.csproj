@@ -78,6 +78,9 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\UriQueryUtility.cs">
+      <Link>Common\UriQueryUtility.cs</Link>
+    </Compile>
     <Compile Include="..\RS.cs">
       <Link>RS.cs</Link>
     </Compile>
@@ -158,7 +161,6 @@
     <Compile Include="ObjectContent.cs" />
     <Compile Include="Formatting\Parsers\ParserState.cs" />
     <Compile Include="UriExtensions.cs" />
-    <Compile Include="Internal\UriQueryUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Common\CommonWebApiResources.Designer.cs">

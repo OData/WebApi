@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
@@ -18,6 +17,38 @@ namespace System.Net.Http.Formatting
     public class MediaTypeFormatterTests
     {
         private const string TestMediaType = "text/test";
+
+        public static TheoryDataSet<string, string[], string> SelectCharacterEncodingTestData
+        {
+            get
+            {
+                // string bodyEncoding, string[] supportedEncodings, string expectedEncoding
+                return new TheoryDataSet<string, string[], string>
+                {
+                    { null, new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { null, new string[] { "utf-16", "utf-8"}, "utf-16"},
+                    { "utf-32", new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { "utf-32", new string[] { "utf-8", "utf-16", "utf-32"}, "utf-32"}
+                };
+            }
+        }
+
+        public static TheoryDataSet<string[], string, string[], string> SelectResponseCharacterEncodingTestData
+        {
+            get
+            {
+                // string[] acceptCharsetValues, string bodyEncoding, string[] supportedEncodings, string expectedEncoding
+                return new TheoryDataSet<string[], string, string[], string>
+                {
+                    { new string[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.7" }, null, new string[] { "utf-16", "utf-8"}, "utf-8" },
+                    { new string[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.9" }, null, new string[] { "utf-8", "utf-16"}, "utf-16" },
+                    { new string[] { "*;q=0.9", "utf-8;q=0.5", "utf-16;q=0.5" }, null, new[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[] { }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-16" },
+                    { new string[] { "*;q=0.5" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[] { "*;q=0.5", "utf-16;q=0.7", "utf-8;q=0.8" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-8" },
+                };
+            }
+        }
 
         [Fact]
         [Trait("Description", "MediaTypeFormatter is public, abstract, and unsealed.")]
@@ -44,7 +75,7 @@ namespace System.Net.Http.Formatting
         public void MaxCollectionKeySize_RoundTrips()
         {
             Assert.Reflection.IntegerProperty<MediaTypeFormatter, int>(
-                null, 
+                null,
                 c => MediaTypeFormatter.MaxHttpCollectionKeys,
                 expectedDefaultValue: 1000,
                 minLegalValue: 1,
@@ -292,86 +323,6 @@ namespace System.Net.Http.Formatting
             Assert.Equal(quality, match.MediaTypeMatch.Quality);
             Assert.NotNull(match.MediaTypeMatch.MediaType);
             Assert.Equal(mediaType.MediaType, match.MediaTypeMatch.MediaType.MediaType);
-        }
-
-        public static IEnumerable<object[]> SelectCharacterEncodingTestData
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    null,
-                    new[] { "utf-8", "utf-16"},
-                    "utf-8"
-                };
-                yield return new object[]
-                {
-                    null,
-                    new[] { "utf-16", "utf-8"},
-                    "utf-16"
-                };
-                yield return new object[]
-                {
-                    "utf-32",
-                    new[] { "utf-8", "utf-16"},
-                    "utf-8"
-                };
-                yield return new object[]
-                {
-                    "utf-32",
-                    new[] { "utf-8", "utf-16", "utf-32"},
-                    "utf-32"
-                };
-            }
-        }
-
-        public static IEnumerable<object[]> SelectResponseCharacterEncodingTestData
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.7" },
-                    null,
-                    new[] { "utf-16", "utf-8"},
-                    "utf-8"
-                };
-                yield return new object[]
-                {
-                    new[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.9" },
-                    null,
-                    new[] { "utf-8", "utf-16"},
-                    "utf-16"
-                };
-                yield return new object[]
-                {
-                    new[] { "*;q=0.9", "utf-8;q=0.5", "utf-16;q=0.5" },
-                    null,
-                    new[] { "utf-8", "utf-16"},
-                    "utf-8"
-                };
-                yield return new object[]
-                {
-                    new string[] { },
-                    "utf-16",
-                    new[] { "utf-8", "utf-16"},
-                    "utf-16"
-                };
-                yield return new object[]
-                {
-                    new[] { "*;q=0.5" },
-                    "utf-16",
-                    new[] { "utf-8", "utf-16"},
-                    "utf-8"
-                };
-                yield return new object[]
-                {
-                    new[] { "*;q=0.5", "utf-16;q=0.7", "utf-8;q=0.8" },
-                    "utf-16",
-                    new[] { "utf-8", "utf-16"},
-                    "utf-8"
-                };
-            }
         }
 
         [Fact]

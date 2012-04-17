@@ -16,10 +16,10 @@ namespace System.Web.Http.Internal
                 throw Error.ArgumentNull("parameterBinding");
             }
 
-            ModelBinderParameterBinding modelParameterBinding = parameterBinding as ModelBinderParameterBinding;
-            if (modelParameterBinding != null)
+            IValueProviderParameterBinding valueProviderParameterBinding = parameterBinding as IValueProviderParameterBinding;
+            if (valueProviderParameterBinding != null)
             {
-                if (modelParameterBinding.ValueProviderFactories.All(factory => factory is IUriValueProviderFactory))
+                if (valueProviderParameterBinding.ValueProviderFactories.All(factory => factory is IUriValueProviderFactory))
                 {
                     return true;
                 }

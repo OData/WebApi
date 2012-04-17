@@ -122,6 +122,7 @@
     <Compile Include="Dispatcher\ExceptionSurrogate.cs" />
     <Compile Include="HttpResponseException.cs" />
     <Compile Include="ModelBinding\HttpRequestParameterBinding.cs" />
+    <Compile Include="ModelBinding\IValueProviderParameterBinding.cs" />
     <Compile Include="ModelBinding\JQueryMVCFormUrlEncodedFormatter.cs" />
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
     <Compile Include="Query\ParseException.cs" />

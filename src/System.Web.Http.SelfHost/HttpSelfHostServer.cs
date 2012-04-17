@@ -209,8 +209,6 @@ namespace System.Web.Http.SelfHost
                     })
                     .Finally(() =>
                     {
-                        Interlocked.Decrement(ref _requestsOutstanding);
-
                         if (responseMessage == null) // No Then or Catch, must've been canceled
                         {
                             responseMessage = request.CreateResponse(HttpStatusCode.ServiceUnavailable);
@@ -222,8 +220,6 @@ namespace System.Web.Http.SelfHost
             }
             catch
             {
-                Interlocked.Decrement(ref _requestsOutstanding);
-
                 // REVIEW: Shouldn't the response contain the exception so it can be serialized?
                 HttpResponseMessage response = request.CreateResponse(HttpStatusCode.InternalServerError);
                 Message reply = response.ToMessage();
@@ -650,7 +646,8 @@ namespace System.Web.Http.SelfHost
             }
             catch
             {
-                BeginReceiveRequestContext(replyContext.ChannelContext);
+                Interlocked.Decrement(ref _requestsOutstanding);
+                BeginNextRequest(replyContext.ChannelContext);
                 replyContext.Dispose();
             }
         }
@@ -682,6 +679,7 @@ namespace System.Web.Http.SelfHost
             }
             finally
             {
+                Interlocked.Decrement(ref _requestsOutstanding);
                 BeginNextRequest(replyContext.ChannelContext);
                 replyContext.Dispose();
             }

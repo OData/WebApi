@@ -333,7 +333,7 @@ namespace System.Web.Http.SelfHost
             Contract.Assert(value > 0);
             try
             {
-                return Environment.ProcessorCount * value;
+                return Math.Max(Environment.ProcessorCount * value, value);
             }
             catch
             {

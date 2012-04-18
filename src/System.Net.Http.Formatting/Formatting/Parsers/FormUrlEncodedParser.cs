@@ -20,7 +20,7 @@ namespace System.Net.Http.Formatting.Parsers
 
         private NameValueState _nameValueState;
         private ICollection<KeyValuePair<string, string>> _nameValuePairs;
-        private CurrentNameValuePair _currentNameValuePair;
+        private readonly CurrentNameValuePair _currentNameValuePair;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormUrlEncodedParser"/> class.

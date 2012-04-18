@@ -18,11 +18,6 @@ namespace System.Net.Http.Formatting
         private const int MinBufferSize = 256;
         private const int DefaultBufferSize = 32 * 1024;
 
-        private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
-        {
-            MediaTypeConstants.ApplicationFormUrlEncodedMediaType
-        };
-
         private int _readBufferSize = DefaultBufferSize;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
 
@@ -31,10 +26,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public FormUrlEncodedMediaTypeFormatter()
         {
-            foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
-            {
-                SupportedMediaTypes.Add(value);
-            }
+            SupportedMediaTypes.Add(MediaTypeConstants.ApplicationFormUrlEncodedMediaType);
         }
 
         /// <summary>

@@ -42,6 +42,32 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void SupportedMediaTypes_HeaderValuesAreNotSharedBetweenInstances()
+        {
+            var formatter1 = new TFormatter();
+            var formatter2 = new TFormatter();
+
+            foreach (MediaTypeHeaderValue mediaType1 in formatter1.SupportedMediaTypes)
+            {
+                MediaTypeHeaderValue mediaType2 = formatter2.SupportedMediaTypes.Single(m => m.Equals(mediaType1));
+                Assert.NotSame(mediaType1, mediaType2);
+            }
+        }
+
+        [Fact]
+        public void SupportEncodings_ValuesAreNotSharedBetweenInstances()
+        {
+            var formatter1 = new TFormatter();
+            var formatter2 = new TFormatter();
+
+            foreach (Encoding mediaType1 in formatter1.SupportedEncodings)
+            {
+                Encoding mediaType2 = formatter2.SupportedEncodings.Single(m => m.Equals(mediaType1));
+                Assert.NotSame(mediaType1, mediaType2);
+            }
+        }
+
+        [Fact]
         public void SupportEncoding_DefaultSupportedMediaTypes()
         {
             TFormatter formatter = new TFormatter();
@@ -60,7 +86,7 @@ namespace System.Net.Http.Formatting
         {
             TFormatter formatter = new TFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), null, null, null, null); }, "stream");
+            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "stream");
         }
 
         [Fact]

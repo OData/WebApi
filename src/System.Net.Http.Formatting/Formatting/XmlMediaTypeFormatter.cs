@@ -21,12 +21,6 @@ namespace System.Net.Http.Formatting
     /// </summary>
     public class XmlMediaTypeFormatter : MediaTypeFormatter
     {
-        private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
-        {
-            MediaTypeConstants.ApplicationXmlMediaType,
-            MediaTypeConstants.TextXmlMediaType
-        };
-
         private ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
         private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
 
@@ -36,10 +30,8 @@ namespace System.Net.Http.Formatting
         public XmlMediaTypeFormatter()
         {
             // Set default supported media types
-            foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
-            {
-                SupportedMediaTypes.Add(value);
-            }
+            SupportedMediaTypes.Add(MediaTypeConstants.ApplicationXmlMediaType);
+            SupportedMediaTypes.Add(MediaTypeConstants.TextXmlMediaType);
 
             // Set default supported character encodings
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));

@@ -17,6 +17,7 @@ namespace System.Net.Http
     public class HttpMessageContent : HttpContent
     {
         private const string SP = " ";
+        private const string ColonSP = ": ";
         private const string CRLF = "\r\n";
         private const string CommaSeparator = ", ";
 
@@ -30,16 +31,21 @@ namespace System.Net.Http
 
         private const string DefaultRequestMediaType = DefaultMediaType + "; " + MsgTypeParameter + "=" + DefaultRequestMsgType;
         private const string DefaultResponseMediaType = DefaultMediaType + "; " + MsgTypeParameter + "=" + DefaultResponseMsgType;
-        private static readonly Task<HttpContent> _nullContentTask = TaskHelpers.FromResult<HttpContent>(null);
+
         private static readonly AsyncCallback _onWriteComplete = new AsyncCallback(OnWriteComplete);
 
-        /// <summary>
-        /// Set of header fields that only support single values such as Set-Cookie.
-        /// </summary>
+        // Set of header fields that only support single values such as Set-Cookie.
         private static readonly HashSet<string> _singleValueHeaderFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
+            "Cookie",
             "Set-Cookie",
             "X-Powered-By",
+        };
+
+        // Set of header fields that should get serialized as space-separated values such as User-Agent.
+        private static readonly HashSet<string> _spaceSeparatedValueHeaderFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "User-Agent",
         };
 
         private bool _contentConsumed;
@@ -348,7 +354,7 @@ namespace System.Net.Http
             // Only insert host header if not already present.
             if (httpRequest.Headers.Host == null)
             {
-                message.Append(FormattingUtilities.HttpHostHeader + ":" + SP + httpRequest.RequestUri.Authority + CRLF);
+                message.Append(FormattingUtilities.HttpHostHeader + ColonSP + httpRequest.RequestUri.Authority + CRLF);
             }
         }
 
@@ -381,12 +387,16 @@ namespace System.Net.Http
                     {
                         foreach (string value in header.Value)
                         {
-                            message.Append(header.Key + ":" + SP + value + CRLF);
+                            message.Append(header.Key + ColonSP + value + CRLF);
                         }
+                    }
+                    else if (_spaceSeparatedValueHeaderFields.Contains(header.Key))
+                    {
+                        message.Append(header.Key + ColonSP + String.Join(SP, header.Value) + CRLF);
                     }
                     else
                     {
-                        message.Append(header.Key + ":" + SP + String.Join(CommaSeparator, header.Value) + CRLF);
+                        message.Append(header.Key + ColonSP + String.Join(CommaSeparator, header.Value) + CRLF);
                     }
                 }
             }
@@ -396,7 +406,7 @@ namespace System.Net.Http
         {
             if (Content == null)
             {
-                return _nullContentTask;
+                return TaskHelpers.FromResult<HttpContent>(null);
             }
 
             return _streamTask.Value.Then(readStream =>

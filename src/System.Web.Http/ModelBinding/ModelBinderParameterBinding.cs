@@ -72,7 +72,7 @@ namespace System.Web.Http.ModelBinding
 
             string prefix = Descriptor.Prefix;
 
-            IValueProvider vp = CreateValueProvider(this._valueProviderFactories, actionContext);
+            IValueProvider vp = CompositeValueProviderFactory.GetValueProvider(actionContext, _valueProviderFactories);
 
             if (_metadataCache == null)
             {
@@ -98,18 +98,6 @@ namespace System.Web.Http.ModelBinding
             }
 
             return ctx;
-        }
-
-        // Instantiate the value providers for the given action context.
-        private static IValueProvider CreateValueProvider(ValueProviderFactory[] factories, HttpActionContext actionContext)
-        {
-            if (factories.Length == 1)
-            {
-                return factories[0].GetValueProvider(actionContext);
-            }
-
-            IValueProvider[] providers = Array.ConvertAll(factories, f => f.GetValueProvider(actionContext));            
-            return new CompositeValueProvider(providers);
         }
     }
 }

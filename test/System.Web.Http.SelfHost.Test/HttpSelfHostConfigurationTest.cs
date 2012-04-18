@@ -224,6 +224,16 @@ namespace System.Web.Http.SelfHost
         }
 
         [Fact]
+        public void HttpSelfHostConfiguration_NegativeTimeouts_ThrowArgumentOutOfRange()
+        {
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost");
+            TimeSpan negativeTimeout = new TimeSpan(-1, 0, 0);
+
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => config.ReceiveTimeout = negativeTimeout, "value", "00:00:00", "-01:00:00");
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => config.SendTimeout = negativeTimeout, "value", "00:00:00", "-01:00:00");
+        }
+
+        [Fact]
         public void HttpSelfHostConfiguration_Settings_PropagateToBinding()
         {
             // Arrange
@@ -232,6 +242,8 @@ namespace System.Web.Http.SelfHost
             {
                 MaxBufferSize = 10,
                 MaxReceivedMessageSize = 11,
+                ReceiveTimeout = new TimeSpan(1, 0, 0),
+                SendTimeout = new TimeSpan(1, 0, 0),
                 TransferMode = TransferMode.StreamedResponse,
                 HostNameComparisonMode = HostNameComparisonMode.WeakWildcard
             };
@@ -242,6 +254,8 @@ namespace System.Web.Http.SelfHost
             // Assert
             Assert.Equal(10, binding.MaxBufferSize);
             Assert.Equal(11, binding.MaxReceivedMessageSize);
+            Assert.Equal(new TimeSpan(1, 0, 0), binding.ReceiveTimeout);
+            Assert.Equal(new TimeSpan(1, 0, 0), binding.SendTimeout);
             Assert.Equal(TransferMode.StreamedResponse, binding.TransferMode);
             Assert.Equal(HostNameComparisonMode.WeakWildcard, binding.HostNameComparisonMode);
         }

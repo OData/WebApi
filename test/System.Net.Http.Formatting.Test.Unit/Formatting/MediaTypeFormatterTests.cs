@@ -265,23 +265,6 @@ namespace System.Net.Http.Formatting
             Assert.Equal(mediaType.MediaType, match.MediaTypeMatch.MediaType.MediaType);
         }
 
-        [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
-        [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches media type from response content type.")]
-        public void SelectResponseMediaTypeMatchesResponseContentType(MediaTypeHeaderValue mediaType)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            formatter.SupportedMediaTypes.Add(mediaType);
-            HttpRequestMessage request = new HttpRequestMessage();
-            HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request, Content = new StringContent("fred") };
-            response.Content.Headers.ContentType = mediaType;
-            ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(typeof(string), request);
-
-            Assert.NotNull(match);
-            Assert.Equal(ResponseFormatterSelectionResult.MatchOnResponseContentType, match.ResponseFormatterSelectionResult);
-            Assert.NotNull(match.MediaTypeMatch.MediaType);
-            Assert.Equal(mediaType.MediaType, match.MediaTypeMatch.MediaType.MediaType);
-        }
-
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
         [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches supported media type from accept headers.")]

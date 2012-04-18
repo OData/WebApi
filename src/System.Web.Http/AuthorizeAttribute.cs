@@ -79,9 +79,15 @@ namespace System.Web.Http
         /// the user is not in the authorized group of <see cref="Users"/> (if defined), or if the user is not in any of the authorized 
         /// <see cref="Roles"/> (if defined).
         /// </summary>
+        /// <param name="actionContext">The context.</param>
         /// <returns><c>true</c> if access is authorized; otherwise <c>false</c>.</returns>
-        private bool AuthorizeCore()
+        protected virtual bool IsAuthorized(HttpActionContext actionContext)
         {
+            if (actionContext == null)
+            {
+                throw Error.ArgumentNull("actionContext");
+            }
+
             IPrincipal user = Thread.CurrentPrincipal;
             if (user == null || !user.Identity.IsAuthenticated)
             {
@@ -113,6 +119,7 @@ namespace System.Web.Http
         /// </summary>
         /// <remarks>You can use <see cref="AllowAnonymousAttribute"/> to cause authorization checks to be skipped for a particular
         /// action or controller.</remarks>
+        /// <seealso cref="IsAuthorized(HttpActionContext)" />
         /// <param name="actionContext">The context.</param>
         /// <exception cref="ArgumentNullException">The context parameter is null.</exception>
         public override void OnAuthorization(HttpActionContext actionContext)
@@ -127,7 +134,7 @@ namespace System.Web.Http
                 return;
             }
 
-            if (!AuthorizeCore())
+            if (!IsAuthorized(actionContext))
             {
                 HandleUnauthorizedRequest(actionContext);
             }

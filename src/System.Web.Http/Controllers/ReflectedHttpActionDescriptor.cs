@@ -300,7 +300,6 @@ namespace System.Web.Http.Controllers
 
         private sealed class ActionExecutor
         {
-            private static readonly Task<object> _completedTaskReturningNull = TaskHelpers.FromResult<object>(null);
             private readonly Func<object, object[], Task<object>> _executor;
             private static MethodInfo _convertOfTMethod = typeof(ActionExecutor).GetMethod("Convert", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -365,7 +364,7 @@ namespace System.Web.Http.Controllers
                     return (instance, methodParameters) =>
                     {
                         voidExecutor(instance, methodParameters);
-                        return _completedTaskReturningNull;
+                        return TaskHelpers.NullResult();
                     };
                 }
                 else

@@ -724,6 +724,26 @@ namespace System.Web.Http.ModelBinding
         }
 
         [Fact]
+        public void BindValuesAsync_Body_To_Complex_Type_NullContent()
+        {
+            // Arrange            
+            HttpRequestMessage request = new HttpRequestMessage() { Content = null };
+            HttpActionContext context = ContextUtil.CreateActionContext(
+                ContextUtil.CreateControllerContext(request),
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("PostComplexType") });
+
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(context, CancellationToken.None).Wait();
+
+            // Assert
+            Assert.Equal(1, context.ActionArguments.Count);
+            object deserializedActionValueItem = context.ActionArguments.First().Value;
+            Assert.Null(deserializedActionValueItem);            
+        }
+
+        [Fact]
         public void BindValuesAsync_Body_To_Complex_And_Uri_To_Simple()
         {
             // Arrange

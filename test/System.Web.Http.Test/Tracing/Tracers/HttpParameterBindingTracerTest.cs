@@ -24,15 +24,14 @@ namespace System.Web.Http.Tracing.Tracers
             Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
             mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
             mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
-            Mock<IModelBinder> mockModelBinder = new Mock<IModelBinder>() { CallBase = true };
             Mock<ValueProviderFactory> mockValueProviderFactory = new Mock<ValueProviderFactory>() { CallBase = true };
-
+            Mock<ModelBinderProvider> mockModelBinderProvider = new Mock<ModelBinderProvider>() { CallBase = true };
             List<ValueProviderFactory> expectedFactories = new List<ValueProviderFactory>
             {
                 mockValueProviderFactory.Object
             };
 
-            ModelBinderParameterBinding binding = new ModelBinderParameterBinding(mockParamDescriptor.Object, mockModelBinder.Object, expectedFactories);
+            ModelBinderParameterBinding binding = new ModelBinderParameterBinding(mockParamDescriptor.Object, mockModelBinderProvider.Object, expectedFactories);
             HttpParameterBindingTracer tracer = new HttpParameterBindingTracer(binding, new TestTraceWriter());
 
             // Act

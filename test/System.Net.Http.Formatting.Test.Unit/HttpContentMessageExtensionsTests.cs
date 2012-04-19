@@ -231,7 +231,7 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void ReadAsHttpRequestMessageVerifyArguments()
+        public void ReadAsHttpRequestMessageAsync_VerifyArguments()
         {
             Assert.ThrowsArgumentNull(() => HttpContentMessageExtensions.ReadAsHttpRequestMessageAsync(null), "content");
             Assert.ThrowsArgument(() => new ByteArrayContent(new byte[] { }).ReadAsHttpRequestMessageAsync(), "content");
@@ -268,7 +268,7 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void ReadAsHttpResponseMessageVerifyArguments()
+        public void ReadAsHttpResponseMessageAsync_VerifyArguments()
         {
             Assert.ThrowsArgumentNull(() => HttpContentMessageExtensions.ReadAsHttpResponseMessageAsync(null), "content");
             Assert.ThrowsArgument(() => new ByteArrayContent(new byte[] { }).ReadAsHttpResponseMessageAsync(), "content");
@@ -378,19 +378,19 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void ReadAsHttpRequestMessageAsync_NoHostHeader_ThrowsIOException()
+        public void ReadAsHttpRequestMessageAsync_NoHostHeader_Throws()
         {
             string[] request = new[] {
                 @"GET / HTTP/1.1",
             };
 
             HttpContent content = CreateContent(true, request, null);
-            Assert.Throws<IOException>(() => content.ReadAsHttpRequestMessageAsync().Result);
+            Assert.Throws<InvalidOperationException>(() => content.ReadAsHttpRequestMessageAsync().Result);
         }
 
         [Fact]
         [Trait("Description", "ReadAsHttpRequestMessage should return HttpRequestMessage.")]
-        public void ReadAsHttpRequestMessageAsync_TwoHostHeaders_ThrowsIOException()
+        public void ReadAsHttpRequestMessageAsync_TwoHostHeaders_Throws()
         {
             string[] request = new[] {
                 @"GET / HTTP/1.1",
@@ -399,7 +399,7 @@ namespace System.Net.Http
             };
 
             HttpContent content = CreateContent(true, request, null);
-            Assert.Throws<IOException>(() => content.ReadAsHttpRequestMessageAsync().Result);
+            Assert.Throws<InvalidOperationException>(() => content.ReadAsHttpRequestMessageAsync().Result);
         }
 
         [Fact]

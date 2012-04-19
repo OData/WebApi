@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Parsers
 {
@@ -32,7 +33,7 @@ namespace System.Net.Http.Formatting.Parsers
             // The minimum length which would be an empty header terminated by CRLF
             if (maxHeaderSize < InternetMessageFormatHeaderParser.MinHeaderSize)
             {
-                throw new ArgumentOutOfRangeException("maxHeaderSize", maxHeaderSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, InternetMessageFormatHeaderParser.MinHeaderSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, MinHeaderSize);
             }
 
             if (headers == null)

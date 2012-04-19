@@ -91,7 +91,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinConcurrentRequests)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinConcurrentRequests);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinConcurrentRequests);
                 }
                 _maxConcurrentRequests = value;
             }
@@ -155,7 +155,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinBufferSize)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinBufferSize);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinBufferSize);
                 }
                 _maxBufferSizeIsInitialized = true;
                 _maxBufferSize = value;
@@ -176,7 +176,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinReceivedMessageSize)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinReceivedMessageSize);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinReceivedMessageSize);
                 }
                 _maxReceivedMessageSize = value;
             }
@@ -196,7 +196,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < TimeSpan.Zero)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, TimeSpan.Zero);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, TimeSpan.Zero);
                 }
 
                 _receiveTimeout = value;
@@ -217,7 +217,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < TimeSpan.Zero)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, TimeSpan.Zero);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, TimeSpan.Zero);
                 }
 
                 _sendTimeout = value;

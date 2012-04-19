@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Parsers
 {
@@ -126,7 +127,7 @@ namespace System.Net.Http.Formatting.Parsers
                 if (_mimeStatus != MimeMultipartParser.State.BodyPartCompleted && _mimeStatus != MimeMultipartParser.State.NeedMoreData)
                 {
                     CleanupCurrentBodyPart();
-                    throw new IOException(RS.Format(Properties.Resources.ReadAsMimeMultipartParseError, bytesConsumed, data));
+                    throw Error.InvalidOperation(Properties.Resources.ReadAsMimeMultipartParseError, bytesConsumed, data);
                 }
 
                 // First body is empty preamble which we just ignore
@@ -160,7 +161,7 @@ namespace System.Net.Http.Formatting.Parsers
                         else if (_bodyPartHeaderStatus != ParserState.NeedMoreData)
                         {
                             CleanupCurrentBodyPart();
-                            throw new IOException(RS.Format(Properties.Resources.ReadAsMimeMultipartHeaderParseError, headerConsumed, part.Array));
+                            throw Error.InvalidOperation(Properties.Resources.ReadAsMimeMultipartHeaderParseError, headerConsumed, part.Array);
                         }
                     }
                     else
@@ -210,7 +211,7 @@ namespace System.Net.Http.Formatting.Parsers
             {
                 if (throwOnError)
                 {
-                    throw new ArgumentOutOfRangeException("maxMessageSize", maxMessageSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MimeMultipartParser.MinMessageSize));
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxMessageSize", maxMessageSize, MimeMultipartParser.MinMessageSize);
                 }
                 else
                 {

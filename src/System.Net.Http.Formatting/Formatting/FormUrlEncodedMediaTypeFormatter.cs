@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -61,7 +62,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value < FormattingUtilities.DefaultMinDepth)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, FormattingUtilities.DefaultMinDepth));
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, FormattingUtilities.DefaultMinDepth);
                 }
 
                 _maxDepth = value;
@@ -82,7 +83,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value < MinBufferSize)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinBufferSize);
                 }
 
                 _readBufferSize = value;
@@ -156,10 +157,9 @@ namespace System.Net.Http.Formatting
                 {
                     return FormUrlEncodedJson.Parse(nameValuePairs, _maxDepth);
                 }
-                
+
                 // Passed us an unsupported type. Should have called CanReadType() first.
-                throw new InvalidOperationException(
-                    RS.Format(Properties.Resources.SerializerCannotSerializeType, GetType().Name, type.Name));
+                throw Error.InvalidOperation(Properties.Resources.SerializerCannotSerializeType, GetType().Name, type.Name);
             });
         }
 
@@ -176,7 +176,7 @@ namespace System.Net.Http.Formatting
             Contract.Assert(bufferSize >= MinBufferSize, "buffer size cannot be less than MinBufferSize");
 
             byte[] data = new byte[bufferSize];
-            
+
             int bytesRead;
             bool isFinal = false;
             List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
@@ -195,14 +195,14 @@ namespace System.Net.Http.Formatting
                 }
                 catch (Exception e)
                 {
-                    throw new IOException(Properties.Resources.ErrorReadingFormUrlEncodedStream, e);
+                    throw Error.InvalidOperation(e, Properties.Resources.ErrorReadingFormUrlEncodedStream);
                 }
 
                 int bytesConsumed = 0;
                 state = parser.ParseBuffer(data, bytesRead, ref bytesConsumed, isFinal);
                 if (state != ParserState.NeedMoreData && state != ParserState.Done)
                 {
-                    throw new IOException(RS.Format(Properties.Resources.FormUrlEncodedParseError, bytesConsumed));
+                    throw Error.InvalidOperation(Properties.Resources.FormUrlEncodedParseError, bytesConsumed);
                 }
 
                 if (isFinal)

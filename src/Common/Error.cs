@@ -145,7 +145,7 @@ namespace System.Web.Http
         /// <param name="actualValue">The value of the argument that causes this exception.</param>
         /// <param name="minValue">The minimum size of the argument.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        internal static ArgumentOutOfRangeException ArgumentGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
+        internal static ArgumentOutOfRangeException ArgumentMustBeGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
         {
             return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(CommonWebApiResources.ArgumentMustBeGreaterThanOrEqualTo, minValue));
         }

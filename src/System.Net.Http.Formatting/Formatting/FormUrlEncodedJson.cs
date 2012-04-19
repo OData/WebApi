@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Web.Http;
 using Newtonsoft.Json.Linq;
 
 namespace System.Net.Http.Formatting
@@ -106,7 +107,7 @@ namespace System.Net.Http.Formatting
 
             if (maxDepth <= MinDepth)
             {
-                throw new ArgumentOutOfRangeException("maxDepth", maxDepth, RS.Format(Properties.Resources.ArgumentMustBeGreaterThan, MinDepth));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxDepth", maxDepth, MinDepth + 1);
             }
 
             JObject result = new JObject();
@@ -114,7 +115,7 @@ namespace System.Net.Http.Formatting
             {
                 string key = nameValuePair.Key;
                 string value = nameValuePair.Value;
-                
+
                 // value is preserved, even if it's null, "undefined", "null", String.Empty, etc when converting to JToken. 
 
                 if (key == null)

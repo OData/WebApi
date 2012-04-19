@@ -31,7 +31,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value < MinBufferSize)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinBufferSize);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinBufferSize);
                 }
                 _bufferSizeInBytes = value;
             }

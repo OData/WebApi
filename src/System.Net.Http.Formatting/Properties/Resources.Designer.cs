@@ -61,24 +61,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Value must be greater than {0}..
-        /// </summary>
-        internal static string ArgumentMustBeGreaterThan {
-            get {
-                return ResourceManager.GetString("ArgumentMustBeGreaterThan", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Value must be greater than or equal to {0}..
-        /// </summary>
-        internal static string ArgumentMustBeGreaterThanOrEqualTo {
-            get {
-                return ResourceManager.GetString("ArgumentMustBeGreaterThanOrEqualTo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to A null &apos;{0}&apos; is not valid..
         /// </summary>
         internal static string CannotHaveNullInList {

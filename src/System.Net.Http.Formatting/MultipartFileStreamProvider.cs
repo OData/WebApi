@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -45,7 +46,7 @@ namespace System.Net.Http
 
             if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
             _rootPath = Path.GetFullPath(rootPath);

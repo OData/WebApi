@@ -32,7 +32,7 @@ namespace System.Net.Http.Formatting.Parsers
             // The minimum length which would be an empty buffer
             if (maxMessageSize < MinMessageSize)
             {
-                throw new ArgumentOutOfRangeException("maxMessageSize", maxMessageSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinMessageSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxMessageSize", maxMessageSize, MinMessageSize);
             }
 
             if (nameValuePairs == null)

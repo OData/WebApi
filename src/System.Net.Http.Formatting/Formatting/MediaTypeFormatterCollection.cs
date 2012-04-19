@@ -126,7 +126,7 @@ namespace System.Net.Http.Formatting
         /// <returns><c>true</c> if the type should be excluded.</returns>
         public static bool IsTypeExcludedFromValidation(Type type)
         {
-            return FormattingUtilities.IsJTokenType(type) || typeof(XObject).IsAssignableFrom(type) || typeof(XmlNode).IsAssignableFrom(type) 
+            return FormattingUtilities.IsJTokenType(type) || typeof(XObject).IsAssignableFrom(type) || typeof(XmlNode).IsAssignableFrom(type)
                 || typeof(FormDataCollection).IsAssignableFrom(type);
         }
 

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -118,12 +119,12 @@ namespace System.Net.Http
 
             if (!Uri.CheckSchemeName(uriScheme))
             {
-                throw new ArgumentException(RS.Format(Properties.Resources.HttpMessageParserInvalidUriScheme, uriScheme, typeof(Uri).Name), "uriScheme");
+                throw Error.Argument("uriScheme", Properties.Resources.HttpMessageParserInvalidUriScheme, uriScheme, typeof(Uri).Name);
             }
 
             if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
             HttpMessageContent.ValidateHttpMessageContent(content, true, true);
@@ -164,7 +165,7 @@ namespace System.Net.Http
                     }
                     else if (parseStatus != ParserState.NeedMoreData)
                     {
-                        throw new IOException(RS.Format(Properties.Resources.HttpMessageParserError, headerConsumed, buffer));
+                        throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
                     }
                 }
             });
@@ -196,7 +197,7 @@ namespace System.Net.Http
 
             if (bufferSize < MinBufferSize)
             {
-                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
             HttpMessageContent.ValidateHttpMessageContent(content, false, true);
@@ -238,7 +239,7 @@ namespace System.Net.Http
                     }
                     else if (parseStatus != ParserState.NeedMoreData)
                     {
-                        throw new IOException(RS.Format(Properties.Resources.HttpMessageParserError, headerConsumed, buffer));
+                        throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
                     }
                 }
             });
@@ -262,12 +263,12 @@ namespace System.Net.Http
                 int hostCount = hostValues.Count();
                 if (hostCount != 1)
                 {
-                    throw new IOException(RS.Format(Properties.Resources.HttpMessageParserInvalidHostCount, FormattingUtilities.HttpHostHeader, hostCount));
+                    throw Error.InvalidOperation(Properties.Resources.HttpMessageParserInvalidHostCount, FormattingUtilities.HttpHostHeader, hostCount);
                 }
             }
             else
             {
-                throw new IOException(RS.Format(Properties.Resources.HttpMessageParserInvalidHostCount, FormattingUtilities.HttpHostHeader, 0));
+                throw Error.InvalidOperation(Properties.Resources.HttpMessageParserInvalidHostCount, FormattingUtilities.HttpHostHeader, 0);
             }
 
             // We don't use UriBuilder as hostValues.ElementAt(0) contains 'host:port' and UriBuilder needs these split out into separate host and port.
@@ -312,7 +313,7 @@ namespace System.Net.Http
                 // which we may already have parsed as we read the content stream.
                 if (!contentStream.CanSeek)
                 {
-                    throw new IOException(RS.Format(Properties.Resources.HttpMessageContentStreamMustBeSeekable, "ContentReadStream", FormattingUtilities.HttpResponseMessageType.Name));
+                    throw Error.InvalidOperation(Properties.Resources.HttpMessageContentStreamMustBeSeekable, "ContentReadStream", FormattingUtilities.HttpResponseMessageType.Name);
                 }
 
                 contentStream.Seek(0 - rewind, SeekOrigin.Current);

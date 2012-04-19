@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -29,7 +30,7 @@ namespace System.Net.Http.Formatting
         private static ConcurrentDictionary<Type, ConstructorInfo> _delegatingEnumerableConstructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
         private static Lazy<int> _defaultMaxHttpCollectionKeys = new Lazy<int>(InitializeDefaultCollectionKeySize, true); // Max number of keys is 1000
         private static int _maxHttpCollectionKeys = -1;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
         /// </summary>
@@ -45,7 +46,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public static int MaxHttpCollectionKeys
         {
-            get 
+            get
             {
                 if (_maxHttpCollectionKeys < 0)
                 {
@@ -58,7 +59,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value < DefaultMinHttpCollectionKeys)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, DefaultMinHttpCollectionKeys));
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, DefaultMinHttpCollectionKeys);
                 }
 
                 _maxHttpCollectionKeys = value;

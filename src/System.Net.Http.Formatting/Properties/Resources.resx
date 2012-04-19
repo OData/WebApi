@@ -168,9 +168,6 @@
   <data name="MimeMultipartParserBadBoundary" xml:space="preserve">
     <value>MIME multipart boundary cannot end with an empty space.</value>
   </data>
-  <data name="ArgumentMustBeGreaterThanOrEqualTo" xml:space="preserve">
-    <value>Value must be greater than or equal to {0}.</value>
-  </data>
   <data name="MultipartFormDataStreamProviderNoContentDisposition" xml:space="preserve">
     <value>Did not find required '{0}' header field in MIME multipart body part.</value>
   </data>
@@ -266,9 +263,6 @@
   </data>
   <data name="MediaTypeFormatterNoEncoding" xml:space="preserve">
     <value>No encoding found for media type formatter '{0}'. There must be at least one supported encoding registered in order for the media type formatter to read or write content.</value>
-  </data>
-  <data name="ArgumentMustBeGreaterThan" xml:space="preserve">
-    <value>Value must be greater than {0}.</value>
   </data>
   <data name="CookieInvalidName" xml:space="preserve">
     <value>The specified value is not a valid cookie name.</value>

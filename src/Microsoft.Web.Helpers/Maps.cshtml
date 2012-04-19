@@ -200,13 +200,15 @@ Parameter zoom:
     Initial zoom level of the map. Defaults to 14.
 Parameter type:
     Map type to display. Valid values are "auto", "aerial", "birdeye", "road" and "mercator".
+Parameter useAdaptiveOverlay:
+    Determines if the map overlay that adapts to the colors of the current map view is used. Defaults to true.
 Parameter showDirectionsLink:
     Determines if a link to get directions should be displayed when a location is specified. Defaults to true.
 Parameter directionsLinkText
     The text for the get directions link. Defaults to "Get Directions".
 **@
 @helper GetBingHtml(string key = null, string location = null, string latitude = null, string longitude = null, string width = null, string height = null, int zoom = 14, string type = "auto",
-            bool showDirectionsLink = true, string directionsLinkText = "Get Directions", IEnumerable<MapLocation> pushpins = null) {
+            bool useAdaptiveOverlay = true, bool showDirectionsLink = true, string directionsLinkText = "Get Directions", IEnumerable<MapLocation> pushpins = null) {
     key = GetApiKey(key, _bingApiKey);
     if (key.IsEmpty()) {
         throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
@@ -218,15 +220,30 @@ Parameter directionsLinkText
     <script src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0" type="text/javascript"></script>
     <script type="text/javascript">
         jQuery(window).load(function() { 
-            var map = new Microsoft.Maps.Map(document.getElementById("@mapElement"), { credentials: '@RawJS(key)', mapTypeId: Microsoft.Maps.MapTypeId['@RawJS(type)'] });
+            var map = null;
+            @if (useAdaptiveOverlay) {
+                <text>
+                Microsoft.Maps.loadModule('Microsoft.Maps.Overlays.Style', {
+                    callback: function () {
+                        map = new Microsoft.Maps.Map(document.getElementById("@mapElement"), { credentials: '@RawJS(key)', mapTypeId: Microsoft.Maps.MapTypeId['@RawJS(type)'], customizeOverlays: true });
+
+                </text>
+            } else {
+                <text>
+                map = new Microsoft.Maps.Map(document.getElementById("@mapElement"), { credentials: '@RawJS(key)', mapTypeId: Microsoft.Maps.MapTypeId['@RawJS(type)'] });
+                </text>
+            }
             @if (latitude != null && longitude != null) {
                 @: map.setView({zoom: @zoom, center: new Microsoft.Maps.Location(@RawJS(latitude), @RawJS(longitude))});
             }
             else if (location != null) {
                 <text>
                 map.getCredentials(function(credentials) {
-                    $.ajax('http://dev.virtualearth.net/REST/v1/Locations/@RawJS(location)', {
-                        data: { output: 'json', key: credentials }, dataType: 'json', jsonp: 'jsonp',
+                    $.ajax({
+                        url: 'http://dev.virtualearth.net/REST/v1/Locations/' + encodeURI('@RawJS(location)'),
+                        type: 'GET',
+                        crossDomain: true,
+                        data: { output: 'json', key: credentials }, dataType: 'jsonp', jsonp: 'jsonp',
                         success: function(data) {
                             if (data && data.resourceSets && data.resourceSets.length > 0 && data.resourceSets[0].resources && data.resourceSets[0].resources.length > 0) {
                                 var r = data.resourceSets[0].resources[0].point.coordinates;
@@ -243,6 +260,12 @@ Parameter directionsLinkText
                 foreach(var loc in pushpins) {
                     @: map.entities.push(new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(@RawJS(loc.Latitude), @RawJS(loc.Longitude)), null));
                 }
+            }
+            @if (useAdaptiveOverlay) {
+                <text>
+                    }
+                });
+                </text>
             }
         });
     </script>

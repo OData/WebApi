@@ -189,8 +189,6 @@ namespace System.Web.Http.SelfHost
                 }
             }
 
-            Interlocked.Increment(ref _requestsOutstanding);
-
             // Submit request up the stack
             try
             {
@@ -547,6 +545,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (requestContext != null)
                 {
+                    Interlocked.Increment(ref _requestsOutstanding);
                     ProcessRequestContext(channelContext, requestContext);
                 }
             }

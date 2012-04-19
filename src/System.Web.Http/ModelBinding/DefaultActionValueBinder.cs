@@ -140,8 +140,7 @@ namespace System.Web.Http.ModelBinding
         {
             HttpConfiguration config = parameter.Configuration;
 
-            ModelBinderProvider provider = attr.GetModelBinderProvider(config);
-            IModelBinder binder = provider.GetBinder(config, parameter.ParameterType);
+            IModelBinder binder = attr.GetModelBinder(config, parameter.ParameterType);
 
             return new ModelBinderParameterBinding(parameter,
                 binder,

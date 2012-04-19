@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Properties;
@@ -31,8 +32,8 @@ namespace System.Web.Http.ModelBinding
 
         /// <summary>
         /// Sets the type of the model binder. 
-        /// This type must be a subclass of <see cref="ModelBinderProvider"/>        
-        /// If null, uses the default from the configuration.
+        /// This type must be a subclass of <see cref="ModelBinderProvider"/>  or <see cref="IModelBinder"/>      
+        /// If null, uses the default from the configuration. 
         /// </summary>   
         public Type BinderType { get; set; }
 
@@ -49,7 +50,7 @@ namespace System.Web.Http.ModelBinding
             if (BinderType != null)
             {
                 object value = configuration.DependencyResolver.GetService(BinderType)
-                            ?? Activator.CreateInstance(BinderType);
+                            ?? Activator.CreateInstance(BinderType);                
 
                 if (value != null)
                 {
@@ -68,6 +69,44 @@ namespace System.Web.Http.ModelBinding
             }
 
             return new CompositeModelBinderProvider(providers);
+        }
+
+        /// <summary>
+        /// Get the IModelBinder for this type. 
+        /// </summary>
+        /// <param name="configuration">configuration object</param>
+        /// <param name="modelType">model type that the binder is expected to bind.</param>
+        /// <returns>a non-null model binder. </returns>
+        public IModelBinder GetModelBinder(HttpConfiguration configuration, Type modelType)
+        {
+            if (BinderType == null)
+            {
+                ModelBinderProvider provider = GetModelBinderProvider(configuration);
+                return provider.GetBinder(configuration, modelType);
+            }
+
+            // This may create a IModelBinder or a ModelBinderProvider
+            object value = configuration.DependencyResolver.GetService(BinderType)
+                            ?? Activator.CreateInstance(BinderType);
+
+            Contract.Assert(value != null); // Activator would have thrown
+            
+            IModelBinder binder = value as IModelBinder;
+            if (binder != null)
+            {
+                return binder;
+            }
+            else
+            {
+                ModelBinderProvider provider = value as ModelBinderProvider;
+                if (provider != null)
+                {
+                    return provider.GetBinder(configuration, modelType);
+                }
+            }
+
+            Type required = typeof(IModelBinder);
+            throw Error.InvalidOperation(SRResources.ValueProviderFactory_Cannot_Create, required.Name, value.GetType().Name, required.Name);
         }
 
         /// <summary>

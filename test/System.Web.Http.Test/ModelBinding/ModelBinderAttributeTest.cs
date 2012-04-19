@@ -95,12 +95,66 @@ namespace System.Web.Http.ModelBinding
             Assert.IsType<CustomValueProviderFactory>(vpfs.First());
         }
 
+        [Fact]
+        public void Get_ModelBinder_From_Empty_Attribute()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Services.Replace(typeof(ModelBinderProvider), new CustomModelBinderProvider());
+
+            // binder = null, so pulls default from config. But attribute still has value by specifying the value providers.
+            ModelBinderAttribute attr = new ValueProviderAttribute(typeof(CustomValueProviderFactory)); 
+
+            // Act
+            IModelBinder binder = attr.GetModelBinder(config, null);
+
+            // Assert
+            Assert.Null(attr.BinderType); // using the default 
+            Assert.NotNull(binder);
+            Assert.IsType<CustomModelBinder>(binder);
+        }
+
+        [Fact]
+        public void Get_ModelBinder_From_Binder()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            ModelBinderAttribute attr = new ModelBinderAttribute { BinderType = typeof(CustomModelBinder) };
+
+            // Act
+            IModelBinder binder = attr.GetModelBinder(config, null);
+
+            // Assert
+            Assert.NotNull(binder);
+            Assert.IsType<CustomModelBinder>(binder);
+        }
+
+        [Fact]
+        public void Get_ModelBinder_From_BinderProvider()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            ModelBinderAttribute attr = new ModelBinderAttribute { BinderType = typeof(CustomModelBinderProvider) };
+
+            // Act
+            IModelBinder binder = attr.GetModelBinder(config, null);
+
+            // Assert
+            Assert.NotNull(binder);
+            Assert.IsType<CustomModelBinder>(binder);
+        }
+
         private class CustomModelBinderProvider : ModelBinderProvider
         {
             public override IModelBinder GetBinder(HttpConfiguration config, Type modelType)
             {
-                throw new NotImplementedException();
+                return new CustomModelBinder();
             }            
+        }
+
+        private class CustomModelBinder : IModelBinder
+        {
+            public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
+            {
+                return true;
+            }
         }
 
         private class SecondCustomModelBinderProvider : ModelBinderProvider

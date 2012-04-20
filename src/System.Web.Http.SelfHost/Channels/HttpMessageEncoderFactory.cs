@@ -81,7 +81,7 @@ namespace System.Web.Http.SelfHost.Channels
                 request.Content = new ByteArrayBufferManagerContent(bufferManager, buffer.Array, buffer.Offset, buffer.Count);
                 if (!String.IsNullOrEmpty(contentType))
                 {
-                    request.Content.Headers.Add(ContentTypeHeaderName, contentType);
+                    request.Content.Headers.TryAddWithoutValidation(ContentTypeHeaderName, contentType);
                 }
 
                 Message message = request.ToMessage();
@@ -102,7 +102,7 @@ namespace System.Web.Http.SelfHost.Channels
                 request.Content = new StreamContent(stream);
                 if (!String.IsNullOrEmpty(contentType))
                 {
-                    request.Content.Headers.Add(ContentTypeHeaderName, contentType);
+                    request.Content.Headers.TryAddWithoutValidation(ContentTypeHeaderName, contentType);
                 }
 
                 Message message = request.ToMessage();

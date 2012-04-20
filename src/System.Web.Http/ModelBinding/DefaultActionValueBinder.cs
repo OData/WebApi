@@ -37,7 +37,7 @@ namespace System.Web.Http.ModelBinding
             }            
 
             HttpParameterDescriptor[] parameters = actionDescriptor.GetParameters().ToArray();
-            HttpParameterBinding[] binders = Array.ConvertAll(parameters, DetermineBinding);
+            HttpParameterBinding[] binders = Array.ConvertAll(parameters, GetParameterBinding);
 
             HttpActionBinding actionBinding = new HttpActionBinding(actionDescriptor, binders);
                         
@@ -85,7 +85,7 @@ namespace System.Web.Http.ModelBinding
 
         // Determine how a single parameter will get bound. 
         // This is all sync. We don't need to actually read the body just to determine that we'll bind to the body.         
-        private HttpParameterBinding DetermineBinding(HttpParameterDescriptor parameter)
+        protected virtual HttpParameterBinding GetParameterBinding(HttpParameterDescriptor parameter)
         {
             // Look at Parameter attributes?
             // [FromBody] - we use Formatter.

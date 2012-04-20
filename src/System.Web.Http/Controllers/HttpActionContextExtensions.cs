@@ -119,6 +119,9 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("bindingContext");
             }
 
+            // Protects against stack overflow for deeply nested model binding
+            EnsureStackHelper.EnsureStack();
+
             Type modelType = bindingContext.ModelType;
             HttpConfiguration config = actionContext.ControllerContext.Configuration;
             

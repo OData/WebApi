@@ -218,7 +218,7 @@ namespace System.Web.Http.ModelBinding
                 {
                     return ctx.Model;
                 }
-                return null;
+                return MediaTypeFormatter.GetDefaultValueForType(type);
             }
         }
     }

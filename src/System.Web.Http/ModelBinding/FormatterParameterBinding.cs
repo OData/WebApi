@@ -54,7 +54,15 @@ namespace System.Web.Http.ModelBinding
             HttpContent content = request.Content;
             if (content == null)
             {
-                return TaskHelpers.NullResult();
+                object defaultValue = MediaTypeFormatter.GetDefaultValueForType(type);
+                if (defaultValue == null)
+                {
+                    return TaskHelpers.NullResult();
+                }
+                else
+                {
+                    return TaskHelpers.FromResult(defaultValue);
+                }
             }
             return content.ReadAsAsync(type, formatters, formatterLogger);
         }

@@ -597,7 +597,7 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Gets the default value for the specified type.
         /// </summary>
-        protected internal static object GetDefaultValueForType(Type type)
+        public static object GetDefaultValueForType(Type type)
         {
             if (type == null)
             {

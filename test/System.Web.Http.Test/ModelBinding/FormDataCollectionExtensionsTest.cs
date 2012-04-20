@@ -252,5 +252,12 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal("3", fd.ReadAs<string>("X", requiredMemberSelector: null, formatterLogger: null));
             Assert.Equal(4, fd.ReadAs<int>("Y", requiredMemberSelector: null, formatterLogger: null));            
         }
+
+        [Fact]
+        public void ReadInvalidInt_ReturnsDefaultValue()
+        {
+            int result = ParseJQuery<int>("xyz");
+            Assert.Equal(0, result);
+        }
     }
 }

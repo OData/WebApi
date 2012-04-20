@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WebHostBufferPolicySelectorTest.cs" />
     <Compile Include="HttpControllerHandlerTest.cs" />
     <Compile Include="RouteCollectionExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

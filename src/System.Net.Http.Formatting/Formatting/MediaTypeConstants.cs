@@ -14,18 +14,18 @@ namespace System.Net.Http.Formatting
         private static readonly MediaTypeHeaderValue _defaultTextXmlMediaType = new MediaTypeHeaderValue("text/xml");
         private static readonly MediaTypeHeaderValue _defaultApplicationJsonMediaType = new MediaTypeHeaderValue("application/json");
         private static readonly MediaTypeHeaderValue _defaultTextJsonMediaType = new MediaTypeHeaderValue("text/json");
-        private static readonly MediaTypeHeaderValue _defaultTextHtmlMediaType = new MediaTypeHeaderValue("text/html") { CharSet = Encoding.UTF8.WebName };
+        private static readonly MediaTypeHeaderValue _defaultApplicationOctetStreamMediaType = new MediaTypeHeaderValue("application/octet-stream");
         private static readonly MediaTypeHeaderValue _defaultApplicationFormUrlEncodedMediaType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
         /// <summary>
-        /// Gets a <see cref="MediaTypeHeaderValue"/> instance representing <c>text/html</c>.
+        /// Gets a <see cref="MediaTypeHeaderValue"/> instance representing <c>application/octet-stream</c>.
         /// </summary>
         /// <value>
-        /// A new <see cref="MediaTypeHeaderValue"/> instance representing <c>text/html</c>.
+        /// A new <see cref="MediaTypeHeaderValue"/> instance representing <c>application/octet-stream</c>.
         /// </value>
-        public static MediaTypeHeaderValue HtmlMediaType
+        public static MediaTypeHeaderValue ApplicationOctetStreamMediaType
         {
-            get { return _defaultTextHtmlMediaType.Clone(); }
+            get { return _defaultApplicationOctetStreamMediaType.Clone(); }
         }
 
         /// <summary>

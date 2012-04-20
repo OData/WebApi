@@ -2,8 +2,6 @@
 
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Text;
-using Microsoft.TestCommon;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -11,14 +9,6 @@ namespace System.Net.Http
 {
     public class MediaTypeConstantsTests
     {
-        [Fact]
-        [Trait("Description", "Class is internal static type.")]
-        public void TypeIsCorrect()
-        {
-            Assert.Type.HasProperties(typeof(MediaTypeConstants), TypeAssert.TypeProperties.IsClass | TypeAssert.TypeProperties.IsStatic);
-        }
-
-
         private static void ValidateClones(MediaTypeHeaderValue clone1, MediaTypeHeaderValue clone2, string charset)
         {
             Assert.NotNull(clone1);
@@ -30,43 +20,37 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "HtmlMediaType returns clone")]
-        public void HtmlMediaTypeReturnsClone()
+        public void ApplicationOctetStreamMediaType_ReturnsClone()
         {
-            ValidateClones(MediaTypeConstants.HtmlMediaType, MediaTypeConstants.HtmlMediaType, Encoding.UTF8.WebName);
+            ValidateClones(MediaTypeConstants.ApplicationOctetStreamMediaType, MediaTypeConstants.ApplicationOctetStreamMediaType, null);
         }
 
         [Fact]
-        [Trait("Description", "ApplicationXmlMediaType returns clone")]
-        public void ApplicationXmlMediaTypeReturnsClone()
+        public void ApplicationXmlMediaType_ReturnsClone()
         {
             ValidateClones(MediaTypeConstants.ApplicationXmlMediaType, MediaTypeConstants.ApplicationXmlMediaType, null);
         }
 
         [Fact]
-        [Trait("Description", "ApplicationJsonMediaType returns clone")]
-        public void ApplicationJsonMediaTypeReturnsClone()
+        public void ApplicationJsonMediaType_ReturnsClone()
         {
             ValidateClones(MediaTypeConstants.ApplicationJsonMediaType, MediaTypeConstants.ApplicationJsonMediaType, null);
         }
 
         [Fact]
-        [Trait("Description", "TextXmlMediaType returns clone")]
-        public void TextXmlMediaTypeReturnsClone()
+        public void TextXmlMediaType_ReturnsClone()
         {
             ValidateClones(MediaTypeConstants.TextXmlMediaType, MediaTypeConstants.TextXmlMediaType, null);
         }
 
         [Fact]
-        [Trait("Description", "TextJsonMediaType returns clone")]
-        public void TextJsonMediaTypeReturnsClone()
+        public void TextJsonMediaType_ReturnsClone()
         {
             ValidateClones(MediaTypeConstants.TextJsonMediaType, MediaTypeConstants.TextJsonMediaType, null);
         }
 
         [Fact]
-        [Trait("Description", "ApplicationFormUrlEncodedMediaType returns clone")]
-        public void ApplicationFormUrlEncodedMediaTypeReturnsClone()
+        public void ApplicationFormUrlEncodedMediaType_ReturnsClone()
         {
             ValidateClones(MediaTypeConstants.ApplicationFormUrlEncodedMediaType, MediaTypeConstants.ApplicationFormUrlEncodedMediaType, null);
         }

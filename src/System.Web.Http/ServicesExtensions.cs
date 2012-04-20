@@ -9,6 +9,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
@@ -136,6 +137,11 @@ namespace System.Web.Http
         public static IBodyModelValidator GetBodyModelValidator(this DefaultServices services)
         {
             return services.GetService<IBodyModelValidator>();
+        }
+
+        public static IHostBufferPolicySelector GetHostBufferPolicySelector(this DefaultServices services)
+        {
+            return services.GetService<IHostBufferPolicySelector>();
         }
 
         // Runtime code shouldn't call GetService() directly. Instead, have a wrapper (like the ones above) and call through the wrapper.

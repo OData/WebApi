@@ -116,7 +116,7 @@ namespace System.Web.Http.Controllers
                     MethodInfo method = validMethods[i];
                     ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(_controllerDescriptor, method);
                     _actionDescriptors[i] = actionDescriptor;
-                    HttpActionBinding actionBinding = controllerDescriptor.ActionValueBinder.GetBinding(actionDescriptor);
+                    HttpActionBinding actionBinding = actionDescriptor.ActionBinding;
 
                     // Build action parameter name mapping, only consider parameters that are simple types, do not have default values and come from URI
                     _actionParameterNames.Add(

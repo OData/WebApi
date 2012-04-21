@@ -152,6 +152,23 @@ namespace System.Web.Http
             Assert.Equal(expectedActionName, descriptor.ActionName);
         }
 
+        [Theory]
+        [InlineData("GET", "notActionParameterValue1/Test", "GetUsers")]
+        [InlineData("GET", "notActionParameterValue2/Test/2", "GetUser")]
+        [InlineData("GET", "notActionParameterValue1/Test?randomQueryVariable=val1", "GetUsers")]
+        [InlineData("GET", "notActionParameterValue2/Test/2?randomQueryVariable=val2", "GetUser")]
+        public void ActionsThatHaveSubsetOfRouteParameters_AreConsideredForSelection(string httpMethod, string requestUrl, string expectedActionName)
+        {
+            string routeUrl = "{notActionParameter}/{controller}/{id}";
+            object routeDefault = new { id = RouteParameter.Optional };
+
+            HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
+            context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
+            HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
+
+            Assert.Equal(expectedActionName, descriptor.ActionName);
+        }
+
         [Fact]
         public void RequestToAmbiguousAction_OnDefaultRoute()
         {

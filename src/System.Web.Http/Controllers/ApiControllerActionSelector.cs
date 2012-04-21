@@ -230,14 +230,7 @@ namespace System.Web.Http.Controllers
 
                 if (hasRouteParameters || hasQueryParameters)
                 {
-                    // refine the results based on route parameters to make sure that route parameters take precedence over query parameters
-                    if (hasRouteParameters && hasQueryParameters)
-                    {
-                        // route parameters is a subset of action parameters
-                        actionsFound = actionsFound.Where(descriptor => !routeParameterNames.Except(_actionParameterNames[descriptor], StringComparer.OrdinalIgnoreCase).Any());
-                    }
-
-                    // further refine the results making sure that action parameters is a subset of route parameters and query parameters
+                    // refine the results making sure that action parameters is a subset of route parameters and query parameters
                     if (actionsFound.Count() > 1)
                     {
                         IEnumerable<string> combinedParameterNames = queryParameterNames.Union(routeParameterNames);
@@ -252,6 +245,13 @@ namespace System.Web.Http.Controllers
                                 .GroupBy(descriptor => _actionParameterNames[descriptor].Count())
                                 .OrderByDescending(g => g.Key)
                                 .First();
+                        }
+
+                        // make sure that route parameters take precedence over query parameters by picking actions with parameters that intersects with route parameters
+                        // e.g. when you have to choose between Get(id) and Get(name) for request /4?name=user where 4 correspond to route parameter {id}, Get(id) would be a better choice.
+                        if (actionsFound.Count() > 1 && hasRouteParameters && hasQueryParameters)
+                        {
+                            actionsFound = actionsFound.Where(descriptor => routeParameterNames.Intersect(_actionParameterNames[descriptor], StringComparer.OrdinalIgnoreCase).Any());
                         }
                     }
                 }
@@ -302,7 +302,7 @@ namespace System.Web.Http.Controllers
                 else
                 {
                     return matchesWithoutSelectionAttributes;
-                }                
+                }
             }
 
             // This is called when we don't specify an Action name
@@ -399,7 +399,7 @@ namespace System.Web.Http.Controllers
             {
                 return Source.Contains(key);
             }
-                        
+
             public IEnumerator<IGrouping<string, HttpActionDescriptor>> GetEnumerator()
             {
                 return Source.GetEnumerator();

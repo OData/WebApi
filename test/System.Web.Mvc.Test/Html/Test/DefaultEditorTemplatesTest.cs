@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Data.Objects.DataClasses;
 using System.Globalization;
+using System.Drawing;
 using System.IO;
 using System.Web.UI.WebControls;
 using Microsoft.Web.UnitTestUtil;
@@ -662,6 +663,25 @@ Value!")));
             Assert.Equal(
                 @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""number"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
                 DefaultEditorTemplates.NumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
+        }
+
+        // ColorInputTemplate
+
+        [Fact]
+        public void ColorInputTemplateTests()
+        {
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""color"" value=""#33F4CC"" />",
+                DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<string>("#33F4CC")));
+            
+            var color = Color.FromArgb(0x33, 0xf4, 0xcc);
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""color"" value=""#33F4CC"" />",
+                DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<Color>(color)));
+
+            Assert.Equal(
+                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""color"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
         // Helpers

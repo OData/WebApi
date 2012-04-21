@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -50,6 +51,7 @@ namespace System.Web.Mvc.Html
                 { "DateTime", DefaultEditorTemplates.DateTimeInputTemplate },
                 { "Date", DefaultEditorTemplates.DateInputTemplate },
                 { "Time", DefaultEditorTemplates.TimeInputTemplate },
+                { typeof(Color).Name, DefaultEditorTemplates.ColorInputTemplate },
                 { typeof(byte).Name, DefaultEditorTemplates.NumberInputTemplate },
                 { typeof(sbyte).Name, DefaultEditorTemplates.NumberInputTemplate },
                 { typeof(int).Name, DefaultEditorTemplates.NumberInputTemplate },

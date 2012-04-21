@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Linq;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -263,11 +264,35 @@ namespace System.Web.Mvc.Html
             return HtmlInputTemplateHelper(html, inputType: "number");
         }
 
+        internal static string ColorInputTemplate(HtmlHelper html)
+        {
+            string value = null;
+            if (html.ViewContext.ViewData.Model != null)
+            {
+                if (html.ViewContext.ViewData.Model is Color)
+                {
+                    Color color = ((Color) html.ViewContext.ViewData.Model);
+                    value = String.Format(CultureInfo.InvariantCulture, "#{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
+                }
+                else
+                {
+                    value = html.ViewContext.ViewData.Model.ToString();
+                }
+            }
+
+            return HtmlInputTemplateHelper(html, "color", value);
+        }
+
         private static string HtmlInputTemplateHelper(HtmlHelper html, string inputType = null)
+        {
+            return HtmlInputTemplateHelper(html, inputType, html.ViewContext.ViewData.TemplateInfo.FormattedModelValue);
+        }
+
+        private static string HtmlInputTemplateHelper(HtmlHelper html, string inputType, object value)
         {
             return html.TextBox(
                     name: String.Empty,
-                    value: html.ViewContext.ViewData.TemplateInfo.FormattedModelValue,
+                    value: value,
                     htmlAttributes: CreateHtmlAttributes(className: "text-box single-line", inputType: inputType))
                 .ToHtmlString();
         }

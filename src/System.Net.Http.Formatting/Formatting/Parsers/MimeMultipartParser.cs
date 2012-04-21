@@ -228,11 +228,6 @@ namespace System.Net.Http.Formatting.Parsers
                     {
                         currentBodyPart.ResetBoundary();
                         bodyPartState = BodyPartState.BodyPart;
-                        if (++bytesConsumed == effectiveMax)
-                        {
-                            goto quit;
-                        }
-
                         goto case BodyPartState.BodyPart;
                     }
 
@@ -269,11 +264,6 @@ namespace System.Net.Http.Formatting.Parsers
                     {
                         currentBodyPart.ResetBoundary();
                         bodyPartState = BodyPartState.BodyPart;
-                        if (++bytesConsumed == effectiveMax)
-                        {
-                            goto quit;
-                        }
-
                         goto case BodyPartState.BodyPart;
                     }
 
@@ -294,11 +284,6 @@ namespace System.Net.Http.Formatting.Parsers
                     {
                         currentBodyPart.ResetBoundary();
                         bodyPartState = BodyPartState.BodyPart;
-                        if (++bytesConsumed == effectiveMax)
-                        {
-                            goto quit;
-                        }
-
                         goto case BodyPartState.BodyPart;
                     }
 
@@ -347,11 +332,6 @@ namespace System.Net.Http.Formatting.Parsers
                     {
                         currentBodyPart.ResetBoundary();
                         bodyPartState = BodyPartState.BodyPart;
-                        if (++bytesConsumed == effectiveMax)
-                        {
-                            goto quit;
-                        }
-
                         goto case BodyPartState.BodyPart;
                     }
 

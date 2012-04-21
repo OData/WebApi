@@ -12,6 +12,14 @@ namespace System.Net.Http.Formatting.Parsers
 {
     public class MimeMultipartParserTests
     {
+        private const string SP = " ";
+        private const string LF = "\n";
+        private const string CR = "\r";
+        private const string CRLF = "\r\n";
+        private const string Dash = "-";
+        private const string DashDash = "--";
+        private const string HTAB = "\t";
+
         [Fact]
         public void MimeMultipartParserTypeIsCorrect()
         {
@@ -45,11 +53,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         private static byte[] CreateBuffer(string boundary, bool withLws, params string[] bodyparts)
         {
-            const string SP = " ";
-            const string HTAB = "\t";
-            const string CRLF = "\r\n";
-            const string DashDash = "--";
-
             string lws = String.Empty;
             if (withLws)
             {
@@ -355,12 +358,14 @@ namespace System.Net.Http.Formatting.Parsers
         [PropertyData("Boundaries")]
         public void MultipartParserNearMatches(string boundary)
         {
-            const string CR = "\r";
-            const string CRLF = "\r\n";
-            const string Dash = "-";
-            const string DashDash = "--";
-
             string[] text = new string[] { 
+                "AAA" + LF,
+                "AAA" + CR,
+                "AAA" + CRLF,
+                "AAA" + CRLF + CRLF,
+                "AAA" + CRLF + Dash,
+                "AAA" + CRLF + Dash + CR,
+                "AAA" + CRLF + Dash + CRLF,
                 CR + Dash + "AAA",
                 CRLF + Dash + "AAA",
                 CRLF + DashDash + "AAA" + CR + "AAA",

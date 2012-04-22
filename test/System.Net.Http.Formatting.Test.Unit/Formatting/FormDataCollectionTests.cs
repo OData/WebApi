@@ -129,7 +129,10 @@ namespace System.Net.Http.Formatting
 
         const string SPACE = " "; // single literal space character
 
-        [Theory]        
+        [Theory]
+        [InlineData("x=?", "?")] // normal
+        [InlineData("x=%3f", "?")] // normal
+        [InlineData("x=%3d", "=")] // normal
         [InlineData("x=abc", "abc")] // normal
         [InlineData("x", "")] // key only
         [InlineData("x=", "")] // rhs only

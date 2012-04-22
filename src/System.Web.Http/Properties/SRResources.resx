@@ -162,12 +162,6 @@
   <data name="ValidatableObjectAdapter_IncompatibleType" xml:space="preserve">
     <value>The model object inside the metadata claimed to be compatible with {0}, but was actually {1}.</value>
   </data>
-  <data name="DelegatingHandlerArrayContainsNullItem" xml:space="preserve">
-    <value>The '{0}' list is invalid because it contains one or more null items.</value>
-  </data>
-  <data name="DelegatingHandlerArrayHasNonNullInnerHandler" xml:space="preserve">
-    <value>The '{0}' list is invalid because the property '{1}' of '{2}' is not null.</value>
-  </data>
   <data name="HttpMessageHandlerDisposed" xml:space="preserve">
     <value>This '{0}' instance has been disposed and can no longer accept HTTP requests.</value>
   </data>

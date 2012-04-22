@@ -288,4 +288,10 @@
   <data name="AsyncResult_ResultMismatch" xml:space="preserve">
     <value>An incorrect IAsyncResult was provided to an 'End' method. The IAsyncResult object passed to 'End' must be the one returned from the matching 'Begin' or passed to the callback provided to 'Begin'.</value>
   </data>
+  <data name="DelegatingHandlerArrayContainsNullItem" xml:space="preserve">
+    <value>The '{0}' list is invalid because it contains one or more null items.</value>
+  </data>
+  <data name="DelegatingHandlerArrayHasNonNullInnerHandler" xml:space="preserve">
+    <value>The '{0}' list is invalid because the property '{1}' of '{2}' is not null.</value>
+  </data>
 </root>

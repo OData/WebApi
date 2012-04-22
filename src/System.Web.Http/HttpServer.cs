@@ -173,7 +173,7 @@ namespace System.Web.Http
                 traceManager.Initialize(_configuration);
 
                 // Create pipeline
-                InnerHandler = HttpPipelineFactory.Create(_configuration.MessageHandlers, _dispatcher);
+                InnerHandler = HttpClientFactory.CreatePipeline(_dispatcher, _configuration.MessageHandlers);
 
                 return null;
             });

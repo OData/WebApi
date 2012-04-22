@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PushStreamContentTest.cs" />
+    <Compile Include="HttpClientFactoryTest.cs" />
     <Compile Include="Handlers\ProgressContentTest.cs" />
     <Compile Include="Handlers\ProgressMessageHandlerTest.cs" />
     <Compile Include="Handlers\ProgressStreamTest.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Internal\HttpValueCollectionTest.cs" />
     <Compile Include="Internal\NonClosingDelegatingStreamTest.cs" />
     <Compile Include="Internal\DelegatingStreamTest.cs" />
+    <Compile Include="Mocks\MockDelegatingHandler.cs" />
     <Compile Include="Mocks\MockNonClosingDelegatingStream.cs" />
     <Compile Include="Mocks\MockDelegatingStream.cs" />
     <Compile Include="Mocks\MockProgressEventHandler.cs" />

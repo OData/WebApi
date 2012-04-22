@@ -92,6 +92,7 @@
     <Compile Include="MultipartFileData.cs" />
     <Compile Include="MultipartStreamProvider.cs" />
     <Compile Include="PushStreamContent.cs" />
+    <Compile Include="HttpClientFactory.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
     <Compile Include="Handlers\HttpProgressEventArgs.cs" />
     <Compile Include="Handlers\ProgressContent.cs" />

@@ -252,24 +252,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; list is invalid because it contains one or more null items..
-        /// </summary>
-        internal static string DelegatingHandlerArrayContainsNullItem {
-            get {
-                return ResourceManager.GetString("DelegatingHandlerArrayContainsNullItem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; list is invalid because the property &apos;{1}&apos; of &apos;{2}&apos; is not null..
-        /// </summary>
-        internal static string DelegatingHandlerArrayHasNonNullInnerHandler {
-            get {
-                return ResourceManager.GetString("DelegatingHandlerArrayHasNonNullInnerHandler", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No service registered for type &apos;{0}&apos;..
         /// </summary>
         internal static string DependencyResolverNoService {

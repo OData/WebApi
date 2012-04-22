@@ -206,7 +206,6 @@
     <Compile Include="Dispatcher\IHttpControllerSelector.cs" />
     <Compile Include="Filters\FilterAttribute.cs" />
     <Compile Include="Hosting\HttpPropertyKeys.cs" />
-    <Compile Include="Hosting\HttpPipelineFactory.cs" />
     <Compile Include="Dispatcher\HttpControllerDispatcher.cs" />
     <Compile Include="Dispatcher\IHttpControllerTypeResolver.cs" />
     <Compile Include="Internal\TypeHelper.cs" />

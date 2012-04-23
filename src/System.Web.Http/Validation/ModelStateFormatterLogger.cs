@@ -38,5 +38,20 @@ namespace System.Web.Http.Validation
             string key = ModelBindingHelper.ConcatenateKeys(_prefix, errorPath);
             _modelState.AddModelError(key, errorMessage);
         }
+
+        public void LogError(string errorPath, Exception exception)
+        {
+            if (errorPath == null)
+            {
+                throw Error.ArgumentNull("errorPath");
+            }
+            if (exception == null)
+            {
+                throw Error.ArgumentNull("exception");
+            }
+
+            string key = ModelBindingHelper.ConcatenateKeys(_prefix, errorPath);
+            _modelState.AddModelError(key, exception);
+        }
     }
 }

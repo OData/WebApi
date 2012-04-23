@@ -202,14 +202,20 @@ namespace System.Web.Http.ModelBinding
                 bool haveResult = binder.BindModel(actionContext, ctx);
 
                 // Log model binding errors
-                if (validateRequiredMembers)
+                if (formatterLogger != null)
                 {
-                    Contract.Assert(formatterLogger != null);
                     foreach (KeyValuePair<string, ModelState> modelStatePair in actionContext.ModelState)
                     {
                         foreach (ModelError modelError in modelStatePair.Value.Errors)
                         {
-                            formatterLogger.LogError(modelStatePair.Key, modelError.ErrorMessage);
+                            if (modelError.Exception != null)
+                            {
+                                formatterLogger.LogError(modelStatePair.Key, modelError.Exception);
+                            }
+                            else
+                            {
+                                formatterLogger.LogError(modelStatePair.Key, modelError.ErrorMessage);
+                            }
                         }
                     }
                 }

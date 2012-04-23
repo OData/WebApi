@@ -224,6 +224,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\SimpleHttpValueProvider.cs" />
     <Compile Include="Validation\DefaultBodyModelValidatorTest.cs" />
+    <Compile Include="Validation\ModelStateFormatterLoggerTest.cs" />
     <Compile Include="Validation\ModelValidationNodeTest.cs" />
     <Compile Include="Validation\ModelValidationRequiredMemberSelectorTest.cs" />
     <Compile Include="Validation\ModelValidationResultTest.cs" />

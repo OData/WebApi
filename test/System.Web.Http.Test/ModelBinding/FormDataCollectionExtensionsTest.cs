@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
+using Moq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -258,6 +259,24 @@ namespace System.Web.Http.ModelBinding
         {
             int result = ParseJQuery<int>("xyz");
             Assert.Equal(0, result);
+        }
+
+        class ThrowingSetterType
+        {
+            public static Exception Exception = new Exception("This setter throws");
+            public string Throws { get { return null; } set { throw Exception; } }
+        }
+
+        [Fact]
+        public void ReadForThrowingSetterTypeRecordsCorrectModelError()
+        {
+            HttpContent content = FormContent("Throws=text");
+            FormDataCollection fd = content.ReadAsAsync<FormDataCollection>().Result;
+            Mock<IFormatterLogger> mockLogger = new Mock<IFormatterLogger>();
+
+            fd.ReadAs<ThrowingSetterType>(String.Empty, requiredMemberSelector: null, formatterLogger: mockLogger.Object);
+            
+            mockLogger.Verify(mock => mock.LogError("Throws", ThrowingSetterType.Exception));
         }
     }
 }

@@ -136,7 +136,7 @@
                     if (!self._isDisposed()) {
                         completeRefresh(obs.asArray(self._entitySource.getEntities()));
                     }
-                });
+                }, 0);
             }
 
             return this;

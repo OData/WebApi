@@ -190,11 +190,15 @@
 
             var self = this,
                 onSuccess = function (entitySet, entities, totalCount) {
-                    self._bindToEntitySource(entitySet);
-                    self._completeRefresh(entities, totalCount, success);
+                    if (!self._isDisposed()) {
+                        self._bindToEntitySource(entitySet);
+                        self._completeRefresh(entities, totalCount, success);
+                    }
                 },
                 onError = function (httpStatus, errorText, context) {
-                    self._failRefresh(httpStatus, errorText, context, error);
+                    if (!self._isDisposed()) {
+                        self._failRefresh(httpStatus, errorText, context, error);
+                    }
                 };
 
             this._dataContext.__load({

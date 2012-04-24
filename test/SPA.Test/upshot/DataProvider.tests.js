@@ -36,7 +36,7 @@
 
     // Verify an offline type scenario where a DataProvider is used directly and results
     // are "offlined" and rehydrated back into the context (metadata and entities)
-    test("Offline scenario", 4, function () {
+    test("Offline scenario", 3, function () {
         // execute a direct query using the dataprovider and simulate
         // caching of the results
         var provider = getTestProvider();
@@ -48,14 +48,11 @@
 
         // create a new context and load the cached entities into it
         var dataContext = getTestContext();
-        var mergedEntities = dataContext.merge(cachedEntities, "Contact", null);
-
-        // verify that after merge, entities are annotated with their type
-        var entitySet = dataContext.getEntitySet("Contact");
-        var contact = entitySet.getEntities()[0];
-        equal(contact.__type, "Contact");
+        dataContext.merge(cachedEntities, "Contact");
 
         // verify that the "rehydrated" context is fully functional
+        var entitySet = dataContext.getEntitySet("Contact");
+        var contact = entitySet.getEntities()[0];
         equal(entitySet.getEntityState(contact), upshot.EntityState.Unmodified);
         $.observable(contact).property("Name", "xyz");
         equal(entitySet.getEntityState(contact), upshot.EntityState.ClientUpdated);
@@ -65,7 +62,7 @@
         var verifySubmit = function (submitParameters, changeSet) {
             // verify we got the expected changeset
             equal(changeSet.length, 1);
-            equal(changeSet[0].Entity.Name, "foo");
+            equal(changeSet[0].entity.Name, "foo");
         };
         var provider = getTestProvider(null, verifySubmit);
 

@@ -12,10 +12,62 @@
             entities = getResult;
         }
 
+        entities = upshot.isArray(entities) ? entities : [entities];
+
+        $.each(entities, function (unused, entity) {
+            // This is not strictly model data.
+            delete entity["$type"];
+        });
+
         return {
-            entities: upshot.isArray(entities) ? entities : [entities],
+            entities: entities,
             totalCount: totalCount
         };
+    }
+
+    var operations = (function () {
+        var operations = {};
+        operations[upshot.ChangeKind.Add] = 1;
+        operations[upshot.ChangeKind.Update] = 2;
+        operations[upshot.ChangeKind.Delete] = 3;
+        return operations;
+    })();
+
+    function transformChangeSet(changeSet) {
+        return $.map(changeSet, function (change, index) {
+            var changeSetEntry =  {
+                Id: index.toString(),
+                Operation: operations[change.changeKind],
+            };
+            $.each({ entity: "Entity", originalEntity: "OriginalEntity" }, function (key, value) {
+                if (change[key]) {
+                    changeSetEntry[value] = $.extend(true, {}, { "$type": change.entityType }, change[key]);
+                }
+            });
+            return changeSetEntry;
+        });
+    }
+
+    function transformSubmitResult(result) {
+        return $.map(result, function (changeSetEntry) {
+            var result = {};
+
+            if (changeSetEntry.Entity) {
+                result.entity = changeSetEntry.Entity;
+            }
+
+            // transform to Error property
+            // even though upshot currently doesn't support reporting of concurrency conflicts,
+            // we must still identify such failures
+            $.each(["ConflictMembers", "ValidationErrors", "IsDeleteConflict"], function (index, property) {
+                if (changeSetEntry.hasOwnProperty(property)) {
+                    result.error = result.error || {};
+                    result.error[property] = changeSetEntry[property];
+                }
+            });
+
+            return result;
+        });
     }
 
     var instanceMembers = {
@@ -76,22 +128,8 @@
             /// <param name="error" type="Function">Optional error callback</param>
             /// <returns type="Promise">A Promise representing the result of the post operation</returns>
 
-            $.each(changeSet, function (index, changeSetEntry) {
-                switch (changeSetEntry.Operation) {
-                    case 2: // insert
-                        changeSetEntry.Operation = 1;
-                        break;
-                    case 3: // update
-                        changeSetEntry.Operation = 2;
-                        break;
-                    case 4: // delete
-                        changeSetEntry.Operation = 3;
-                        break;
-                };
-            });
-
             var self = this,
-                encodedChangeSet = JSON.stringify(changeSet);
+                encodedChangeSet = JSON.stringify(transformChangeSet(changeSet));
 
             $.ajax({
                 url: upshot.DataProvider.normalizeUrl(parameters.url) + "Submit",
@@ -99,23 +137,11 @@
                 data: encodedChangeSet,
                 dataType: "json",
                 type: "POST",
-                success: (success || error) && function (data, statusText, jqXHR) {
-                    var result = data;
-                    var hasErrors = false;
-                    if (result) {
-                        // transform to Error property
-                        $.each(result, function (index, changeSetEntry) {
-                            // even though upshot currently doesn't support reporting of concurrency conflicts,
-                            // we must still identify such failures
-                            $.each(["ConflictMembers", "ValidationErrors", "IsDeleteConflict"], function (index, property) {
-                                if (changeSetEntry.hasOwnProperty(property)) {
-                                    changeSetEntry.Error = changeSetEntry.Error || {};
-                                    changeSetEntry.Error[property] = changeSetEntry[property];
-                                    hasErrors = true;
-                                }
-                            });
-                        });
-                    }
+                success: (success || error) && function (submitChangesResult, statusText, jqXHR) {
+                    var result = submitChangesResult ? transformSubmitResult(submitChangesResult) : [];
+                    var hasErrors = $.grep(result, function (subresult) {
+                        return subresult.hasOwnProperty("error");
+                    }).length > 0;
 
                     if (!hasErrors) {
                         if (success) {
@@ -123,9 +149,10 @@
                         }
                     } else if (error) {
                         var errorText = "Submit failed.";
-                        if (result) {
-                            for (var i = 0; i < result.length; ++i) {
-                                var validationError = (result[i].ValidationErrors && result[i].ValidationErrors[0] && result[i].ValidationErrors[0].Message);
+                        if (submitChangesResult) {
+                            for (var i = 0; i < submitChangesResult.length; ++i) {
+                                // TODO: Why does this only treat ValidationErrors?  What about ConflictMembers and IsDeleteConflict?
+                                var validationError = (submitChangesResult[i].ValidationErrors && submitChangesResult[i].ValidationErrors[0] && submitChangesResult[i].ValidationErrors[0].Message);
                                 if (validationError) {
                                     errorText = validationError;
                                     break;

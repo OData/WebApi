@@ -275,9 +275,6 @@
             return array;
         } else if (upshot.isObject(item)) {
             var obj = {};
-            if (item.hasOwnProperty("__type")) { // make sure __type flows through first
-                obj["__type"] = ko.utils.unwrapObservable(item["__type"]);
-            }
             ko.utils.arrayForEach(upshot.metadata.getProperties(item, entityType), function (prop) {
                 // TODO: determine if there are scenarios where we want to support hasOwnProperty returning false
                 if (item.hasOwnProperty(prop.name)) {

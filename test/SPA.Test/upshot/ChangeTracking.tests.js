@@ -116,7 +116,7 @@
     });
 
 /* TODO: We forced managed associations on for Dev11 beta, since unmanaged associations are broken.
-    test("Nested entities can be added to an entity, and navigation properties are untracked", 16, function () {
+    test("Nested entities can be added to an entity, and navigation properties are untracked", 15, function () {
         try {
             upshot.observability.configuration = observability.knockout;
 
@@ -151,7 +151,7 @@
                 properties.push(key);
                 equal(ko.utils.unwrapObservable(orderDetail[key]), value, "Properties should be equal");
             });
-            equal(properties.length, 4, "The should be 4 serialized properties");
+            equal(properties.length, 3, "There should be 3 serialized properties");
 
         } finally {
             upshot.observability.configuration = observability.jquery;
@@ -159,7 +159,7 @@
     });
 */
 
-    test("Nested entities can be added to an entity, and navigation properties are computed", 39, function () {
+    test("Nested entities can be added to an entity, and navigation properties are computed", 38, function () {
         try {
             upshot.observability.configuration = observability.knockout;
 
@@ -221,7 +221,7 @@
                 properties.push(key);
                 equal(ko.utils.unwrapObservable(orderDetail[key]), value, "Properties should be equal");
             });
-            equal(properties.length, 4, "The should be 4 serialized properties");
+            equal(properties.length, 3, "There should be 3 serialized properties");
 
         } finally {
             upshot.observability.configuration = observability.jquery;

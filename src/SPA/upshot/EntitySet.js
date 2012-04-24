@@ -283,8 +283,8 @@
                 // Deleting a entity that is uncommitted and only on the client.
                 this._purgeUncommittedAddedEntity(this._getAddedEntityFromId(id));
             } else if (upshot.EntityState.isServerSyncing(entityState)) {
-                // Force the application to block deletes while saving any edit to this same entity.
-                // We don't have a mechanism to enqueue this edit, then apply when the commit succeeds,
+                // Force the application to block deletes while saving any change to this same entity.
+                // We don't have a mechanism to enqueue this change, then apply when the commit succeeds,
                 // possibly discard it when the commit fails.
                 throw "Can't delete an entity while previous changes are being committed.";
             } else {
@@ -340,7 +340,7 @@
             return mergedLoadedEntities;
         },
 
-        __getEditedEntities: function () {
+        __getChangedEntities: function () {
             var self = this,
             entities = [];
             $.each(this._entityStates, function (id, state) {
@@ -352,38 +352,37 @@
             return entities;
         },
 
-        __getEntityEdit: function (entity) {
+        __getEntityChange: function (entity) {
             var id = this.getEntityId(entity),
             self = this,
             submittingState,
-            operation,
-            addEntityType = function (entityToExtend) {
-                return $.extend({ "__type": self._entityType }, entityToExtend);
-            };
+            change,
+            changeKind,
+            lastError = this.getEntityError(entity);
+
             switch (this._entityStates[id]) {
                 case upshot.EntityState.ClientUpdated:
                     submittingState = upshot.EntityState.ServerUpdating;
-                    operation = {
-                        Operation: 3,
-                        Entity: addEntityType(this._getSerializableEntity(entity)),
-                        OriginalEntity: addEntityType(this._getOriginalValue(entity, this._entityType))
+                    changeKind = upshot.ChangeKind.Update;
+                    change = {
+                        entity: this._getSerializableEntity(entity),
+                        originalEntity: this._getOriginalValue(entity, this._entityType)
                     };
                     break;
 
                 case upshot.EntityState.ClientAdded:
                     submittingState = upshot.EntityState.ServerAdding;
-                    entity = this._getAddedEntityFromId(id).entity;
-                    operation = {
-                        Operation: 2,
-                        Entity: addEntityType(this._getSerializableEntity(entity))
+                    changeKind = upshot.ChangeKind.Add;
+                    change = {
+                        entity: this._getSerializableEntity(entity)
                     };
                     break;
 
                 case upshot.EntityState.ClientDeleted:
                     submittingState = upshot.EntityState.ServerDeleting;
-                    operation = {
-                        Operation: 4,
-                        Entity: addEntityType(this._getOriginalValue(entity, this._entityType))
+                    changeKind = upshot.ChangeKind.Delete;
+                    change = {
+                        entity: this._getOriginalValue(entity, this._entityType)
                     };
                     // TODO -- Do we allow for concurrency guards here?
                     break;
@@ -392,11 +391,11 @@
                     throw "Unrecognized entity state.";
             }
 
-            var lastError = self.getEntityError(entity);
-            var edit = {
-                entityType: this._entityType,
-                storeEntity: entity,
-                operation: operation,
+            return {
+                changeSetEntry: $.extend(change, {
+                    entityType: this._entityType,
+                    changeKind: changeKind
+                }),
                 updateEntityState: function () {
                     self._updateEntityState(id, submittingState, lastError);
 
@@ -405,13 +404,12 @@
                     ///#ENDDEBUG
                 },
                 succeeded: function (result) {
-                    self._handleSubmitSucceeded(id, operation, result);
+                    self._handleSubmitSucceeded(id, changeKind, result);
                 },
                 failed: function (error) {
-                    self._handleSubmitFailed(id, operation, error || lastError);
+                    self._handleSubmitFailed(id, changeKind, error || lastError);
                 }
             };
-            return edit;
         },
 
         __revertChanges: function () {
@@ -520,12 +518,12 @@
                 throw "Entity not cached in data context.";
             } else if (entityState === upshot.EntityState.ClientAdded) {
                 // Updating a entity that is uncommitted and only on the client.
-                // Edit state remains "ClientAdded".  We won't event an edit state change (so clients had
+                // Entity state remains "ClientAdded".  We won't event an entity state change (so clients had
                 // better be listening on "change").
                 // Fall through and do implicit commit.
             } else if (upshot.EntityState.isServerSyncing(entityState)) {
-                // Force the application to block updates while saving any edit to this same entity.
-                // We don't have a mechanism to enqueue this edit, then apply when the commit succeeds,
+                // Force the application to block updates while saving any change to this same entity.
+                // We don't have a mechanism to enqueue this change, then apply when the commit succeeds,
                 // possibly discard it when the commit fails.
                 throw "Can't update an entity while previous changes are being committed.";
             } else {
@@ -1204,7 +1202,7 @@
         },
 
         _arrayRemove: function (array, type, index, numToRemove) {
-            this._removeTracking(array.slice(index, numToRemove));
+            this._removeTracking(array.slice(index, index + numToRemove));
             obs.remove(array, index, numToRemove);
         },
 
@@ -1236,20 +1234,20 @@
             return addedEntities[0];
         },
 
-        _handleSubmitSucceeded: function (id, operation, result) {
+        _handleSubmitSucceeded: function (id, changeKind, result) {
             var entity = this._getEntityFromId(id);  // ...before we purge.
 
-            switch (operation.Operation) {
-                case 2:
+            switch (changeKind) {
+                case upshot.ChangeKind.Add:
                     // Do this before the model change, so listeners on data change events see consistent entity state.
                     this._updateEntityState(id, upshot.EntityState.Unmodified);
 
                     // Keep entity in addedEntities to maintain its synthetic id as the client-known id.
                     this._getAddedEntityFromId(id).committed = true;
 
-                    this._serverEntities.push({ entity: entity, identity: this._getEntityIdentity(result.Entity) });
+                    this._serverEntities.push({ entity: entity, identity: this._getEntityIdentity(result.entity) });
                     this._clearChanges(entity, false);
-                    this._merge(entity, result.Entity);
+                    this._merge(entity, result.entity);
 
                     ///#DEBUG
                     this._verifyConsistency(entity, id, false, true);
@@ -1257,12 +1255,12 @@
 
                     break;
 
-                case 3:
+                case upshot.ChangeKind.Update:
                     // Do this before the model change, so listeners on data change events see consistent entity state.
                     this._updateEntityState(id, upshot.EntityState.Unmodified);
 
                     this._clearChanges(entity, false);
-                    this._merge(entity, result.Entity);
+                    this._merge(entity, result.entity);
                     this._triggerEntityUpdated(entity);
 
                     ///#DEBUG
@@ -1271,7 +1269,7 @@
 
                     break;
 
-                case 4:
+                case upshot.ChangeKind.Delete:
                     this._purgeServerEntity(entity, id);  // This updates entity state to Deleted, verifies consistency.
                     break;
             }
@@ -1281,14 +1279,14 @@
             ///#ENDDEBUG
         },
 
-        _handleSubmitFailed: function (id, operation, error) {
+        _handleSubmitFailed: function (id, changeKind, error) {
             var entity = this._getEntityFromId(id);
 
             var state;
-            switch (operation.Operation) {
-                case 2: state = upshot.EntityState.ClientAdded; break;
-                case 3: state = upshot.EntityState.ClientUpdated; break;
-                case 4: state = upshot.EntityState.ClientDeleted; break;
+            switch (changeKind) {
+                case upshot.ChangeKind.Add: state = upshot.EntityState.ClientAdded; break;
+                case upshot.ChangeKind.Update: state = upshot.EntityState.ClientUpdated; break;
+                case upshot.ChangeKind.Delete: state = upshot.EntityState.ClientDeleted; break;
             }
 
             this._updateEntityState(id, state, error);

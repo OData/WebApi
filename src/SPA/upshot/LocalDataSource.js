@@ -62,7 +62,7 @@
             /// Establishes the sort specification that is to be applied to the input data.
             /// </summary>
             /// <param name="sort">
-            /// &#10;The sort specification to applied when loading model data.
+            /// &#10;The sort specification to applied to the input data.
             /// &#10;Should be supplied as an object of the form &#123; property: &#60;propertyName&#62; [, descending: &#60;bool&#62; ] &#125; or an array of ordered objects of this form.
             /// &#10;When supplied as null or undefined, the sort specification for this LocalDataSource is cleared.
             /// </param>
@@ -80,7 +80,7 @@
             /// Establishes the filter specification that is to be applied to the input data.
             /// </summary>
             /// <param name="filter">
-            /// &#10;The filter specification to applied when loading model data.
+            /// &#10;The filter specification to applied to the input data.
             /// &#10;Should be supplied as an object of the form &#123; property: &#60;propertyName&#62;, value: &#60;propertyValue&#62; [, operator: &#60;operator&#62; ] &#125; or a function(entity) returning Boolean or an ordered array of these forms.
             /// &#10;When supplied as null or undefined, the filter specification for this LocalDataSource is cleared.
             /// </param>
@@ -132,7 +132,11 @@
                 // We do this refresh asynchronously so that, if this refresh was called during a callback,
                 // the app receives remaining callbacks first, before the new batch of callbacks with respect to this refresh.
                 // TODO -- We should only refresh once in response to N>1 "refresh" calls.
-                setTimeout(function () { completeRefresh(obs.asArray(self._entitySource.getEntities())); });
+                setTimeout(function () {
+                    if (!self._isDisposed()) {
+                        completeRefresh(obs.asArray(self._entitySource.getEntities()));
+                    }
+                }, 0);
             }
 
             return this;
@@ -387,9 +391,10 @@
                     case "insert":
                         var insertedEntities = eventArguments.items;
                         if (insertedEntities.length > 0) {
-                            var anyExternallyInsertedEntitiesMatchFilter = $.grep(insertedEntities, function (entity) {
-                                return (!self._filter || self._filter(entity)) && $.inArray(entity, obs.asArray(self._clientEntities)) < 0;
-                            }).length > 0;
+                            var anyExternallyInsertedEntitiesMatchFilter = !this._filter ||
+                                $.grep(insertedEntities, function (entity) {
+                                    return self._filter(entity);
+                                }).length > 0;
                             if (anyExternallyInsertedEntitiesMatchFilter) {
                                 needRecompute = true;
                             }
@@ -447,9 +452,9 @@
 
         _handleEntityAdd: function (entity) {
             if (!this._needRecompute) {
-                if (this._filter && !this._filter(entity)) {
-                    this._setNeedRecompute();
-                }
+                // We have no idea whether this add is in the right position relative to the input entities,
+                // the current sort or paging specifications.  Conservatively recompute.
+                this._setNeedRecompute();
             }
             base._handleEntityAdd.apply(this, arguments);
         },

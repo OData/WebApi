@@ -19,11 +19,6 @@ namespace System.Net.Http.Formatting
         MatchOnCanWriteType,
 
         /// <summary>
-        /// Matched on explicit content-type set on the <see cref="HttpResponseMessage"/>.
-        /// </summary>
-        MatchOnResponseContentType,
-
-        /// <summary>
         /// Matched on explicit accept header set in <see cref="HttpRequestMessage"/>.
         /// </summary>
         MatchOnRequestAcceptHeader,

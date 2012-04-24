@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Text;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Parsers
 {
@@ -31,7 +32,7 @@ namespace System.Net.Http.Formatting.Parsers
             // The minimum length which would be an empty header terminated by CRLF
             if (maxRequestLineSize < MinRequestLineSize)
             {
-                throw new ArgumentOutOfRangeException("maxRequestLineSize", maxRequestLineSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinRequestLineSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxRequestLineSize", maxRequestLineSize, MinRequestLineSize);
             }
 
             if (httpRequest == null)

@@ -1,15 +1,51 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Specialized;
+using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using Microsoft.TestCommon;
 
 namespace System.Net.Http.Headers
 {
-    class CookieStateTest
+    public class CookieStateTest
     {
+        public static TheoryDataSet<string> InvalidCookieNames
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "<acb>",
+                    "{acb}",
+                    "[acb]",
+                    "\"acb\"",
+                    "a,b",
+                    "a;b",
+                    "a\\b",
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, string> EncodedCookieStateStrings
+        {
+            get
+            {
+                return new TheoryDataSet<string, string>
+                {
+                    { "?", "%3f" },
+                    { "=", "%3d" },
+                    { "<acb>", "%3cacb%3e" },
+                    { "{acb}", "%7bacb%7d" },
+                    { "[acb]", "%5bacb%5d" },
+                    { "\"acb\"", "%22acb%22" },
+                    { "a,b", "a%2cb" },
+                    { "a;b", "a%3bb" },
+                    { "a\\b", "a%5cb" },
+                };
+            }
+        }
+
         [Fact]
         public void CookieState_CtorThrowsOnNullName()
         {
@@ -17,22 +53,10 @@ namespace System.Net.Http.Headers
         }
 
         [Theory]
-        [InlineData("<acb>")]
-        [InlineData("{acb}")]
-        [InlineData("[acb]")]
+        [PropertyData("InvalidCookieNames")]
         public void CookieState_CtorThrowsOnInvalidName(string name)
         {
             Assert.ThrowsArgument(() => new CookieState(name, "value"), "name");
-        }
-
-        [Theory]
-        [InlineData("\"acb\"")]
-        [InlineData("a,b")]
-        [InlineData("a;b")]
-        [InlineData("a\\b")]
-        public void CookieState_CtorThrowsOnInvalidValue(string value)
-        {
-            Assert.ThrowsArgument(() => new CookieState("name", value), "value");
         }
 
         [Fact]
@@ -67,7 +91,7 @@ namespace System.Net.Http.Headers
             Assert.Equal(1, cookie.Values.Count);
             Assert.Equal("n1", cookie.Values.AllKeys[0]);
             Assert.Equal("v1", cookie.Values["n1"]);
-            Assert.Equal("n1=v1", cookie.Value);
+            Assert.Equal("n1", cookie.Value);
         }
 
         [Fact]
@@ -81,6 +105,49 @@ namespace System.Net.Http.Headers
 
             cookie.Values.AllKeys[0] = "value2";
             Assert.Equal("value2", cookie.Value);
+        }
+
+        [Fact]
+        public void CookieState_ItemTreatsNullNameAsEmpty()
+        {
+            // Arrange
+            CookieState state = new CookieState("name", "value");
+
+            // Act
+            state[null] = "v1";
+
+            // Assert
+            Assert.Equal("name=value&=v1", state.ToString());
+        }
+
+        [Theory]
+        [PropertyData("EncodedCookieStateStrings")]
+        public void CookieState_ItemEncodesName(string subname, string encodedSubname)
+        {
+            // Arrange
+            CookieState state = new CookieState("name", "value");
+
+            // Act
+            state[subname] = "v1";
+
+            // Assert
+            string value = String.Format("name=value&{0}=v1", encodedSubname);
+            Assert.Equal(value, state.ToString());
+        }
+
+        [Theory]
+        [PropertyData("EncodedCookieStateStrings")]
+        public void CookieState_ItemEncodesValue(string subvalue, string encodedSubvalue)
+        {
+            // Arrange
+            CookieState state = new CookieState("name", "value");
+
+            // Act
+            state["n1"] = subvalue;
+
+            // Assert
+            string value = String.Format("name=value&n1={0}", encodedSubvalue);
+            Assert.Equal(value, state.ToString());
         }
 
         [Fact]

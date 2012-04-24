@@ -31,17 +31,25 @@ namespace System.Web.Http.ModelBinding
                 return string.Empty;
             }
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             int i = 0;
             while (true)
             {
                 int indexOpen = key.IndexOf('[', i);
                 if (indexOpen < 0)
                 {
+                    // Fast path, no normalization needed.
+                    // This skips the string conversion and allocating the string builder.
+                    if (i == 0)
+                    {
+                        return key;
+                    }
+                    sb = sb ?? new StringBuilder();
                     sb.Append(key, i, key.Length - i);
                     break; // no more brackets
                 }
 
+                sb = sb ?? new StringBuilder();
                 sb.Append(key, i, indexOpen - i); // everything up to "["
 
                 // Find closing bracket.
@@ -210,7 +218,7 @@ namespace System.Web.Http.ModelBinding
                 {
                     return ctx.Model;
                 }
-                return null;
+                return MediaTypeFormatter.GetDefaultValueForType(type);
             }
         }
     }

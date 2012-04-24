@@ -15,7 +15,7 @@ namespace System.Net.Http
     {
         private static readonly Type _streamType = typeof(Stream);
         private Stream _outputStream;
-        private IMultipartStreamProvider _streamProvider;
+        private MultipartStreamProvider _streamProvider;
         private HttpContentHeaders _headers;
 
         /// <summary>
@@ -23,9 +23,9 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="streamProvider">The stream provider.</param>
         /// <param name="maxBodyPartHeaderSize">The max length of the MIME header within each MIME body part.</param>
-        public MimeBodyPart(IMultipartStreamProvider streamProvider, int maxBodyPartHeaderSize)
+        public MimeBodyPart(MultipartStreamProvider streamProvider, int maxBodyPartHeaderSize)
         {
-            Contract.Assert(streamProvider != null, "Stream provider cannot be null.");
+            Contract.Assert(streamProvider != null);
             _streamProvider = streamProvider;
             Segments = new ArrayList(2);
             _headers = FormattingUtilities.CreateEmptyContentHeaders();
@@ -79,13 +79,14 @@ namespace System.Net.Http
         /// Gets the output stream.
         /// </summary>
         /// <returns>The output stream to write the body part to.</returns>
-        public Stream GetOutputStream()
+        public Stream GetOutputStream(HttpContent parent)
         {
+            Contract.Assert(parent != null);
             if (_outputStream == null)
             {
                 try
                 {
-                    _outputStream = _streamProvider.GetStream(_headers);
+                    _outputStream = _streamProvider.GetStream(parent, _headers);
                 }
                 catch (Exception e)
                 {

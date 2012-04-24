@@ -86,12 +86,6 @@ namespace System.Net.Http.Formatting
 
                         break;
 
-                    case ResponseFormatterSelectionResult.MatchOnResponseContentType:
-
-                        // Match on response content trumps all other choices
-                        mediaType = match.MediaTypeMatch.MediaType;
-                        return formatter;
-
                     case ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader:
 
                         // Matches on accept headers must choose the highest quality match

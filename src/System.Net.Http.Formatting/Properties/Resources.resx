@@ -168,9 +168,6 @@
   <data name="MimeMultipartParserBadBoundary" xml:space="preserve">
     <value>MIME multipart boundary cannot end with an empty space.</value>
   </data>
-  <data name="ArgumentMustBeGreaterThanOrEqualTo" xml:space="preserve">
-    <value>Value must be greater than or equal to {0}.</value>
-  </data>
   <data name="MultipartFormDataStreamProviderNoContentDisposition" xml:space="preserve">
     <value>Did not find required '{0}' header field in MIME multipart body part.</value>
   </data>
@@ -267,9 +264,6 @@
   <data name="MediaTypeFormatterNoEncoding" xml:space="preserve">
     <value>No encoding found for media type formatter '{0}'. There must be at least one supported encoding registered in order for the media type formatter to read or write content.</value>
   </data>
-  <data name="ArgumentMustBeGreaterThan" xml:space="preserve">
-    <value>Value must be greater than {0}.</value>
-  </data>
   <data name="CookieInvalidName" xml:space="preserve">
     <value>The specified value is not a valid cookie name.</value>
   </data>
@@ -278,5 +272,20 @@
   </data>
   <data name="MaxHttpCollectionKeyLimitReached" xml:space="preserve">
     <value>The number of keys in a NameValueCollection has exceeded the limit of '{0}'. You can adjust it by modifying the MaxHttpCollectionKeys property on the '{1}' class.</value>
+  </data>
+  <data name="AsyncResult_CallbackThrewException" xml:space="preserve">
+    <value>Async Callback threw an exception.</value>
+  </data>
+  <data name="AsyncResult_CannotGetHandleAfterEnd" xml:space="preserve">
+    <value>The IAsyncResult implementation '{0}' tried to get a handle after End was called.</value>
+  </data>
+  <data name="AsyncResult_MultipleCompletes" xml:space="preserve">
+    <value>The IAsyncResult implementation '{0}' tried to complete a single operation multiple times. This could be caused by an incorrect application IAsyncResult implementation or other extensibility code, such as an IAsyncResult that returns incorrect CompletedSynchronously values or invokes the AsyncCallback multiple times.</value>
+  </data>
+  <data name="AsyncResult_MultipleEnds" xml:space="preserve">
+    <value>End cannot be called twice on an AsyncResult.</value>
+  </data>
+  <data name="AsyncResult_ResultMismatch" xml:space="preserve">
+    <value>An incorrect IAsyncResult was provided to an 'End' method. The IAsyncResult object passed to 'End' must be the one returned from the matching 'Begin' or passed to the callback provided to 'Begin'.</value>
   </data>
 </root>

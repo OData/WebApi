@@ -3,15 +3,14 @@
 using System.Diagnostics.Contracts;
 using System.Text;
 
-namespace System.Net.Http.Internal
+namespace System.Web.Http
 {
     /// <summary>
-    /// Helpers for encoding, decoding, and parsing URI query components.
+    /// Helpers for encoding, decoding, and parsing URI query components. In .Net 4.5
+    /// please use the WebUtility class.
     /// </summary>
     internal static class UriQueryUtility
     {
-        // The implementation below is ported from WebUtility for use in .Net 4
-
         #region UrlEncode implementation
 
         private static byte[] UrlEncode(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)

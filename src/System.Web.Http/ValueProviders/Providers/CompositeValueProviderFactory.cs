@@ -17,7 +17,24 @@ namespace System.Web.Http.ValueProviders.Providers
 
         public override IValueProvider GetValueProvider(HttpActionContext actionContext)
         {
-            List<IValueProvider> providers = _factories.Select<ValueProviderFactory, IValueProvider>((f) => f.GetValueProvider(actionContext)).Where((vp) => vp != null).ToList();
+            return GetValueProvider(actionContext, _factories);
+        }
+
+        // Get a single ValueProvider from a collection of factories. 
+        // This will never return null.
+        internal static IValueProvider GetValueProvider(HttpActionContext actionContext, ValueProviderFactory[] factories)
+        {
+            // Fast-path the case of just one 
+            if (factories.Length == 1)
+            {
+                IValueProvider provider = factories[0].GetValueProvider(actionContext);
+                if (provider != null)
+                {
+                    return provider;
+                }
+            }
+
+            List<IValueProvider> providers = factories.Select((f) => f.GetValueProvider(actionContext)).Where((vp) => vp != null).ToList();
             return new CompositeValueProvider(providers);
         }
     }

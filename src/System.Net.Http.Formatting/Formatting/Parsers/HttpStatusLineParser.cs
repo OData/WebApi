@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Parsers
 {
@@ -33,7 +34,7 @@ namespace System.Net.Http.Formatting.Parsers
             // The minimum length which would be an empty header terminated by CRLF
             if (maxStatusLineSize < MinStatusLineSize)
             {
-                throw new ArgumentOutOfRangeException("maxStatusLineSize", maxStatusLineSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinStatusLineSize));
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxStatusLineSize", maxStatusLineSize, MinStatusLineSize);
             }
 
             if (httpResponse == null)

@@ -69,6 +69,9 @@
     <Compile Include="..\Common\DictionaryExtensions.cs">
       <Link>Common\DictionaryExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\EnsureStackHelper.cs">
+      <Link>Common\EnsureStackHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>
@@ -84,6 +87,9 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\UriQueryUtility.cs">
+      <Link>Common\UriQueryUtility.cs</Link>
+    </Compile>
     <Compile Include="AcceptVerbsAttribute.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
@@ -94,6 +100,7 @@
     <Compile Include="Dependencies\IDependencyScope.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolver.cs" />
     <Compile Include="Dispatcher\IAssembliesResolver.cs" />
+    <Compile Include="Hosting\IHostBufferPolicySelector.cs" />
     <Compile Include="HttpOptionsAttribute.cs" />
     <Compile Include="HttpHeadAttribute.cs" />
     <Compile Include="HttpPatchAttribute.cs" />
@@ -107,7 +114,6 @@
     <Compile Include="IncludeErrorDetailPolicy.cs" />
     <Compile Include="Filters\HttpActionExecutedContext.cs" />
     <Compile Include="Internal\HttpParameterBindingExtensions.cs" />
-    <Compile Include="Internal\UriQueryUtility.cs" />
     <Compile Include="ModelBinding\FormatterParameterBinding.cs" />
     <Compile Include="ModelBinding\CancellationTokenParameterBinding.cs" />
     <Compile Include="ModelBinding\ErrorParameterBinding.cs" />
@@ -120,6 +126,7 @@
     <Compile Include="Dispatcher\ExceptionSurrogate.cs" />
     <Compile Include="HttpResponseException.cs" />
     <Compile Include="ModelBinding\HttpRequestParameterBinding.cs" />
+    <Compile Include="ModelBinding\IValueProviderParameterBinding.cs" />
     <Compile Include="ModelBinding\JQueryMVCFormUrlEncodedFormatter.cs" />
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
     <Compile Include="Query\ParseException.cs" />

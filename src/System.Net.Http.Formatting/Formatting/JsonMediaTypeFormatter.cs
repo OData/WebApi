@@ -10,6 +10,7 @@ using System.Net.Http.Internal;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Xml;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -21,12 +22,6 @@ namespace System.Net.Http.Formatting
     /// </summary>
     public class JsonMediaTypeFormatter : MediaTypeFormatter
     {
-        private static readonly MediaTypeHeaderValue[] _supportedMediaTypes = new MediaTypeHeaderValue[]
-        {
-            MediaTypeConstants.ApplicationJsonMediaType,
-            MediaTypeConstants.TextJsonMediaType
-        };
-
         private JsonSerializerSettings _jsonSerializerSettings;
         private readonly IContractResolver _defaultContractResolver;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
@@ -41,10 +36,8 @@ namespace System.Net.Http.Formatting
         public JsonMediaTypeFormatter()
         {
             // Set default supported media types
-            foreach (MediaTypeHeaderValue value in _supportedMediaTypes)
-            {
-                SupportedMediaTypes.Add(value);
-            }
+            SupportedMediaTypes.Add(MediaTypeConstants.ApplicationJsonMediaType);
+            SupportedMediaTypes.Add(MediaTypeConstants.TextJsonMediaType);
 
             // Initialize serializer
             _defaultContractResolver = new JsonContractResolver(this);
@@ -118,7 +111,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value < FormattingUtilities.DefaultMinDepth)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, FormattingUtilities.DefaultMinDepth));
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, FormattingUtilities.DefaultMinDepth);
                 }
 
                 _maxDepth = value;

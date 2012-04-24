@@ -71,10 +71,10 @@ namespace System.Web.Http.ModelBinding
         }
 
         #region Query Strings
-                
+
         [Fact]
         public void BindValuesAsync_ConvertEmptyString()
-        {                    
+        {
             HttpActionContext actionContext = ContextUtil.CreateActionContext(
                 ContextUtil.CreateControllerContext(new HttpRequestMessage()
                 {
@@ -89,7 +89,7 @@ namespace System.Web.Http.ModelBinding
             provider.BindValuesAsync(actionContext, CancellationToken.None).Wait();
 
             // Assert
-            ConvertEmptyStringContainer arg = (ConvertEmptyStringContainer) actionContext.ActionArguments["x"];
+            ConvertEmptyStringContainer arg = (ConvertEmptyStringContainer)actionContext.ActionArguments["x"];
 
             Assert.NotNull(arg);
             Assert.Equal(String.Empty, arg.A1);
@@ -724,6 +724,26 @@ namespace System.Web.Http.ModelBinding
         }
 
         [Fact]
+        public void BindValuesAsync_Body_To_Complex_Type_NullContent()
+        {
+            // Arrange            
+            HttpRequestMessage request = new HttpRequestMessage() { Content = null };
+            HttpActionContext context = ContextUtil.CreateActionContext(
+                ContextUtil.CreateControllerContext(request),
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("PostComplexType") });
+
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(context, CancellationToken.None).Wait();
+
+            // Assert
+            Assert.Equal(1, context.ActionArguments.Count);
+            object deserializedActionValueItem = context.ActionArguments.First().Value;
+            Assert.Null(deserializedActionValueItem);
+        }
+
+        [Fact]
         public void BindValuesAsync_Body_To_Complex_And_Uri_To_Simple()
         {
             // Arrange
@@ -890,6 +910,30 @@ namespace System.Web.Http.ModelBinding
             expectedResult["point"] = new Point { X = 123, Y = 456, Data = new Data { Description = "mypoint" } };
             Assert.Equal(expectedResult, actionContext.ActionArguments, new DictionaryEqualityComparer());
         }
+
+        [Fact]
+        public void BindValuesAsync_ModelBinderAttribute_WithEmptyName()
+        {
+            // Arrange
+            CancellationToken cancellationToken = new CancellationToken();
+            HttpActionContext actionContext = ContextUtil.CreateActionContext(
+                ContextUtil.CreateControllerContext(new HttpRequestMessage()
+                {
+                    Method = new HttpMethod("Options"),
+                    RequestUri = new Uri("http://localhost?x=123&y=456&data.description=mypoint")
+                }),
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("Options") });
+
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(actionContext, cancellationToken).Wait();
+
+            // Assert
+            Dictionary<string, object> expectedResult = new Dictionary<string, object>();
+            expectedResult["data"] = new Point { X = 123, Y = 456, Data = new Data { Description = "mypoint" } };
+            Assert.Equal(expectedResult, actionContext.ActionArguments, new DictionaryEqualityComparer());
+        }
     }
 
     [FromUri]
@@ -922,6 +966,9 @@ namespace System.Web.Http.ModelBinding
 
     public class ActionValueController : ApiController
     {
+        // Demonstrates the use of ModelBinderAttribute with empty name
+        public void Options([FromUri(Name = "")]Point data) { }
+
         // Demonstrates complex parameter that has FromUri declared on the type
         public void Patch(Point point) { }
 

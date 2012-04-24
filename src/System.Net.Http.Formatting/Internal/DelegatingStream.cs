@@ -10,7 +10,7 @@ namespace System.Net.Http.Internal
     /// </summary>
     internal abstract class DelegatingStream : Stream
     {
-        protected Stream _innerStream;
+        private Stream _innerStream;
 
         protected DelegatingStream(Stream innerStream)
         {
@@ -19,6 +19,11 @@ namespace System.Net.Http.Internal
                 throw new ArgumentNullException("innerStream");
             }
             _innerStream = innerStream;
+        }
+
+        protected Stream InnerStream
+        {
+            get { return _innerStream; }
         }
 
         public override bool CanRead

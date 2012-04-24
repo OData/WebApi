@@ -8,7 +8,7 @@ using Xunit.Extensions;
 
 namespace System.Net.Http.Headers
 {
-    class CookieHeaderValueTest
+    public class CookieHeaderValueTest
     {
         public static TheoryDataSet<CookieHeaderValue, string> CookieHeaderDataSet
         {

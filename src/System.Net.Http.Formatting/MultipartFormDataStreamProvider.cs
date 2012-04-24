@@ -1,14 +1,19 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Globalization;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
+using System.Net.Http.Formatting.Internal;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
     /// <summary>
-    /// An <see cref="IMultipartStreamProvider"/> suited for use with HTML file uploads for writing file 
+    /// A <see cref="MultipartStreamProvider"/> implementation suited for use with HTML file uploads for writing file 
     /// content to a <see cref="FileStream"/>. The stream provider looks at the <b>Content-Disposition</b> header 
     /// field and determines an output <see cref="Stream"/> based on the presence of a <b>filename</b> parameter.
     /// If a <b>filename</b> parameter is present in the <b>Content-Disposition</b> header field then the body 
@@ -16,22 +21,19 @@ namespace System.Net.Http
     /// This makes it convenient to process MIME Multipart HTML Form data which is a combination of form 
     /// data and file content.
     /// </summary>
-    public class MultipartFormDataStreamProvider : IMultipartStreamProvider
+    public class MultipartFormDataStreamProvider : MultipartFileStreamProvider
     {
-        private const int MinBufferSize = 1;
-        private const int DefaultBufferSize = 0x1000;
+        private NameValueCollection _formData = HttpValueCollection.Create();
 
-        private Dictionary<string, string> _bodyPartFileNames = new Dictionary<string, string>();
-        private readonly object _thisLock = new object();
-        private string _rootPath;
-        private int _bufferSize = DefaultBufferSize;
+        // Set of indexes of which HttpContents we designate as form data
+        private Collection<bool> _isFormData = new Collection<bool>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MultipartFormDataStreamProvider"/> class.
         /// </summary>
         /// <param name="rootPath">The root path where the content of MIME multipart body parts are written to.</param>
         public MultipartFormDataStreamProvider(string rootPath)
-            : this(rootPath, DefaultBufferSize)
+            : base(rootPath)
         {
         }
 
@@ -41,36 +43,16 @@ namespace System.Net.Http
         /// <param name="rootPath">The root path where the content of MIME multipart body parts are written to.</param>
         /// <param name="bufferSize">The number of bytes buffered for writes to the file.</param>
         public MultipartFormDataStreamProvider(string rootPath, int bufferSize)
+            : base(rootPath, bufferSize)
         {
-            if (String.IsNullOrWhiteSpace(rootPath))
-            {
-                throw new ArgumentNullException("rootPath");
-            }
-
-            if (bufferSize < MinBufferSize)
-            {
-                throw new ArgumentOutOfRangeException("bufferSize", bufferSize, RS.Format(Properties.Resources.ArgumentMustBeGreaterThanOrEqualTo, MinBufferSize));
-            }
-
-            _rootPath = Path.GetFullPath(rootPath);
-            _bufferSize = bufferSize;
         }
 
         /// <summary>
-        /// Gets an <see cref="IDictionary{T1, T2}"/> instance containing mappings of each 
-        /// <b>filename</b> parameter provided in a <b>Content-Disposition</b> header field 
-        /// (represented as the keys) to a local file name where the contents of the body part is 
-        /// stored (represented as the values).
+        /// Gets a <see cref="NameValueCollection"/> of form data passed as part of the multipart form data.
         /// </summary>
-        public IDictionary<string, string> BodyPartFileNames
+        public NameValueCollection FormData
         {
-            get
-            {
-                lock (_thisLock)
-                {
-                    return new Dictionary<string, string>(_bodyPartFileNames);
-                }
-            }
+            get { return _formData; }
         }
 
         /// <summary>
@@ -78,64 +60,70 @@ namespace System.Net.Http
         /// and decides whether it should return a file stream or a memory stream for the body part to be 
         /// written to.
         /// </summary>
+        /// <param name="parent">The parent MIME multipart HttpContent instance.</param>
         /// <param name="headers">Header fields describing the body part</param>
         /// <returns>The <see cref="Stream"/> instance where the message body part is written to.</returns>
-        public virtual Stream GetStream(HttpContentHeaders headers)
+        public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
         {
-            if (headers == null)
+            if (parent == null)
             {
-                throw new ArgumentNullException("headers");
+                throw Error.ArgumentNull("parent");
             }
 
+            if (headers == null)
+            {
+                throw Error.ArgumentNull("headers");
+            }
+
+            // For form data, Content-Disposition header is a requirement
             ContentDispositionHeaderValue contentDisposition = headers.ContentDisposition;
             if (contentDisposition != null)
             {
                 // If we have a file name then write contents out to temporary file. Otherwise just write to MemoryStream
                 if (!String.IsNullOrEmpty(contentDisposition.FileName))
                 {
-                    string localFilePath;
-                    try
-                    {
-                        string filename = GetLocalFileName(headers);
-                        localFilePath = Path.Combine(_rootPath, Path.GetFileName(filename));
-                    }
-                    catch (Exception e)
-                    {
-                        throw new InvalidOperationException(Properties.Resources.MultipartStreamProviderInvalidLocalFileName, e);
-                    }
+                    // We won't post process files as form data
+                    _isFormData.Add(false);
 
-                    // Add mapping from Content-Disposition FileName parameter to local file name.
-                    lock (_thisLock)
-                    {
-                        _bodyPartFileNames.Add(contentDisposition.FileName, localFilePath);
-                    }
-
-                    return File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous);
+                    return base.GetStream(parent, headers);
                 }
+
+                // We will post process this as form data
+                _isFormData.Add(true);
 
                 // If no filename parameter was found in the Content-Disposition header then return a memory stream.
                 return new MemoryStream();
             }
 
             // If no Content-Disposition header was present.
-            throw new IOException(RS.Format(Properties.Resources.MultipartFormDataStreamProviderNoContentDisposition, "Content-Disposition"));
+            throw Error.InvalidOperation(Properties.Resources.MultipartFormDataStreamProviderNoContentDisposition, "Content-Disposition");
         }
 
         /// <summary>
-        /// Gets the name of the local file which will be combined with the root path to
-        /// create an absolute file name where the contents of the current MIME body part
-        /// will be stored.
+        /// Read the non-file contents as form data.
         /// </summary>
-        /// <param name="headers">The headers for the current MIME body part.</param>
-        /// <returns>A relative filename with no path component.</returns>
-        public virtual string GetLocalFileName(HttpContentHeaders headers)
+        /// <returns></returns>
+        public override Task ExecutePostProcessingAsync()
         {
-            if (headers == null)
-            {
-                throw new ArgumentNullException("headers");
-            }
+            // Find instances of HttpContent for which we created a memory stream and read them asynchronously
+            // to get the string content and then add that as form data
+            IEnumerable<Task> readTasks = Contents.Where((content, index) => _isFormData[index] == true).Select(
+                formContent =>
+                {
+                    // Extract name from Content-Disposition header. We know from earlier that the header is present.
+                    ContentDispositionHeaderValue contentDisposition = formContent.Headers.ContentDisposition;
+                    string formFieldName = FormattingUtilities.UnquoteToken(contentDisposition.Name) ?? String.Empty;
 
-            return String.Format(CultureInfo.InvariantCulture, "BodyPart_{0}", Guid.NewGuid());
+                    // Read the contents as string data and add to form data
+                    return formContent.ReadAsStringAsync().Then(
+                        formFieldValue =>
+                        {
+                            FormData.Add(formFieldName, formFieldValue);
+                        });
+                });
+
+            // Actually execute the read tasks while trying to stay on the same thread
+            return TaskHelpers.Iterate(readTasks);
         }
     }
 }

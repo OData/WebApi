@@ -2,101 +2,78 @@
 
 using System.IO;
 using System.Linq;
-using Microsoft.TestCommon;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {
-    public class MultipartFormDataStreamProviderTests
+    public class MockMultipartFormDataStreamProvider : MultipartFormDataStreamProvider
     {
-        private const int MinBufferSize = 1;
-        private const int DefaultBufferSize = 0x1000;
+        public MockMultipartFormDataStreamProvider()
+            : base(Path.GetTempPath())
+        {
+        }
+
+        public MockMultipartFormDataStreamProvider(string rootPath)
+            : base(rootPath)
+        {
+        }
+
+        public MockMultipartFormDataStreamProvider(string rootPath, int bufferSize)
+            : base(rootPath, bufferSize)
+        {
+        }
+    }
+
+    public class MultipartFormDataStreamProviderTests : MultipartStreamProviderTestBase<MockMultipartFormDataStreamProvider>
+    {
+        private const int ValidBufferSize = 0x111;
         private const string ValidPath = @"c:\some\path";
 
         [Fact]
-        [Trait("Description", "MultipartFormDataStreamProvider is public, visible type.")]
-        public void TypeIsCorrect()
+        public void FormData_IsEmpty()
         {
-            Assert.Type.HasProperties(
-                typeof(MultipartFormDataStreamProvider),
-                TypeAssert.TypeProperties.IsPublicVisibleClass,
-                typeof(IMultipartStreamProvider));
+            MultipartFormDataStreamProvider provider = new MultipartFormDataStreamProvider(ValidPath, ValidBufferSize);
+            Assert.Empty(provider.FormData);
         }
 
         [Fact]
-        [Trait("Description", "MultipartFormDataStreamProvider ctor with invalid root paths.")]
-        public void ConstructorInvalidRootPath()
+        public void GetStream_ThrowsOnNoContentDisposition()
         {
-            Assert.ThrowsArgumentNull(() => { new MultipartFormDataStreamProvider(null); }, "rootPath");
+            MultipartFormDataStreamProvider provider = new MultipartFormDataStreamProvider(ValidPath);
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders headers = FormattingUtilities.CreateEmptyContentHeaders();
 
-            foreach (string path in TestData.NotSupportedFilePaths)
-            {
-                Assert.Throws<NotSupportedException>(() => new MultipartFormDataStreamProvider(path, DefaultBufferSize));
-            }
-
-            foreach (string path in TestData.InvalidNonNullFilePaths)
-            {
-                // Note: Path.GetFileName doesn't set the argument name when throwing.
-                Assert.ThrowsArgument(() => { new MultipartFormDataStreamProvider(path, DefaultBufferSize); }, null, allowDerivedExceptions: true);
-            }
+            Assert.Throws<InvalidOperationException>(() => { provider.GetStream(content, headers); });
         }
 
         [Fact]
-        [Trait("Description", "MultipartFormDataStreamProvider ctor with null path.")]
-        public void ConstructorInvalidBufferSize()
-        {
-            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new MultipartFileStreamProvider(ValidPath, MinBufferSize - 1),
-                "bufferSize", MinBufferSize.ToString(), MinBufferSize - 1);
-        }
-
-        [Fact]
-        [Trait("Description", "BodyPartFileNames empty.")]
-        public void EmptyBodyPartFileNames()
-        {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
-            Assert.NotNull(instance.BodyPartFileNames);
-            Assert.Equal(0, instance.BodyPartFileNames.Count);
-        }
-
-        [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) throws on null.")]
-        public void GetStreamThrowsOnNull()
-        {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
-            Assert.ThrowsArgumentNull(() => { instance.GetStream(null); }, "headers");
-        }
-
-        [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) throws on no Content-Disposition header.")]
-        public void GetStreamThrowsOnNoContentDisposition()
-        {
-            MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
-            HttpContent content = new StringContent("text");
-            Assert.Throws<IOException>(() => { instance.GetStream(content.Headers); }, RS.Format(Properties.Resources.MultipartFormDataStreamProviderNoContentDisposition, "Content-Disposition"));
-        }
-
-        [Fact]
-        [Trait("Description", "GetStream(HttpContentHeaders) validation.")]
-        public void GetStreamValidation()
+        public void GetStream()
         {
             Stream stream0 = null;
             Stream stream1 = null;
 
             try
             {
+                string tempPath = Path.GetTempPath();
                 MultipartFormDataContent content = new MultipartFormDataContent();
-                content.Add(new StringContent("Not a file"), "notafile");
-                content.Add(new StringContent("This is a file"), "file", "filename");
+                content.Add(new StringContent("Content 1"), "NoFile");
+                content.Add(new StringContent("Content 2"), "File", "Filename");
 
-                MultipartFormDataStreamProvider instance = new MultipartFormDataStreamProvider(Path.GetTempPath());
-                stream0 = instance.GetStream(content.ElementAt(0).Headers);
+                MultipartFormDataStreamProvider provider = new MultipartFormDataStreamProvider(tempPath);
+                stream0 = provider.GetStream(content, content.ElementAt(0).Headers);
+                stream1 = provider.GetStream(content, content.ElementAt(1).Headers);
+
                 Assert.IsType<MemoryStream>(stream0);
-                stream1 = instance.GetStream(content.ElementAt(1).Headers);
                 Assert.IsType<FileStream>(stream1);
 
-                Assert.Equal(1, instance.BodyPartFileNames.Count);
-                Assert.Contains("BodyPart", instance.BodyPartFileNames.Values.ElementAt(0));
+                Assert.Equal(1, provider.FileData.Count);
+                string partialFileName = String.Format("{0}BodyPart_", tempPath);
+                Assert.Contains(partialFileName, provider.FileData[0].LocalFileName);
+
+                Assert.Same(content.ElementAt(1).Headers.ContentDisposition, provider.FileData[0].Headers.ContentDisposition);
             }
             finally
             {
@@ -110,6 +87,47 @@ namespace System.Net.Http
                     stream1.Close();
                 }
             }
+        }
+
+        [Fact]
+        public Task PostProcessing_ProcessesFormData()
+        {
+            // Arrange
+            int maxContents = 16;
+            string contentFormat = "Content {0}";
+            string formNameFormat = "FormName_{0}";
+
+            MultipartFormDataContent multipartContent = new MultipartFormDataContent();
+
+            for (int index = 0; index < maxContents; index++)
+            {
+                string content = String.Format(contentFormat, index);
+                string formName = String.Format(formNameFormat, index);
+                multipartContent.Add(new StringContent(content), formName);
+            }
+
+            MultipartFormDataStreamProvider provider = new MultipartFormDataStreamProvider(ValidPath);
+            foreach (HttpContent content in multipartContent)
+            {
+                provider.Contents.Add(content);
+                provider.GetStream(multipartContent, content.Headers);
+            }
+
+            // Act
+            return provider.ExecutePostProcessingAsync().ContinueWith(
+                processingTask =>
+                {
+                    // Assert
+                    Assert.Equal(TaskStatus.RanToCompletion, processingTask.Status);
+                    Assert.Equal(maxContents, provider.FormData.Count);
+
+                    for (int index = 0; index < maxContents; index++)
+                    {
+                        string content = String.Format(contentFormat, index);
+                        string formName = String.Format(formNameFormat, index);
+                        Assert.Equal(content, provider.FormData[formName]);
+                    }
+                });
         }
     }
 }

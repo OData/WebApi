@@ -6,9 +6,7 @@ using System.Linq;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.TestCommon;
-using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 using FactAttribute = Microsoft.TestCommon.DefaultTimeoutFactAttribute;
@@ -18,6 +16,7 @@ namespace System.Net.Http
 {
     public class HttpContentMultipartExtensionsTests
     {
+        private const string ValidBoundary = "-A-";
         private const string DefaultContentType = "text/plain";
         private const string DefaultContentDisposition = "form-data";
         private const string ExceptionStreamProviderMessage = "Bad Stream Provider!";
@@ -25,14 +24,49 @@ namespace System.Net.Http
         private const string ExceptionAsyncStreamMessage = "Bad Async Stream!";
         private const string LongText = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
 
-        [Fact]
-        [Trait("Description", "HttpContentMultipartExtensionMethods is a public static class")]
-        public void TypeIsCorrect()
+        public static TheoryDataSet<string, bool, string, bool> IsMimeMultipartContentTestData
         {
-            Assert.Type.HasProperties(
-                typeof(HttpContentMultipartExtensions),
-                TypeAssert.TypeProperties.IsPublicVisibleClass |
-                TypeAssert.TypeProperties.IsStatic);
+            get
+            {
+                return new TheoryDataSet<string, bool, string, bool>
+                {
+                    { "text/plain", false, "plain", false },
+                    { "application/*", false, "related", false },
+                    { "*/*", false, "related", false },
+                    { "multipart/form-data", false, "form-data", false },
+                    { "multipart/form-data; boundary=1234", true, "related", false },
+                    { "multipart/form-data; boundary=1234; charset=utf-8", true, "form-data", true },
+                    { "multipart/form-data; boundary=1234; charset=utf-8", true, "form-data", true },
+                    { "Multipart/Related; boundary=example-1; start=\"<950120.aaCC@XIson.com>\"; type=\"Application/X-FixedRecord\"; start-info=\"-o ps\"", true, "related", true },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string> Boundaries
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                 {
+                    "1",
+                    "a",
+                    "'",
+                    "(",
+                    ")",
+                    "+",
+                    "_",
+                    "-",
+                    ".",
+                    "/",
+                    ":",
+                    "=",
+                    "?",
+                    "--",
+                    "--------------------01234567890123456789",
+                    "--------------------01234567890123456789--------------------",
+                    "--A--B--C--D--E--F--",
+                 };
+            }
         }
 
         private static HttpContent CreateContent(string boundary, params string[] bodyEntity)
@@ -80,252 +114,182 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_DetectsNonMultipartContent()
+        public void IsMimeMultipartContent_ThrowsOnNullContent()
         {
             Assert.ThrowsArgumentNull(() => HttpContentMultipartExtensions.IsMimeMultipartContent(null), "content");
-            Assert.ThrowsArgument(() => new ByteArrayContent(new byte[0]).ReadAsMultipartAsync().Result, "content");
-            Assert.ThrowsArgument(() => new StringContent(String.Empty).ReadAsMultipartAsync().Result, "content");
-            Assert.ThrowsArgument(() => new StringContent(String.Empty, Encoding.UTF8, "multipart/form-data").ReadAsMultipartAsync().Result, "content");
-        }
-
-        public static IEnumerable<object[]> Boundaries
-        {
-            get { return ParserData.Boundaries; }
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_NullStreamProviderThrows()
+        public void IsMimeMultipartContent_ThrowsOnNullSubType()
         {
-            HttpContent content = CreateContent("---");
-
-            Assert.ThrowsArgumentNull(() =>
-            {
-                content.ReadAsMultipartAsync(null);
-            }, "streamProvider");
+            StringContent content = new StringContent(String.Empty);
+            Assert.ThrowsArgumentNull(() => HttpContentMultipartExtensions.IsMimeMultipartContent(content, null), "subtype");
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
-        [Trait("Description", "ReadAsMultipartAsync(HttpContent, IMultipartStreamProvider, int) throws on buffersize.")]
-        public void ReadAsMultipartAsyncStreamProviderThrowsOnBufferSize(string boundary)
+        [PropertyData("IsMimeMultipartContentTestData")]
+        public void IsMimeMultipartContent_ReturnsCorrectValue(string mediaType, bool isMultipart, string subtype, bool hasSubtype)
         {
-            HttpContent content = CreateContent(boundary);
-            Assert.NotNull(content);
+            StringContent content = new StringContent(String.Empty);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
 
+            Assert.Equal(isMultipart, content.IsMimeMultipartContent());
+            Assert.Equal(hasSubtype, content.IsMimeMultipartContent(subtype));
+        }
+
+        [Fact]
+        public void ReadAsMultipartAsync_ThrowsOnNullStreamProvider()
+        {
+            HttpContent content = CreateContent(ValidBoundary);
+            Assert.ThrowsArgumentNull(() => content.ReadAsMultipartAsync((MultipartMemoryStreamProvider)null), "streamProvider");
+        }
+
+        [Fact]
+        public void ReadAsMultipartAsync_ThrowsOnInvalidBufferSize()
+        {
+            HttpContent content = CreateContent(ValidBoundary);
             Assert.ThrowsArgumentGreaterThanOrEqualTo(
-                () => content.ReadAsMultipartAsync(new MemoryStreamProvider(), ParserData.MinBufferSize - 1),
+                () => content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), ParserData.MinBufferSize - 1),
                 "bufferSize", ParserData.MinBufferSize.ToString(), ParserData.MinBufferSize - 1);
         }
 
-        [Fact]
-        [Trait("Description", "IsMimeMultipartContent(HttpContent) checks extension method arguments.")]
-        public void IsMimeMultipartContentVerifyArguments()
-        {
-            Assert.ThrowsArgumentNull(() =>
-            {
-                HttpContent content = null;
-                HttpContentMultipartExtensions.IsMimeMultipartContent(content);
-            }, "content");
-        }
-
-        [Fact]
-        public void IsMumeMultipartContentReturnsFalseForEmptyValues()
-        {
-            Assert.False(new ByteArrayContent(new byte[] { }).IsMimeMultipartContent(), "HttpContent should not be valid MIME multipart content");
-
-            Assert.False(new StringContent(String.Empty).IsMimeMultipartContent(), "HttpContent should not be valid MIME multipart content");
-
-            Assert.False(new StringContent(String.Empty, Encoding.UTF8, "multipart/form-data").IsMimeMultipartContent(), "HttpContent should not be valid MIME multipart content");
-        }
-
         [Theory]
-        [PropertyData("Boundaries")]
-        [Trait("Description", "IsMimeMultipartContent(HttpContent) responds correctly to MIME multipart and other content")]
-        public void IsMimeMultipartContent(string boundary)
+        [PropertyData("IsMimeMultipartContentTestData")]
+        public void ReadAsMultipartAsync_DetectsNonMultipartContent(string mediaType, bool isMultipart, string subtype, bool hasSubtype)
         {
-            HttpContent content = CreateContent(boundary);
-            Assert.NotNull(content);
-            Assert.True(content.IsMimeMultipartContent());
-        }
-
-        [Theory]
-        [PropertyData("Boundaries")]
-        [Trait("Description", "IsMimeMultipartContent(HttpContent, string) throws on null string.")]
-        public void IsMimeMultipartContentThrowsOnNullString(string boundary)
-        {
-            HttpContent content = CreateContent(boundary);
-            Assert.NotNull(content);
-            foreach (var subtype in CommonUnitTestDataSets.EmptyStrings)
+            StringContent content = new StringContent(String.Empty);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+            if (!isMultipart)
             {
-                Assert.ThrowsArgumentNull(() =>
-                    {
-                        content.IsMimeMultipartContent(subtype);
-                    }, "subtype");
+                Assert.ThrowsArgument(() => content.ReadAsMultipartAsync().Result, "content");
             }
         }
 
-        [Fact]
-        public void ReadAsMultipartAsync_SuccessfullyParsesContent()
+        [Theory]
+        [PropertyData("Boundaries")]
+        public void ReadAsMultipartAsync_ParsesContent(string boundary)
         {
             HttpContent successContent;
-            Task<IEnumerable<HttpContent>> task;
-            IEnumerable<HttpContent> result;
+            MultipartMemoryStreamProvider result;
 
-            successContent = CreateContent("boundary", "A", "B", "C");
-            task = successContent.ReadAsMultipartAsync();
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            result = task.Result;
-            Assert.Equal(3, result.Count());
+            successContent = CreateContent(boundary, "A", "B", "C");
+            result = successContent.ReadAsMultipartAsync().Result;
+            Assert.Equal(3, result.Contents.Count);
 
-            successContent = CreateContent("boundary", "A", "B", "C");
-            task = successContent.ReadAsMultipartAsync(new MemoryStreamProvider());
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            result = task.Result;
-            Assert.Equal(3, result.Count());
+            successContent = CreateContent(boundary, "A", "B", "C");
+            result = successContent.ReadAsMultipartAsync(new MultipartMemoryStreamProvider()).Result;
+            Assert.Equal(3, result.Contents.Count);
 
-            successContent = CreateContent("boundary", "A", "B", "C");
-            task = successContent.ReadAsMultipartAsync(new MemoryStreamProvider(), 1024);
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            result = task.Result;
-            Assert.Equal(3, result.Count());
+            successContent = CreateContent(boundary, "A", "B", "C");
+            result = successContent.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), 1024).Result;
+            Assert.Equal(3, result.Contents.Count);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_ParsesEmptyContentSuccessfully(string boundary)
+        public void ReadAsMultipartAsync_ParsesEmptyContent(string boundary)
         {
             HttpContent content = CreateContent(boundary);
-            Task<IEnumerable<HttpContent>> task = content.ReadAsMultipartAsync();
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            IEnumerable<HttpContent> result = task.Result;
-            Assert.Equal(0, result.Count());
+            MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
+            Assert.Empty(result.Contents);
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_WithBadStreamProvider_Throws()
+        public void ReadAsMultipartAsync_ThrowsOnBadStreamProvider()
         {
-            HttpContent content = CreateContent("--", "A", "B", "C");
-
-            var invalidOperationException = Assert.Throws<InvalidOperationException>(
-                () => content.ReadAsMultipartAsync(new BadStreamProvider()).Result,
-                "The stream provider of type 'BadStreamProvider' threw an exception."
-            );
-            Assert.NotNull(invalidOperationException.InnerException);
-            Assert.Equal(ExceptionStreamProviderMessage, invalidOperationException.InnerException.Message);
+            HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => content.ReadAsMultipartAsync(new BadStreamProvider()).Result);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal(ExceptionStreamProviderMessage, exception.InnerException.Message);
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_NullStreamProvider_Throws()
+        public void ReadAsMultipartAsync_ThrowsOnNullProvider()
         {
-            HttpContent content = CreateContent("--", "A", "B", "C");
-
-            Assert.Throws<InvalidOperationException>(
-                () => content.ReadAsMultipartAsync(new NullStreamProvider()).Result,
-                "The stream provider of type 'NullStreamProvider' returned null. It must return a writable 'Stream' instance."
-            );
+            HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
+            Assert.Throws<InvalidOperationException>(() => content.ReadAsMultipartAsync(new NullProvider()).Result);
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_ReadOnlyStream_Throws()
+        public void ReadAsMultipartAsync_ThrowsOnReadOnlyStream()
         {
-            HttpContent content = CreateContent("--", "A", "B", "C");
-
-            Assert.Throws<InvalidOperationException>(
-                () => content.ReadAsMultipartAsync(new ReadOnlyStreamProvider()).Result,
-                "The stream provider of type 'ReadOnlyStreamProvider' returned a read-only stream. It must return a writable 'Stream' instance."
-            );
+            HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
+            Assert.Throws<InvalidOperationException>(() => content.ReadAsMultipartAsync(new ReadOnlyStreamProvider()).Result);
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_PrematureEndOfStream_Throws()
+        public void ReadAsMultipartAsync_ThrowsOnPrematureEndOfStream()
         {
             HttpContent content = new StreamContent(Stream.Null);
-            var contentType = new MediaTypeHeaderValue("multipart/form-data");
-            contentType.Parameters.Add(new NameValueHeaderValue("boundary", "\"{--\""));
-            content.Headers.ContentType = contentType;
-
-            Assert.Throws<IOException>(
-                () => content.ReadAsMultipartAsync().Result,
-                "Unexpected end of MIME multipart stream. MIME multipart message is not complete."
-            );
+            string mediaType = String.Format("multipart/form-data; boundary=\"{0}\"", ValidBoundary);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+            Assert.Throws<IOException>(() => content.ReadAsMultipartAsync().Result);
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_ReadErrorOnStream_Throws()
+        public void ReadAsMultipartAsync_ThrowsOnReadError()
         {
             HttpContent content = new StreamContent(new ReadErrorStream());
-            var contentType = new MediaTypeHeaderValue("multipart/form-data");
-            contentType.Parameters.Add(new NameValueHeaderValue("boundary", "\"--\""));
-            content.Headers.ContentType = contentType;
-
-            var ioException = Assert.Throws<IOException>(
-                () => content.ReadAsMultipartAsync().Result,
-                "Error reading MIME multipart body part."
-            );
-            Assert.NotNull(ioException.InnerException);
-            Assert.Equal(ExceptionAsyncStreamMessage, ioException.InnerException.Message);
+            string mediaType = String.Format("multipart/form-data; boundary=\"{0}\"", ValidBoundary);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
+            IOException exception = Assert.Throws<IOException>(() => content.ReadAsMultipartAsync().Result);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal(ExceptionAsyncStreamMessage, exception.InnerException.Message);
         }
 
         [Fact]
-        public void ReadAsMultipartAsync_WriteErrorOnStream_Throws()
+        public void ReadAsMultipartAsync_ThrowsOnWriteError()
         {
-            HttpContent content = CreateContent("--", "A", "B", "C");
-
-            var ioException = Assert.Throws<IOException>(
-                () => content.ReadAsMultipartAsync(new WriteErrorStreamProvider()).Result,
-                "Error writing MIME multipart body part to output stream."
-            );
-            Assert.NotNull(ioException.InnerException);
-            Assert.Equal(ExceptionAsyncStreamMessage, ioException.InnerException.Message);
+            HttpContent content = CreateContent(ValidBoundary, "A", "B", "C");
+            IOException exception = Assert.Throws<IOException>(() => content.ReadAsMultipartAsync(new WriteErrorStreamProvider()).Result);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal(ExceptionAsyncStreamMessage, exception.InnerException.Message);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_SingleShortBodyPart_ParsesSuccessfully(string boundary)
+        public void ReadAsMultipartAsync_SingleShortBodyPart(string boundary)
         {
             HttpContent content = CreateContent(boundary, "A");
-            IEnumerable<HttpContent> result = content.ReadAsMultipartAsync().Result;
-            Assert.Equal(1, result.Count());
-            Assert.Equal("A", result.ElementAt(0).ReadAsStringAsync().Result);
-            ValidateContents(result);
+
+            MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
+            Assert.Equal(1, result.Contents.Count);
+            Assert.Equal("A", result.Contents[0].ReadAsStringAsync().Result);
+            ValidateContents(result.Contents);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_MultipleShortBodyParts_ParsesSuccessfully(string boundary)
+        public void ReadAsMultipartAsync_MultipleShortBodyParts(string boundary)
         {
             string[] text = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 
             HttpContent content = CreateContent(boundary, text);
-            IEnumerable<HttpContent> result = content.ReadAsMultipartAsync().Result;
-            Assert.Equal(text.Length, result.Count());
+            MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
+            Assert.Equal(text.Length, result.Contents.Count);
             for (var check = 0; check < text.Length; check++)
             {
-                Assert.Equal(text[check], result.ElementAt(check).ReadAsStringAsync().Result);
+                Assert.Equal(text[check], result.Contents[check].ReadAsStringAsync().Result);
             }
 
-            ValidateContents(result);
+            ValidateContents(result.Contents);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        [Trait("Description", "ReadAsMultipartAsync(HttpContent) parses with single long body asynchronously.")]
-        public void ReadAsMultipartAsyncSingleLongBodyPartAsync(string boundary)
+        public void ReadAsMultipartAsync_SingleLongBodyPart(string boundary)
         {
             HttpContent content = CreateContent(boundary, LongText);
-            Task<IEnumerable<HttpContent>> task = content.ReadAsMultipartAsync();
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            IEnumerable<HttpContent> result = task.Result;
-            Assert.Equal(1, result.Count());
-            Assert.Equal(LongText, result.ElementAt(0).ReadAsStringAsync().Result);
 
-            ValidateContents(result);
+            MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
+            Assert.Equal(1, result.Contents.Count);
+            Assert.Equal(LongText, result.Contents[0].ReadAsStringAsync().Result);
+            ValidateContents(result.Contents);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        [Trait("Description", "ReadAsMultipartAsync(HttpContent) parses with multiple long bodies asynchronously.")]
-        public void ReadAsMultipartAsyncMultipleLongBodyPartsAsync(string boundary)
+        public void ReadAsMultipartAsync_MultipleLongBodyParts(string boundary)
         {
             string[] text = new string[] { 
                 "A" + LongText + "A", 
@@ -356,22 +320,19 @@ namespace System.Net.Http
                 "Z" + LongText + "Z"};
 
             HttpContent content = CreateContent(boundary, text);
-            Task<IEnumerable<HttpContent>> task = content.ReadAsMultipartAsync(new MemoryStreamProvider(), ParserData.MinBufferSize);
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            IEnumerable<HttpContent> result = task.Result;
-            Assert.Equal(text.Length, result.Count());
+            MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), ParserData.MinBufferSize).Result;
+            Assert.Equal(text.Length, result.Contents.Count);
             for (var check = 0; check < text.Length; check++)
             {
-                Assert.Equal(text[check], result.ElementAt(check).ReadAsStringAsync().Result);
+                Assert.Equal(text[check], result.Contents[check].ReadAsStringAsync().Result);
             }
 
-            ValidateContents(result);
+            ValidateContents(result.Contents);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        [Trait("Description", "ReadAsMultipartAsync(HttpContent) parses content generated by MultipartContent asynchronously.")]
-        public void ReadAsMultipartAsyncUsingMultipartContentAsync(string boundary)
+        public void ReadAsMultipartAsync_UsingMultipartContent(string boundary)
         {
             MultipartContent content = new MultipartContent("mixed", boundary);
             content.Add(new StringContent("A"));
@@ -385,19 +346,16 @@ namespace System.Net.Http
             var byteContent = new ByteArrayContent(data);
             byteContent.Headers.ContentType = content.Headers.ContentType;
 
-            Task<IEnumerable<HttpContent>> task = byteContent.ReadAsMultipartAsync();
-            task.Wait(TimeoutConstant.DefaultTimeout);
-            IEnumerable<HttpContent> result = task.Result;
-            Assert.Equal(3, result.Count());
-            Assert.Equal("A", result.ElementAt(0).ReadAsStringAsync().Result);
-            Assert.Equal("B", result.ElementAt(1).ReadAsStringAsync().Result);
-            Assert.Equal("C", result.ElementAt(2).ReadAsStringAsync().Result);
+            MultipartMemoryStreamProvider result = byteContent.ReadAsMultipartAsync().Result;
+            Assert.Equal(3, result.Contents.Count);
+            Assert.Equal("A", result.Contents[0].ReadAsStringAsync().Result);
+            Assert.Equal("B", result.Contents[1].ReadAsStringAsync().Result);
+            Assert.Equal("C", result.Contents[2].ReadAsStringAsync().Result);
         }
 
         [Theory]
         [PropertyData("Boundaries")]
-        [Trait("Description", "ReadAsMultipartAsync(HttpContent) parses nested content generated by MultipartContent asynchronously.")]
-        public void ReadAsMultipartAsyncNestedMultipartContentAsync(string boundary)
+        public void ReadAsMultipartAsync_NestedMultipartContent(string boundary)
         {
             const int nesting = 10;
             const string innerText = "Content";
@@ -421,11 +379,9 @@ namespace System.Net.Http
 
             for (var cnt = 0; cnt < nesting + 1; cnt++)
             {
-                Task<IEnumerable<HttpContent>> task = content.ReadAsMultipartAsync();
-                task.Wait(TimeoutConstant.DefaultTimeout);
-                IEnumerable<HttpContent> result = task.Result;
-                Assert.Equal(1, result.Count());
-                content = result.ElementAt(0);
+                MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
+                Assert.Equal(1, result.Contents.Count);
+                content = result.Contents[0];
                 Assert.NotNull(content);
             }
 
@@ -470,41 +426,33 @@ namespace System.Net.Http
             }
         }
 
-        public class MemoryStreamProvider : IMultipartStreamProvider
+        public class BadStreamProvider : MultipartStreamProvider
         {
-            public Stream GetStream(HttpContentHeaders headers)
-            {
-                return new MemoryStream();
-            }
-        }
-
-        public class BadStreamProvider : IMultipartStreamProvider
-        {
-            public Stream GetStream(HttpContentHeaders headers)
+            public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
             {
                 throw new Exception(ExceptionStreamProviderMessage);
             }
         }
 
-        public class NullStreamProvider : IMultipartStreamProvider
+        public class NullProvider : MultipartStreamProvider
         {
-            public Stream GetStream(HttpContentHeaders headers)
+            public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
             {
                 return null;
             }
         }
 
-        public class ReadOnlyStreamProvider : IMultipartStreamProvider
+        public class ReadOnlyStreamProvider : MultipartStreamProvider
         {
-            public Stream GetStream(HttpContentHeaders headers)
+            public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
             {
                 return new ReadOnlyStream();
             }
         }
 
-        public class WriteErrorStreamProvider : IMultipartStreamProvider
+        public class WriteErrorStreamProvider : MultipartStreamProvider
         {
-            public Stream GetStream(HttpContentHeaders headers)
+            public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
             {
                 return new WriteErrorStream();
             }

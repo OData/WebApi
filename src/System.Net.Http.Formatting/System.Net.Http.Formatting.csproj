@@ -78,6 +78,9 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\UriQueryUtility.cs">
+      <Link>Common\UriQueryUtility.cs</Link>
+    </Compile>
     <Compile Include="..\RS.cs">
       <Link>RS.cs</Link>
     </Compile>
@@ -85,7 +88,16 @@
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
+    <Compile Include="MultipartRelatedStreamProvider.cs" />
+    <Compile Include="MultipartFileData.cs" />
+    <Compile Include="MultipartStreamProvider.cs" />
+    <Compile Include="PushStreamContent.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueExtensions.cs" />
+    <Compile Include="Handlers\HttpProgressEventArgs.cs" />
+    <Compile Include="Handlers\ProgressContent.cs" />
+    <Compile Include="Handlers\ProgressMessageHandler.cs" />
+    <Compile Include="Handlers\ProgressStream.cs" />
+    <Compile Include="Handlers\ProgressWriteAsyncResult.cs" />
     <Compile Include="HttpResponseHeadersExtensions.cs" />
     <Compile Include="HttpRequestHeadersExtensions.cs" />
     <Compile Include="Formatting\StringWithQualityHeaderValueComparer.cs" />
@@ -99,6 +111,7 @@
     <Compile Include="Headers\CookieState.cs" />
     <Compile Include="HttpClientExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
+    <Compile Include="Internal\AsyncResult.cs" />
     <Compile Include="Internal\HttpValueCollection.cs" />
     <Compile Include="Internal\NonClosingDelegatingStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -132,7 +145,6 @@
     <Compile Include="Formatting\XHRRequestHeaderMapping.cs" />
     <Compile Include="Formatting\XmlMediaTypeFormatter.cs" />
     <Compile Include="Formatting\Parsers\FormUrlEncodedParser.cs" />
-    <Compile Include="HttpContentCollectionExtensions.cs" />
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="HttpContentMessageExtensions.cs" />
     <Compile Include="HttpContentMultipartExtensions.cs" />
@@ -145,7 +157,6 @@
     <Compile Include="HttpUnsortedHeaders.cs" />
     <Compile Include="HttpUnsortedRequest.cs" />
     <Compile Include="HttpUnsortedResponse.cs" />
-    <Compile Include="IMultipartStreamProvider.cs" />
     <Compile Include="Internal\AsyncResultWithExtraData.cs" />
     <Compile Include="Internal\DelegatingStream.cs" />
     <Compile Include="Formatting\Parsers\InternetMessageFormatHeaderParser.cs" />
@@ -158,7 +169,6 @@
     <Compile Include="ObjectContent.cs" />
     <Compile Include="Formatting\Parsers\ParserState.cs" />
     <Compile Include="UriExtensions.cs" />
-    <Compile Include="Internal\UriQueryUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Common\CommonWebApiResources.Designer.cs">

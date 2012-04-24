@@ -15,13 +15,12 @@ namespace System.Web.Http.ModelBinding
     /// <summary>
     /// Describes a parameter that gets bound via ModelBinding.  
     /// </summary>
-    public class ModelBinderParameterBinding : HttpParameterBinding
+    public class ModelBinderParameterBinding : HttpParameterBinding, IValueProviderParameterBinding
     {
-        private readonly ValueProviderFactory[] _valueProviderFactories;        
+        private readonly ValueProviderFactory[] _valueProviderFactories;
         private readonly IModelBinder _binder;
 
         // Cache information for ModelBindingContext.
-        private ModelMetadata _metadataCache;
         private ModelValidationNode _validationNodeCache;
 
         public ModelBinderParameterBinding(HttpParameterDescriptor descriptor,
@@ -39,9 +38,9 @@ namespace System.Web.Http.ModelBinding
             }
 
             _binder = modelBinder;
-            _valueProviderFactories = valueProviderFactories.ToArray();            
+            _valueProviderFactories = valueProviderFactories.ToArray();
         }
-        
+
         public IEnumerable<ValueProviderFactory> ValueProviderFactories
         {
             get { return _valueProviderFactories; }
@@ -72,22 +71,17 @@ namespace System.Web.Http.ModelBinding
 
             string prefix = Descriptor.Prefix;
 
-            IValueProvider vp = CreateValueProvider(this._valueProviderFactories, actionContext);
-
-            if (_metadataCache == null)
-            {
-                Interlocked.Exchange(ref _metadataCache, metadataProvider.GetMetadataForType(null, type));
-            }
+            IValueProvider vp = CompositeValueProviderFactory.GetValueProvider(actionContext, _valueProviderFactories);
 
             ModelBindingContext ctx = new ModelBindingContext()
             {
                 ModelName = prefix ?? name,
                 FallbackToEmptyPrefix = prefix == null, // only fall back if prefix not specified
-                ModelMetadata = _metadataCache,
+                ModelMetadata = metadataProvider.GetMetadataForType(null, type),
                 ModelState = actionContext.ModelState,
                 ValueProvider = vp
             };
-            
+
             if (_validationNodeCache == null)
             {
                 Interlocked.Exchange(ref _validationNodeCache, ctx.ValidationNode);
@@ -98,18 +92,6 @@ namespace System.Web.Http.ModelBinding
             }
 
             return ctx;
-        }
-
-        // Instantiate the value providers for the given action context.
-        private static IValueProvider CreateValueProvider(ValueProviderFactory[] factories, HttpActionContext actionContext)
-        {
-            if (factories.Length == 1)
-            {
-                return factories[0].GetValueProvider(actionContext);
-            }
-
-            IValueProvider[] providers = Array.ConvertAll(factories, f => f.GetValueProvider(actionContext));            
-            return new CompositeValueProvider(providers);
         }
     }
 }

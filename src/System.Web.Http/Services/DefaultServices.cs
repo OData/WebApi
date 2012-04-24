@@ -11,6 +11,7 @@ using System.Web.Http.Dependencies;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
@@ -39,6 +40,7 @@ namespace System.Web.Http.Services
     ///         <item><see cref="IContentNegotiator"/></item>
     ///         <item><see cref="IDocumentationProvider"/></item>
     ///         <item><see cref="IFilterProvider"/></item>
+    ///         <item><see cref="IHostBufferPolicySelector"/></item>
     ///         <item><see cref="IHttpActionInvoker"/></item>
     ///         <item><see cref="IHttpActionSelector"/></item>
     ///         <item><see cref="IHttpControllerActivator"/></item>
@@ -98,6 +100,7 @@ namespace System.Web.Http.Services
                                                               new ConfigurationFilterProvider(),
                                                               new ActionDescriptorFilterProvider()
                                                           });
+            _defaultServices.Add(typeof(IHostBufferPolicySelector), new List<object>());
             _defaultServices.Add(typeof(IHttpActionInvoker), new List<object> { new ApiControllerActionInvoker() });
             _defaultServices.Add(typeof(IHttpActionSelector), new List<object> { new ApiControllerActionSelector() });
             _defaultServices.Add(typeof(IHttpControllerActivator), new List<object> { new DefaultHttpControllerActivator() });

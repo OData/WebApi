@@ -80,7 +80,7 @@ namespace System.Web.Http.Controllers
             get
             {
                 ModelBinderAttribute attribute = ModelBinderAttribute;
-                return attribute != null && !String.IsNullOrEmpty(attribute.Name)
+                return attribute != null
                            ? attribute.Name
                            : null;
             }

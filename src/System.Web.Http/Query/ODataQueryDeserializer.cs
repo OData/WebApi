@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Web.Http.Internal;
+using System.Net.Http;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Query
@@ -185,7 +185,7 @@ namespace System.Web.Http.Query
                 throw Error.ArgumentNull("uri");
             }
 
-            NameValueCollection queryPartCollection = UriQueryUtility.ParseQueryString(uri.Query);
+            NameValueCollection queryPartCollection = uri.ParseQueryString();
 
             List<ServiceQueryPart> serviceQueryParts = new List<ServiceQueryPart>();
             foreach (string queryPart in queryPartCollection)

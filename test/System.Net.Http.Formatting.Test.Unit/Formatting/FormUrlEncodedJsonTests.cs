@@ -25,8 +25,8 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void ParseThrowsInvalidMaxDepth()
         {
-            Assert.ThrowsArgumentGreaterThan(() => FormUrlEncodedJson.Parse(CreateQuery(), -1), "maxDepth", "0", -1);
-            Assert.ThrowsArgumentGreaterThan(() => FormUrlEncodedJson.Parse(CreateQuery(), 0), "maxDepth", "0", 0);
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => FormUrlEncodedJson.Parse(CreateQuery(), -1), "maxDepth", "1", -1);
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => FormUrlEncodedJson.Parse(CreateQuery(), 0), "maxDepth", "1", 0);
         }
 
         [Fact]
@@ -51,8 +51,8 @@ namespace System.Net.Http.Formatting
         public void TryParseThrowsInvalidMaxDepth()
         {
             JObject value;
-            Assert.ThrowsArgumentGreaterThan(() => FormUrlEncodedJson.TryParse(CreateQuery(), -1, out value), "maxDepth", "0", -1);
-            Assert.ThrowsArgumentGreaterThan(() => FormUrlEncodedJson.TryParse(CreateQuery(), 0, out value), "maxDepth", "0", 0);
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => FormUrlEncodedJson.TryParse(CreateQuery(), -1, out value), "maxDepth", "1", -1);
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => FormUrlEncodedJson.TryParse(CreateQuery(), 0, out value), "maxDepth", "1", 0);
         }
 
         [Fact]

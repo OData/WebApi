@@ -3,8 +3,8 @@
 using System.Collections.Generic;
 using System.Json;
 using System.Net.Http.Formatting.Parsers;
-using System.Net.Http.Internal;
 using System.Text;
+using System.Web.Http;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;

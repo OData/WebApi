@@ -51,7 +51,20 @@ namespace System.Web.Http.ModelBinding
 
         protected virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
         {
-            return request.Content.ReadAsAsync(type, formatters, formatterLogger);
+            HttpContent content = request.Content;
+            if (content == null)
+            {
+                object defaultValue = MediaTypeFormatter.GetDefaultValueForType(type);
+                if (defaultValue == null)
+                {
+                    return TaskHelpers.NullResult();
+                }
+                else
+                {
+                    return TaskHelpers.FromResult(defaultValue);
+                }
+            }
+            return content.ReadAsAsync(type, formatters, formatterLogger);
         }
 
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)

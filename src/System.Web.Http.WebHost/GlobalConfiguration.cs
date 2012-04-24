@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.Dispatcher;
+using System.Web.Http.Hosting;
 using System.Web.Http.WebHost;
 using System.Web.Http.WebHost.Routing;
 using System.Web.Routing;
@@ -18,6 +19,7 @@ namespace System.Web.Http
                 HttpConfiguration config = new HttpConfiguration(new HostedHttpRouteCollection(RouteTable.Routes));
                 config.Services.Replace(typeof(IAssembliesResolver), new WebHostAssembliesResolver());
                 config.Services.Replace(typeof(IHttpControllerTypeResolver), new WebHostHttpControllerTypeResolver());
+                config.Services.Replace(typeof(IHostBufferPolicySelector), new WebHostBufferPolicySelector());
                 return config;
             });
 

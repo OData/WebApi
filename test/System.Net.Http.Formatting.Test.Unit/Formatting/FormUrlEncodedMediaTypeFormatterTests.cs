@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Linq;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
 using System.Text;
@@ -23,6 +24,32 @@ namespace System.Net.Http.Formatting
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(FormUrlEncodedMediaTypeFormatter), TypeAssert.TypeProperties.IsPublicVisibleClass);
+        }
+
+        [Fact]
+        public void SupportedMediaTypes_HeaderValuesAreNotSharedBetweenInstances()
+        {
+            var formatter1 = new FormUrlEncodedMediaTypeFormatter();
+            var formatter2 = new FormUrlEncodedMediaTypeFormatter();
+
+            foreach (MediaTypeHeaderValue mediaType1 in formatter1.SupportedMediaTypes)
+            {
+                MediaTypeHeaderValue mediaType2 = formatter2.SupportedMediaTypes.Single(m => m.Equals(mediaType1));
+                Assert.NotSame(mediaType1, mediaType2);
+            }
+        }
+
+        [Fact]
+        public void SupportEncodings_ValuesAreNotSharedBetweenInstances()
+        {
+            var formatter1 = new FormUrlEncodedMediaTypeFormatter();
+            var formatter2 = new FormUrlEncodedMediaTypeFormatter();
+
+            foreach (Encoding encoding1 in formatter1.SupportedEncodings)
+            {
+                Encoding encoding2 = formatter2.SupportedEncodings.Single(e => e.Equals(encoding1));
+                Assert.NotSame(encoding1, encoding2);
+            }
         }
 
         [Theory]

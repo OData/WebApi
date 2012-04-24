@@ -11,7 +11,9 @@ namespace System.Threading.Tasks
     /// </summary>
     internal static class TaskHelpers
     {
-        private static Task _defaultCompleted = FromResult<AsyncVoid>(default(AsyncVoid));
+        private static readonly Task _defaultCompleted = FromResult<AsyncVoid>(default(AsyncVoid));
+
+        private static readonly Task<object> _completedTaskReturningNull = FromResult<object>(null);
 
         /// <summary>
         /// Returns a canceled Task. The task is completed, IsCanceled = True, IsFaulted = False.
@@ -82,6 +84,11 @@ namespace System.Threading.Tasks
             TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
             tcs.SetResult(result);
             return tcs.Task;
+        }
+
+        internal static Task<object> NullResult()
+        {
+            return _completedTaskReturningNull;
         }
 
         /// <summary>

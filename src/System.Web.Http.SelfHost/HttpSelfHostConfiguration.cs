@@ -27,6 +27,9 @@ namespace System.Web.Http.SelfHost
         private const int MinBufferSize = 1;
         private const int MinReceivedMessageSize = 1;
 
+        private static readonly TimeSpan DefaultReceiveTimeout = new TimeSpan(0, 10, 0);
+        private static readonly TimeSpan DefaultSendTimeout = new TimeSpan(0, 1, 0);
+
         private Uri _baseAddress;
         private int _maxConcurrentRequests;
         private ServiceCredentials _credentials = new ServiceCredentials();
@@ -35,6 +38,8 @@ namespace System.Web.Http.SelfHost
         private int _maxBufferSize = DefaultMaxBufferSize;
         private bool _maxBufferSizeIsInitialized;
         private long _maxReceivedMessageSize = DefaultReceivedMessageSize;
+        private TimeSpan _receiveTimeout = DefaultReceiveTimeout;
+        private TimeSpan _sendTimeout = DefaultSendTimeout;
         private HostNameComparisonMode _hostNameComparisonMode;
 
         /// <summary>
@@ -86,7 +91,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinConcurrentRequests)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinConcurrentRequests);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinConcurrentRequests);
                 }
                 _maxConcurrentRequests = value;
             }
@@ -150,7 +155,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinBufferSize)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinBufferSize);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinBufferSize);
                 }
                 _maxBufferSizeIsInitialized = true;
                 _maxBufferSize = value;
@@ -171,9 +176,51 @@ namespace System.Web.Http.SelfHost
             {
                 if (value < MinReceivedMessageSize)
                 {
-                    throw Error.ArgumentGreaterThanOrEqualTo("value", value, MinReceivedMessageSize);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinReceivedMessageSize);
                 }
                 _maxReceivedMessageSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the interval of time that a connection can remain inactive, during which no application messages are received, before it is dropped.
+        /// </summary>
+        /// <value>
+        /// The interval of time that a connection can remain inactive, during which no application messages are received, before it is dropped.
+        /// </value>
+        public TimeSpan ReceiveTimeout
+        {
+            get { return _receiveTimeout; }
+
+            set
+            {
+                if (value < TimeSpan.Zero)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, TimeSpan.Zero);
+                }
+
+                _receiveTimeout = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the interval of time provided for a write operation to complete before the transport raises an exception.
+        /// </summary>
+        /// <value>
+        /// The interval of time provided for a write operation to complete before the transport raises an exception.
+        /// </value>
+        public TimeSpan SendTimeout
+        {
+            get { return _sendTimeout; }
+
+            set
+            {
+                if (value < TimeSpan.Zero)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, TimeSpan.Zero);
+                }
+
+                _sendTimeout = value;
             }
         }
 
@@ -237,6 +284,8 @@ namespace System.Web.Http.SelfHost
             httpBinding.MaxReceivedMessageSize = MaxReceivedMessageSize;
             httpBinding.TransferMode = TransferMode;
             httpBinding.HostNameComparisonMode = HostNameComparisonMode;
+            httpBinding.ReceiveTimeout = ReceiveTimeout;
+            httpBinding.SendTimeout = SendTimeout;
 
             if (_baseAddress.Scheme == Uri.UriSchemeHttps)
             {
@@ -333,7 +382,7 @@ namespace System.Web.Http.SelfHost
             Contract.Assert(value > 0);
             try
             {
-                return Environment.ProcessorCount * value;
+                return Math.Max(Environment.ProcessorCount * value, value);
             }
             catch
             {

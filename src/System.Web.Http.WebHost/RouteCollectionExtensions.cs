@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Web.Http.WebHost;
 using System.Web.Http.WebHost.Routing;
@@ -56,13 +57,24 @@ namespace System.Web.Http
 
             HttpWebRoute route = new HttpWebRoute(routeTemplate, HttpControllerRouteHandler.Instance)
             {
-                Defaults = new RouteValueDictionary(defaults),
-                Constraints = new RouteValueDictionary(constraints),
+                Defaults = CreateRouteValueDictionary(defaults),
+                Constraints = CreateRouteValueDictionary(constraints),
                 DataTokens = new RouteValueDictionary()
             };
 
             routes.Add(name, route);
             return route;
+        }
+
+        private static RouteValueDictionary CreateRouteValueDictionary(object values)
+        {
+            var dictionary = values as IDictionary<string, object>;
+            if (dictionary != null)
+            {
+                return new RouteValueDictionary(dictionary);
+            }
+
+            return new RouteValueDictionary(values);
         }
     }
 }

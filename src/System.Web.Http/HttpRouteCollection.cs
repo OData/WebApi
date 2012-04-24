@@ -263,6 +263,12 @@ namespace System.Web.Http
 
         internal static IDictionary<string, object> GetTypeProperties(object instance)
         {
+            IDictionary<string, object> instanceAsDictionary = instance as IDictionary<string, object>;
+            if (instanceAsDictionary != null)
+            {
+                return new Dictionary<string, object>(instanceAsDictionary);
+            }
+
             Dictionary<string, object> result = new Dictionary<string, object>();
             if (instance != null)
             {

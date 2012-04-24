@@ -40,6 +40,20 @@ namespace System.Web.Http.ModelBinding
             AssertIsModelBound(binding, 0);
         }
 
+        [Fact]
+        public void Check_Config_Override_Use_Formatters()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.ParameterBindingProviders.Add(param => param.BindWithFormatter()); // overrides
+
+            DefaultActionValueBinder binder = new DefaultActionValueBinder();
+
+            var binding = binder.GetBinding(GetAction("Action_Int", config));
+
+            Assert.Equal(1, binding.ParameterBindings.Length);
+            AssertIsBody(binding, 0);
+        }
+
         private void Action_Int_FromUri([FromUri] int id) { }
 
         [Fact]
@@ -189,6 +203,20 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal(1, binding.ParameterBindings.Length);
             AssertIsBody(binding, 0);            
         }
+        
+        [Fact]
+        public void Check_Config_Override_Use_ModelBinding()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.ParameterBindingProviders.Add(param => param.BindWithModelBinding());
+            DefaultActionValueBinder binder = new DefaultActionValueBinder();
+
+            var binding = binder.GetBinding(GetAction("Action_Complex_Type", config));
+
+            Assert.Equal(1, binding.ParameterBindings.Length);
+            AssertIsModelBound(binding, 0);            
+        }
+
 
         private void Action_Complex_ValueType(ComplexValueType complex) { }
 

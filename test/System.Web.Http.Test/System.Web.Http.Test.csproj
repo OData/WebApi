@@ -77,6 +77,7 @@
     <Compile Include="Common\TaskHelpersTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
+    <Compile Include="Controllers\ParameterBindingExtensionsTest.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />
     <Compile Include="Controllers\ValueResultConverterTest.cs" />
     <Compile Include="Controllers\HttpActionDescriptorTest.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs" />
+    <Compile Include="ModelBinding\ParameterBindingProvidersTest.cs" />
     <Compile Include="QueryableAttributeTest.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolverTest.cs" />
     <Compile Include="Controllers\ApiControllerActionInvokerTest.cs" />

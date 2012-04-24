@@ -77,27 +77,22 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
-        private HttpParameterBinding MakeBodyBinding(HttpParameterDescriptor parameter)
-        {
-            HttpActionDescriptor actionDescriptor = parameter.ActionDescriptor;
-            return new FormatterParameterBinding(parameter, GetFormatters(actionDescriptor), GetBodyModelValidator(actionDescriptor));
-        }
-
         // Determine how a single parameter will get bound. 
         // This is all sync. We don't need to actually read the body just to determine that we'll bind to the body.         
         protected virtual HttpParameterBinding GetParameterBinding(HttpParameterDescriptor parameter)
         {
+            // Attribute has the highest precedence
             // Look at Parameter attributes?
             // [FromBody] - we use Formatter.
             bool hasFromBody = parameter.GetCustomAttributes<FromBodyAttribute>().Any();
             ModelBinderAttribute attr = parameter.ModelBinderAttribute;
-                        
+
             if (hasFromBody)
             {
                 if (attr != null)
                 {
                     string message = Error.Format(SRResources.ParameterBindingConflictingAttributes, parameter.ParameterName);
-                    return new ErrorParameterBinding(parameter, message);
+                    return parameter.BindAsError(message);
                 }
 
                 return MakeBodyBinding(parameter); // It's from the body. Uses a formatter. 
@@ -106,45 +101,54 @@ namespace System.Web.Http.ModelBinding
             // Presence of a model binder attribute overrides.
             if (attr != null)
             {
-                return GetBinding(parameter, attr);
+                return parameter.BindWithModelBinding(attr);
             }
-            
-            // No attribute, key off type
+
+            // No attribute, so lookup in global map.
+            HttpConfiguration config = parameter.Configuration;
+            ParameterBindingProviders pb = config.ParameterBindingProviders;
+            if (pb != null)
+            {
+                HttpParameterBinding binding = pb.LookupBinding(parameter);
+                if (binding != null)
+                {
+                    return binding;
+                }
+            }
+
+            // Not explicitly specified in global map or attribute.
+            // Use a default policy to determine it. These are catch-all policies. 
+
             Type type = parameter.ParameterType;
             if (TypeHelper.IsSimpleUnderlyingType(type) || TypeHelper.HasStringConverter(type))
             {
-                attr = new ModelBinderAttribute(); // use default settings
-                return GetBinding(parameter, attr);
-            }
-
-            // Handle special types
-            if (type == typeof(CancellationToken))
-            {
-                return new CancellationTokenParameterBinding(parameter);
-            }
-            if (type == typeof(HttpRequestMessage))
-            {
-                return new HttpRequestParameterBinding(parameter);
-            }
-            if (typeof(HttpContent).IsAssignableFrom(type))
-            {
-                string message = Error.Format(SRResources.ParameterBindingIllegalType, type.Name, parameter.ParameterName);
-                return new ErrorParameterBinding(parameter, message);
-            }            
+                return parameter.BindWithModelBinding(); // use default settings
+            }                        
 
             // Fallback. Must be a complex type. Default is to look in body.             
-            return MakeBodyBinding(parameter);
+            return MakeBodyBinding(parameter);            
         }
 
-        private static HttpParameterBinding GetBinding(HttpParameterDescriptor parameter, ModelBinderAttribute attr)
+        private HttpParameterBinding MakeBodyBinding(HttpParameterDescriptor parameter)
         {
-            HttpConfiguration config = parameter.Configuration;
+            HttpActionDescriptor actionDescriptor = parameter.ActionDescriptor;
+            return parameter.BindWithFormatter(GetFormatters(actionDescriptor), GetBodyModelValidator(actionDescriptor));
+        }
 
-            IModelBinder binder = attr.GetModelBinder(config, parameter.ParameterType);
+        // Create an instance and add some default binders
+        internal static ParameterBindingProviders GetDefaultParameterBinders()
+        {
+            ParameterBindingProviders pb = new ParameterBindingProviders();
 
-            return new ModelBinderParameterBinding(parameter,
-                binder,
-                attr.GetValueProviderFactories(config));
+            pb.Add(typeof(CancellationToken), parameter => new CancellationTokenParameterBinding(parameter));
+            pb.Add(typeof(HttpRequestMessage), parameter => new HttpRequestParameterBinding(parameter));
+
+            // Warning binder for HttpContent. 
+            pb.Add(parameter => typeof(HttpContent).IsAssignableFrom(parameter.ParameterType) ?                    
+                                    parameter.BindAsError(Error.Format(SRResources.ParameterBindingIllegalType, parameter.ParameterType.Name, parameter.ParameterName))
+                                    : null);
+
+            return pb;
         }
     }
 }

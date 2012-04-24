@@ -192,7 +192,7 @@
 
         commitChanges: function (options, success, error) {
             /// <summary>
-            /// Initiates an asynchronous commit of any model data edits collected by this DataContext.
+            /// Initiates an asynchronous commit of any model data changes collected by this DataContext.
             /// </summary>
             /// <param name="success" type="Function" optional="true">
             /// &#10;A success callback.
@@ -211,7 +211,7 @@
 
         revertChanges: function () {
             /// <summary>
-            /// Reverts any edits to model data (to entities) back to original entity values.
+            /// Reverts any changes to model data (to entities) back to original entity values.
             /// </summary>
             /// <returns type="upshot.DataContext"/>
 
@@ -233,20 +233,10 @@
             includedEntities = includedEntities || {};
 
             $.each(entities, function (unused, entity) {
-                // apply type info to the entity instances
-                // TODO: Do we want this to go through the compatibility layer?
-                obs.setProperty(entity, "__type", type);
-
                 self.__flatten(entity, type, includedEntities);
             });
 
             $.each(includedEntities, function (type, entities) {
-                $.each(entities, function (unused, entity) {
-                    // apply type info to the entity instances
-                    // TODO: Do we want this to go through the compatibility layer?
-                    obs.setProperty(entity, "__type", type);
-                });
-
                 var entitySet = self.getEntitySet(type);
                 entitySet.__loadEntities(entities);
             });
@@ -310,6 +300,10 @@
             var dataProvider = this._dataProvider,
                 self = this,
                 onSuccess = function (result) {
+                    if (self._isDisposed()) {
+                        return;
+                    }
+
                     // add metadata if specified
                     if (result.metadata) {
                         upshot.metadata(result.metadata);
@@ -339,7 +333,9 @@
                     success.call(self, self.getEntitySet(entityType), mergedEntities, result.totalCount);
                 },
                 onError = function (httpStatus, errorText, context) {
-                    error.call(self, httpStatus, errorText, context);
+                    if (!self._isDisposed()) {
+                        error.call(self, httpStatus, errorText, context);
+                    }
                 };
 
             var getParameters = getProviderParameters("get", options.providerParameters);
@@ -357,14 +353,20 @@
 
                     var self = this;
                     setTimeout(function () {
-                        self._implicitCommitQueued = false;
-                        self._implicitCommitHandler();
+                        if (!self._isDisposed()) {
+                            self._implicitCommitQueued = false;
+                            self._implicitCommitHandler();
+                        }
                     }, 0);
                 }
             }
         },
 
         // Private methods
+
+        _isDisposed: function () {
+            return this._entitySets === null;
+        },
 
         _trigger: function (eventType) {
             var list = this._eventCallbacks[eventType];
@@ -379,50 +381,44 @@
             return this;
         },
 
-        _submitChanges: function (options, editedEntities, success, error) {
+        _submitChanges: function (options, changedEntities, success, error) {
 
             this._trigger("commitStart");
 
-            var edits = $.map(editedEntities, function (editedEntity) {
-                return editedEntity.entitySet.__getEntityEdit(editedEntity.entity);
+            var changes = $.map(changedEntities, function (changedEntity) {
+                return changedEntity.entitySet.__getEntityChange(changedEntity.entity);
             });
 
-            $.each(edits, function (index, edit) { edit.updateEntityState(); });
+            $.each(changes, function (index, change) { change.updateEntityState(); });
 
             var self = this;
-            var mapChange = function (entity, entityType, result) {
-                var change = {
-                    Id: result.Id,
-                    Operation: result.Operation
-                };
-                if (result.Operation !== 4) { // Only add/update operations require mapped entity.
-                    change.Entity = self._mapEntity(result.Entity, entityType);
+            var mapChangeResult = function (result, changeKind, entityType) {
+                if (changeKind !== upshot.ChangeKind.Delete) { // Only add/update operations require mapped entity.
+                    return $.extend({}, result, {
+                        entity: self._mapEntity(result.entity, entityType)
+                    });
                 }
-                return change;
+                return result;
             };
 
-            var unmapChange = function (index, entityType, operation) {
-                var change = {
-                    Id: index.toString(),
-                    Operation: operation.Operation,
-                    Entity: operation.Entity,
-                    OriginalEntity: operation.OriginalEntity
-                };
-                if (operation.Operation !== 4) { // Delete operations don't require unmapping
-                    var unmap = (self._mappings[entityType] || {}).unmap || obs.unmap;
-                    change.Entity = unmap(operation.Entity, entityType);
+            var unmapChange = function (change) {
+                if (change.changeKind !== upshot.ChangeKind.Delete) { // Delete operations don't require unmapping
+                    var unmap = (self._mappings[change.entityType] || {}).unmap || obs.unmap;
+                    change.entity = unmap(change.entity, change.entityType);
                 }
-                return change;
             };
-
-            var changeSet = $.map(edits, function (edit, index) {
-                return unmapChange(index, edit.entityType, edit.operation);
+            $.each(changes, function (unused, change) {
+                return unmapChange(change.changeSetEntry);
             });
 
             var onSuccess = function (submitResult) {
+                    if (self._isDisposed()) {
+                        return;
+                    }
+
                     // all updates in the changeset where successful
-                    $.each(edits, function (index, edit) {
-                        edit.succeeded(mapChange(edit.storeEntity, edit.entityType, submitResult[index]));
+                    $.each(changes, function (index, change) {
+                        change.succeeded(mapChangeResult(submitResult[index], change.changeSetEntry.changeKind, change.changeSetEntry.entityType));
                     });
                     upshot.__triggerRecompute();
                     self._trigger("commitSuccess", submitResult);
@@ -431,24 +427,28 @@
                     }
                 },
                 onError = function (httpStatus, errorText, context, submitResult) {
+                    if (self._isDisposed()) {
+                        return;
+                    }
+
                     // one or more updates in the changeset failed
-                    $.each(edits, function (index, edit) {
+                    $.each(changes, function (index, change) {
                         if (submitResult) {
                             // if a submitResult was provided, we use that data in the
-                            // completion of the edit
-                            var editResult = submitResult[index];
-                            if (editResult.Error) {
-                                edit.failed(editResult.Error);
+                            // completion of the change
+                            var changeResult = submitResult[index];
+                            if (changeResult.error) {
+                                change.failed(changeResult.error);
                             } else {
                                 // even though there were failures in the changeset,
-                                // this particular edit is marked as completed, so
+                                // this particular change is marked as completed, so
                                 // we need to accept changes for it
-                                edit.succeeded(mapChange(edit.storeEntity, edit.entityType, editResult));
+                                change.succeeded(mapChangeResult(change.changeSetEntry.entityType, changeResult));
                             }
                         } else {
                             // if we don't have a submitResult, we still need to state
-                            // transition the edit properly
-                            edit.failed(null);
+                            // transition the change properly
+                            change.failed(null);
                         }
                     });
 
@@ -459,21 +459,24 @@
                     }
                 };
 
-            var submitParameters = getProviderParameters("submit", options.providerParameters);
+            var submitParameters = getProviderParameters("submit", options.providerParameters),
+                changeSet = $.map(changes, function (change) {
+                    return change.changeSetEntry;
+                });
 
             this._dataProvider.submit(submitParameters, changeSet, onSuccess, onError);
         },
 
         _commitChanges: function (options, success, error) {
-            var editedEntities = [];
+            var changedEntities = [];
             $.each(this._entitySets, function (type, entitySet) {
-                var entities = $.map(entitySet.__getEditedEntities(), function (entity) {
+                var entities = $.map(entitySet.__getChangedEntities(), function (entity) {
                     return { entitySet: entitySet, entity: entity };
                 });
-                [ ].push.apply(editedEntities, entities);
+                [ ].push.apply(changedEntities, entities);
             });
 
-            this._submitChanges(options, editedEntities, success, error);
+            this._submitChanges(options, changedEntities, success, error);
             upshot.__triggerRecompute();
         },
 

@@ -209,6 +209,12 @@
         }
     };
 
+    upshot.ChangeKind = {
+        Add: "Add",
+        Update: "Update",
+        Delete: "Delete"
+    };
+
     ///#DEBUG
     upshot.assert = function (cond, msg) {
         if (!cond) {

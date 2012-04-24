@@ -168,6 +168,10 @@
             // Will be overridden by derived classes.
         },
 
+        _isDisposed: function () {
+            return this._eventCallbacks === null;
+        },
+
         _handleArrayChange: function (type, eventArguments) {
             switch (type) {
                 case "insert":

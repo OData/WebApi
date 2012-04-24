@@ -142,10 +142,9 @@ namespace Microsoft.Web.Http.Data.Helpers
             return string.Format(CultureInfo.InvariantCulture, "{{{0}}}", string.Join(",", clientMappingStrings));
         }
 
-        // TODO: Duplicated from DataControllerMetadataGenerator.cs.  Refactor when combining this into the main System.Web.Http.Data.Helper assembly.
         private static string EncodeServerTypeName(Type type)
         {
-            return String.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", type.Name, ":#", type.Namespace);
+            return DataControllerMetadataGenerator.EncodeTypeName(type);
         }
 
         private class DataSourceConfig<TDataController> : IDataSourceConfig where TDataController : DataController

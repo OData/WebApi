@@ -41,9 +41,10 @@ namespace Microsoft.Web.Http.Data.Helpers
             return metadata;
         }
 
-        private static string EncodeTypeName(string typeName, string typeNamespace)
+        internal static string EncodeTypeName(Type type)
         {
-            return String.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", typeName, MetadataStrings.NamespaceMarker, typeNamespace);
+            // This format matches that employed by Json.NET.  We assume that DataController uses Json.NET for JSON serialization.
+            return String.Format(CultureInfo.InvariantCulture, "{0}.{1},{2}", type.Namespace, type.Name, type.Assembly.GetName().Name);
         }
 
         private static class MetadataStrings
@@ -71,11 +72,10 @@ namespace Microsoft.Web.Http.Data.Helpers
             public TypeMetadata(Type entityType)
             {
                 Type type = TypeUtility.GetElementType(entityType);
-                TypeName = type.Name;
-                TypeNamespace = type.Namespace;
+                ClrType = type;
 
                 IEnumerable<PropertyDescriptor> properties =
-                    TypeDescriptor.GetProperties(entityType).Cast<PropertyDescriptor>().OrderBy(p => p.Name)
+                    TypeDescriptor.GetProperties(type).Cast<PropertyDescriptor>().OrderBy(p => p.Name)
                         .Where(p => TypeUtility.IsDataMember(p));
 
                 foreach (PropertyDescriptor pd in properties)
@@ -88,12 +88,11 @@ namespace Microsoft.Web.Http.Data.Helpers
                 }
             }
 
-            public string TypeName { get; private set; }
-            public string TypeNamespace { get; private set; }
+            public Type ClrType { get; private set; }
 
             public string EncodedTypeName
             {
-                get { return EncodeTypeName(TypeName, TypeNamespace); }
+                get { return EncodeTypeName(ClrType); }
             }
 
             public IEnumerable<string> Key
@@ -200,8 +199,7 @@ namespace Microsoft.Web.Http.Data.Helpers
                 Type elementType = TypeUtility.GetElementType(descriptor.PropertyType);
                 IsArray = !elementType.Equals(descriptor.PropertyType);
                 // TODO: What should we do with nullable types here?
-                TypeName = elementType.Name;
-                TypeNamespace = elementType.Namespace;
+                ClrType = elementType;
 
                 AttributeCollection propertyAttributes = TypeDescriptorExtensions.ExplicitAttributes(descriptor);
 
@@ -254,8 +252,7 @@ namespace Microsoft.Web.Http.Data.Helpers
             }
 
             public string Name { get; private set; }
-            public string TypeName { get; private set; }
-            public string TypeNamespace { get; private set; }
+            public Type ClrType { get; private set; }
             public bool IsReadOnly { get; private set; }
             public bool IsArray { get; private set; }
             public TypePropertyAssociationMetadata Association { get; private set; }
@@ -269,7 +266,7 @@ namespace Microsoft.Web.Http.Data.Helpers
             {
                 JObject value = new JObject();
 
-                value[MetadataStrings.TypeString] = EncodeTypeName(TypeName, TypeNamespace);
+                value[MetadataStrings.TypeString] = EncodeTypeName(ClrType);
 
                 if (IsReadOnly)
                 {

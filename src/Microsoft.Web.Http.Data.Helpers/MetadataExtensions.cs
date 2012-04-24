@@ -29,7 +29,7 @@ namespace Microsoft.Web.Http.Data.Helpers
                 DataControllerMetadataGenerator.GetMetadata(description);
 
             JToken metadataValue = new JObject(metadata.Select(
-                m => new KeyValuePair<string, JToken>(m.EncodedTypeName, m.ToJToken())));
+                m => new JProperty(m.EncodedTypeName, m.ToJToken())));
 
             return htmlHelper.Raw(metadataValue);
         }

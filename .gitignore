@@ -10,3 +10,4 @@ _[Ss]cripts
 *.exe
 *.dll
 *.nupkg
+*.ncrunchsolution

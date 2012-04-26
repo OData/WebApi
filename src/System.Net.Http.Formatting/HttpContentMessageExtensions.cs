@@ -142,9 +142,9 @@ namespace System.Net.Http
                 throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
-            if (maxHeaderSize < 0)
+            if (maxHeaderSize < InternetMessageFormatHeaderParser.MinHeaderSize)
             {
-                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, 0);
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, InternetMessageFormatHeaderParser.MinHeaderSize);
             }
 
             HttpMessageContent.ValidateHttpMessageContent(content, true, true);
@@ -232,9 +232,9 @@ namespace System.Net.Http
                 throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
-            if (maxHeaderSize < 0)
+            if (maxHeaderSize < InternetMessageFormatHeaderParser.MinHeaderSize)
             {
-                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, 0);
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, InternetMessageFormatHeaderParser.MinHeaderSize);
             }
 
             HttpMessageContent.ValidateHttpMessageContent(content, false, true);

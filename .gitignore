@@ -11,3 +11,4 @@ _[Ss]cripts
 *.dll
 *.nupkg
 *.ncrunchsolution
+*.dot[Cc]over

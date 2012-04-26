@@ -30,24 +30,13 @@ namespace System.Web.Http.Tracing.Tracers
             _traceWriter = traceWriter;
 
             // capture values we cannot override
-            if (innerDescriptor.HttpControllerActivator != null)
+            if (innerDescriptor.Formatters != null)
             {
-                HttpControllerActivator = innerDescriptor.HttpControllerActivator;
+                Formatters = innerDescriptor.Formatters;
             }
-
-            if (innerDescriptor.HttpActionInvoker != null)
+            if (innerDescriptor.ParameterBindingProviders != null)
             {
-                HttpActionInvoker = innerDescriptor.HttpActionInvoker;
-            }
-
-            if (innerDescriptor.HttpActionSelector != null)
-            {
-                HttpActionSelector = innerDescriptor.HttpActionSelector;
-            }
-
-            if (innerDescriptor.ActionValueBinder != null)
-            {
-                ActionValueBinder = innerDescriptor.ActionValueBinder;
+                ParameterBindingProviders = innerDescriptor.ParameterBindingProviders;
             }
         }
 

@@ -31,58 +31,6 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void HttpControllerActivator_Uses_Inners()
-        {
-            // Arrange
-            IHttpControllerActivator activator = new Mock<IHttpControllerActivator>().Object;
-            HttpConfiguration config = new HttpConfiguration();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "controllerName", typeof(IHttpController)) { HttpControllerActivator = activator };
-            HttpControllerDescriptorTracer tracer = new HttpControllerDescriptorTracer(config, controllerDescriptor.ControllerName, controllerDescriptor.ControllerType, controllerDescriptor, new TestTraceWriter());
-
-            // Act and Assert
-            Assert.Same(controllerDescriptor.HttpControllerActivator, tracer.HttpControllerActivator);
-        }
-
-        [Fact]
-        public void HttpActionSelector_Uses_Inners()
-        {
-            // Arrange
-            IHttpActionSelector selector = new Mock<IHttpActionSelector>().Object;
-            HttpConfiguration config = new HttpConfiguration();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "controllerName", typeof(IHttpController)) { HttpActionSelector = selector };
-            HttpControllerDescriptorTracer tracer = new HttpControllerDescriptorTracer(config, controllerDescriptor.ControllerName, controllerDescriptor.ControllerType, controllerDescriptor, new TestTraceWriter());
-
-            // Act and Assert
-            Assert.Same(controllerDescriptor.HttpActionSelector, tracer.HttpActionSelector);
-        }
-
-        [Fact]
-        public void HttpActionInvoker_Uses_Inners()
-        {
-            // Arrange
-            IHttpActionInvoker invoker = new Mock<IHttpActionInvoker>().Object;
-            HttpConfiguration config = new HttpConfiguration();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "controllerName", typeof(IHttpController)) { HttpActionInvoker = invoker };
-            HttpControllerDescriptorTracer tracer = new HttpControllerDescriptorTracer(config, controllerDescriptor.ControllerName, controllerDescriptor.ControllerType, controllerDescriptor, new TestTraceWriter());
-
-            // Act and Assert
-            Assert.Same(controllerDescriptor.HttpActionInvoker, tracer.HttpActionInvoker);
-        }
-
-        [Fact]
-        public void ActionValueBinder_Uses_Inners()
-        {
-            // Arrange
-            IActionValueBinder binder = new Mock<IActionValueBinder>().Object;
-            HttpConfiguration config = new HttpConfiguration();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "controllerName", typeof(IHttpController)) { ActionValueBinder = binder };
-            HttpControllerDescriptorTracer tracer = new HttpControllerDescriptorTracer(config, controllerDescriptor.ControllerName, controllerDescriptor.ControllerType, controllerDescriptor, new TestTraceWriter());
-
-            // Act and Assert
-            Assert.Same(controllerDescriptor.ActionValueBinder, tracer.ActionValueBinder);
-        }
-
-        [Fact]
         public void CreateController_Invokes_Inner_And_Traces()
         {
             // Arrange

@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Hosting;
 using System.Web.Http.Properties;
@@ -33,6 +34,21 @@ namespace System.Net.Http
             }
 
             return request.GetProperty<HttpConfiguration>(HttpPropertyKeys.HttpConfigurationKey);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="HttpControllerDescriptor"/> that this request is dispatching too. 
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns>The controller descriptor, or null if the request is not yet associated with a controller.</returns>
+        public static HttpControllerDescriptor GetControllerDescriptor(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetProperty<HttpControllerDescriptor>(HttpPropertyKeys.HttpControllerDescriptorKey);
         }
 
         /// <summary>
@@ -115,7 +131,7 @@ namespace System.Net.Http
         /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
         public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value)
         {
-            return request.CreateResponse<T>(statusCode, value, configuration: null);
+            return request.CreateResponse<T>(statusCode, value, controllerDescriptor: null);
         }
 
         /// <summary>
@@ -132,8 +148,7 @@ namespace System.Net.Http
         /// <param name="statusCode">The status code of the created response.</param>
         /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
         /// <param name="configuration">The configuration to use. Can be <c>null</c>.</param>
-        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>        
         public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, HttpConfiguration configuration)
         {
             if (request == null)
@@ -141,6 +156,7 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
+            // Called before the request is associated with a controller. Use global configuration instead
             configuration = configuration ?? request.GetConfiguration();
             if (configuration == null)
             {
@@ -148,13 +164,55 @@ namespace System.Net.Http
             }
 
             IContentNegotiator contentNegotiator = configuration.Services.GetContentNegotiator();
+            IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;
+
+            return request.CreateResponse<T>(statusCode, value, formatters, contentNegotiator);
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
+        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found that this
+        /// method returns a response with status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method will use the provided <paramref name="controllerDescriptor"/> or it will get the 
+        /// <see cref="HttpControllerDescriptor"/> instance or <see cref="HttpConfiguration"/> instance associated with <paramref name="request"/>.
+        /// </remarks>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
+        /// <param name="controllerDescriptor">The controller-specific configuration to use. Can be <c>null</c>.</param>
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns> 
+        public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, HttpControllerDescriptor controllerDescriptor)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            controllerDescriptor = controllerDescriptor ?? request.GetControllerDescriptor();
+            if (controllerDescriptor == null)
+            {
+                // If no controller-specific config yet, then fallback to to look for global config.
+                return request.CreateResponse<T>(statusCode, value, configuration: null);
+            }
+            IContentNegotiator contentNegotiator = controllerDescriptor.ControllerServices.GetContentNegotiator();
+            IEnumerable<MediaTypeFormatter> formatters = controllerDescriptor.Formatters;
+
+            return request.CreateResponse<T>(statusCode, value, formatters, contentNegotiator);
+        }
+
+        // Common worker for creating a response. Separated from any configuration. All parameters are passed in explicitly. 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
+        private static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, IEnumerable<MediaTypeFormatter> formatters, IContentNegotiator contentNegotiator)
+        {
+            // Ensure we have services we need
             if (contentNegotiator == null)
             {
                 throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoContentNegotiator, typeof(IContentNegotiator).FullName);
             }
-
-            IEnumerable<MediaTypeFormatter> formatters = configuration.Formatters;
-
+            
             // Run content negotiation
             ContentNegotiationResult result = contentNegotiator.Negotiate(typeof(T), request, formatters);
 

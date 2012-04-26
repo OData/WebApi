@@ -45,9 +45,10 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter, ModelBinderAttribute attribute)
         {
-            HttpConfiguration config = parameter.Configuration;
-            IModelBinder binder = attribute.GetModelBinder(config, parameter.ParameterType);
-            IEnumerable<ValueProviderFactory> valueProviderFactories = attribute.GetValueProviderFactories(config);
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+
+            IModelBinder binder = attribute.GetModelBinder(controllerDescriptor, parameter.ParameterType);
+            IEnumerable<ValueProviderFactory> valueProviderFactories = attribute.GetValueProviderFactories(controllerDescriptor);
 
             return BindWithModelBinding(parameter, binder, valueProviderFactories);
         }
@@ -60,8 +61,8 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter, IModelBinder binder)
         {
-            HttpConfiguration config = parameter.Configuration;
-            IEnumerable<ValueProviderFactory> valueProviderFactories = new ModelBinderAttribute().GetValueProviderFactories(config);
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+            IEnumerable<ValueProviderFactory> valueProviderFactories = new ModelBinderAttribute().GetValueProviderFactories(controllerDescriptor);
 
             return BindWithModelBinding(parameter, binder, valueProviderFactories);
         }
@@ -85,8 +86,8 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter, IEnumerable<ValueProviderFactory> valueProviderFactories)
         {
-            HttpConfiguration config = parameter.Configuration;
-            IModelBinder binder = new ModelBinderAttribute().GetModelBinder(config, parameter.ParameterType);
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+            IModelBinder binder = new ModelBinderAttribute().GetModelBinder(controllerDescriptor, parameter.ParameterType);
 
             return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories);
         }
@@ -111,10 +112,10 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithFormatter(this HttpParameterDescriptor parameter)
         {
-            HttpConfiguration config = parameter.Configuration;
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
 
-            IEnumerable<MediaTypeFormatter> formatters = config.Formatters;
-            IBodyModelValidator validators = config.Services.GetBodyModelValidator();
+            IEnumerable<MediaTypeFormatter> formatters = controllerDescriptor.Formatters;
+            IBodyModelValidator validators = controllerDescriptor.ControllerServices.GetBodyModelValidator();
 
             return new FormatterParameterBinding(parameter, formatters, validators);
         }
@@ -138,8 +139,8 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithFormatter(this HttpParameterDescriptor parameter, IEnumerable<MediaTypeFormatter> formatters)
         {
-            HttpConfiguration config = parameter.Configuration;
-            IBodyModelValidator validators = config.Services.GetBodyModelValidator();
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+            IBodyModelValidator validators = controllerDescriptor.ControllerServices.GetBodyModelValidator();
             return new FormatterParameterBinding(parameter, formatters, validators);
         }
 

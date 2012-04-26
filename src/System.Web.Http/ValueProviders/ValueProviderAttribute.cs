@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 
@@ -33,7 +34,7 @@ namespace System.Web.Http.ValueProviders
             get { return _valueProviderFactoryTypes; }
         }
 
-        public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpConfiguration configuration)
+        public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpControllerDescriptor controllerDescriptor)
         {
             // By default, just get all registered value provider factories
             return Array.ConvertAll(_valueProviderFactoryTypes, Instantiate);

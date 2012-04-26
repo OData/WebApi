@@ -94,10 +94,11 @@
       <Link>Common\UriQueryUtility.cs</Link>
     </Compile>
     <Compile Include="AcceptVerbsAttribute.cs" />
+    <Compile Include="Controllers\HttpControllerDescriptorExtensions.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />
-    <Compile Include="Controllers\HttpControllerConfigurationAttribute.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
+    <Compile Include="Controllers\IControllerConfiguration.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverter.cs" />
     <Compile Include="Controllers\ValueResultConverter.cs" />
     <Compile Include="Controllers\VoidResultConverter.cs" />
@@ -225,6 +226,7 @@
     <Compile Include="Controllers\ApiControllerActionSelector.cs" />
     <Compile Include="Controllers\HttpParameterBinding.cs" />
     <Compile Include="Controllers\HttpParameterDescriptor.cs" />
+    <Compile Include="Services\ControllerServices.cs" />
     <Compile Include="Services\DefaultServices.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Controllers\IHttpController.cs" />
@@ -271,6 +273,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Services\ServicesContainer.cs" />
     <Compile Include="Tracing\IFormatterTracer.cs" />
     <Compile Include="Tracing\ITraceManager.cs" />
     <Compile Include="Tracing\ITraceWriter.cs" />

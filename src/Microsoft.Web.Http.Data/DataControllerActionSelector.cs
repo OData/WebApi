@@ -6,7 +6,7 @@ using System.Web.Http.Controllers;
 
 namespace Microsoft.Web.Http.Data
 {
-    public sealed class DataControllerActionSelector : ApiControllerActionSelector
+    internal sealed class DataControllerActionSelector : ApiControllerActionSelector
     {
         private const string ActionRouteKey = "action";
         private const string SubmitActionValue = "Submit";

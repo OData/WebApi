@@ -24,6 +24,7 @@ namespace System.Web.Http
             {
                 context.Controller = instance;
             }
+            context.ControllerDescriptor = CreateControllerDescriptor(config);
 
             return context;
         }
@@ -48,6 +49,15 @@ namespace System.Web.Http
             actionContext.ControllerContext.Request = request;
             HttpActionExecutedContext actionExecutedContext = new HttpActionExecutedContext(actionContext, null) { Response = response };
             return actionExecutedContext;
+        }
+
+        public static HttpControllerDescriptor CreateControllerDescriptor(HttpConfiguration config = null)
+        {
+            if (config == null)
+            {
+                config = new HttpConfiguration();
+            }
+            return new HttpControllerDescriptor(config);
         }
     }
 }

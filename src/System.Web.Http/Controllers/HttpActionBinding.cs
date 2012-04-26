@@ -95,8 +95,8 @@ namespace System.Web.Http.Controllers
 
             if (_metadataProvider == null)
             {
-                HttpConfiguration config = actionContext.ControllerContext.Configuration;
-                _metadataProvider = config.Services.GetModelMetadataProvider();
+                HttpControllerDescriptor cd = actionContext.ControllerContext.ControllerDescriptor;
+                _metadataProvider = cd.ControllerServices.GetModelMetadataProvider();
             }
 
             // Execute all the binders.

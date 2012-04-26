@@ -59,22 +59,37 @@ namespace System.Web.Http.Services
     ///     </para>
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
-    public class DefaultServices : IDisposable
+    public class DefaultServices : ServicesContainer, IDisposable
     {
         // This lock protects both caches (and _lastKnownDependencyResolver is updated under it as well)
         private readonly ReaderWriterLockSlim _cacheLock = new ReaderWriterLockSlim();
         private readonly Dictionary<Type, object[]> _cacheMulti = new Dictionary<Type, object[]>();
         private readonly Dictionary<Type, object> _cacheSingle = new Dictionary<Type, object>();
         private readonly HttpConfiguration _configuration;
-        private readonly Dictionary<Type, List<object>> _defaultServices = new Dictionary<Type, List<object>>();
+
+        // Mutation operations delegate (throw if applied to wrong set)
+        private readonly Dictionary<Type, object> _defaultServicesSingle = new Dictionary<Type, object>();
+
+        private readonly Dictionary<Type, List<object>> _defaultServicesMulti = new Dictionary<Type, List<object>>();
         private IDependencyResolver _lastKnownDependencyResolver;
-        private readonly HashSet<Type> _serviceTypes;
+        private readonly HashSet<Type> _serviceTypesSingle;
+        private readonly HashSet<Type> _serviceTypesMulti;
 
         /// <summary>
         /// This constructor is for unit testing purposes only.
         /// </summary>
         protected DefaultServices()
         {
+        }
+
+        private void SetSingle<T>(T instance) where T : class
+        {
+            _defaultServicesSingle[typeof(T)] = instance;
+        }
+        private void SetMultiple<T>(params T[] instances) where T : class
+        {
+            var x = (IEnumerable<object>)instances;
+            _defaultServicesMulti[typeof(T)] = new List<object>(x);
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class needs references to large number of types.")]
@@ -89,101 +104,57 @@ namespace System.Web.Http.Services
 
             // Initialize the dictionary with all known service types, even if the list for that service type is
             // empty, because we will throw if the developer tries to read or write unsupported types.
-            _defaultServices.Add(typeof(IActionValueBinder), new List<object> { new DefaultActionValueBinder() });
-            _defaultServices.Add(typeof(IApiExplorer), new List<object> { new ApiExplorer(configuration) });
-            _defaultServices.Add(typeof(IAssembliesResolver), new List<object> { new DefaultAssembliesResolver() });
-            _defaultServices.Add(typeof(IBodyModelValidator), new List<object> { new DefaultBodyModelValidator() });
-            _defaultServices.Add(typeof(IContentNegotiator), new List<object> { new DefaultContentNegotiator() });
-            _defaultServices.Add(typeof(IDocumentationProvider), new List<object>());
-            _defaultServices.Add(typeof(IFilterProvider), new List<object>
-                                                          {
-                                                              new ConfigurationFilterProvider(),
-                                                              new ActionDescriptorFilterProvider()
-                                                          });
-            _defaultServices.Add(typeof(IHostBufferPolicySelector), new List<object>());
-            _defaultServices.Add(typeof(IHttpActionInvoker), new List<object> { new ApiControllerActionInvoker() });
-            _defaultServices.Add(typeof(IHttpActionSelector), new List<object> { new ApiControllerActionSelector() });
-            _defaultServices.Add(typeof(IHttpControllerActivator), new List<object> { new DefaultHttpControllerActivator() });
-            _defaultServices.Add(typeof(IHttpControllerSelector), new List<object> { new DefaultHttpControllerSelector(configuration) });
-            _defaultServices.Add(typeof(IHttpControllerTypeResolver), new List<object> { new DefaultHttpControllerTypeResolver() });
-            _defaultServices.Add(typeof(ITraceManager), new List<object> { new TraceManager() });
-            _defaultServices.Add(typeof(ITraceWriter), new List<object>());
+
+            SetSingle<IActionValueBinder>(new DefaultActionValueBinder());
+            SetSingle<IApiExplorer>(new ApiExplorer(configuration));
+            SetSingle<IAssembliesResolver>(new DefaultAssembliesResolver());
+            SetSingle<IBodyModelValidator>(new DefaultBodyModelValidator());
+            SetSingle<IContentNegotiator>(new DefaultContentNegotiator());
+            SetSingle<IDocumentationProvider>(null); // Missing
+
+            SetMultiple<IFilterProvider>(new ConfigurationFilterProvider(),
+                                      new ActionDescriptorFilterProvider());
+
+            SetSingle<IHostBufferPolicySelector>(null);
+            SetSingle<IHttpActionInvoker>(new ApiControllerActionInvoker());
+            SetSingle<IHttpActionSelector>(new ApiControllerActionSelector());
+            SetSingle<IHttpControllerActivator>(new DefaultHttpControllerActivator());
+            SetSingle<IHttpControllerSelector>(new DefaultHttpControllerSelector(configuration));
+            SetSingle<IHttpControllerTypeResolver>(new DefaultHttpControllerTypeResolver());
+            SetSingle<ITraceManager>(new TraceManager());
+            SetSingle<ITraceWriter>(null);
 
             // This is a priority list. So put the most common binders at the top. 
-            _defaultServices.Add(typeof(ModelBinderProvider), new List<object>
-                                                              {
-                                                                  new TypeConverterModelBinderProvider(),
-                                                                  new TypeMatchModelBinderProvider(),
-                                                                  new KeyValuePairModelBinderProvider(),
-                                                                  new ComplexModelDtoModelBinderProvider(),
-                                                                  new ArrayModelBinderProvider(),
-                                                                  new DictionaryModelBinderProvider(),
-                                                                  new CollectionModelBinderProvider(),                                                                  
-                                                                  new MutableObjectModelBinderProvider()
-                                                              });
-            _defaultServices.Add(typeof(ModelMetadataProvider), new List<object> { new DataAnnotationsModelMetadataProvider() });
-            _defaultServices.Add(typeof(ModelValidatorProvider), new List<object>
-                                                                 {
-                                                                     new DataAnnotationsModelValidatorProvider(),
-                                                                     new DataMemberModelValidatorProvider()
-                                                                 });
+            SetMultiple<ModelBinderProvider>(new TypeConverterModelBinderProvider(),
+                                        new TypeMatchModelBinderProvider(),
+                                        new KeyValuePairModelBinderProvider(),
+                                        new ComplexModelDtoModelBinderProvider(),
+                                        new ArrayModelBinderProvider(),
+                                        new DictionaryModelBinderProvider(),
+                                        new CollectionModelBinderProvider(),
+                                        new MutableObjectModelBinderProvider());
+            SetSingle<ModelMetadataProvider>(new DataAnnotationsModelMetadataProvider());
+            SetMultiple<ModelValidatorProvider>(new DataAnnotationsModelValidatorProvider(),
+                                        new DataMemberModelValidatorProvider());
 
             // This is an ordered list,so put the most common providers at the top. 
-            _defaultServices.Add(typeof(ValueProviderFactory), new List<object>
-                                                               {
-                                                                   new QueryStringValueProviderFactory(),
-                                                                   new RouteDataValueProviderFactory()                                                                   
-                                                               });
+            SetMultiple<ValueProviderFactory>(new QueryStringValueProviderFactory(),
+                                           new RouteDataValueProviderFactory());
 
-            _serviceTypes = new HashSet<Type>(_defaultServices.Keys);
+            _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);            
+            _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);
+
             // Reset the caches and the known dependency scope
             ResetCache();
         }
 
-        /// <summary>
-        /// Returns a list of supported service types registered in the service list.
-        /// </summary>
-        public ICollection<Type> ServiceTypes
-        {
-            get { return _serviceTypes.ToArray(); }
-        }
-
-        /// <summary>
-        /// Adds a service to the end of services list for the given service type. 
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="service">The service instance.</param>
-        public void Add(Type serviceType, object service)
-        {
-            Insert(serviceType, Int32.MaxValue, service);
-        }
-
-        /// <summary>
-        /// Adds the services of the specified collection to the end of the services list for
-        /// the given service type.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="services">The services to add.</param>
-        public void AddRange(Type serviceType, IEnumerable<object> services)
-        {
-            InsertRange(serviceType, Int32.MaxValue, services);
-        }
-
-        /// <summary>
-        /// Removes all the service instances of the given service type. 
-        /// </summary>
-        /// <param name="serviceType">The service type to clear from the services list.</param>
-        public void Clear(Type serviceType)
+        public override bool IsSingleService(Type serviceType)
         {
             if (serviceType == null)
             {
                 throw Error.ArgumentNull("serviceType");
             }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            instances.Clear();
-
-            ResetCache(serviceType);
+            return _serviceTypesSingle.Contains(serviceType);
         }
 
         /// <inheritdoc/>
@@ -195,40 +166,17 @@ namespace System.Web.Http.Services
         }
 
         /// <summary>
-        /// Searches for a service that matches the conditions defined by the specified
-        /// predicate, and returns the zero-based index of the first occurrence.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="match">The delegate that defines the conditions of the element
-        /// to search for. </param>
-        /// <returns>The zero-based index of the first occurrence, if found; otherwise, -1.</returns>
-        public int FindIndex(Type serviceType, Predicate<object> match)
-        {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-            if (match == null)
-            {
-                throw Error.ArgumentNull("match");
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            return instances.FindIndex(match);
-        }
-
-        /// <summary>
         /// Try to get a service of the given type.
         /// </summary>
         /// <param name="serviceType">The service type.</param>
         /// <returns>The first instance of the service, or null if the service is not found.</returns>
-        public virtual object GetService(Type serviceType)
+        public override object GetService(Type serviceType)
         {
             if (serviceType == null)
             {
                 throw Error.ArgumentNull("serviceType");
             }
-            if (!_serviceTypes.Contains(serviceType))
+            if (!_serviceTypesSingle.Contains(serviceType))
             {
                 throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
@@ -263,7 +211,7 @@ namespace System.Web.Http.Services
             {
                 if (!_cacheSingle.TryGetValue(serviceType, out result))
                 {
-                    result = dependencyService ?? _defaultServices[serviceType].FirstOrDefault();
+                    result = dependencyService ?? _defaultServicesSingle[serviceType];
                     _cacheSingle[serviceType] = result;
                 }
 
@@ -281,13 +229,13 @@ namespace System.Web.Http.Services
         /// <param name="serviceType">The service type.</param>
         /// <returns>The list of service instances of the given type. Returns an empty enumeration if the
         /// service is not found. </returns>
-        public virtual IEnumerable<object> GetServices(Type serviceType)
+        public override IEnumerable<object> GetServices(Type serviceType)
         {
             if (serviceType == null)
             {
                 throw Error.ArgumentNull("serviceType");
             }
-            if (!_serviceTypes.Contains(serviceType))
+            if (!_serviceTypesMulti.Contains(serviceType))
             {
                 throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
@@ -323,7 +271,7 @@ namespace System.Web.Http.Services
                 if (!_cacheMulti.TryGetValue(serviceType, out result))
                 {
                     result = dependencyServices.Where(s => s != null)
-                                               .Concat(_defaultServices[serviceType])
+                                               .Concat(_defaultServicesMulti[serviceType])
                                                .ToArray();
                     _cacheMulti[serviceType] = result;
                 }
@@ -337,12 +285,13 @@ namespace System.Web.Http.Services
         }
 
         // Returns the List<object> for the given service type. Also validates serviceType is in the known service type list.
-        private List<object> GetServiceInstances(Type serviceType)
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "inherits from base")]
+        protected override List<object> GetServiceInstances(Type serviceType)
         {
             Contract.Assert(serviceType != null);
 
             List<object> result;
-            if (!_defaultServices.TryGetValue(serviceType, out result))
+            if (!_defaultServicesMulti.TryGetValue(serviceType, out result))
             {
                 throw Error.Argument("serviceType", SRResources.DefaultServices_InvalidServiceType, serviceType.Name);
             }
@@ -350,177 +299,18 @@ namespace System.Web.Http.Services
             return result;
         }
 
-        /// <summary>
-        /// Inserts a service into the collection at the specified index.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="index">The zero-based index at which the service should be inserted.
-        /// If <see cref="Int32.MaxValue"/> is passed, ensures the element is added to the end.</param>
-        /// <param name="service">The service to insert.</param>
-        public void Insert(Type serviceType, int index, object service)
+        protected override void ClearSingle(Type serviceType)
+        {
+            _defaultServicesSingle[serviceType] = null;
+        }
+
+        protected override void ReplaceSingle(Type serviceType, object service)
         {
             if (serviceType == null)
             {
                 throw Error.ArgumentNull("serviceType");
             }
-            if (service == null)
-            {
-                throw Error.ArgumentNull("service");
-            }
-            if (!serviceType.IsAssignableFrom(service.GetType()))
-            {
-                throw Error.Argument("service", SRResources.Common_TypeMustDriveFromType, service.GetType().Name, serviceType.Name);
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            if (index == Int32.MaxValue)
-            {
-                index = instances.Count;
-            }
-
-            instances.Insert(index, service);
-
-            ResetCache(serviceType);
-        }
-
-        /// <summary>
-        /// Inserts the elements of the collection into the service list at the specified index.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="index">The zero-based index at which the new elements should be inserted.
-        /// If <see cref="Int32.MaxValue"/> is passed, ensures the elements are added to the end.</param>
-        /// <param name="services">The collection of services to insert.</param>
-        public void InsertRange(Type serviceType, int index, IEnumerable<object> services)
-        {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-            if (services == null)
-            {
-                throw Error.ArgumentNull("services");
-            }
-
-            object[] filteredServices = services.Where(svc => svc != null).ToArray();
-            object incorrectlyTypedService = filteredServices.FirstOrDefault(svc => !serviceType.IsAssignableFrom(svc.GetType()));
-            if (incorrectlyTypedService != null)
-            {
-                throw Error.Argument("services", SRResources.Common_TypeMustDriveFromType, incorrectlyTypedService.GetType().Name, serviceType.Name);
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            if (index == Int32.MaxValue)
-            {
-                index = instances.Count;
-            }
-
-            instances.InsertRange(index, filteredServices);
-
-            ResetCache(serviceType);
-        }
-
-        /// <summary>
-        /// Removes the first occurrence of the given service from the service list for the given service type.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="service">The service instance to remove.</param>
-        /// <returns> <c>true</c> if the item is successfull removed; otherwise, <c>false</c>.</returns>
-        public bool Remove(Type serviceType, object service)
-        {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-            if (service == null)
-            {
-                throw Error.ArgumentNull("service");
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            bool result = instances.Remove(service);
-
-            ResetCache(serviceType);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Removes all the elements that match the conditions defined by the specified predicate.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="match">The delegate that defines the conditions of the elements to remove.</param>
-        /// <returns>The number of elements removed from the list.</returns>
-        public int RemoveAll(Type serviceType, Predicate<object> match)
-        {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-            if (match == null)
-            {
-                throw Error.ArgumentNull("match");
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            int result = instances.RemoveAll(match);
-
-            ResetCache(serviceType);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Removes the service at the specified index.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="index">The zero-based index of the service to remove.</param>
-        public void RemoveAt(Type serviceType, int index)
-        {
-            if (serviceType == null)
-            {
-                throw Error.ArgumentNull("serviceType");
-            }
-
-            List<object> instances = GetServiceInstances(serviceType);
-            instances.RemoveAt(index);
-
-            ResetCache(serviceType);
-        }
-
-        /// <summary>
-        /// Replaces all existing services for the given service type with the given
-        /// service instance.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="service">The service instance.</param>
-        public void Replace(Type serviceType, object service)
-        {
-            // Check this early, so we don't call RemoveAll before Insert would catch the null service.
-            if (service == null)
-            {
-                throw Error.ArgumentNull("service");
-            }
-
-            RemoveAll(serviceType, _ => true);
-            Insert(serviceType, 0, service);
-        }
-
-        /// <summary>
-        /// Replaces all existing services for the given service type with the given
-        /// service instances.
-        /// </summary>
-        /// <param name="serviceType">The service type.</param>
-        /// <param name="services">The service instances.</param>
-        public void ReplaceRange(Type serviceType, IEnumerable<object> services)
-        {
-            // Check this early, so we don't call RemoveAll before InsertRange would catch the null services.
-            if (services == null)
-            {
-                throw Error.ArgumentNull("services");
-            }
-
-            RemoveAll(serviceType, _ => true);
-            InsertRange(serviceType, 0, services);
+            _defaultServicesSingle[serviceType] = service;
         }
 
         // Removes the cached values for all service types. Called when the dependency scope
@@ -542,7 +332,7 @@ namespace System.Web.Http.Services
 
         // Removes the cached values for a single service type. Called whenever the user manipulates
         // the local service list for a given service type.
-        private void ResetCache(Type serviceType)
+        protected override void ResetCache(Type serviceType)
         {
             _cacheLock.EnterWriteLock();
             try

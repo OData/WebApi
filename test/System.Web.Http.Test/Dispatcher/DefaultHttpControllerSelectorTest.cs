@@ -310,8 +310,6 @@ namespace System.Web.Http.Dispatcher
 
             mockType.Setup(t => t.Name).Returns(controllerName + "Controller");
             mockType.Setup(t => t.FullName).Returns("Full" + controllerName + "Controller");
-            mockType.Setup(t => t.GetCustomAttributes(typeof(HttpControllerConfigurationAttribute), It.IsAny<bool>()))
-                .Returns(new HttpControllerConfigurationAttribute[0]);
             return mockType.Object;
         }
     }

@@ -73,6 +73,7 @@ namespace System.Web.Http.Dispatcher
                         .Returns(mockDescriptor.Object);
             mockDescriptor.Setup(d => d.CreateController(request))
                           .Returns(mockController.Object);
+            mockDescriptor.Object.Initialize(config);
             mockController.Setup(c => c.ExecuteAsync(It.IsAny<HttpControllerContext>(), CancellationToken.None))
                           .Callback((HttpControllerContext ctxt, CancellationToken token) => { calledContext = ctxt; });
             var dispatcher = new HttpControllerDispatcher(config);
@@ -131,6 +132,13 @@ namespace System.Web.Http.Dispatcher
         private class PrivateController : ApiController
         {
             public void Get() { }
+
+            public override Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
+            {
+                // Empty. Skip all the logic of execcuting a controller.
+                HttpResponseMessage response = new HttpResponseMessage();
+                return TaskHelpers.FromResult(response);
+            }
         }
     }
 

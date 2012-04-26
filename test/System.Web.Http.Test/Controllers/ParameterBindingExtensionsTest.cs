@@ -183,6 +183,9 @@ namespace System.Web.Http.Controllers
             HttpConfiguration config = new HttpConfiguration();
             HttpParameterDescriptor param = CreateParameterDescriptor(typeof(object), "thing");
             param.Configuration = config;
+            param.ActionDescriptor = new Mock<HttpActionDescriptor>().Object;
+            param.ActionDescriptor.ControllerDescriptor = new HttpControllerDescriptor(config);
+
             return param;
         }
 

@@ -69,7 +69,8 @@ namespace System.Web.Http.Controllers
             {
                 if (_actionBinding == null)
                 {
-                    IActionValueBinder actionValueBinder = _controllerDescriptor.ActionValueBinder;
+                    ControllerServices controllerServices = _controllerDescriptor.ControllerServices;
+                    IActionValueBinder actionValueBinder = controllerServices.GetActionValueBinder();
                     HttpActionBinding actionBinding = actionValueBinder.GetBinding(this);
                     _actionBinding = actionBinding;
                 }

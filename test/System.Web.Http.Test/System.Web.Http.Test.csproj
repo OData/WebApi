@@ -91,6 +91,7 @@
     <Compile Include="AuthorizeAttributeTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
+    <Compile Include="Controllers\HttpControllerDescriptorExtensionsTest.cs" />
     <Compile Include="Controllers\ParameterBindingExtensionsTest.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />
     <Compile Include="Controllers\ValueResultConverterTest.cs" />
@@ -133,7 +134,9 @@
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Routing\UriPathExtensionMappingTests.cs" />
     <Compile Include="Routing\UrlHelperTest.cs" />
+    <Compile Include="Services\ControllerServicesTests.cs" />
     <Compile Include="Services\DefaultServicesTests.cs" />
+    <Compile Include="Services\ServicesExtensionsTests.cs" />
     <Compile Include="Tracing\FormattingUtilitiesTest.cs" />
     <Compile Include="Tracing\HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="Tracing\ITraceWriterExtensionsTest.cs" />

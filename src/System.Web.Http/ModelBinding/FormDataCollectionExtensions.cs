@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http.Formatting;
 using System.Text;
@@ -178,25 +179,12 @@ namespace System.Web.Http.ModelBinding
 
                 // Looks like HttpActionContext is just a way of getting to the config, which we really
                 // just need to get a list of modelbinderPRoviders for composition. 
-                HttpControllerContext controllerContext = new HttpControllerContext() { Configuration = config };
-                HttpActionContext actionContext = new HttpActionContext { ControllerContext = controllerContext };
-
-                ModelMetadataProvider metadataProvider = config.Services.GetModelMetadataProvider();
-
-                // Create default over config
-                IEnumerable<ModelBinderProvider> providers = config.Services.GetModelBinderProviders();
-                ModelBinderProvider modelBinderProvider = new CompositeModelBinderProvider(providers);
+                HttpActionContext actionContext = CreateActionContextForModelBinding(config);
 
                 IValueProvider vp = formData.GetJQueryValueProvider();
+                ModelBindingContext ctx = CreateModelBindingContext(actionContext, modelName, type, vp);
 
-                ModelBindingContext ctx = new ModelBindingContext()
-                {
-                    ModelName = modelName,
-                    FallbackToEmptyPrefix = false,
-                    ModelMetadata = metadataProvider.GetMetadataForType(null, type),
-                    ModelState = actionContext.ModelState,
-                    ValueProvider = vp
-                };
+                ModelBinderProvider modelBinderProvider = CreateModelBindingProvider(actionContext);
 
                 IModelBinder binder = modelBinderProvider.GetBinder(config, type);
                 bool haveResult = binder.BindModel(actionContext, ctx);
@@ -226,6 +214,51 @@ namespace System.Web.Http.ModelBinding
                 }
                 return MediaTypeFormatter.GetDefaultValueForType(type);
             }
+        }
+
+        // Helper for ReadAs() to get a ModelBinderProvider to read FormUrl data. 
+        private static ModelBinderProvider CreateModelBindingProvider(HttpActionContext actionContext)
+        {
+            Contract.Assert(actionContext != null);
+
+            ControllerServices cs = actionContext.ControllerContext.ControllerDescriptor.ControllerServices;
+            IEnumerable<ModelBinderProvider> providers = cs.GetModelBinderProviders();
+            ModelBinderProvider modelBinderProvider = new CompositeModelBinderProvider(providers);
+            return modelBinderProvider;
+        }
+
+        // Helper for ReadAs() to get a ModelBindingContext to invoke model binding over FormUrl data. 
+        private static ModelBindingContext CreateModelBindingContext(HttpActionContext actionContext, string modelName, Type type, IValueProvider vp)
+        {
+            Contract.Assert(actionContext != null);
+            Contract.Assert(type != null);
+            Contract.Assert(vp != null);
+
+            ControllerServices cs = actionContext.ControllerContext.ControllerDescriptor.ControllerServices;
+            ModelMetadataProvider metadataProvider = cs.GetModelMetadataProvider();
+            
+            ModelBindingContext ctx = new ModelBindingContext()
+            {
+                ModelName = modelName,
+                FallbackToEmptyPrefix = false,
+                ModelMetadata = metadataProvider.GetMetadataForType(null, type),
+                ModelState = actionContext.ModelState,
+                ValueProvider = vp
+            };
+            return ctx;
+        }
+
+        // Creates a default action context to invoke model binding
+        private static HttpActionContext CreateActionContextForModelBinding(HttpConfiguration config)
+        {
+            Contract.Assert(config != null);
+
+            HttpControllerContext controllerContext = new HttpControllerContext() { Configuration = config };
+            controllerContext.ControllerDescriptor = new HttpControllerDescriptor(config);
+
+            HttpActionContext actionContext = new HttpActionContext { ControllerContext = controllerContext };
+
+            return actionContext;
         }
     }
 }

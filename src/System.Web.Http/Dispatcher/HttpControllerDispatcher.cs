@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http.Dispatcher
@@ -99,10 +100,12 @@ namespace System.Web.Http.Dispatcher
                 return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.NotFound));
             }
 
+            request.Properties.Add(HttpPropertyKeys.HttpControllerDescriptorKey, httpControllerDescriptor);
+                        
             // Create context
             HttpControllerContext controllerContext = new HttpControllerContext(_configuration, routeData, request);
             controllerContext.Controller = httpController;
-            controllerContext.ControllerDescriptor = httpControllerDescriptor;
+            controllerContext.ControllerDescriptor = httpControllerDescriptor;            
 
             return httpController.ExecuteAsync(controllerContext, cancellationToken);
         }

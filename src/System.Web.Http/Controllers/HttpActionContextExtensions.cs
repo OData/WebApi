@@ -28,7 +28,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return actionContext.ControllerContext.Configuration.Services.GetModelMetadataProvider();
+            return actionContext.ControllerContext.ControllerDescriptor.ControllerServices.GetModelMetadataProvider();
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return actionContext.ControllerContext.Configuration.Services.GetModelValidatorProviders();
+            return actionContext.ControllerContext.ControllerDescriptor.ControllerServices.GetModelValidatorProviders();
         }
 
         /// <summary>
@@ -91,10 +91,11 @@ namespace System.Web.Http.Controllers
         // Pulls binders from the config
         public static bool Bind(this HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
-            Type modelType = bindingContext.ModelType;
-            HttpConfiguration config = actionContext.ControllerContext.Configuration;
+            Type modelType = bindingContext.ModelType;            
+            HttpControllerDescriptor cd = actionContext.ControllerContext.ControllerDescriptor;
+            HttpConfiguration config = cd.Configuration;
 
-            IEnumerable<IModelBinder> binders = from provider in config.Services.GetModelBinderProviders()
+            IEnumerable<IModelBinder> binders = from provider in cd.ControllerServices.GetModelBinderProviders()
                                                 select provider.GetBinder(config, modelType);
 
             return Bind(actionContext, bindingContext, binders);

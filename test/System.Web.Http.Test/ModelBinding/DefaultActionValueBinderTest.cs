@@ -447,10 +447,16 @@ namespace System.Web.Http.ModelBinding
         }
 
         private HttpActionDescriptor GetAction(string name, HttpConfiguration config)
-        {
+        {            
             MethodInfo method = this.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.NotNull(method);
-            return new ReflectedHttpActionDescriptor { MethodInfo = method, Configuration = config };
+            return new ReflectedHttpActionDescriptor { MethodInfo = method, Configuration = config, ControllerDescriptor = GetControllerDescriptor(config)};
+        }
+
+        // Get a controller descriptor that's sufficiently initialized to use with parameter binding
+        private HttpControllerDescriptor GetControllerDescriptor(HttpConfiguration config)
+        {
+            return new HttpControllerDescriptor(config);
         }
 
         // Complex type to use with tests

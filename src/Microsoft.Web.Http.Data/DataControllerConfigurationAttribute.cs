@@ -8,39 +8,40 @@ using System.Net.Http.Formatting;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dependencies;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Validation;
 using Newtonsoft.Json;
 
 namespace Microsoft.Web.Http.Data
 {
-    public class DataControllerActionValueBinder : DefaultActionValueBinder
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    internal sealed class DataControllerConfigurationAttribute : Attribute, IControllerConfiguration
     {
         private static ConcurrentDictionary<Type, IEnumerable<SerializerInfo>> _serializerCache = new ConcurrentDictionary<Type, IEnumerable<SerializerInfo>>();
 
-        private MediaTypeFormatter[] _formatters;
-
-        protected override IEnumerable<MediaTypeFormatter> GetFormatters(HttpActionDescriptor actionDescriptor)
+        public void Initialize(HttpControllerDescriptor controllerDescriptor)
         {
-            if (_formatters == null)
-            {
-                HttpControllerDescriptor descr = actionDescriptor.ControllerDescriptor;
-                HttpConfiguration config = actionDescriptor.Configuration;
-                DataControllerDescription dataDesc = DataControllerDescription.GetDescription(descr);
+            controllerDescriptor.Formatters = new MediaTypeFormatterCollection(GetFormatters(controllerDescriptor));
 
-                List<MediaTypeFormatter> list = new List<MediaTypeFormatter>();
-                AddFormattersFromConfig(list, config);
-                AddDataControllerFormatters(list, dataDesc);
-                _formatters = list.ToArray();
-            }
+            controllerDescriptor.ReplaceService<IHttpActionInvoker>(new DataControllerActionInvoker());
+            controllerDescriptor.ReplaceService<IHttpActionSelector>(new DataControllerActionSelector());
 
-            return _formatters;
+            // Clear the validator to disable validation.
+            controllerDescriptor.ControllerServices.Replace(typeof(IBodyModelValidator), null);
         }
-
-        protected override IBodyModelValidator GetBodyModelValidator(HttpActionDescriptor actionDescriptor)
+            
+        private static IEnumerable<MediaTypeFormatter> GetFormatters(HttpControllerDescriptor descr)
         {
-            return null;
-        }
+            HttpConfiguration config = descr.Configuration;
+            DataControllerDescription dataDesc = DataControllerDescription.GetDescription(descr);
+
+            List<MediaTypeFormatter> list = new List<MediaTypeFormatter>();
+            AddFormattersFromConfig(list, config);
+            AddDataControllerFormatters(list, dataDesc);
+                
+            return list;
+        } 
 
         private static void AddDataControllerFormatters(List<MediaTypeFormatter> formatters, DataControllerDescription description)
         {

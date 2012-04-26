@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.Internal;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
@@ -135,7 +136,8 @@ namespace System.Web.Http
             }
 
             HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
-            HttpActionDescriptor actionDescriptor = controllerDescriptor.HttpActionSelector.SelectAction(controllerContext);
+            ControllerServices controllerServices = controllerDescriptor.ControllerServices;
+            HttpActionDescriptor actionDescriptor = controllerServices.GetActionSelector().SelectAction(controllerContext);
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
 
             IEnumerable<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
@@ -156,7 +158,7 @@ namespace System.Web.Http
                     _modelState = actionContext.ModelState;
                     Func<Task<HttpResponseMessage>> invokeFunc = InvokeActionWithActionFilters(actionContext, cancellationToken, actionFilters, () =>
                     {
-                        return controllerDescriptor.HttpActionInvoker.InvokeActionAsync(actionContext, cancellationToken);
+                        return controllerServices.GetActionInvoker().InvokeActionAsync(actionContext, cancellationToken);
                     });
                     return invokeFunc();
                 });

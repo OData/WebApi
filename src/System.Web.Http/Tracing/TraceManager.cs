@@ -34,21 +34,21 @@ namespace System.Web.Http.Tracing
 
         private static void CreateActionInvokerTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
         {
-            IHttpActionInvoker invoker = configuration.Services.GetActionInvoker();
+            IHttpActionInvoker invoker = GetService<IHttpActionInvoker>(configuration.Services);
             HttpActionInvokerTracer tracer = new HttpActionInvokerTracer(invoker, traceWriter);
             configuration.Services.Replace(typeof(IHttpActionInvoker), tracer);
         }
 
         private static void CreateActionSelectorTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
         {
-            IHttpActionSelector selector = configuration.Services.GetActionSelector();
+            IHttpActionSelector selector = GetService<IHttpActionSelector>(configuration.Services);
             HttpActionSelectorTracer tracer = new HttpActionSelectorTracer(selector, traceWriter);
             configuration.Services.Replace(typeof(IHttpActionSelector), tracer);
         }
 
         private static void CreateActionValueBinderTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
         {
-            IActionValueBinder binder = configuration.Services.GetActionValueBinder();
+            IActionValueBinder binder = GetService<IActionValueBinder>(configuration.Services);
             ActionValueBinderTracer tracer = new ActionValueBinderTracer(binder, traceWriter);
             configuration.Services.Replace(typeof(IActionValueBinder), tracer);
         }
@@ -62,7 +62,7 @@ namespace System.Web.Http.Tracing
 
         private static void CreateControllerActivatorTracer(HttpConfiguration configuration, ITraceWriter traceWriter)
         {
-            IHttpControllerActivator activator = configuration.Services.GetHttpControllerActivator();
+            IHttpControllerActivator activator = GetService<IHttpControllerActivator>(configuration.Services);
             HttpControllerActivatorTracer tracer = new HttpControllerActivatorTracer(activator, traceWriter);
             configuration.Services.Replace(typeof(IHttpControllerActivator), tracer);
         }
@@ -72,6 +72,12 @@ namespace System.Web.Http.Tracing
             IHttpControllerSelector controllerSelector = configuration.Services.GetHttpControllerSelector();
             HttpControllerSelectorTracer tracer = new HttpControllerSelectorTracer(controllerSelector, traceWriter);
             configuration.Services.Replace(typeof(IHttpControllerSelector), tracer);
+        }
+
+        // Get services from the global config. These are normally per-controller services, but we're getting the global fallbacks.
+        private static TService GetService<TService>(ServicesContainer services)
+        {
+            return (TService)services.GetService(typeof(TService));
         }
 
         private static void CreateMediaTypeFormatterTracers(HttpConfiguration configuration, ITraceWriter traceWriter)

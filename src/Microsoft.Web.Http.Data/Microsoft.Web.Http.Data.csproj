@@ -86,7 +86,7 @@
     <Compile Include="CustomizingActionDescriptor.cs" />
     <Compile Include="DataController.cs" />
     <Compile Include="DataControllerActionSelector.cs" />
-    <Compile Include="DataControllerActionValueBinder.cs" />
+    <Compile Include="DataControllerConfigurationAttribute.cs" />
     <Compile Include="DataControllerDescription.cs" />
     <Compile Include="DataControllerValidation.cs" />
     <Compile Include="Metadata\DataControllerTypeDescriptor.cs" />

@@ -6,23 +6,31 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Internal;
+using System.Web.Http.ModelBinding;
 
 namespace System.Web.Http.Controllers
 {
+    /// <summary>
+    /// Description and configuration for a controller.
+    /// </summary>
     public class HttpControllerDescriptor
     {
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
 
         private HttpConfiguration _configuration;
+
         private string _controllerName;
         private Type _controllerType;
-        private IHttpControllerActivator _controllerActivator;
-        private IHttpActionSelector _actionSelector;
-        private IHttpActionInvoker _actionInvoker;
-        private IActionValueBinder _actionValueBinder;
+
+        private MediaTypeFormatterCollection _formatters;
+        private ParameterBindingProviders _parameterBindings;
+
+        private ControllerServices _controllerServices;
 
         private object[] _attrCached;
 
@@ -42,11 +50,13 @@ namespace System.Web.Http.Controllers
             {
                 throw Error.ArgumentNull("controllerType");
             }
-
+            
             _configuration = configuration;
             _controllerName = controllerName;
             _controllerType = controllerType;
 
+            _controllerServices = new ControllerServices(_configuration.Services);
+            
             Initialize();
         }
 
@@ -58,6 +68,12 @@ namespace System.Web.Http.Controllers
         {
         }
 
+        // For unit testing purposes. 
+        internal HttpControllerDescriptor(HttpConfiguration configuration)
+        {
+            Initialize(configuration);
+        }
+
         /// <summary>
         /// Gets the properties associated with this instance.
         /// </summary>
@@ -66,6 +82,9 @@ namespace System.Web.Http.Controllers
             get { return _properties; }
         }
 
+        /// <summary>
+        /// Global configuration. Controller can override services, so check properties from controller descriptor instead of configuration. 
+        /// </summary>
         public HttpConfiguration Configuration
         {
             get { return _configuration; }
@@ -105,55 +124,47 @@ namespace System.Web.Http.Controllers
             }
         }
 
-        public IHttpControllerActivator HttpControllerActivator
+        /// <summary>
+        /// Per-controller services. This can override the services found in the global configuration's default services.
+        /// </summary>
+        public ControllerServices ControllerServices
         {
-            get { return _controllerActivator; }
+            get { return _controllerServices; }
+        }
+
+        /// <summary>
+        /// Get the parameter binding rules for this controller.
+        /// To override these to be separate from the global config, set the collection to a new instance.
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "setting the collection is how you override it")]
+        public ParameterBindingProviders ParameterBindingProviders
+        {
+            get { return _parameterBindings; }
             set
             {
                 if (value == null)
                 {
                     throw Error.PropertyNull();
                 }
-                _controllerActivator = value;
+                _parameterBindings = value;
             }
         }
 
-        public IHttpActionSelector HttpActionSelector
+        /// <summary>
+        /// Gets the media type formatters.
+        /// To override these to be separate from the global config, set the collection to a new instance.
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "setting the collection is how you override it")]
+        public MediaTypeFormatterCollection Formatters
         {
-            get { return _actionSelector; }
+            get { return _formatters; }
             set
             {
                 if (value == null)
                 {
                     throw Error.PropertyNull();
                 }
-                _actionSelector = value;
-            }
-        }
-
-        public IHttpActionInvoker HttpActionInvoker
-        {
-            get { return _actionInvoker; }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-                _actionInvoker = value;
-            }
-        }
-
-        public IActionValueBinder ActionValueBinder
-        {
-            get { return _actionValueBinder; }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-                _actionValueBinder = value;
+                _formatters = value;
             }
         }
 
@@ -170,7 +181,8 @@ namespace System.Web.Http.Controllers
             }
 
             // Invoke the controller activator
-            IHttpController instance = HttpControllerActivator.Create(request, this, ControllerType);
+            IHttpControllerActivator activator = ControllerServices.GetHttpControllerActivator();
+            IHttpController instance = activator.Create(request, this, ControllerType);
             return instance;
         }
 
@@ -206,78 +218,57 @@ namespace System.Web.Http.Controllers
             return new Collection<T>(TypeHelper.OfType<T>(_attrCached));
         }
 
+        // For unit tests for initializing mock objects. Controller may not have a type, so we can't do the normal Initialize() path. 
+        internal void Initialize(HttpConfiguration configuration)
+        {
+            _configuration = configuration;
+            _controllerServices = new ControllerServices(_configuration.Services);
+            FinishInitialize();
+        }
+
+        // Initialize the Controller Descriptor. This invokes all IControllerConfiguration attributes
+        // on the controller type (and its base types)
         private void Initialize()
         {
-            // Look for attribute to provide specialized information for this controller type
-            HttpControllerConfigurationAttribute controllerConfig =
-                _controllerType.GetCustomAttributes<HttpControllerConfigurationAttribute>(inherit: true).FirstOrDefault();
-
-            // If we find attribute then first ask dependency resolver and if we get null then create it ourselves
-            if (controllerConfig != null)
+            InvokeAttributesOnControllerType(this, ControllerType);
+            FinishInitialize();
+        }
+                
+        private void FinishInitialize()
+        {
+            // If initialization didn't override properties, then set those to point at the global configuration            
+            if (Formatters == null)
             {
-                if (controllerConfig.HttpControllerActivator != null)
-                {
-                    _controllerActivator = GetService<IHttpControllerActivator>(_configuration, controllerConfig.HttpControllerActivator);
-                }
-
-                if (controllerConfig.HttpActionSelector != null)
-                {
-                    _actionSelector = GetService<IHttpActionSelector>(_configuration, controllerConfig.HttpActionSelector);
-                }
-
-                if (controllerConfig.HttpActionInvoker != null)
-                {
-                    _actionInvoker = GetService<IHttpActionInvoker>(_configuration, controllerConfig.HttpActionInvoker);
-                }
-
-                if (controllerConfig.ActionValueBinder != null)
-                {
-                    _actionValueBinder = GetService<IActionValueBinder>(_configuration, controllerConfig.ActionValueBinder);
-                }
+                Formatters = Configuration.Formatters;
             }
-
-            // For everything still null we fall back to the default service list.
-            if (_controllerActivator == null)
+            if (ParameterBindingProviders == null)
             {
-                _controllerActivator = Configuration.Services.GetHttpControllerActivator();
-            }
-
-            if (_actionSelector == null)
-            {
-                _actionSelector = Configuration.Services.GetActionSelector();
-            }
-
-            if (_actionInvoker == null)
-            {
-                _actionInvoker = Configuration.Services.GetActionInvoker();
-            }
-
-            if (_actionValueBinder == null)
-            {
-                _actionValueBinder = Configuration.Services.GetActionValueBinder();
+                ParameterBindingProviders = Configuration.ParameterBindingProviders;
             }
         }
 
-        /// <summary>
-        /// Helper for looking up or activating <see cref="IHttpControllerActivator"/>, <see cref="IHttpActionSelector"/>, 
-        /// and <see cref="IHttpActionInvoker"/>. Note that we here use the slow <see cref="M:Activator.CreateInstance"/>
-        /// as the instances live for the lifetime of the <see cref="HttpControllerDescriptor"/> instance itself so there is
-        /// little benefit in caching a delegate.
-        /// </summary>
-        /// <typeparam name="TBase">The type of the base.</typeparam>
-        /// <param name="configuration">The configuration.</param>
-        /// <param name="serviceType">Type of the service.</param>
-        /// <returns>A new instance.</returns>
-        private static TBase GetService<TBase>(HttpConfiguration configuration, Type serviceType) where TBase : class
+        // Helper to invoke any Controller config attributes on this controller type or its base classes.
+        private static void InvokeAttributesOnControllerType(HttpControllerDescriptor controllerDescriptor, Type type)
         {
-            Contract.Assert(configuration != null);
-            if (serviceType != null)
-            {
-                return (TBase)configuration.DependencyResolver.GetService(serviceType)
-                    ?? (TBase)Activator.CreateInstance(serviceType);
-            }
+            Contract.Assert(controllerDescriptor != null);
 
-            return null;
+            if (type == null)
+            {
+                return;
+            }
+            // Initialize base class before derived classes (same order as ctors).
+            InvokeAttributesOnControllerType(controllerDescriptor, type.BaseType);
+
+            // Check for attribute
+            object[] attrs = type.GetCustomAttributes(inherit: false);
+            foreach (object attr in attrs)
+            {
+                var init = attr as IControllerConfiguration;
+                if (init != null)
+                {
+                    init.Initialize(controllerDescriptor);
+                }
+            }
         }
     }
 }

@@ -77,7 +77,7 @@ namespace System.Web.Http.ModelBinding
             // ValuesController works as expected without tracing.
             if (traceWriter != null)
             {
-                config.Services.Add(typeof(ITraceWriter), traceWriter);
+                config.Services.Replace(typeof(ITraceWriter), traceWriter);
                 traceWriter.Start();
             }
 
@@ -229,7 +229,7 @@ namespace System.Web.Http.ModelBinding
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional });
             MemoryTraceWriter traceWriter = new MemoryTraceWriter();
-            config.Services.Add(typeof(ITraceWriter), traceWriter);
+            config.Services.Replace(typeof(ITraceWriter), traceWriter);
 
             using (HttpServer server = new HttpServer(config))
             {

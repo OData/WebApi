@@ -7,7 +7,7 @@ using System.Web.Http.Controllers;
 
 namespace Microsoft.Web.Http.Data
 {
-    public sealed class DataControllerActionInvoker : ApiControllerActionInvoker
+    internal sealed class DataControllerActionInvoker : ApiControllerActionInvoker
     {
         public override Task<HttpResponseMessage> InvokeActionAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {

@@ -104,10 +104,9 @@ namespace System.Web.Http.Tracing
                             "get_Configuration", "set_Configuration", 
                             "get_ControllerType", "set_ControllerType",
                             "get_ControllerName", "set_ControllerName",
-                            "get_HttpControllerActivator", "set_HttpControllerActivator",
-                            "get_HttpActionSelector", "set_HttpActionSelector",
-                            "get_HttpActionInvoker", "set_HttpActionInvoker",
-                            "get_ActionValueBinder", "set_ActionValueBinder",
+                            "get_Formatters", "set_Formatters",
+                            "get_ParameterBindingProviders", "set_ParameterBindingProviders",
+                            "get_ControllerServices"
                         }
                     },
                     { typeof(IHttpControllerSelector), typeof(HttpControllerSelectorTracer), new string[0] },

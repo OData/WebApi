@@ -21,9 +21,6 @@ namespace System.Web.Http
             Assert.Null(controllerDescriptor.ControllerName);
             Assert.Null(controllerDescriptor.Configuration);
             Assert.Null(controllerDescriptor.ControllerType);
-            Assert.Null(controllerDescriptor.HttpActionInvoker);
-            Assert.Null(controllerDescriptor.HttpActionSelector);
-            Assert.Null(controllerDescriptor.HttpControllerActivator);
             Assert.NotNull(controllerDescriptor.Properties);
         }
 
@@ -38,9 +35,6 @@ namespace System.Web.Http
             Assert.NotNull(controllerDescriptor.ControllerName);
             Assert.NotNull(controllerDescriptor.Configuration);
             Assert.NotNull(controllerDescriptor.ControllerType);
-            Assert.NotNull(controllerDescriptor.HttpActionInvoker);
-            Assert.NotNull(controllerDescriptor.HttpActionSelector);
-            Assert.NotNull(controllerDescriptor.HttpControllerActivator);
             Assert.NotNull(controllerDescriptor.Properties);
             Assert.Equal(config, controllerDescriptor.Configuration);
             Assert.Equal(controllerName, controllerDescriptor.ControllerName);
@@ -114,62 +108,6 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void HttpActionInvoker_Property()
-        {
-            IHttpActionInvoker invoker = new ApiControllerActionInvoker();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor();
-
-            Assert.Reflection.Property<HttpControllerDescriptor, IHttpActionInvoker>(
-                instance: controllerDescriptor,
-                propertyGetter: cd => cd.HttpActionInvoker,
-                expectedDefaultValue: null,
-                allowNull: false,
-                roundTripTestValue: invoker);
-        }
-
-        [Fact]
-        public void HttpActionSelector_Property()
-        {
-            IHttpActionSelector selector = new ApiControllerActionSelector();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor();
-
-            Assert.Reflection.Property<HttpControllerDescriptor, IHttpActionSelector>(
-                instance: controllerDescriptor,
-                propertyGetter: cd => cd.HttpActionSelector,
-                expectedDefaultValue: null,
-                allowNull: false,
-                roundTripTestValue: selector);
-        }
-
-        [Fact]
-        public void HttpControllerActivator_Property()
-        {
-            IHttpControllerActivator activator = new Mock<IHttpControllerActivator>().Object;
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor();
-
-            Assert.Reflection.Property<HttpControllerDescriptor, IHttpControllerActivator>(
-                instance: controllerDescriptor,
-                propertyGetter: cd => cd.HttpControllerActivator,
-                expectedDefaultValue: null,
-                allowNull: false,
-                roundTripTestValue: activator);
-        }
-
-        [Fact]
-        public void ActionValueBinder_Property()
-        {
-            IActionValueBinder activator = new Mock<IActionValueBinder>().Object;
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor();
-
-            Assert.Reflection.Property<HttpControllerDescriptor, IActionValueBinder>(
-                instance: controllerDescriptor,
-                propertyGetter: cd => cd.ActionValueBinder,
-                expectedDefaultValue: null,
-                allowNull: false,
-                roundTripTestValue: activator);
-        }
-
-        [Fact]
         public void GetFilters_InvokesGetCustomAttributesMethod()
         {
             var descriptorMock = new Mock<HttpControllerDescriptor> { CallBase = true };
@@ -181,5 +119,62 @@ namespace System.Web.Http
             Assert.Same(filters, result);
             descriptorMock.Verify();
         }
+
+        [Fact]
+        public void Initialize_In_InheritenceHierarchy()
+        {
+            // Verifies that initialization is run in order with , and that they all mutate on the same descriptor object 
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act.
+            HttpControllerDescriptor desc = new HttpControllerDescriptor(config, "MyController", typeof(MyDerived2Controller));
+
+            // Assert
+            Assert.Same(MyDerived1Controller.SelectorBase, desc.ControllerServices.GetActionSelector());
+            Assert.Same(MyDerived1Controller.ActionValueBinderDerived1, desc.ControllerServices.GetActionValueBinder());
+            Assert.Same(config.Formatters, desc.Formatters); // didn't override, stays the same
+            Assert.Same(config.ParameterBindingProviders, desc.ParameterBindingProviders); // didn't override, stays the same
+        }
+
+        class MyConfigBaseAttribute : Attribute, IControllerConfiguration
+        {
+            public void Initialize(HttpControllerDescriptor desc) 
+            {
+                desc.ControllerServices.Replace(typeof(IActionValueBinder), MyBaseController.ActionValueBinderBase);
+                desc.ControllerServices.Replace(typeof(IHttpActionSelector), MyBaseController.SelectorBase);
+            }
+        }
+
+        [MyConfigBase]
+        class MyBaseController : ApiController
+        {
+            public static IHttpActionSelector SelectorBase = new Mock<IHttpActionSelector>().Object;
+            public static IActionValueBinder ActionValueBinderBase = new Mock<IActionValueBinder>().Object;
+        }
+
+        class MyConfigDerived1Attribute : Attribute, IControllerConfiguration
+        {
+            public void Initialize(HttpControllerDescriptor desc)
+            {
+                // Base runs first, so we should be able to see changes from the base.
+                Assert.Same(MyBaseController.ActionValueBinderBase, desc.ControllerServices.GetActionValueBinder());
+
+                // Also overwrite them
+                desc.ControllerServices.Replace(typeof(IActionValueBinder), MyDerived1Controller.ActionValueBinderDerived1);
+            }
+        }
+
+        [MyConfigDerived1]
+        class MyDerived1Controller : MyBaseController
+        {
+            public static IActionValueBinder ActionValueBinderDerived1 = new Mock<IActionValueBinder>().Object;
+        }
+
+        class MyDerived2Controller : MyDerived1Controller
+        {
+        }
+
+
+
     }
 }

@@ -16,7 +16,7 @@ using System.Web.Http.Controllers;
 
 namespace Microsoft.Web.Http.Data
 {
-    [HttpControllerConfiguration(HttpActionInvoker = typeof(DataControllerActionInvoker), HttpActionSelector = typeof(DataControllerActionSelector), ActionValueBinder = typeof(DataControllerActionValueBinder))]
+    [DataControllerConfiguration]
     public abstract class DataController : ApiController
     {
         private ChangeSet _changeSet;

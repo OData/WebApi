@@ -50,7 +50,7 @@ namespace System.Web.Http
                     tcs.TrySetResult(new HttpResponseMessage() { Content = new StringContent(responseText) });
                     return tcs.Task;
                 });
-            controllerDescriptor.HttpActionInvoker = mockInvoker.Object;
+            controllerDescriptor.ControllerServices.Replace(typeof(IHttpActionInvoker), mockInvoker.Object);
 
             // Act
             HttpResponseMessage message = api.ExecuteAsync(
@@ -85,7 +85,7 @@ namespace System.Web.Http
                         MethodInfo = testDelegate.Method
                     };
                 });
-            controllerDescriptor.HttpActionSelector = mockSelector.Object;
+            controllerDescriptor.ControllerServices.Replace(typeof(IHttpActionSelector), mockSelector.Object);
 
             // Act
             HttpResponseMessage message = api.ExecuteAsync(
@@ -338,9 +338,9 @@ namespace System.Web.Http
                            log.Add("action");
                            return new HttpResponseMessage();
                        }));
-            controllerContext.ControllerDescriptor.HttpActionInvoker = invokerMock.Object;
-            controllerContext.ControllerDescriptor.HttpActionSelector = selectorMock.Object;
-            controllerContext.ControllerDescriptor.ActionValueBinder = binderMock.Object;
+            controllerContext.ControllerDescriptor.ControllerServices.Replace(typeof(IHttpActionInvoker), invokerMock.Object);
+            controllerContext.ControllerDescriptor.ControllerServices.Replace(typeof(IHttpActionSelector), selectorMock.Object);
+            controllerContext.ControllerDescriptor.ControllerServices.Replace(typeof(IActionValueBinder), binderMock.Object);
 
             var task = controller.ExecuteAsync(controllerContext, CancellationToken.None);
 

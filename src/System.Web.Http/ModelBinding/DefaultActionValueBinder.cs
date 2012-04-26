@@ -14,18 +14,6 @@ namespace System.Web.Http.ModelBinding
 {
     public class DefaultActionValueBinder : IActionValueBinder
     {
-        // Derived binder may customize the formatters and use per-controller specific formatters instead of config formatters.
-        protected virtual IEnumerable<MediaTypeFormatter> GetFormatters(HttpActionDescriptor actionDescriptor)
-        {
-            IEnumerable<MediaTypeFormatter> formatters = actionDescriptor.Configuration.Formatters;
-            return formatters;
-        }
-
-        protected virtual IBodyModelValidator GetBodyModelValidator(HttpActionDescriptor actionDescriptor)
-        {
-            return actionDescriptor.Configuration.Services.GetBodyModelValidator();
-        }
-
         /// <summary>
         /// Implementation of <see cref="IActionValueBinder"/>, Primary entry point for binding parameters for an action.
         /// </summary>           
@@ -84,10 +72,13 @@ namespace System.Web.Http.ModelBinding
             // Attribute has the highest precedence
             // Look at Parameter attributes?
             // [FromBody] - we use Formatter.
-            bool hasFromBody = parameter.GetCustomAttributes<FromBodyAttribute>().Any();
+            
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+
+            FromBodyAttribute fromBodyAttr = parameter.GetCustomAttributes<FromBodyAttribute>().FirstOrDefault();
             ModelBinderAttribute attr = parameter.ModelBinderAttribute;
 
-            if (hasFromBody)
+            if (fromBodyAttr != null)
             {
                 if (attr != null)
                 {
@@ -95,7 +86,7 @@ namespace System.Web.Http.ModelBinding
                     return parameter.BindAsError(message);
                 }
 
-                return MakeBodyBinding(parameter); // It's from the body. Uses a formatter. 
+                return fromBodyAttr.GetBinding(parameter, controllerDescriptor); // It's from the body. Uses a formatter. 
             }
 
             // Presence of a model binder attribute overrides.
@@ -105,8 +96,7 @@ namespace System.Web.Http.ModelBinding
             }
 
             // No attribute, so lookup in global map.
-            HttpConfiguration config = parameter.Configuration;
-            ParameterBindingProviders pb = config.ParameterBindingProviders;
+            ParameterBindingProviders pb = controllerDescriptor.ParameterBindingProviders;
             if (pb != null)
             {
                 HttpParameterBinding binding = pb.LookupBinding(parameter);
@@ -125,14 +115,9 @@ namespace System.Web.Http.ModelBinding
                 return parameter.BindWithModelBinding(); // use default settings
             }                        
 
-            // Fallback. Must be a complex type. Default is to look in body.             
-            return MakeBodyBinding(parameter);            
-        }
-
-        private HttpParameterBinding MakeBodyBinding(HttpParameterDescriptor parameter)
-        {
-            HttpActionDescriptor actionDescriptor = parameter.ActionDescriptor;
-            return parameter.BindWithFormatter(GetFormatters(actionDescriptor), GetBodyModelValidator(actionDescriptor));
+            // Fallback. Must be a complex type. Default is to look in body. Exactly as if this type had a [FromBody] attribute.
+            fromBodyAttr = new FromBodyAttribute();
+            return fromBodyAttr.GetBinding(parameter, controllerDescriptor);
         }
 
         // Create an instance and add some default binders

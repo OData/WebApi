@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http.Properties;
 
 namespace System.Web.Http
 {
@@ -43,29 +42,6 @@ namespace System.Web.Http
 
             value = default(T);
             return false;
-        }
-
-        /// <summary>
-        /// Gets the value of <typeparamref name="T"/> associated with the specified key or throw an <see cref="T:System.InvalidOperationException"/> 
-        /// if either the key is not present or the value is not of type <typeparamref name="T"/>. 
-        /// </summary>
-        /// <param name="collection">The <see cref="IDictionary{TKey,TValue}"/> instance where <c>TValue</c> is <c>object</c>.</param>
-        /// <param name="key">The key whose value to get.</param>
-        /// <returns>An instance of type <typeparam name="T"/>.</returns>
-        public static T GetValue<T>(this IDictionary<string, object> collection, string key)
-        {
-            if (collection == null)
-            {
-                throw Error.ArgumentNull("collection");
-            }
-
-            T value;
-            if (collection.TryGetValue(key, out value))
-            {
-                return value;
-            }
-
-            throw Error.InvalidOperation(CommonWebApiResources.DictionaryMissingRequiredValue, collection.GetType().Name, key, typeof(T).Name);
         }
 
         internal static IEnumerable<KeyValuePair<string, TValue>> FindKeysWithPrefix<TValue>(this IDictionary<string, TValue> dictionary, string prefix)
@@ -117,33 +93,6 @@ namespace System.Web.Http
                     }
                 }
             }
-        }
-
-        internal static bool DoesAnyKeyHavePrefix<TValue>(this IDictionary<string, TValue> dictionary, string prefix)
-        {
-            return FindKeysWithPrefix(dictionary, prefix).Any();
-        }
-
-        /// <summary>
-        /// Adds a key/value pair of type <typeparamref name="T"/> to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary{object, object}"/>
-        ///     if the key does not already exist.
-        /// </summary>
-        /// <typeparam name="T">The actual type of the dictionary value.</typeparam>
-        /// <param name="concurrentPropertyBag">A dictionary.</param>
-        /// <param name="key">The key of the element to add.</param>
-        /// <param name="factory">The function used to generate a value for the <paramref name="key"/>.</param>
-        /// <returns> The value for the key. This will be either the existing value for the <paramref name="key"/> if the key is already in the dictionary,
-        /// or the new value for the key as returned by <paramref name="factory"/> if the key was not in the dictionary.</returns>
-        internal static T GetOrAdd<T>(this ConcurrentDictionary<object, object> concurrentPropertyBag, object key, Func<object, T> factory)
-        {
-            Contract.Assert(concurrentPropertyBag != null);
-            Contract.Assert(key != null);
-            Contract.Assert(factory != null);
-
-            // SIMPLIFYING ASSUMPTION: this method is internal and keys are private so it's assumed that client code won't be able to
-            // replace the value with an object of a different type.
-
-            return (T)concurrentPropertyBag.GetOrAdd(key, valueFactory: k => factory(k));
         }
     }
 }

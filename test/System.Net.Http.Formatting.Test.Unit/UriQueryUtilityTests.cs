@@ -28,18 +28,6 @@ namespace System.Net.Http
             Assert.Null(UriQueryUtility.UrlEncode(null));
         }
 
-        public void UrlEncodeToBytesThrowsOnInvalidArgs()
-        {
-            Assert.Null(UriQueryUtility.UrlEncodeToBytes(null, 0, 0));
-            Assert.ThrowsArgumentNull(() => UriQueryUtility.UrlEncodeToBytes(null, 0, 2), "bytes");
-
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlEncodeToBytes(new byte[0], -1, 0), "offset", null);
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlEncodeToBytes(new byte[0], 2, 0), "offset", null);
-
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlEncodeToBytes(new byte[0], 0, -1), "count", null);
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlEncodeToBytes(new byte[0], 0, 2), "count", null);
-        }
-
         #endregion
 
         #region UrlDecode
@@ -134,18 +122,6 @@ namespace System.Net.Http
                     Assert.Equal(resultValue, value);
                 }
             }
-        }
-
-        public void UrlDecodeToBytesThrowsOnInvalidArgs()
-        {
-            Assert.Null(UriQueryUtility.UrlDecodeToBytes(null, 0, 0));
-            Assert.ThrowsArgumentNull(() => UriQueryUtility.UrlDecodeToBytes(null, 0, 2), "bytes");
-
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlDecodeToBytes(new byte[0], -1, 0), "offset", null);
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlDecodeToBytes(new byte[0], 2, 0), "offset", null);
-
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlDecodeToBytes(new byte[0], 0, -1), "count", null);
-            Assert.ThrowsArgumentOutOfRange(() => UriQueryUtility.UrlDecodeToBytes(new byte[0], 0, 2), "count", null);
         }
 
         #endregion

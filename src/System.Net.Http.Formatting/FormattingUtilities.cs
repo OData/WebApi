@@ -74,16 +74,6 @@ namespace System.Net.Http
         public const string HttpVersionToken = "HTTP";
 
         /// <summary>
-        /// A <see cref="Type"/> representing <see cref="UTF8Encoding"/>.
-        /// </summary>
-        public static readonly Type Utf8EncodingType = typeof(UTF8Encoding);
-
-        /// <summary>
-        /// A <see cref="Type"/> representing <see cref="UnicodeEncoding"/>.
-        /// </summary>
-        public static readonly Type Utf16EncodingType = typeof(UnicodeEncoding);
-
-        /// <summary>
         /// A <see cref="Type"/> representing <see cref="HttpRequestMessage"/>.
         /// </summary>
         public static readonly Type HttpRequestMessageType = typeof(HttpRequestMessage);
@@ -150,30 +140,6 @@ namespace System.Net.Http
             }
 
             return contentHeaders;
-        }
-
-        /// <summary>
-        /// Ensure the actual collection is identical to the expected one
-        /// </summary>
-        /// <param name="actual">The actual collection of the instance</param>
-        /// <param name="expected">The expected collection of the instance</param>
-        /// <returns>Returns true if they are identical</returns>
-        public static bool ValidateCollection(Collection<MediaTypeHeaderValue> actual, MediaTypeHeaderValue[] expected)
-        {
-            if (actual.Count != expected.Length)
-            {
-                return false;
-            }
-
-            foreach (MediaTypeHeaderValue value in expected)
-            {
-                if (!actual.Contains(value))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         /// <summary>

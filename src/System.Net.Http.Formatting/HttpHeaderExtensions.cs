@@ -18,27 +18,5 @@ namespace System.Net.Http
                 toHeaders.TryAddWithoutValidation(header.Key, header.Value);
             }
         }
-
-        public static void CopyTo(this HttpRequestHeaders fromHeaders, HttpRequestHeaders toHeaders)
-        {
-            Contract.Assert(fromHeaders != null, "fromHeaders cannot be null.");
-            Contract.Assert(toHeaders != null, "toHeaders cannot be null.");
-
-            foreach (KeyValuePair<string, IEnumerable<string>> header in fromHeaders)
-            {
-                toHeaders.TryAddWithoutValidation(header.Key, header.Value);
-            }
-        }
-
-        public static void CopyTo(this HttpResponseHeaders fromHeaders, HttpResponseHeaders toHeaders)
-        {
-            Contract.Assert(fromHeaders != null, "fromHeaders cannot be null.");
-            Contract.Assert(toHeaders != null, "toHeaders cannot be null.");
-
-            foreach (KeyValuePair<string, IEnumerable<string>> header in fromHeaders)
-            {
-                toHeaders.TryAddWithoutValidation(header.Key, header.Value);
-            }
-        }
     }
 }

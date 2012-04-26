@@ -135,7 +135,4 @@
   <data name="ArgumentUriHasQueryOrFragment" xml:space="preserve">
     <value>URI must not contain a query component or a fragment identifier.</value>
   </data>
-  <data name="DictionaryMissingRequiredValue" xml:space="preserve">
-    <value>The '{0}' must contain an item named '{1}' with a value of type '{2}'.</value>
-  </data>
 </root>

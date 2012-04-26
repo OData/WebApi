@@ -154,11 +154,6 @@ namespace System.Net.Http.Formatting
             return _serializerCache.TryRemove(type, out value);
         }
 
-        internal bool ContainsSerializerForType(Type type)
-        {
-            return _serializerCache.ContainsKey(type);
-        }
-
         /// <summary>
         /// Determines whether this <see cref="XmlMediaTypeFormatter"/> can read objects
         /// of the specified <paramref name="type"/>.

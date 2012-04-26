@@ -88,11 +88,6 @@ namespace System.Web.Http
             return Encoding.ASCII.GetString(UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */));
         }
 
-        public static byte[] UrlEncodeToBytes(byte[] bytes, int offset, int count)
-        {
-            return UrlEncode(bytes, offset, count, true /* alwaysCreateNewReturnValue */);
-        }
-
         #endregion
 
         #region UrlDecode implementation
@@ -164,50 +159,6 @@ namespace System.Web.Http
             return helper.GetString();
         }
 
-        private static byte[] UrlDecodeInternal(byte[] bytes, int offset, int count)
-        {
-            if (!ValidateUrlEncodingParameters(bytes, offset, count))
-            {
-                return null;
-            }
-
-            int decodedBytesCount = 0;
-            byte[] decodedBytes = new byte[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                int pos = offset + i;
-                byte b = bytes[pos];
-
-                if (b == '+')
-                {
-                    b = (byte)' ';
-                }
-                else if (b == '%' && i < count - 2)
-                {
-                    int h1 = HexToInt((char)bytes[pos + 1]);
-                    int h2 = HexToInt((char)bytes[pos + 2]);
-
-                    if (h1 >= 0 && h2 >= 0)
-                    {     // valid 2 hex chars
-                        b = (byte)((h1 << 4) | h2);
-                        i += 2;
-                    }
-                }
-
-                decodedBytes[decodedBytesCount++] = b;
-            }
-
-            if (decodedBytesCount < decodedBytes.Length)
-            {
-                byte[] newDecodedBytes = new byte[decodedBytesCount];
-                Array.Copy(decodedBytes, newDecodedBytes, decodedBytesCount);
-                decodedBytes = newDecodedBytes;
-            }
-
-            return decodedBytes;
-        }
-
         #endregion
 
         #region UrlDecode public methods
@@ -218,11 +169,6 @@ namespace System.Web.Http
                 return null;
 
             return UrlDecodeInternal(str, Encoding.UTF8);
-        }
-
-        public static byte[] UrlDecodeToBytes(byte[] bytes, int offset, int count)
-        {
-            return UrlDecodeInternal(bytes, offset, count);
         }
 
         #endregion

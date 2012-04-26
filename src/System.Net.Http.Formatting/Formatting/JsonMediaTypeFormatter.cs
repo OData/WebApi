@@ -135,11 +135,6 @@ namespace System.Net.Http.Formatting
             };
         }
 
-        internal bool ContainsSerializerForType(Type type)
-        {
-            return _dataContractSerializerCache.ContainsKey(type);
-        }
-
         /// <summary>
         /// Determines whether this <see cref="JsonMediaTypeFormatter"/> can read objects
         /// of the specified <paramref name="type"/>.

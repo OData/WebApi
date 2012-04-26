@@ -89,43 +89,6 @@ namespace System.Web.Http
             Assert.Equal(value, resultValue);
         }
 
-        [Fact]
-        public void GetValueThrowsOnNullCollection()
-        {
-            Assert.ThrowsArgumentNull(() => DictionaryExtensions.GetValue<string>(null, String.Empty), "collection");
-        }
-
-        [Fact]
-        public void GetValueThrowsOnNullKey()
-        {
-            IDictionary<string, object> dict = new Dictionary<string, object>();
-            Assert.ThrowsArgumentNull(() => dict.GetValue<string>(null), "key");
-        }
-
-        [Fact]
-        public void GetValueThrowsOnNotFound()
-        {
-            IDictionary<string, object> dict = new Dictionary<string, object>();
-            Assert.Throws<InvalidOperationException>(() => dict.GetValue<string>("notfound"));
-        }
-
-        [Theory]
-        [PropertyData("DictionaryValues")]
-        public void GetValueReturnsValue<T>(T value)
-        {
-            // Arrange
-            IDictionary<string, object> dict = new Dictionary<string, object>()
-            {
-                { "key", value }
-            };
-
-            // Act
-            T resultValue = DictionaryExtensions.GetValue<T>(dict, "key");
-
-            // Assert
-            Assert.Equal(typeof(T), resultValue.GetType());
-            Assert.Equal(value, resultValue);
-        }
 
         [Fact]
         public void FindKeysWithPrefixRecognizesRootChilden()

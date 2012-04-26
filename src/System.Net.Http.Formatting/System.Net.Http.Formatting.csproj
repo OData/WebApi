@@ -158,7 +158,6 @@
     <Compile Include="HttpUnsortedHeaders.cs" />
     <Compile Include="HttpUnsortedRequest.cs" />
     <Compile Include="HttpUnsortedResponse.cs" />
-    <Compile Include="Internal\AsyncResultWithExtraData.cs" />
     <Compile Include="Internal\DelegatingStream.cs" />
     <Compile Include="Formatting\Parsers\InternetMessageFormatHeaderParser.cs" />
     <Compile Include="MimeBodyPart.cs" />

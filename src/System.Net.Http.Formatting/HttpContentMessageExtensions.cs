@@ -104,8 +104,23 @@ namespace System.Net.Http
         /// <param name="bufferSize">Size of the buffer.</param>
         /// <returns>The parsed <see cref="HttpRequestMessage"/> instance.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "This is not a full URI but only the URI scheme")]
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception translates to parser state.")]
         public static Task<HttpRequestMessage> ReadAsHttpRequestMessageAsync(this HttpContent content, string uriScheme, int bufferSize)
+        {
+            return ReadAsHttpRequestMessageAsync(content, uriScheme, bufferSize, HttpRequestHeaderParser.DefaultMaxHeaderSize);
+        }
+
+        /// <summary>
+        /// Read the <see cref="HttpContent"/> as an <see cref="HttpRequestMessage"/>.
+        /// </summary>
+        /// <param name="content">The content to read.</param>
+        /// <param name="uriScheme">The URI scheme to use for the request URI (the 
+        /// URI scheme is not actually part of the HTTP Request URI and so must be provided externally).</param>
+        /// <param name="bufferSize">Size of the buffer.</param>
+        /// <param name="maxHeaderSize">The max length of the HTTP header.</param>
+        /// <returns>The parsed <see cref="HttpRequestMessage"/> instance.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "This is not a full URI but only the URI scheme")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception translates to parser state.")]
+        public static Task<HttpRequestMessage> ReadAsHttpRequestMessageAsync(this HttpContent content, string uriScheme, int bufferSize, int maxHeaderSize)
         {
             if (content == null)
             {
@@ -127,12 +142,17 @@ namespace System.Net.Http
                 throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
+            if (maxHeaderSize < 0)
+            {
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, 0);
+            }
+
             HttpMessageContent.ValidateHttpMessageContent(content, true, true);
 
             return content.ReadAsStreamAsync().Then(stream =>
             {
                 HttpUnsortedRequest httpRequest = new HttpUnsortedRequest();
-                HttpRequestHeaderParser parser = new HttpRequestHeaderParser(httpRequest);
+                HttpRequestHeaderParser parser = new HttpRequestHeaderParser(httpRequest, HttpRequestHeaderParser.DefaultMaxRequestLineSize, maxHeaderSize);
                 ParserState parseStatus;
 
                 byte[] buffer = new byte[bufferSize];
@@ -187,8 +207,20 @@ namespace System.Net.Http
         /// <param name="content">The content to read.</param>
         /// <param name="bufferSize">Size of the buffer.</param>
         /// <returns>The parsed <see cref="HttpResponseMessage"/> instance.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception translates to parser state.")]
         public static Task<HttpResponseMessage> ReadAsHttpResponseMessageAsync(this HttpContent content, int bufferSize)
+        {
+            return ReadAsHttpResponseMessageAsync(content, bufferSize, HttpResponseHeaderParser.DefaultMaxHeaderSize);
+        }
+
+        /// <summary>
+        /// Read the <see cref="HttpContent"/> as an <see cref="HttpResponseMessage"/>.
+        /// </summary>
+        /// <param name="content">The content to read.</param>
+        /// <param name="bufferSize">Size of the buffer.</param>
+        /// <param name="maxHeaderSize">The max length of the HTTP header.</param>
+        /// <returns>The parsed <see cref="HttpResponseMessage"/> instance.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception translates to parser state.")]
+        public static Task<HttpResponseMessage> ReadAsHttpResponseMessageAsync(this HttpContent content, int bufferSize, int maxHeaderSize)
         {
             if (content == null)
             {
@@ -200,12 +232,17 @@ namespace System.Net.Http
                 throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
+            if (maxHeaderSize < 0)
+            {
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("maxHeaderSize", maxHeaderSize, 0);
+            }
+
             HttpMessageContent.ValidateHttpMessageContent(content, false, true);
 
             return content.ReadAsStreamAsync().Then(stream =>
             {
                 HttpUnsortedResponse httpResponse = new HttpUnsortedResponse();
-                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(httpResponse);
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(httpResponse, HttpResponseHeaderParser.DefaultMaxStatusLineSize, maxHeaderSize);
                 ParserState parseStatus;
 
                 byte[] buffer = new byte[bufferSize];

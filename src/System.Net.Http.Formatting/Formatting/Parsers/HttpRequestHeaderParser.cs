@@ -10,8 +10,8 @@ namespace System.Net.Http.Formatting.Parsers
     /// </summary>
     internal class HttpRequestHeaderParser
     {
-        private const int DefaultMaxRequestLineSize = 2 * 1024;
-        private const int DefaultMaxHeaderSize = 16 * 1024; // Same default size as IIS has for regular requests
+        internal const int DefaultMaxRequestLineSize = 2 * 1024;
+        internal const int DefaultMaxHeaderSize = 16 * 1024; // Same default size as IIS has for regular requests
 
         private HttpUnsortedRequest _httpRequest;
         private HttpRequestState _requestStatus = HttpRequestState.RequestLine;

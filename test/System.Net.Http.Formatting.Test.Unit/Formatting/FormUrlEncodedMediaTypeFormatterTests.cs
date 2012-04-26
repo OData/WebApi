@@ -20,7 +20,6 @@ namespace System.Net.Http.Formatting
         private const int DefaultMaxDepth = 1024;
 
         [Fact]
-        [Trait("Description", "FormUrlEncodedMediaTypeFormatter is public, concrete, and unsealed.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(FormUrlEncodedMediaTypeFormatter), TypeAssert.TypeProperties.IsPublicVisibleClass);
@@ -54,7 +53,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "StandardFormUrlEncodedMediaTypes")]
-        [Trait("Description", "FormUrlEncodedMediaTypeFormatter() constructor sets standard form URL encoded media types in SupportedMediaTypes.")]
         public void Constructor(MediaTypeHeaderValue mediaType)
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();
@@ -62,7 +60,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "DefaultMediaType property returns application/x-www-form-urlencoded.")]
         public void DefaultMediaTypeReturnsApplicationJson()
         {
             MediaTypeHeaderValue mediaType = FormUrlEncodedMediaTypeFormatter.DefaultMediaType;
@@ -85,7 +82,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MaxDepth return correct value.")]
         public void MaxDepthReturnsCorrectValue()
         {
             Assert.Reflection.IntegerProperty(
@@ -100,7 +96,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Deeply nested objects throws.")]
         public void ReadDeeplyNestedObjectThrows()
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter() { MaxDepth = 100 };
@@ -114,7 +109,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Read DeeplyNestedobject WithBigDepthQuota should work")]
         public void ReadDeeplyNestedObjectWithBigDepthQuotaWorks()
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter() { MaxDepth = 150 };
@@ -139,7 +133,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CanReadType() throws on null.")]
         public void CanReadTypeThrowsOnNull()
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
@@ -159,7 +152,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanReadType(Type) returns false.")]
         public void CanReadTypeReturnsFalse(Type variationType, object testData)
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
@@ -172,7 +164,6 @@ namespace System.Net.Http.Formatting
 
 
         [Fact]
-        [Trait("Description", "CanWriteType(Type) throws on null.")]
         public void CanWriteTypeThrowsOnNull()
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
@@ -181,7 +172,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanWriteType() returns false.")]
         public void CanWriteTypeReturnsFalse(Type variationType, object testData)
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
@@ -193,7 +183,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "ReadFromStreamAsync() throws on null.")]
         public void ReadFromStreamThrowsOnNull()
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
@@ -202,7 +191,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "WriteToStreamAsync() throws not implemented.")]
         public void WriteToStreamAsyncThrowsNotImplemented()
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();

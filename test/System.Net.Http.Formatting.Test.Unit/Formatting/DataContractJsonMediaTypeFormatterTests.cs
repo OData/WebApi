@@ -151,7 +151,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractJsonSerializer property with Indent throws when set to true.")]
         public void UseDataContractJsonSerializer_True_Indent_Throws()
         {
             DataContractJsonMediaTypeFormatter jsonFormatter = new DataContractJsonMediaTypeFormatter { Indent = true };

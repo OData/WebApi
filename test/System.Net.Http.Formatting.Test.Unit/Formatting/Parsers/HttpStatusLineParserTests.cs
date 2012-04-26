@@ -13,7 +13,6 @@ namespace System.Net.Http.Formatting.Parsers
     public class HttpStatusLineParserTests
     {
         [Fact]
-        [Trait("Description", "HttpStatusLineParser is internal class")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties<HttpStatusLineParser>(TypeAssert.TypeProperties.IsClass);
@@ -71,7 +70,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser constructor throws on invalid arguments")]
         public void HttpStatusLineParserConstructorTest()
         {
             HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
@@ -88,7 +86,6 @@ namespace System.Net.Http.Formatting.Parsers
 
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer throws on null buffer.")]
         public void StatusLineParserNullBuffer()
         {
             HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
@@ -99,7 +96,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer parses minimum requestline.")]
         public void StatusLineParserMinimumBuffer()
         {
             byte[] data = CreateBuffer("HTTP/1.1", "200", "");
@@ -116,7 +112,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer rejects LWS requestline.")]
         public void StatusLineParserRejectsLws()
         {
             byte[] data = CreateBuffer("HTTP/1.1", "200", "Reason", true);
@@ -133,7 +128,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer parses standard status codes.")]
         public void StatusLineParserAcceptsStandardStatusCodes()
         {
             foreach (HttpStatusCode status in HttpUnitTestDataSets.AllHttpStatusCodes)
@@ -157,7 +151,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer parses custom status codes.")]
         public void StatusLineParserAcceptsCustomStatusCodes()
         {
             foreach (HttpStatusCode status in HttpUnitTestDataSets.CustomHttpStatusCodes)
@@ -181,7 +174,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer rejects invalid status codes")]
         public void StatusLineParserRejectsInvalidStatusCodes()
         {
             foreach (string invalidStatus in ParserData.InvalidStatusCodes)
@@ -216,7 +208,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("ValidReasonPhrases")]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer accepts valid reason phrase.")]
         public void StatusLineParserAcceptsValidReasonPhrase(string validReasonPhrase)
         {
             byte[] data = CreateBuffer("HTTP/1.1", "200", validReasonPhrase);
@@ -241,7 +232,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("Versions")]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer accepts valid versions.")]
         public void StatusLineParserAcceptsValidVersion(Version version)
         {
             byte[] data = CreateBuffer(String.Format("HTTP/{0}", version.ToString(2)), "200", "Reason");
@@ -267,7 +257,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("InvalidVersions")]
-        [Trait("Description", "HttpStatusLineParser.ParseBuffer rejects invalid protocol version.")]
         public void StatusLineParserRejectsInvalidVersion(string invalidVersion)
         {
             byte[] data = CreateBuffer(invalidVersion, "200", "Reason");

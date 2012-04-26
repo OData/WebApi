@@ -14,14 +14,12 @@ namespace System.Net.Http.Formatting
     {
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection is public, concrete, and unsealed.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(MediaTypeFormatterCollection), TypeAssert.TypeProperties.IsPublicVisibleClass, typeof(Collection<MediaTypeFormatter>));
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection() initializes default formatters.")]
         public void Constructor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
@@ -32,7 +30,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection(IEnumerable<MediaTypeFormatter>) accepts empty collection and does not add to it.")]
         public void Constructor1AcceptsEmptyList()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
@@ -40,7 +37,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection(IEnumerable<MediaTypeFormatter>) sets XmlFormatter and JsonFormatter for all known collections of formatters that contain them.")]
         public void Constructor1SetsProperties()
         {
             // All combination of formatters presented to ctor should still set XmlFormatter
@@ -68,7 +64,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection(IEnumerable<MediaTypeFormatter>) sets derived classes of Xml and Json formatters.")]
         public void Constructor1SetsDerivedFormatters()
         {
             // force to array to get stable instances
@@ -78,14 +73,12 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection(IEnumerable<MediaTypeFormatter>) throws with null formatters collection.")]
         public void Constructor1ThrowsWithNullFormatters()
         {
             Assert.ThrowsArgumentNull(() => new MediaTypeFormatterCollection(null), "formatters");
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection(IEnumerable<MediaTypeFormatter>) throws with null formatter in formatters collection.")]
         public void Constructor1ThrowsWithNullFormatterInCollection()
         {
             Assert.ThrowsArgument(
@@ -95,7 +88,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatterCollection(IEnumerable<MediaTypeFormatter>) accepts multiple instances of same formatter type.")]
         public void Constructor1AcceptsDuplicateFormatterTypes()
         {
             MediaTypeFormatter[] formatters = new MediaTypeFormatter[]
@@ -113,7 +105,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "XmlFormatter is set by ctor.")]
         public void XmlFormatterSetByCtor()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
@@ -122,7 +113,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "XmlFormatter is cleared by ctor with empty collection.")]
         public void XmlFormatterClearedByCtor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
@@ -132,7 +122,6 @@ namespace System.Net.Http.Formatting
 
 
         [Fact]
-        [Trait("Description", "JsonFormatter is set by ctor.")]
         public void JsonFormatterSetByCtor()
         {
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
@@ -141,7 +130,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "JsonFormatter is cleared by ctor with empty collection.")]
         public void JsonFormatterClearedByCtor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
@@ -152,7 +140,6 @@ namespace System.Net.Http.Formatting
 
 
         [Fact]
-        [Trait("Description", "FormUrlEncodedFormatter is set by ctor.")]
         public void FormUrlEncodedFormatterSetByCtor()
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();
@@ -161,7 +148,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "FormUrlEncodedFormatter is cleared by ctor with empty collection.")]
         public void FormUrlEncodedFormatterClearedByCtor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
@@ -174,7 +160,6 @@ namespace System.Net.Http.Formatting
 
 
         [Fact]
-        [Trait("Description", "Remove(MediaTypeFormatter) sets XmlFormatter to null.")]
         public void RemoveSetsXmlFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
@@ -185,7 +170,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Remove(MediaTypeFormatter) sets JsonFormatter to null.")]
         public void RemoveSetsJsonFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
@@ -196,7 +180,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Insert(int, MediaTypeFormatter) sets XmlFormatter.")]
         public void InsertSetsXmlFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
@@ -208,8 +191,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "Insert(int, MediaTypeFormatter) sets JsonFormatter.")]
-
         public void InsertSetsJsonFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();

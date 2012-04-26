@@ -128,14 +128,12 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "Utilities is internal static type.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(FormattingUtilities), TypeAssert.TypeProperties.IsClass | TypeAssert.TypeProperties.IsStatic);
         }
 
         [Fact]
-        [Trait("Description", "IsJsonValueType returns true")]
         public void IsJsonValueTypeReturnsTrue()
         {
             Assert.True(FormattingUtilities.IsJTokenType(typeof(JToken)), "Should return true");
@@ -145,7 +143,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "CreateEmptyContentHeaders returns empty headers")]
         public void CreateEmptyContentHeadersReturnsEmptyHeaders()
         {
             HttpContentHeaders headers = FormattingUtilities.CreateEmptyContentHeaders();
@@ -155,7 +152,6 @@ namespace System.Net.Http
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "EmptyStrings")]
-        [Trait("Description", "UnquoteToken returns same string on null, empty strings")]
         public void UnquoteTokenReturnsSameRefOnEmpty(string empty)
         {
             string result = FormattingUtilities.UnquoteToken(empty);
@@ -164,7 +160,6 @@ namespace System.Net.Http
 
         [Theory]
         [PropertyData("NotQuotedStrings")]
-        [Trait("Description", "UnquoteToken returns unquoted strings")]
         public void UnquoteTokenReturnsSameRefNonQuotedStrings(string test)
         {
             string result = FormattingUtilities.UnquoteToken(test);
@@ -173,7 +168,6 @@ namespace System.Net.Http
 
         [Theory]
         [PropertyData("QuotedStrings")]
-        [Trait("Description", "UnquoteToken returns unquoted strings")]
         public void UnquoteTokenReturnsUnquotedStrings(string token, string expectedResult)
         {
             string result = FormattingUtilities.UnquoteToken(token);

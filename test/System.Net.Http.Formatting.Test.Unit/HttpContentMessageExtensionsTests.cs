@@ -389,7 +389,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "ReadAsHttpRequestMessage should return HttpRequestMessage.")]
         public void ReadAsHttpRequestMessageAsync_TwoHostHeaders_Throws()
         {
             string[] request = new[] {
@@ -403,7 +402,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "ReadAsHttpRequestMessage sorts request vs entity headers correctly.")]
         public void ReadAsHttpRequestMessageAsync_SortHeaders()
         {
             string[] request = new[] {
@@ -423,7 +421,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "ReadAsHttpResponseMessage sorts response vs entity headers correctly.")]
         public void ReadAsHttpResponseMessageAsync_SortHeaders()
         {
             string[] response = new[] {

@@ -172,7 +172,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractJsonSerializer property works when set to false.")]
         public void UseDataContractJsonSerializer_False()
         {
             JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
@@ -187,7 +186,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "UseDataContractJsonSerializer property with Indent works when set to false.")]
         public void UseDataContractJsonSerializer_False_Indent()
         {
             JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
@@ -215,7 +213,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "OnWriteToStreamAsync() roundtrips JsonValue.")]
         public void WriteToStreamAsync_RoundTripsJToken()
         {
             string beforeMessage = "Hello World";

@@ -14,7 +14,6 @@ namespace System.Net.Http.Formatting.Parsers
     public class HttpRequestHeaderParserTests
     {
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser is internal class")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties<HttpRequestHeaderParser>(TypeAssert.TypeProperties.IsClass);
@@ -87,7 +86,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser constructor throws on invalid arguments")]
         public void HttpRequestHeaderParserConstructorTest()
         {
             HttpUnsortedRequest result = new HttpUnsortedRequest();
@@ -107,7 +105,6 @@ namespace System.Net.Http.Formatting.Parsers
 
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer throws on null buffer.")]
         public void RequestHeaderParserNullBuffer()
         {
             HttpUnsortedRequest result = new HttpUnsortedRequest();
@@ -118,7 +115,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer parses minimum requestline.")]
         public void RequestHeaderParserMinimumBuffer()
         {
             byte[] data = CreateBuffer("G", "/", "HTTP/1.1", null);
@@ -135,7 +131,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer parses standard methods.")]
         public void RequestHeaderParserAcceptsStandardMethods()
         {
             foreach (HttpMethod method in HttpUnitTestDataSets.AllHttpMethods)
@@ -159,7 +154,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer parses custom methods.")]
         public void RequestHeaderParserAcceptsCustomMethods()
         {
             foreach (HttpMethod method in HttpUnitTestDataSets.CustomHttpMethods)
@@ -183,7 +177,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer rejects invalid method")]
         public void RequestHeaderParserRejectsInvalidMethod()
         {
             foreach (string invalidMethod in ParserData.InvalidMethods)
@@ -204,7 +197,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer rejects invalid URI.")]
         public void RequestHeaderParserRejectsInvalidUri()
         {
             foreach (string invalidRequestUri in ParserData.InvalidRequestUris)
@@ -231,7 +223,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("Versions")]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer accepts valid versions.")]
         public void RequestHeaderParserAcceptsValidVersion(Version version)
         {
             byte[] data = CreateBuffer("GET", "/", String.Format("HTTP/{0}", version.ToString(2)), ParserData.ValidHeaders);
@@ -257,7 +248,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("InvalidVersions")]
-        [Trait("Description", "HttpRequestHeaderParser.ParseBuffer rejects lower case protocol version.")]
         public void RequestHeaderParserRejectsInvalidVersion(string invalidVersion)
         {
             byte[] data = CreateBuffer("GET", "/", invalidVersion, ParserData.ValidHeaders);

@@ -13,7 +13,6 @@ namespace System.Net.Http.Formatting.Parsers
     public class InternetMessageFormatHeaderParserTests
     {
         [Fact]
-        [Trait("Description", "HeaderParser is internal class")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties<InternetMessageFormatHeaderParser>(TypeAssert.TypeProperties.IsClass);
@@ -91,7 +90,6 @@ namespace System.Net.Http.Formatting.Parsers
 
 
         [Fact]
-        [Trait("Description", "HeaderParser constructor throws on invalid arguments")]
         public void HeaderParserConstructorTest()
         {
             IEnumerable<HttpHeaders> headers = InternetMessageFormatHeaderParserTests.CreateHttpHeaders();
@@ -109,7 +107,6 @@ namespace System.Net.Http.Formatting.Parsers
 
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer throws on null buffer.")]
         public void HeaderParserNullBuffer()
         {
             HttpHeaders headers;
@@ -120,7 +117,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses empty header.")]
         public void HeaderParserEmptyBuffer()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer();
@@ -137,7 +133,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses single header field.")]
         public void HeaderParserSingleNameValueHeader()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N:V");
@@ -161,7 +156,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses single header field with name only.")]
         public void HeaderParserSingleNameHeader()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N:");
@@ -185,7 +179,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses multiple header fields.")]
         public void HeaderParserMultipleNameHeader()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N:V1", "N:V2");
@@ -210,7 +203,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses multiple header fields with linear white space.")]
         public void HeaderParserLwsHeader()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N1:V1", "N2: V2", "N3:\tV3");
@@ -243,7 +235,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses invalid header field.")]
         public void HeaderParserInvalidHeader()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N1 :V1");
@@ -262,7 +253,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses various specialized header fields including JSON, P3P, etc.")]
         public void HeaderParserSpecializedHeaders()
         {
             Dictionary<string, string> headerData = new Dictionary<string, string>
@@ -296,7 +286,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses multi-line header field.")]
         public void HeaderParserSplitHeader()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N:V1,", " V2,", "\tV3,", "      V4,", " \tV5");
@@ -320,7 +309,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses too big header with single header field.")]
         public void HeaderParserDataTooBigSingle()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N:V");
@@ -339,7 +327,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer parses too big header with multiple header field.")]
         public void HeaderParserTestDataTooBigMulti()
         {
             byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer("N1:V1", "N2:V2", "N3:V3");
@@ -474,7 +461,6 @@ namespace System.Net.Http.Formatting.Parsers
         };
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample1 header.")]
         public void Rfc5322Sample1Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample1,
@@ -490,7 +476,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample2 header.")]
         public void Rfc5322Sample2Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample2,
@@ -507,7 +492,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample3 header.")]
         public void Rfc5322Sample3Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample3,
@@ -523,7 +507,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample4 header.")]
         public void Rfc5322Sample4Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample4,
@@ -539,7 +522,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample5 header.")]
         public void Rfc5322Sample5Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample5,
@@ -555,7 +537,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample6 header.")]
         public void Rfc5322Sample6Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample6,
@@ -574,7 +555,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample7 header.")]
         public void Rfc5322Sample7Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample7,
@@ -592,7 +572,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample8 header.")]
         public void Rfc5322Sample8Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample8,
@@ -608,7 +587,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample9 header.")]
         public void Rfc5322Sample9Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample9,
@@ -628,7 +606,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample10 header.")]
         public void Rfc5322Sample10Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample10,
@@ -646,7 +623,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HeaderParser.ParseBuffer Rfc5322Sample11 header.")]
         public void Rfc5322Sample11Test()
         {
             RunRfc5322SampleTest(Rfc5322Sample11,

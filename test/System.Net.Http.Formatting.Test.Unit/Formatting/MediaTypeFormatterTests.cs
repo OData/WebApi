@@ -51,14 +51,12 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatter is public, abstract, and unsealed.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(MediaTypeFormatter), TypeAssert.TypeProperties.IsPublicVisibleClass | TypeAssert.TypeProperties.IsAbstract);
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeFormatter() constructor (via derived class) sets SupportedMediaTypes and MediaTypeMappings.")]
         public void Constructor()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -86,7 +84,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SupportedMediaTypes is a mutable collection.")]
         public void SupportedMediaTypesIsMutable()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -101,7 +98,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SupportedMediaTypes Add throws with a null media type.")]
         public void SupportedMediaTypesAddThrowsWithNullMediaType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -112,7 +108,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaRangeValues")]
-        [Trait("Description", "SupportedMediaTypes Add throws with a media range.")]
         public void SupportedMediaTypesAddThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -121,7 +116,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SupportedMediaTypes Insert throws with a null media type.")]
         public void SupportedMediaTypesInsertThrowsWithNullMediaType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -132,7 +126,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaRangeValues")]
-        [Trait("Description", "SupportedMediaTypes Insert throws with a media range.")]
         public void SupportedMediaTypesInsertThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -142,7 +135,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "MediaTypeMappings is a mutable collection.")]
         public void MediaTypeMappingsIsMutable()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -158,7 +150,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
-        [Trait("Description", "TryMatchSupportedMediaType(MediaTypeHeaderValue, out MediaTypeMatch) returns media type and quality.")]
         public void TryMatchSupportedMediaTypeWithQuality(MediaTypeWithQualityHeaderValue mediaTypeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -176,7 +167,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
-        [Trait("Description", "TryMatchSupportedMediaType(MediaTypeHeaderValue, out MediaTypeMatch) returns cloned media type, not original.")]
         public void TryMatchSupportedMediaTypeReturnsClone(MediaTypeWithQualityHeaderValue mediaTypeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -193,7 +183,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
-        [Trait("Description", "TryMatchMediaTypeMapping(HttpRequestMessage, out MediaTypeMatch) returns media type and quality from media range with quality.")]
         public void TryMatchMediaTypeMappingWithQuality(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -216,7 +205,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
-        [Trait("Description", "TryMatchMediaTypeMapping(HttpRequestMessage, out MediaTypeMatch) returns a clone of the original media type.")]
         public void TryMatchMediaTypeMappingClonesMediaType(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -235,7 +223,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches based only on type.")]
         public void SelectResponseMediaTypeMatchesType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -249,7 +236,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
-        [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches media type from request content type.")]
         public void SelectResponseMediaTypeMatchesRequestContentType(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -267,7 +253,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
-        [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches supported media type from accept headers.")]
         public void SelectResponseMediaTypeMatchesAcceptHeaderToSupportedMediaTypes(MediaTypeWithQualityHeaderValue mediaTypeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -287,7 +272,6 @@ namespace System.Net.Http.Formatting
         }
 
         [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
-        [Trait("Description", "SelectResponseMediaType(Type, HttpRequestMessage) matches media type with quality from media type mapping.")]
         public void SelectResponseMediaTypeMatchesWithMediaTypeMapping(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -384,7 +368,6 @@ namespace System.Net.Http.Formatting
         [TestDataSet(
             typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
             typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
-        [Trait("Description", "CanReadAs(Type, MediaTypeHeaderValue) returns true for all standard media types.")]
         public void CanReadAsReturnsTrue(Type variationType, object testData, string mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -399,7 +382,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CanReadAs(Type, MediaTypeHeaderValue) throws with null type.")]
         public void CanReadAsThrowsWithNullType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -407,7 +389,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CanReadAs(Type, MediaTypeHeaderValue) throws with null formatter context.")]
         public void CanReadAsThrowsWithNullMediaType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -416,7 +397,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanWriteAs(Type, MediaTypeHeaderValue, out MediaTypeHeaderValue) returns true always for supported media types.")]
         public void CanWriteAsReturnsTrue(Type variationType, object testData)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -430,7 +410,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "CanWriteAs(Type, MediaTypeHeaderValue, out MediaTypeHeaderValue) throws with null content.")]
         public void CanWriteAsThrowsWithNullContent()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -440,7 +419,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanWriteAs(Type, MediaTypeHeaderValue, out MediaTypeHeaderValue) returns true always for supported media types.")]
         public void CanWriteAsUsingRequestReturnsTrue(Type variationType, object testData)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -457,7 +435,6 @@ namespace System.Net.Http.Formatting
         [TestDataSet(
             typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
             typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
-        [Trait("Description", "CanReadType(Type) base implementation returns true for all types.")]
         public void CanReadTypeReturnsTrue(Type variationType, object testData, string mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
@@ -473,7 +450,6 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        [Trait("Description", "CanWriteType() base implementation returns true always.")]
         public void CanWriteTypeReturnsTrue(Type variationType, object testData)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };

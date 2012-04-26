@@ -9,7 +9,6 @@ namespace System.Net.Http.Formatting
     public class ParsedMediaTypeHeadeValueTests
     {
         [Fact]
-        [Trait("Description", "MediaTypeHeaderValue ensures only valid media types are constructed.")]
         public void MediaTypeHeaderValue_Ensures_Valid_MediaType()
         {
             string[] invalidMediaTypes = new string[] { "", " ", "\n", "\t", "text", "text/", "text\\", "\\", "//", "text/[", "text/ ", " text/", " text/ ", "text\\ ", " text\\", " text\\ ", "text\\xml", "text//xml" };
@@ -21,7 +20,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "ParsedMediaTypeHeadeValue.Type returns the media type.")]
         public void Type_Returns_Just_The_Type()
         {
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/xml");
@@ -38,7 +36,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "ParsedMediaTypeHeadeValue.SubType returns the media sub-type.")]
         public void SubType_Returns_Just_The_Sub_Type()
         {
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/xml");
@@ -55,7 +52,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "ParsedMediaTypeHeadeValue.IsSubTypeMediaRange returns true for media ranges.")]
         public void IsSubTypeMediaRange_Returns_True_For_Media_Ranges()
         {
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/*");
@@ -68,7 +64,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        [Trait("Description", "ParsedMediaTypeHeadeValue.IsAllMediaRange returns true only when both the type and subtype are wildcard characters.")]
         public void IsAllMediaRange_Returns_True_Only_When_Type_And_SubType_Are_Wildcards()
         {
             MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/*");

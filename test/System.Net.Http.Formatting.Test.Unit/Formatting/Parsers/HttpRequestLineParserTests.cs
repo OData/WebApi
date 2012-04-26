@@ -13,7 +13,6 @@ namespace System.Net.Http.Formatting.Parsers
     public class HttpRequestLineParserTests
     {
         [Fact]
-        [Trait("Description", "HttpRequestLineParser is internal class")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties<HttpRequestLineParser>(TypeAssert.TypeProperties.IsClass);
@@ -71,7 +70,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser constructor throws on invalid arguments")]
         public void HttpRequestLineParserConstructorTest()
         {
             HttpUnsortedRequest requestLine = new HttpUnsortedRequest();
@@ -88,7 +86,6 @@ namespace System.Net.Http.Formatting.Parsers
 
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer throws on null buffer.")]
         public void RequestLineParserNullBuffer()
         {
             HttpUnsortedRequest requestLine = new HttpUnsortedRequest();
@@ -99,7 +96,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer parses minimum requestline.")]
         public void RequestLineParserMinimumBuffer()
         {
             byte[] data = CreateBuffer("G", "/", "HTTP/1.1");
@@ -116,7 +112,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer rejects LWS requestline.")]
         public void RequestLineParserRejectsLws()
         {
             byte[] data = CreateBuffer("GET", "/", "HTTP/1.1", true);
@@ -134,7 +129,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer parses standard methods.")]
         public void RequestLineParserAcceptsStandardMethods()
         {
             foreach (HttpMethod method in HttpUnitTestDataSets.AllHttpMethods)
@@ -158,7 +152,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer parses custom methods.")]
         public void RequestLineParserAcceptsCustomMethods()
         {
             foreach (HttpMethod method in HttpUnitTestDataSets.CustomHttpMethods)
@@ -182,7 +175,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer rejects invalid method")]
         public void RequestLineParserRejectsInvalidMethod()
         {
             foreach (string invalidMethod in ParserData.InvalidMethods)
@@ -203,7 +195,6 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Fact]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer rejects invalid URI.")]
         public void RequestLineParserRejectsInvalidUri()
         {
             foreach (string invalidRequestUri in ParserData.InvalidRequestUris)
@@ -230,7 +221,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("Versions")]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer accepts valid versions.")]
         public void RequestLineParserAcceptsValidVersion(Version version)
         {
             byte[] data = CreateBuffer("GET", "/", String.Format("HTTP/{0}", version.ToString(2)));
@@ -256,7 +246,6 @@ namespace System.Net.Http.Formatting.Parsers
 
         [Theory]
         [PropertyData("InvalidVersions")]
-        [Trait("Description", "HttpRequestLineParser.ParseBuffer rejects invalid protocol version.")]
         public void RequestLineParserRejectsInvalidVersion(string invalidVersion)
         {
             byte[] data = CreateBuffer("GET", "/", invalidVersion);

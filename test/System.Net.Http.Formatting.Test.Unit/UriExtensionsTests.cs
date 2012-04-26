@@ -16,14 +16,12 @@ namespace System.Net.Http
         private static readonly Type TestType = typeof(string);
 
         [Fact]
-        [Trait("Description", "UriExtensionMethods is public and static.")]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(UriExtensions), TypeAssert.TypeProperties.IsPublicVisibleClass | TypeAssert.TypeProperties.IsStatic);
         }
 
         [Fact]
-        [Trait("Description", "ParseQueryString(Uri) throws with null 'this'.")]
         public void ParseQueryStringThrowsWithNull()
         {
             Assert.ThrowsArgumentNull(() => ((Uri)null).ParseQueryString(), "address");
@@ -31,7 +29,6 @@ namespace System.Net.Http
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "Uris")]
-        [Trait("Description", "ParseQueryString(Uri) succeeds with valid URIs.")]
         public void ParseQueryStringSucceeds(Uri address)
         {
             NameValueCollection result = address.ParseQueryString();
@@ -49,7 +46,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "TryReadQueryAsJson(Uri, out JsonObject) throws with null 'this'.")]
         public void TryReadQueryAsJsonThrowsWithNull()
         {
             JObject value;
@@ -58,7 +54,6 @@ namespace System.Net.Http
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "Uris")]
-        [Trait("Description", "TryReadQueryAsJson(Uri, out JsonObject) succeeds with valid URIs.")]
         public void TryReadQueryAsJsonSucceeds(Uri address)
         {
             JObject value;
@@ -68,7 +63,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "TryReadQueryAs(Uri, Type, out object) throws with null 'this'.")]
         public void TryReadQueryAsThrowsWithNull()
         {
             object value;
@@ -77,7 +71,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "TryReadQueryAs(Uri, Type, out object) succeeds with valid URIs.")]
         public void TryReadQueryAsSucceeds()
         {
             object value;
@@ -115,7 +108,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "TryReadQueryAs<T>(Uri, out T) throws with null 'this'.")]
         public void TryReadQueryAsTThrowsWithNull()
         {
             object value;
@@ -123,7 +115,6 @@ namespace System.Net.Http
         }
 
         [Fact]
-        [Trait("Description", "TryReadQueryAs<T>(Uri, out T) succeeds with valid URIs.")]
         public void TryReadQueryAsTSucceeds()
         {
             UriBuilder address = new UriBuilder("http://some.host");

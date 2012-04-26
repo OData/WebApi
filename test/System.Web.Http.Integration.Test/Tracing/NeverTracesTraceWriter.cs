@@ -1,0 +1,40 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http;
+
+namespace System.Web.Http.Tracing
+{
+    /// <summary>
+    /// This <see cref="ITraceWriter"/> unconditionally responds that
+    /// all categories and levels are disabled.  
+    /// All attempts to trace do not call back to the user for trace information.
+    /// </summary>
+    /// <para>
+    /// Its use forces all tracers to be installed and to execute,
+    /// but all their trace statements are not called back for
+    /// their trace information.
+    /// </para>
+    public class NeverTracesTraceWriter : ITestTraceWriter
+    {
+        public bool IsEnabled(string category, TraceLevel level)
+        {
+            return false;
+        }
+
+        public void Trace(HttpRequestMessage request, string category, TraceLevel level, Action<TraceRecord> traceAction)
+        {
+            DidReceiveTraceRequests = true;
+        }
+
+        public void Start()
+        {
+            DidReceiveTraceRequests = false;
+        }
+
+        public bool DidReceiveTraceRequests { get; set; }
+
+        public void Finish()
+        {
+        }
+    }
+}

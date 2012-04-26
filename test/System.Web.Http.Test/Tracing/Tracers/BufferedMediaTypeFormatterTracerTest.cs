@@ -4,156 +4,17 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Text;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing.Tracers
 {
-    public class BufferedMediaTypeFormatterTracerTest
+    internal class BufferedMediaTypeFormatterTracerTest : MediaTypeFormatterTracerTestBase<BufferedMediaTypeFormatter, BufferedMediaTypeFormatterTracer>
     {
-        [Fact]
-        public void CanReadType_Calls_Inner()
+        public override BufferedMediaTypeFormatterTracer CreateTracer(BufferedMediaTypeFormatter formatter, HttpRequestMessage request, ITraceWriter traceWriter)
         {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            Type randomType = typeof(string);
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>();
-            mockFormatter.Setup(f => f.CanReadType(randomType)).Returns(true).Verifiable();
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(mockFormatter.Object, new TestTraceWriter(), request);
-
-            // Act
-            bool valueReturned = tracer.CanReadType(randomType);
-
-            // Assert
-            Assert.True(valueReturned);
-            mockFormatter.Verify();
-        }
-
-        [Fact]
-        public void CanWriteType_Calls_Inner()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            Type randomType = typeof(string);
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>();
-            mockFormatter.Setup(f => f.CanWriteType(randomType)).Returns(true).Verifiable();
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(mockFormatter.Object, new TestTraceWriter(), request);
-
-            // Act
-            bool valueReturned = tracer.CanWriteType(randomType);
-
-            // Assert
-            Assert.True(valueReturned);
-            mockFormatter.Verify();
-        }
-
-        [Fact]
-        public void GetPerRequestFormatterInstance_Calls_Inner_And_Wraps_Tracer_Around_It()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            Type randomType = typeof(string);
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("plain/text");
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>();
-            BufferedMediaTypeFormatter formatterObject = mockFormatter.Object;
-
-            mockFormatter.Setup(f => f.GetPerRequestFormatterInstance(randomType, request, mediaType)).Returns(formatterObject).Verifiable();
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(formatterObject, new TestTraceWriter(), request);
-
-            // Act
-            MediaTypeFormatter valueReturned = tracer.GetPerRequestFormatterInstance(randomType, request, mediaType);
-
-            // Assert
-            BufferedMediaTypeFormatterTracer tracerReturned = Assert.IsType<BufferedMediaTypeFormatterTracer>(valueReturned);
-            Assert.Same(formatterObject, tracerReturned.InnerFormatter as BufferedMediaTypeFormatter);
-            mockFormatter.Verify();
-        }
-
-        [Fact]
-        public void SetDefaultContentHeaders_Calls_Inner()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            Type randomType = typeof(string);
-            HttpContentHeaders contentHeaders = new StringContent("").Headers;
-            string mediaType = "plain/text";
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>();
-            BufferedMediaTypeFormatter formatterObject = mockFormatter.Object;
-
-            mockFormatter.Setup(f => f.SetDefaultContentHeaders(randomType, contentHeaders, mediaType)).Verifiable();
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(formatterObject, new TestTraceWriter(), request);
-
-            // Act
-            tracer.SetDefaultContentHeaders(randomType, contentHeaders, mediaType);
-
-            // Assert
-            mockFormatter.Verify();
-        }
-
-        [Fact]
-        public void SupportedMediaTypes_Uses_Inners()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/fake");
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
-            BufferedMediaTypeFormatter innerFormatter = mockFormatter.Object;
-            innerFormatter.SupportedMediaTypes.Clear();
-            innerFormatter.SupportedMediaTypes.Add(mediaType);
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
-
-            // Act & Assert
-            Assert.Equal(innerFormatter.SupportedMediaTypes, tracer.SupportedMediaTypes);
-        }
-
-        [Fact]
-        public void MediaTypeMappings_Uses_Inners()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/fake");
-            Mock<MediaTypeMapping> mockMapping = new Mock<MediaTypeMapping>(mediaType);
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
-            BufferedMediaTypeFormatter innerFormatter = mockFormatter.Object;
-            innerFormatter.MediaTypeMappings.Clear();
-            innerFormatter.MediaTypeMappings.Add(mockMapping.Object);
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
-
-            // Act & Assert
-            Assert.Equal(innerFormatter.MediaTypeMappings, tracer.MediaTypeMappings);
-        }
-
-        [Fact]
-        public void SupportedEncodings_Uses_Inners()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            Mock<Encoding> mockEncoding = new Mock<Encoding>();
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
-            BufferedMediaTypeFormatter innerFormatter = mockFormatter.Object;
-            innerFormatter.SupportedEncodings.Clear();
-            innerFormatter.SupportedEncodings.Add(mockEncoding.Object);
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
-
-            // Act & Assert
-            Assert.Equal(innerFormatter.SupportedEncodings, tracer.SupportedEncodings);
-        }
-
-        [Fact]
-        public void RequiredMemberSelector_Uses_Inners()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            Mock<IRequiredMemberSelector> mockSelector = new Mock<IRequiredMemberSelector>();
-            Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
-            BufferedMediaTypeFormatter innerFormatter = mockFormatter.Object;
-            innerFormatter.RequiredMemberSelector = mockSelector.Object;
-            BufferedMediaTypeFormatterTracer tracer = new BufferedMediaTypeFormatterTracer(innerFormatter, new TestTraceWriter(), request);
-
-            // Act & Assert
-            Assert.Equal(innerFormatter.RequiredMemberSelector, tracer.RequiredMemberSelector);
+            return new BufferedMediaTypeFormatterTracer(formatter, traceWriter, request);
         }
 
         [Fact]

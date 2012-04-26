@@ -127,6 +127,7 @@
     <Compile Include="Tracing\TracerCorrectnessTest.cs" />
     <Compile Include="Tracing\TraceRecordComparer.cs" />
     <Compile Include="Tracing\Tracers\BufferedMediaTypeFormatterTracerTest.cs" />
+    <Compile Include="Tracing\Tracers\ReadWriteMediaTypeFormatterTracerTestBase.cs" />
     <Compile Include="Tracing\Tracers\FormUrlEncodedMediaTypeFormatterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpActionBindingTracerTest.cs" />
     <Compile Include="Tracing\Tracers\HttpActionDescriptorTracerTest.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="Tracing\Tracers\HttpParameterBindingTracerTest.cs" />
     <Compile Include="Tracing\Tracers\JsonMediaTypeFormatterTracerTest.cs" />
     <Compile Include="Tracing\Tracers\MediaTypeFormatterTracerTest.cs" />
+    <Compile Include="Tracing\Tracers\MediaTypeFormatterTracerTestBase.cs" />
     <Compile Include="Tracing\Tracers\MessageHandlerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\RequestMessageHandlerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\XmlMediaTypeFormatterTracerTest.cs" />

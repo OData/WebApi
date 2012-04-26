@@ -232,10 +232,10 @@
     <value>The media type formatter of type '{0}' does not support writing because it does not implement the WriteToStreamAsync method.</value>
   </data>
   <data name="MediaTypeFormatterCannotReadSync" xml:space="preserve">
-    <value>The media type formatter of type '{0}' does not support reading because it does not implement the OnReadFromStream method.</value>
+    <value>The media type formatter of type '{0}' does not support reading because it does not implement the ReadFromStream method.</value>
   </data>
   <data name="MediaTypeFormatterCannotWriteSync" xml:space="preserve">
-    <value>The media type formatter of type '{0}' does not support writing because it does not implement the OnWriteToStream method.</value>
+    <value>The media type formatter of type '{0}' does not support writing because it does not implement the WriteToStream method.</value>
   </data>
   <data name="ObjectContent_FormatterCannotWriteType" xml:space="preserve">
     <value>The configured formatter '{0}' cannot write an object of type '{1}'.</value>

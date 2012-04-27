@@ -146,7 +146,7 @@
         return $.map(changeSet, function (change, index) {
             var changeSetEntry =  {
                 Id: index.toString(),
-                Operation: operations[change.changeKind],
+                Operation: operations[change.changeKind]
             };
             $.each({ entity: "Entity", originalEntity: "OriginalEntity" }, function (key, value) {
                 if (change[key]) {

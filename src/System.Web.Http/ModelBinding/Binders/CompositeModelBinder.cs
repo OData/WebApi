@@ -78,12 +78,6 @@ namespace System.Web.Http.ModelBinding.Binders
                 ValueProvider = oldBindingContext.ValueProvider
             };
 
-            // validation is expensive to create, so copy it over if we can
-            if (object.ReferenceEquals(modelName, oldBindingContext.ModelName))
-            {
-                newBindingContext.ValidationNode = oldBindingContext.ValidationNode;
-            }
-
             return newBindingContext;
         }
     }

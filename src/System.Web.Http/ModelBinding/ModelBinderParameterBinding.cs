@@ -20,9 +20,6 @@ namespace System.Web.Http.ModelBinding
         private readonly ValueProviderFactory[] _valueProviderFactories;
         private readonly IModelBinder _binder;
 
-        // Cache information for ModelBindingContext.
-        private ModelValidationNode _validationNodeCache;
-
         public ModelBinderParameterBinding(HttpParameterDescriptor descriptor,
             IModelBinder modelBinder,
             IEnumerable<ValueProviderFactory> valueProviderFactories)
@@ -81,15 +78,6 @@ namespace System.Web.Http.ModelBinding
                 ModelState = actionContext.ModelState,
                 ValueProvider = vp
             };
-
-            if (_validationNodeCache == null)
-            {
-                Interlocked.Exchange(ref _validationNodeCache, ctx.ValidationNode);
-            }
-            else
-            {
-                ctx.ValidationNode = _validationNodeCache;
-            }
 
             return ctx;
         }

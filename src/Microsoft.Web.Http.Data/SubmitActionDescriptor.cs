@@ -8,8 +8,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Web.Http.Controllers;
 
 namespace Microsoft.Web.Http.Data
@@ -40,7 +40,7 @@ namespace Microsoft.Web.Http.Data
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns HttpResponseMessage.")]
-        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             return TaskHelpers.RunSynchronously<object>(() =>
             {
@@ -59,7 +59,7 @@ namespace Microsoft.Web.Http.Data
 
                 // return the entries
                 return controllerContext.Request.CreateResponse<ChangeSetEntry[]>(HttpStatusCode.OK, changeSet.ChangeSetEntries.ToArray());
-            });
+            }, cancellationToken);
         }
 
         /// <summary>

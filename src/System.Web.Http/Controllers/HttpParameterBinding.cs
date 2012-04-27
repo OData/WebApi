@@ -54,7 +54,7 @@ namespace System.Web.Http.Controllers
         {
             get { return _descriptor; }
         }
-                
+
         /// <summary>
         /// Execute the binding for the given request.
         /// On success, this will add the parameter to the actionContext.ActionArguments dictionary.
@@ -65,6 +65,6 @@ namespace System.Web.Http.Controllers
         /// <param name="cancellationToken">Cancellation token for cancelling the binding operation. Or a binder can also bind a parameter to this.</param>
         /// <returns>Task that is signaled when the binding is complete. For simple bindings from a URI, this should be signalled immediately.
         /// For bindings that read the content body, this may do network IO.</returns>
-        public abstract Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken);                
+        public abstract Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken);
     }
 }

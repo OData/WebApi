@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,30 +29,18 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [Fact]
-        public void InvokeActionAsync_Calls_ActionDescriptor_ExecuteAsync()
+        public void InvokeActionAsync_Invokes_Inner_InvokeActionAsync()
         {
             // Arrange
-            Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
-            mockActionDescriptor.Setup(a => a.ActionName).Returns("mockAction");
-            mockActionDescriptor.Setup(a => a.GetParameters()).Returns(new Collection<HttpParameterDescriptor>(new HttpParameterDescriptor[0]));
-            mockActionDescriptor.Setup(a => a.ReturnType).Returns(typeof(void));
-            mockActionDescriptor.Setup(a => a.ResultConverter).Returns(new VoidResultConverter());
-            bool executeWasCalled = false;
-            mockActionDescriptor.Setup(a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>()))
-                .Returns(() => TaskHelpers.FromResult<object>(null))
-                .Callback(() => { executeWasCalled = true; });
-
-            HttpActionContext context = ContextUtil.CreateActionContext(
-                ContextUtil.CreateControllerContext(instance: _apiController),
-                mockActionDescriptor.Object);
-
-            HttpActionInvokerTracer tracer = new HttpActionInvokerTracer(new ApiControllerActionInvoker(), new TestTraceWriter());
+            var cts = new CancellationTokenSource();
+            var mockInnerInvoker = new Mock<IHttpActionInvoker>();
+            IHttpActionInvoker invoker = new HttpActionInvokerTracer(mockInnerInvoker.Object, new Mock<ITraceWriter>().Object);
 
             // Act
-            ((IHttpActionInvoker)tracer).InvokeActionAsync(context, CancellationToken.None).Wait();
+            invoker.InvokeActionAsync(_actionContext, cts.Token);
 
             // Assert
-            Assert.True(executeWasCalled);
+            mockInnerInvoker.Verify(i => i.InvokeActionAsync(_actionContext, cts.Token), Times.Once());
         }
 
         [Fact]
@@ -183,7 +169,7 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             InvalidOperationException expectedException = new InvalidOperationException("test message");
-            Mock<ApiControllerActionInvoker> mockActionInvoker = new Mock<ApiControllerActionInvoker>() {CallBase = true};
+            Mock<ApiControllerActionInvoker> mockActionInvoker = new Mock<ApiControllerActionInvoker>() { CallBase = true };
             mockActionInvoker.Setup(
                 a => a.InvokeActionAsync(It.IsAny<HttpActionContext>(), It.IsAny<CancellationToken>())).Throws(expectedException);
             HttpActionInvokerTracer tracer = new HttpActionInvokerTracer(mockActionInvoker.Object, new TestTraceWriter());

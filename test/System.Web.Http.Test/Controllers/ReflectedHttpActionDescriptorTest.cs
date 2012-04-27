@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -172,12 +173,27 @@ namespace System.Web.Http
         }
 
         [Fact]
+        public void ExecuteAsync_DoesNotCallActionWhenCancelled()
+        {
+            var cts = new CancellationTokenSource();
+            cts.Cancel();
+            Action action = () => { throw new NotImplementedException(); };
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = action.Method };
+
+            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments, cts.Token);
+
+            result.WaitUntilCompleted();
+            Assert.True(result.IsCanceled);
+        }
+
+
+        [Fact]
         public void ExecuteAsync_Returns_TaskOfNull_ForVoidAction()
         {
             Action deleteAllUsersMethod = _controller.DeleteAllUsers;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = deleteAllUsersMethod.Method };
 
-            Task<object> returnValue = actionDescriptor.ExecuteAsync(_context, _arguments);
+            Task<object> returnValue = actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None);
 
             returnValue.WaitUntilCompleted();
             Assert.Null(returnValue.Result);
@@ -191,7 +207,7 @@ namespace System.Web.Http
             _arguments["firstName"] = "test";
             _arguments["lastName"] = "unit";
 
-            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments);
+            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None);
 
             result.WaitUntilCompleted();
             var returnValue = Assert.IsType<User>(result.Result);
@@ -205,7 +221,7 @@ namespace System.Web.Http
             Func<Task> deleteAllUsersMethod = _controller.DeleteAllUsersAsync;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = deleteAllUsersMethod.Method };
 
-            Task<object> returnValue = actionDescriptor.ExecuteAsync(_context, _arguments);
+            Task<object> returnValue = actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None);
 
             returnValue.WaitUntilCompleted();
             Assert.Null(returnValue.Result);
@@ -219,7 +235,7 @@ namespace System.Web.Http
             _arguments["firstName"] = "test";
             _arguments["lastName"] = "unit";
 
-            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments);
+            Task<object> result = actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None);
 
             result.WaitUntilCompleted();
             var returnValue = Assert.IsType<User>(result.Result);
@@ -234,7 +250,7 @@ namespace System.Web.Http
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
 
             Assert.ThrowsArgumentNull(
-                () => actionDescriptor.ExecuteAsync(null, _arguments),
+                () => actionDescriptor.ExecuteAsync(null, _arguments, CancellationToken.None),
                 "controllerContext");
         }
 
@@ -245,7 +261,7 @@ namespace System.Web.Http
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = echoUserMethod.Method };
 
             Assert.ThrowsArgumentNull(
-                () => actionDescriptor.ExecuteAsync(_context, null).RethrowFaultedTaskException(),
+                () => actionDescriptor.ExecuteAsync(_context, null, CancellationToken.None).RethrowFaultedTaskException(),
                 "arguments");
         }
 
@@ -257,7 +273,7 @@ namespace System.Web.Http
             _arguments["id"] = null;
 
             var exception = Assert.Throws<HttpResponseException>(
-                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException());
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
@@ -275,7 +291,7 @@ namespace System.Web.Http
             _arguments["otherId"] = 6;
 
             var exception = Assert.Throws<HttpResponseException>(
-                () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException());
+                () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
@@ -293,7 +309,7 @@ namespace System.Web.Http
             _arguments["id"] = new DateTime();
 
             var exception = Assert.Throws<HttpResponseException>(
-                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException());
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
@@ -311,7 +327,7 @@ namespace System.Web.Http
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = method.Method };
 
             var exception = Assert.Throws<InvalidOperationException>(
-                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException(),
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException(),
                  "The method 'WrappedTaskReturningMethod' on type 'UsersRpcController' returned an instance of 'System.Threading.Tasks.Task`1[[System.Threading.Tasks.Task, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'. Make sure to call Unwrap on the returned value to avoid unobserved faulted Task.");
         }
 
@@ -322,7 +338,7 @@ namespace System.Web.Http
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = method.Method };
 
             var exception = Assert.Throws<InvalidOperationException>(
-                 () => actionDescriptor.ExecuteAsync(_context, _arguments).RethrowFaultedTaskException(),
+                 () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException(),
                  "The method 'TaskAsObjectReturningMethod' on type 'UsersRpcController' returned a Task instance even though it is not an asynchronous method.");
         }
 

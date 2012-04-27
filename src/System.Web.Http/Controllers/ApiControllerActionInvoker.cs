@@ -20,8 +20,8 @@ namespace System.Web.Http.Controllers
 
             return TaskHelpers.RunSynchronously(() =>
             {
-                return actionDescriptor.ExecuteAsync(controllerContext, actionContext.ActionArguments)
-                    .Then(value => actionDescriptor.ResultConverter.Convert(controllerContext, value));
+                return actionDescriptor.ExecuteAsync(controllerContext, actionContext.ActionArguments, cancellationToken)
+                                       .Then(value => actionDescriptor.ResultConverter.Convert(controllerContext, value), cancellationToken);
             }, cancellationToken)
             .Catch<HttpResponseMessage>(info =>
             {

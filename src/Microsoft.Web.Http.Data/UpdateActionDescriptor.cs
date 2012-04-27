@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -60,7 +61,7 @@ namespace Microsoft.Web.Http.Data
             return true;
         }
 
-        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             return TaskHelpers.RunSynchronously(() =>
             {
@@ -68,7 +69,7 @@ namespace Microsoft.Web.Http.Data
                 object[] paramValues = arguments.Select(p => p.Value).ToArray();
 
                 return _method.Invoke(controller, paramValues);
-            });
+            }, cancellationToken);
         }
     }
 }

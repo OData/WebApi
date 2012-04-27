@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -302,21 +303,19 @@ namespace System.Web.Http.Tracing.Tracers
         public void ExecuteAsync_Invokes_Inner_ExecuteAsync()
         {
             // Arrange
-            bool executeCalled = false;
-            Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
+            var cts = new CancellationTokenSource();
+            var mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");
-            mockActionDescriptor.Setup(
-                a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>())).Callback(() => executeCalled = true);
-            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
+            var controllerContext = ContextUtil.CreateControllerContext();
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(ApiController));
-            IDictionary<string, object> arguments = new Dictionary<string, object>();
-            HttpActionDescriptorTracer tracer = new HttpActionDescriptorTracer(controllerContext, mockActionDescriptor.Object, new TestTraceWriter());
+            var arguments = new Dictionary<string, object>();
+            var tracer = new HttpActionDescriptorTracer(controllerContext, mockActionDescriptor.Object, new TestTraceWriter());
 
             // Act
-            tracer.ExecuteAsync(controllerContext, arguments);
+            tracer.ExecuteAsync(controllerContext, arguments, cts.Token);
 
             // Assert
-            Assert.True(executeCalled);
+            mockActionDescriptor.Verify(a => a.ExecuteAsync(controllerContext, arguments, cts.Token), Times.Once());
         }
 
         [Fact]
@@ -325,7 +324,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");
-            mockActionDescriptor.Setup(a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>()))
+            mockActionDescriptor.Setup(a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>(), CancellationToken.None))
                 .Returns(TaskHelpers.FromResult<object>(null));
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(ApiController));
@@ -339,7 +338,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            var result = tracer.ExecuteAsync(controllerContext, arguments);
+            var result = tracer.ExecuteAsync(controllerContext, arguments, CancellationToken.None);
 
             // Assert
             result.WaitUntilCompleted();
@@ -353,7 +352,7 @@ namespace System.Web.Http.Tracing.Tracers
             Mock<HttpActionDescriptor> mockActionDescriptor = new Mock<HttpActionDescriptor>() { CallBase = true };
             InvalidOperationException exception = new InvalidOperationException("test");
             mockActionDescriptor.Setup(
-                a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>())).Throws(exception);
+                a => a.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>(), CancellationToken.None)).Throws(exception);
             mockActionDescriptor.Setup(a => a.ActionName).Returns("test");
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext();
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, "test", typeof(ApiController));
@@ -367,7 +366,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => tracer.ExecuteAsync(controllerContext, arguments));
+            Assert.Throws<InvalidOperationException>(() => tracer.ExecuteAsync(controllerContext, arguments, CancellationToken.None));
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());

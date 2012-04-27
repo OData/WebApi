@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Filters;
 using System.Web.Http.Internal;
@@ -101,15 +102,7 @@ namespace System.Web.Http.Controllers
             }
         }
 
-        /// <summary>
-        /// The return type of the method or <c>null</c> if the method does not return a value (e.g. a method returning
-        /// <c>void</c>).
-        /// </summary>
-        /// <remarks>
-        /// This implementation returns the exact value of <see cref="System.Reflection.MethodInfo.ReturnType"/> for 
-        /// synchronous methods and an unwrapped value for asynchronous methods (e.g. the <c>T</c> of <see cref="Task{T}"/>.
-        /// This returns <c>null</c> for methods returning <c>void</c> or <see cref="Task"/>.
-        /// </remarks>
+        /// <inheritdoc/>
         public override Type ReturnType
         {
             get { return _returnType; }
@@ -122,14 +115,8 @@ namespace System.Web.Http.Controllers
             return new Collection<T>(TypeHelper.OfType<T>(_attrCached));
         }
 
-        /// <summary>
-        /// Executes the described action and returns a <see cref="Task{T}"/> that once completed will
-        /// contain the return value of the action.
-        /// </summary>
-        /// <param name="controllerContext">The context.</param>
-        /// <param name="arguments">The arguments.</param>
-        /// <returns>A <see cref="Task{T}"/> that once completed will contain the return value of the action.</returns>
-        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        /// <inheritdoc/>
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             if (controllerContext == null)
             {
@@ -145,7 +132,7 @@ namespace System.Web.Http.Controllers
             {
                 object[] argumentValues = PrepareParameters(arguments, controllerContext);
                 return _actionExecutor.Value.Execute(controllerContext.Controller, argumentValues);
-            });
+            }, cancellationToken);
         }
 
         public override Collection<IFilter> GetFilters()

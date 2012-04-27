@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -23,7 +24,8 @@ namespace System.Web.Http.Tracing.Tracers
         private readonly HttpActionDescriptor _innerDescriptor;
         private readonly ITraceWriter _traceWriter;
 
-        public HttpActionDescriptorTracer(HttpControllerContext controllerContext, HttpActionDescriptor innerDescriptor, ITraceWriter traceWriter) : base(controllerContext.ControllerDescriptor)
+        public HttpActionDescriptorTracer(HttpControllerContext controllerContext, HttpActionDescriptor innerDescriptor, ITraceWriter traceWriter)
+            : base(controllerContext.ControllerDescriptor)
         {
             Contract.Assert(innerDescriptor != null);
             Contract.Assert(traceWriter != null);
@@ -75,7 +77,7 @@ namespace System.Web.Http.Tracing.Tracers
             get { return _innerDescriptor.ReturnType; }
         }
 
-        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
             return _traceWriter.TraceBeginEndAsync<object>(
                 controllerContext.Request,
@@ -90,9 +92,9 @@ namespace System.Web.Http.Tracing.Tracers
                 },
                 execute: () =>
                 {
-                    return _innerDescriptor.ExecuteAsync(controllerContext, arguments);
+                    return _innerDescriptor.ExecuteAsync(controllerContext, arguments, cancellationToken);
                 },
-                endTrace: (tr, value) => 
+                endTrace: (tr, value) =>
                 {
                     tr.Message = Error.Format(SRResources.TraceActionReturnValue,
                                               FormattingUtilities.ValueToString(value, CultureInfo.CurrentCulture));

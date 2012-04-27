@@ -52,17 +52,19 @@ namespace System.Web.Http
         [Fact]
         public void InvokeActionAsync_InvokesActionDescriptorExecuteAsync()
         {
-            var result = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
+            var cts = new CancellationTokenSource();
+
+            var result = _actionInvoker.InvokeActionAsync(_actionContext, cts.Token);
 
             result.WaitUntilCompleted();
-            _actionDescriptorMock.Verify(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments), Times.Once());
+            _actionDescriptorMock.Verify(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments, cts.Token), Times.Once());
         }
 
         [Fact]
         public void InvokeActionAsync_PassesExecutionResultToConfiguredConverter()
         {
             var value = new object();
-            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments))
+            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments, CancellationToken.None))
                 .Returns(TaskHelpers.FromResult(value));
 
             var result = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
@@ -75,7 +77,7 @@ namespace System.Web.Http
         public void InvokeActionAsync_ReturnsResponseFromConverter()
         {
             var response = new HttpResponseMessage();
-            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments))
+            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(_actionContext.ControllerContext, _actionContext.ActionArguments, CancellationToken.None))
                 .Returns(TaskHelpers.FromResult(new object()));
             _converterMock.Setup(c => c.Convert(_actionContext.ControllerContext, It.IsAny<object>()))
                 .Returns(response);
@@ -90,7 +92,7 @@ namespace System.Web.Http
         public void InvokeActionAsync_WhenExecuteThrowsHttpResponseException_ReturnsResponse()
         {
             HttpResponseMessage response = new HttpResponseMessage();
-            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>()))
+            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>(), CancellationToken.None))
                 .Throws(new HttpResponseException(response));
 
             var result = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);
@@ -104,7 +106,7 @@ namespace System.Web.Http
         public void InvokeActionAsync_WhenExecuteThrows_ReturnsFaultedTask()
         {
             Exception exception = new Exception();
-            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>()))
+            _actionDescriptorMock.Setup(ad => ad.ExecuteAsync(It.IsAny<HttpControllerContext>(), It.IsAny<IDictionary<string, object>>(), CancellationToken.None))
                 .Throws(exception);
 
             var result = _actionInvoker.InvokeActionAsync(_actionContext, CancellationToken.None);

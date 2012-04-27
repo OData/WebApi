@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -40,9 +41,9 @@ namespace Microsoft.Web.Http.Data
             get { return _innerDescriptor.ResultConverter; }
         }
 
-        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments)
+        public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
         {
-            return _innerDescriptor.ExecuteAsync(controllerContext, arguments);
+            return _innerDescriptor.ExecuteAsync(controllerContext, arguments, cancellationToken);
         }
 
         public override Collection<HttpParameterDescriptor> GetParameters()

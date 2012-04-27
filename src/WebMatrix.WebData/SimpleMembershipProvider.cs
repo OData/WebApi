@@ -157,6 +157,11 @@ namespace WebMatrix.WebData
             get { return "webpages_OAuthMembership"; }
         }
 
+        internal static string OAuthTokenTableName 
+        {
+            get { return "webpages_OAuthToken"; }
+        }
+
         private string SafeUserTableName
         {
             get { return "[" + UserTableName + "]"; }
@@ -255,7 +260,12 @@ namespace WebMatrix.WebData
 
                 if (!CheckTableExists(db, OAuthMembershipTableName))
                 {
-                    db.Execute(@"CREATE TABLE " + OAuthMembershipTableName + "(Provider nvarchar(30) NOT NULL, ProviderUserId nvarchar(100) NOT NULL, UserId int NOT NULL, Primary Key (Provider, ProviderUserId))");
+                    db.Execute(@"CREATE TABLE " + OAuthMembershipTableName + " (Provider nvarchar(30) NOT NULL, ProviderUserId nvarchar(100) NOT NULL, UserId int NOT NULL, PRIMARY KEY (Provider, ProviderUserId))");
+                }
+
+                if (!CheckTableExists(db, OAuthTokenTableName))
+                {
+                    db.Execute(@"CREATE TABLE " + OAuthTokenTableName + " (Token nvarchar(100) NOT NULL, Secret nvarchar(100) NOT NULL, PRIMARY KEY (Token))");
                 }
 
                 if (!CheckTableExists(db, MembershipTableName))
@@ -1106,6 +1116,87 @@ namespace WebMatrix.WebData
                 }
 
                 return -1;
+            }
+        }
+
+        public override string GetOAuthTokenSecret(string token)
+        {
+            VerifyInitialized();
+
+            using (var db = ConnectToDatabase())
+            {
+                // Note that token is case-sensitive
+                dynamic secret = db.QueryValue(@"SELECT Secret FROM [" + OAuthTokenTableName + "] WHERE Token=@0", token);
+                return (string)secret;
+            }
+        }
+
+        public override void StoreOAuthRequestToken(string requestToken, string requestTokenSecret)
+        {
+            VerifyInitialized();
+
+            string existingSecret = GetOAuthTokenSecret(requestToken);
+            if (existingSecret != null)
+            {
+                if (existingSecret == requestTokenSecret)
+                {
+                    // the record already exists
+                    return;
+                }
+
+                using (var db = ConnectToDatabase())
+                {
+                    // the token exists with old secret, update it to new secret
+                    db.Execute(@"UPDATE [" + OAuthTokenTableName + "] SET Secret = @1 WHERE Token = @0", requestToken, requestTokenSecret);
+                }
+            }
+            else
+            {
+                using (var db = ConnectToDatabase())
+                {
+                    // insert new record
+                    int insert = db.Execute(@"INSERT INTO [" + OAuthTokenTableName + "] (Token, Secret) VALUES(@0, @1)", requestToken, requestTokenSecret);
+                    if (insert != 1)
+                    {
+                        throw new ProviderException(WebDataResources.SimpleMembership_FailToStoreOAuthToken);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replaces the request token with access token and secret.
+        /// </summary>
+        /// <param name="requestToken">The request token.</param>
+        /// <param name="accessToken">The access token.</param>
+        /// <param name="accessTokenSecret">The access token secret.</param>
+        public override void ReplaceOAuthRequestTokenWithAccessToken(string requestToken, string accessToken, string accessTokenSecret)
+        {
+            VerifyInitialized();
+
+            using (var db = ConnectToDatabase())
+            {
+                // insert new record
+                db.Execute(@"DELETE FROM [" + OAuthTokenTableName + "] WHERE Token = @0", requestToken);
+
+                // Although there are two different types of tokens, request token and access token,
+                // we treat them the same in database records.
+                StoreOAuthRequestToken(accessToken, accessTokenSecret);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the OAuth token from the backing store from the database.
+        /// </summary>
+        /// <param name="token">The token to be deleted.</param>
+        public override void DeleteOAuthToken(string token)
+        {
+            VerifyInitialized();
+
+            using (var db = ConnectToDatabase())
+            {
+                // Note that token is case-sensitive
+                db.Execute(@"DELETE FROM [" + OAuthTokenTableName + "] WHERE Token=@0", token);
             }
         }
 

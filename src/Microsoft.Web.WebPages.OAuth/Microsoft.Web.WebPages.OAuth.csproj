@@ -44,22 +44,22 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotNetOpenAuth.AspNet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetOpenAuth.AspNet.4.0.0.12084\lib\net40-full\DotNetOpenAuth.AspNet.dll</HintPath>
+      <HintPath>..\..\packages\DotNetOpenAuth.AspNet.4.0.3.12129\lib\net40-full\DotNetOpenAuth.AspNet.dll</HintPath>
     </Reference>
     <Reference Include="DotNetOpenAuth.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetOpenAuth.Core.4.0.0.12084\lib\net40-full\DotNetOpenAuth.Core.dll</HintPath>
+      <HintPath>..\..\packages\DotNetOpenAuth.Core.4.0.3.12129\lib\net40-full\DotNetOpenAuth.Core.dll</HintPath>
     </Reference>
     <Reference Include="DotNetOpenAuth.OAuth, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetOpenAuth.OAuth.Core.4.0.0.12084\lib\net40-full\DotNetOpenAuth.OAuth.dll</HintPath>
+      <HintPath>..\..\packages\DotNetOpenAuth.OAuth.Core.4.0.3.12129\lib\net40-full\DotNetOpenAuth.OAuth.dll</HintPath>
     </Reference>
     <Reference Include="DotNetOpenAuth.OAuth.Consumer, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetOpenAuth.OAuth.Consumer.4.0.0.12084\lib\net40-full\DotNetOpenAuth.OAuth.Consumer.dll</HintPath>
+      <HintPath>..\..\packages\DotNetOpenAuth.OAuth.Consumer.4.0.3.12129\lib\net40-full\DotNetOpenAuth.OAuth.Consumer.dll</HintPath>
     </Reference>
     <Reference Include="DotNetOpenAuth.OpenId, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetOpenAuth.OpenId.Core.4.0.0.12084\lib\net40-full\DotNetOpenAuth.OpenId.dll</HintPath>
+      <HintPath>..\..\packages\DotNetOpenAuth.OpenId.Core.4.0.3.12129\lib\net40-full\DotNetOpenAuth.OpenId.dll</HintPath>
     </Reference>
     <Reference Include="DotNetOpenAuth.OpenId.RelyingParty, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetOpenAuth.OpenId.RelyingParty.4.0.0.12084\lib\net40-full\DotNetOpenAuth.OpenId.RelyingParty.dll</HintPath>
+      <HintPath>..\..\packages\DotNetOpenAuth.OpenId.RelyingParty.4.0.3.12129\lib\net40-full\DotNetOpenAuth.OpenId.RelyingParty.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -71,12 +71,17 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\CommonResources.Designer.cs">
+      <Link>Common\CommonResources.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="..\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="AuthenticationClientCollection.cs" />
-    <Compile Include="BuiltInOAuthClient.cs" />
-    <Compile Include="BuiltInOpenIDClient.cs" />
+    <Compile Include="AuthenticationClientData.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OAuthAccount.cs" />
     <Compile Include="OAuthWebSecurity.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
@@ -86,7 +91,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>WebResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\OAuthResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OAuthResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="WebPagesOAuthDataProvider.cs" />
+    <Compile Include="WebPagesOAuthTokenManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Web.Razor\System.Web.Razor.csproj">
@@ -103,9 +114,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\CommonResources.resx">
+      <Link>Common\CommonResources.resx</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonResources1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\WebResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>WebResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\OAuthResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OAuthResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

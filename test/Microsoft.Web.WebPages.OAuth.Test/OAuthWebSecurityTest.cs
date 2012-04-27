@@ -53,92 +53,6 @@ namespace Microsoft.Web.WebPages.OAuth.Test
         }
 
         [Fact]
-        public void RegisterOAuthClient()
-        {
-            // Arrange
-            var clients = new BuiltInOAuthClient[]
-                              {
-                                  BuiltInOAuthClient.Facebook,
-                                  BuiltInOAuthClient.Twitter,
-                                  BuiltInOAuthClient.LinkedIn,
-                                  BuiltInOAuthClient.WindowsLive
-                              };
-            var clientNames = new string[]
-                                  {
-                                      "Facebook",
-                                      "Twitter",
-                                      "LinkedIn",
-                                      "WindowsLive"
-                                  };
-
-            for (int i = 0; i < clients.Length; i++)
-            {
-                // Act
-                OAuthWebSecurity.RegisterOAuthClient(clients[i], "key", "secret");
-
-                var client = new Mock<IAuthenticationClient>();
-                client.Setup(c => c.ProviderName).Returns(clientNames[i]);
-
-                // Assert
-                Assert.Throws(typeof(ArgumentException), () => OAuthWebSecurity.RegisterClient(client.Object));
-            }
-        }
-
-        [Fact]
-        public void RegisterOpenIDClient()
-        {
-            // Arrange
-            var clients = new BuiltInOpenIDClient[]
-                              {
-                                  BuiltInOpenIDClient.Google,
-                                  BuiltInOpenIDClient.Yahoo
-                              };
-            var clientNames = new string[]
-                                  {
-                                      "Google",
-                                      "Yahoo"
-                                  };
-
-            for (int i = 0; i < clients.Length; i++)
-            {
-                // Act
-                OAuthWebSecurity.RegisterOpenIDClient(clients[i]);
-
-                var client = new Mock<IAuthenticationClient>();
-                client.Setup(c => c.ProviderName).Returns(clientNames[i]);
-
-                // Assert
-                AssertEx.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client.Object), null);
-            }
-        }
-
-        [Fact]
-        public void GetRegisteredClientsReturnTheCorrectSet()
-        {
-            // Arrange
-            OAuthWebSecurity.RegisterOpenIDClient(BuiltInOpenIDClient.Google);
-            OAuthWebSecurity.RegisterOpenIDClient(BuiltInOpenIDClient.Yahoo);
-
-            OAuthWebSecurity.RegisterOAuthClient(BuiltInOAuthClient.Facebook, "123", "456");
-            OAuthWebSecurity.RegisterOAuthClient(BuiltInOAuthClient.LinkedIn, "142", "4312");
-
-            var client = new Mock<IAuthenticationClient>();
-            client.Setup(c => c.ProviderName).Returns("awesome provider");
-            OAuthWebSecurity.RegisterClient(client.Object);
-
-            // Act
-            var results = OAuthWebSecurity.RegisteredClients.ToList();
-
-            // Assert
-            Assert.Equal(5, results.Count);
-            Assert.Equal("google", results[0].ProviderName);
-            Assert.Equal("yahoo", results[1].ProviderName);
-            Assert.Equal("facebook", results[2].ProviderName);
-            Assert.Equal("linkedIn", results[3].ProviderName);
-            Assert.Equal("awesome provider", results[4].ProviderName);
-        }
-
-        [Fact]
         public void RequestAuthenticationRedirectsToProviderWithNullReturnUrl()
         {
             // Arrange
@@ -291,7 +205,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             dataProvider.Setup(p => p.GetUserNameFromOpenAuth("twitter", "12345")).Returns("hola");
             OAuthWebSecurity.OAuthDataProvider = dataProvider.Object;
 
-            OAuthWebSecurity.RegisterOAuthClient(BuiltInOAuthClient.Twitter, "sdfdsfsd", "dfdsfdsf");
+            OAuthWebSecurity.RegisterTwitterClient("sdfdsfsd", "dfdsfdsf");
 
             // Act
             bool successful = OAuthWebSecurity.LoginCore(context.Object, "twitter", "12345", createPersistentCookie: false);
@@ -321,7 +235,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
         {
             // Arrange 
             var context = new Mock<HttpContextBase>();
-            OAuthWebSecurity.RegisterOAuthClient(BuiltInOAuthClient.Twitter, "consumerKey", "consumerSecrte");
+            OAuthWebSecurity.RegisterTwitterClient("consumerKey", "consumerSecrte");
 
             var dataProvider = new Mock<IOpenAuthDataProvider>();
             dataProvider.Setup(p => p.GetUserNameFromOpenAuth("twitter", "12345")).Returns((string)null);
@@ -409,6 +323,108 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             // Assert
             Assert.Null(expectedClient);
             Assert.False(result);
+        }
+
+        [Fact]
+        public void TestRegisterFacebookClient()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterFacebookClient("one", "two", displayName: "FB", extraData: null);
+
+            // Act
+            var data = OAuthWebSecurity.RegisteredClientData;
+
+            // Assert
+            Assert.True(data.IsReadOnly);
+            Assert.Equal(1, data.Count);
+            Assert.Equal("facebook", data.First().AuthenticationClient.ProviderName);
+            Assert.Equal("FB", data.First().DisplayName);
+            Assert.Null(data.First().ExtraData);
+        }
+
+        [Fact]
+        public void TestRegisterMicrosoftClient()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterMicrosoftClient("one", "two", displayName: "MS", extraData: null);
+
+            // Act
+            var data = OAuthWebSecurity.RegisteredClientData;
+
+            // Assert
+            Assert.True(data.IsReadOnly);
+            Assert.Equal(1, data.Count);
+            Assert.Equal("microsoft", data.First().AuthenticationClient.ProviderName);
+            Assert.Equal("MS", data.First().DisplayName);
+            Assert.Null(data.First().ExtraData);
+        }
+
+        [Fact]
+        public void TestRegisterTwitterClient()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterTwitterClient("x0", "y0", displayName: "Tweet", extraData: null);
+
+            // Act
+            var data = OAuthWebSecurity.RegisteredClientData;
+
+            // Assert
+            Assert.True(data.IsReadOnly);
+            Assert.Equal(1, data.Count);
+            Assert.Equal("twitter", data.First().AuthenticationClient.ProviderName);
+            Assert.Equal("Tweet", data.First().DisplayName);
+            Assert.Null(data.First().ExtraData);
+        }
+
+        [Fact]
+        public void TestRegisterLinkedInClient()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterLinkedInClient("x0", "y0", displayName: "LINKED", extraData: null);
+
+            // Act
+            var data = OAuthWebSecurity.RegisteredClientData;
+
+            // Assert
+            Assert.True(data.IsReadOnly);
+            Assert.Equal(1, data.Count);
+            Assert.Equal("linkedIn", data.First().AuthenticationClient.ProviderName);
+            Assert.Equal("LINKED", data.First().DisplayName);
+            Assert.Null(data.First().ExtraData);
+        }
+
+        [Fact]
+        public void TestRegisterGoogleClient()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterGoogleClient(displayName: "GOOG", extraData: null);
+
+            // Act
+            var data = OAuthWebSecurity.RegisteredClientData;
+
+            // Assert
+            Assert.True(data.IsReadOnly);
+            Assert.Equal(1, data.Count);
+            Assert.Equal("google", data.First().AuthenticationClient.ProviderName);
+            Assert.Equal("GOOG", data.First().DisplayName);
+            Assert.Null(data.First().ExtraData);
+        }
+
+        [Fact]
+        public void TestRegisterYahooClient()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterYahooClient(displayName: "YHOO", extraData: null);
+
+            // Act
+            var data = OAuthWebSecurity.RegisteredClientData;
+
+            // Assert
+            Assert.True(data.IsReadOnly);
+            Assert.Equal(1, data.Count);
+            Assert.Equal("yahoo", data.First().AuthenticationClient.ProviderName);
+            Assert.Equal("YHOO", data.First().DisplayName);
+            Assert.Null(data.First().ExtraData);
         }
 
         public void Dispose() {

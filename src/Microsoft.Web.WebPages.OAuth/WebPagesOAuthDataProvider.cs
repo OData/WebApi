@@ -3,6 +3,7 @@
 using System;
 using System.Web.Security;
 using DotNetOpenAuth.AspNet;
+using Microsoft.Web.WebPages.OAuth.Resources;
 using WebMatrix.WebData;
 
 namespace Microsoft.Web.WebPages.OAuth
@@ -14,7 +15,7 @@ namespace Microsoft.Web.WebPages.OAuth
             var provider = Membership.Provider as ExtendedMembershipProvider;
             if (provider == null)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(OAuthResources.Security_NoExtendedMembershipProvider);
             }
             return provider;
         }

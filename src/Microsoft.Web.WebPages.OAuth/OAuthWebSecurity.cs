@@ -24,7 +24,8 @@ namespace Microsoft.Web.WebPages.OAuth
         internal static IOpenAuthDataProvider OAuthDataProvider = new WebPagesOAuthDataProvider();
 
         // contains all registered authentication clients
-        private static readonly AuthenticationClientCollection _authenticationClients = new AuthenticationClientCollection();
+        private static readonly Dictionary<string, AuthenticationClientData> _authenticationClients =
+            new Dictionary<string, AuthenticationClientData>();
 
         /// <summary>
         /// Gets a value indicating whether the current user is authenticated by an OAuth provider.
@@ -43,78 +44,225 @@ namespace Microsoft.Web.WebPages.OAuth
         }
 
         /// <summary>
-        /// Gets the registered OAuthen &amp; OpenID clients.
+        /// Gets the collection of all registered authentication client;
         /// </summary>
         /// <returns></returns>
-        public static ICollection<IAuthenticationClient> RegisteredClients
+        public static ICollection<AuthenticationClientData> RegisteredClientData
         {
             get
             {
-                return new ReadOnlyCollection<IAuthenticationClient>(_authenticationClients);
+                // the Values property returns a read-only collection.
+                // so we don't need to worry about clients of this method modifying our internal collection.
+                return _authenticationClients.Values;
             }
         }
 
         /// <summary>
-        /// Registers a supported OAuth client with the specified consumer key and consumer secret.
+        /// Registers the Facebook client.
         /// </summary>
-        /// <param name="client">One of the supported OAuth clients.</param>
+        /// <param name="appId">The app id.</param>
+        /// <param name="appSecret">The app secret.</param>
+        public static void RegisterFacebookClient(string appId, string appSecret)
+        {
+            RegisterFacebookClient(appId, appSecret, displayName: "Facebook");
+        }
+
+        /// <summary>
+        /// Registers the Facebook client.
+        /// </summary>
+        /// <param name="appId">The app id.</param>
+        /// <param name="appSecret">The app secret.</param>
+        /// <param name="displayName">The display name of the client.</param>
+        public static void RegisterFacebookClient(string appId, string appSecret, string displayName)
+        {
+            RegisterFacebookClient(appId, appSecret, displayName, extraData: new Dictionary<string, object>());
+        }
+
+        /// <summary>
+        /// Registers the Facebook client.
+        /// </summary>
+        /// <param name="appId">The app id.</param>
+        /// <param name="appSecret">The app secret.</param>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag used to store extra data about this client</param>
+        public static void RegisterFacebookClient(string appId, string appSecret, string displayName, IDictionary<string, object> extraData)
+        {
+            RegisterClient(new FacebookClient(appId, appSecret), displayName, extraData);
+        }
+
+        /// <summary>
+        /// Registers the Microsoft account client.
+        /// </summary>
+        /// <param name="clientId">The client id.</param>
+        /// <param name="clientSecret">The client secret.</param>
+        public static void RegisterMicrosoftClient(string clientId, string clientSecret)
+        {
+            RegisterMicrosoftClient(clientId, clientSecret, displayName: "Microsoft account");
+        }
+
+        /// <summary>
+        /// Registers the Microsoft account client.
+        /// </summary>
+        /// <param name="clientId">The client id.</param>
+        /// <param name="clientSecret">The client secret.</param>
+        /// <param name="displayName">The display name.</param>
+        public static void RegisterMicrosoftClient(string clientId, string clientSecret, string displayName)
+        {
+            RegisterMicrosoftClient(clientId, clientSecret, displayName, new Dictionary<string, object>());
+        }
+
+        /// <summary>
+        /// Registers the Microsoft account client.
+        /// </summary>
+        /// <param name="clientId">The client id.</param>
+        /// <param name="clientSecret">The client secret.</param>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag used to store extra data about this client</param>
+        public static void RegisterMicrosoftClient(string clientId, string clientSecret, string displayName, IDictionary<string, object> extraData)
+        {
+            RegisterClient(new MicrosoftClient(clientId, clientSecret), displayName, extraData);
+        }
+
+        /// <summary>
+        /// Registers the Twitter client.
+        /// </summary>
         /// <param name="consumerKey">The consumer key.</param>
         /// <param name="consumerSecret">The consumer secret.</param>
-        public static void RegisterOAuthClient(BuiltInOAuthClient client, string consumerKey, string consumerSecret)
+        public static void RegisterTwitterClient(string consumerKey, string consumerSecret)
         {
-            IAuthenticationClient authenticationClient;
-            switch (client)
-            {
-                case BuiltInOAuthClient.LinkedIn:
-                    authenticationClient = new LinkedInClient(consumerKey, consumerSecret);
-                    break;
-
-                case BuiltInOAuthClient.Twitter:
-                    authenticationClient = new TwitterClient(consumerKey, consumerSecret);
-                    break;
-
-                case BuiltInOAuthClient.Facebook:
-                    authenticationClient = new FacebookClient(consumerKey, consumerSecret);
-                    break;
-
-                case BuiltInOAuthClient.WindowsLive:
-                    authenticationClient = new WindowsLiveClient(consumerKey, consumerSecret);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException("client");
-            }
-            RegisterClient(authenticationClient);
+            RegisterTwitterClient(consumerKey, consumerSecret, displayName: "Twitter");
         }
 
         /// <summary>
-        /// Registers a supported OpenID client
+        /// Registers the Twitter client.
         /// </summary>
-        public static void RegisterOpenIDClient(BuiltInOpenIDClient openIDClient)
+        /// <param name="consumerKey">The consumer key.</param>
+        /// <param name="consumerSecret">The consumer secret.</param>
+        /// <param name="displayName">The display name.</param>
+        public static void RegisterTwitterClient(string consumerKey, string consumerSecret, string displayName)
         {
-            IAuthenticationClient client;
-            switch (openIDClient)
-            {
-                case BuiltInOpenIDClient.Google:
-                    client = new GoogleOpenIdClient();
-                    break;
+            RegisterTwitterClient(consumerKey, consumerSecret, displayName, new Dictionary<string, object>());
+        }
 
-                case BuiltInOpenIDClient.Yahoo:
-                    client = new YahooOpenIdClient();
-                    break;
+        /// <summary>
+        /// Registers the Twitter client.
+        /// </summary>
+        /// <param name="consumerKey">The consumer key.</param>
+        /// <param name="consumerSecret">The consumer secret.</param>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag used to store extra data about this client</param>
+        public static void RegisterTwitterClient(string consumerKey, string consumerSecret, string displayName, IDictionary<string, object> extraData)
+        {
+            var twitterClient = new TwitterClient(consumerKey, consumerSecret);
+            RegisterClient(twitterClient, displayName, extraData);
+        }
 
-                default:
-                    throw new ArgumentOutOfRangeException("openIDClient");
-            }
+        /// <summary>
+        /// Registers the LinkedIn client.
+        /// </summary>
+        /// <param name="consumerKey">The consumer key.</param>
+        /// <param name="consumerSecret">The consumer secret.</param>
+        public static void RegisterLinkedInClient(string consumerKey, string consumerSecret)
+        {
+            RegisterLinkedInClient(consumerKey, consumerSecret, displayName: "LinkedIn");
+        }
 
-            RegisterClient(client);
+        /// <summary>
+        /// Registers the LinkedIn client.
+        /// </summary>
+        /// <param name="consumerKey">The consumer key.</param>
+        /// <param name="consumerSecret">The consumer secret.</param>
+        /// <param name="displayName">The display name.</param>
+        public static void RegisterLinkedInClient(string consumerKey, string consumerSecret, string displayName)
+        {
+            RegisterLinkedInClient(consumerKey, consumerSecret, displayName, new Dictionary<string, object>());
+        }
+
+        /// <summary>
+        /// Registers the LinkedIn client.
+        /// </summary>
+        /// <param name="consumerKey">The consumer key.</param>
+        /// <param name="consumerSecret">The consumer secret.</param>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag used to store extra data about this client</param>
+        public static void RegisterLinkedInClient(string consumerKey, string consumerSecret, string displayName, IDictionary<string, object> extraData)
+        {
+            var linkedInClient = new LinkedInClient(consumerKey, consumerSecret);
+            RegisterClient(linkedInClient, displayName, extraData);
+        }
+
+        /// <summary>
+        /// Registers the Google client.
+        /// </summary>
+        public static void RegisterGoogleClient()
+        {
+            RegisterGoogleClient(displayName: "Google");
+        }
+
+        /// <summary>
+        /// Registers the Google client.
+        /// </summary>
+        /// <param name="displayName">The display name.</param>
+        public static void RegisterGoogleClient(string displayName)
+        {
+            RegisterClient(new GoogleOpenIdClient(), displayName, new Dictionary<string, object>());
+        }
+
+        /// <summary>
+        /// Registers the Google client.
+        /// </summary>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag.</param>
+        public static void RegisterGoogleClient(string displayName, IDictionary<string, object> extraData)
+        {
+            RegisterClient(new GoogleOpenIdClient(), displayName, extraData);
+        }
+
+        /// <summary>
+        /// Registers the Yahoo client.
+        /// </summary>
+        public static void RegisterYahooClient()
+        {
+            RegisterYahooClient(displayName: "Yahoo");
+        }
+
+        /// <summary>
+        /// Registers the Yahoo client.
+        /// </summary>
+        /// <param name="displayName">The display name.</param>
+        public static void RegisterYahooClient(string displayName)
+        {
+            RegisterYahooClient(displayName, new Dictionary<string, object>());
+        }
+
+        /// <summary>
+        /// Registers the Yahoo client.
+        /// </summary>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag.</param>
+        public static void RegisterYahooClient(string displayName, IDictionary<string, object> extraData)
+        {
+            RegisterClient(new YahooOpenIdClient(), displayName, extraData);
         }
 
         /// <summary>
         /// Registers an authentication client.
         /// </summary>
+        /// <param name="client">The client to be registered.</param>
         [CLSCompliant(false)]
         public static void RegisterClient(IAuthenticationClient client)
+        {
+            RegisterClient(client, displayName: null, extraData: new Dictionary<string, object>());
+        }
+
+        /// <summary>
+        /// Registers an authentication client.
+        /// </summary>
+        /// <param name="client">The client to be registered</param>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="extraData">The data bag used to store extra data about the specified client</param>
+        [CLSCompliant(false)]
+        public static void RegisterClient(IAuthenticationClient client, string displayName, IDictionary<string, object> extraData)
         {
             if (client == null)
             {
@@ -126,12 +274,13 @@ namespace Microsoft.Web.WebPages.OAuth
                 throw new ArgumentException(WebResources.InvalidServiceProviderName, "client");
             }
 
-            if (_authenticationClients.Contains(client))
+            if (_authenticationClients.ContainsKey(client.ProviderName))
             {
                 throw new ArgumentException(WebResources.ServiceProviderNameExists, "client");
             }
 
-            _authenticationClients.Add(client);
+            var clientData = new AuthenticationClientData(client, displayName, extraData);
+            _authenticationClients.Add(client.ProviderName, clientData);
         }
 
         /// <summary>
@@ -159,6 +308,12 @@ namespace Microsoft.Web.WebPages.OAuth
             RequestAuthenticationCore(new HttpContextWrapper(HttpContext.Current), provider, returnUrl);
         }
 
+        /// <summary>
+        /// Requests the authentication core.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="provider">The provider.</param>
+        /// <param name="returnUrl">The return URL.</param>
         internal static void RequestAuthenticationCore(HttpContextBase context, string provider, string returnUrl)
         {
             IAuthenticationClient client = GetOAuthClient(provider);
@@ -169,6 +324,7 @@ namespace Microsoft.Web.WebPages.OAuth
         /// <summary>
         /// Checks if user is successfully authenticated when user is redirected back to this user.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care if the operation fails.")]
         [CLSCompliant(false)]
         public static AuthenticationResult VerifyAuthentication()
         {
@@ -297,7 +453,7 @@ namespace Microsoft.Web.WebPages.OAuth
             ExtendedMembershipProvider provider = VerifyProvider();
 
             string username = GetUserName(providerName, providerUserId);
-            if (String.IsNullOrEmpty(username)) 
+            if (String.IsNullOrEmpty(username))
             {
                 // account doesn't exist
                 return false;
@@ -307,21 +463,52 @@ namespace Microsoft.Web.WebPages.OAuth
             return true;
         }
 
-        internal static IAuthenticationClient GetOAuthClient(string providerName)
+        /// <summary>
+        /// Gets the OAuth client data of the specified provider name.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <returns>The AuthenticationClientData of the specified provider name.</returns>
+        public static AuthenticationClientData GetOAuthClientData(string providerName)
         {
-            if (!_authenticationClients.Contains(providerName))
+            if (providerName == null)
             {
-                throw new ArgumentException(WebResources.ServiceProviderNotFound, "providerName");
+                throw new ArgumentNullException("providerName");
             }
 
             return _authenticationClients[providerName];
         }
 
+        /// <summary>
+        /// Tries getting the OAuth client data of the specified provider name.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="clientData">The client data of the specified provider name.</param>
+        /// <returns><c>true</c> if the client data is found for the specified provider name. Otherwise, <c>false</c></returns>
+        public static bool TryGetOAuthClientData(string providerName, out AuthenticationClientData clientData)
+        {
+            if (providerName == null)
+            {
+                throw new ArgumentNullException("providerName");
+            }
+
+            return _authenticationClients.TryGetValue(providerName, out clientData);
+        }
+
+        internal static IAuthenticationClient GetOAuthClient(string providerName)
+        {
+            if (!_authenticationClients.ContainsKey(providerName))
+            {
+                throw new ArgumentException(WebResources.ServiceProviderNotFound, "providerName");
+            }
+
+            return _authenticationClients[providerName].AuthenticationClient;
+        }
+
         internal static bool TryGetOAuthClient(string provider, out IAuthenticationClient client)
         {
-            if (_authenticationClients.Contains(provider))
+            if (_authenticationClients.ContainsKey(provider))
             {
-                client = _authenticationClients[provider];
+                client = _authenticationClients[provider].AuthenticationClient;
                 return true;
             }
             else
@@ -339,10 +526,10 @@ namespace Microsoft.Web.WebPages.OAuth
             _authenticationClients.Clear();
         }
 
-        private static ExtendedMembershipProvider VerifyProvider() 
+        private static ExtendedMembershipProvider VerifyProvider()
         {
             var provider = Membership.Provider as ExtendedMembershipProvider;
-            if (provider == null) 
+            if (provider == null)
             {
                 throw new InvalidOperationException();
             }

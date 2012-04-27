@@ -112,7 +112,7 @@ namespace System.Web.Http.WebHost
             }
             else {
                 // .NET 4.5
-                Assert.False((bool)suppressRedirect.GetValue(contextMock.Object, null));
+                Assert.False((bool)suppressRedirect.GetValue(contextMock.Object.Response, null));
             }
         }
 
@@ -137,7 +137,7 @@ namespace System.Web.Http.WebHost
             }
             else {
                 // .NET 4.5
-                Assert.True((bool)suppressRedirect.GetValue(contextMock.Object, null));
+                Assert.True((bool)suppressRedirect.GetValue(contextMock.Object.Response, null));
             }
         }
     }

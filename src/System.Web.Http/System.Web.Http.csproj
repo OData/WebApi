@@ -336,7 +336,7 @@
     <Compile Include="ValueProviders\IUriValueProviderFactory.cs" />
     <Compile Include="ValueProviders\Providers\CompositeValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\CompositeValueProviderFactory.cs" />
-    <Compile Include="ValueProviders\Providers\NameValueCollectionValueProvider.cs" />
+    <Compile Include="ValueProviders\Providers\NameValuePairsValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\ElementalValueProvider.cs" />
     <Compile Include="ValueProviders\IEnumerableValueProvider.cs" />
     <Compile Include="ValueProviders\Providers\RouteDataValueProvider.cs" />

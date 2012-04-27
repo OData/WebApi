@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Net.Http.Formatting;
 using System.Text;
@@ -87,23 +85,25 @@ namespace System.Web.Http.ModelBinding
             return sb.ToString();
         }
 
-        internal static NameValueCollection GetJQueryValueNameValueCollection(this FormDataCollection formData)
+        internal static IEnumerable<KeyValuePair<string, string>> GetJQueryNameValuePairs(this FormDataCollection formData)
         {
             if (formData == null)
             {
                 throw Error.ArgumentNull("formData");
             }
 
-            NameValueCollection nvc = new NameValueCollection(StringComparer.OrdinalIgnoreCase);
-            foreach (var kv in formData)
+            int count = 0;
+
+            foreach (KeyValuePair<string, string> kv in formData)
             {
-                ThrowIfMaxHttpCollectionKeysExceeded(nvc.Count);
+                ThrowIfMaxHttpCollectionKeysExceeded(count);
 
                 string key = NormalizeJQueryToMvc(kv.Key);
                 string value = kv.Value ?? String.Empty;                
-                nvc.Add(key, value);
+                yield return new KeyValuePair<string, string>(key, value);
+
+                count++;
             }
-            return nvc;
         }
 
         private static void ThrowIfMaxHttpCollectionKeysExceeded(int count)
@@ -122,8 +122,8 @@ namespace System.Web.Http.ModelBinding
                 throw Error.ArgumentNull("formData");
             }
 
-            NameValueCollection nvc = formData.GetJQueryValueNameValueCollection();
-            return new NameValueCollectionValueProvider(nvc, CultureInfo.InvariantCulture);
+            IEnumerable<KeyValuePair<string, string>> nvc = formData.GetJQueryNameValuePairs();
+            return new NameValuePairsValueProvider(nvc, CultureInfo.InvariantCulture);
         }
 
         public static T ReadAs<T>(this FormDataCollection formData)

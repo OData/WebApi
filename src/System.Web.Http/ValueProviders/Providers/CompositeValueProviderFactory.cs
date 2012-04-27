@@ -24,7 +24,7 @@ namespace System.Web.Http.ValueProviders.Providers
         // This will never return null.
         internal static IValueProvider GetValueProvider(HttpActionContext actionContext, ValueProviderFactory[] factories)
         {
-            // Fast-path the case of just one 
+            // Fast-path the case of just one factory
             if (factories.Length == 1)
             {
                 IValueProvider provider = factories[0].GetValueProvider(actionContext);
@@ -34,7 +34,22 @@ namespace System.Web.Http.ValueProviders.Providers
                 }
             }
 
-            List<IValueProvider> providers = factories.Select((f) => f.GetValueProvider(actionContext)).Where((vp) => vp != null).ToList();
+            List<IValueProvider> providers = new List<IValueProvider>();
+            foreach (ValueProviderFactory factory in factories)
+            {
+                IValueProvider vp = factory.GetValueProvider(actionContext);
+                if (vp != null)
+                {
+                    providers.Add(vp);
+                }
+            }
+
+            // Fast-path the case of just one provider
+            if (providers.Count == 1)
+            {
+                return providers[0];
+            }
+            
             return new CompositeValueProvider(providers);
         }
     }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using Xunit;
 
@@ -7,11 +8,21 @@ namespace System.Web.Http.ValueProviders.Providers
 {
     public class QueryStringValueProviderTest
     {
+        private NameValueCollection ParseQueryString(Uri uri)
+        {
+            NameValueCollection nameValuePairs = new NameValueCollection();
+            foreach (KeyValuePair<string, string> keyValuePair in QueryStringValueProvider.ParseQueryString(uri))
+            {
+                nameValuePairs.Add(keyValuePair.Key, keyValuePair.Value);
+            }
+            return nameValuePairs;
+        }
+
         [Fact]
         public void ParseQueryString_Null()
         {
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(null);
+            NameValueCollection result = ParseQueryString(null);
 
             // Assert
             Assert.Equal(0, result.Count);
@@ -24,7 +35,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             string key = Assert.Single(result) as string;
@@ -39,7 +50,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key1=value1");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             string key = Assert.Single(result) as string;
@@ -54,7 +65,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key1=value1&key2=value2");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -69,7 +80,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key1=value1&key2");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -85,7 +96,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key1=value1&key1=value2");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Equal("value1,value2", result["key1"]);
@@ -99,7 +110,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?&key1=value1");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -114,7 +125,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key1=value1&&key2=value2");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Equal(3, result.Count);
@@ -130,7 +141,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key1=value1&");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -145,7 +156,7 @@ namespace System.Web.Http.ValueProviders.Providers
             Uri uri = new Uri("http://localhost/?key%31=value%31");
 
             // Act
-            NameValueCollection result = QueryStringValueProvider.ParseQueryString(uri);
+            NameValueCollection result = ParseQueryString(uri);
 
             // Assert
             Assert.Single(result);

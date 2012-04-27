@@ -1,20 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
+using System.Linq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
-    public class NameValueCollectionValueProviderTest
+    public class NameValuePairsValueProviderTest
     {
-        private static readonly NameValueCollection _backingStore = new NameValueCollection()
+        private static readonly IEnumerable<KeyValuePair<string, string>> _backingStore = new KeyValuePair<string, string>[]
         {
-            { "foo", "fooValue1" },
-            { "foo", "fooValue2" },
-            { "bar.baz", "someOtherValue" }
+            new KeyValuePair<string, string>("foo", "fooValue1"),
+            new KeyValuePair<string, string>("foo", "fooValue2"),
+            new KeyValuePair<string, string>("bar.baz", "someOtherValue")
         };
 
         [Fact]
@@ -22,11 +22,11 @@ namespace System.Web.Http.ValueProviders.Providers
         {
             // Act & assert
             Assert.ThrowsArgumentNull(
-                () => new NameValueCollectionValueProvider(values: null, culture: CultureInfo.InvariantCulture),
+                () => new NameValuePairsValueProvider(values: null, culture: CultureInfo.InvariantCulture),
                 "values");
 
             Assert.ThrowsArgumentNull(
-                () => new NameValueCollectionValueProvider(valuesFactory: null, culture: CultureInfo.InvariantCulture),
+                () => new NameValuePairsValueProvider(valuesFactory: null, culture: CultureInfo.InvariantCulture),
                 "valuesFactory");
         }
 
@@ -34,7 +34,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ContainsPrefix_GuardClauses()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act & assert
             Assert.ThrowsArgumentNull(
@@ -46,7 +46,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ContainsPrefix_WithEmptyCollection_ReturnsFalseForEmptyPrefix()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(new NameValueCollection(), null);
+            var valueProvider = new NameValuePairsValueProvider(Enumerable.Empty<KeyValuePair<string, string>>(), null);
 
             // Act
             bool result = valueProvider.ContainsPrefix("");
@@ -59,7 +59,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ContainsPrefix_WithNonEmptyCollection_ReturnsTrueForEmptyPrefix()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act
             bool result = valueProvider.ContainsPrefix("");
@@ -72,7 +72,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ContainsPrefix_WithNonEmptyCollection_ReturnsTrueForKnownPrefixes()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act & Assert
             Assert.True(valueProvider.ContainsPrefix("foo"));
@@ -84,7 +84,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void ContainsPrefix_WithNonEmptyCollection_ReturnsFalseForUnknownPrefix()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act
             bool result = valueProvider.ContainsPrefix("biff");
@@ -97,7 +97,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void GetKeysFromPrefix_GuardClauses()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act & assert
             Assert.ThrowsArgumentNull(
@@ -109,7 +109,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void GetKeysFromPrefix_EmptyPrefix_ReturnsAllPrefixes()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act
             IDictionary<string, string> result = valueProvider.GetKeysFromPrefix("");
@@ -124,7 +124,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void GetKeysFromPrefix_UnknownPrefix_ReturnsEmptyDictionary()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act
             IDictionary<string, string> result = valueProvider.GetKeysFromPrefix("abc");
@@ -137,7 +137,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void GetKeysFromPrefix_KnownPrefix_ReturnsMatchingItems()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act
             IDictionary<string, string> result = valueProvider.GetKeysFromPrefix("bar");
@@ -152,7 +152,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void GetValue_GuardClauses()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act & assert
             Assert.ThrowsArgumentNull(
@@ -165,14 +165,14 @@ namespace System.Web.Http.ValueProviders.Providers
         {
             // Arrange
             var culture = CultureInfo.GetCultureInfo("fr-FR");
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, culture);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, culture);
 
             // Act
             ValueProviderResult vpResult = valueProvider.GetValue("bar.baz");
 
             // Assert
             Assert.NotNull(vpResult);
-            Assert.Equal(new[] { "someOtherValue" }, (string[])vpResult.RawValue);
+            Assert.Equal("someOtherValue", vpResult.RawValue);
             Assert.Equal("someOtherValue", vpResult.AttemptedValue);
             Assert.Equal(culture, vpResult.Culture);
         }
@@ -182,14 +182,14 @@ namespace System.Web.Http.ValueProviders.Providers
         {
             // Arrange
             var culture = CultureInfo.GetCultureInfo("fr-FR");
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, culture);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, culture);
 
             // Act
             ValueProviderResult vpResult = valueProvider.GetValue("foo");
 
             // Assert
             Assert.NotNull(vpResult);
-            Assert.Equal(new[] { "fooValue1", "fooValue2" }, (string[])vpResult.RawValue);
+            Assert.Equal(new List<string>() { "fooValue1", "fooValue2" }, (List<string>)vpResult.RawValue);
             Assert.Equal("fooValue1,fooValue2", vpResult.AttemptedValue);
             Assert.Equal(culture, vpResult.Culture);
         }
@@ -198,7 +198,7 @@ namespace System.Web.Http.ValueProviders.Providers
         public void GetValue_ReturnsNullIfKeyNotFound()
         {
             // Arrange
-            var valueProvider = new NameValueCollectionValueProvider(_backingStore, null);
+            var valueProvider = new NameValuePairsValueProvider(_backingStore, null);
 
             // Act
             ValueProviderResult vpResult = valueProvider.GetValue("bar");

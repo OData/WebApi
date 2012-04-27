@@ -21,23 +21,40 @@ namespace System.Web.Http.ValueProviders.Providers
 
         public virtual bool ContainsPrefix(string prefix)
         {
-            return this.Any(vp => vp.ContainsPrefix(prefix));
+            foreach (IValueProvider vp in this)
+            {
+                if (vp.ContainsPrefix(prefix))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public virtual ValueProviderResult GetValue(string key)
         {
-            return (from provider in this
-                    let result = provider.GetValue(key)
-                    where result != null
-                    select result).FirstOrDefault();
+            foreach (IValueProvider vp in this)
+            {
+                ValueProviderResult result = vp.GetValue(key);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
-            return (from provider in this
-                    let result = GetKeysFromPrefixFromProvider(provider, prefix)
-                    where result != null && result.Any()
-                    select result).FirstOrDefault() ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (IValueProvider vp in this)
+            {
+                IDictionary<string, string> result = GetKeysFromPrefixFromProvider(vp, prefix);
+                if (result != null && result.Count > 0)
+                {
+                    return result;
+                }
+            }
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         internal static IDictionary<string, string> GetKeysFromPrefixFromProvider(IValueProvider provider, string prefix)

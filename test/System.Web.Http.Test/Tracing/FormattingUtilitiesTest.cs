@@ -215,7 +215,7 @@ namespace System.Web.Http.Tracing
             List<IValueProvider> providers = new List<IValueProvider>()
                                                  {
                                                     new ElementalValueProvider("unused", 1, CultureInfo.CurrentCulture),
-                                                    new NameValueCollectionValueProvider(() => null, CultureInfo.CurrentCulture)
+                                                    new NameValuePairsValueProvider(() => null, CultureInfo.CurrentCulture)
                                                  };
 
             CompositeValueProvider compositeProvider = new CompositeValueProvider(providers);
@@ -223,7 +223,7 @@ namespace System.Web.Http.Tracing
                                 "{0}({1}, {2})", 
                                 typeof(CompositeValueProvider).Name, 
                                 typeof(ElementalValueProvider).Name,
-                                typeof(NameValueCollectionValueProvider).Name);
+                                typeof(NameValuePairsValueProvider).Name);
 
             // Act
             string actual = FormattingUtilities.ValueProviderToString(compositeProvider);

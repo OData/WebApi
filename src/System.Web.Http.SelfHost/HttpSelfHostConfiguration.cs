@@ -33,7 +33,7 @@ namespace System.Web.Http.SelfHost
         private Uri _baseAddress;
         private int _maxConcurrentRequests;
         private ServiceCredentials _credentials = new ServiceCredentials();
-        private bool _useWindowsAuth;
+        private HttpClientCredentialType _clientCredentialType = HttpClientCredentialType.None;
         private TransferMode _transferMode;
         private int _maxBufferSize = DefaultMaxBufferSize;
         private bool _maxBufferSizeIsInitialized;
@@ -235,22 +235,34 @@ namespace System.Web.Http.SelfHost
         {
             get { return _credentials.UserNameAuthentication.CustomUserNamePasswordValidator; }
 
-            set { _credentials.UserNameAuthentication.CustomUserNamePasswordValidator = value; }
+            set 
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _clientCredentialType = HttpClientCredentialType.Basic;
+                _credentials.UserNameAuthentication.CustomUserNamePasswordValidator = value;
+                _credentials.UserNameAuthentication.UserNamePasswordValidationMode = UserNamePasswordValidationMode.Custom;
+            }
         }
 
         /// <summary>
-        /// Use this flag to indicate that you want to use windows authentication. This flag can
-        /// not be used together with UserNamePasswordValidator property since you can either use
-        /// Windows or Username Password as client credential.
+        /// Gets/Sets the ClientCredentialType that server is expecting 
         /// </summary>
         /// <value>
-        /// set it true if you want to use windows authentication
+        /// The default value is HttpClientCredentialType.None.
         /// </value>
-        public bool UseWindowsAuthentication
+        public HttpClientCredentialType ClientCredentialType
         {
-            get { return _useWindowsAuth; }
+            get { return _clientCredentialType; }
 
-            set { _useWindowsAuth = value; }
+            set
+            {
+                HttpClientCredentialTypeHelper.Validate(value);
+                _clientCredentialType = value;
+            }
         }
 
         /// <summary>
@@ -275,9 +287,9 @@ namespace System.Web.Http.SelfHost
                 throw Error.ArgumentNull("httpBinding");
             }
 
-            if (_useWindowsAuth && _credentials.UserNameAuthentication.CustomUserNamePasswordValidator != null)
+            if (_clientCredentialType != HttpClientCredentialType.Basic && _credentials.UserNameAuthentication.CustomUserNamePasswordValidator != null)
             {
-                throw Error.InvalidOperation(SRResources.CannotUseWindowsAuthWithUserNamePasswordValidator);
+                throw Error.InvalidOperation(SRResources.CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator);
             }
 
             httpBinding.MaxBufferSize = MaxBufferSize;
@@ -287,6 +299,7 @@ namespace System.Web.Http.SelfHost
             httpBinding.ReceiveTimeout = ReceiveTimeout;
             httpBinding.SendTimeout = SendTimeout;
 
+            // Set up binding parameters
             if (_baseAddress.Scheme == Uri.UriSchemeHttps)
             {
                 // we need to use SSL
@@ -295,11 +308,9 @@ namespace System.Web.Http.SelfHost
                     Mode = HttpBindingSecurityMode.Transport,
                 };
             }
-
-            // Set up binding parameters
-            if (_credentials.UserNameAuthentication.CustomUserNamePasswordValidator != null)
-            {
-                _credentials.UserNameAuthentication.UserNamePasswordValidationMode = UserNamePasswordValidationMode.Custom;
+            
+            if (_clientCredentialType != HttpClientCredentialType.None)
+            {       
                 if (httpBinding.Security == null || httpBinding.Security.Mode == HttpBindingSecurityMode.None)
                 {
                     // Basic over HTTP case
@@ -309,29 +320,17 @@ namespace System.Web.Http.SelfHost
                     };
                 }
 
-                // We have validator, so we can set the client credential type to be basic
-                httpBinding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Basic;
-
-                return AddCredentialsToBindingParameters();
+                httpBinding.Security.Transport.ClientCredentialType = _clientCredentialType;                
             }
-            else if (_useWindowsAuth)
+
+            if (_clientCredentialType == HttpClientCredentialType.Basic)
             {
-                if (httpBinding.Security == null || httpBinding.Security.Mode == HttpBindingSecurityMode.None)
-                {
-                    // Basic over HTTP case, should we even allow this?
-                    httpBinding.Security = new HttpBindingSecurity()
-                    {
-                        Mode = HttpBindingSecurityMode.TransportCredentialOnly,
-                    };
-                }
-
-                // We have validator, so we can set the client credential type to be windows
-                httpBinding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Windows;
-
                 return AddCredentialsToBindingParameters();
             }
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
         private BindingParameterCollection AddCredentialsToBindingParameters()

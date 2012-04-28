@@ -32,5 +32,24 @@ namespace System.Web.Http.SelfHost.ServiceModel
             Debug.Assert(false, "Invalid clientCredentialType " + clientCredentialType);
             return AuthenticationSchemes.Anonymous;
         }
+
+        public static bool IsDefined(HttpClientCredentialType value)
+        {
+            return
+                value == HttpClientCredentialType.Basic
+                || value == HttpClientCredentialType.None
+                || value == HttpClientCredentialType.Digest
+                || value == HttpClientCredentialType.Ntlm
+                || value == HttpClientCredentialType.Windows
+                || value == HttpClientCredentialType.Certificate;
+        }
+
+        public static void Validate(HttpClientCredentialType value)
+        {
+            if (!IsDefined(value))
+            {
+                throw Error.InvalidEnumArgument("value", (int)value, typeof(HttpClientCredentialType));
+            }
+        }
     }
 }

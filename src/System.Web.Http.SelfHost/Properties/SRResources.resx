@@ -123,8 +123,8 @@
   <data name="AsyncResultCompletedTwice" xml:space="preserve">
     <value>The IAsyncResult implementation '{0}' tried to complete a single operation multiple times. This could be caused by an incorrect application IAsyncResult implementation or other extensibility code, such as an IAsyncResult that returns incorrect CompletedSynchronously values or invokes the AsyncCallback multiple times.</value>
   </data>
-  <data name="CannotUseWindowsAuthWithUserNamePasswordValidator" xml:space="preserve">
-    <value>The UseWindowsAuthentication option cannot be enabled when a UserNamePasswordValidator is specified on the HttpSelfHostConfiguration."</value>
+  <data name="CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator" xml:space="preserve">
+    <value>ClientCredentialType must be set to Basic when a UserNamePasswordValidator is specified on the HttpSelfHostConfiguration.</value>
   </data>
   <data name="CertificateUnsupportedForHttpTransportCredentialOnly" xml:space="preserve">
     <value>Certificate-based client authentication is not supported in TransportCredentialOnly security mode. Select the Transport security mode.</value>

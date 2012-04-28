@@ -277,7 +277,7 @@ namespace Microsoft.Web.Http.Data
                 // This method is not correctly observing the execution results, the catch block below is wrong.
                 // Submit should be Task<bool>, not bool, and should model bind for the CancellationToken which would then
                 // be propagated through to all the helper methods (one or more of which might also need to be made async,
-                // once we start respecting the fact that the CRUD actions should be allowed to be async).
+                // once we start respecting the fact that the read/write actions should be allowed to be async).
                 action.ExecuteAsync(ActionContext.ControllerContext, paramMap, CancellationToken.None);
             }
             catch (TargetInvocationException tie)

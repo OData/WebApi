@@ -6,7 +6,7 @@ namespace System.Net.Http.Formatting
     /// Contains information about the degree to which a <see cref="MediaTypeFormatter"/> matches the  
     /// explicit or implicit preferences found in an incoming request.
     /// </summary>
-    internal enum ResponseFormatterSelectionResult
+    public enum MediaTypeFormatterMatchRanking
     {
         /// <summary>
         /// No match was found
@@ -32,6 +32,6 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// Matched on the media type of the <see cref="HttpContent"/> of the <see cref="HttpRequestMessage"/>.
         /// </summary>
-        MatchOnRequestContentType,
+        MatchOnRequestMediaType,
     }
 }

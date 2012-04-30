@@ -79,11 +79,17 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("mediaType");
             }
 
-            foreach (MediaTypeFormatter formatter in this.Items)
+            foreach (MediaTypeFormatter formatter in Items)
             {
-                if (formatter.CanReadAs(type, mediaType))
+                if (formatter != null && formatter.CanReadType(type))
                 {
-                    return formatter;
+                    foreach (MediaTypeHeaderValue supportedMediaType in formatter.SupportedMediaTypes)
+                    {
+                        if (supportedMediaType != null && supportedMediaType.IsSubsetOf(mediaType))
+                        {
+                            return formatter;
+                        }
+                    }
                 }
             }
 
@@ -109,10 +115,15 @@ namespace System.Net.Http.Formatting
 
             foreach (MediaTypeFormatter formatter in Items)
             {
-                MediaTypeHeaderValue match;
-                if (formatter.CanWriteAs(type, mediaType, out match))
+                if (formatter != null && formatter.CanWriteType(type))
                 {
-                    return formatter;
+                    foreach (MediaTypeHeaderValue supportedMediaType in formatter.SupportedMediaTypes)
+                    {
+                        if (supportedMediaType != null && supportedMediaType.IsSubsetOf(mediaType))
+                        {
+                            return formatter;
+                        }
+                    }
                 }
             }
 

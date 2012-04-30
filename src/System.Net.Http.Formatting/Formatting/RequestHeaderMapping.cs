@@ -108,20 +108,20 @@ namespace System.Net.Http.Formatting
                     {
                         if (value.IndexOf(headerValue, valueComparison) != -1)
                         {
-                            return MediaTypeMatch.Match;
+                            return FormattingUtilities.Match;
                         }
                     }
                     else
                     {
                         if (value.Equals(headerValue, valueComparison))
                         {
-                            return MediaTypeMatch.Match;
+                            return FormattingUtilities.Match;
                         }
                     }
                 }
             }
 
-            return MediaTypeMatch.NoMatch;
+            return FormattingUtilities.NoMatch;
         }
 
         private void Initialize(string headerName, string headerValue, StringComparison valueComparison, bool isValueSubstring)

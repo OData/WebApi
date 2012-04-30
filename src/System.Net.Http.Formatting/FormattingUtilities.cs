@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Xml;
 using Newtonsoft.Json.Linq;
 
@@ -42,6 +40,16 @@ namespace System.Net.Http
 
         // Valid header token characters are within the range 0x20 < c < 0x7F excluding the following characters
         private const string NonTokenChars = "()<>@,;:\\\"/[]?={}";
+
+        /// <summary>
+        /// Quality factor to indicate a perfect match.
+        /// </summary>
+        public const double Match = 1.0;
+
+        /// <summary>
+        /// Quality factor to indicate no match.
+        /// </summary>
+        public const double NoMatch = 0.0;
 
         /// <summary>
         /// The default max depth for our formatter is 256

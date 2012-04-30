@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
+using System.Net.Http.Formatting.Mocks;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using Microsoft.TestCommon;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {
     public class MediaTypeFormatterCollectionTests
     {
-
         [Fact]
         public void TypeIsCorrect()
         {
@@ -31,14 +33,14 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void Constructor1AcceptsEmptyList()
+        public void Constructor1_AcceptsEmptyList()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
             Assert.Equal(0, collection.Count);
         }
 
         [Fact]
-        public void Constructor1SetsProperties()
+        public void Constructor1_SetsProperties()
         {
             // All combination of formatters presented to ctor should still set XmlFormatter
             foreach (IEnumerable<MediaTypeFormatter> formatterCollection in HttpUnitTestDataSets.AllFormatterCollections)
@@ -65,7 +67,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void Constructor1SetsDerivedFormatters()
+        public void Constructor1_SetsDerivedFormatters()
         {
             // force to array to get stable instances
             MediaTypeFormatter[] derivedFormatters = HttpUnitTestDataSets.DerivedFormatters.ToArray();
@@ -74,13 +76,13 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void Constructor1ThrowsWithNullFormatters()
+        public void Constructor1_ThrowsWithNullFormatters()
         {
             Assert.ThrowsArgumentNull(() => new MediaTypeFormatterCollection(null), "formatters");
         }
 
         [Fact]
-        public void Constructor1ThrowsWithNullFormatterInCollection()
+        public void Constructor1_ThrowsWithNullFormatterInCollection()
         {
             Assert.ThrowsArgument(
                 () => new MediaTypeFormatterCollection(new MediaTypeFormatter[] { null }), "formatters",
@@ -89,7 +91,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void Constructor1AcceptsDuplicateFormatterTypes()
+        public void Constructor1_AcceptsDuplicateFormatterTypes()
         {
             MediaTypeFormatter[] formatters = new MediaTypeFormatter[]
             {
@@ -106,7 +108,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void XmlFormatterSetByCtor()
+        public void XmlFormatter_SetByCtor()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[] { formatter });
@@ -114,16 +116,14 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void XmlFormatterClearedByCtor()
+        public void XmlFormatter_ClearedByCtor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
             Assert.Null(collection.XmlFormatter);
         }
 
-
-
         [Fact]
-        public void JsonFormatterSetByCtor()
+        public void JsonFormatter_SetByCtor()
         {
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter();
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[] { formatter });
@@ -131,17 +131,14 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void JsonFormatterClearedByCtor()
+        public void JsonFormatter_ClearedByCtor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
             Assert.Null(collection.JsonFormatter);
         }
 
-
-
-
         [Fact]
-        public void FormUrlEncodedFormatterSetByCtor()
+        public void FormUrlEncodedFormatter_SetByCtor()
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[] { formatter });
@@ -149,19 +146,14 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void FormUrlEncodedFormatterClearedByCtor()
+        public void FormUrlEncodedFormatter_ClearedByCtor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
             Assert.Null(collection.FormUrlEncodedFormatter);
         }
 
-
-
-
-
-
         [Fact]
-        public void RemoveSetsXmlFormatter()
+        public void Remove_SetsXmlFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
             int count = collection.Count;
@@ -171,7 +163,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void RemoveSetsJsonFormatter()
+        public void Remove_SetsJsonFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
             int count = collection.Count;
@@ -181,7 +173,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void InsertSetsXmlFormatter()
+        public void Insert_SetsXmlFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
             int count = collection.Count;
@@ -192,7 +184,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void InsertSetsJsonFormatter()
+        public void Insert_SetsJsonFormatter()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
             int count = collection.Count;
@@ -202,5 +194,124 @@ namespace System.Net.Http.Formatting
             Assert.Equal(count + 1, collection.Count);
         }
 
+        [Fact]
+        public void FindReader_ThrowsOnNullType()
+        {
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/test");
+            Assert.ThrowsArgumentNull(() => collection.FindReader(type: null, mediaType: mediaType), "type");
+        }
+
+        [Fact]
+        public void FindReader_ThrowsOnNullMediaType()
+        {
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            Assert.ThrowsArgumentNull(() => collection.FindReader(type: typeof(object), mediaType: null), "mediaType");
+        }
+
+        [Fact]
+        public void FindReader_ReturnsNullOnNoMatch()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
+
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            collection.Clear();
+            collection.Add(formatter);
+
+            MediaTypeHeaderValue contentType = new MediaTypeHeaderValue("text/test");
+
+            // Act
+            MediaTypeFormatter actualFormatter = collection.FindReader(typeof(object), contentType);
+
+            // Assert
+            Assert.Null(actualFormatter);
+        }
+
+        [Theory]
+        [TestDataSet(
+            typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
+            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+        public void FindReader_ReturnsFormatterOnMatch(Type variationType, object testData, string mediaType)
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
+            foreach (string legalMediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
+            {
+                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(legalMediaType));
+            }
+
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            collection.Clear();
+            collection.Add(formatter);
+
+            MediaTypeHeaderValue contentType = new MediaTypeHeaderValue(mediaType);
+
+            // Act
+            MediaTypeFormatter actualFormatter = collection.FindReader(variationType, contentType);
+
+            // Assert
+            Assert.Same(formatter, actualFormatter);
+        }
+
+        [Fact]
+        public void FindWriter_ThrowsOnNullType()
+        {
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/test");
+            Assert.ThrowsArgumentNull(() => collection.FindWriter(type: null, mediaType: mediaType), "type");
+        }
+
+        [Fact]
+        public void FindWriter_ThrowsOnNullMediaType()
+        {
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            Assert.ThrowsArgumentNull(() => collection.FindWriter(type: typeof(object), mediaType: null), "mediaType");
+        }
+
+        [Fact]
+        public void FindWriter_ReturnsNullOnNoMatch()
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
+
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            collection.Clear();
+            collection.Add(formatter);
+
+            MediaTypeHeaderValue contentType = new MediaTypeHeaderValue("text/test");
+
+            // Act
+            MediaTypeFormatter actualFormatter = collection.FindWriter(typeof(object), contentType);
+
+            // Assert
+            Assert.Null(actualFormatter);
+        }
+
+        [Theory]
+        [TestDataSet(
+            typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
+            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+        public void FindWriter_ReturnsFormatterOnMatch(Type variationType, object testData, string mediaType)
+        {
+            // Arrange
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
+            foreach (string legalMediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
+            {
+                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaType));
+            }
+
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+            collection.Clear();
+            collection.Add(formatter);
+
+            MediaTypeHeaderValue contentType = new MediaTypeHeaderValue(mediaType);
+
+            // Act
+            MediaTypeFormatter actualFormatter = collection.FindWriter(variationType, contentType);
+
+            // Assert
+            Assert.Same(formatter, actualFormatter);
+        }
     }
 }

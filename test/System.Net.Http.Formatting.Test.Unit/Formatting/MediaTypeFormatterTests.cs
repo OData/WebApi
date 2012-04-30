@@ -35,23 +35,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        public static TheoryDataSet<string[], string, string[], string> SelectResponseCharacterEncodingTestData
-        {
-            get
-            {
-                // string[] acceptCharsetValues, string bodyEncoding, string[] supportedEncodings, string expectedEncoding
-                return new TheoryDataSet<string[], string, string[], string>
-                {
-                    { new string[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.7" }, null, new string[] { "utf-16", "utf-8"}, "utf-8" },
-                    { new string[] { "*;q=0.5", "utf-8;q=0.8", "utf-16;q=0.9" }, null, new string[] { "utf-8", "utf-16"}, "utf-16" },
-                    { new string[] { "*;q=0.9", "utf-8;q=0.5", "utf-16;q=0.5" }, null, new[] { "utf-8", "utf-16"}, "utf-8" },
-                    { new string[] { }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-16" },
-                    { new string[] { "*;q=0.5" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-8" },
-                    { new string[] { "*;q=0.5", "utf-16;q=0.7", "utf-8;q=0.8" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-8" },
-                };
-            }
-        }
-
         [Fact]
         public void TypeIsCorrect()
         {
@@ -86,7 +69,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void SupportedMediaTypesIsMutable()
+        public void SupportedMediaTypes_IsMutable()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
@@ -100,7 +83,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void SupportedMediaTypesAddThrowsWithNullMediaType()
+        public void SupportedMediaTypes_AddThrowsWithNullMediaType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
@@ -110,7 +93,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaRangeValues")]
-        public void SupportedMediaTypesAddThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
+        public void SupportedMediaTypes_AddThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
@@ -118,7 +101,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void SupportedMediaTypesInsertThrowsWithNullMediaType()
+        public void SupportedMediaTypes_InsertThrowsWithNullMediaType()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
@@ -128,7 +111,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaRangeValues")]
-        public void SupportedMediaTypesInsertThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
+        public void SupportedMediaTypes_InsertThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
@@ -137,7 +120,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void MediaTypeMappingsIsMutable()
+        public void MediaTypeMappings_IsMutable()
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeMapping> mappings = formatter.MediaTypeMappings;
@@ -148,150 +131,6 @@ namespace System.Net.Http.Formatting
             }
 
             Assert.True(standardMappings.SequenceEqual(formatter.MediaTypeMappings));
-        }
-
-        [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
-        public void TryMatchSupportedMediaTypeWithQuality(MediaTypeWithQualityHeaderValue mediaTypeWithQuality)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            MediaTypeHeaderValue mediaTypeWithoutQuality = new MediaTypeHeaderValue(mediaTypeWithQuality.MediaType);
-            formatter.SupportedMediaTypes.Add(mediaTypeWithoutQuality);
-            MediaTypeMatch match;
-            bool result = formatter.TryMatchSupportedMediaType(mediaTypeWithQuality, out match);
-            Assert.True(result, String.Format("TryMatchSupportedMediaType should have succeeded for '{0}'.", mediaTypeWithQuality));
-            Assert.NotNull(match);
-            double quality = mediaTypeWithQuality.Quality.Value;
-            Assert.Equal(quality, match.Quality);
-            Assert.NotNull(match.MediaType);
-            Assert.Equal(mediaTypeWithoutQuality.MediaType, match.MediaType.MediaType);
-        }
-
-        [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
-        public void TryMatchSupportedMediaTypeReturnsClone(MediaTypeWithQualityHeaderValue mediaTypeWithQuality)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            MediaTypeHeaderValue mediaTypeWithoutQuality = new MediaTypeHeaderValue(mediaTypeWithQuality.MediaType);
-            formatter.SupportedMediaTypes.Add(mediaTypeWithoutQuality);
-            MediaTypeMatch match;
-            bool result = formatter.TryMatchSupportedMediaType(mediaTypeWithQuality, out match);
-
-            Assert.True(result);
-            Assert.NotNull(match);
-            Assert.NotNull(match.MediaType);
-            Assert.NotSame(mediaTypeWithoutQuality, match.MediaType);
-        }
-
-        [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
-        public void TryMatchMediaTypeMappingWithQuality(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            MediaTypeHeaderValue mediaRangeWithoutQuality = new MediaTypeHeaderValue(mediaRangeWithQuality.MediaType);
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("application/xml");
-            MediaRangeMapping mapping = new MediaRangeMapping(mediaRangeWithoutQuality, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.Accept.Add(mediaRangeWithQuality);
-            MediaTypeMatch match;
-            bool result = formatter.TryMatchMediaTypeMapping(request, out match);
-            Assert.True(result, String.Format("TryMatchMediaTypeMapping should have succeeded for '{0}'.", mediaRangeWithQuality));
-            Assert.NotNull(match);
-            double quality = mediaRangeWithQuality.Quality.Value;
-            Assert.Equal(quality, match.Quality);
-            Assert.NotNull(match.MediaType);
-            Assert.Equal(mediaType.MediaType, match.MediaType.MediaType);
-        }
-
-        [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
-        public void TryMatchMediaTypeMappingClonesMediaType(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            MediaTypeHeaderValue mediaRangeWithoutQuality = new MediaTypeHeaderValue(mediaRangeWithQuality.MediaType);
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("application/xml");
-            MediaRangeMapping mapping = new MediaRangeMapping(mediaRangeWithoutQuality, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.Accept.Add(mediaRangeWithQuality);
-            MediaTypeMatch match;
-            formatter.TryMatchMediaTypeMapping(request, out match);
-            Assert.NotNull(match);
-            Assert.NotNull(match.MediaType);
-            Assert.NotSame(mediaType, match.MediaType);
-        }
-
-        [Fact]
-        public void SelectResponseMediaTypeMatchesType()
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            HttpRequestMessage request = new HttpRequestMessage();
-            ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(typeof(string), request);
-
-            Assert.NotNull(match);
-            Assert.Equal(ResponseFormatterSelectionResult.MatchOnCanWriteType, match.ResponseFormatterSelectionResult);
-            Assert.Null(match.MediaTypeMatch.MediaType);
-        }
-
-        [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
-        public void SelectResponseMediaTypeMatchesRequestContentType(MediaTypeHeaderValue mediaType)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            formatter.SupportedMediaTypes.Add(mediaType);
-            HttpRequestMessage request = new HttpRequestMessage() { Content = new StringContent("fred") };
-            request.Content.Headers.ContentType = mediaType;
-            HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
-            ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(typeof(string), request);
-
-            Assert.NotNull(match);
-            Assert.Equal(ResponseFormatterSelectionResult.MatchOnRequestContentType, match.ResponseFormatterSelectionResult);
-            Assert.NotNull(match.MediaTypeMatch.MediaType);
-            Assert.Equal(mediaType.MediaType, match.MediaTypeMatch.MediaType.MediaType);
-        }
-
-        [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "StandardMediaTypesWithQuality")]
-        public void SelectResponseMediaTypeMatchesAcceptHeaderToSupportedMediaTypes(MediaTypeWithQualityHeaderValue mediaTypeWithQuality)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            MediaTypeHeaderValue mediaTypeWithoutQuality = new MediaTypeHeaderValue(mediaTypeWithQuality.MediaType);
-            formatter.SupportedMediaTypes.Add(mediaTypeWithoutQuality);
-
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.Accept.Add(mediaTypeWithQuality);
-            ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(typeof(string), request);
-
-            Assert.NotNull(match);
-            Assert.Equal(ResponseFormatterSelectionResult.MatchOnRequestAcceptHeader, match.ResponseFormatterSelectionResult);
-            double quality = mediaTypeWithQuality.Quality.Value;
-            Assert.Equal(quality, match.MediaTypeMatch.Quality);
-            Assert.NotNull(match.MediaTypeMatch.MediaType);
-            Assert.Equal(mediaTypeWithoutQuality.MediaType, match.MediaTypeMatch.MediaType.MediaType);
-        }
-
-        [TestDataSet(typeof(HttpUnitTestDataSets), "MediaRangeValuesWithQuality")]
-        public void SelectResponseMediaTypeMatchesWithMediaTypeMapping(MediaTypeWithQualityHeaderValue mediaRangeWithQuality)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            MediaTypeHeaderValue mediaRangeWithoutQuality = new MediaTypeHeaderValue(mediaRangeWithQuality.MediaType);
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("application/xml");
-            MediaRangeMapping mapping = new MediaRangeMapping(mediaRangeWithoutQuality, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.Accept.Add(mediaRangeWithQuality);
-            ResponseMediaTypeMatch match = formatter.SelectResponseMediaType(typeof(string), request);
-
-            Assert.NotNull(match);
-            Assert.Equal(ResponseFormatterSelectionResult.MatchOnRequestWithMediaTypeMapping, match.ResponseFormatterSelectionResult);
-            double quality = mediaRangeWithQuality.Quality.Value;
-            Assert.Equal(quality, match.MediaTypeMatch.Quality);
-            Assert.NotNull(match.MediaTypeMatch.MediaType);
-            Assert.Equal(mediaType.MediaType, match.MediaTypeMatch.MediaType.MediaType);
         }
 
         [Fact]
@@ -331,137 +170,6 @@ namespace System.Net.Http.Formatting
             // Assert
             Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
             Assert.Equal(expectedEnc, actualEncoding);
-        }
-
-        [Theory]
-        [PropertyData("SelectResponseCharacterEncodingTestData")]
-        public void SelectResponseCharacterEncoding_ReturnsBestEncodingBasedOnAcceptCharsetMatch(string[] acceptCharsetValues, string bodyEncoding, string[] supportedEncodings, string expectedEncoding)
-        {
-            // Arrange
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            HttpRequestMessage request = new HttpRequestMessage();
-            foreach (var acceptCharsetValue in acceptCharsetValues)
-            {
-                request.Headers.AcceptCharset.Add(StringWithQualityHeaderValue.Parse(acceptCharsetValue));
-            }
-
-            foreach (var supportedEncoding in supportedEncodings)
-            {
-                Encoding supportedEnc = Encoding.GetEncoding(supportedEncoding);
-                formatter.SupportedEncodings.Add(supportedEnc);
-            }
-
-            if (bodyEncoding != null)
-            {
-                Encoding bodyEnc = Encoding.GetEncoding(bodyEncoding);
-                request.Method = HttpMethod.Post;
-                request.Content = new StringContent("Hello World", bodyEnc, "text/plain");
-            }
-
-            // Act
-            Encoding actualEncoding = formatter.SelectResponseCharacterEncoding(request);
-
-            // Assert
-            Encoding expectedEnc = expectedEncoding != null ? Encoding.GetEncoding(expectedEncoding) : null;
-            Assert.Equal(expectedEnc, actualEncoding);
-        }
-
-        [Theory]
-        [TestDataSet(
-            typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
-        public void CanReadAsReturnsTrue(Type variationType, object testData, string mediaType)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            string[] legalMediaTypeStrings = HttpUnitTestDataSets.LegalMediaTypeStrings.ToArray();
-            foreach (string legalMediaType in legalMediaTypeStrings)
-            {
-                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(legalMediaType));
-            }
-
-            MediaTypeHeaderValue contentType = new MediaTypeHeaderValue(mediaType);
-            Assert.True(formatter.CanReadAs(variationType, contentType));
-        }
-
-        [Fact]
-        public void CanReadAsThrowsWithNullType()
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            Assert.ThrowsArgumentNull(() => formatter.CanReadAs(type: null, mediaType: null), "type");
-        }
-
-        [Fact]
-        public void CanReadAsThrowsWithNullMediaType()
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            Assert.ThrowsArgumentNull(() => formatter.CanReadAs(typeof(int), mediaType: null), "mediaType");
-        }
-
-        [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        public void CanWriteAsReturnsTrue(Type variationType, object testData)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            foreach (string mediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
-            {
-                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaType));
-            }
-
-            MediaTypeHeaderValue matchedMediaType = null;
-            Assert.True(formatter.CanWriteAs(variationType, formatter.SupportedMediaTypes[0], out matchedMediaType));
-        }
-
-        [Fact]
-        public void CanWriteAsThrowsWithNullContent()
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            MediaTypeHeaderValue mediaType = null;
-            Assert.ThrowsArgumentNull(() => formatter.CanWriteAs(typeof(int), null, out mediaType), "mediaType");
-        }
-
-        [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        public void CanWriteAsUsingRequestReturnsTrue(Type variationType, object testData)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            foreach (string mediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
-            {
-                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaType));
-            }
-
-            MediaTypeHeaderValue matchedMediaType = null;
-            Assert.True(formatter.CanWriteAs(variationType, formatter.SupportedMediaTypes[0], out matchedMediaType));
-        }
-
-        [Theory]
-        [TestDataSet(
-            typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
-        public void CanReadTypeReturnsTrue(Type variationType, object testData, string mediaType)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            string[] legalMediaTypeStrings = HttpUnitTestDataSets.LegalMediaTypeStrings.ToArray();
-            foreach (string mediaTypeTmp in legalMediaTypeStrings)
-            {
-                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaTypeTmp));
-            }
-
-            // Invoke CanReadAs because it invokes CanReadType
-            Assert.True(formatter.CanReadAs(variationType, new MediaTypeHeaderValue(mediaType)));
-        }
-
-        [Theory]
-        [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
-        public void CanWriteTypeReturnsTrue(Type variationType, object testData)
-        {
-            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            foreach (string mediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
-            {
-                formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaType));
-            }
-
-            MediaTypeHeaderValue matchedMediaType = null;
-            Assert.True(formatter.CanWriteAs(variationType, formatter.SupportedMediaTypes[0], out matchedMediaType));
         }
 
         [Fact]

@@ -46,7 +46,7 @@ namespace System.Net.Http.Formatting
             }
             else
             {
-                return MediaTypeMatch.NoMatch;
+                return FormattingUtilities.NoMatch;
             }
         }
     }

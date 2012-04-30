@@ -67,12 +67,12 @@ namespace System.Net.Http.Formatting
                 {
                     if (MediaRange.IsSubsetOf(mediaType))
                     {
-                        return mediaType.Quality.HasValue ? mediaType.Quality.Value : MediaTypeMatch.Match;
+                        return mediaType.Quality.HasValue ? mediaType.Quality.Value : FormattingUtilities.Match;
                     }
                 }
             }
 
-            return MediaTypeMatch.NoMatch;
+            return FormattingUtilities.NoMatch;
         }
 
         private void Initialize(MediaTypeHeaderValue mediaRange)

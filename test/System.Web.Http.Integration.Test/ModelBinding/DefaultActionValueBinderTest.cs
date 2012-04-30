@@ -934,6 +934,33 @@ namespace System.Web.Http.ModelBinding
             expectedResult["data"] = new Point { X = 123, Y = 456, Data = new Data { Description = "mypoint" } };
             Assert.Equal(expectedResult, actionContext.ActionArguments, new DictionaryEqualityComparer());
         }
+
+        [Fact]
+        public void BindValuesAsync_Config_BindParameter()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            config.BindParameter(typeof(Data), new CustomModelBinder());
+
+            HttpRequestMessage request = new HttpRequestMessage()
+                {                    
+                    RequestUri = new Uri("http://localhost")
+                };
+
+            HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(config, request);
+            HttpActionContext actionContext = ContextUtil.CreateActionContext(controllerContext,                 
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("GetData") });
+
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(actionContext, CancellationToken.None).Wait();
+
+            // Assert                    
+            Data argData = (Data) actionContext.ActionArguments["data"];
+            Assert.NotNull(argData);
+            Assert.Equal("testing", argData.Description);
+        }
     }
 
     [FromUri]
@@ -959,6 +986,16 @@ namespace System.Web.Http.ModelBinding
         }
     }
 
+    // Test model binder to bind typeof(Data) 
+    public class CustomModelBinder : IModelBinder
+    {
+        public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
+        {
+            bindingContext.Model = new Data { Description = "testing" };            
+            return true;
+        }
+    }
+
     public class Data
     {
         public string Description { get; set; }
@@ -966,6 +1003,11 @@ namespace System.Web.Http.ModelBinding
 
     public class ActionValueController : ApiController
     {
+        public void GetData(Data data)
+        {
+        }
+
+
         // Demonstrates the use of ModelBinderAttribute with empty name
         public void Options([FromUri(Name = "")]Point data) { }
 

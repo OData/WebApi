@@ -4,6 +4,8 @@ namespace System.Web.Http.Routing
 {
     public class HttpVirtualPathData : IHttpVirtualPathData
     {
+        private string _virtualPath;
+
         public HttpVirtualPathData(IHttpRoute route, string virtualPath)
         {
             if (route == null)
@@ -22,6 +24,17 @@ namespace System.Web.Http.Routing
 
         public IHttpRoute Route { get; private set; }
 
-        public string VirtualPath { get; private set; }
+        public string VirtualPath
+        {
+            get { return _virtualPath; }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+                _virtualPath = value;
+            }
+        }
     }
 }

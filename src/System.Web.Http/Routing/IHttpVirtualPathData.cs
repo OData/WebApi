@@ -6,6 +6,6 @@ namespace System.Web.Http.Routing
     {
         IHttpRoute Route { get; }
 
-        string VirtualPath { get; }
+        string VirtualPath { get; set; }
     }
 }

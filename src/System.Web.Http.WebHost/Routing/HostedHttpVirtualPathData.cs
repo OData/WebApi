@@ -29,6 +29,14 @@ namespace System.Web.Http.WebHost.Routing
         public string VirtualPath
         {
             get { return _virtualPath.VirtualPath; }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+                _virtualPath.VirtualPath = value;
+            }
         }
     }
 }

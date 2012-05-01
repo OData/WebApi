@@ -147,7 +147,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             object value;
@@ -164,7 +164,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             // If there is a registered non-null serializer, we can support this type.
@@ -187,7 +187,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (UseXmlSerializer)
@@ -221,12 +221,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>
@@ -284,12 +284,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             return TaskHelpers.RunSynchronously(() =>
@@ -368,11 +368,9 @@ namespace System.Net.Http.Formatting
             {
                 if (throwOnError)
                 {
-                    throw new InvalidOperationException(
-                        RS.Format(Properties.Resources.SerializerCannotSerializeType,
+                    throw Error.InvalidOperation(exception, Properties.Resources.SerializerCannotSerializeType,
                                   UseXmlSerializer ? typeof(XmlSerializer).Name : typeof(DataContractSerializer).Name,
-                                  type.Name),
-                        exception);
+                                  type.Name);
                 }
             }
 
@@ -383,12 +381,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (serializer == null)
             {
-                throw new ArgumentNullException("serializer");
+                throw Error.ArgumentNull("serializer");
             }
 
             SetSerializerInternal(type, serializer);
@@ -411,10 +409,9 @@ namespace System.Net.Http.Formatting
             {
                 // A null serializer indicates the type has already been tested
                 // and found unsupportable.
-                throw new InvalidOperationException(
-                    RS.Format(Properties.Resources.SerializerCannotSerializeType,
+                throw Error.InvalidOperation(Properties.Resources.SerializerCannotSerializeType,
                               UseXmlSerializer ? typeof(XmlSerializer).Name : typeof(DataContractSerializer).Name,
-                              type.Name));
+                              type.Name);
             }
 
             Contract.Assert(serializer is XmlSerializer || serializer is XmlObjectSerializer, "Only XmlSerializer or XmlObjectSerializer are supported.");

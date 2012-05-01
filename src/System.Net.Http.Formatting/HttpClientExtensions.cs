@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -162,7 +163,7 @@ namespace System.Net.Http
         {
             if (client == null)
             {
-                throw new ArgumentNullException("client");
+                throw Error.ArgumentNull("client");
             }
 
             var content = new ObjectContent<T>(value, formatter, mediaType);
@@ -318,7 +319,7 @@ namespace System.Net.Http
         {
             if (client == null)
             {
-                throw new ArgumentNullException("client");
+                throw Error.ArgumentNull("client");
             }
 
             var content = new ObjectContent<T>(value, formatter, mediaType);

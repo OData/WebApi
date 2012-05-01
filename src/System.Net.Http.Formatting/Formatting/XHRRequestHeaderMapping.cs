@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -32,7 +33,7 @@ namespace System.Net.Http.Formatting
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
 
             // Accept header trumps XHR mapping.

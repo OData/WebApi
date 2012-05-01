@@ -2,6 +2,7 @@
 
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
+using System.Web.Http;
 using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
@@ -51,7 +52,7 @@ namespace System.Net.Http.Formatting
             typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
         public void ConstructorThrowsWithIllegalMediaRange(MediaTypeHeaderValue mediaRange, MediaTypeHeaderValue mediaType)
         {
-            string errorMessage = RS.Format(Properties.Resources.InvalidMediaRange, mediaRange.MediaType);
+            string errorMessage = Error.Format(Properties.Resources.InvalidMediaRange, mediaRange.MediaType);
             Assert.Throws<InvalidOperationException>(() => new MediaRangeMapping(mediaRange, mediaType), errorMessage);
         }
 
@@ -90,7 +91,7 @@ namespace System.Net.Http.Formatting
             typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
         public void Constructor1ThrowsWithIllegalMediaRange(string mediaRange, string mediaType)
         {
-            string errorMessage = RS.Format(Properties.Resources.InvalidMediaRange, mediaRange);
+            string errorMessage = Error.Format(Properties.Resources.InvalidMediaRange, mediaRange);
             Assert.Throws<InvalidOperationException>(() => new MediaRangeMapping(mediaRange, mediaType), errorMessage);
         }
 

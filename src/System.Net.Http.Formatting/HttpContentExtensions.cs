@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -104,15 +105,15 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
             if (formatters == null)
             {
-                throw new ArgumentNullException("formatters");
+                throw Error.ArgumentNull("formatters");
             }
 
             ObjectContent objectContent = content as ObjectContent;
@@ -131,8 +132,7 @@ namespace System.Net.Http
             if (formatter == null)
             {
                 string mediaTypeAsString = mediaType != null ? mediaType.MediaType : Properties.Resources.UndefinedMediaType;
-                throw new InvalidOperationException(
-                    RS.Format(Properties.Resources.NoReadSerializerAvailable, type.Name, mediaTypeAsString));
+                throw Error.InvalidOperation(Properties.Resources.NoReadSerializerAvailable, type.Name, mediaTypeAsString);
             }
 
             return content.ReadAsStreamAsync()

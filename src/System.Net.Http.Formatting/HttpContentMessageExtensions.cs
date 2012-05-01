@@ -35,7 +35,7 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             try
@@ -60,7 +60,7 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             try
@@ -124,12 +124,12 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             if (uriScheme == null)
             {
-                throw new ArgumentNullException("uriScheme");
+                throw Error.ArgumentNull("uriScheme");
             }
 
             if (!Uri.CheckSchemeName(uriScheme))
@@ -224,7 +224,7 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             if (bufferSize < MinBufferSize)

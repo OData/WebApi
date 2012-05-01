@@ -110,8 +110,7 @@ namespace System.Net.Http.Formatting
         /// <seealso cref="CanWriteType(Type)"/>
         public virtual Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
-            throw new NotSupportedException(
-                RS.Format(Properties.Resources.MediaTypeFormatterCannotRead, GetType().Name));
+            throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotRead, GetType().Name);
         }
 
         /// <summary>
@@ -135,8 +134,7 @@ namespace System.Net.Http.Formatting
         /// <seealso cref="CanReadType(Type)"/>
         public virtual Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
         {
-            throw new NotSupportedException(
-                RS.Format(Properties.Resources.MediaTypeFormatterCannotWrite, GetType().Name));
+            throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotWrite, GetType().Name);
         }
 
         private static bool TryGetDelegatingType(Type interfaceType, ref Type type)
@@ -236,7 +234,7 @@ namespace System.Net.Http.Formatting
             if (encoding == null)
             {
                 // No supported encoding was found so there is no way for us to start reading or writing.
-                throw new InvalidOperationException(RS.Format(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name));
+                throw Error.InvalidOperation(Properties.Resources.MediaTypeFormatterNoEncoding, GetType().Name);
             }
 
             return encoding;
@@ -246,12 +244,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (mediaType == null)
             {
-                throw new ArgumentNullException("mediaType");
+                throw Error.ArgumentNull("mediaType");
             }
 
             if (!CanReadType(type))
@@ -267,12 +265,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (mediaType == null)
             {
-                throw new ArgumentNullException("mediaType");
+                throw Error.ArgumentNull("mediaType");
             }
 
             if (!CanWriteType(type))
@@ -296,12 +294,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
 
             if (!CanWriteType(type))
@@ -485,11 +483,11 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
             if (headers == null)
             {
-                throw new ArgumentNullException("headers");
+                throw Error.ArgumentNull("headers");
             }
 
             if (!String.IsNullOrEmpty(mediaType))
@@ -536,11 +534,11 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
 
             return this;
@@ -601,7 +599,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (type.IsValueType)
@@ -645,15 +643,13 @@ namespace System.Net.Http.Formatting
             {
                 if (item == null)
                 {
-                    throw new ArgumentNullException("item");
+                    throw Error.ArgumentNull("item");
                 }
 
                 ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(item);
                 if (parsedMediaType.IsAllMediaRange || parsedMediaType.IsSubTypeMediaRange)
                 {
-                    throw new ArgumentException(
-                        RS.Format(Properties.Resources.CannotUseMediaRangeForSupportedMediaType, _mediaTypeHeaderValueType.Name, item.MediaType),
-                        "item");
+                    throw Error.Argument("item", Properties.Resources.CannotUseMediaRangeForSupportedMediaType, _mediaTypeHeaderValueType.Name, item.MediaType);
                 }
             }
         }

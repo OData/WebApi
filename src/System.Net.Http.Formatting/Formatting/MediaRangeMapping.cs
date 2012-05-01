@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -33,7 +34,7 @@ namespace System.Net.Http.Formatting
         {
             if (String.IsNullOrWhiteSpace(mediaRange))
             {
-                throw new ArgumentNullException("mediaRange");
+                throw Error.ArgumentNull("mediaRange");
             }
 
             Initialize(new MediaTypeHeaderValue(mediaRange));
@@ -56,7 +57,7 @@ namespace System.Net.Http.Formatting
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
 
             ICollection<MediaTypeWithQualityHeaderValue> acceptHeader = request.Headers.Accept;
@@ -78,12 +79,12 @@ namespace System.Net.Http.Formatting
         {
             if (mediaRange == null)
             {
-                throw new ArgumentNullException("mediaRange");
+                throw Error.ArgumentNull("mediaRange");
             }
 
             if (!mediaRange.IsMediaRange())
             {
-                throw new InvalidOperationException(RS.Format(Properties.Resources.InvalidMediaRange, mediaRange.ToString()));
+                throw Error.InvalidOperation(Properties.Resources.InvalidMediaRange, mediaRange.ToString());
             }
 
             MediaRange = mediaRange;

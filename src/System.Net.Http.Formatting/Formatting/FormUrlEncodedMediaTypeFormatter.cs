@@ -92,7 +92,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             // Can't read arbitrary types. 
@@ -109,7 +109,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             return false;
@@ -128,12 +128,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>

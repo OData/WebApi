@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -22,7 +23,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             _formatter = formatter;
@@ -39,7 +40,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw Error.ArgumentNull("value");
                 }
                 _formatter = value;
             }

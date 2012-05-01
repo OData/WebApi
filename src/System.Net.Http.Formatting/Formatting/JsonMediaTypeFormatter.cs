@@ -78,7 +78,7 @@ namespace System.Net.Http.Formatting
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw Error.ArgumentNull("value");
                 }
 
                 _jsonSerializerSettings = value;
@@ -145,7 +145,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (UseDataContractJsonSerializer)
@@ -173,7 +173,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (UseDataContractJsonSerializer)
@@ -206,12 +206,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>
@@ -281,17 +281,17 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             if (UseDataContractJsonSerializer && Indent)
             {
-                throw new NotSupportedException(RS.Format(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer)));
+                throw Error.NotSupported(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer));
             }
 
             return TaskHelpers.RunSynchronously(() =>
@@ -335,7 +335,7 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             DataContractJsonSerializer serializer = null;
@@ -391,8 +391,7 @@ namespace System.Net.Http.Formatting
             if (serializer == null)
             {
                 // A null serializer means the type cannot be serialized
-                throw new InvalidOperationException(
-                    RS.Format(Properties.Resources.SerializerCannotSerializeType, typeof(DataContractJsonSerializer).Name, type.Name));
+                throw Error.InvalidOperation(Properties.Resources.SerializerCannotSerializeType, typeof(DataContractJsonSerializer).Name, type.Name);
             }
 
             return serializer;

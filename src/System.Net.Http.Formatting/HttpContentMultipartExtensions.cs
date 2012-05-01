@@ -35,7 +35,7 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             return MimeMultipartBodyPartParser.IsMimeMultipartContent(content);
@@ -55,7 +55,7 @@ namespace System.Net.Http
         {
             if (String.IsNullOrWhiteSpace(subtype))
             {
-                throw new ArgumentNullException("subtype");
+                throw Error.ArgumentNull("subtype");
             }
 
             if (IsMimeMultipartContent(content))
@@ -106,12 +106,12 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             if (streamProvider == null)
             {
-                throw new ArgumentNullException("streamProvider");
+                throw Error.ArgumentNull("streamProvider");
             }
 
             if (bufferSize < MinBufferSize)

@@ -37,7 +37,7 @@ namespace System.Net.Http.Formatting.Parsers
 
             if (httpRequest == null)
             {
-                throw new ArgumentNullException("httpRequest");
+                throw Error.ArgumentNull("httpRequest");
             }
 
             _httpRequest = httpRequest;
@@ -71,7 +71,7 @@ namespace System.Net.Http.Formatting.Parsers
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw Error.ArgumentNull("buffer");
             }
 
             ParserState parseStatus = ParserState.NeedMoreData;
@@ -241,7 +241,7 @@ namespace System.Net.Http.Formatting.Parsers
                     string version = currentToken.ToString();
                     if (String.CompareOrdinal(FormattingUtilities.HttpVersionToken, version) != 0)
                     {
-                        throw new FormatException(RS.Format(Properties.Resources.HttpInvalidVersion, version, FormattingUtilities.HttpVersionToken));
+                        throw new FormatException(Error.Format(Properties.Resources.HttpInvalidVersion, version, FormattingUtilities.HttpVersionToken));
                     }
 
                     currentToken.Clear();

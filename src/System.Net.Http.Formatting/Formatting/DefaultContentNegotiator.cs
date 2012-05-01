@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -25,15 +26,15 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
             if (formatters == null)
             {
-                throw new ArgumentNullException("formatters");
+                throw Error.ArgumentNull("formatters");
             }
 
             MediaTypeHeaderValue mediaType;

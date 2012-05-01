@@ -81,9 +81,6 @@
     <Compile Include="..\Common\UriQueryUtility.cs">
       <Link>Common\UriQueryUtility.cs</Link>
     </Compile>
-    <Compile Include="..\RS.cs">
-      <Link>RS.cs</Link>
-    </Compile>
     <Compile Include="..\TransparentCommonAssemblyInfo.cs">
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>

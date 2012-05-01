@@ -50,7 +50,7 @@ namespace System.Net.Http.Formatting
         /// modifying the headers will have no effect on the generated HTTP message; they should only be used to guide the writing.</param>
         public virtual void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
         {
-            throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotWriteSync, GetType().Name));
+            throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotWriteSync, GetType().Name);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace System.Net.Http.Formatting
         /// <returns>An object of the given type.</returns>
         public virtual object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
         {
-            throw new NotSupportedException(RS.Format(Properties.Resources.MediaTypeFormatterCannotReadSync, GetType().Name));
+            throw Error.NotSupported(Properties.Resources.MediaTypeFormatterCannotReadSync, GetType().Name);
         }
 
         // Sealed because derived classes shouldn't override the async version. Override sync version instead.
@@ -74,12 +74,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             return TaskHelpers.RunSynchronously(
@@ -96,12 +96,12 @@ namespace System.Net.Http.Formatting
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw Error.ArgumentNull("stream");
             }
 
             return TaskHelpers.RunSynchronously<object>(

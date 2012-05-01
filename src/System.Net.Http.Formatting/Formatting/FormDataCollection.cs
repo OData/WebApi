@@ -8,6 +8,7 @@ using System.Net.Http.Formatting.Internal;
 using System.Net.Http.Formatting.Parsers;
 using System.Text;
 using System.Threading;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -32,7 +33,7 @@ namespace System.Net.Http.Formatting
         {
             if (pairs == null)
             {
-                throw new ArgumentNullException("pairs");
+                throw Error.ArgumentNull("pairs");
             }
             _pairs = pairs;
         }
@@ -45,7 +46,7 @@ namespace System.Net.Http.Formatting
         {
             if (uri == null)
             {
-                throw new ArgumentNullException("uri");
+                throw Error.ArgumentNull("uri");
             }
 
             string query = uri.Query;
@@ -85,7 +86,7 @@ namespace System.Net.Http.Formatting
 
             if (state != ParserState.Done)
             {
-                throw new InvalidOperationException(RS.Format(Properties.Resources.FormUrlEncodedParseError, bytesConsumed));
+                throw Error.InvalidOperation(Properties.Resources.FormUrlEncodedParseError, bytesConsumed);
             }
 
             return result;

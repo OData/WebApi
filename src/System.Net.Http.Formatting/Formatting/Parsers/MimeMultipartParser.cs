@@ -43,12 +43,12 @@ namespace System.Net.Http.Formatting.Parsers
 
             if (String.IsNullOrWhiteSpace(boundary))
             {
-                throw new ArgumentNullException("boundary");
+                throw Error.ArgumentNull("boundary");
             }
 
             if (boundary.EndsWith(" ", StringComparison.Ordinal))
             {
-                throw new ArgumentException(Properties.Resources.MimeMultipartParserBadBoundary, "boundary");
+                throw Error.Argument("boundary", Properties.Resources.MimeMultipartParserBadBoundary);
             }
 
             _maxMessageSize = maxMessageSize;
@@ -125,7 +125,7 @@ namespace System.Net.Http.Formatting.Parsers
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw Error.ArgumentNull("buffer");
             }
 
             State parseStatus = State.NeedMoreData;

@@ -2,6 +2,7 @@
 
 using System.Collections.Specialized;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -59,7 +60,7 @@ namespace System.Net.Http.Formatting
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
 
             NameValueCollection queryString = GetQueryString(request.RequestUri);
@@ -70,7 +71,7 @@ namespace System.Net.Http.Formatting
         {
             if (uri == null)
             {
-                throw new InvalidOperationException(RS.Format(Properties.Resources.NonNullUriRequiredForMediaTypeMapping, _queryStringMappingType.Name));
+                throw Error.InvalidOperation(Properties.Resources.NonNullUriRequiredForMediaTypeMapping, _queryStringMappingType.Name);
             }
 
             return new FormDataCollection(uri).ReadAsNameValueCollection();
@@ -80,12 +81,12 @@ namespace System.Net.Http.Formatting
         {
             if (String.IsNullOrWhiteSpace(queryStringParameterName))
             {
-                throw new ArgumentNullException("queryStringParameterName");
+                throw Error.ArgumentNull("queryStringParameterName");
             }
 
             if (String.IsNullOrWhiteSpace(queryStringParameterValue))
             {
-                throw new ArgumentNullException("queryStringParameterValue");
+                throw Error.ArgumentNull("queryStringParameterValue");
             }
 
             QueryStringParameterName = queryStringParameterName.Trim();

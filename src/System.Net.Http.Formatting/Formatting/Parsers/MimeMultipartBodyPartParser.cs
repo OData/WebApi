@@ -224,7 +224,7 @@ namespace System.Net.Http.Formatting.Parsers
             {
                 if (throwOnError)
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.ReadAsMimeMultipartArgumentNoContentType, typeof(HttpContent).Name, "multipart/"), "content");
+                    throw Error.Argument("content", Properties.Resources.ReadAsMimeMultipartArgumentNoContentType, typeof(HttpContent).Name, "multipart/");
                 }
                 else
                 {
@@ -236,7 +236,7 @@ namespace System.Net.Http.Formatting.Parsers
             {
                 if (throwOnError)
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.ReadAsMimeMultipartArgumentNoMultipart, typeof(HttpContent).Name, "multipart/"), "content");
+                    throw Error.Argument("content", Properties.Resources.ReadAsMimeMultipartArgumentNoMultipart, typeof(HttpContent).Name, "multipart/");
                 }
                 else
                 {
@@ -258,7 +258,7 @@ namespace System.Net.Http.Formatting.Parsers
             {
                 if (throwOnError)
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.ReadAsMimeMultipartArgumentNoBoundary, typeof(HttpContent).Name, "multipart", "boundary"), "content");
+                    throw Error.Argument("content", Properties.Resources.ReadAsMimeMultipartArgumentNoBoundary, typeof(HttpContent).Name, "multipart", "boundary");
                 }
                 else
                 {

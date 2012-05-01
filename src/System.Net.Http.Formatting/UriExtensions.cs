@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Formatting;
+using System.Web.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,7 +26,7 @@ namespace System.Net.Http
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw Error.ArgumentNull("address");
             }
 
             return new FormDataCollection(address).ReadAsNameValueCollection();
@@ -41,7 +42,7 @@ namespace System.Net.Http
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw Error.ArgumentNull("address");
             }
 
             IEnumerable<KeyValuePair<string, string>> query = new FormDataCollection(address);
@@ -60,12 +61,12 @@ namespace System.Net.Http
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw Error.ArgumentNull("address");
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
 
             IEnumerable<KeyValuePair<string, string>> query = new FormDataCollection(address);
@@ -95,7 +96,7 @@ namespace System.Net.Http
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw Error.ArgumentNull("address");
             }
 
             IEnumerable<KeyValuePair<string, string>> query = new FormDataCollection(address);

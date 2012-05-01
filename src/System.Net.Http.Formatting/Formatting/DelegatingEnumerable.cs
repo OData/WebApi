@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -32,7 +33,7 @@ namespace System.Net.Http.Formatting
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw Error.ArgumentNull("source");
             }
             _source = source;
         }

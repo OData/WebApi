@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
+using System.Web.Http;
 using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
@@ -173,7 +174,7 @@ namespace System.Net.Http.Formatting
         public void TryMatchMediaTypeThrowsWithNullUriInHttpRequestMessage(string queryStringParameterName, string queryStringParameterValue, string mediaType)
         {
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
-            string errorMessage = RS.Format(Properties.Resources.NonNullUriRequiredForMediaTypeMapping, typeof(QueryStringMapping).Name);
+            string errorMessage = Error.Format(Properties.Resources.NonNullUriRequiredForMediaTypeMapping, typeof(QueryStringMapping).Name);
             Assert.Throws<InvalidOperationException>(() => mapping.TryMatchMediaType(new HttpRequestMessage()), errorMessage);
         }
 

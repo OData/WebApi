@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http.Formatting.DataSets;
+using System.Web.Http;
 using Microsoft.TestCommon;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -83,7 +84,7 @@ namespace System.Net.Http.Formatting
         {
             Assert.ThrowsArgument(
                 () => new MediaTypeFormatterCollection(new MediaTypeFormatter[] { null }), "formatters",
-                RS.Format(Properties.Resources.CannotHaveNullInList,
+                Error.Format(Properties.Resources.CannotHaveNullInList,
                 typeof(MediaTypeFormatter).Name));
         }
 

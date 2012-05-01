@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -39,7 +40,7 @@ namespace System.Net.Http.Formatting
         {
             if (!IsDefined(value))
             {
-                throw new InvalidEnumArgumentException(parameterName, (int)value, _stringComparisonType);
+                throw Error.InvalidEnumArgument(parameterName, (int)value, _stringComparisonType);
             }
         }
     }

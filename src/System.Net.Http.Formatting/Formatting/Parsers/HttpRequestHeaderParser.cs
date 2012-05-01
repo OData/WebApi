@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting.Parsers
 {
@@ -38,7 +39,7 @@ namespace System.Net.Http.Formatting.Parsers
         {
             if (httpRequest == null)
             {
-                throw new ArgumentNullException("httpRequest");
+                throw Error.ArgumentNull("httpRequest");
             }
 
             _httpRequest = httpRequest;
@@ -71,7 +72,7 @@ namespace System.Net.Http.Formatting.Parsers
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw Error.ArgumentNull("buffer");
             }
 
             ParserState parseStatus = ParserState.NeedMoreData;

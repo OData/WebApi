@@ -6,6 +6,7 @@ using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Web.Http;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
@@ -112,7 +113,7 @@ namespace System.Net.Http.Formatting
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
-            Assert.ThrowsArgument(() => supportedMediaTypes.Add(mediaType), "item", RS.Format(Properties.Resources.CannotUseMediaRangeForSupportedMediaType, typeof(MediaTypeHeaderValue).Name, mediaType.MediaType));
+            Assert.ThrowsArgument(() => supportedMediaTypes.Add(mediaType), "item", Error.Format(Properties.Resources.CannotUseMediaRangeForSupportedMediaType, typeof(MediaTypeHeaderValue).Name, mediaType.MediaType));
         }
 
         [Fact]
@@ -131,7 +132,7 @@ namespace System.Net.Http.Formatting
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
 
-            Assert.ThrowsArgument(() => supportedMediaTypes.Insert(0, mediaType), "item", RS.Format(Properties.Resources.CannotUseMediaRangeForSupportedMediaType, typeof(MediaTypeHeaderValue).Name, mediaType.MediaType));
+            Assert.ThrowsArgument(() => supportedMediaTypes.Insert(0, mediaType), "item", Error.Format(Properties.Resources.CannotUseMediaRangeForSupportedMediaType, typeof(MediaTypeHeaderValue).Name, mediaType.MediaType));
         }
 
         [Fact]

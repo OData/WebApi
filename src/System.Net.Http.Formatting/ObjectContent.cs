@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -39,11 +40,11 @@ namespace System.Net.Http
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw Error.ArgumentNull("type");
             }
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             _formatter = formatter;
@@ -113,7 +114,7 @@ namespace System.Net.Http
                 // Null may not be assigned to value types (unless Nullable<T>)
                 if (!IsTypeNullable(ObjectType))
                 {
-                    throw new InvalidOperationException(RS.Format(Properties.Resources.CannotUseNullValueType, typeof(ObjectContent).Name, ObjectType.Name));
+                    throw Error.InvalidOperation(Properties.Resources.CannotUseNullValueType, typeof(ObjectContent).Name, ObjectType.Name);
                 }
             }
             else
@@ -122,12 +123,12 @@ namespace System.Net.Http
                 Type objectType = value.GetType();
                 if (!ObjectType.IsAssignableFrom(objectType))
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.ObjectAndTypeDisagree, objectType.Name, ObjectType.Name), "value");
+                    throw Error.Argument("value", Properties.Resources.ObjectAndTypeDisagree, objectType.Name, ObjectType.Name);
                 }
 
                 if (!_formatter.CanWriteType(objectType))
                 {
-                    throw new InvalidOperationException(RS.Format(Properties.Resources.ObjectContent_FormatterCannotWriteType, _formatter.GetType().FullName, objectType.Name));
+                    throw Error.InvalidOperation(Properties.Resources.ObjectContent_FormatterCannotWriteType, _formatter.GetType().FullName, objectType.Name);
                 }
             }
 

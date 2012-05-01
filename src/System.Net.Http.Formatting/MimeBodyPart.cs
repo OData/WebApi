@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -90,19 +91,17 @@ namespace System.Net.Http
                 }
                 catch (Exception e)
                 {
-                    throw new InvalidOperationException(RS.Format(Properties.Resources.ReadAsMimeMultipartStreamProviderException, _streamProvider.GetType().Name), e);
+                    throw Error.InvalidOperation(e, Properties.Resources.ReadAsMimeMultipartStreamProviderException, _streamProvider.GetType().Name);
                 }
 
                 if (_outputStream == null)
                 {
-                    throw new InvalidOperationException(
-                        RS.Format(Properties.Resources.ReadAsMimeMultipartStreamProviderNull, _streamProvider.GetType().Name, _streamType.Name));
+                    throw Error.InvalidOperation(Properties.Resources.ReadAsMimeMultipartStreamProviderNull, _streamProvider.GetType().Name, _streamType.Name);
                 }
 
                 if (!_outputStream.CanWrite)
                 {
-                    throw new InvalidOperationException(
-                        RS.Format(Properties.Resources.ReadAsMimeMultipartStreamProviderReadOnly, _streamProvider.GetType().Name, _streamType.Name));
+                    throw Error.InvalidOperation(Properties.Resources.ReadAsMimeMultipartStreamProviderReadOnly, _streamProvider.GetType().Name, _streamType.Name);
                 }
 
                 HttpContent = new StreamContent(_outputStream);

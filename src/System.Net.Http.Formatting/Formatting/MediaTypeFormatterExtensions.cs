@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -30,7 +31,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
@@ -56,7 +57,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
@@ -75,7 +76,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             MediaRangeMapping mapping = new MediaRangeMapping(mediaRange, mediaType);
@@ -97,7 +98,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             MediaRangeMapping mapping = new MediaRangeMapping(mediaRange, mediaType);
@@ -130,7 +131,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, valueComparison, isValueSubstring, mediaType);
@@ -163,7 +164,7 @@ namespace System.Net.Http.Formatting
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw Error.ArgumentNull("formatter");
             }
 
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, valueComparison, isValueSubstring, mediaType);

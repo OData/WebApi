@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -50,7 +51,7 @@ namespace System.Net.Http
         {
             if (onStreamAvailable == null)
             {
-                throw new ArgumentNullException("onStreamAvailable");
+                throw Error.ArgumentNull("onStreamAvailable");
             }
 
             _onStreamAvailable = onStreamAvailable;

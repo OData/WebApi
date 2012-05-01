@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -24,7 +25,7 @@ namespace System.Net.Http.Formatting
         {
             if (mediaType == null)
             {
-                throw new ArgumentNullException("mediaType");
+                throw Error.ArgumentNull("mediaType");
             }
 
             MediaType = mediaType;
@@ -43,7 +44,7 @@ namespace System.Net.Http.Formatting
         {
             if (String.IsNullOrWhiteSpace(mediaType))
             {
-                throw new ArgumentNullException("mediaType");
+                throw Error.ArgumentNull("mediaType");
             }
 
             MediaType = new MediaTypeHeaderValue(mediaType);

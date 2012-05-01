@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Net.Http.Headers;
+using System.Web.Http;
 
 namespace System.Net.Http.Formatting
 {
@@ -86,7 +87,7 @@ namespace System.Net.Http.Formatting
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw Error.ArgumentNull("request");
             }
 
             return MatchHeaderValue(request, HeaderName, HeaderValue, HeaderValueComparison, IsValueSubstring);
@@ -127,12 +128,12 @@ namespace System.Net.Http.Formatting
         {
             if (String.IsNullOrWhiteSpace(headerName))
             {
-                throw new ArgumentNullException("headerName");
+                throw Error.ArgumentNull("headerName");
             }
 
             if (String.IsNullOrWhiteSpace(headerValue))
             {
-                throw new ArgumentNullException("headerValue");
+                throw Error.ArgumentNull("headerValue");
             }
 
             StringComparisonHelper.Validate(valueComparison, "valueComparison");

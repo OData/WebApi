@@ -97,7 +97,7 @@ namespace System.Net.Http
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException(Properties.Resources.MultipartStreamProviderInvalidLocalFileName, e);
+                throw Error.InvalidOperation(e, Properties.Resources.MultipartStreamProviderInvalidLocalFileName);
             }
 
             // Add local file name 

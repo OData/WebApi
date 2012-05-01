@@ -148,14 +148,14 @@ namespace System.Net.Http.Formatting
         {
             if (formatters == null)
             {
-                throw new ArgumentNullException("formatters");
+                throw Error.ArgumentNull("formatters");
             }
 
             foreach (MediaTypeFormatter formatter in formatters)
             {
                 if (formatter == null)
                 {
-                    throw new ArgumentException(RS.Format(Properties.Resources.CannotHaveNullInList, _mediaTypeFormatterType.Name), "formatters");
+                    throw Error.Argument("formatters", Properties.Resources.CannotHaveNullInList, _mediaTypeFormatterType.Name);
                 }
 
                 Add(formatter);

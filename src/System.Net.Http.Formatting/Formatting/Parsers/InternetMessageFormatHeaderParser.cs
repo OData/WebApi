@@ -38,7 +38,7 @@ namespace System.Net.Http.Formatting.Parsers
 
             if (headers == null)
             {
-                throw new ArgumentNullException("headers");
+                throw Error.ArgumentNull("headers");
             }
 
             _headers = headers;
@@ -71,7 +71,7 @@ namespace System.Net.Http.Formatting.Parsers
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw Error.ArgumentNull("buffer");
             }
 
             ParserState parseStatus = ParserState.NeedMoreData;

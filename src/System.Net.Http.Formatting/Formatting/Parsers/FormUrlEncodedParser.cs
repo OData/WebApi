@@ -37,7 +37,7 @@ namespace System.Net.Http.Formatting.Parsers
 
             if (nameValuePairs == null)
             {
-                throw new ArgumentNullException("nameValuePairs");
+                throw Error.ArgumentNull("nameValuePairs");
             }
 
             _nameValuePairs = nameValuePairs;
@@ -70,7 +70,7 @@ namespace System.Net.Http.Formatting.Parsers
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw Error.ArgumentNull("buffer");
             }
 
             ParserState parseStatus = ParserState.NeedMoreData;

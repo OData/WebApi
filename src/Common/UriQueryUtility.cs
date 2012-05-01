@@ -220,7 +220,7 @@ namespace System.Web.Http
                 return false;
             if (bytes == null)
             {
-                throw new ArgumentNullException("bytes");
+                throw Error.ArgumentNull("bytes");
             }
             if (offset < 0 || offset > bytes.Length)
             {

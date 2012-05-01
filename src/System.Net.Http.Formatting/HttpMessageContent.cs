@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace System.Net.Http
 {
@@ -60,7 +61,7 @@ namespace System.Net.Http
         {
             if (httpRequest == null)
             {
-                throw new ArgumentNullException("httpRequest");
+                throw Error.ArgumentNull("httpRequest");
             }
 
             HttpRequestMessage = httpRequest;
@@ -79,7 +80,7 @@ namespace System.Net.Http
         {
             if (httpResponse == null)
             {
-                throw new ArgumentNullException("httpResponse");
+                throw Error.ArgumentNull("httpResponse");
             }
 
             HttpResponseMessage = httpResponse;
@@ -120,7 +121,7 @@ namespace System.Net.Http
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw Error.ArgumentNull("content");
             }
 
             MediaTypeHeaderValue contentType = content.Headers.ContentType;
@@ -130,10 +131,8 @@ namespace System.Net.Http
                 {
                     if (throwOnError)
                     {
-                        throw new ArgumentException(
-                            RS.Format(Properties.Resources.HttpMessageInvalidMediaType, FormattingUtilities.HttpContentType.Name,
-                                      isRequest ? DefaultRequestMediaType : DefaultResponseMediaType),
-                            "content");
+                        throw Error.Argument("content", Properties.Resources.HttpMessageInvalidMediaType, FormattingUtilities.HttpContentType.Name,
+                                      isRequest ? DefaultRequestMediaType : DefaultResponseMediaType);
                     }
                     else
                     {
@@ -150,9 +149,7 @@ namespace System.Net.Http
                         {
                             if (throwOnError)
                             {
-                                throw new ArgumentException(
-                                    RS.Format(Properties.Resources.HttpMessageInvalidMediaType, FormattingUtilities.HttpContentType.Name, isRequest ? DefaultRequestMediaType : DefaultResponseMediaType),
-                                    "content");
+                                throw Error.Argument("content", Properties.Resources.HttpMessageInvalidMediaType, FormattingUtilities.HttpContentType.Name, isRequest ? DefaultRequestMediaType : DefaultResponseMediaType);
                             }
                             else
                             {
@@ -167,9 +164,7 @@ namespace System.Net.Http
 
             if (throwOnError)
             {
-                throw new ArgumentException(
-                    RS.Format(Properties.Resources.HttpMessageInvalidMediaType, FormattingUtilities.HttpContentType.Name, isRequest ? DefaultRequestMediaType : DefaultResponseMediaType),
-                    "content");
+                throw Error.Argument("content", Properties.Resources.HttpMessageInvalidMediaType, FormattingUtilities.HttpContentType.Name, isRequest ? DefaultRequestMediaType : DefaultResponseMediaType);
             }
             else
             {
@@ -422,12 +417,11 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        throw new InvalidOperationException(
-                            RS.Format(Properties.Resources.HttpMessageContentAlreadyRead,
+                        throw Error.InvalidOperation(Properties.Resources.HttpMessageContentAlreadyRead,
                                       FormattingUtilities.HttpContentType.Name,
                                       HttpRequestMessage != null
                                           ? FormattingUtilities.HttpRequestMessageType.Name
-                                          : FormattingUtilities.HttpResponseMessageType.Name));
+                                          : FormattingUtilities.HttpResponseMessageType.Name);
                     }
 
                     _contentConsumed = true;

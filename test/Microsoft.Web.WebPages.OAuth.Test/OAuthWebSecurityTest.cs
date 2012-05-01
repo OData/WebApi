@@ -127,7 +127,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             OAuthWebSecurity.RegisterClient(client.Object);
 
             // Act
-            var results = OAuthWebSecurity.GetRegisteredClients().ToList();
+            var results = OAuthWebSecurity.RegisteredClients.ToList();
 
             // Assert
             Assert.Equal(5, results.Count);

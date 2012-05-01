@@ -43,6 +43,18 @@ namespace Microsoft.Web.WebPages.OAuth
         }
 
         /// <summary>
+        /// Gets the registered OAuthen &amp; OpenID clients.
+        /// </summary>
+        /// <returns></returns>
+        public static ICollection<IAuthenticationClient> RegisteredClients
+        {
+            get
+            {
+                return new ReadOnlyCollection<IAuthenticationClient>(_authenticationClients);
+            }
+        }
+
+        /// <summary>
         /// Registers a supported OAuth client with the specified consumer key and consumer secret.
         /// </summary>
         /// <param name="client">One of the supported OAuth clients.</param>
@@ -120,16 +132,6 @@ namespace Microsoft.Web.WebPages.OAuth
             }
 
             _authenticationClients.Add(client);
-        }
-
-        /// <summary>
-        /// Gets the registered OAuthen &amp; OpenID clients.
-        /// </summary>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This operation can be expensive because it queries from database.")]
-        public static ICollection<IAuthenticationClient> GetRegisteredClients()
-        {
-            return new ReadOnlyCollection<IAuthenticationClient>(_authenticationClients);
         }
 
         /// <summary>

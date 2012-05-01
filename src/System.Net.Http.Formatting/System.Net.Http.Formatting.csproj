@@ -88,6 +88,7 @@
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CloneableExtensions.cs" />
+    <Compile Include="HttpContentFormDataExtensions.cs" />
     <Compile Include="MultipartRelatedStreamProvider.cs" />
     <Compile Include="MultipartFileData.cs" />
     <Compile Include="MultipartStreamProvider.cs" />

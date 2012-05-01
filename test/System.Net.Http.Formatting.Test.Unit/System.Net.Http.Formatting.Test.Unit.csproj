@@ -86,6 +86,7 @@
     <Compile Include="..\Common\UriQueryUtilityTest.cs">
       <Link>Common\UriQueryUtilityTest.cs</Link>
     </Compile>
+    <Compile Include="HttpContentFormDataExtensionsTest.cs" />
     <Compile Include="PushStreamContentTest.cs" />
     <Compile Include="HttpClientFactoryTest.cs" />
     <Compile Include="Handlers\ProgressContentTest.cs" />

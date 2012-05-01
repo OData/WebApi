@@ -173,6 +173,13 @@ namespace System.Web.Http.Validation
                         {
                             key = keyBuilder.AppendTo(key);
                         }
+
+                        // Avoid adding model errors if the model state already contains model errors for that key
+                        // We can't perform this check earlier because we compute the key string only when we detect an error
+                        if (!validationContext.ModelState.IsValidField(key))
+                        {
+                            return false;
+                        }
                     }
                     validationContext.ModelState.AddModelError(key, error.Message);
                     isValid = false;

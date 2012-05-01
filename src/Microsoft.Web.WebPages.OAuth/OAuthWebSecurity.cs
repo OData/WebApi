@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -118,6 +120,16 @@ namespace Microsoft.Web.WebPages.OAuth
             }
 
             _authenticationClients.Add(client);
+        }
+
+        /// <summary>
+        /// Gets the registered OAuthen &amp; OpenID clients.
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This operation can be expensive because it queries from database.")]
+        public static ICollection<IAuthenticationClient> GetRegisteredClients()
+        {
+            return new ReadOnlyCollection<IAuthenticationClient>(_authenticationClients);
         }
 
         /// <summary>
@@ -257,6 +269,20 @@ namespace Microsoft.Web.WebPages.OAuth
 
             ExtendedMembershipProvider provider = VerifyProvider();
             return provider.GetAccountsForUser(userName).Select(p => new OAuthAccount(p.Provider, p.ProviderUserId)).ToList();
+        }
+
+        /// <summary>
+        /// Determines whether there exists a local account (as opposed to OAuth account) with the specified userId.
+        /// </summary>
+        /// <param name="userId">The user id to check for local account.</param>
+        /// <returns>
+        ///   <c>true</c> if there is a local account with the specified user id]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool HasLocalAccount(int userId)
+        {
+            ExtendedMembershipProvider provider = VerifyProvider();
+            Debug.Assert(provider != null); // VerifyProvider checks this
+            return provider.HasLocalAccount(userId);
         }
 
         /// <summary>

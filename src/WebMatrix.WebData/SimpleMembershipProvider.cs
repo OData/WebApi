@@ -1133,5 +1133,23 @@ namespace WebMatrix.WebData
 
             return new OAuthAccountData[0];
         }
+
+        /// <summary>
+        /// Determines whether there exists a local account (as opposed to OAuth account) with the specified userId.
+        /// </summary>
+        /// <param name="userId">The user id to check for local account.</param>
+        /// <returns>
+        ///   <c>true</c> if there is a local account with the specified user id]; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool HasLocalAccount(int userId)
+        {
+            VerifyInitialized();
+
+            using (var db = ConnectToDatabase())
+            {
+                dynamic id = db.QueryValue(@"SELECT UserId FROM [" + MembershipTableName + "] WHERE UserId=@0", userId);
+                return id != null;
+            }           
+        }
     }
 }

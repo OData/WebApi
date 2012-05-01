@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Web;
 using System.Web.Security;
 using DotNetOpenAuth.AspNet;
@@ -109,6 +110,32 @@ namespace Microsoft.Web.WebPages.OAuth.Test
                 // Assert
                 AssertEx.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client.Object), null);
             }
+        }
+
+        [Fact]
+        public void GetRegisteredClientsReturnTheCorrectSet()
+        {
+            // Arrange
+            OAuthWebSecurity.RegisterOpenIDClient(BuiltInOpenIDClient.Google);
+            OAuthWebSecurity.RegisterOpenIDClient(BuiltInOpenIDClient.Yahoo);
+
+            OAuthWebSecurity.RegisterOAuthClient(BuiltInOAuthClient.Facebook, "123", "456");
+            OAuthWebSecurity.RegisterOAuthClient(BuiltInOAuthClient.LinkedIn, "142", "4312");
+
+            var client = new Mock<IAuthenticationClient>();
+            client.Setup(c => c.ProviderName).Returns("awesome provider");
+            OAuthWebSecurity.RegisterClient(client.Object);
+
+            // Act
+            var results = OAuthWebSecurity.GetRegisteredClients().ToList();
+
+            // Assert
+            Assert.Equal(5, results.Count);
+            Assert.Equal("google", results[0].ProviderName);
+            Assert.Equal("yahoo", results[1].ProviderName);
+            Assert.Equal("facebook", results[2].ProviderName);
+            Assert.Equal("linkedIn", results[3].ProviderName);
+            Assert.Equal("awesome provider", results[4].ProviderName);
         }
 
         [Fact]

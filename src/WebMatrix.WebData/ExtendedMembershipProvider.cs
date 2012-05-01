@@ -41,6 +41,18 @@ namespace WebMatrix.WebData
         public abstract string GetUserNameFromId(int userId);
 
         /// <summary>
+        /// Determines whether there exists a local account (as opposed to OAuth account) with the specified userId.
+        /// </summary>
+        /// <param name="userId">The user id to check for local account.</param>
+        /// <returns>
+        ///   <c>true</c> if there is a local account with the specified user id]; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool HasLocalAccount(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets all OAuth accounts associated with the specified username
         /// </summary>
         /// <param name="userName">Name of the user.</param>

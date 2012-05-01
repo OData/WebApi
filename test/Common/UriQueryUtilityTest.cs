@@ -12,34 +12,36 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {
-    public class UriQueryUtilityTests
+    public class UriQueryUtilityTest
     {
+        public static TheoryDataSet<string, string, string> UriQueryData
+        {
+            get
+            {
+                return UriQueryTestData.UriQueryData;
+            }
+        }
+
         [Fact]
         public void TypeIsCorrect()
         {
             Assert.Type.HasProperties(typeof(UriQueryUtility), TypeAssert.TypeProperties.IsClass | TypeAssert.TypeProperties.IsStatic);
         }
 
-        #region UrlEncode
-
         [Fact]
-        public void UrlEncodeReturnsNull()
+        public void UrlEncode_ReturnsNull()
         {
             Assert.Null(UriQueryUtility.UrlEncode(null));
         }
 
-        #endregion
-
-        #region UrlDecode
-
         [Fact]
-        public void UrlDecodeReturnsNull()
+        public void UrlDecode_ReturnsNull()
         {
             Assert.Null(UriQueryUtility.UrlDecode(null));
         }
 
         [Fact]
-        public void UrlDecodeParsesEmptySegmentsCorrectly()
+        public void UrlDecode_ParsesEmptySegmentsCorrectly()
         {
             int iterations = 16;
             List<string> segments = new List<string>();
@@ -66,40 +68,11 @@ namespace System.Net.Http
             }
         }
 
-        public static TheoryDataSet<string, string, string> UriQueryData
-        {
-            get
-            {
-                return UriQueryTestData.UriQueryData;
-            }
-        }
-
-        private static string CreateQuery(params string[] segments)
-        {
-            StringBuilder buffer = new StringBuilder();
-            bool first = true;
-            foreach (string segment in segments)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    buffer.Append('&');
-                }
-
-                buffer.Append(segment);
-            }
-
-            return buffer.ToString();
-        }
-
         [Theory]
         [InlineData("N", "N", "")]
         [InlineData("%26", "&", "")]
         [PropertyData("UriQueryData")]
-        public void UrlDecodeParsesCorrectly(string segment, string resultName, string resultValue)
+        public void UrlDecode_ParsesCorrectly(string segment, string resultName, string resultValue)
         {
             int iterations = 16;
             List<string> segments = new List<string>();
@@ -124,8 +97,26 @@ namespace System.Net.Http
             }
         }
 
-        #endregion
+        private static string CreateQuery(params string[] segments)
+        {
+            StringBuilder buffer = new StringBuilder();
+            bool first = true;
+            foreach (string segment in segments)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    buffer.Append('&');
+                }
 
+                buffer.Append(segment);
+            }
+
+            return buffer.ToString();
+        }
 
         private static NameValueCollection ParseQueryString(string query)
         {

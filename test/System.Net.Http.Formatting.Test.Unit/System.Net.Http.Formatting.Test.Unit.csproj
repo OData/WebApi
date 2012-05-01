@@ -71,6 +71,21 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\DictionaryExtensionsTest.cs">
+      <Link>Common\DictionaryExtensionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\ErrorTest.cs">
+      <Link>Common\ErrorTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpersExtensionsTest.cs">
+      <Link>Common\TaskHelpersExtensionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpersTest.cs">
+      <Link>Common\TaskHelpersTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\UriQueryUtilityTest.cs">
+      <Link>Common\UriQueryUtilityTest.cs</Link>
+    </Compile>
     <Compile Include="PushStreamContentTest.cs" />
     <Compile Include="HttpClientFactoryTest.cs" />
     <Compile Include="Handlers\ProgressContentTest.cs" />
@@ -120,7 +135,6 @@
     <Compile Include="Mocks\TestableHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriQueryDataSet.cs" />
-    <Compile Include="UriQueryUtilityTests.cs" />
     <Compile Include="FormattingUtilitiesTests.cs" />
     <Compile Include="Formatting\BufferedMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\DefaultContentNegotiatorTests.cs" />

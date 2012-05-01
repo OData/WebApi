@@ -12,6 +12,26 @@ namespace System.Web.Http
 {
     public class DictionaryExtensionsTest
     {
+        public static TheoryDataSet<object> DictionaryValues
+        {
+            get
+            {
+                return new TheoryDataSet<object>
+                {
+                    "test",
+                    new string[] { "A", "B", "C" },
+                    8,
+                    new List<int> {1, 2, 3},
+                    1D,
+                    (IEnumerable<double>)new List<double> { 1D, 2D, 3D },
+                    new Uri("http://some.host"),
+                    Guid.NewGuid(),
+                    HttpStatusCode.NotImplemented,
+                    new HttpStatusCode[] { HttpStatusCode.Accepted, HttpStatusCode.Ambiguous, HttpStatusCode.BadGateway }
+                };
+            }
+        }
+
         [Fact]
         public void IsCorrectType()
         {
@@ -31,26 +51,6 @@ namespace System.Web.Http
             IDictionary<string, object> dict = new Dictionary<string, object>();
             string value;
             Assert.ThrowsArgumentNull(() => dict.TryGetValue<string>(null, out value), "key");
-        }
-
-        public static TheoryDataSet<object> DictionaryValues
-        {
-            get
-            {
-                return new TheoryDataSet<object>
-                {
-                    "test",
-                    new string[] { "A", "B", "C" },
-                    8,
-                    new List<int> {1, 2, 3},
-                    1D,
-                    (IEnumerable<double>)new List<double> { 1D, 2D, 3D },
-                    new Uri("http://some.host"),
-                    Guid.NewGuid(),
-                    HttpStatusCode.NotImplemented,
-                    new HttpStatusCode[] { HttpStatusCode.Accepted, HttpStatusCode.Ambiguous, HttpStatusCode.BadGateway }
-                };
-            }
         }
 
         [Fact]
@@ -88,7 +88,6 @@ namespace System.Web.Http
             Assert.Equal(typeof(T), resultValue.GetType());
             Assert.Equal(value, resultValue);
         }
-
 
         [Fact]
         public void FindKeysWithPrefixRecognizesRootChilden()

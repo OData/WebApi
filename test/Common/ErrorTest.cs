@@ -5,7 +5,7 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http
 {
-    public class ErrorTests
+    public class ErrorTest
     {
         [Fact]
         public void Format()

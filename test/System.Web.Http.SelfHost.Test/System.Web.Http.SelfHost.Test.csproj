@@ -70,6 +70,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\DictionaryExtensionsTest.cs">
+      <Link>Common\DictionaryExtensionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\ErrorTest.cs">
+      <Link>Common\ErrorTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\HttpMethodHelperTest.cs">
+      <Link>Common\HttpMethodHelperTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpersExtensionsTest.cs">
+      <Link>Common\TaskHelpersExtensionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TaskHelpersTest.cs">
+      <Link>Common\TaskHelpersTest.cs</Link>
+    </Compile>
     <Compile Include="DeeplyNestedTypeTests.cs" />
     <Compile Include="HttpSelfHostConfigurationTest.cs" />
     <Compile Include="HttpSelfHostServerTest.cs" />

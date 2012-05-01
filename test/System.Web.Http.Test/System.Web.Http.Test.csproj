@@ -186,9 +186,6 @@
     <Compile Include="Internal\CollectionModelBinderUtilTest.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinderProviderTest.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinderTest.cs" />
-    <Compile Include="ModelBinding\Binders\BinaryDataModelBinderProviderTest.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ModelBinding\Binders\CollectionModelBinderProviderTest.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -114,7 +114,6 @@ namespace System.Web.Http.Services
                                                               {
                                                                   new TypeConverterModelBinderProvider(),
                                                                   new TypeMatchModelBinderProvider(),
-                                                                  new BinaryDataModelBinderProvider(),
                                                                   new KeyValuePairModelBinderProvider(),
                                                                   new ComplexModelDtoModelBinderProvider(),
                                                                   new ArrayModelBinderProvider(),

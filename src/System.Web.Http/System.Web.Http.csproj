@@ -240,7 +240,6 @@
     <Compile Include="Metadata\Providers\EmptyMetadataProvider.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\ArrayModelBinder.cs" />
-    <Compile Include="ModelBinding\Binders\BinaryDataModelBinderProvider.cs" />
     <Compile Include="ModelBinding\HttpBindingBehavior.cs" />
     <Compile Include="ModelBinding\HttpBindingBehaviorAttribute.cs" />
     <Compile Include="ModelBinding\Binders\CollectionModelBinderProvider.cs" />

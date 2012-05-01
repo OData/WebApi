@@ -66,16 +66,15 @@ namespace System.Web.Http.Services
             Assert.IsType<ActionDescriptorFilterProvider>(filterProviders[1]);
 
             object[] modelBinderProviders = defaultServices.GetServices(typeof(ModelBinderProvider)).ToArray();
-            Assert.Equal(9, modelBinderProviders.Length);
+            Assert.Equal(8, modelBinderProviders.Length);
             Assert.IsType<TypeConverterModelBinderProvider>(modelBinderProviders[0]);
             Assert.IsType<TypeMatchModelBinderProvider>(modelBinderProviders[1]);
-            Assert.IsType<BinaryDataModelBinderProvider>(modelBinderProviders[2]);
-            Assert.IsType<KeyValuePairModelBinderProvider>(modelBinderProviders[3]);
-            Assert.IsType<ComplexModelDtoModelBinderProvider>(modelBinderProviders[4]);
-            Assert.IsType<ArrayModelBinderProvider>(modelBinderProviders[5]);
-            Assert.IsType<DictionaryModelBinderProvider>(modelBinderProviders[6]);
-            Assert.IsType<CollectionModelBinderProvider>(modelBinderProviders[7]);            
-            Assert.IsType<MutableObjectModelBinderProvider>(modelBinderProviders[8]);
+            Assert.IsType<KeyValuePairModelBinderProvider>(modelBinderProviders[2]);
+            Assert.IsType<ComplexModelDtoModelBinderProvider>(modelBinderProviders[3]);
+            Assert.IsType<ArrayModelBinderProvider>(modelBinderProviders[4]);
+            Assert.IsType<DictionaryModelBinderProvider>(modelBinderProviders[5]);
+            Assert.IsType<CollectionModelBinderProvider>(modelBinderProviders[6]);            
+            Assert.IsType<MutableObjectModelBinderProvider>(modelBinderProviders[7]);
 
             object[] validatorProviders = defaultServices.GetServices(typeof(ModelValidatorProvider)).ToArray();
             Assert.Equal(2, validatorProviders.Length);

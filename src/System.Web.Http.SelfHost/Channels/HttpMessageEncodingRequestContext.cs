@@ -217,9 +217,10 @@ namespace System.Web.Http.SelfHost.Channels
             httpRequestMessage.RequestUri = uri;
             httpRequestMessage.Method = HttpMethodHelper.GetHttpMethod(requestProperty.Method);
 
-            foreach (var headerName in requestProperty.Headers.AllKeys)
+            WebHeaderCollection headers = requestProperty.Headers;
+            foreach (var headerName in headers.AllKeys)
             {
-                string headerValue = requestProperty.Headers[headerName];
+                string headerValue = headers[headerName];
                 if (!httpRequestMessage.Headers.TryAddWithoutValidation(headerName, headerValue))
                 {
                     httpRequestMessage.Content.Headers.TryAddWithoutValidation(headerName, headerValue);

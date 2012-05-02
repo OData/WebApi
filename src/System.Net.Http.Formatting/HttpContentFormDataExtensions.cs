@@ -38,10 +38,11 @@ namespace System.Net.Http
 
         /// <summary>
         /// Returns a <see cref="Task{T}"/> that will yield a <see cref="NameValueCollection"/> instance containing the form data
-        /// from the <paramref name="content"/> instance.
+        /// parsed as HTML form URL-encoded from the <paramref name="content"/> instance.
         /// </summary>
         /// <param name="content">The content.</param>
-        /// <returns>A <see cref="Task{T}"/> which will provide the result.</returns>
+        /// <returns>A <see cref="Task{T}"/> which will provide the result. If the data can not be read
+        /// as HTML form URL-encoded data then the result is null.</returns>
         public static Task<NameValueCollection> ReadAsFormDataAsync(this HttpContent content)
         {
             if (content == null)
@@ -49,7 +50,8 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("content");
             }
 
-            return content.ReadAsAsync<FormDataCollection>()
+            MediaTypeFormatter[] formatters = new MediaTypeFormatter[1] { new FormUrlEncodedMediaTypeFormatter() };
+            return content.ReadAsAsync<FormDataCollection>(formatters)
                 .Then(formdata => formdata != null ? formdata.ReadAsNameValueCollection() : null);
         }
     }

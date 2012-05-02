@@ -84,16 +84,16 @@ namespace System.Web.Http.Routing
             {
                 // If no route values were passed in at all we have to create a new dictionary
                 // so that we can add the extra "httproute" key.
-                routeValues = new Dictionary<string, object>();
+                routeValues = new HttpRouteValueDictionary();
                 routeValues.Add(HttpRoute.HttpRouteKey, true);
             }
             else
             {
+                // Copy the dictionary so that we can guarantee that routeValues uses an OrdinalIgnoreCase comparer
+                // and to add the extra "httproute" key used by all Web API routes to disambiguate them from other MVC routes.
+                routeValues = new HttpRouteValueDictionary(routeValues);
                 if (!routeValues.ContainsKey(HttpRoute.HttpRouteKey))
                 {
-                    // Copy the dictionary so that we can add the extra "httproute" key used by all Web API routes to
-                    // disambiguate them from other MVC routes.
-                    routeValues = new Dictionary<string, object>(routeValues);
                     routeValues.Add(HttpRoute.HttpRouteKey, true);
                 }
             }

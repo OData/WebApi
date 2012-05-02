@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Mvc;
@@ -71,6 +72,23 @@ namespace System.Web.Http.WebHost.Routing
             string generatedUrl = virtualPathData.VirtualPath;
 
             Assert.Equal("$APP$/SOMEAPP/api/something/someotheraction", generatedUrl);
+        }
+
+        [Theory]
+        [InlineData("httproute")]
+        [InlineData("httpRoute")]
+        [InlineData("HTTPROUTE")]
+        [InlineData("hTtProuTE")]
+        public void UrlHelper_DoesntAddDuplicateHttpRoute_ForHttpRouteInDifferentCasing(string httpRoute)
+        {
+            // Mixed mode app with MVC generating URLs to Web APIs
+            RouteCollection routes;
+            RequestContext requestContext;
+            var url = GetUrlHelperForMixedApp(WhichRoute.ApiRoute1, out routes, out requestContext);
+
+            string generatedUrl = url.Route("apiroute1", new Dictionary<string, object> { { "controller", "something" }, { "id", 789 }, { httpRoute, true } });
+
+            Assert.Equal("$APP$/SOMEAPP/api/something/789", generatedUrl);
         }
 
         private static UrlHelper GetUrlHelperForMixedApp(WhichRoute whichRoute)

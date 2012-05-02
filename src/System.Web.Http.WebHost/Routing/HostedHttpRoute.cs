@@ -13,6 +13,11 @@ namespace System.Web.Http.WebHost.Routing
         private readonly Route _route;
 
         public HostedHttpRoute(Route route)
+            : this(route, handler: null)
+        {
+        }
+
+        public HostedHttpRoute(Route route, HttpMessageHandler handler)
         {
             if (route == null)
             {
@@ -20,6 +25,7 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             _route = route;
+            Handler = handler;
         }
 
         public string RouteTemplate
@@ -41,6 +47,8 @@ namespace System.Web.Http.WebHost.Routing
         {
             get { return _route.DataTokens; }
         }
+
+        public HttpMessageHandler Handler { get; private set; }
 
         internal Route OriginalRoute
         {

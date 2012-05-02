@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Net.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.WebHost;
@@ -9,7 +10,7 @@ using System.Web.Routing;
 namespace System.Web.Http
 {
     /// <summary>
-    /// Provides a global <see cref="T:System.Web.Http.HttpConfiguration"/> for ASP applications.
+    /// Provides a global <see cref="T:System.Web.Http.HttpConfiguration"/> for ASP.NET applications.
     /// </summary>
     public static class GlobalConfiguration
     {
@@ -23,11 +24,8 @@ namespace System.Web.Http
                 return config;
             });
 
-        private static Lazy<HttpControllerDispatcher> _dispatcher = new Lazy<HttpControllerDispatcher>(
-            () =>
-            {
-                return new HttpControllerDispatcher(_configuration.Value);
-            });
+        private static Lazy<HttpMessageHandler> _defaultHandler = new Lazy<HttpMessageHandler>(
+            () => new HttpRoutingDispatcher(_configuration.Value));
 
         /// <summary>
         /// Gets the global <see cref="T:System.Web.Http.HttpConfiguration"/>.
@@ -38,11 +36,11 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets the global <see cref="T:System.Web.Http.Dispatcher.HttpControllerDispatcher"/>.
+        /// Gets the default message handler that will be called for all requests.
         /// </summary>
-        public static HttpControllerDispatcher Dispatcher
+        public static HttpMessageHandler DefaultHandler
         {
-            get { return _dispatcher.Value; }
+            get { return _defaultHandler.Value; }
         }
     }
 }

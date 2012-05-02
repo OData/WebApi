@@ -129,15 +129,20 @@ namespace System.Web.Http
         {
             IDictionary<string, object> dataTokens = new Dictionary<string, object>();
 
-            return CreateRoute(routeTemplate, GetTypeProperties(defaults), GetTypeProperties(constraints), dataTokens, parameters);
+            return CreateRoute(routeTemplate, GetTypeProperties(defaults), GetTypeProperties(constraints), dataTokens, parameters, handler: null);
         }
 
-        public virtual IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters)
+        public IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters)
+        {
+            return CreateRoute(routeTemplate, defaults, constraints, dataTokens, parameters, handler: null);
+        }
+
+        public virtual IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters, HttpMessageHandler handler)
         {
             HttpRouteValueDictionary routeDefaults = defaults != null ? new HttpRouteValueDictionary(defaults) : null;
             HttpRouteValueDictionary routeConstraints = constraints != null ? new HttpRouteValueDictionary(constraints) : null;
             HttpRouteValueDictionary routeDataTokens = dataTokens != null ? new HttpRouteValueDictionary(dataTokens) : null;
-            return new HttpRoute(routeTemplate, routeDefaults, routeConstraints, routeDataTokens);
+            return new HttpRoute(routeTemplate, routeDefaults, routeConstraints, routeDataTokens, handler);
         }
 
         void ICollection<IHttpRoute>.Add(IHttpRoute route)

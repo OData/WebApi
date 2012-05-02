@@ -50,27 +50,27 @@ namespace System.Web.Http
         [Fact]
         public void ConstructorDispatcherThrowsOnNull()
         {
-            Assert.ThrowsArgumentNull(() => new HttpServer((HttpControllerDispatcher)null), "dispatcher");
+            Assert.ThrowsArgumentNull(() => new HttpServer((HttpMessageHandler)null), "dispatcher");
         }
 
         [Fact]
         public void ConstructorDispatcherSetsUpProperties()
         {
             // Arrange
-            Mock<HttpControllerDispatcher> controllerDispatcherMock = new Mock<HttpControllerDispatcher>();
+            Mock<HttpMessageHandler> mockHandler = new Mock<HttpMessageHandler>();
 
             // Act
-            HttpServer server = new HttpServer(controllerDispatcherMock.Object);
+            HttpServer server = new HttpServer(mockHandler.Object);
 
             // Assert
-            Assert.Same(controllerDispatcherMock.Object, server.Dispatcher);
+            Assert.Same(mockHandler.Object, server.Dispatcher);
         }
 
         [Fact]
         public void ConstructorThrowsOnNull()
         {
-            Mock<HttpControllerDispatcher> controllerDispatcherMock = new Mock<HttpControllerDispatcher>();
-            Assert.ThrowsArgumentNull(() => new HttpServer((HttpConfiguration)null, controllerDispatcherMock.Object), "configuration");
+            Mock<HttpMessageHandler> mockHandler = new Mock<HttpMessageHandler>();
+            Assert.ThrowsArgumentNull(() => new HttpServer((HttpConfiguration)null, mockHandler.Object), "configuration");
             Assert.ThrowsArgumentNull(() => new HttpServer(new HttpConfiguration(), null), "dispatcher");
         }
 
@@ -79,7 +79,7 @@ namespace System.Web.Http
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
-            Mock<HttpControllerDispatcher> controllerDispatcherMock = new Mock<HttpControllerDispatcher>();
+            Mock<HttpControllerDispatcher> controllerDispatcherMock = new Mock<HttpControllerDispatcher>(config);
 
             // Act
             HttpServer server = new HttpServer(config, controllerDispatcherMock.Object);
@@ -93,8 +93,8 @@ namespace System.Web.Http
         public Task<HttpResponseMessage> DisposedReturnsServiceUnavailable()
         {
             // Arrange
-            Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>();
-            HttpServer server = new HttpServer(dispatcherMock.Object);
+            Mock<HttpMessageHandler> mockHandler = new Mock<HttpMessageHandler>();
+            HttpServer server = new HttpServer(mockHandler.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
             server.Dispose();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -104,7 +104,7 @@ namespace System.Web.Http
                 (reqTask) =>
                 {
                     // Assert
-                    dispatcherMock.Protected().Verify<Task<HttpResponseMessage>>("SendAsync", Times.Never(), request, CancellationToken.None);
+                    mockHandler.Protected().Verify<Task<HttpResponseMessage>>("SendAsync", Times.Never(), request, CancellationToken.None);
                     Assert.Equal(HttpStatusCode.ServiceUnavailable, reqTask.Result.StatusCode);
                     return reqTask.Result;
                 }
@@ -117,11 +117,11 @@ namespace System.Web.Http
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
 
-            Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>();
+            HttpConfiguration config = new HttpConfiguration();
+            Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None).
                 Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
-            HttpConfiguration config = new HttpConfiguration();
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
@@ -143,11 +143,11 @@ namespace System.Web.Http
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
 
-            Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>();
+            HttpConfiguration config = new HttpConfiguration();
+            Mock<HttpControllerDispatcher> dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             dispatcherMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", request, CancellationToken.None).
                 Returns(TaskHelpers.FromResult<HttpResponseMessage>(request.CreateResponse()));
 
-            HttpConfiguration config = new HttpConfiguration();
             HttpServer server = new HttpServer(config, dispatcherMock.Object);
             HttpMessageInvoker invoker = new HttpMessageInvoker(server);
 
@@ -172,7 +172,7 @@ namespace System.Web.Http
             // Arrange
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            var dispatcherMock = new Mock<HttpControllerDispatcher>();
+            var dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             var server = new HttpServer(config, dispatcherMock.Object);
             var invoker = new HttpMessageInvoker(server);
             IPrincipal callbackPrincipal = null;
@@ -200,7 +200,7 @@ namespace System.Web.Http
             // Arrange
             var config = new HttpConfiguration();
             var request = new HttpRequestMessage();
-            var dispatcherMock = new Mock<HttpControllerDispatcher>();
+            var dispatcherMock = new Mock<HttpControllerDispatcher>(config);
             var server = new HttpServer(config, dispatcherMock.Object);
             var invoker = new HttpMessageInvoker(server);
             var principal = new GenericPrincipal(new GenericIdentity("joe"), new string[0]);

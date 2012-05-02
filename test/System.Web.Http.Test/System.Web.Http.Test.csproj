@@ -100,6 +100,8 @@
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerSelectorTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerActivatorTest.cs" />
+    <Compile Include="Dispatcher\HttpControllerDispatcherTest.cs" />
+    <Compile Include="Dispatcher\HttpRoutingDispatcherTest.cs" />
     <Compile Include="Filters\HttpFilterCollectionTest.cs" />
     <Compile Include="HttpResponseMessageExtensionsTest.cs" />
     <Compile Include="HttpResponseExceptionTest.cs" />

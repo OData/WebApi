@@ -106,13 +106,13 @@ namespace System.Web.Http.WebHost.Routing
             return null;
         }
 
-        public override IHttpRoute CreateRoute(string uriTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters)
+        public override IHttpRoute CreateRoute(string uriTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters, HttpMessageHandler handler)
         {
             RouteValueDictionary routeDefaults = defaults != null ? new RouteValueDictionary(defaults) : null;
             RouteValueDictionary routeConstraints = constraints != null ? new RouteValueDictionary(constraints) : null;
             RouteValueDictionary routeDataTokens = dataTokens != null ? new RouteValueDictionary(dataTokens) : null;
             HttpWebRoute route = new HttpWebRoute(uriTemplate, routeDefaults, routeConstraints, routeDataTokens, HttpControllerRouteHandler.Instance);
-            return new HostedHttpRoute(route);
+            return new HostedHttpRoute(route, handler);
         }
 
         public override void Add(string name, IHttpRoute route)

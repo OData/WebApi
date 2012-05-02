@@ -52,7 +52,7 @@ namespace System.Web.Http.WebHost
             new Lazy<HttpMessageInvoker>(
                 () =>
                 {
-                    HttpServer server = new HttpServer(GlobalConfiguration.Configuration, GlobalConfiguration.Dispatcher);
+                    HttpServer server = new HttpServer(GlobalConfiguration.Configuration, GlobalConfiguration.DefaultHandler);
                     return new HttpMessageInvoker(server);
                 });
 

@@ -306,15 +306,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This &apos;{0}&apos; instance has been disposed and can no longer accept HTTP requests..
-        /// </summary>
-        internal static string HttpMessageHandlerDisposed {
-            get {
-                return ResourceManager.GetString("HttpMessageHandlerDisposed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The request does not have an associated configuration object or the provided configuration was null..
         /// </summary>
         internal static string HttpRequestMessageExtensions_NoConfiguration {

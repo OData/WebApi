@@ -48,7 +48,7 @@ namespace System.Web.Http
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "The configuration object is disposed as part of this class.")]
         public HttpServer(HttpConfiguration configuration)
-            : this(configuration, new HttpControllerDispatcher(configuration))
+            : this(configuration, new HttpRoutingDispatcher(configuration))
         {
         }
 
@@ -58,7 +58,7 @@ namespace System.Web.Http
         /// <param name="dispatcher">Http dispatcher responsible for handling incoming requests.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "The configuration object is disposed as part of this class.")]
-        public HttpServer(HttpControllerDispatcher dispatcher)
+        public HttpServer(HttpMessageHandler dispatcher)
             : this(new HttpConfiguration(), dispatcher)
         {
         }

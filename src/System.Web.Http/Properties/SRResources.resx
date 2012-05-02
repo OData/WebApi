@@ -162,9 +162,6 @@
   <data name="ValidatableObjectAdapter_IncompatibleType" xml:space="preserve">
     <value>The model object inside the metadata claimed to be compatible with {0}, but was actually {1}.</value>
   </data>
-  <data name="HttpMessageHandlerDisposed" xml:space="preserve">
-    <value>This '{0}' instance has been disposed and can no longer accept HTTP requests.</value>
-  </data>
   <data name="HttpResponseExceptionMessage" xml:space="preserve">
     <value>Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.</value>
   </data>

@@ -103,6 +103,7 @@
     <Compile Include="Controllers\VoidResultConverter.cs" />
     <Compile Include="Dependencies\IDependencyScope.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolver.cs" />
+    <Compile Include="Dispatcher\HttpRoutingDispatcher.cs" />
     <Compile Include="Dispatcher\IAssembliesResolver.cs" />
     <Compile Include="Hosting\IHostBufferPolicySelector.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />

@@ -33,6 +33,12 @@ namespace System.Web.Http.Routing
         IDictionary<string, object> DataTokens { get; }
 
         /// <summary>
+        /// Gets the message handler that will be the recipient of the request. If <c>null</c>, the default handler will
+        /// be used (which dispatches messages to implementations of <see cref="IHttpController"/>).
+        /// </summary>
+        HttpMessageHandler Handler { get; }
+
+        /// <summary>
         /// Determine whether this route is a match for the incoming request by looking up the <see cref="IHttpRouteData"/> for the route.
         /// </summary>
         /// <param name="virtualPathRoot">The virtual path root.</param>

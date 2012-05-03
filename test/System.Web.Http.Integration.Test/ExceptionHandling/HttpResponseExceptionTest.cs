@@ -193,18 +193,18 @@ namespace System.Web.Http.ExceptionHandling
             _throwAt = throwAt;
         }
 
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             ExceptionTestsUtility.CheckForThrow(_throwAt, "MediaTypeFormatterReadFromStreamAsync");
 
-            return base.ReadFromStreamAsync(type, stream, contentHeaders, formatterLogger);
+            return base.ReadFromStreamAsync(type, readStream, content, formatterLogger);
         }
 
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             ExceptionTestsUtility.CheckForThrow(_throwAt, "MediaTypeFormatterWriteToStreamAsync");
 
-            return base.WriteToStreamAsync(type, value, stream, contentHeaders, transportContext);
+            return base.WriteToStreamAsync(type, value, writeStream, content, transportContext);
         }
     }
 

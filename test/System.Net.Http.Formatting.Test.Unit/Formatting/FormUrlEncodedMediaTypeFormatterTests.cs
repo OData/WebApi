@@ -104,7 +104,7 @@ namespace System.Net.Http.Formatting
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
             Assert.ThrowsArgument(
-                () => formatter.ReadFromStreamAsync(typeof(JToken), content.ReadAsStreamAsync().Result, content.Headers, null).Result,
+                () => formatter.ReadFromStreamAsync(typeof(JToken), content.ReadAsStreamAsync().Result, content, null).Result,
                 null);
         }
 
@@ -117,7 +117,7 @@ namespace System.Net.Http.Formatting
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-            JToken result = (JToken)formatter.ReadFromStreamAsync(typeof(JToken), content.ReadAsStreamAsync().Result, content.Headers, null).Result;
+            JToken result = (JToken)formatter.ReadFromStreamAsync(typeof(JToken), content.ReadAsStreamAsync().Result, content, null).Result;
             Assert.NotNull(result);
         }
 
@@ -187,7 +187,7 @@ namespace System.Net.Http.Formatting
         {
             TestFormUrlEncodedMediaTypeFormatter formatter = new TestFormUrlEncodedMediaTypeFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "stream");
+            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
         }
 
         [Fact]

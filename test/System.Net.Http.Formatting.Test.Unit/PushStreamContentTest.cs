@@ -2,7 +2,6 @@
 
 using System.IO;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Moq;
 using Moq.Protected;
@@ -58,7 +57,7 @@ namespace System.Net.Http
                     // Assert
                     Assert.Equal(TaskStatus.RanToCompletion, copyTask.Status);
                     Assert.True(streamAction.WasInvoked);
-                    Assert.Same(content.Headers, streamAction.Headers);
+                    Assert.Same(content, streamAction.Content);
                     Assert.IsType<PushStreamContent.CompleteTaskOnCloseStream>(streamAction.OutputStream);
                     Assert.True(outputStream.CanRead);
                 });
@@ -136,15 +135,15 @@ namespace System.Net.Http
 
             public Stream OutputStream { get; private set; }
 
-            public HttpContentHeaders Headers { get; private set; }
+            public HttpContent Content { get; private set; }
 
             public TransportContext TransportContext { get; private set; }
 
-            public void Action(Stream stream, HttpContentHeaders headers, TransportContext context)
+            public void Action(Stream stream, HttpContent content, TransportContext context)
             {
                 WasInvoked = true;
                 OutputStream = stream;
-                Headers = headers;
+                Content = content;
                 TransportContext = context;
 
                 if (_close)

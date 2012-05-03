@@ -65,7 +65,7 @@ namespace System.Net.Http.Formatting
         {
             BufferedMediaTypeFormatter formatter = new MockBufferedMediaTypeFormatter();
             Assert.ThrowsArgumentNull(
-                () => formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null), "stream");
+                () => formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null), "writeStream");
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace System.Net.Http.Formatting
         public void ReadFromStreamAsync_WhenStreamParamterIsNull_ThrowsException()
         {
             BufferedMediaTypeFormatter formatter = new MockBufferedMediaTypeFormatter();
-            Assert.ThrowsArgumentNull(() => formatter.ReadFromStreamAsync(typeof(object), null, null, null), "stream");
+            Assert.ThrowsArgumentNull(() => formatter.ReadFromStreamAsync(typeof(object), null, null, null), "readStream");
         }
 
         [Fact]
@@ -160,11 +160,11 @@ namespace System.Net.Http.Formatting
         {
             return true;
         }
-
-        public override object ReadFromStream(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        
+        public override object ReadFromStream(Type type, Stream stream, HttpContent content, IFormatterLogger formatterLogger)
         {
             object result = null;
-
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
             using (StreamReader sReader = new StreamReader(stream, effectiveEncoding))
             {
@@ -180,8 +180,9 @@ namespace System.Net.Http.Formatting
             return result;
         }
 
-        public override void WriteToStream(Type type, object value, Stream stream, HttpContentHeaders contentHeaders)
+        public override void WriteToStream(Type type, object value, Stream stream, HttpContent content)
         {
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
             using (StreamWriter sWriter = new StreamWriter(stream, effectiveEncoding))
             {

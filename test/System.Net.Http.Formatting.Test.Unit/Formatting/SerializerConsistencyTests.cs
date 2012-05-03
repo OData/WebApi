@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Http.Formatting;
 using System.IO;
-using System.Net.Http.Headers;
+using System.Linq;
+using System.Net.Http.Formatting;
 using System.Runtime.Serialization;
 using Xunit;
 
@@ -103,7 +100,7 @@ namespace System.Net.Formatting.Tests
             SerializerConsistencyHepers.Test(source);
         }
 
-        
+
 
         [Fact]
         public void Dictionary()
@@ -228,7 +225,7 @@ namespace System.Net.Formatting.Tests
         public string PropertyWithAttribute { get; set; }
 
         // no attribute here
-        public string PropertyWithoutAttribute { get; set; }        
+        public string PropertyWithoutAttribute { get; set; }
     }
 
     public class PrivateProperty // with private field
@@ -354,10 +351,10 @@ namespace System.Net.Formatting.Tests
 
             MemoryStream blobJson = Write(source, tSourceWrite, jsonFor); // C# --> JSON
             MemoryStream blobXml = Write(source, tSourceWrite, xmlFormatter); // C# --> XML
-            
+
             object obj2 = Read(blobJson, tSourceRead, jsonFor); // C# --> JSON --> C#
             object obj1 = Read(blobXml, tSourceRead, xmlFormatter); // C# --> XML --> C#            
-            
+
             // We were able to round trip the source object through both formatters.
             // Now see if the resulting object is the same.
 
@@ -367,7 +364,7 @@ namespace System.Net.Formatting.Tests
             var blobJson2 = Write(obj1, tSourceRead, jsonFor); // C# --> XML --> C# --> JSON
 
             // Ensure that C#->XMl and  C#->XML->C#->XML give us the same result..
-            Compare(blobXml, blobXml2); 
+            Compare(blobXml, blobXml2);
 
             // Ensure that C#->Json and C#->XML->C#->Json give us the same result 
             Compare(blobJson, blobJson2);
@@ -389,8 +386,8 @@ namespace System.Net.Formatting.Tests
         {
             string s1 = ToString(ms1);
             string s2 = ToString(ms2);
-            
-            Assert.Equal(s1, s2);            
+
+            Assert.Equal(s1, s2);
         }
 
         // Given a memory stream (which is representing a textual serialization format), get the string.
@@ -405,7 +402,7 @@ namespace System.Net.Formatting.Tests
             bool f = formatter.CanReadType(tSource);
             Assert.True(f);
 
-            object o = formatter.ReadFromStreamAsync(tSource, ms, contentHeaders : null, formatterLogger : null).Result;
+            object o = formatter.ReadFromStreamAsync(tSource, ms, content: null, formatterLogger: null).Result;
             Assert.True(tSource.IsAssignableFrom(o.GetType()));
 
             return o;
@@ -418,7 +415,7 @@ namespace System.Net.Formatting.Tests
 
             MemoryStream ms = new MemoryStream();
 
-            formatter.WriteToStreamAsync(tSource, obj, ms, contentHeaders:null, transportContext: null).Wait();
+            formatter.WriteToStreamAsync(tSource, obj, ms, content: null, transportContext: null).Wait();
 
             ms.Position = 0;
             return ms;

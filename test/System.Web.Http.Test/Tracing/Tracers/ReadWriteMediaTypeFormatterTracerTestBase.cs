@@ -27,7 +27,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
             mockFormatter.Setup(
-                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).
+                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).
                 Returns(TaskHelpers.FromResult<object>("sampleValue"));
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -43,7 +43,7 @@ namespace System.Web.Http.Tracing.Tracers
                 };
 
             // Act
-            Task<object> task = tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content.Headers, null);
+            Task<object> task = tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content, null);
             string result = task.Result as string;
 
             // Assert
@@ -58,7 +58,7 @@ namespace System.Web.Http.Tracing.Tracers
             InvalidOperationException exception = new InvalidOperationException("test");
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
             mockFormatter.Setup(
-                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).Throws(exception);
+                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -73,7 +73,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content.Headers, null));
+            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content, null));
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
@@ -91,7 +91,7 @@ namespace System.Web.Http.Tracing.Tracers
             tcs.TrySetException(exception);
 
             mockFormatter.Setup(
-                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).
+                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).
                 Returns(tcs.Task);
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -106,7 +106,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Task<object> task = tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content.Headers, null);
+            Task<object> task = tracer.ReadFromStreamAsync(typeof(string), new MemoryStream(), request.Content, null);
 
             // Assert
             Exception thrown = Assert.Throws<InvalidOperationException>(() => task.Wait());
@@ -121,7 +121,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
             mockFormatter.Setup(
-                f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<TransportContext>())).
+                f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).
                 Returns(TaskHelpers.Completed());
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -136,7 +136,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Task task = tracer.WriteToStreamAsync(typeof(string), "sampleValue", new MemoryStream(), request.Content.Headers, transportContext: null);
+            Task task = tracer.WriteToStreamAsync(typeof(string), "sampleValue", new MemoryStream(), request.Content, transportContext: null);
             task.Wait();
 
             // Assert
@@ -152,7 +152,7 @@ namespace System.Web.Http.Tracing.Tracers
             mockFormatter.Setup(
                 f =>
                 f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
-                                     It.IsAny<HttpContentHeaders>(), It.IsAny<TransportContext>())).
+                                     It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).
                 Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
@@ -168,7 +168,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.WriteToStreamAsync(typeof(string), "sampleValue", new MemoryStream(), request.Content.Headers, transportContext: null));
+            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.WriteToStreamAsync(typeof(string), "sampleValue", new MemoryStream(), request.Content, transportContext: null));
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
@@ -186,7 +186,7 @@ namespace System.Web.Http.Tracing.Tracers
             tcs.TrySetException(exception);
 
             mockFormatter.Setup(
-                f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<TransportContext>())).
+                f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).
                 Returns(tcs.Task);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
@@ -202,7 +202,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Task task = tracer.WriteToStreamAsync(typeof(string), "sampleValue", new MemoryStream(), request.Content.Headers, transportContext: null);
+            Task task = tracer.WriteToStreamAsync(typeof(string), "sampleValue", new MemoryStream(), request.Content, transportContext: null);
 
             // Assert
             Exception thrown = Assert.Throws<InvalidOperationException>(() => task.Wait());

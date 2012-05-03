@@ -76,7 +76,7 @@ namespace System.Net.Http.Formatting
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
 
-            Assert.IsType<Nest>(formatter.ReadFromStreamAsync(typeof(Nest), content.ReadAsStreamAsync().Result, content.Headers, null).Result);
+            Assert.IsType<Nest>(formatter.ReadFromStreamAsync(typeof(Nest), content.ReadAsStreamAsync().Result, content, null).Result);
         }
 
         [Fact]
@@ -95,8 +95,8 @@ namespace System.Net.Http.Formatting
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));
+            HttpContent content = new StringContent(String.Empty);
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("nil=\"true\""),
@@ -110,8 +110,8 @@ namespace System.Net.Http.Formatting
         {
             XmlSerializerMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
+            HttpContent content = new StringContent(String.Empty);
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.False(serializedString.Contains("DataContractSampleType"),
@@ -126,8 +126,8 @@ namespace System.Net.Http.Formatting
         {
             XmlSerializerMediaTypeFormatter xmlFormatter = new XmlSerializerMediaTypeFormatter { Indent = true };
             MemoryStream memoryStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, contentHeaders, transportContext: null));
+            HttpContent content = new StringContent(String.Empty);
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("\r\n"), "Using default XmlSerializer with Indent set to true should emit data with indentation.");
@@ -208,7 +208,8 @@ namespace System.Net.Http.Formatting
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsyncUsingXmlSerializer(Type variationType, object testData)
         {
             TestXmlSerializerMediaTypeFormatter formatter = new TestXmlSerializerMediaTypeFormatter();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
 
             bool canSerialize = IsSerializableWithXmlSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
             if (canSerialize)
@@ -219,10 +220,10 @@ namespace System.Net.Http.Formatting
                 Assert.Stream.WriteAndRead(
                     stream =>
                     {
-                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
+                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
                         contentHeaders.ContentLength = stream.Length;
                     },
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null)));
+                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, null)));
                 Assert.Equal(testData, readObj);
             }
         }

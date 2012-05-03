@@ -84,7 +84,7 @@ namespace System.Net.Http
         /// <returns>A <see cref="Task"/> instance that is asynchronously serializing the object's content.</returns>
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
-            return _formatter.WriteToStreamAsync(ObjectType, Value, stream, Headers, context);
+            return _formatter.WriteToStreamAsync(ObjectType, Value, stream, this, context);
         }
 
         /// <summary>

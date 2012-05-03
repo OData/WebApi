@@ -117,28 +117,28 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Called during deserialization to read an object of the specified <paramref name="type"/>
-        /// from the specified <paramref name="stream"/>.
+        /// from the specified <paramref name="readStream"/>.
         /// </summary>
         /// <param name="type">The type of object to read.</param>
-        /// <param name="stream">The <see cref="Stream"/> from which to read.</param>
-        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> for the content being read.</param>
+        /// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
 
-            if (stream == null)
+            if (readStream == null)
             {
-                throw Error.ArgumentNull("stream");
+                throw Error.ArgumentNull("readStream");
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {
-                IEnumerable<KeyValuePair<string, string>> nameValuePairs = ReadFormUrlEncoded(stream, ReadBufferSize);
+                IEnumerable<KeyValuePair<string, string>> nameValuePairs = ReadFormUrlEncoded(readStream, ReadBufferSize);
 
                 if (type == typeof(FormDataCollection))
                 {

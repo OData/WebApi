@@ -53,14 +53,14 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerTracer.GetPerRequestFormatterInstance(type, request, mediaType);
         }
 
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
-            return _innerTracer.ReadFromStreamAsync(type, stream, contentHeaders, formatterLogger);
+            return _innerTracer.ReadFromStreamAsync(type, readStream, content, formatterLogger);
         }
 
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
-            return _innerTracer.WriteToStreamAsync(type, value, stream, contentHeaders, transportContext);
+            return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext);
         }
 
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, string mediaType)

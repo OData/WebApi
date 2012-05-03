@@ -18,7 +18,7 @@ namespace System.Net.Http
     /// </summary>
     public class PushStreamContent : HttpContent
     {
-        private readonly Action<Stream, HttpContentHeaders, TransportContext> _onStreamAvailable;
+        private readonly Action<Stream, HttpContent, TransportContext> _onStreamAvailable;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PushStreamContent"/> class. The
@@ -29,7 +29,7 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="onStreamAvailable">The action to call when an output stream
         /// is available. Close the stream to complete the HTTP request or response.</param>
-        public PushStreamContent(Action<Stream, HttpContentHeaders, TransportContext> onStreamAvailable)
+        public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable)
             : this(onStreamAvailable, (MediaTypeHeaderValue)null)
         {
         }
@@ -38,7 +38,7 @@ namespace System.Net.Http
         /// Initializes a new instance of the <see cref="PushStreamContent"/> class
         /// with the given media type.
         /// </summary>
-        public PushStreamContent(Action<Stream, HttpContentHeaders, TransportContext> onStreamAvailable, string mediaType)
+        public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable, string mediaType)
             : this(onStreamAvailable, new MediaTypeHeaderValue(mediaType))
         {
         }
@@ -47,7 +47,7 @@ namespace System.Net.Http
         /// Initializes a new instance of the <see cref="PushStreamContent"/> class
         /// with the given <see cref="MediaTypeHeaderValue"/>.
         /// </summary>
-        public PushStreamContent(Action<Stream, HttpContentHeaders, TransportContext> onStreamAvailable, MediaTypeHeaderValue mediaType)
+        public PushStreamContent(Action<Stream, HttpContent, TransportContext> onStreamAvailable, MediaTypeHeaderValue mediaType)
         {
             if (onStreamAvailable == null)
             {
@@ -73,7 +73,7 @@ namespace System.Net.Http
             try
             {
                 Stream wrappedStream = new CompleteTaskOnCloseStream(stream, serializeToStreamTask);
-                _onStreamAvailable(wrappedStream, Headers, context);
+                _onStreamAvailable(wrappedStream, this, context);
             }
             catch (Exception e)
             {

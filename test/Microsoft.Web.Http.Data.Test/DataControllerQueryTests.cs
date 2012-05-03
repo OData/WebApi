@@ -75,7 +75,7 @@ namespace Microsoft.Web.Http.Data.Test
             QueryResult qr = new QueryResult(products, products.Length);
             ObjectContent oc = (ObjectContent)response.Content;
             MemoryStream ms = new MemoryStream();
-            Task task = new JsonMediaTypeFormatter().WriteToStreamAsync(typeof(QueryResult), qr, ms, oc.Headers, null);
+            Task task = new JsonMediaTypeFormatter().WriteToStreamAsync(typeof(QueryResult), qr, ms, oc, null);
             task.Wait();
             Assert.True(ms.Length > 0);
 
@@ -89,7 +89,7 @@ namespace Microsoft.Web.Http.Data.Test
             qr = new QueryResult(cities, cities.Length);
             oc = (ObjectContent)response.Content;
             ms = new MemoryStream();
-            task = new JsonMediaTypeFormatter().WriteToStreamAsync(typeof(QueryResult), qr, ms, oc.Headers, null);
+            task = new JsonMediaTypeFormatter().WriteToStreamAsync(typeof(QueryResult), qr, ms, oc, null);
             task.Wait();
             Assert.True(ms.Length > 0);
         }

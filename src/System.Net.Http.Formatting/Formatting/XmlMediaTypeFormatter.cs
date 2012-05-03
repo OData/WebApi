@@ -210,27 +210,29 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Called during deserialization to read an object of the specified <paramref name="type"/>
-        /// from the specified <paramref name="stream"/>.
+        /// from the specified <paramref name="readStream"/>.
         /// </summary>
         /// <param name="type">The type of object to read.</param>
-        /// <param name="stream">The <see cref="Stream"/> from which to read.</param>
-        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> for the content being read.</param>
+        /// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being read.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
 
-            if (stream == null)
+            if (readStream == null)
             {
-                throw Error.ArgumentNull("stream");
+                throw Error.ArgumentNull("readStream");
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {
+                HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+
                 // If content length is 0 then return default value for this type
                 if (contentHeaders != null && contentHeaders.ContentLength == 0)
                 {
@@ -244,7 +246,7 @@ namespace System.Net.Http.Formatting
 
                 try
                 {
-                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(stream), effectiveEncoding, _readerQuotas, null))
+                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
                     {
                         XmlSerializer xmlSerializer = serializer as XmlSerializer;
                         if (xmlSerializer != null)
@@ -272,24 +274,24 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Called during serialization to write an object of the specified <paramref name="type"/>
-        /// to the specified <paramref name="stream"/>.
+        /// to the specified <paramref name="writeStream"/>.
         /// </summary>
         /// <param name="type">The type of object to write.</param>
         /// <param name="value">The object to write.</param>
-        /// <param name="stream">The <see cref="Stream"/> to which to write.</param>
-        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> for the content being written.</param>
+        /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <param name="transportContext">The <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> that will write the value to the stream.</returns>
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
 
-            if (stream == null)
+            if (writeStream == null)
             {
-                throw Error.ArgumentNull("stream");
+                throw Error.ArgumentNull("writeStream");
             }
 
             return TaskHelpers.RunSynchronously(() =>
@@ -309,7 +311,7 @@ namespace System.Net.Http.Formatting
                     value = MediaTypeFormatter.GetTypeRemappingConstructor(type).Invoke(new object[] { value });
                 }
 
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+                Encoding effectiveEncoding = SelectCharacterEncoding(content != null ? content.Headers : null);
                 XmlWriterSettings writerSettings = new XmlWriterSettings
                 {
                     OmitXmlDeclaration = true,
@@ -320,7 +322,7 @@ namespace System.Net.Http.Formatting
 
                 object serializer = GetSerializerForType(type);
 
-                using (XmlWriter writer = XmlWriter.Create(stream, writerSettings))
+                using (XmlWriter writer = XmlWriter.Create(writeStream, writerSettings))
                 {
                     XmlSerializer xmlSerializer = serializer as XmlSerializer;
                     if (xmlSerializer != null)

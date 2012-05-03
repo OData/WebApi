@@ -86,7 +86,7 @@ namespace System.Net.Http.Formatting
         {
             TFormatter formatter = new TFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "stream");
+            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
         }
 
         [Fact]
@@ -96,11 +96,12 @@ namespace System.Net.Http.Formatting
             TFormatter formatter = new TFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = 0;
 
             // Act 
-            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, contentHeaders, mockFormatterLogger).
+            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger).
                 ContinueWith(
                     readTask =>
                     {
@@ -119,11 +120,12 @@ namespace System.Net.Http.Formatting
             TFormatter formatter = new TFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = 0;
 
             // Act 
-            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, contentHeaders, mockFormatterLogger).
+            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger).
                 ContinueWith(
                     readTask =>
                     {
@@ -145,7 +147,7 @@ namespace System.Net.Http.Formatting
 
             // Act
             var result = formatter.ReadFromStreamAsync(typeof(T), content.ReadAsStreamAsync().Result,
-                content.Headers, null);
+                content, null);
             result.WaitUntilCompleted();
 
             // Assert
@@ -158,11 +160,12 @@ namespace System.Net.Http.Formatting
             // Arrange
             TFormatter formatter = new TFormatter();
             MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = memStream.Length;
 
             // Act
-            return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, contentHeaders, null).ContinueWith(
+            return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
                 readTask =>
                 {
                     // Assert
@@ -180,11 +183,12 @@ namespace System.Net.Http.Formatting
             // Arrange
             TFormatter formatter = new TFormatter();
             MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = null;
 
             // Act
-            return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, contentHeaders, null).ContinueWith(
+            return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
                 readTask =>
                 {
                     // Assert
@@ -201,7 +205,7 @@ namespace System.Net.Http.Formatting
         {
             TFormatter formatter = new TFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(null, new object(), Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null); }, "stream");
+            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null); }, "writeStream");
         }
 
         [Fact]
@@ -211,10 +215,10 @@ namespace System.Net.Http.Formatting
             TFormatter formatter = new TFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
             mockStream.Setup(s => s.CanWrite).Returns(true);
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
 
             // Act 
-            return formatter.WriteToStreamAsync(typeof(object), null, mockStream.Object, contentHeaders, null).ContinueWith(
+            return formatter.WriteToStreamAsync(typeof(object), null, mockStream.Object, content, null).ContinueWith(
                 writeTask =>
                 {
                     // Assert
@@ -231,10 +235,10 @@ namespace System.Net.Http.Formatting
             TFormatter formatter = new TFormatter();
             SampleType sampleType = new SampleType { Number = 42 };
             MemoryStream memStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
 
             // Act
-            return formatter.WriteToStreamAsync(typeof(SampleType), sampleType, memStream, contentHeaders, null).ContinueWith(
+            return formatter.WriteToStreamAsync(typeof(SampleType), sampleType, memStream, content, null).ContinueWith(
                 writeTask =>
                 {
                     // Assert
@@ -276,7 +280,7 @@ namespace System.Net.Http.Formatting
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
 
             // Act
-            return formatter.ReadFromStreamAsync(typeof(string), memStream, headers, mockFormatterLogger).ContinueWith(
+            return formatter.ReadFromStreamAsync(typeof(string), memStream, dummyContent, mockFormatterLogger).ContinueWith(
                 (readTask) =>
                 {
                     string result = readTask.Result as string;
@@ -309,7 +313,8 @@ namespace System.Net.Http.Formatting
 
             MemoryStream memStream = new MemoryStream();
 
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent httpContent = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = httpContent.Headers;
             contentHeaders.Clear();
             contentHeaders.ContentType = MediaTypeHeaderValue.Parse(mediaType);
             contentHeaders.ContentLength = expectedData.Length;
@@ -317,7 +322,7 @@ namespace System.Net.Http.Formatting
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
 
             // Act
-            return formatter.WriteToStreamAsync(typeof(string), content, memStream, contentHeaders, null).ContinueWith(
+            return formatter.WriteToStreamAsync(typeof(string), content, memStream, httpContent, null).ContinueWith(
                 (writeTask) =>
                 {
                     // Assert
@@ -353,7 +358,7 @@ namespace System.Net.Http.Formatting
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
 
             // Act
-            return formatter.ReadFromStreamAsync(typeof(string), memStream, headers, mockFormatterLogger).ContinueWith(
+            return formatter.ReadFromStreamAsync(typeof(string), memStream, dummyContent, mockFormatterLogger).ContinueWith(
                 (readTask) =>
                 {
                     string result = readTask.Result as string;
@@ -395,7 +400,7 @@ namespace System.Net.Http.Formatting
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
 
             // Act
-            return formatter.WriteToStreamAsync(typeof(string), content, memStream, headers, null).ContinueWith(
+            return formatter.WriteToStreamAsync(typeof(string), content, memStream, dummyContent, null).ContinueWith(
                 (writeTask) =>
                 {
                     // Assert

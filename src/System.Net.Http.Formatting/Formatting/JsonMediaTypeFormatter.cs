@@ -195,27 +195,29 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Called during deserialization to read an object of the specified <paramref name="type"/>
-        /// from the specified <paramref name="stream"/>.
+        /// from the specified <paramref name="readStream"/>.
         /// </summary>
         /// <param name="type">The type of object to read.</param>
-        /// <param name="stream">The <see cref="Stream"/> from which to read.</param>
-        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> for the content being written.</param>
+        /// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <param name="formatterLogger">The <see cref="IFormatterLogger"/> to log events to.</param>
         /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
 
-            if (stream == null)
+            if (readStream == null)
             {
-                throw Error.ArgumentNull("stream");
+                throw Error.ArgumentNull("readStream");
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>
             {
+                HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
+
                 // If content length is 0 then return default value for this type
                 if (contentHeaders != null && contentHeaders.ContentLength == 0)
                 {
@@ -230,14 +232,14 @@ namespace System.Net.Http.Formatting
                     if (UseDataContractJsonSerializer)
                     {
                         DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new NonClosingDelegatingStream(stream), effectiveEncoding, _readerQuotas, null))
+                        using (XmlReader reader = JsonReaderWriterFactory.CreateJsonReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
                         {
                             return dataContractSerializer.ReadObject(reader);
                         }
                     }
                     else
                     {
-                        using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(stream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
+                        using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(readStream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
                         {
                             JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
                             if (formatterLogger != null)
@@ -269,24 +271,24 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Called during serialization to write an object of the specified <paramref name="type"/>
-        /// to the specified <paramref name="stream"/>.
+        /// to the specified <paramref name="writeStream"/>.
         /// </summary>
         /// <param name="type">The type of object to write.</param>
         /// <param name="value">The object to write.</param>
-        /// <param name="stream">The <see cref="Stream"/> to which to write.</param>
-        /// <param name="contentHeaders">The <see cref="HttpContentHeaders"/> for the content being written.</param>
+        /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+        /// <param name="content">The <see cref="HttpContent"/> for the content being written.</param>
         /// <param name="transportContext">The <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> that will write the value to the stream.</returns>
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
 
-            if (stream == null)
+            if (writeStream == null)
             {
-                throw Error.ArgumentNull("stream");
+                throw Error.ArgumentNull("writeStream");
             }
 
             if (UseDataContractJsonSerializer && Indent)
@@ -296,11 +298,11 @@ namespace System.Net.Http.Formatting
 
             return TaskHelpers.RunSynchronously(() =>
             {
-                Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
+                Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
 
                 if (!UseDataContractJsonSerializer)
                 {
-                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, effectiveEncoding)) { CloseOutput = false })
+                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) { CloseOutput = false })
                     {
                         if (Indent)
                         {
@@ -322,7 +324,7 @@ namespace System.Net.Http.Formatting
                     }
 
                     DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
-                    using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(stream, effectiveEncoding, ownsStream: false))
+                    using (XmlWriter writer = JsonReaderWriterFactory.CreateJsonWriter(writeStream, effectiveEncoding, ownsStream: false))
                     {
                         dataContractSerializer.WriteObject(writer, value);
                     }

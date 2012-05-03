@@ -245,7 +245,7 @@ namespace System.Net.Http.Formatting
             ms.Write(bytes, 0, bytes.Length);
             ms.Flush();
             ms.Position = 0;
-            Task<object> readTask = formatter.ReadFromStreamAsync(type, ms, contentHeaders: null, formatterLogger: formatterLogger);
+            Task<object> readTask = formatter.ReadFromStreamAsync(type, ms, content: null, formatterLogger: formatterLogger);
             readTask.WaitUntilCompleted();
             if (readTask.IsFaulted)
             {

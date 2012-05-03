@@ -119,7 +119,7 @@ namespace System.Net.Http
             var formatterMock = new Mock<TestableMediaTypeFormatter> { CallBase = true };
             var oc = new TestableObjectContent(typeof(string), "abc", formatterMock.Object);
             var task = new Task(() => { });
-            formatterMock.Setup(f => f.WriteToStreamAsync(typeof(string), "abc", stream, oc.Headers, context))
+            formatterMock.Setup(f => f.WriteToStreamAsync(typeof(string), "abc", stream, oc, context))
                 .Returns(task).Verifiable();
 
             var result = oc.CallSerializeToStreamAsync(stream, context);
@@ -191,7 +191,7 @@ namespace System.Net.Http
                 return true;
             }
 
-            public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+            public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContent content, TransportContext transportContext)
             {
                 throw new NotImplementedException();
             }

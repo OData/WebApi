@@ -174,8 +174,9 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "Tracing layer needs to observer all Task completion paths")]
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             MediaTypeHeaderValue contentType = contentHeaders == null ? null : contentHeaders.ContentType;
 
             return TraceWriter.TraceBeginEndAsync<object>(
@@ -192,7 +193,7 @@ namespace System.Web.Http.Tracing.Tracers
                                         contentType == null ? SRResources.TraceNoneObjectMessage : contentType.ToString());
                 },
 
-                execute: () => InnerFormatter.ReadFromStreamAsync(type, stream, contentHeaders, formatterLogger),
+                execute: () => InnerFormatter.ReadFromStreamAsync(type, readStream, content, formatterLogger),
 
                 endTrace: (tr, value) =>
                 {
@@ -205,8 +206,9 @@ namespace System.Web.Http.Tracing.Tracers
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "Tracing layer needs to observer all Task completion paths")]
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             MediaTypeHeaderValue contentType = contentHeaders == null
                                        ? null
                                        : contentHeaders.ContentType;
@@ -225,7 +227,7 @@ namespace System.Web.Http.Tracing.Tracers
                                         type.Name,
                                         contentType == null ? SRResources.TraceNoneObjectMessage : contentType.ToString());
                 },
-                execute: () => InnerFormatter.WriteToStreamAsync(type, value, stream, contentHeaders, transportContext),
+                execute: () => InnerFormatter.WriteToStreamAsync(type, value, writeStream, content, transportContext),
                 endTrace: null,
                 errorTrace: null);
         }

@@ -154,7 +154,8 @@ namespace System.Net.Http.Formatting
         public void ReadFromStreamAsync_RoundTripsWriteToStreamAsync(Type variationType, object testData)
         {
             TestJsonMediaTypeFormatter formatter = new TestJsonMediaTypeFormatter();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
+            HttpContent content = new StringContent(String.Empty);
+            HttpContentHeaders contentHeaders = content.Headers;
 
             bool canSerialize = IsTypeSerializableWithJsonSerializer(variationType, testData) && Assert.Http.CanRoundTrip(variationType);
             if (canSerialize)
@@ -163,10 +164,10 @@ namespace System.Net.Http.Formatting
                 Assert.Stream.WriteAndRead(
                     stream =>
                     {
-                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, contentHeaders, transportContext: null));
+                        Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
                         contentHeaders.ContentLength = stream.Length;
                     },
-                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, contentHeaders, null)));
+                    stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, null)));
                 Assert.Equal(testData, readObj);
             }
         }
@@ -176,8 +177,8 @@ namespace System.Net.Http.Formatting
         {
             JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
             MemoryStream memoryStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
+            HttpContent content = new StringContent(String.Empty);
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             //Assert.True(serializedString.Contains("DataContractSampleType"),
@@ -190,8 +191,8 @@ namespace System.Net.Http.Formatting
         {
             JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
             MemoryStream memoryStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, contentHeaders, transportContext: null));
+            HttpContent content = new StringContent(String.Empty);
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Console.WriteLine(serializedString);
@@ -205,8 +206,8 @@ namespace System.Net.Http.Formatting
         {
             JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false};
             MemoryStream memoryStream = new MemoryStream();
-            HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, contentHeaders, transportContext: null));
+            HttpContent content = new StringContent(String.Empty);
+            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("null"), "Using Json formatter to serialize null should emit 'null'.");

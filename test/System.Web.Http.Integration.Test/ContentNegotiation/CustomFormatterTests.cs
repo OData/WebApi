@@ -158,25 +158,25 @@ namespace System.Web.Http.ContentNegotiation
             contentHeaders.TryAddWithoutValidation("Version", "1.3.5.0");
         }
 
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
-            string content = null;
+            string stringContent = null;
 
-            using (var reader = new StreamReader(stream))
+            using (var reader = new StreamReader(readStream))
             {
-                content = reader.ReadToEnd();
+                stringContent = reader.ReadToEnd();
             }
 
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(content);
+            tcs.SetResult(stringContent);
 
             return tcs.Task;
         }
 
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             var output = value.ToString();
-            var writer = new StreamWriter(stream);
+            var writer = new StreamWriter(writeStream);
             writer.Write(output);
             writer.Flush();
 
@@ -204,24 +204,24 @@ namespace System.Web.Http.ContentNegotiation
             return true;
         }
 
-        public override Task<object> ReadFromStreamAsync(Type type, Stream stream, HttpContentHeaders contentHeaders, IFormatterLogger formatterLogger)
+        public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
-            string content = null;
+            string stringContent = null;
 
-            using (var reader = new StreamReader(stream))
+            using (var reader = new StreamReader(readStream))
             {
-                content = reader.ReadToEnd();
+                stringContent = reader.ReadToEnd();
             }
 
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(content);
+            tcs.SetResult(stringContent);
             return tcs.Task;
         }
 
-        public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, TransportContext transportContext)
+        public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             var output = value == null ? String.Empty : value.ToString();
-            var writer = new StreamWriter(stream);
+            var writer = new StreamWriter(writeStream);
             writer.Write(output);
             writer.Flush();
 

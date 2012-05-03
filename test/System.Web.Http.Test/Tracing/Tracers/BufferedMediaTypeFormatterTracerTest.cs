@@ -37,7 +37,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
-                f => f.ReadFromStream(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).
+                f => f.ReadFromStream(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).
                 Returns("sampleValue");
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -50,7 +50,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            string valueReturned = tracer.ReadFromStream(typeof(string), new MemoryStream(), request.Content.Headers, null) as string;
+            string valueReturned = tracer.ReadFromStream(typeof(string), new MemoryStream(), request.Content, null) as string;
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
@@ -64,7 +64,7 @@ namespace System.Web.Http.Tracing.Tracers
             InvalidOperationException exception = new InvalidOperationException("test");
             Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
-                f => f.ReadFromStream(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>(), It.IsAny<IFormatterLogger>())).Throws(exception);
+                f => f.ReadFromStream(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -77,7 +77,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReadFromStream(typeof(string), new MemoryStream(), request.Content.Headers, null));
+            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.ReadFromStream(typeof(string), new MemoryStream(), request.Content, null));
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
@@ -91,7 +91,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
             mockFormatter.Setup(
-                f => f.WriteToStream(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContentHeaders>()));
+                f => f.WriteToStream(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>()));
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
@@ -103,7 +103,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            tracer.WriteToStream(typeof(string), "sampleValue", new MemoryStream(), request.Content.Headers);
+            tracer.WriteToStream(typeof(string), "sampleValue", new MemoryStream(), request.Content);
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());
@@ -118,7 +118,7 @@ namespace System.Web.Http.Tracing.Tracers
             mockFormatter.Setup(
                 f =>
                 f.WriteToStream(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
-                                     It.IsAny<HttpContentHeaders>())).
+                                     It.IsAny<HttpContent>())).
                 Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
@@ -132,7 +132,7 @@ namespace System.Web.Http.Tracing.Tracers
             };
 
             // Act
-            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.WriteToStream(typeof(string), "sampleValue", new MemoryStream(), request.Content.Headers));
+            Exception thrown = Assert.Throws<InvalidOperationException>(() => tracer.WriteToStream(typeof(string), "sampleValue", new MemoryStream(), request.Content));
 
             // Assert
             Assert.Equal<TraceRecord>(expectedTraces, traceWriter.Traces, new TraceRecordComparer());

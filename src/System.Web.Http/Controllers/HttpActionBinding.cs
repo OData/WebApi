@@ -88,7 +88,7 @@ namespace System.Web.Http.Controllers
                 if (!parameterBinder.IsValid)
                 {
                     // Error code here is 500 because the WebService developer's action signature is bad. 
-                    return TaskHelpers.FromError(new HttpResponseException(actionContext.Request.CreateResponse(
+                    return TaskHelpers.FromError(new HttpResponseException(actionContext.Request.CreateErrorResponse(
                         HttpStatusCode.InternalServerError, parameterBinder.ErrorMessage)));
                 }
             }

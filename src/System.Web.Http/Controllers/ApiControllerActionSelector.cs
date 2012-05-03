@@ -161,7 +161,7 @@ namespace System.Web.Http.Controllers
                     // Throws HttpResponseException with NotFound status because no action matches the Name
                     if (actionsFoundByName.Length == 0)
                     {
-                        throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                             HttpStatusCode.NotFound,
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
@@ -178,7 +178,7 @@ namespace System.Web.Http.Controllers
                 // Throws HttpResponseException with MethodNotAllowed status because no action matches the Http Method
                 if (actionsFoundByHttpMethods.Length == 0)
                 {
-                    throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                    throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                         HttpStatusCode.MethodNotAllowed,
                         Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod)));
                 }
@@ -196,7 +196,7 @@ namespace System.Web.Http.Controllers
                 {
                     case 0:
                         // Throws HttpResponseException with NotFound status because no action matches the request
-                        throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                             HttpStatusCode.NotFound,
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName)));
                     case 1:
@@ -204,7 +204,7 @@ namespace System.Web.Http.Controllers
                     default:
                         // Throws HttpResponseException with InternalServerError status because multiple action matches the request
                         string ambiguityList = CreateAmbiguousMatchList(selectedActions);
-                        throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                             HttpStatusCode.InternalServerError,
                             Error.Format(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList)));
                 }

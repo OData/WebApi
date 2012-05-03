@@ -219,4 +219,7 @@
   <data name="ValueMustBeNonNegative" xml:space="preserve">
     <value>Value must be non-negative.</value>
   </data>
+  <data name="RequestCancelled" xml:space="preserve">
+    <value>Processing of the request was cancelled.</value>
+  </data>
 </root>

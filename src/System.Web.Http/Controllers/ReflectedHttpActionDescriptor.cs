@@ -202,7 +202,7 @@ namespace System.Web.Http.Controllers
             if (!parameters.TryGetValue(parameterInfo.Name, out value))
             {
                 // the key should always be present, even if the parameter value is null
-                throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                     HttpStatusCode.BadRequest,
                     Error.Format(SRResources.ReflectedActionDescriptor_ParameterNotInDictionary,
                                  parameterInfo.Name, parameterInfo.ParameterType, MethodInfo, MethodInfo.DeclaringType)));
@@ -211,7 +211,7 @@ namespace System.Web.Http.Controllers
             if (value == null && !TypeHelper.TypeAllowsNullValue(parameterInfo.ParameterType))
             {
                 // tried to pass a null value for a non-nullable parameter type
-                throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                     HttpStatusCode.BadRequest,
                     Error.Format(SRResources.ReflectedActionDescriptor_ParameterCannotBeNull,
                                     parameterInfo.Name, parameterInfo.ParameterType, MethodInfo, MethodInfo.DeclaringType)));
@@ -220,7 +220,7 @@ namespace System.Web.Http.Controllers
             if (value != null && !parameterInfo.ParameterType.IsInstanceOfType(value))
             {
                 // value was supplied but is not of the proper type
-                throw new HttpResponseException(controllerContext.Request.CreateResponse(
+                throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                     HttpStatusCode.BadRequest,
                     Error.Format(SRResources.ReflectedActionDescriptor_ParameterValueHasWrongType,
                                     parameterInfo.Name, MethodInfo, MethodInfo.DeclaringType, value.GetType(), parameterInfo.ParameterType)));

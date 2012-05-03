@@ -3,6 +3,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -203,8 +204,8 @@ namespace System.Web.Http
             });
 
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
-            Assert.Equal("The requested resource does not support http method 'POST'.", content.Value);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method 'POST'.", ((HttpError)content.Value).Message);
         }
 
         [Fact]
@@ -231,8 +232,8 @@ namespace System.Web.Http
             });
 
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
-            Assert.Equal("The requested resource does not support http method 'PUT'.", content.Value);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method 'PUT'.", ((HttpError)content.Value).Message);
         }
     }
 }

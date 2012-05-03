@@ -196,6 +196,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No route providing a controller name was found to match request URI &apos;{0}&apos;.
+        /// </summary>
+        internal static string ControllerNameNotFound {
+            get {
+                return ResourceManager.GetString("ControllerNameNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type {0} must have a public constructor which accepts three parameters of types {1}, {2}, and {3}..
         /// </summary>
         internal static string DataAnnotationsModelValidatorProvider_ConstructorRequirements {
@@ -342,6 +351,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This HttpServer instance has already been disposed..
+        /// </summary>
+        internal static string HttpServerDisposed {
+            get {
+                return ResourceManager.GetString("HttpServerDisposed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Identifier expected.
         /// </summary>
         internal static string IdentifierExpected {
@@ -401,6 +419,15 @@ namespace System.Web.Http.Properties {
         internal static string InvalidIntegerLiteral {
             get {
                 return ResourceManager.GetString("InvalidIntegerLiteral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The model state is invalid..
+        /// </summary>
+        internal static string InvalidModelState {
+            get {
+                return ResourceManager.GetString("InvalidModelState", resourceCulture);
             }
         }
         
@@ -549,6 +576,33 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No controller was created to handle this request..
+        /// </summary>
+        internal static string NoControllerCreated {
+            get {
+                return ResourceManager.GetString("NoControllerCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No controller was selected to handle this request..
+        /// </summary>
+        internal static string NoControllerSelected {
+            get {
+                return ResourceManager.GetString("NoControllerSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No route data was found for this request..
+        /// </summary>
+        internal static string NoRouteData {
+            get {
+                return ResourceManager.GetString("NoRouteData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;(&apos; expected.
         /// </summary>
         internal static string OpenParenExpected {
@@ -653,6 +707,15 @@ namespace System.Web.Http.Properties {
         internal static string ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods {
             get {
                 return ResourceManager.GetString("ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authorization has been denied for this request..
+        /// </summary>
+        internal static string RequestNotAuthorized {
+            get {
+                return ResourceManager.GetString("RequestNotAuthorized", resourceCulture);
             }
         }
         
@@ -1049,6 +1112,15 @@ namespace System.Web.Http.Properties {
         internal static string Validation_ValueNotFound {
             get {
                 return ResourceManager.GetString("Validation_ValueNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The model state is valid..
+        /// </summary>
+        internal static string ValidModelState {
+            get {
+                return ResourceManager.GetString("ValidModelState", resourceCulture);
             }
         }
         

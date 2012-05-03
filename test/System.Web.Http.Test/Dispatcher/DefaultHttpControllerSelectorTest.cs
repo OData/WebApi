@@ -238,6 +238,7 @@ namespace System.Web.Http.Dispatcher
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
             configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             controllerTypeResolver
                 .Setup(c => c.GetControllerTypes(It.IsAny<IAssembliesResolver>()))
@@ -257,7 +258,8 @@ namespace System.Web.Http.Dispatcher
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
-            Assert.Equal("\"No type was found that matches the controller named 'Sample'.\"", ex.Response.Content.ReadAsStringAsync().Result);
+            string response = ex.Response.Content.ReadAsAsync<HttpError>().Result.Message;
+            Assert.Equal("No type was found that matches the controller named 'Sample'.", response);
         }
 
         [Fact]
@@ -266,6 +268,7 @@ namespace System.Web.Http.Dispatcher
             HttpConfiguration configuration = new HttpConfiguration();
             Mock<IHttpControllerTypeResolver> controllerTypeResolver = new Mock<IHttpControllerTypeResolver>();
             configuration.Services.Replace(typeof(IHttpControllerTypeResolver), controllerTypeResolver.Object);
+            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             controllerTypeResolver
                 .Setup(c => c.GetControllerTypes(It.IsAny<IAssembliesResolver>()))
@@ -285,7 +288,7 @@ namespace System.Web.Http.Dispatcher
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, ex.Response.StatusCode);
-            string response = ex.Response.Content.ReadAsAsync<string>().Result;
+            string response = ex.Response.Content.ReadAsAsync<HttpError>().Result.Message;
             Assert.Contains(
                 "Multiple types were found that match the controller named 'Sample'. This can happen if the route that services this request ('') found multiple controllers defined with the same name but differing namespaces, which is not supported.\r\n\r\nThe request for 'Sample' has found the following matching controllers:",
                 response);

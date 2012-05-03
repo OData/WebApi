@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
+using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http.Dispatcher
@@ -70,8 +71,7 @@ namespace System.Web.Http.Dispatcher
                 }
                 else
                 {
-                    // TODO, 328927, add an error message in the response body
-                    return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.NotFound));
+                    return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoRouteData));
                 }
             }
 

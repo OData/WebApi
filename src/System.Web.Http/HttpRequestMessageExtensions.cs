@@ -10,7 +10,9 @@ using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
+using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
@@ -148,8 +150,93 @@ namespace System.Net.Http
         }
 
         /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with message <paramref name="message"/>.
+        /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="message">The error message.</param>
+        /// <returns>An error response with error message <paramref name="message"/> and status code <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, string message)
+        {
+            return request.CreateErrorResponse(statusCode, new HttpError(message));
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> for exception <paramref name="exception"/>.
+        /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="exception">The exception.</param>
+        /// <returns>An error response for <paramref name="exception"/> with status code <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, Exception exception)
+        {
+            return request.CreateErrorResponse(statusCode, new HttpError(exception));
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> for model state <paramref name="modelState"/>.
+        /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="modelState">The model state.</param>
+        /// <returns>An error response for <paramref name="modelState"/> with status code <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, ModelStateDictionary modelState)
+        {
+            return request.CreateErrorResponse(statusCode, new HttpError(modelState));
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping <paramref name="error"/> as the content. If no formatter 
+        /// is found, this method returns a response with status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="error">The error to wrap.</param>
+        /// <returns>An error response wrapping <paramref name="error"/> with status code <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, HttpError error)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null || !configuration.ShouldIncludeErrorDetail(request))
+            {
+                return request.CreateResponse(statusCode);
+            }
+            else
+            {
+                return request.CreateResponse<HttpError>(statusCode, error);
+            }
+        }
+
+        /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
-        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found that this
+        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found, this
         /// method returns a response with status 406 NotAcceptable. This forwards the call to
         /// <see cref="CreateResponse{T}(HttpRequestMessage, HttpStatusCode, T, HttpConfiguration)"/> with a <c>null</c>
         /// configuration.
@@ -170,7 +257,7 @@ namespace System.Net.Http
 
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> with an instance
-        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found that this
+        /// of <see cref="ObjectContent{T}"/> as the content if a formatter can be found. If no formatter is found, this
         /// method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>

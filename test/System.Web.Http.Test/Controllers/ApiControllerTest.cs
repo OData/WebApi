@@ -281,6 +281,7 @@ namespace System.Web.Http
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(instance: api, routeData: route, request: new HttpRequestMessage() { Method = HttpMethod.Get });
             Type controllerType = typeof(UsersController);
             controllerContext.ControllerDescriptor = new HttpControllerDescriptor(controllerContext.Configuration, controllerType.Name, controllerType);
+            controllerContext.Configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             // Act & Assert
             var exception = Assert.Throws<HttpResponseException>(() =>
@@ -289,9 +290,9 @@ namespace System.Web.Http
              });
 
             Assert.Equal(HttpStatusCode.NotFound, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("No action was found on the controller 'UsersController' that matches the name 'invalidOp'.",
-                content.Value);
+                ((HttpError)content.Value).Message);
         }
 
         [Fact]

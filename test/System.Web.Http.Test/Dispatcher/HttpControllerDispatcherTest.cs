@@ -104,7 +104,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void SendAsync_Returns500WithExceptionSurrogateWhenControllerThrows()
+        public void SendAsync_Returns500WithHttpErrorWhenControllerThrows()
         {
             var config = new HttpConfiguration();
             var request = CreateRequest(config, "http://localhost/api/HttpControllerDispatcherThrowing");
@@ -115,8 +115,8 @@ namespace System.Web.Http.Dispatcher
             resultTask.WaitUntilCompleted();
 
             Assert.Equal(HttpStatusCode.InternalServerError, resultTask.Result.StatusCode);
-            var objectContent = Assert.IsType<ObjectContent<ExceptionSurrogate>>(resultTask.Result.Content);
-            var surrogate = Assert.IsType<ExceptionSurrogate>(objectContent.Value);
+            var objectContent = Assert.IsType<ObjectContent<HttpError>>(resultTask.Result.Content);
+            var surrogate = Assert.IsType<HttpError>(objectContent.Value);
             Assert.Equal("Hello from the throwing controller", surrogate.Message);
         }
 

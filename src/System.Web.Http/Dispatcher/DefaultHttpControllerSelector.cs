@@ -55,7 +55,9 @@ namespace System.Web.Http.Dispatcher
             string controllerName = GetControllerName(request);
             if (String.IsNullOrEmpty(controllerName))
             {
-                throw new HttpResponseException(request.CreateResponse(HttpStatusCode.NotFound));
+                throw new HttpResponseException(request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ControllerNameNotFound, request.RequestUri)));
             }
 
             HttpControllerDescriptor controllerDescriptor;
@@ -72,14 +74,14 @@ namespace System.Web.Http.Dispatcher
             if (matchingTypes.Count == 0)
             {
                 // no matching types
-                throw new HttpResponseException(request.CreateResponse(
+                throw new HttpResponseException(request.CreateErrorResponse(
                     HttpStatusCode.NotFound,
                     Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName)));
             }
             else
             {
                 // multiple matching types
-                throw new HttpResponseException(request.CreateResponse(
+                throw new HttpResponseException(request.CreateErrorResponse(
                     HttpStatusCode.InternalServerError,
                     CreateAmbiguousControllerExceptionMessage(request.GetRouteData().Route, controllerName, matchingTypes)));
             }

@@ -3,6 +3,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -60,8 +61,8 @@ namespace System.Web.Http
                 });
 
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
-            Assert.Equal("The requested resource does not support http method '" + httpMethod + "'.", content.Value);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method '" + httpMethod + "'.", ((HttpError)content.Value).Message);
         }
 
         [Theory]
@@ -81,8 +82,8 @@ namespace System.Web.Http
                 });
 
             Assert.Equal(HttpStatusCode.NotFound, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
-            Assert.Equal("No action was found on the controller 'ActionAttributeTestController' that matches the request.", content.Value);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
+            Assert.Equal("No action was found on the controller 'ActionAttributeTestController' that matches the request.", ((HttpError)content.Value).Message);
         }
 
         [Theory]
@@ -134,8 +135,8 @@ namespace System.Web.Http
                 });
 
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
-            Assert.Equal("The requested resource does not support http method '" + httpMethod + "'.", content.Value);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
+            Assert.Equal("The requested resource does not support http method '" + httpMethod + "'.", ((HttpError)content.Value).Message);
         }
     }
 }

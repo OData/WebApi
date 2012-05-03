@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Properties;
 using System.Web.Http.Query;
@@ -78,9 +79,9 @@ namespace System.Web.Http
                     }
                     catch (ParseException e)
                     {
-                        actionExecutedContext.Response = request.CreateResponse(
+                        actionExecutedContext.Response = request.CreateErrorResponse(
                             HttpStatusCode.BadRequest,
-                            Error.Format(SRResources.UriQueryStringInvalid, e.Message));
+                            new HttpError(e) { Message = Error.Format(SRResources.UriQueryStringInvalid, e.Message) });
                         return;
                     }
                 }

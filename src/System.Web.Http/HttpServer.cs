@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
+using System.Web.Http.Properties;
 using System.Web.Http.Tracing;
 using System.Web.Http.Validation;
 
@@ -134,7 +135,7 @@ namespace System.Web.Http
 
             if (_disposed)
             {
-                return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.ServiceUnavailable));
+                return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.HttpServerDisposed));
             }
 
             // The first request initializes the server

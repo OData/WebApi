@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
+using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http.Dispatcher
@@ -67,11 +68,11 @@ namespace System.Web.Http.Dispatcher
             try
             {
                 return SendAsyncInternal(request, cancellationToken)
-                      .Catch(info => info.Handled(HandleException(request, info.Exception, _configuration)));
+                      .Catch(info => info.Handled(HandleException(request, info.Exception)));
             }
             catch (Exception exception)
             {
-                return TaskHelpers.FromResult(HandleException(request, exception, _configuration));
+                return TaskHelpers.FromResult(HandleException(request, exception));
             }
         }
 
@@ -88,16 +89,13 @@ namespace System.Web.Http.Dispatcher
             HttpControllerDescriptor httpControllerDescriptor = ControllerSelector.SelectController(request);
             if (httpControllerDescriptor == null)
             {
-                // TODO, 328927, add an error message in the response body
-                return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.NotFound));
+                return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoControllerSelected));
             }
 
             IHttpController httpController = httpControllerDescriptor.CreateController(request);
-
             if (httpController == null)
             {
-                // TODO, 328927, add an error message in the response body
-                return TaskHelpers.FromResult(request.CreateResponse(HttpStatusCode.NotFound));
+                return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoControllerCreated));
             }
 
             request.Properties.Add(HttpPropertyKeys.HttpControllerDescriptorKey, httpControllerDescriptor);
@@ -111,7 +109,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns HttpResponseMessage instance.")]
-        private static HttpResponseMessage HandleException(HttpRequestMessage request, Exception exception, HttpConfiguration configuration)
+        private static HttpResponseMessage HandleException(HttpRequestMessage request, Exception exception)
         {
             Exception unwrappedException = exception.GetBaseException();
             HttpResponseException httpResponseException = unwrappedException as HttpResponseException;
@@ -121,12 +119,7 @@ namespace System.Web.Http.Dispatcher
                 return httpResponseException.Response;
             }
 
-            if (configuration.ShouldIncludeErrorDetail(request))
-            {
-                return request.CreateResponse<ExceptionSurrogate>(HttpStatusCode.InternalServerError, new ExceptionSurrogate(unwrappedException));
-            }
-
-            return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            return request.CreateErrorResponse(HttpStatusCode.InternalServerError, unwrappedException);
         }
     }
 }

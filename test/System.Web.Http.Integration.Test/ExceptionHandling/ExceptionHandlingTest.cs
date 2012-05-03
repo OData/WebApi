@@ -47,8 +47,8 @@ namespace System.Web.Http
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                    ExceptionSurrogate exception = response.Content.ReadAsAsync<ExceptionSurrogate>().Result;
-                    Assert.Equal(typeof(ArgumentNullException).FullName, exception.ExceptionType.ToString());
+                    HttpError exception = response.Content.ReadAsAsync<HttpError>().Result;
+                    Assert.Equal(typeof(ArgumentNullException).FullName, exception["ExceptionType"].ToString());
                 }
             );
         }
@@ -91,8 +91,8 @@ namespace System.Web.Http
                 (response) =>
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                    ExceptionSurrogate exception = response.Content.ReadAsAsync<ExceptionSurrogate>().Result;
-                    Assert.Equal(typeof(ArgumentException).FullName, exception.ExceptionType.ToString());
+                    HttpError exception = response.Content.ReadAsAsync<HttpError>().Result;
+                    Assert.Equal(typeof(ArgumentException).FullName, exception["ExceptionType"].ToString());
                 }
             );
         }
@@ -137,7 +137,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                     Assert.Equal(
                         String.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName),
-                        response.Content.ReadAsAsync<string>().Result);
+                        response.Content.ReadAsAsync<HttpError>().Result.Message);
                 }
             );
         }
@@ -158,7 +158,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                     Assert.Equal(
                         String.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, controllerName, actionName),
-                        response.Content.ReadAsAsync<string>().Result);
+                        response.Content.ReadAsAsync<HttpError>().Result.Message);
                 }
             );
         }
@@ -179,7 +179,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
                     Assert.Equal(
                         String.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, requestMethod.Method),
-                        response.Content.ReadAsAsync<string>().Result);
+                        response.Content.ReadAsAsync<HttpError>().Result.Message);
                 }
             );
         }
@@ -199,7 +199,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     Assert.Contains(
                         String.Format(SRResources.ApiControllerActionSelector_AmbiguousMatch, String.Empty),
-                        response.Content.ReadAsAsync<string>().Result);
+                        response.Content.ReadAsAsync<HttpError>().Result.Message);
                 }
             );
         }
@@ -219,7 +219,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     Assert.Contains(
                         String.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, "{controller}", String.Empty),
-                        response.Content.ReadAsAsync<string>().Result);
+                        response.Content.ReadAsAsync<HttpError>().Result.Message);
                 }
             );
         }
@@ -243,8 +243,8 @@ namespace System.Web.Http
                 // Make a request to generic method and verify the exception
                 response = client.PostAsync("http://localhost/Exception/GenericAction", null).Result;
                 Type controllerType = typeof(ExceptionController);
-                ExceptionSurrogate exception = response.Content.ReadAsAsync<ExceptionSurrogate>().Result;
-                Assert.Equal(typeof(InvalidOperationException).FullName, exception.ExceptionType);
+                HttpError exception = response.Content.ReadAsAsync<HttpError>().Result;
+                Assert.Equal(typeof(InvalidOperationException).FullName, exception["ExceptionType"]);
                 Assert.Equal(
                     String.Format(
                         SRResources.ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods,

@@ -9,6 +9,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Properties;
 
 namespace System.Web.Http
 {
@@ -152,7 +153,7 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("actionContext");
             }
 
-            actionContext.Response = actionContext.ControllerContext.Request.CreateResponse(HttpStatusCode.Unauthorized);
+            actionContext.Response = actionContext.ControllerContext.Request.CreateErrorResponse(HttpStatusCode.Unauthorized, SRResources.RequestNotAuthorized);
         }
 
         private static bool SkipAuthorization(HttpActionContext actionContext)

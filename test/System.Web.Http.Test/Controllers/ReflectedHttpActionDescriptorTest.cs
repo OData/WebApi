@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using Moq;
 using Xunit;
@@ -26,6 +27,7 @@ namespace System.Web.Http
         public ReflectedHttpActionDescriptorTest()
         {
             _context = ContextUtil.CreateControllerContext(instance: _controller);
+            _context.Configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
         }
 
         [Fact]
@@ -276,11 +278,11 @@ namespace System.Web.Http
                  () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("The parameters dictionary contains a null entry for parameter 'id' of non-nullable type 'System.Int32' " +
                 "for method 'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. An optional parameter " +
                 "must be a reference type, a nullable type, or be declared as an optional parameter.",
-                content.Value);
+                ((HttpError)content.Value).Message);
         }
 
         [Fact]
@@ -294,11 +296,11 @@ namespace System.Web.Http
                 () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("The parameters dictionary does not contain an entry for parameter 'id' of type 'System.Int32' " +
                 "for method 'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. " +
                 "The dictionary must contain an entry for each parameter, including parameters that have null values.",
-                content.Value);
+                ((HttpError)content.Value).Message);
         }
 
         [Fact]
@@ -312,12 +314,12 @@ namespace System.Web.Http
                  () => actionDescriptor.ExecuteAsync(_context, _arguments, CancellationToken.None).RethrowFaultedTaskException());
 
             Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
-            var content = Assert.IsType<ObjectContent<string>>(exception.Response.Content);
+            var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("The parameters dictionary contains an invalid entry for parameter 'id' for method " +
                 "'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. " +
                 "The dictionary contains a value of type 'System.DateTime', but the parameter requires a value " +
                 "of type 'System.Int32'.",
-                content.Value);
+                ((HttpError)content.Value).Message);
         }
 
         [Fact]

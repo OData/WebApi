@@ -458,4 +458,28 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="MaxHttpCollectionKeyLimitReached" xml:space="preserve">
     <value>The number of keys in a NameValueCollection has exceeded the limit of '{0}'. You can adjust it by modifying the MaxHttpCollectionKeys property on the '{1}' class.</value>
   </data>
+  <data name="ControllerNameNotFound" xml:space="preserve">
+    <value>No route providing a controller name was found to match request URI '{0}'</value>
+  </data>
+  <data name="HttpServerDisposed" xml:space="preserve">
+    <value>This HttpServer instance has already been disposed.</value>
+  </data>
+  <data name="NoControllerCreated" xml:space="preserve">
+    <value>No controller was created to handle this request.</value>
+  </data>
+  <data name="NoControllerSelected" xml:space="preserve">
+    <value>No controller was selected to handle this request.</value>
+  </data>
+  <data name="NoRouteData" xml:space="preserve">
+    <value>No route data was found for this request.</value>
+  </data>
+  <data name="RequestNotAuthorized" xml:space="preserve">
+    <value>Authorization has been denied for this request.</value>
+  </data>
+  <data name="InvalidModelState" xml:space="preserve">
+    <value>The model state is invalid.</value>
+  </data>
+  <data name="ValidModelState" xml:space="preserve">
+    <value>The model state is valid.</value>
+  </data>
 </root>

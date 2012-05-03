@@ -177,20 +177,7 @@ namespace System.Web.Http.SelfHost
             }
 
             // create principal information and add it the request for the windows auth case
-            SecurityMessageProperty property = request.GetSecurityMessageProperty();
-            if (property != null)
-            {
-                ServiceSecurityContext context = property.ServiceSecurityContext;
-                if (context != null && context.PrimaryIdentity != null)
-                {
-                    WindowsIdentity windowsIdentity = context.PrimaryIdentity as WindowsIdentity;
-
-                    if (windowsIdentity != null)
-                    {
-                        Thread.CurrentPrincipal = new WindowsPrincipal(windowsIdentity);
-                    }
-                }
-            }
+            SetCurrentPrincipal(request);
 
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
             request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate));
@@ -207,27 +194,43 @@ namespace System.Web.Http.SelfHost
                     })
                     .Catch(info =>
                     {
-                        // REVIEW: Shouldn't the response contain the exception so it can be serialized?
-                        responseMessage = request.CreateResponse(HttpStatusCode.InternalServerError);
+                        responseMessage = request.CreateErrorResponse(HttpStatusCode.InternalServerError, info.Exception);
                         return info.Handled();
                     })
                     .Finally(() =>
                     {
                         if (responseMessage == null) // No Then or Catch, must've been canceled
                         {
-                            responseMessage = request.CreateResponse(HttpStatusCode.ServiceUnavailable);
+                            responseMessage = request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.RequestCancelled);
                         }
 
                         Message reply = responseMessage.ToMessage();
                         BeginReply(new ReplyContext(channelContext, requestContext, reply));
                     });
             }
-            catch
+            catch (Exception e)
             {
-                // REVIEW: Shouldn't the response contain the exception so it can be serialized?
-                HttpResponseMessage response = request.CreateResponse(HttpStatusCode.InternalServerError);
+                HttpResponseMessage response = request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
                 Message reply = response.ToMessage();
                 BeginReply(new ReplyContext(channelContext, requestContext, reply));
+            }
+        }
+
+        private static void SetCurrentPrincipal(HttpRequestMessage request)
+        {
+            SecurityMessageProperty property = request.GetSecurityMessageProperty();
+            if (property != null)
+            {
+                ServiceSecurityContext context = property.ServiceSecurityContext;
+                if (context != null && context.PrimaryIdentity != null)
+                {
+                    WindowsIdentity windowsIdentity = context.PrimaryIdentity as WindowsIdentity;
+
+                    if (windowsIdentity != null)
+                    {
+                        Thread.CurrentPrincipal = new WindowsPrincipal(windowsIdentity);
+                    }
+                }
             }
         }
 

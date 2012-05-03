@@ -162,6 +162,11 @@ namespace System.Web.Http
             switch (IncludeErrorDetailPolicy)
             {
                 case IncludeErrorDetailPolicy.LocalOnly:
+                    if (request == null || request.RequestUri == null)
+                    {
+                        return false;
+                    }
+
                     Uri requestUri = request.RequestUri;
                     return requestUri.IsAbsoluteUri && requestUri.IsLoopback;
 

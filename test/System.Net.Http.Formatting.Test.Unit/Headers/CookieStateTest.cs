@@ -42,6 +42,7 @@ namespace System.Net.Http.Headers
                     { "a,b", "a%2cb" },
                     { "a;b", "a%3bb" },
                     { "a\\b", "a%5cb" },
+                    { "[]{}\\|!@#$%^&*()_-+=", "%5b%5d%7b%7d%5c%7c!%40%23%24%25%5e%26*()_-%2b%3d" },
                 };
             }
         }
@@ -68,6 +69,7 @@ namespace System.Net.Http.Headers
         [Theory]
         [InlineData("name", "")]
         [InlineData("name", "value")]
+        [InlineData("name", "+=\\[]{}!@#$%^&*()_")]
         public void CookieState_Ctor1InitializesCorrectly(string name, string value)
         {
             CookieState cookie = new CookieState(name, value);
@@ -168,34 +170,38 @@ namespace System.Net.Http.Headers
             Assert.Equal("v1", actualValue.Values["n1"]);
         }
 
-        [Fact]
-        public void CookieState_ToStringWithSingleValue()
+        [Theory]
+        [PropertyData("EncodedCookieStateStrings")]
+        public void CookieState_ToStringWithSingleValue(string subValue, string encodedSubvalue)
         {
             // Arrange
-            CookieState cookie = new CookieState("name", "value");
+            CookieState cookie = new CookieState("name", subValue);
 
             // Act
             string actualValue = cookie.ToString();
 
             // Assert
-            Assert.Equal("name=value", actualValue);
+            string expectedValue = String.Format("name={0}", encodedSubvalue);
+            Assert.Equal(expectedValue, actualValue);
         }
 
-        [Fact]
-        public void CookieState_ToStringWithNameValueCollection()
+        [Theory]
+        [PropertyData("EncodedCookieStateStrings")]
+        public void CookieState_ToStringWithNameValueCollection(string subValue, string encodedSubvalue)
         {
             // Arrange
             NameValueCollection nvc = new NameValueCollection();
-            nvc.Add("n1", "v1");
-            nvc.Add("n2", "v2");
-            nvc.Add("n3", "v3");
+            nvc.Add("n1", subValue);
+            nvc.Add("n2", subValue);
+            nvc.Add("n3", subValue);
             CookieState cookie = new CookieState("name", nvc);
 
             // Act
             string actualValue = cookie.ToString();
 
             // Assert
-            Assert.Equal("name=n1=v1&n2=v2&n3=v3", actualValue);
+            string expectedValue = String.Format("name=n1={0}&n2={0}&n3={0}", encodedSubvalue);
+            Assert.Equal(expectedValue, actualValue);
         }
     }
 }

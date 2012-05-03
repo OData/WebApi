@@ -28,6 +28,7 @@ namespace System.Net.Http.Internal
                         new KeyValuePair<string,string>("n 3", "v 3"),
                         new KeyValuePair<string,string>("n+4", "v+4"),
                         new KeyValuePair<string,string>("n;5", "v;5"),
+                        new KeyValuePair<string,string>("n=5", "v=5"),
                     }
                 };
             }
@@ -81,7 +82,12 @@ namespace System.Net.Http.Internal
                 NameValueCollection hvc9 = HttpValueCollection.Create();
                 hvc9.Add("n1", "&");
                 hvc9.Add("n2", ";");
-                dataSet.Add(hvc9, "n1=%26&n2=%3b");
+                hvc9.Add("n3", "&");
+                hvc9.Add("n4", "+");
+                hvc9.Add("n5", "&");
+                hvc9.Add("n6", "=");
+                hvc9.Add("n7", "&");
+                dataSet.Add(hvc9, "n1=%26&n2=%3b&n3=%26&n4=%2b&n5=%26&n6=%3d&n7=%26");
 
                 NameValueCollection hvc10 = HttpValueCollection.Create();
                 hvc10.Add("n1", "&");

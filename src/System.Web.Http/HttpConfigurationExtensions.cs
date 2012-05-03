@@ -40,7 +40,7 @@ namespace System.Web.Http
             // This ensures that the parameter binding will actually use model binding instead of Formatters.            
             // Without this, the parameter binding system may see the parameter type is complex and choose
             // to use formatters instead, in which case it would ignore the registered model binders. 
-            configuration.ParameterBindingProviders.Insert(0, param => param.BindWithModelBinding(binder));
+            configuration.ParameterBindingRules.Insert(0, param => param.BindWithModelBinding(binder));
         }
     }
 }

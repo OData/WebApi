@@ -14,7 +14,7 @@ namespace System.Web.Http.ModelBinding
         [Fact]
         public void AsCollection()
         {
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
 
             // Knowing that it's a collection means we have known behavior around 
             // the collection methods (like insert, add, clear, etc).
@@ -25,7 +25,7 @@ namespace System.Web.Http.ModelBinding
         public void Lookup_empty_collection_returns_null()
         {
             // The collection is empty,  so lookup will fail.
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
             HttpParameterDescriptor parameter = CreateParameterDescriptor(typeof(object), "none");
 
             // Act
@@ -38,7 +38,7 @@ namespace System.Web.Http.ModelBinding
         [Fact]
         public void Lookup_is_ordered()
         {
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
             HttpParameterBinding mockBinding1 = new EmptyParameterBinding();
             HttpParameterBinding mockBinding2 = new EmptyParameterBinding();
             HttpParameterBinding mockBinding3 = new EmptyParameterBinding();
@@ -64,7 +64,7 @@ namespace System.Web.Http.ModelBinding
         [Fact]
         public void Add_with_type_match()
         {
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
             HttpParameterBinding mockBinding = new EmptyParameterBinding();
 
             pb.Add(typeof(string), param => mockBinding);
@@ -81,7 +81,7 @@ namespace System.Web.Http.ModelBinding
         [Fact]
         public void type_match_user_function_not_invoked_if_type_doesnt_match()
         {
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
             HttpParameterBinding mockBinding = new EmptyParameterBinding();
 
             pb.Add(typeof(string), param => { throw new InvalidOperationException("shouldn't be called"); });
@@ -96,7 +96,7 @@ namespace System.Web.Http.ModelBinding
         [Fact]
         public void Insert_with_type_match()
         {
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
             HttpParameterBinding mockBinding1 = new EmptyParameterBinding();
             HttpParameterBinding mockBinding2 = new EmptyParameterBinding();
             HttpParameterBinding mockBinding3 = new EmptyParameterBinding();

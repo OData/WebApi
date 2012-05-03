@@ -49,7 +49,7 @@ namespace System.Web.Http
 
             _routes = routes;
             Services = new DefaultServices(this);
-            ParameterBindingProviders = DefaultActionValueBinder.GetDefaultParameterBinders();
+            ParameterBindingRules = DefaultActionValueBinder.GetDefaultParameterBinders();
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace System.Web.Http
         /// Top level hook for how parameters should be bound. 
         /// This should be respected by the IActionValueBinder. If a parameter is not claimed by the list, the IActionValueBinder still binds it. 
         /// </summary>
-        public ParameterBindingProviders ParameterBindingProviders { get; internal set; }
+        public ParameterBindingRulesCollection ParameterBindingRules { get; internal set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether error details should be included in error messages.

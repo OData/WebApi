@@ -9,8 +9,7 @@ namespace System.Web.Http.ModelBinding
     /// <summary>
     /// Collection of functions that can produce a parameter binding for a given parameter.   
     /// </summary>
-    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "providers is a better suffix")]
-    public class ParameterBindingProviders : Collection<Func<HttpParameterDescriptor, HttpParameterBinding>>
+    public class ParameterBindingRulesCollection : Collection<Func<HttpParameterDescriptor, HttpParameterBinding>>
     {
         // Helper to wrap the lambda in a type-check
         // This is for convenience overloads that want to register by type, which should be a common case.

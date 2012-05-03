@@ -44,7 +44,7 @@ namespace System.Web.Http.ModelBinding
         public void Check_Config_Override_Use_Formatters()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.ParameterBindingProviders.Add(param => param.BindWithFormatter()); // overrides
+            config.ParameterBindingRules.Add(param => param.BindWithFormatter()); // overrides
 
             DefaultActionValueBinder binder = new DefaultActionValueBinder();
 
@@ -208,7 +208,7 @@ namespace System.Web.Http.ModelBinding
         public void Check_Config_Override_Use_ModelBinding()
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.ParameterBindingProviders.Add(param => param.BindWithModelBinding());
+            config.ParameterBindingRules.Add(param => param.BindWithModelBinding());
             DefaultActionValueBinder binder = new DefaultActionValueBinder();
 
             var binding = binder.GetBinding(GetAction("Action_Complex_Type", config));

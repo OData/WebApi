@@ -34,9 +34,9 @@ namespace System.Web.Http.Tracing.Tracers
             {
                 Formatters = innerDescriptor.Formatters;
             }
-            if (innerDescriptor.ParameterBindingProviders != null)
+            if (innerDescriptor.ParameterBindingRules != null)
             {
-                ParameterBindingProviders = innerDescriptor.ParameterBindingProviders;
+                ParameterBindingRules = innerDescriptor.ParameterBindingRules;
             }
         }
 

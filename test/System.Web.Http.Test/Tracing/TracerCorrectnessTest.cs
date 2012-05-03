@@ -105,7 +105,7 @@ namespace System.Web.Http.Tracing
                             "get_ControllerType", "set_ControllerType",
                             "get_ControllerName", "set_ControllerName",
                             "get_Formatters", "set_Formatters",
-                            "get_ParameterBindingProviders", "set_ParameterBindingProviders",
+                            "get_ParameterBindingRules", "set_ParameterBindingRules",
                             "get_ControllerServices"
                         }
                     },

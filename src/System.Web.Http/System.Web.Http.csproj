@@ -136,7 +136,7 @@
     <Compile Include="ModelBinding\IValueProviderParameterBinding.cs" />
     <Compile Include="ModelBinding\JQueryMVCFormUrlEncodedFormatter.cs" />
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
-    <Compile Include="ModelBinding\ParameterBindingProviders.cs" />
+    <Compile Include="ModelBinding\ParameterBindingRulesCollection.cs" />
     <Compile Include="Query\ParseException.cs" />
     <Compile Include="Query\ServiceQueryPart.cs" />
     <Compile Include="QueryableAttribute.cs" />

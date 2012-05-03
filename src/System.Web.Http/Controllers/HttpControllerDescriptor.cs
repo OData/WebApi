@@ -28,7 +28,7 @@ namespace System.Web.Http.Controllers
         private Type _controllerType;
 
         private MediaTypeFormatterCollection _formatters;
-        private ParameterBindingProviders _parameterBindings;
+        private ParameterBindingRulesCollection _parameterBindings;
 
         private ControllerServices _controllerServices;
 
@@ -137,7 +137,7 @@ namespace System.Web.Http.Controllers
         /// To override these to be separate from the global config, set the collection to a new instance.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "setting the collection is how you override it")]
-        public ParameterBindingProviders ParameterBindingProviders
+        public ParameterBindingRulesCollection ParameterBindingRules
         {
             get { return _parameterBindings; }
             set
@@ -241,9 +241,9 @@ namespace System.Web.Http.Controllers
             {
                 Formatters = Configuration.Formatters;
             }
-            if (ParameterBindingProviders == null)
+            if (ParameterBindingRules == null)
             {
-                ParameterBindingProviders = Configuration.ParameterBindingProviders;
+                ParameterBindingRules = Configuration.ParameterBindingRules;
             }
         }
 

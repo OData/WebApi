@@ -133,7 +133,7 @@ namespace System.Web.Http
             Assert.Same(MyDerived1Controller.SelectorBase, desc.ControllerServices.GetActionSelector());
             Assert.Same(MyDerived1Controller.ActionValueBinderDerived1, desc.ControllerServices.GetActionValueBinder());
             Assert.Same(config.Formatters, desc.Formatters); // didn't override, stays the same
-            Assert.Same(config.ParameterBindingProviders, desc.ParameterBindingProviders); // didn't override, stays the same
+            Assert.Same(config.ParameterBindingRules, desc.ParameterBindingRules); // didn't override, stays the same
         }
 
         class MyConfigBaseAttribute : Attribute, IControllerConfiguration

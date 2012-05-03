@@ -96,7 +96,7 @@ namespace System.Web.Http.ModelBinding
             }
 
             // No attribute, so lookup in global map.
-            ParameterBindingProviders pb = controllerDescriptor.ParameterBindingProviders;
+            ParameterBindingRulesCollection pb = controllerDescriptor.ParameterBindingRules;
             if (pb != null)
             {
                 HttpParameterBinding binding = pb.LookupBinding(parameter);
@@ -121,9 +121,9 @@ namespace System.Web.Http.ModelBinding
         }
 
         // Create an instance and add some default binders
-        internal static ParameterBindingProviders GetDefaultParameterBinders()
+        internal static ParameterBindingRulesCollection GetDefaultParameterBinders()
         {
-            ParameterBindingProviders pb = new ParameterBindingProviders();
+            ParameterBindingRulesCollection pb = new ParameterBindingRulesCollection();
 
             pb.Add(typeof(CancellationToken), parameter => new CancellationTokenParameterBinding(parameter));
             pb.Add(typeof(HttpRequestMessage), parameter => new HttpRequestParameterBinding(parameter));

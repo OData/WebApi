@@ -2,6 +2,7 @@
 
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Configuration;
 using System.Web;
 using System.Web.Security;
 using System.Web.WebPages;
@@ -18,6 +19,8 @@ namespace WebMatrix.WebData
         // discoverable by users. Place new members on more appropriate classes that
         // relate to the public API (for example, a LoginUrl property should go on a
         // membership-related class).
+
+        private const string LoginUrlKey = "loginUrl";
 
         private static bool _startWasCalled;
 
@@ -71,12 +74,25 @@ namespace WebMatrix.WebData
         {
             if (ConfigUtil.SimpleMembershipEnabled)
             {
-                // Allow use of <add key="loginUrl" value="~/MyPath/LogOn" /> as a shortcut to specify
-                // a custom log in url
-                FormsAuthentication.EnableFormsAuthentication(new NameValueCollection()
+                NameValueCollection configurationData = new NameValueCollection();
+
+                string appSettingsLoginUrl = ConfigurationManager.AppSettings[FormsAuthenticationSettings.LoginUrlKey];
+                if (appSettingsLoginUrl != null)
                 {
-                    { "loginUrl", ConfigUtil.LoginUrl }
-                });
+                    // Allow use of <add key="loginUrl" value="~/MyPath/LogOn" /> as a shortcut to specify
+                    // a custom log in url
+                    configurationData[LoginUrlKey] = appSettingsLoginUrl;
+                }
+                else if (!ConfigUtil.ShouldPreserveLoginUrl())
+                {
+                    // Otherwise, use the default login url, but only if PreserveLoginUrl != true
+                    // If PreserveLoginUrl == true, we do not want to override FormsAuthentication's default
+                    // behavior because trying to evaluate FormsAuthentication.LoginUrl at this point in a
+                    // PreAppStart method would cause app-relative URLs to be evaluated incorrectly.
+                    configurationData[LoginUrlKey] = FormsAuthenticationSettings.DefaultLoginUrl;
+                }
+
+                FormsAuthentication.EnableFormsAuthentication(configurationData);
             }
         }
     }

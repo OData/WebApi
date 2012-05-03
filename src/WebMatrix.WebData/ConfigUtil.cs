@@ -2,29 +2,16 @@
 
 using System;
 using System.Configuration;
-using System.Web.Security;
 
 namespace WebMatrix.WebData
 {
     internal static class ConfigUtil
     {
         private static bool _simpleMembershipEnabled = IsSimpleMembershipEnabled();
-        private static string _loginUrl = GetLoginUrl();
 
         public static bool SimpleMembershipEnabled
         {
             get { return _simpleMembershipEnabled; }
-        }
-
-        public static string LoginUrl
-        {
-            get { return _loginUrl; }
-        }
-
-        private static string GetLoginUrl()
-        {
-            return ConfigurationManager.AppSettings[FormsAuthenticationSettings.LoginUrlKey] ??
-                   (ShouldPreserveLoginUrl() ? FormsAuthentication.LoginUrl : FormsAuthenticationSettings.DefaultLoginUrl);
         }
 
         private static bool IsSimpleMembershipEnabled()
@@ -39,7 +26,7 @@ namespace WebMatrix.WebData
             return true;
         }
 
-        private static bool ShouldPreserveLoginUrl()
+        internal static bool ShouldPreserveLoginUrl()
         {
             string settingValue = ConfigurationManager.AppSettings[FormsAuthenticationSettings.PreserveLoginUrlKey];
             bool preserveLoginUrl;

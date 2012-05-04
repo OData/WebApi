@@ -60,6 +60,8 @@ namespace System.Web.Http.WebHost
         private static readonly Lazy<IHostBufferPolicySelector> _bufferPolicySelector = 
             new Lazy<IHostBufferPolicySelector>(() => GlobalConfiguration.Configuration.Services.GetHostBufferPolicySelector());
 
+        private static readonly Func<HttpRequestMessage, X509Certificate2> _retrieveClientCertificate = new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate);
+
         private IHttpRouteData _routeData;
 
         /// <summary>
@@ -364,7 +366,7 @@ namespace System.Web.Http.WebHost
             request.Properties.Add(HttpContextBaseKey, httpContextBase);
 
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
-            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate));
+            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
 
             return request;
         }

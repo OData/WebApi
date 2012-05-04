@@ -31,6 +31,8 @@ namespace System.Web.Http.SelfHost
         private static readonly TimeSpan _acceptTimeout = TimeSpan.MaxValue;
         private static readonly TimeSpan _receiveTimeout = TimeSpan.MaxValue;
 
+        private static readonly Func<HttpRequestMessage, X509Certificate2> _retrieveClientCertificate = new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate);
+
         // Window size gets increased if the ratio of outstanding requests to the window size is greater than IncreaseWindowSizeRatio
         // Window size gets decreased if the ratio of outstanding requests to the window size is less than DecreaseWindowsSizeRatio
         private const double IncreaseWindowSizeRatio = .8;
@@ -180,7 +182,7 @@ namespace System.Web.Http.SelfHost
             SetCurrentPrincipal(request);
 
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
-            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate));
+            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
 
             // Submit request up the stack
             try

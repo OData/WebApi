@@ -250,7 +250,7 @@ namespace System.Web.Http.SelfHost
 
         /// <summary>
         /// Gets or sets X509CertificateValidator so that it can be used to validate the client certificate
-        /// sent over HTTP or HTTPS
+        /// sent over HTTPS
         /// </summary>
         /// <value>
         /// The server certificate.

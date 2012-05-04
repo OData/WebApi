@@ -195,7 +195,8 @@ namespace System.Net.Http
             HttpConfiguration config = new HttpConfiguration();
             HttpControllerDescriptor cd = new HttpControllerDescriptor(config);
 
-            cd.Formatters = new MediaTypeFormatterCollection(new MediaTypeFormatter[] { formatter });
+            cd.Formatters.Clear();
+            cd.Formatters.Add(formatter);
 
             var negotiatorMock = new Mock<IContentNegotiator>();
             negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, cd.Formatters))

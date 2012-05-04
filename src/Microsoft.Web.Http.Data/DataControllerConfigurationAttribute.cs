@@ -22,7 +22,11 @@ namespace Microsoft.Web.Http.Data
 
         public void Initialize(HttpControllerDescriptor controllerDescriptor)
         {
-            controllerDescriptor.Formatters = new MediaTypeFormatterCollection(GetFormatters(controllerDescriptor));
+            controllerDescriptor.Formatters.Clear();
+            foreach (MediaTypeFormatter formatter in GetFormatters(controllerDescriptor))
+            {
+                controllerDescriptor.Formatters.Add(formatter);
+            }
 
             controllerDescriptor.ReplaceService<IHttpActionInvoker>(new DataControllerActionInvoker());
             controllerDescriptor.ReplaceService<IHttpActionSelector>(new DataControllerActionSelector());

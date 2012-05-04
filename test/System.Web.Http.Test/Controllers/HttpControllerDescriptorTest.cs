@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
@@ -175,6 +176,42 @@ namespace System.Web.Http
         }
 
 
+        [Fact]
+        public void Initialize_Append_A_Formatter()
+        {
+            // Verifies that controller inherit the formatter list from the global config, and can mutate it. 
+            HttpConfiguration config = new HttpConfiguration();
+
+            MediaTypeFormatter globalFormatter = new Mock<MediaTypeFormatter>().Object;
+            config.Formatters.Clear();
+            config.Formatters.Add(globalFormatter);
+
+            // Act.
+            HttpControllerDescriptor desc = new HttpControllerDescriptor(config, "MyController", typeof(MyControllerWithCustomFormatter));
+
+            // Assert
+            Assert.Equal(2, desc.Formatters.Count);
+            Assert.Same(globalFormatter, desc.Formatters[0]);
+            Assert.Same(MyControllerWithCustomFormatter.CustomFormatter, desc.Formatters[1]);
+        }
+
+
+        class MyControllerWithCustomFormatterConfigAttribute : Attribute, IControllerConfiguration
+        {
+            public void Initialize(HttpControllerDescriptor desc)
+            {
+                // Appends to existing list. Formatter list has copy-on-write semantics. 
+                Assert.Equal(1, desc.Formatters.Count); // the one we already set 
+                desc.Formatters.Add(MyControllerWithCustomFormatter.CustomFormatter);
+            }
+        }
+
+        [MyControllerWithCustomFormatterConfig]
+        class MyControllerWithCustomFormatter : ApiController
+        {
+            public static MediaTypeFormatter CustomFormatter = new Mock<MediaTypeFormatter>().Object;
+
+        }
 
     }
 }

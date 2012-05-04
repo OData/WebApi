@@ -30,15 +30,9 @@ namespace System.Web.Http.Tracing.Tracers
             _traceWriter = traceWriter;
 
             // capture values we cannot override
-            if (innerDescriptor.Formatters != null)
-            {
-                Formatters = innerDescriptor.Formatters;
-            }
-            if (innerDescriptor.ParameterBindingRules != null)
-            {
-                ParameterBindingRules = innerDescriptor.ParameterBindingRules;
-            }
-        }
+            Formatters = _innerDescriptor.Formatters;
+            ParameterBindingRules = _innerDescriptor.ParameterBindingRules;
+        }        
 
         public override ConcurrentDictionary<object, object> Properties
         {

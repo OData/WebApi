@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -136,16 +137,29 @@ namespace System.Web.Http.Controllers
         /// Get the parameter binding rules for this controller.
         /// To override these to be separate from the global config, set the collection to a new instance.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "setting the collection is how you override it")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "protected setter needed for tracers and unit tests")]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // don't let the debugger evaluate a lazy-init property
         public ParameterBindingRulesCollection ParameterBindingRules
         {
-            get { return _parameterBindings; }
-            set
+            get 
             {
-                if (value == null)
+                if (_parameterBindings == null)
                 {
-                    throw Error.PropertyNull();
+                    if (Configuration == null)
+                    {
+                        return null; // unit tests will call with null configuration
+                    }
+                    // If this is null, then copy it from the global config.
+                    _parameterBindings = new ParameterBindingRulesCollection();
+                    foreach (var rule in Configuration.ParameterBindingRules)
+                    {
+                        _parameterBindings.Add(rule);
+                    }
                 }
+                return _parameterBindings; 
+            }  
+            protected set
+            {
                 _parameterBindings = value;
             }
         }
@@ -154,16 +168,24 @@ namespace System.Web.Http.Controllers
         /// Gets the media type formatters.
         /// To override these to be separate from the global config, set the collection to a new instance.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "setting the collection is how you override it")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "protected setter needed for tracers and unit tests")]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // don't let the debugger evaluate a lazy-init property
         public MediaTypeFormatterCollection Formatters
         {
-            get { return _formatters; }
-            set
+            get 
             {
-                if (value == null)
+                if (Configuration == null)
                 {
-                    throw Error.PropertyNull();
+                    return null; // unit tests will call with null configuration
                 }
+                if (_formatters == null)
+                {
+                    _formatters = new MediaTypeFormatterCollection(Configuration.Formatters);
+                }
+                return _formatters; 
+            }
+            protected set
+            {
                 _formatters = value;
             }
         }
@@ -236,14 +258,15 @@ namespace System.Web.Http.Controllers
                 
         private void FinishInitialize()
         {
-            // If initialization didn't override properties, then set those to point at the global configuration            
-            if (Formatters == null)
+            // If initialization didn't override properties, then set those to point at the global configuration           
+            // Be sure to check against fields rather than properties to avoid triggering a lazy copy of the global config.
+            if (_formatters == null)
             {
-                Formatters = Configuration.Formatters;
+                _formatters = Configuration.Formatters;
             }
-            if (ParameterBindingRules == null)
+            if (_parameterBindings == null)
             {
-                ParameterBindingRules = Configuration.ParameterBindingRules;
+                _parameterBindings = Configuration.ParameterBindingRules;
             }
         }
 

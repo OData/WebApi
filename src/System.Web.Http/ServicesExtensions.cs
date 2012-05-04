@@ -33,8 +33,8 @@ namespace System.Web.Http
     /// <item>is it optional or mandatory?</item>
     /// <item>what are the ordering semantics</item>
     /// </list>
-    /// Services that are per-controller hang off <see cref="ControllerServices"/>, 
-    /// whereas global services hang off <see cref="DefaultServices"/>
+    /// Services that are per-controller extend <see cref="ControllerServices"/>, 
+    /// whereas global services extend off <see cref="DefaultServices"/>
     /// Expected that any <see cref="IEnumerable{T}"/> we return is non-null, although possibly empty.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]

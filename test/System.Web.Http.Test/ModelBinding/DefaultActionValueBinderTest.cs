@@ -9,6 +9,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.ValueProviders;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
+using Moq;
 
 namespace System.Web.Http.ModelBinding
 {
@@ -356,6 +357,24 @@ namespace System.Web.Http.ModelBinding
             AssertIsError(binding, 0);
         }
 
+        [FromBody]
+        class Widget
+        {
+        }
+        private void Action_Closest_Attribute_Wins([FromUri] Widget i) { }
+
+        [Fact]
+        public void Check_Closest_Attribute_Wins()
+        {
+            DefaultActionValueBinder binder = new DefaultActionValueBinder();
+
+            var binding = binder.GetBinding(GetAction("Action_Closest_Attribute_Wins"));
+
+            // Have 2 attributes that conflict with each other. Still get the contract, but it has an error in it. 
+            Assert.Equal(1, binding.ParameterBindings.Length);
+            AssertIsModelBound(binding, 0);
+        }
+
         private void Action_HttpContent_Parameter(HttpContent c) { }
 
         [Fact]
@@ -394,7 +413,44 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal(1, binding.ParameterBindings.Length);
             AssertIsCustomBinder<HttpRequestParameterBinding>(binding, 0);
         }
-        
+
+
+        private void Action_CustomBindingAttribute([CustomBindingAttribute] int x) { }
+
+        [Fact]
+        public void Check_CustomBindingAttribute()
+        {
+            DefaultActionValueBinder binder = new DefaultActionValueBinder();
+
+            var binding = binder.GetBinding(GetAction("Action_CustomBindingAttribute"));
+
+            Assert.Equal(1, binding.ParameterBindings.Length);
+            Assert.Same(CustomBindingAttribute.MockBinding, binding.ParameterBindings[0]);
+        }
+
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
+        private class CustomBindingAttribute : ParameterBindingAttribute
+        {
+            public static HttpParameterBinding MockBinding = new CustomBinding();
+
+            public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
+            {
+                return MockBinding;
+            }
+
+            private class CustomBinding : HttpParameterBinding            
+            {
+                public CustomBinding()
+                    : base(new Mock<HttpParameterDescriptor>().Object)
+                {
+                }
+                public override Threading.Tasks.Task ExecuteBindingAsync(Metadata.ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
 
 
         // Assert that the binding contract says the given parameter comes from the body

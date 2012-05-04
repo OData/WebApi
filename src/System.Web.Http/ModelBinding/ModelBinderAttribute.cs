@@ -20,7 +20,7 @@ namespace System.Web.Http.ModelBinding
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "want constructor argument shortcut")]
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "part of a class hierarchy")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
-    public class ModelBinderAttribute : Attribute
+    public class ModelBinderAttribute : ParameterBindingAttribute
     {
         public ModelBinderAttribute()
             : this(null)
@@ -45,6 +45,16 @@ namespace System.Web.Http.ModelBinding
         public string Name { get; set; }
 
         public bool SuppressPrefixCheck { get; set; }
+
+        public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
+        {
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+
+            IModelBinder binder = GetModelBinder(controllerDescriptor, parameter.ParameterType);
+            IEnumerable<ValueProviderFactory> valueProviderFactories = GetValueProviderFactories(controllerDescriptor);
+
+            return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories);
+        }
 
         // This will get called by a parameter binding, which will cache the results. 
         public ModelBinderProvider GetModelBinderProvider(HttpControllerDescriptor controllerDescriptor)

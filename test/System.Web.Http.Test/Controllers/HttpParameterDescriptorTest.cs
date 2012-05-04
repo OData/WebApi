@@ -20,7 +20,7 @@ namespace System.Web.Http
             Assert.Null(parameterDescriptor.ParameterType);
             Assert.Null(parameterDescriptor.Configuration);
             Assert.Null(parameterDescriptor.Prefix);
-            Assert.Null(parameterDescriptor.ModelBinderAttribute);
+            Assert.Null(parameterDescriptor.ParameterBinderAttribute);
             Assert.Null(parameterDescriptor.ActionDescriptor);
             Assert.Null(parameterDescriptor.DefaultValue);
             Assert.NotNull(parameterDescriptor.Properties);

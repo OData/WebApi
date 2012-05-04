@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.Http.Internal;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.Properties;
 
 namespace System.Web.Http.Controllers
 {
@@ -12,7 +14,7 @@ namespace System.Web.Http.Controllers
     {
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
 
-        private ModelBinderAttribute _modelBinderAttribute;
+        private ParameterBindingAttribute _parameterBindingAttribute;
         private bool _searchedModelBinderAttribute;
         private HttpConfiguration _configuration;
         private HttpActionDescriptor _actionDescriptor;
@@ -79,30 +81,35 @@ namespace System.Web.Http.Controllers
         {
             get
             {
-                ModelBinderAttribute attribute = ModelBinderAttribute;
-                return attribute != null
-                           ? attribute.Name
+                ParameterBindingAttribute attribute = ParameterBinderAttribute;
+                ModelBinderAttribute modelAttribute = attribute as ModelBinderAttribute;
+                return modelAttribute != null
+                           ? modelAttribute.Name
                            : null;
             }
         }
 
-        public virtual ModelBinderAttribute ModelBinderAttribute
+        /// <summary>
+        /// Return a <see cref="ParameterBindingAttribute"/> if present on this parameter's signature or declared type.
+        /// Returns null if no attribute is specified.
+        /// </summary>
+        public virtual ParameterBindingAttribute ParameterBinderAttribute
         {
             get
             {
-                if (_modelBinderAttribute == null)
+                if (_parameterBindingAttribute == null)
                 {
                     if (!_searchedModelBinderAttribute)
                     {
                         _searchedModelBinderAttribute = true;
-                        _modelBinderAttribute = FindModelBinderAttribute();
+                        _parameterBindingAttribute = FindParameterBindingAttribute();
                     }
                 }
 
-                return _modelBinderAttribute;
+                return _parameterBindingAttribute;
             }
 
-            set { _modelBinderAttribute = value; }
+            set { _parameterBindingAttribute = value; }
         }
 
         public virtual Collection<T> GetCustomAttributes<T>() where T : class
@@ -110,11 +117,35 @@ namespace System.Web.Http.Controllers
             return new Collection<T>();
         }
 
-        private ModelBinderAttribute FindModelBinderAttribute()
+        private ParameterBindingAttribute FindParameterBindingAttribute()
         {
             // Can be on parameter itself or on the parameter's type.  Nearest wins.
-            return GetCustomAttributes<ModelBinderAttribute>().SingleOrDefault()
-                ?? ParameterType.GetCustomAttributes<ModelBinderAttribute>(false).SingleOrDefault();
+            return ChooseAttribute(GetCustomAttributes<ParameterBindingAttribute>())
+                ?? ChooseAttribute(ParameterType.GetCustomAttributes<ParameterBindingAttribute>(false));
+        }
+
+        private static ParameterBindingAttribute ChooseAttribute(IList<ParameterBindingAttribute> list)
+        {
+            if (list.Count == 0)
+            {
+                return null;
+            }
+            if (list.Count > 1)
+            {
+                // Multiple attributes specified at the same level
+                return new AmbiguousParameterBindingAttribute();
+            }
+            return list[0];
+        }
+
+        // Helper class to return an error binding if an parameter has an invalid attribute combination. 
+        private sealed class AmbiguousParameterBindingAttribute : ParameterBindingAttribute
+        {
+            public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
+            {
+                string message = Error.Format(SRResources.ParameterBindingConflictingAttributes, parameter.ParameterName);
+                return parameter.BindAsError(message);
+            }
         }
     }
 }

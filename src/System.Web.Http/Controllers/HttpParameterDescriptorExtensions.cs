@@ -10,7 +10,7 @@ namespace System.Web.Http.Controllers
 {    
     /// <summary>
     /// Convenience helpers to easily create specific types of parameter bindings
-    /// These provide a direct programmatic counterpart to the ModelBinder attributes. 
+    /// These provide a direct programmatic counterpart to the <see cref="ParameterBindingAttribute"/> attributes. 
     /// </summary>
     public static class ParameterBindingExtensions
     {        
@@ -25,6 +25,17 @@ namespace System.Web.Http.Controllers
         {
             return new ErrorParameterBinding(parameter, message);
         }
+
+        /// <summary>
+        /// Bind the parameter as if it had the given attribute on the declaration.
+        /// </summary>
+        /// <param name="parameter">parameter to provide binding for.</param>
+        /// <param name="attribute">attribute to describe the binding.</param>
+        /// <returns>a binding</returns>
+        public static HttpParameterBinding BindWithAttribute(this HttpParameterDescriptor parameter, ParameterBindingAttribute attribute)
+        {
+            return attribute.GetBinding(parameter);
+        }
                 
         /// <summary>
         /// Bind the parameter using model binding. Get all other information from the configuration.
@@ -34,23 +45,7 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter)
         {
-            return BindWithModelBinding(parameter, new ModelBinderAttribute());
-        }
-
-        /// <summary>
-        /// Bind the parameter as if it had the given attribute on the declaration.
-        /// </summary>
-        /// <param name="parameter">parameter to provide binding for.</param>
-        /// <param name="attribute">attribute to describe the binding.</param>
-        /// <returns>a binding</returns>
-        public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter, ModelBinderAttribute attribute)
-        {
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-
-            IModelBinder binder = attribute.GetModelBinder(controllerDescriptor, parameter.ParameterType);
-            IEnumerable<ValueProviderFactory> valueProviderFactories = attribute.GetValueProviderFactories(controllerDescriptor);
-
-            return BindWithModelBinding(parameter, binder, valueProviderFactories);
+            return BindWithAttribute(parameter, new ModelBinderAttribute());
         }
 
         /// <summary>

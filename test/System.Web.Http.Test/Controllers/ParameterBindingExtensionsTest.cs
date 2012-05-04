@@ -48,7 +48,7 @@ namespace System.Web.Http.Controllers
             HttpParameterDescriptor param = CreateParameterDescriptor();
 
             ModelBinderAttribute attribute = new ModelBinderAttribute(typeof(CustomModelBinder));
-            ModelBinderParameterBinding binding = (ModelBinderParameterBinding) param.BindWithModelBinding(attribute);
+            ModelBinderParameterBinding binding = (ModelBinderParameterBinding) param.BindWithAttribute(attribute);
 
             Assert.NotNull(binding);
             Assert.IsType<CustomModelBinder>(binding.Binder);

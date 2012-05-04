@@ -14,15 +14,17 @@ namespace System.Web.Http
     /// they come only from the content body of the incoming <see cref="HttpRequestMessage"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
-    public sealed class FromBodyAttribute : Attribute
+    public sealed class FromBodyAttribute : ParameterBindingAttribute
     {
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "impl detail")]
-        public HttpParameterBinding GetBinding(HttpParameterDescriptor parameter, HttpControllerDescriptor controllerDescriptor)
+        public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
         {
             if (parameter == null)
             {
                 throw Error.ArgumentNull("parameter");
             }
+
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
+
             if (controllerDescriptor == null)
             {
                 throw Error.ArgumentNull("controllerDescriptor");

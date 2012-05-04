@@ -70,32 +70,15 @@ namespace System.Web.Http.ModelBinding
         protected virtual HttpParameterBinding GetParameterBinding(HttpParameterDescriptor parameter)
         {
             // Attribute has the highest precedence
-            // Look at Parameter attributes?
-            // [FromBody] - we use Formatter.
-            
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-
-            FromBodyAttribute fromBodyAttr = parameter.GetCustomAttributes<FromBodyAttribute>().FirstOrDefault();
-            ModelBinderAttribute attr = parameter.ModelBinderAttribute;
-
-            if (fromBodyAttr != null)
-            {
-                if (attr != null)
-                {
-                    string message = Error.Format(SRResources.ParameterBindingConflictingAttributes, parameter.ParameterName);
-                    return parameter.BindAsError(message);
-                }
-
-                return fromBodyAttr.GetBinding(parameter, controllerDescriptor); // It's from the body. Uses a formatter. 
-            }
-
             // Presence of a model binder attribute overrides.
+            ParameterBindingAttribute attr = parameter.ParameterBinderAttribute;
             if (attr != null)
             {
-                return parameter.BindWithModelBinding(attr);
+                return attr.GetBinding(parameter);
             }
 
             // No attribute, so lookup in global map.
+            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
             ParameterBindingRulesCollection pb = controllerDescriptor.ParameterBindingRules;
             if (pb != null)
             {
@@ -108,7 +91,6 @@ namespace System.Web.Http.ModelBinding
 
             // Not explicitly specified in global map or attribute.
             // Use a default policy to determine it. These are catch-all policies. 
-
             Type type = parameter.ParameterType;
             if (TypeHelper.IsSimpleUnderlyingType(type) || TypeHelper.HasStringConverter(type))
             {
@@ -116,8 +98,8 @@ namespace System.Web.Http.ModelBinding
             }                        
 
             // Fallback. Must be a complex type. Default is to look in body. Exactly as if this type had a [FromBody] attribute.
-            fromBodyAttr = new FromBodyAttribute();
-            return fromBodyAttr.GetBinding(parameter, controllerDescriptor);
+            attr = new FromBodyAttribute();
+            return attr.GetBinding(parameter);
         }
 
         // Create an instance and add some default binders

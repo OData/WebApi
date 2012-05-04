@@ -27,7 +27,7 @@ namespace System.Web.Http
             Assert.Equal(parameterInfo.Name, parameterDescriptor.ParameterName);
             Assert.Equal(typeof(string), parameterDescriptor.ParameterType);
             Assert.Null(parameterDescriptor.Prefix);
-            Assert.Null(parameterDescriptor.ModelBinderAttribute);
+            Assert.Null(parameterDescriptor.ParameterBinderAttribute);
         }
 
         [Fact]

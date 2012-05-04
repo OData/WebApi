@@ -2,7 +2,6 @@
 
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -283,14 +282,6 @@ namespace System.Web.Http.Query
             VerifyQueryDeserialization(
                 "$filter=indexof(ProductName, 'Abc') eq 5",
                 "Where(Param_0 => (Param_0.ProductName.IndexOf(\"Abc\") == 5))");
-        }
-
-        [Fact]
-        public void StringReplace()
-        {
-            VerifyQueryDeserialization(
-                "$filter=replace(ProductName, 'Abc', 'Def') eq 'FooDef'",
-                "Where(Param_0 => (Param_0.ProductName.Replace(\"Abc\", \"Def\") == \"FooDef\"))");
         }
 
         [Fact]
@@ -701,12 +692,6 @@ namespace System.Web.Http.Query
         }
 
         #endregion
-
-        [Fact(DisplayName = "ODataQueryDeserializer is internal.")]
-        public void TypeIsCorrect()
-        {
-            Assert.Type.HasProperties(typeof(ODataQueryDeserializer), TypeAssert.TypeProperties.IsStatic | TypeAssert.TypeProperties.IsClass);
-        }
 
         /// <summary>
         /// Call the query deserializer and verify the results

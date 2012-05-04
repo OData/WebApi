@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http.Properties;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 
 namespace System.Web.Http.Query
 {
@@ -83,7 +84,8 @@ namespace System.Web.Http.Query
                             (HasAttribute<DataContractAttribute>(parentAttributes) && !HasAttribute<DataMemberAttribute>(attributes)) // isDataContractAndNotDataMember
                             || HasAttribute<XmlIgnoreAttribute>(attributes)
                             || HasAttribute<IgnoreDataMemberAttribute>(attributes)
-                            || HasAttribute<NonSerializedAttribute>(attributes));
+                            || HasAttribute<NonSerializedAttribute>(attributes)
+                            || HasAttribute<JsonIgnoreAttribute>(attributes));
             }
 
             private static bool HasAttribute<T>(object[] attribs)

@@ -18,6 +18,9 @@ namespace System.Web.Http
     public class QueryableAttribute : ActionFilterAttribute
     {
         private readonly QueryValidator _queryValidator;
+        private IStructuredQueryBuilder _structuredQueryBuilder;
+
+        private static readonly IStructuredQueryBuilder _defaultStructuredQueryBuilder = new DefaultStructuredQueryBuilder();
 
         public QueryableAttribute()
         {
@@ -29,6 +32,27 @@ namespace System.Web.Http
         /// indicates no limit. Negative values are not supported and will cause a runtime exception.
         /// </summary>
         public int ResultLimit { get; set; }
+
+        /// <summary>
+        /// The <see cref="IStructuredQueryBuilder"/> to use. Derived classes can use this to have a per-attribute query builder 
+        /// instead of the one on <see cref="HttpConfiguration"/>
+        /// </summary>
+        protected IStructuredQueryBuilder StructuredQueryBuilder
+        {
+            get
+            {
+                return _structuredQueryBuilder;
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+                _structuredQueryBuilder = value;
+            }
+        }
 
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
@@ -65,13 +89,13 @@ namespace System.Web.Http
                     Uri requestUri = request.RequestUri;
                     try
                     {
-                        ServiceQuery serviceQuery = ODataQueryDeserializer.GetServiceQuery(requestUri);
+                        StructuredQuery structuredQuery = GetStructuredQuery(request);
 
-                        if (serviceQuery.QueryParts.Count > 0)
+                        if (structuredQuery != null && structuredQuery.QueryParts.Any())
                         {
                             IQueryable baseQuery = Array.CreateInstance(query.ElementType, 0).AsQueryable(); // T[]
-                            deserializedQuery = ODataQueryDeserializer.Deserialize(baseQuery, serviceQuery.QueryParts);
-                            if (_queryValidator != null)
+                            deserializedQuery = ODataQueryDeserializer.Deserialize(baseQuery, structuredQuery.QueryParts);
+                            if (_queryValidator != null && deserializedQuery != null)
                             {
                                 _queryValidator.Validate(deserializedQuery);
                             }
@@ -113,6 +137,28 @@ namespace System.Web.Http
                 query = query.Take(ResultLimit);
             }
             return query;
+        }
+
+        private StructuredQuery GetStructuredQuery(HttpRequestMessage request)
+        {
+            Contract.Assert(request != null);
+
+            IStructuredQueryBuilder queryBuilder = null;
+            if (StructuredQueryBuilder != null)
+            {
+                queryBuilder = StructuredQueryBuilder;
+            }
+            else
+            {
+                HttpConfiguration configuration = request.GetConfiguration();
+                if (configuration != null)
+                {
+                    queryBuilder = configuration.Services.GetStructuredQueryBuilder();
+                }
+            }
+
+            queryBuilder = queryBuilder ?? _defaultStructuredQueryBuilder;
+            return queryBuilder.GetStructuredQuery(request.RequestUri);
         }
     }
 }

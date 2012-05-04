@@ -130,6 +130,7 @@
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
     <Compile Include="Query\DataModel.cs" />
+    <Compile Include="Query\DefaultStructuredQueryBuilderTests.cs" />
     <Compile Include="Query\ODataQueryDeserializerTests.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />

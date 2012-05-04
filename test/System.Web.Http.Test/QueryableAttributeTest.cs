@@ -8,6 +8,7 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
+using System.Web.Http.Query;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
@@ -139,6 +140,73 @@ namespace System.Web.Http
             // Act & Assert
             Assert.DoesNotThrow(() => _filter.OnActionExecuted(actionContext));
             Assert.Null(actionContext.Response);
+        }
+
+        [Fact]
+        public void OnActionExecuted_Calls_GetStructuredQuery()
+        {
+            // Arrange
+            Mock<IStructuredQueryBuilder> structuredQueryBuilderMock = new Mock<IStructuredQueryBuilder>();
+            structuredQueryBuilderMock
+                .Setup(q => q.GetStructuredQuery(It.IsAny<Uri>()))
+                .Returns((StructuredQuery)null)
+                .Verifiable();
+
+            MockQueryableAttribute filter = new MockQueryableAttribute();
+            filter.StructuredQueryBuilder = structuredQueryBuilderMock.Object;
+
+            var content = new ObjectContent<IQueryable<int>>(Enumerable.Range(1, 1000).AsQueryable(), new JsonMediaTypeFormatter());
+            _request.RequestUri = new Uri(String.Format("http://localhost/?{0}", "$top=100"));
+            _response.Content = content;
+            var actionContext = ContextUtil.GetActionExecutedContext(_request, _response);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => filter.OnActionExecuted(actionContext));
+            structuredQueryBuilderMock.Verify();
+        }
+
+        [Fact]
+        public void OnActionExecuted_Calls_ApplyOnStructuredQueryPart()
+        {
+            // Arrange
+            Mock<IStructuredQueryPart> structuredQueryPartMock = new Mock<IStructuredQueryPart>();
+            structuredQueryPartMock
+                .Setup(q => q.ApplyTo(It.IsAny<IQueryable>()))
+                .Returns((IQueryable)null)
+                .Verifiable();
+
+            Mock<IStructuredQueryBuilder> structuredQueryBuilderMock = new Mock<IStructuredQueryBuilder>();
+            structuredQueryBuilderMock
+                .Setup(q => q.GetStructuredQuery(It.IsAny<Uri>()))
+                .Returns(new StructuredQuery { QueryParts = new IStructuredQueryPart[] { structuredQueryPartMock.Object } })
+                .Verifiable();
+
+            MockQueryableAttribute filter = new MockQueryableAttribute();
+            filter.StructuredQueryBuilder = structuredQueryBuilderMock.Object;
+
+            var content = new ObjectContent<IQueryable<int>>(Enumerable.Range(1, 1000).AsQueryable(), new JsonMediaTypeFormatter());
+            _request.RequestUri = new Uri(String.Format("http://localhost/?{0}", "$top=100"));
+            _response.Content = content;
+            var actionContext = ContextUtil.GetActionExecutedContext(_request, _response);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => filter.OnActionExecuted(actionContext));
+            structuredQueryPartMock.Verify();
+        }
+
+        private class MockQueryableAttribute : QueryableAttribute
+        {
+            public new IStructuredQueryBuilder StructuredQueryBuilder
+            {
+                get
+                {
+                    return base.StructuredQueryBuilder;
+                }
+                set
+                {
+                    base.StructuredQueryBuilder = value;
+                }
+            }
         }
     }
 }

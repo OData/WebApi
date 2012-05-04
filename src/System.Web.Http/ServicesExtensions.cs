@@ -13,6 +13,7 @@ using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
+using System.Web.Http.Query;
 using System.Web.Http.Tracing;
 using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
@@ -141,6 +142,11 @@ namespace System.Web.Http
         public static ITraceWriter GetTraceWriter(this ServicesContainer services)
         {
             return services.GetService<ITraceWriter>();
+        }
+
+        public static IStructuredQueryBuilder GetStructuredQueryBuilder(this ServicesContainer services)
+        {
+            return services.GetService<IStructuredQueryBuilder>();
         }
 
         // Runtime code shouldn't call GetService() directly. Instead, have a wrapper (like the ones above) and call through the wrapper.

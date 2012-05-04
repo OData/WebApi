@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using Moq;
+using Newtonsoft.Json;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -42,6 +43,16 @@ namespace System.Web.Http.Query
             Assert.Throws<InvalidOperationException>(
                 () => _queryValidator.Validate(query.Where((sample) => sample.NonSerializedAttributeField == 0)),
                 "The property or field 'NonSerializedAttributeField' in type 'QueryValidatorSampleClass' is not accessible.");
+        }
+
+        [Fact]
+        public void JsonIgnoreAttributeCausesInvalidOperation()
+        {
+            IQueryable<QueryValidatorSampleClass> query = new QueryValidatorSampleClass[0].AsQueryable();
+
+            Assert.Throws<InvalidOperationException>(
+                () => _queryValidator.Validate(query.Where((sample) => sample.JsonIgnoreAttributeProperty == "hello")),
+                "The property or field 'JsonIgnoreAttributeProperty' in type 'QueryValidatorSampleClass' is not accessible.");
         }
 
         [Fact]
@@ -130,6 +141,9 @@ namespace System.Web.Http.Query
 
             [NonSerialized]
             public int NonSerializedAttributeField = 0;
+
+            [JsonIgnore]
+            public string JsonIgnoreAttributeProperty { get; set; }
 
             public int NormalProperty { get; set; }
 

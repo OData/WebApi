@@ -138,8 +138,11 @@
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
     <Compile Include="ModelBinding\ParameterBindingRulesCollection.cs" />
     <Compile Include="ParameterBindingAttribute.cs" />
+    <Compile Include="Query\DefaultStructuredQueryBuilder.cs" />
+    <Compile Include="Query\IStructuredQueryBuilder.cs" />
+    <Compile Include="Query\IStructuredQueryPart.cs" />
     <Compile Include="Query\ParseException.cs" />
-    <Compile Include="Query\ServiceQueryPart.cs" />
+    <Compile Include="Query\StandardStructuredQueryPart.cs" />
     <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerActivator.cs" />
@@ -357,7 +360,7 @@
     <Compile Include="Query\ODataQueryDeserializer.cs" />
     <Compile Include="Query\QueryComposer.cs" />
     <Compile Include="Query\QueryResolver.cs" />
-    <Compile Include="Query\ServiceQuery.cs" />
+    <Compile Include="Query\StructuredQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />

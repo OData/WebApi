@@ -17,6 +17,7 @@ using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Properties;
+using System.Web.Http.Query;
 using System.Web.Http.Tracing;
 using System.Web.Http.Validation;
 using System.Web.Http.Validation.Providers;
@@ -48,6 +49,7 @@ namespace System.Web.Http.Services
     ///         <item><see cref="IHttpControllerTypeResolver"/></item>
     ///         <item><see cref="ITraceManager"/></item>
     ///         <item><see cref="ITraceWriter"/></item>
+    ///         <item><see cref="IStructuredQueryBuilder"/></item>
     ///         <item><see cref="ModelBinderProvider"/></item>
     ///         <item><see cref="ModelMetadataProvider"/></item>
     ///         <item><see cref="ModelValidatorProvider"/></item>
@@ -123,6 +125,7 @@ namespace System.Web.Http.Services
             SetSingle<IHttpControllerTypeResolver>(new DefaultHttpControllerTypeResolver());
             SetSingle<ITraceManager>(new TraceManager());
             SetSingle<ITraceWriter>(null);
+            SetSingle<IStructuredQueryBuilder>(new DefaultStructuredQueryBuilder());
 
             // This is a priority list. So put the most common binders at the top. 
             SetMultiple<ModelBinderProvider>(new TypeConverterModelBinderProvider(),

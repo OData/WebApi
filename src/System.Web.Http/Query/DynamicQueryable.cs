@@ -893,109 +893,91 @@ namespace System.Web.Http.Query
 
             static MappedMemberInfo MapStringFunction(string functionName)
             {
-                if (functionName == "startswith")
+                switch (functionName)
                 {
-                    return new MappedMemberInfo(typeof(string), "StartsWith", false, true);
-                }
-                else if (functionName == "endswith")
-                {
-                    return new MappedMemberInfo(typeof(string), "EndsWith", false, true);
-                }
-                else if (functionName == "length")
-                {
-                    return new MappedMemberInfo(typeof(string), "Length", false, false);
-                }
-                else if (functionName == "toupper")
-                {
-                    return new MappedMemberInfo(typeof(string), "ToUpper", false, true);
-                }
-                else if (functionName == "tolower")
-                {
-                    return new MappedMemberInfo(typeof(string), "ToLower", false, true);
-                }
-                else if (functionName == "substringof")
-                {
-                    MappedMemberInfo memberInfo = new MappedMemberInfo(typeof(string), "Contains", false, true);
-                    memberInfo.MapParams = (args) =>
-                    {
-                        // reverse the order of arguments for string.Contains
-                        Expression tmp = args[0];
-                        args[0] = args[1];
-                        args[1] = tmp;
-                    };
-                    return memberInfo;
-                }
-                else if (functionName == "indexof")
-                {
-                    return new MappedMemberInfo(typeof(string), "IndexOf", false, true);
-                }
-                else if (functionName == "replace")
-                {
-                    return new MappedMemberInfo(typeof(string), "Replace", false, true);
-                }
-                else if (functionName == "substring")
-                {
-                    return new MappedMemberInfo(typeof(string), "Substring", false, true);
-                }
-                else if (functionName == "trim")
-                {
-                    return new MappedMemberInfo(typeof(string), "Trim", false, true);
-                }
-                else if (functionName == "concat")
-                {
-                    return new MappedMemberInfo(typeof(string), "Concat", true, true);
-                }
+                    case "startswith":
+                        return new MappedMemberInfo(typeof(string), "StartsWith", false, true);
 
-                return null;
+                    case "endswith":
+                        return new MappedMemberInfo(typeof(string), "EndsWith", false, true);
+
+                    case "length":
+                        return new MappedMemberInfo(typeof(string), "Length", false, false);
+
+                    case "toupper":
+                        return new MappedMemberInfo(typeof(string), "ToUpper", false, true);
+
+                    case "tolower":
+                        return new MappedMemberInfo(typeof(string), "ToLower", false, true);
+
+                    case "substringof":
+                        MappedMemberInfo memberInfo = new MappedMemberInfo(typeof(string), "Contains", false, true);
+                        memberInfo.MapParams = (args) =>
+                        {
+                            // reverse the order of arguments for string.Contains
+                            Expression tmp = args[0];
+                            args[0] = args[1];
+                            args[1] = tmp;
+                        };
+                        return memberInfo;
+
+                    case "indexof":
+                        return new MappedMemberInfo(typeof(string), "IndexOf", false, true);
+
+                    case "substring":
+                        return new MappedMemberInfo(typeof(string), "Substring", false, true);
+
+                    case "trim":
+                        return new MappedMemberInfo(typeof(string), "Trim", false, true);
+
+                    case "concat":
+                        return new MappedMemberInfo(typeof(string), "Concat", true, true);
+
+                    default:
+                        return null;
+                }
             }
 
             static MappedMemberInfo MapDateFunction(string functionName)
             {
-                // date functions
-                if (functionName == "day")
+                switch (functionName)
                 {
-                    return new MappedMemberInfo(typeof(DateTime), "Day", false, false);
-                }
-                else if (functionName == "month")
-                {
-                    return new MappedMemberInfo(typeof(DateTime), "Month", false, false);
-                }
-                else if (functionName == "year")
-                {
-                    return new MappedMemberInfo(typeof(DateTime), "Year", false, false);
-                }
-                else if (functionName == "hour")
-                {
-                    return new MappedMemberInfo(typeof(DateTime), "Hour", false, false);
-                }
-                else if (functionName == "minute")
-                {
-                    return new MappedMemberInfo(typeof(DateTime), "Minute", false, false);
-                }
-                else if (functionName == "second")
-                {
-                    return new MappedMemberInfo(typeof(DateTime), "Second", false, false);
-                }
+                    case "day":
+                        return new MappedMemberInfo(typeof(DateTime), "Day", false, false);
 
-                return null;
+                    case "month":
+                        return new MappedMemberInfo(typeof(DateTime), "Month", false, false);
+
+                    case "year":
+                        return new MappedMemberInfo(typeof(DateTime), "Year", false, false);
+
+                    case "hour":
+                        return new MappedMemberInfo(typeof(DateTime), "Hour", false, false);
+
+                    case "minute":
+                        return new MappedMemberInfo(typeof(DateTime), "Minute", false, false);
+
+                    case "second":
+                        return new MappedMemberInfo(typeof(DateTime), "Second", false, false);
+
+                    default:
+                        return null;
+                }
             }
 
             static MappedMemberInfo MapMathFunction(string functionName)
             {
-                if (functionName == "round")
+                switch (functionName)
                 {
-                    return new MappedMemberInfo(typeof(Math), "Round", true, true);
+                    case "round":
+                        return new MappedMemberInfo(typeof(Math), "Round", true, true);
+                    case "floor":
+                        return new MappedMemberInfo(typeof(Math), "Floor", true, true);
+                    case "ceiling":
+                        return new MappedMemberInfo(typeof(Math), "Ceiling", true, true);
+                    default:
+                        return null;
                 }
-                if (functionName == "floor")
-                {
-                    return new MappedMemberInfo(typeof(Math), "Floor", true, true);
-                }
-                if (functionName == "ceiling")
-                {
-                    return new MappedMemberInfo(typeof(Math), "Ceiling", true, true);
-                }
-
-                return null;
             }
 
             Expression ParseTypeConstruction(Type type)

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Properties;
 
 namespace System.Web.Http.Query
 {
@@ -34,56 +32,12 @@ namespace System.Web.Http.Query
                 throw Error.ArgumentNull("uri");
             }
 
-            ServiceQuery serviceQuery = GetServiceQuery(uri);
+            StructuredQuery structuredQuery = GetStructuredQuery(uri);
 
-            return Deserialize(query, serviceQuery.QueryParts, null);
+            return Deserialize(query, structuredQuery.QueryParts);
         }
 
-        /// <summary>
-        /// Deserializes the query operations in the specified Uri and returns an IQueryable
-        /// with a manufactured query root with those operations applied.
-        /// </summary>
-        /// <typeparam name="T">The element type of the query</typeparam>
-        /// <param name="uri">The request Uri containing the query operations.</param>
-        /// <returns>The resulting IQueryable with the deserialized query composed over it.</returns>
-        public static IQueryable<T> Deserialize<T>(Uri uri)
-        {
-            if (uri == null)
-            {
-                throw Error.ArgumentNull("uri");
-            }
-
-            return (IQueryable<T>)Deserialize(typeof(T), uri);
-        }
-
-        /// <summary>
-        /// Deserializes the query operations in the specified Uri and returns an IQueryable
-        /// with a manufactured query root with those operations applied.
-        /// </summary>
-        /// <param name="elementType">The element type of the query</param>
-        /// <param name="uri">The request Uri containing the query operations.</param>
-        /// <returns>The resulting IQueryable with the deserialized query composed over it.</returns>
-        public static IQueryable Deserialize(Type elementType, Uri uri)
-        {
-            if (elementType == null)
-            {
-                throw Error.ArgumentNull("elementType");
-            }
-
-            if (uri == null)
-            {
-                throw Error.ArgumentNull("uri");
-            }
-
-            ServiceQuery serviceQuery = GetServiceQuery(uri);
-
-            Array array = Array.CreateInstance(elementType, 0);
-            IQueryable baseQuery = ((IEnumerable)array).AsQueryable();
-
-            return Deserialize(baseQuery, serviceQuery.QueryParts, null);
-        }
-
-        internal static IQueryable Deserialize(IQueryable query, IEnumerable<ServiceQueryPart> queryParts)
+        internal static IQueryable Deserialize(IQueryable query, IEnumerable<IStructuredQueryPart> queryParts)
         {
             if (query == null)
             {
@@ -95,90 +49,15 @@ namespace System.Web.Http.Query
                 throw Error.ArgumentNull("queryParts");
             }
 
-            return Deserialize(query, queryParts, null);
-        }
-
-        internal static IQueryable Deserialize(IQueryable query, IEnumerable<ServiceQueryPart> queryParts, QueryResolver queryResolver)
-        {
-            if (query == null)
+            foreach (IStructuredQueryPart part in queryParts)
             {
-                throw Error.ArgumentNull("query");
-            }
-
-            if (queryParts == null)
-            {
-                throw Error.ArgumentNull("queryParts");
-            }
-
-            foreach (ServiceQueryPart part in queryParts)
-            {
-                switch (part.QueryOperator)
-                {
-                    case "filter":
-                        try
-                        {
-                            query = DynamicQueryable.Where(query, part.Expression, queryResolver);
-                        }
-                        catch (ParseException e)
-                        {
-                            throw new ParseException(
-                                Error.Format(SRResources.ParseErrorInClause, "$filter", e.Message));
-                        }
-                        break;
-                    case "orderby":
-                        try
-                        {
-                            query = DynamicQueryable.OrderBy(query, part.Expression, queryResolver);
-                        }
-                        catch (ParseException e)
-                        {
-                            throw new ParseException(
-                                Error.Format(SRResources.ParseErrorInClause, "$orderby", e.Message));
-                        }
-                        break;
-                    case "skip":
-                        try
-                        {
-                            int skipCount = Convert.ToInt32(part.Expression, System.Globalization.CultureInfo.InvariantCulture);
-                            if (skipCount < 0)
-                            {
-                                throw new ParseException(
-                                        Error.Format(SRResources.PositiveIntegerExpectedForODataQueryParameter, "$skip", part.Expression));
-                            }
-
-                            query = DynamicQueryable.Skip(query, skipCount);
-                        }
-                        catch (FormatException e)
-                        {
-                            throw new ParseException(
-                                Error.Format(SRResources.ParseErrorInClause, "$skip", e.Message));
-                        }
-                        break;
-                    case "top":
-                        try
-                        {
-                            int topCount = Convert.ToInt32(part.Expression, System.Globalization.CultureInfo.InvariantCulture);
-                            if (topCount < 0)
-                            {
-                                throw new ParseException(
-                                    Error.Format(SRResources.PositiveIntegerExpectedForODataQueryParameter, "$top", part.Expression));
-                            }
-
-                            query = DynamicQueryable.Take(query, topCount);
-                        }
-                        catch (FormatException e)
-                        {
-                            throw new ParseException(
-                                Error.Format(SRResources.ParseErrorInClause, "$top", e.Message));
-                        }
-                        break;
-                }
+                query = part.ApplyTo(query);
             }
 
             return query;
         }
 
-        internal static ServiceQuery GetServiceQuery(Uri uri)
+        internal static StructuredQuery GetStructuredQuery(Uri uri)
         {
             if (uri == null)
             {
@@ -187,7 +66,7 @@ namespace System.Web.Http.Query
 
             NameValueCollection queryPartCollection = uri.ParseQueryString();
 
-            List<ServiceQueryPart> serviceQueryParts = new List<ServiceQueryPart>();
+            List<IStructuredQueryPart> structuredQueryParts = new List<IStructuredQueryPart>();
             foreach (string queryPart in queryPartCollection)
             {
                 if (queryPart == null || !queryPart.StartsWith("$", StringComparison.Ordinal))
@@ -199,14 +78,14 @@ namespace System.Web.Http.Query
                 foreach (string value in queryPartCollection.GetValues(queryPart))
                 {
                     string queryOperator = queryPart.Substring(1);
-                    if (!ServiceQuery.IsSupportedQueryOperator(queryOperator))
+                    if (!StandardStructuredQueryPart.IsSupportedQueryOperator(queryOperator))
                     {
                         // skip any operators we don't support
                         continue;
                     }
 
-                    ServiceQueryPart serviceQueryPart = new ServiceQueryPart(queryOperator, value);
-                    serviceQueryParts.Add(serviceQueryPart);
+                    StandardStructuredQueryPart structuredQueryPart = new StandardStructuredQueryPart(queryOperator, value);
+                    structuredQueryParts.Add(structuredQueryPart);
                 }
             }
 
@@ -214,14 +93,14 @@ namespace System.Web.Http.Query
             // set of query operators, they are already in alphabetical order, so it suffices to
             // order by operator name. In the future if we support other operators, this may need
             // to be reexamined.
-            serviceQueryParts = serviceQueryParts.OrderBy(p => p.QueryOperator).ToList();
+            structuredQueryParts = structuredQueryParts.OrderBy(p => p.QueryOperator).ToList();
 
-            ServiceQuery serviceQuery = new ServiceQuery()
+            StructuredQuery structuredQuery = new StructuredQuery()
             {
-                QueryParts = serviceQueryParts,
+                QueryParts = structuredQueryParts,
             };
 
-            return serviceQuery;
+            return structuredQuery;
         }
     }
 }

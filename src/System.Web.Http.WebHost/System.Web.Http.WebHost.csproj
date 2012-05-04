@@ -80,7 +80,6 @@
     <Compile Include="..\Common\TaskHelpersExtensions.cs">
       <Link>Common\TaskHelpersExtensions.cs</Link>
     </Compile>
-    <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="WebHostBufferPolicySelector.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="HttpControllerTypeCacheSerializer.cs" />

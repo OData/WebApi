@@ -3,14 +3,17 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.IdentityModel.Claims;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Hosting;
 using System.Web.Http.SelfHost.Channels;
 using System.Web.Http.SelfHost.Properties;
 using System.Web.Http.SelfHost.ServiceModel.Channels;
@@ -189,6 +192,9 @@ namespace System.Web.Http.SelfHost
                 }
             }
 
+            // Add the retrieve client certificate delegate to the property bag to enable lookup later on
+            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate));
+
             // Submit request up the stack
             try
             {
@@ -223,6 +229,34 @@ namespace System.Web.Http.SelfHost
                 Message reply = response.ToMessage();
                 BeginReply(new ReplyContext(channelContext, requestContext, reply));
             }
+        }
+
+        private static X509Certificate2 RetrieveClientCertificate(HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            SecurityMessageProperty property = request.GetSecurityMessageProperty();
+            X509Certificate2 result = null;
+
+            if (property != null && property.ServiceSecurityContext != null && property.ServiceSecurityContext.AuthorizationContext != null)
+            {
+                X509CertificateClaimSet certClaimSet = null;
+                foreach (ClaimSet claimSet in property.ServiceSecurityContext.AuthorizationContext.ClaimSets)
+                {
+                    certClaimSet = claimSet as X509CertificateClaimSet;
+
+                    if (certClaimSet != null)
+                    {
+                        result = certClaimSet.X509Certificate;
+                        break;
+                    }
+                }
+            }
+
+            return result;
         }
 
         private static void CancelTask(TaskCompletionSource<bool> taskCompletionSource)

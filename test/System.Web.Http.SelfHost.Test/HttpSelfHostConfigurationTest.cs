@@ -1,21 +1,85 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.IdentityModel.Selectors;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.Web.Http.SelfHost.Channels;
+using Microsoft.TestCommon;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Collections.Generic;
-using Microsoft.TestCommon;
 
 namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostConfigurationTest
     {
+        public static IEnumerable<object[]> BasicClientCredentialTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType>()
+                {
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Basic},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Basic}, 
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> CertificateClientCredentialTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType>()
+                {
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Certificate},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Certificate}, 
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> NonCertificateClientCredentialTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType>()
+                {
+                    {"http://localhost", HttpBindingSecurityMode.None, HttpClientCredentialType.None},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.None},
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Basic},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Basic},
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Digest},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Digest}, 
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Ntlm},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Ntlm},
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Windows},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Windows},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> NonBasicClientCredentialTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType>()
+                {
+                    {"http://localhost", HttpBindingSecurityMode.None, HttpClientCredentialType.None},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.None},
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Certificate},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Certificate},
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Digest},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Digest}, 
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Ntlm},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Ntlm},
+                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Windows},
+                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Windows},
+                };
+            }
+        }
+
         [Fact]
         public void HttpSelfHostConfiguration_NullBaseAddressString_Throws()
         {
@@ -183,12 +247,21 @@ namespace System.Web.Http.SelfHost
         [Fact]
         public void HttpSelfHostConfiguration_ClientCredentialType_RoundTrips()
         {
-            Assert.Reflection.EnumProperty(
-                   new HttpSelfHostConfiguration("http://localhost"),
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost");
+
+            Assert.Reflection.EnumPropertyWithoutIllegalValueCheck<HttpSelfHostConfiguration, HttpClientCredentialType>(
+                   config,
                    c => c.ClientCredentialType,
                    expectedDefaultValue: HttpClientCredentialType.None,
-                   illegalValue: (HttpClientCredentialType)999,
                    roundTripTestValue: HttpClientCredentialType.Windows);
+
+            // now let us check the illegal value differently
+            config.ClientCredentialType = (HttpClientCredentialType)999; 
+            Assert.ThrowsArgumentOutOfRange(
+                () =>
+                {  
+                    new HttpSelfHostServer(config).OpenAsync().Wait(); 
+                }, "value", null, false, 999);
         }
 
         [Fact]
@@ -203,6 +276,20 @@ namespace System.Web.Http.SelfHost
                 expectedDefaultValue: null,
                 allowNull: false,
                 roundTripTestValue: userNamePasswordValidator);
+        }
+
+        [Fact]
+        public void HttpSelfHostConfiguration_X509CertificateValidator_RoundTrips()
+        {
+            // Arrange
+            X509CertificateValidator x509CertificateValidator = new Mock<X509CertificateValidator>().Object;
+
+            Assert.Reflection.Property(
+                new HttpSelfHostConfiguration("http://localhost"),
+                c => c.X509CertificateValidator,
+                expectedDefaultValue: null,
+                allowNull: false,
+                roundTripTestValue: x509CertificateValidator);
         }
 
         [Fact]
@@ -242,6 +329,7 @@ namespace System.Web.Http.SelfHost
         {
             // Arrange
             HttpBinding binding = new HttpBinding();
+            binding.ConfigureTransportBindingElement = ConfigureTransportBindingElement; 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost")
             {
                 MaxBufferSize = 10,
@@ -262,6 +350,12 @@ namespace System.Web.Http.SelfHost
             Assert.Equal(new TimeSpan(1, 0, 0), binding.SendTimeout);
             Assert.Equal(TransferMode.StreamedResponse, binding.TransferMode);
             Assert.Equal(HostNameComparisonMode.WeakWildcard, binding.HostNameComparisonMode);
+            Assert.Equal(Net.AuthenticationSchemes.Ntlm, binding.CreateBindingElements().Find<HttpTransportBindingElement>().AuthenticationScheme);
+        }
+
+        void ConfigureTransportBindingElement(HttpTransportBindingElement element)
+        {
+            element.AuthenticationScheme = Net.AuthenticationSchemes.Ntlm;
         }
 
         [Theory]
@@ -279,14 +373,6 @@ namespace System.Web.Http.SelfHost
             // Act
             BindingParameterCollection parameters = config.ConfigureBinding(binding);
 
-            // Assert
-            if (clientCredentialType == HttpClientCredentialType.Basic)
-            {
-                Assert.NotNull(parameters);
-                ServiceCredentials serviceCredentials = parameters.Find<ServiceCredentials>();
-                Assert.NotNull(serviceCredentials);
-            }
-
             Assert.Equal(clientCredentialType, binding.Security.Transport.ClientCredentialType);
             Assert.Equal(mode, binding.Security.Mode);
         }
@@ -294,19 +380,19 @@ namespace System.Web.Http.SelfHost
 
         [Theory]
         [PropertyData("NonBasicClientCredentialTestData")]
-        public void HttpSelfHostConfiguration_WrongClientCredentialType_WithUsernamePasswordValidators_Throws(string address, HttpBindingSecurityMode mode, HttpClientCredentialType clientCredentialType)
+        public void HttpSelfHostConfiguration_WrongClientCredentialType_WithUsernamePasswordValidator_Throws(string address, HttpBindingSecurityMode mode, HttpClientCredentialType clientCredentialType)
         {
+            // Arrange
+            HttpBinding binding = new HttpBinding();
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(address)
+            {
+                UserNamePasswordValidator = new CustomUsernamePasswordValidator()
+            };
+
+            config.ClientCredentialType = clientCredentialType;
+
             Assert.Throws<InvalidOperationException>(() =>
                 {
-                    // Arrange
-                    HttpBinding binding = new HttpBinding();
-                    HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(address)
-                    {
-                        UserNamePasswordValidator = new CustomUsernamePasswordValidator()
-                    };
-
-                    config.ClientCredentialType = clientCredentialType;
-
                     // Act
                     BindingParameterCollection parameters = config.ConfigureBinding(binding);
                 });
@@ -314,7 +400,7 @@ namespace System.Web.Http.SelfHost
 
         [Theory]
         [PropertyData("BasicClientCredentialTestData")]
-        public void HttpSelfHostConfiguration_CorrectClientCredentialType_WithUsernamePasswordValidators_Works(string address, HttpBindingSecurityMode mode, HttpClientCredentialType clientCredentialType)
+        public void HttpSelfHostConfiguration_CorrectClientCredentialType_WithUsernamePasswordValidator_Works(string address, HttpBindingSecurityMode mode, HttpClientCredentialType clientCredentialType)
         {
             // Arrange
             HttpBinding binding = new HttpBinding();
@@ -328,6 +414,44 @@ namespace System.Web.Http.SelfHost
             // Act
             BindingParameterCollection parameters = config.ConfigureBinding(binding);
         }
+
+        [Theory]
+        [PropertyData("NonCertificateClientCredentialTestData")]
+        public void HttpSelfHostConfiguration_WrongClientCredentialType_WithX509CertificateValidator_Throws(string address, HttpBindingSecurityMode mode, HttpClientCredentialType clientCredentialType)
+        {
+            // Arrange
+            HttpBinding binding = new HttpBinding();
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(address)
+            {
+                X509CertificateValidator = new Mock<X509CertificateValidator>().Object
+            };
+
+            config.ClientCredentialType = clientCredentialType;
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                // Act
+                BindingParameterCollection parameters = config.ConfigureBinding(binding);
+            });
+        }
+
+        [Theory]
+        [PropertyData("CertificateClientCredentialTestData")]
+        public void HttpSelfHostConfiguration_CorrectClientCredentialType_WithX509CertificateValidator_Works(string address, HttpBindingSecurityMode mode, HttpClientCredentialType clientCredentialType)
+        {
+            // Arrange
+            HttpBinding binding = new HttpBinding();
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(address)
+            {
+                X509CertificateValidator = new Mock<X509CertificateValidator>().Object
+            };
+
+            config.ClientCredentialType = clientCredentialType;
+
+            // Act
+            BindingParameterCollection parameters = config.ConfigureBinding(binding);
+        }
+
 
         [Theory]
         [InlineData("http://localhost", HttpBindingSecurityMode.TransportCredentialOnly)]
@@ -379,38 +503,5 @@ namespace System.Web.Http.SelfHost
                 }
             }
         }
-
-        public static IEnumerable<object[]> BasicClientCredentialTestData
-        {
-            get
-            {
-                return new TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType>()
-                {
-                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Basic},
-                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Basic}, 
-                };
-            }
-        }
-
-        public static IEnumerable<object[]> NonBasicClientCredentialTestData
-        {
-            get
-            {
-                return new TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType>()
-                {
-                    {"http://localhost", HttpBindingSecurityMode.None, HttpClientCredentialType.None},
-                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.None},
-                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Certificate},
-                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Certificate},
-                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Digest},
-                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Digest}, 
-                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Ntlm},
-                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Ntlm},
-                    {"http://localhost", HttpBindingSecurityMode.TransportCredentialOnly, HttpClientCredentialType.Windows},
-                    {"https://localhost", HttpBindingSecurityMode.Transport, HttpClientCredentialType.Windows},
-                };
-            }
-        }
-
     }
 }

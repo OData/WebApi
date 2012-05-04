@@ -8,7 +8,7 @@ using System.Web.Http.SelfHost.ServiceModel;
 using System.Web.Http.SelfHost.ServiceModel.Channels;
 
 namespace System.Web.Http.SelfHost.Channels
-{
+{   
     /// <summary>
     /// A binding used with endpoints for web services that use strongly-type HTTP request 
     /// and response messages.
@@ -17,11 +17,12 @@ namespace System.Web.Http.SelfHost.Channels
     {
         internal const string CollectionElementName = "httpBinding";
         internal const TransferMode DefaultTransferMode = System.ServiceModel.TransferMode.Buffered;
-
+        
         private HttpsTransportBindingElement _httpsTransportBindingElement;
         private HttpTransportBindingElement _httpTransportBindingElement;
         private HttpBindingSecurity _security;
         private HttpMessageEncodingBindingElement _httpMessageEncodingBindingElement;
+        private Action<HttpTransportBindingElement> _configureTransportBindingElement;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpBinding"/> class.
@@ -119,6 +120,24 @@ namespace System.Web.Http.SelfHost.Channels
         }
 
         /// <summary>
+        /// Gets or sets the delegate which can configure the <see cref="HttpTransportBindingElement"/> that this binding creates.
+        /// </summary>
+        public Action<HttpTransportBindingElement> ConfigureTransportBindingElement
+        {
+            get { return _configureTransportBindingElement; }
+
+            set 
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _configureTransportBindingElement = value;              
+            }
+        }
+
+        /// <summary>
         /// Gets the URI transport scheme for the channels and listeners that are configured 
         /// with this binding. (Overrides <see cref="System.ServiceModel.Channels.Binding.Scheme">
         /// Binding.Scheme</see>.)
@@ -191,19 +210,31 @@ namespace System.Web.Http.SelfHost.Channels
 
         private TransportBindingElement GetTransport()
         {
+            HttpTransportBindingElement result = null;
+
             if (_security.Mode == HttpBindingSecurityMode.Transport)
             {
                 _security.Transport.ConfigureTransportProtectionAndAuthentication(_httpsTransportBindingElement);
-                return _httpsTransportBindingElement;
+                result = _httpsTransportBindingElement;
             }
             else if (_security.Mode == HttpBindingSecurityMode.TransportCredentialOnly)
             {
                 _security.Transport.ConfigureTransportAuthentication(_httpTransportBindingElement);
-                return _httpTransportBindingElement;
+                result = _httpTransportBindingElement;
+            }
+            else
+            {
+                _security.Transport.DisableTransportAuthentication(_httpTransportBindingElement);
+                result = _httpTransportBindingElement;
             }
 
-            _security.Transport.DisableTransportAuthentication(_httpTransportBindingElement);
-            return _httpTransportBindingElement;
+            // give customer final chance to customize the auth scheme
+            if (_configureTransportBindingElement != null)
+            {
+                _configureTransportBindingElement(result);
+            }
+
+            return result;
         }
 
         private void Initialize()

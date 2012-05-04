@@ -88,10 +88,21 @@ namespace System.Web.Http.SelfHost.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ClientCredentialType must be set to Basic when a UserNamePasswordValidator is specified on the HttpSelfHostConfiguration..
+        ///   Looks up a localized string similar to ClientCredentialType must be set to Certificate when a X509CertificateValidator is specified on the HttpSelfHostConfiguration..
         /// </summary>
-        internal static string CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator {
+        internal static string CannotUseOtherClientCredentialTypeWithX509CertificateValidator {
             get {
+                return ResourceManager.GetString("CannotUseOtherClientCredentialTypeWithX509CertificateValidator", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ClientCredentialType must be set to Certificate when a UserNamePasswordValidator is specified on the HttpSelfHostConfiguration..
+        /// </summary>
+        internal static string CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator
+        {
+            get
+            {
                 return ResourceManager.GetString("CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator", resourceCulture);
             }
         }

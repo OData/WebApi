@@ -126,6 +126,9 @@
   <data name="CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator" xml:space="preserve">
     <value>ClientCredentialType must be set to Basic when a UserNamePasswordValidator is specified on the HttpSelfHostConfiguration.</value>
   </data>
+  <data name="CannotUseOtherClientCredentialTypeWithX509CertificateValidator" xml:space="preserve">
+    <value>ClientCredentialType must be set to Certificate when a X509CertificateValidator is specified on the HttpSelfHostConfiguration.</value>
+  </data>
   <data name="CertificateUnsupportedForHttpTransportCredentialOnly" xml:space="preserve">
     <value>Certificate-based client authentication is not supported in TransportCredentialOnly security mode. Select the Transport security mode.</value>
   </data>

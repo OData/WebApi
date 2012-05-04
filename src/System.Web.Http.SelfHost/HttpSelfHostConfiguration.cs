@@ -239,7 +239,7 @@ namespace System.Web.Http.SelfHost
             {
                 if (value == null)
                 {
-                    throw Error.ArgumentNull("value");
+                    throw Error.PropertyNull();
                 }
 
                 _clientCredentialType = HttpClientCredentialType.Basic;
@@ -249,7 +249,31 @@ namespace System.Web.Http.SelfHost
         }
 
         /// <summary>
-        /// Gets/Sets the ClientCredentialType that server is expecting 
+        /// Gets or sets X509CertificateValidator so that it can be used to validate the client certificate
+        /// sent over HTTP or HTTPS
+        /// </summary>
+        /// <value>
+        /// The server certificate.
+        /// </value>
+        public X509CertificateValidator X509CertificateValidator
+        {
+            get { return _credentials.ClientCertificate.Authentication.CustomCertificateValidator; }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _clientCredentialType = HttpClientCredentialType.Certificate;
+                _credentials.ClientCertificate.Authentication.CustomCertificateValidator = value;
+                _credentials.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.Custom;
+            }
+        }
+
+        /// <summary>
+        /// Gets/Sets the ClientCredentialType that server is expecting. 
         /// </summary>
         /// <value>
         /// The default value is HttpClientCredentialType.None.
@@ -257,12 +281,7 @@ namespace System.Web.Http.SelfHost
         public HttpClientCredentialType ClientCredentialType
         {
             get { return _clientCredentialType; }
-
-            set
-            {
-                HttpClientCredentialTypeHelper.Validate(value);
-                _clientCredentialType = value;
-            }
+            set { _clientCredentialType = value; }
         }
 
         /// <summary>
@@ -290,6 +309,11 @@ namespace System.Web.Http.SelfHost
             if (_clientCredentialType != HttpClientCredentialType.Basic && _credentials.UserNameAuthentication.CustomUserNamePasswordValidator != null)
             {
                 throw Error.InvalidOperation(SRResources.CannotUseOtherClientCredentialTypeWithUserNamePasswordValidator);
+            }
+
+            if (_clientCredentialType != HttpClientCredentialType.Certificate && _credentials.ClientCertificate.Authentication.CustomCertificateValidator != null)
+            {
+                throw Error.InvalidOperation(SRResources.CannotUseOtherClientCredentialTypeWithX509CertificateValidator);
             }
 
             httpBinding.MaxBufferSize = MaxBufferSize;
@@ -323,8 +347,9 @@ namespace System.Web.Http.SelfHost
                 httpBinding.Security.Transport.ClientCredentialType = _clientCredentialType;                
             }
 
-            if (_clientCredentialType == HttpClientCredentialType.Basic)
+            if (UserNamePasswordValidator != null || X509CertificateValidator != null)
             {
+                // those are the only two things that affect service credentials
                 return AddCredentialsToBindingParameters();
             }
             else

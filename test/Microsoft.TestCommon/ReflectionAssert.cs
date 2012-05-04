@@ -121,6 +121,17 @@ namespace Microsoft.TestCommon
             TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
         }
 
+        public void EnumPropertyWithoutIllegalValueCheck<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, TResult roundTripTestValue) where TResult : struct
+        {
+            PropertyInfo property = GetPropertyInfo(propertyGetter);
+            Func<T, TResult> getFunc = (obj) => (TResult)property.GetValue(obj, index: null);
+            Action<T, TResult> setFunc = (obj, value) => property.SetValue(obj, value, index: null);
+
+            Assert.Equal(expectedDefaultValue, getFunc(instance));
+
+            TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
+        }
+
         public void StringProperty<T>(T instance, Expression<Func<T, string>> propertyGetter, string expectedDefaultValue,
                                       bool allowNullAndEmpty = true, string nullAndEmptyReturnValue = "")
         {

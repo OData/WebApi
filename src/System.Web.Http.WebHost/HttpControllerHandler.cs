@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Configuration;
@@ -362,6 +363,9 @@ namespace System.Web.Http.WebHost
             // Add context to enable route lookup later on
             request.Properties.Add(HttpContextBaseKey, httpContextBase);
 
+            // Add the retrieve client certificate delegate to the property bag to enable lookup later on
+            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate));
+
             return request;
         }
 
@@ -379,6 +383,27 @@ namespace System.Web.Http.WebHost
             {
                 _suppressRedirectAction.Value(httpContextBase);
             }
+        }
+
+        private static X509Certificate2 RetrieveClientCertificate(HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            X509Certificate2 result = null;
+
+            HttpContextBase httpContextBase;
+            if (request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            {
+                if (httpContextBase.Request.ClientCertificate.Certificate != null && httpContextBase.Request.ClientCertificate.Certificate.Length > 0)
+                {
+                    result = new X509Certificate2(httpContextBase.Request.ClientCertificate.Certificate);
+                }
+            }
+
+            return result;
         }
     }
 }

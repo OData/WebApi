@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -89,6 +90,39 @@ namespace System.Net.Http
             }
 
             return request.GetProperty<SynchronizationContext>(HttpPropertyKeys.SynchronizationContextKey);
+        }
+
+        /// <summary>
+        /// Gets the current <see cref="T:System.Security.Cryptography.X509Certificates.X509Certificate2"/> or null if not available.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns>The <see cref="T:System.Security.Cryptography.X509Certificates.X509Certificate2"/> or null.</returns>
+        public static X509Certificate2 GetClientCertificate(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            X509Certificate2 result = null;
+
+            if (!request.Properties.TryGetValue(HttpPropertyKeys.ClientCertificateKey, out result))
+            {
+                // now let us get out the delegate and try to invoke it
+                Func<HttpRequestMessage, X509Certificate2> retrieveCertificate;
+
+                if (request.Properties.TryGetValue(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, out retrieveCertificate))
+                {
+                    result = retrieveCertificate(request);
+
+                    if (result != null)
+                    {
+                        request.Properties.Add(HttpPropertyKeys.ClientCertificateKey, result);
+                    }
+                }
+            }
+
+            return result;
         }
 
         /// <summary>

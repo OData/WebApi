@@ -87,7 +87,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice gt 5.00",
-                "Where(Param_0 => (Param_0.UnitPrice > 5.00))");
+                Error.Format("Where(Param_0 => (Param_0.UnitPrice > {0:0.00}))", 5.0));
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice ge 5.00",
-                "Where(Param_0 => (Param_0.UnitPrice >= 5.00))");
+                Error.Format("Where(Param_0 => (Param_0.UnitPrice >= {0:0.00}))", 5.0));
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice lt 5.00",
-                "Where(Param_0 => (Param_0.UnitPrice < 5.00))");
+                Error.Format("Where(Param_0 => (Param_0.UnitPrice < {0:0.00}))", 5.0));
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice le 5.00",
-                "Where(Param_0 => (Param_0.UnitPrice <= 5.00))");
+                Error.Format("Where(Param_0 => (Param_0.UnitPrice <= {0:0.00}))", 5.0));
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice le -5.00",
-                "Where(Param_0 => (Param_0.UnitPrice <= -5.00))");
+                Error.Format("Where(Param_0 => (Param_0.UnitPrice <= {0:0.00}))", -5.0));
         }
 
         [Theory]
@@ -142,7 +142,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice eq 5.00 or UnitPrice eq 10.00",
-                "Where(Param_0 => ((Param_0.UnitPrice == 5.00) OrElse (Param_0.UnitPrice == 10.00)))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice == {0:0.00}) OrElse (Param_0.UnitPrice == {1:0.00})))", 5.0, 10.0));
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice eq 5.00 and UnitPrice eq 10.00",
-                "Where(Param_0 => ((Param_0.UnitPrice == 5.00) AndAlso (Param_0.UnitPrice == 10.00)))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice == {0:0.00}) AndAlso (Param_0.UnitPrice == {1:0.00})))", 5.0, 10.0));
         }
 
         [Fact]
@@ -158,7 +158,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=not (UnitPrice eq 5.00)",
-                "Where(Param_0 => Not((Param_0.UnitPrice == 5.00)))");
+                Error.Format("Where(Param_0 => Not((Param_0.UnitPrice == {0:0.00})))", 5.0));
         }
 
         [Fact]
@@ -184,7 +184,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice sub 1.00 lt 5.00",
-                "Where(Param_0 => ((Param_0.UnitPrice - 1.00) < 5.00))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice - {0:0.00}) < {1:0.00}))", 1.0, 5.0));
         }
 
         [Fact]
@@ -192,7 +192,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice add 1.00 lt 5.00",
-                "Where(Param_0 => ((Param_0.UnitPrice + 1.00) < 5.00))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice + {0:0.00}) < {1:0.00}))", 1.0, 5.0));
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice mul 1.00 lt 5.00",
-                "Where(Param_0 => ((Param_0.UnitPrice * 1.00) < 5.00))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice * {0:0.00}) < {1:0.00}))", 1.0, 5.0));
         }
 
         [Fact]
@@ -208,7 +208,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice div 1.00 lt 5.00",
-                "Where(Param_0 => ((Param_0.UnitPrice / 1.00) < 5.00))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice / {0:0.00}) < {1:0.00}))", 1.0, 5.0));
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=UnitPrice mod 1.00 lt 5.00",
-                "Where(Param_0 => ((Param_0.UnitPrice % 1.00) < 5.00))");
+                Error.Format("Where(Param_0 => ((Param_0.UnitPrice % {0:0.00}) < {1:0.00}))", 1.0, 5.0));
         }
         #endregion
 
@@ -225,7 +225,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=((ProductName ne 'Doritos') or (UnitPrice lt 5.00))",
-                "Where(Param_0 => ((Param_0.ProductName != \"Doritos\") OrElse (Param_0.UnitPrice < 5.00)))");
+                Error.Format("Where(Param_0 => ((Param_0.ProductName != \"Doritos\") OrElse (Param_0.UnitPrice < {0:0.00})))", 5.0));
         }
 
         [Fact]
@@ -384,7 +384,7 @@ namespace System.Web.Http.Query
         {
             VerifyQueryDeserialization(
                 "$filter=round(UnitPrice) gt 5.00",
-                "Where(Param_0 => (Round(Param_0.UnitPrice) > 5.00))");
+                Error.Format("Where(Param_0 => (Round(Param_0.UnitPrice) > {0:0.00}))", 5.0));
         }
 
         [Fact]
@@ -531,12 +531,12 @@ namespace System.Web.Http.Query
             // Float F
             VerifyQueryDeserialization<DataTypes>(
                 "$filter=FloatProp lt 4321.56F and FloatProp gt 1234.56f",
-                "Where(Param_0 => ((Param_0.FloatProp < 4321.56) AndAlso (Param_0.FloatProp > 1234.56)))");
+                Error.Format("Where(Param_0 => ((Param_0.FloatProp < {0:0.00}) AndAlso (Param_0.FloatProp > {1:0.00})))", 4321.56, 1234.56));
 
             // Decimal M
             VerifyQueryDeserialization<DataTypes>(
                 "$filter=DecimalProp lt 4321.56M and DecimalProp gt 1234.56m",
-                "Where(Param_0 => ((Param_0.DecimalProp < 4321.56) AndAlso (Param_0.DecimalProp > 1234.56)))");
+                Error.Format("Where(Param_0 => ((Param_0.DecimalProp < {0:0.00}) AndAlso (Param_0.DecimalProp > {1:0.00})))", 4321.56, 1234.56));
         }
 
         [Theory]

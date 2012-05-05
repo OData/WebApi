@@ -58,7 +58,8 @@ namespace System.Web.WebPages.Test
         {
             Mock<HttpContextBase> mockContext = new Mock<HttpContextBase>();
             mockContext.Setup(context => context.Items).Returns(new Hashtable());
-            mockContext.Object.Items[typeof(WebPageMatch)] = new WebPageMatch("~/a.cshtml", "one/2/3.0/4.0005");
+            string pathInfo = String.Format("{0}/{1}/{2}/{3}", "one", 2, 3.0, 4.0005);
+            mockContext.Object.Items[typeof(WebPageMatch)] = new WebPageMatch("~/a.cshtml", pathInfo);
             WebPage page = new Mock<WebPage>() { CallBase = true }.Object;
             page.Context = mockContext.Object;
 

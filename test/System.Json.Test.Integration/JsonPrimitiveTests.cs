@@ -587,18 +587,18 @@ namespace System.Json
             const string ISO8601Format = "yyyy-MM-ddTHH:mm:sszzz";
             dateTimeOffset = DateTimeOffset.ParseExact(dateTimeOffset.ToString(ISO8601Format, CultureInfo.InvariantCulture), ISO8601Format, CultureInfo.InvariantCulture);
             DateTime dateTime = dateTimeOffset.UtcDateTime;
-            TestReadAsFromStringRoundtrip<DateTime>(dateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \U\T\C"));
-            TestReadAsFromStringRoundtrip<DateTime>(dateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \G\M\T"));
-            TestReadAsFromStringRoundtrip<DateTime>(dateTime.ToLocalTime(), dateTimeOffset.ToString(@"ddd, d MMM yyyy HH:mm:ss zzz"));
+            TestReadAsFromStringRoundtrip<DateTime>(dateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \U\T\C", CultureInfo.InvariantCulture));
+            TestReadAsFromStringRoundtrip<DateTime>(dateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \G\M\T", CultureInfo.InvariantCulture));
+            TestReadAsFromStringRoundtrip<DateTime>(dateTime.ToLocalTime(), dateTimeOffset.ToString(@"ddd, d MMM yyyy HH:mm:ss zzz", CultureInfo.InvariantCulture));
             TestReadAsFromStringRoundtrip<DateTime>(dateTime, dateTime.ToString("yyyy-MM-ddTHH:mm:ssK"));
-            TestReadAsFromStringRoundtrip<DateTime>(dateTime.ToLocalTime(), dateTimeOffset.ToString(@"ddd, d MMM yyyy HH:mm:ss zzz"));
+            TestReadAsFromStringRoundtrip<DateTime>(dateTime.ToLocalTime(), dateTimeOffset.ToString(@"ddd, d MMM yyyy HH:mm:ss zzz", CultureInfo.InvariantCulture));
             TestReadAsFromStringRoundtrip<DateTime>(dateTime.ToLocalTime(), dateTimeOffset.ToString("yyyy-MM-ddTHH:mm:sszzz"));
-            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset.UtcDateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \U\T\C"));
-            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset.UtcDateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \G\M\T"));
-            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss zzz"));
+            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset.UtcDateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \U\T\C", CultureInfo.InvariantCulture));
+            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset.UtcDateTime, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss \G\M\T", CultureInfo.InvariantCulture));
+            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset, dateTimeOffset.ToUniversalTime().ToString(@"ddd, d MMM yyyy HH:mm:ss zzz", CultureInfo.InvariantCulture));
             TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset, dateTime.ToString("yyyy-MM-ddTHH:mm:ssK"));
             TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset, dateTimeOffset.ToString("yyyy-MM-ddTHH:mm:sszzz"));
-            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset, dateTimeOffset.ToString(@"ddd, d MMM yyyy HH:mm:ss zzz"));
+            TestReadAsFromStringRoundtrip<DateTimeOffset>(dateTimeOffset, dateTimeOffset.ToString(@"ddd, d MMM yyyy HH:mm:ss zzz", CultureInfo.InvariantCulture));
 
             // Create ASPNetFormat DateTime
             long unixEpochMilliseconds = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / 10000;

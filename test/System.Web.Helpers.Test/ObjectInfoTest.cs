@@ -225,7 +225,7 @@ namespace System.Web.Helpers.Test
 
             // Assert            
             Assert.True(visitor.Members.Contains("string Name = David"));
-            Assert.True(visitor.Members.Contains("double Age = 23.3"));
+            Assert.True(visitor.Members.Contains(String.Format("double Age = {0}", 23.3)));
             Assert.True(visitor.Members.Contains("PersonNode Next = Visited"));
         }
 

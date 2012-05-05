@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Data.Objects.DataClasses;
+using System.Globalization;
 using System.IO;
 using System.Web.UI.WebControls;
 using Microsoft.Web.UnitTestUtil;
@@ -62,7 +63,8 @@ namespace System.Web.Mvc.Html.Test
 
         private static string CollectionSpyCallback(HtmlHelper html, ModelMetadata metadata, string htmlFieldName, string templateName, DataBoundControlMode mode, object additionalViewData)
         {
-            return String.Format(Environment.NewLine + "Model = {0}, ModelType = {1}, PropertyName = {2}, HtmlFieldName = {3}, TemplateName = {4}, Mode = {5}, TemplateInfo.HtmlFieldPrefix = {6}, AdditionalViewData = {7}",
+            return String.Format(CultureInfo.InvariantCulture,
+                                 Environment.NewLine + "Model = {0}, ModelType = {1}, PropertyName = {2}, HtmlFieldName = {3}, TemplateName = {4}, Mode = {5}, TemplateInfo.HtmlFieldPrefix = {6}, AdditionalViewData = {7}",
                                  metadata.Model ?? "(null)",
                                  metadata.ModelType == null ? "(null)" : metadata.ModelType.FullName,
                                  metadata.PropertyName ?? "(null)",
@@ -185,7 +187,7 @@ Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), Html
         public void CollectionTemplateUsesRealObjectTypes()
         {
             // Arrange
-            HtmlHelper html = MakeHtmlHelper<List<Object>>(new List<Object> { 1, 2.3, "Hello World" });
+            HtmlHelper html = MakeHtmlHelper<List<object>>(new List<object> { 1, 2.3, "Hello World" });
             html.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = null;
 
             // Act
@@ -223,7 +225,10 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void DecimalTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""12.35"" />",
+                String.Format(
+                    CultureInfo.CurrentCulture,
+                    @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""{0:0.00}"" />",
+                    12.35M),
                 DefaultEditorTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M)));
 
             Assert.Equal(

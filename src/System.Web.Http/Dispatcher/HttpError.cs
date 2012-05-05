@@ -20,6 +20,7 @@ namespace System.Web.Http.Dispatcher
     public sealed class HttpError : Dictionary<string, object>, IXmlSerializable
     {
         private const string MessageKey = "Message";
+        private const string ExceptionMessageKey = "ExceptionMessage";
         private const string ExceptionTypeKey = "ExceptionType";
         private const string StackTraceKey = "StackTrace";
         private const string InnerExceptionKey = "InnerException";
@@ -56,8 +57,9 @@ namespace System.Web.Http.Dispatcher
                 throw Error.ArgumentNull("exception");
             }
 
-            Message = exception.Message;
+            Message = SRResources.ExceptionOccurred;
 
+            Add(ExceptionMessageKey, exception.Message);
             Add(ExceptionTypeKey, exception.GetType().FullName);
             Add(StackTraceKey, exception.StackTrace);
             if (exception.InnerException != null)
@@ -101,8 +103,28 @@ namespace System.Web.Http.Dispatcher
         /// </summary>
         public string Message
         {
-            get { return this[MessageKey] as string; }
+            get
+            {
+                if (ContainsKey(MessageKey))
+                {
+                    return this[MessageKey] as string;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             set { this[MessageKey] = value; }
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether or not this instance contains error information beyond the error message
+        /// </summary>
+        /// <returns><c>true</c> if this instance contains information that isn't in the error message, <c>false</c> otherwise</returns>
+        public bool ContainsErrorDetail()
+        {
+            return Keys.Any(key => key != MessageKey);
         }
 
         XmlSchema IXmlSerializable.GetSchema()

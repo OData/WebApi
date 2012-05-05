@@ -39,7 +39,8 @@ namespace System.Web.Http.Dispatcher
         {
             HttpError error = new HttpError(new ArgumentException("error", new Exception()));
 
-            Assert.Contains(new KeyValuePair<string, object>("Message", "error"), error);
+            Assert.Contains(new KeyValuePair<string, object>("Message", "An exception has occurred."), error);
+            Assert.Contains(new KeyValuePair<string, object>("ExceptionMessage", "error"), error);
             Assert.Contains(new KeyValuePair<string, object>("ExceptionType", "System.ArgumentException"), error);
             Assert.True(error.ContainsKey("StackTrace"));
             Assert.True(error.ContainsKey("InnerException"));

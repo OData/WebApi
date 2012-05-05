@@ -250,7 +250,7 @@ namespace System.Web.Http
                         SRResources.ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods,
                         controllerType.GetMethod("GenericAction"),
                         controllerType.FullName),
-                    exception.Message);
+                    exception["ExceptionMessage"]);
             }
         }
     }

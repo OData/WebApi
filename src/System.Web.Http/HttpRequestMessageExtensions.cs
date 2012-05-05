@@ -224,13 +224,34 @@ namespace System.Net.Http
             }
 
             HttpConfiguration configuration = request.GetConfiguration();
-            if (configuration == null || !configuration.ShouldIncludeErrorDetail(request))
+
+            // CreateErrorResponse should never fail, even if there is no configuration associated with the request
+            // In that case, use the default HttpConfiguration to con-neg the response media type
+            if (configuration == null)
             {
-                return request.CreateResponse(statusCode);
+                using (HttpConfiguration defaultConfig = new HttpConfiguration())
+                {
+                    return request.CreateErrorResponse(statusCode, error, defaultConfig);
+                }
             }
             else
             {
-                return request.CreateResponse<HttpError>(statusCode, error);
+                return request.CreateErrorResponse(statusCode, error, configuration);
+            }
+        }
+
+        private static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, HttpError error, HttpConfiguration configuration)
+        {
+            if (error.ContainsErrorDetail() && !configuration.ShouldIncludeErrorDetail(request))
+            {
+                // return only the error message and no additional details
+                // appends suggestion to enable error details on the configuration
+                string errorMessage = error.Message == null ? SRResources.EnableErrorDetailHint : Error.Format(SRResources.CombineErrorMessages, error.Message, SRResources.EnableErrorDetailHint);
+                return request.CreateResponse<HttpError>(statusCode, new HttpError(errorMessage), configuration);
+            }
+            else
+            {
+                return request.CreateResponse<HttpError>(statusCode, error, configuration);
             }
         }
 

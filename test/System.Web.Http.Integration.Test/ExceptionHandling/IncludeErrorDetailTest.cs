@@ -72,7 +72,10 @@ namespace System.Web.Http
         private void AssertResponseDoesNotIncludeErrorDetail(HttpResponseMessage response)
         {
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-            Assert.Null(response.Content);
+            JObject json = JToken.Parse(response.Content.ReadAsStringAsync().Result) as JObject;
+            Assert.Equal(1, json.Count);
+            string errorMessage = ((JValue)json["Message"]).ToString();
+            Assert.Equal("An exception has occurred. For more information about the error, consider setting IncludeErrorDetailPolicy on your server's HttpConfiguration to Always.", errorMessage);
         }
     }
 }

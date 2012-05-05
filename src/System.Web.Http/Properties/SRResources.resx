@@ -482,4 +482,14 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ValidModelState" xml:space="preserve">
     <value>The model state is valid.</value>
   </data>
+  <data name="CombineErrorMessages" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>Defines a way to combine two error messages</comment>
+  </data>
+  <data name="EnableErrorDetailHint" xml:space="preserve">
+    <value>For more information about the error, consider setting IncludeErrorDetailPolicy on your server's HttpConfiguration to Always.</value>
+  </data>
+  <data name="ExceptionOccurred" xml:space="preserve">
+    <value>An exception has occurred.</value>
+  </data>
 </root>

@@ -116,8 +116,8 @@ namespace System.Web.Http.Dispatcher
 
             Assert.Equal(HttpStatusCode.InternalServerError, resultTask.Result.StatusCode);
             var objectContent = Assert.IsType<ObjectContent<HttpError>>(resultTask.Result.Content);
-            var surrogate = Assert.IsType<HttpError>(objectContent.Value);
-            Assert.Equal("Hello from the throwing controller", surrogate.Message);
+            var error = Assert.IsType<HttpError>(objectContent.Value);
+            Assert.Equal("Hello from the throwing controller", error["ExceptionMessage"]);
         }
 
         private static HttpRequestMessage CreateRequest(HttpConfiguration config, string requestUri)

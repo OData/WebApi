@@ -178,6 +178,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} {1}.
+        /// </summary>
+        internal static string CombineErrorMessages {
+            get {
+                return ResourceManager.GetString("CombineErrorMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property {0}.{1} could not be found..
         /// </summary>
         internal static string Common_PropertyNotFound {
@@ -284,6 +293,24 @@ namespace System.Web.Http.Properties {
         internal static string DuplicateIdentifier {
             get {
                 return ResourceManager.GetString("DuplicateIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For more information about the error, consider setting IncludeErrorDetailPolicy on your server&apos;s HttpConfiguration to Always..
+        /// </summary>
+        internal static string EnableErrorDetailHint {
+            get {
+                return ResourceManager.GetString("EnableErrorDetailHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An exception has occurred..
+        /// </summary>
+        internal static string ExceptionOccurred {
+            get {
+                return ResourceManager.GetString("ExceptionOccurred", resourceCulture);
             }
         }
         

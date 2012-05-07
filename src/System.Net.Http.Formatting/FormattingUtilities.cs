@@ -61,7 +61,7 @@ namespace System.Net.Http
         /// <summary>
         /// HTTP X-Requested-With header field value
         /// </summary>
-        public const string HttpRequestedWithHeaderValue = @"xmlhttprequest";
+        public const string HttpRequestedWithHeaderValue = @"XMLHttpRequest";
 
         /// <summary>
         /// HTTP Host header field name

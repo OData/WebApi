@@ -7,14 +7,15 @@ using System.Web.Http;
 namespace System.Net.Http.Formatting
 {
     /// <summary>
-    /// A RequestHeaderMapping for the x-requested-with http header set by ajax XHR's
+    /// A <see cref="RequestHeaderMapping"/> that maps the X-Requested-With http header field set by AJAX XmlHttpRequest (XHR)
+    /// to the media type <c>application/json</c> if no explicit Accept header fields are present in the request.
     /// </summary>
-    internal sealed class XHRRequestHeaderMapping : RequestHeaderMapping
+    public class XmlHttpRequestHeaderMapping : RequestHeaderMapping
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="XHRRequestHeaderMapping" /> class
+        /// Initializes a new instance of <see cref="XmlHttpRequestHeaderMapping" /> class
         /// </summary>
-        public XHRRequestHeaderMapping() :
+        public XmlHttpRequestHeaderMapping() :
             base(FormattingUtilities.HttpRequestedWithHeader, FormattingUtilities.HttpRequestedWithHeaderValue, StringComparison.OrdinalIgnoreCase, isValueSubstring: true, mediaType: MediaTypeConstants.ApplicationJsonMediaType)
         {
         }

@@ -141,7 +141,7 @@
     <Compile Include="Formatting\ResponseFormatterSelectionResult.cs" />
     <Compile Include="Formatting\ResponseMediaTypeMatch.cs" />
     <Compile Include="Formatting\StringComparisonHelper.cs" />
-    <Compile Include="Formatting\XHRRequestHeaderMapping.cs" />
+    <Compile Include="Formatting\XmlHttpRequestHeaderMapping.cs" />
     <Compile Include="Formatting\XmlMediaTypeFormatter.cs" />
     <Compile Include="Formatting\Parsers\FormUrlEncodedParser.cs" />
     <Compile Include="HttpContentExtensions.cs" />

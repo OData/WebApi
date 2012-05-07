@@ -71,6 +71,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Formatting\XmlHttpRequestHeaderMappingTest.cs" />
     <Compile Include="HttpContentFormDataExtensionsTest.cs" />
     <Compile Include="PushStreamContentTest.cs" />
     <Compile Include="HttpClientFactoryTest.cs" />

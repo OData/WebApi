@@ -17,7 +17,7 @@ namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostServerTest : IDisposable
     {
-        private string machineName = Environment.MachineName;
+        private string machineName = "localhost";
         private HttpSelfHostServer _bufferServer;
         private HttpSelfHostServer _streamServer;
 
@@ -235,7 +235,8 @@ namespace System.Web.Http.SelfHost
 
         internal class ThrowsBeforeTaskObjectContent : ObjectContent
         {
-            public ThrowsBeforeTaskObjectContent() : base(typeof(string), "testContent", new JsonMediaTypeFormatter())
+            public ThrowsBeforeTaskObjectContent()
+                : base(typeof(string), "testContent", new JsonMediaTypeFormatter())
             {
             }
 
@@ -283,7 +284,8 @@ namespace System.Web.Http.SelfHost
 
         internal class ThrowBeforeWriteStream : StreamContent
         {
-            public ThrowBeforeWriteStream() : base(new MemoryStream(Encoding.UTF8.GetBytes("ThrowBeforeWriteStream")))
+            public ThrowBeforeWriteStream()
+                : base(new MemoryStream(Encoding.UTF8.GetBytes("ThrowBeforeWriteStream")))
             {
             }
 
@@ -295,7 +297,8 @@ namespace System.Web.Http.SelfHost
 
         internal class ThrowAfterWriteStream : StreamContent
         {
-            public ThrowAfterWriteStream() : base(new MemoryStream(Encoding.UTF8.GetBytes("ThrowAfterWriteStream")))
+            public ThrowAfterWriteStream()
+                : base(new MemoryStream(Encoding.UTF8.GetBytes("ThrowAfterWriteStream")))
             {
             }
 

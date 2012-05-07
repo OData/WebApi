@@ -56,7 +56,7 @@ namespace System.Web.Http.ModelBinding
         {
             httpClient = new HttpClient();
 
-            baseAddress = String.Format("http://{0}", Environment.MachineName);
+            baseAddress = "http://localhost/";
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "HttpContentBinding", action = "HandleMessage" });

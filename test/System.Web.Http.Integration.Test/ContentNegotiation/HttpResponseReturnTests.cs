@@ -76,15 +76,15 @@ namespace System.Web.Http.ContentNegotiation
             HttpResponseMessage response = httpClient.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
             IEnumerable<string> list;
-            Assert.True(response.Headers.TryGetValues("Set-Cookie",  out list));
-            Assert.Equal("cookie1,cookie2", ((string[]) list)[0]);
+            Assert.True(response.Headers.TryGetValues("Set-Cookie", out list));
+            Assert.Equal("cookie1,cookie2", ((string[])list)[0]);
         }
 
         public void SetupHost()
         {
             httpClient = new HttpClient();
 
-            baseAddress = String.Format("http://{0}/", Environment.MachineName);
+            baseAddress = "http://localhost/";
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "HttpResponseReturn" });
@@ -138,7 +138,7 @@ namespace System.Web.Http.ContentNegotiation
             HttpResponseMessage resp = new HttpResponseMessage(HttpStatusCode.OK);
             resp.Headers.Add("Set-Cookie", "cookie1");
             resp.Headers.Add("Set-Cookie", "cookie2");
-            return resp; 
+            return resp;
         }
     }
 }

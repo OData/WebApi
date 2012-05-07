@@ -116,7 +116,7 @@ namespace System.Web.Http.ContentNegotiation
         private void SetupHost()
         {
             httpClient = new HttpClient();
-            baseAddress = String.Format("http://{0}", Environment.MachineName);
+            baseAddress = "http://localhost/";
             config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "CustomFormatterTests", action = "EchoOrder" });
             config.Formatters.Add(new PlainTextFormatterWithVersionInfo());

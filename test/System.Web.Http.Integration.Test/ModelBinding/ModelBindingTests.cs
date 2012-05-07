@@ -29,7 +29,7 @@ namespace System.Web.Http.ModelBinding
         {
             httpClient = new HttpClient();
 
-            baseAddress = String.Format("http://{0}/", Environment.MachineName);
+            baseAddress = "http://localhost/";
 
             configuration = new HttpSelfHostConfiguration(baseAddress);
             configuration.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "ModelBinding" });

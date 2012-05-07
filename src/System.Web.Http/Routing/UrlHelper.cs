@@ -74,7 +74,7 @@ namespace System.Web.Http.Routing
 
         private static string GetHttpRouteHelper(HttpControllerContext controllerContext, string routeName, object routeValues)
         {
-            IDictionary<string, object> routeValuesDictionary = HttpRouteCollection.GetTypeProperties(routeValues);
+            HttpRouteValueDictionary routeValuesDictionary = new HttpRouteValueDictionary(routeValues);
             return GetHttpRouteHelper(controllerContext, routeName, routeValuesDictionary);
         }
 

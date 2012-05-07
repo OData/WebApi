@@ -132,6 +132,7 @@
     <Compile Include="Query\DataModel.cs" />
     <Compile Include="Query\DefaultStructuredQueryBuilderTests.cs" />
     <Compile Include="Query\ODataQueryDeserializerTests.cs" />
+    <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
     <Compile Include="Routing\UriPathExtensionMappingTests.cs" />

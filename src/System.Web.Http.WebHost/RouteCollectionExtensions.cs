@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
+using System.Web.Http.Routing;
 using System.Web.Http.WebHost.Routing;
 using System.Web.Routing;
 
@@ -70,28 +70,12 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("routes");
             }
 
-            RouteValueDictionary defaultsDictionary = CreateRouteValueDictionary(defaults);
-            RouteValueDictionary constraintsDictionary = CreateRouteValueDictionary(constraints);
+            HttpRouteValueDictionary defaultsDictionary = new HttpRouteValueDictionary(defaults);
+            HttpRouteValueDictionary constraintsDictionary = new HttpRouteValueDictionary(constraints);
             HostedHttpRoute httpRoute = (HostedHttpRoute)GlobalConfiguration.Configuration.Routes.CreateRoute(routeTemplate, defaultsDictionary, constraintsDictionary, dataTokens: null, handler: handler);
             Route route = httpRoute.OriginalRoute;
             routes.Add(name, route);
             return route;
-        }
-
-        private static RouteValueDictionary CreateRouteValueDictionary(object values)
-        {
-            if (values == null)
-            {
-                return new RouteValueDictionary();
-            }
-
-            var dictionary = values as IDictionary<string, object>;
-            if (dictionary != null)
-            {
-                return new RouteValueDictionary(dictionary);
-            }
-
-            return new RouteValueDictionary(values);
         }
     }
 }

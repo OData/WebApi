@@ -3,7 +3,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
@@ -129,7 +128,7 @@ namespace System.Web.Http
         {
             IDictionary<string, object> dataTokens = new Dictionary<string, object>();
 
-            return CreateRoute(routeTemplate, GetTypeProperties(defaults), GetTypeProperties(constraints), dataTokens, handler: null);
+            return CreateRoute(routeTemplate, new HttpRouteValueDictionary(defaults), new HttpRouteValueDictionary(constraints), dataTokens, handler: null);
         }
 
         public IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens)
@@ -139,9 +138,9 @@ namespace System.Web.Http
 
         public virtual IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, HttpMessageHandler handler)
         {
-            HttpRouteValueDictionary routeDefaults = defaults != null ? new HttpRouteValueDictionary(defaults) : null;
-            HttpRouteValueDictionary routeConstraints = constraints != null ? new HttpRouteValueDictionary(constraints) : null;
-            HttpRouteValueDictionary routeDataTokens = dataTokens != null ? new HttpRouteValueDictionary(dataTokens) : null;
+            HttpRouteValueDictionary routeDefaults = new HttpRouteValueDictionary(defaults);
+            HttpRouteValueDictionary routeConstraints = new HttpRouteValueDictionary(constraints);
+            HttpRouteValueDictionary routeDataTokens = new HttpRouteValueDictionary(dataTokens);
             return new HttpRoute(routeTemplate, routeDefaults, routeConstraints, routeDataTokens, handler);
         }
 
@@ -266,30 +265,6 @@ namespace System.Web.Http
             return _dictionary.TryGetValue(name, out route);
         }
 
-        internal static IDictionary<string, object> GetTypeProperties(object instance)
-        {
-            IDictionary<string, object> instanceAsDictionary = instance as IDictionary<string, object>;
-            if (instanceAsDictionary != null)
-            {
-                return new Dictionary<string, object>(instanceAsDictionary);
-            }
-
-            Dictionary<string, object> result = new Dictionary<string, object>();
-            if (instance != null)
-            {
-                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(instance);
-                foreach (PropertyDescriptor prop in properties)
-                {
-                    object val = prop.GetValue(instance);
-                    result.Add(prop.Name, val);
-                }
-            }
-
-            return result;
-        }
-
-        #region IDisposable
-
         public void Dispose()
         {
             Dispose(true);
@@ -303,7 +278,5 @@ namespace System.Web.Http
                 _disposed = true;
             }
         }
-
-        #endregion
     }
 }

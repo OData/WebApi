@@ -15,23 +15,36 @@ namespace System.Web.Http.Routing
         }
 
         public HttpRouteValueDictionary(IDictionary<string, object> dictionary)
-            : base(dictionary, StringComparer.OrdinalIgnoreCase)
+            : base(StringComparer.OrdinalIgnoreCase)
         {
+            if (dictionary != null)
+            {
+                foreach (KeyValuePair<string, object> current in dictionary)
+                {
+                    Add(current.Key, current.Value);
+                }
+            }
         }
 
         public HttpRouteValueDictionary(object values)
             : base(StringComparer.OrdinalIgnoreCase)
         {
-            if (values == null)
+            IDictionary<string, object> valuesAsDictionary = values as IDictionary<string, object>;
+            if (valuesAsDictionary != null)
             {
-                throw Error.ArgumentNull("values");
+                foreach (KeyValuePair<string, object> current in valuesAsDictionary)
+                {
+                    Add(current.Key, current.Value);
+                }
             }
-
-            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(values);
-            foreach (PropertyDescriptor prop in properties)
+            else if (values != null)
             {
-                object val = prop.GetValue(values);
-                Add(prop.Name, val);
+                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(values);
+                foreach (PropertyDescriptor prop in properties)
+                {
+                    object val = prop.GetValue(values);
+                    Add(prop.Name, val);
+                }
             }
         }
     }

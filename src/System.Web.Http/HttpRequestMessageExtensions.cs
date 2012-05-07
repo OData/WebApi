@@ -155,8 +155,8 @@ namespace System.Net.Http
         /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
-        /// This method requires that <paramref name="request"/> has been associated with an instance of
-        /// <see cref="HttpConfiguration"/>.
+        /// This method requires that <paramref name="request"/> has been associated with an instance of <see cref="HttpConfiguration"/>.
+        /// <paramref name="message"/> can be sent to remote clients, so avoid disclosing any security-sensitive information.
         /// </remarks>
         /// <param name="request">The request.</param>
         /// <param name="statusCode">The status code of the created response.</param>

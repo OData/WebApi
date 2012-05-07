@@ -35,6 +35,9 @@ namespace System.Web.Http.Dispatcher
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpError"/> class containing error message <paramref name="message"/>.
         /// </summary>
+        /// <remarks>
+        /// <paramref name="message"/> can be sent to remote clients, so avoid disclosing any security-sensitive information.
+        /// </remarks>
         /// <param name="message">The error message to associate with this instance.</param>
         public HttpError(string message)
         {
@@ -101,6 +104,9 @@ namespace System.Web.Http.Dispatcher
         /// <summary>
         /// The error message associated with this instance.
         /// </summary>
+        /// <remarks>
+        /// This message can be sent to remote clients, so avoid disclosing any security-sensitive information.
+        /// </remarks>
         public string Message
         {
             get
@@ -122,7 +128,7 @@ namespace System.Web.Http.Dispatcher
         /// Returns a value indicating whether or not this instance contains error information beyond the error message
         /// </summary>
         /// <returns><c>true</c> if this instance contains information that isn't in the error message, <c>false</c> otherwise</returns>
-        public bool ContainsErrorDetail()
+        internal bool ContainsErrorDetail()
         {
             return Keys.Any(key => key != MessageKey);
         }

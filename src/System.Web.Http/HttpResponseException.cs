@@ -20,6 +20,7 @@ namespace System.Web.Http
         /// Initializes a new instance of the <see cref="HttpResponseException"/> class.
         /// </summary>
         /// <param name="statusCode">The status code of the response.</param>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Instance is disposed elsewhere")]
         public HttpResponseException(HttpStatusCode statusCode)
             : this(new HttpResponseMessage(statusCode))
         {

@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
 
@@ -34,16 +33,16 @@ namespace System.Web.Http.ApiExplorer
 
         private class MyFromUriAttribute : ModelBinderAttribute, IUriValueProviderFactory
         {
-            public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpControllerDescriptor controllerDescriptor)
+            public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpConfiguration configuration)
             {
-                var factories = from f in base.GetValueProviderFactories(controllerDescriptor) where f is IUriValueProviderFactory select f;
+                var factories = from f in base.GetValueProviderFactories(configuration) where f is IUriValueProviderFactory select f;
                 return factories;
             }
         }
 
         private class FromHeaderAttribute : ModelBinderAttribute
         {
-            public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpControllerDescriptor controllerDescriptor)
+            public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpConfiguration configuration)
             {
                 var factories = new ValueProviderFactory[] { new HeaderValueProvider() };
                 return factories;

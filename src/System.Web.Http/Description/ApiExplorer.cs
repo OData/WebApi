@@ -195,7 +195,7 @@ namespace System.Web.Http.Description
 
         private void ExploreRouteActions(IHttpRoute route, string localPath, HttpControllerDescriptor controllerDescriptor, Collection<ApiDescription> apiDescriptions)
         {
-            ControllerServices controllerServices = controllerDescriptor.ControllerServices;
+            ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
             ILookup<string, HttpActionDescriptor> actionMappings = controllerServices.GetActionSelector().GetActionMapping(controllerDescriptor);
             string actionVariableValue;
             if (actionMappings != null)
@@ -450,7 +450,7 @@ namespace System.Web.Http.Description
                 return null;
             }
 
-            ControllerServices controllerServices = controllerDescriptor.ControllerServices;
+            ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
             IActionValueBinder actionValueBinder = controllerServices.GetActionValueBinder();
             HttpActionBinding actionBinding = actionValueBinder != null ? actionValueBinder.GetBinding(actionDescriptor) : null;
             return actionBinding;

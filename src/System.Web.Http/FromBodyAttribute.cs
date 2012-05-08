@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
@@ -23,15 +22,8 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("parameter");
             }
 
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-
-            if (controllerDescriptor == null)
-            {
-                throw Error.ArgumentNull("controllerDescriptor");
-            }
-
-            IEnumerable<MediaTypeFormatter> formatters = controllerDescriptor.Formatters;
-            IBodyModelValidator validator = controllerDescriptor.ControllerServices.GetBodyModelValidator();
+            IEnumerable<MediaTypeFormatter> formatters = parameter.Configuration.Formatters;
+            IBodyModelValidator validator = parameter.Configuration.Services.GetBodyModelValidator();
 
             return parameter.BindWithFormatter(formatters, validator);
         }

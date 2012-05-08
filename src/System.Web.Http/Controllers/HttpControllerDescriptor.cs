@@ -2,17 +2,12 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Internal;
-using System.Web.Http.ModelBinding;
 
 namespace System.Web.Http.Controllers
 {
@@ -27,11 +22,6 @@ namespace System.Web.Http.Controllers
 
         private string _controllerName;
         private Type _controllerType;
-
-        private MediaTypeFormatterCollection _formatters;
-        private ParameterBindingRulesCollection _parameterBindings;
-
-        private ControllerServices _controllerServices;
 
         private object[] _attrCached;
 
@@ -51,13 +41,11 @@ namespace System.Web.Http.Controllers
             {
                 throw Error.ArgumentNull("controllerType");
             }
-            
+
             _configuration = configuration;
             _controllerName = controllerName;
             _controllerType = controllerType;
 
-            _controllerServices = new ControllerServices(_configuration.Services);
-            
             Initialize();
         }
 
@@ -84,7 +72,7 @@ namespace System.Web.Http.Controllers
         }
 
         /// <summary>
-        /// Global configuration. Controller can override services, so check properties from controller descriptor instead of configuration. 
+        /// Gets the configuration associated with the <see cref="HttpControllerDescriptor"/>. 
         /// </summary>
         public HttpConfiguration Configuration
         {
@@ -126,71 +114,6 @@ namespace System.Web.Http.Controllers
         }
 
         /// <summary>
-        /// Per-controller services. This can override the services found in the global configuration's default services.
-        /// </summary>
-        public ControllerServices ControllerServices
-        {
-            get { return _controllerServices; }
-        }
-
-        /// <summary>
-        /// Get the parameter binding rules for this controller.
-        /// To override these to be separate from the global config, set the collection to a new instance.
-        /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "protected setter needed for tracers and unit tests")]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // don't let the debugger evaluate a lazy-init property
-        public ParameterBindingRulesCollection ParameterBindingRules
-        {
-            get 
-            {
-                if (_parameterBindings == null)
-                {
-                    if (Configuration == null)
-                    {
-                        return null; // unit tests will call with null configuration
-                    }
-                    // If this is null, then copy it from the global config.
-                    _parameterBindings = new ParameterBindingRulesCollection();
-                    foreach (var rule in Configuration.ParameterBindingRules)
-                    {
-                        _parameterBindings.Add(rule);
-                    }
-                }
-                return _parameterBindings; 
-            }  
-            protected set
-            {
-                _parameterBindings = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the media type formatters.
-        /// To override these to be separate from the global config, set the collection to a new instance.
-        /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "protected setter needed for tracers and unit tests")]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // don't let the debugger evaluate a lazy-init property
-        public MediaTypeFormatterCollection Formatters
-        {
-            get 
-            {
-                if (Configuration == null)
-                {
-                    return null; // unit tests will call with null configuration
-                }
-                if (_formatters == null)
-                {
-                    _formatters = new MediaTypeFormatterCollection(Configuration.Formatters);
-                }
-                return _formatters; 
-            }
-            protected set
-            {
-                _formatters = value;
-            }
-        }
-
-        /// <summary>
         /// Creates a controller instance for the given <see cref="HttpRequestMessage"/>
         /// </summary>
         /// <param name="request">The request message</param>
@@ -203,7 +126,7 @@ namespace System.Web.Http.Controllers
             }
 
             // Invoke the controller activator
-            IHttpControllerActivator activator = ControllerServices.GetHttpControllerActivator();
+            IHttpControllerActivator activator = Configuration.Services.GetHttpControllerActivator();
             IHttpController instance = activator.Create(request, this, ControllerType);
             return instance;
         }
@@ -244,8 +167,6 @@ namespace System.Web.Http.Controllers
         internal void Initialize(HttpConfiguration configuration)
         {
             _configuration = configuration;
-            _controllerServices = new ControllerServices(_configuration.Services);
-            FinishInitialize();
         }
 
         // Initialize the Controller Descriptor. This invokes all IControllerConfiguration attributes
@@ -253,21 +174,6 @@ namespace System.Web.Http.Controllers
         private void Initialize()
         {
             InvokeAttributesOnControllerType(this, ControllerType);
-            FinishInitialize();
-        }
-                
-        private void FinishInitialize()
-        {
-            // If initialization didn't override properties, then set those to point at the global configuration           
-            // Be sure to check against fields rather than properties to avoid triggering a lazy copy of the global config.
-            if (_formatters == null)
-            {
-                _formatters = Configuration.Formatters;
-            }
-            if (_parameterBindings == null)
-            {
-                _parameterBindings = Configuration.ParameterBindingRules;
-            }
         }
 
         // Helper to invoke any Controller config attributes on this controller type or its base classes.
@@ -286,10 +192,13 @@ namespace System.Web.Http.Controllers
             object[] attrs = type.GetCustomAttributes(inherit: false);
             foreach (object attr in attrs)
             {
-                var init = attr as IControllerConfiguration;
-                if (init != null)
+                var controllerConfig = attr as IControllerConfiguration;
+                if (controllerConfig != null)
                 {
-                    init.Initialize(controllerDescriptor);
+                    var originalConfig = controllerDescriptor.Configuration;
+                    var controllerSettings = new HttpControllerSettings(originalConfig);
+                    controllerConfig.Initialize(controllerSettings, controllerDescriptor);
+                    controllerDescriptor.Configuration = HttpConfiguration.ApplyControllerSettings(controllerSettings, originalConfig);
                 }
             }
         }

@@ -48,20 +48,19 @@ namespace System.Web.Http.ModelBinding
 
         public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
         {
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-
-            IModelBinder binder = GetModelBinder(controllerDescriptor, parameter.ParameterType);
-            IEnumerable<ValueProviderFactory> valueProviderFactories = GetValueProviderFactories(controllerDescriptor);
+            HttpConfiguration config = parameter.Configuration;
+            IModelBinder binder = GetModelBinder(config, parameter.ParameterType);
+            IEnumerable<ValueProviderFactory> valueProviderFactories = GetValueProviderFactories(config);
 
             return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories);
         }
 
         // This will get called by a parameter binding, which will cache the results. 
-        public ModelBinderProvider GetModelBinderProvider(HttpControllerDescriptor controllerDescriptor)
+        public ModelBinderProvider GetModelBinderProvider(HttpConfiguration configuration)
         {
             if (BinderType != null)
             {
-                object value = GetOrInstantiate(controllerDescriptor, BinderType);   
+                object value = GetOrInstantiate(configuration, BinderType);
 
                 if (value != null)
                 {
@@ -72,7 +71,7 @@ namespace System.Web.Http.ModelBinding
             }
 
             // Create default over config
-            IEnumerable<ModelBinderProvider> providers = controllerDescriptor.ControllerServices.GetModelBinderProviders();
+            IEnumerable<ModelBinderProvider> providers = configuration.Services.GetModelBinderProviders();
 
             if (providers.Count() == 1)
             {
@@ -83,24 +82,26 @@ namespace System.Web.Http.ModelBinding
         }
 
         /// <summary>
-        /// Get the IModelBinder for this type. 
+        /// Get the IModelBinder for this type.
         /// </summary>
-        /// <param name="controllerDescriptor">per-controller configuration object</param>
+        /// <param name="configuration">The configuration.</param>
         /// <param name="modelType">model type that the binder is expected to bind.</param>
-        /// <returns>a non-null model binder. </returns>
-        public IModelBinder GetModelBinder(HttpControllerDescriptor controllerDescriptor, Type modelType)
+        /// <returns>
+        /// a non-null model binder.
+        /// </returns>
+        public IModelBinder GetModelBinder(HttpConfiguration configuration, Type modelType)
         {
             if (BinderType == null)
             {
-                ModelBinderProvider provider = GetModelBinderProvider(controllerDescriptor);
-                return provider.GetBinder(controllerDescriptor.Configuration, modelType);
+                ModelBinderProvider provider = GetModelBinderProvider(configuration);
+                return provider.GetBinder(configuration, modelType);
             }
 
             // This may create a IModelBinder or a ModelBinderProvider
-            object value = GetOrInstantiate(controllerDescriptor, BinderType);
+            object value = GetOrInstantiate(configuration, BinderType);
 
             Contract.Assert(value != null); // Activator would have thrown
-            
+
             IModelBinder binder = value as IModelBinder;
             if (binder != null)
             {
@@ -111,7 +112,7 @@ namespace System.Web.Http.ModelBinding
                 ModelBinderProvider provider = value as ModelBinderProvider;
                 if (provider != null)
                 {
-                    return provider.GetBinder(controllerDescriptor.Configuration, modelType);
+                    return provider.GetBinder(configuration, modelType);
                 }
             }
 
@@ -122,10 +123,10 @@ namespace System.Web.Http.ModelBinding
         /// <summary>
         /// Value providers that will be fed to the model binder.
         /// </summary>
-        public virtual IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpControllerDescriptor controllerDescriptor)
+        public virtual IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpConfiguration configuration)
         {
             // By default, just get all registered value provider factories
-            return controllerDescriptor.ControllerServices.GetValueProviderFactories();
+            return configuration.Services.GetValueProviderFactories();
         }
 
         private static void VerifyBinderType(Type attemptedType)
@@ -137,9 +138,9 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
-        private static object GetOrInstantiate(HttpControllerDescriptor controllerDescriptor, Type type)
+        private static object GetOrInstantiate(HttpConfiguration configuration, Type type)
         {
-            IDependencyResolver dr = controllerDescriptor.Configuration.DependencyResolver;
+            IDependencyResolver dr = configuration.DependencyResolver;
             object value = dr.GetService(type);
             if (value != null)
             {

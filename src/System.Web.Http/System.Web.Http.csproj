@@ -94,7 +94,7 @@
       <Link>Common\UriQueryUtility.cs</Link>
     </Compile>
     <Compile Include="AcceptVerbsAttribute.cs" />
-    <Compile Include="Controllers\HttpControllerDescriptorExtensions.cs" />
+    <Compile Include="Controllers\HttpControllerSettings.cs" />
     <Compile Include="Controllers\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />

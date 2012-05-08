@@ -69,7 +69,7 @@ namespace System.Web.Http.Controllers
             }
             _overrideSingle[serviceType] = service;
         }
-                
+
         /// <inheritdoc/>
         protected override void ClearSingle(Type serviceType)
         {
@@ -93,7 +93,7 @@ namespace System.Web.Http.Controllers
             {
                 // Copy parents list. 
                 list = new List<object>(_parent.GetServices(serviceType));
-                
+
                 // Copy into per-controller. If they're asking for the list, the expectation is that it's going to get mutated.
                 _overrideMulti[serviceType] = list;
             }

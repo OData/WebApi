@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
 
@@ -11,14 +9,14 @@ namespace System.Web.Http
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
     public sealed class FromUriAttribute : ModelBinderAttribute
     {
-        public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpControllerDescriptor controllerDescriptor)
+        public override IEnumerable<ValueProviderFactory> GetValueProviderFactories(HttpConfiguration configuration)
         {
-            if (controllerDescriptor == null)
+            if (configuration == null)
             {
-                throw Error.ArgumentNull("controllerDescriptor");
+                throw Error.ArgumentNull("configuration");
             }
 
-            foreach (ValueProviderFactory f in base.GetValueProviderFactories(controllerDescriptor))
+            foreach (ValueProviderFactory f in base.GetValueProviderFactories(configuration))
             {
                 if (f is IUriValueProviderFactory)
                 {

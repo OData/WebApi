@@ -136,7 +136,7 @@ namespace System.Web.Http
             }
 
             HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
-            ControllerServices controllerServices = controllerDescriptor.ControllerServices;
+            ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
             HttpActionDescriptor actionDescriptor = controllerServices.GetActionSelector().SelectAction(controllerContext);
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
 

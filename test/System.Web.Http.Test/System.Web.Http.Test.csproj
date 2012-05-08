@@ -91,7 +91,6 @@
     <Compile Include="AuthorizeAttributeTest.cs" />
     <Compile Include="Controllers\Apis\User.cs" />
     <Compile Include="Controllers\Apis\UsersRpcController.cs" />
-    <Compile Include="Controllers\HttpControllerDescriptorExtensionsTest.cs" />
     <Compile Include="Controllers\HttpParameterBindingTest.cs" />
     <Compile Include="Controllers\ParameterBindingExtensionsTest.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverterTest.cs" />

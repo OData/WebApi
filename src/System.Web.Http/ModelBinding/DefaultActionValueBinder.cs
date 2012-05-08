@@ -3,12 +3,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading;
 using System.Web.Http.Controllers;
 using System.Web.Http.Internal;
 using System.Web.Http.Properties;
-using System.Web.Http.Validation;
 
 namespace System.Web.Http.ModelBinding
 {
@@ -22,16 +20,16 @@ namespace System.Web.Http.ModelBinding
             if (actionDescriptor == null)
             {
                 throw Error.ArgumentNull("actionDescriptor");
-            }            
+            }
 
             HttpParameterDescriptor[] parameters = actionDescriptor.GetParameters().ToArray();
             HttpParameterBinding[] binders = Array.ConvertAll(parameters, GetParameterBinding);
 
             HttpActionBinding actionBinding = new HttpActionBinding(actionDescriptor, binders);
-                        
+
             EnsureOneBodyParameter(actionBinding);
 
-            return actionBinding;            
+            return actionBinding;
         }
 
         /// <summary>
@@ -78,8 +76,7 @@ namespace System.Web.Http.ModelBinding
             }
 
             // No attribute, so lookup in global map.
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-            ParameterBindingRulesCollection pb = controllerDescriptor.ParameterBindingRules;
+            ParameterBindingRulesCollection pb = parameter.Configuration.ParameterBindingRules;
             if (pb != null)
             {
                 HttpParameterBinding binding = pb.LookupBinding(parameter);
@@ -95,7 +92,7 @@ namespace System.Web.Http.ModelBinding
             if (TypeHelper.IsSimpleUnderlyingType(type) || TypeHelper.HasStringConverter(type))
             {
                 return parameter.BindWithModelBinding(); // use default settings
-            }                        
+            }
 
             // Fallback. Must be a complex type. Default is to look in body. Exactly as if this type had a [FromBody] attribute.
             attr = new FromBodyAttribute();
@@ -111,7 +108,7 @@ namespace System.Web.Http.ModelBinding
             pb.Add(typeof(HttpRequestMessage), parameter => new HttpRequestParameterBinding(parameter));
 
             // Warning binder for HttpContent. 
-            pb.Add(parameter => typeof(HttpContent).IsAssignableFrom(parameter.ParameterType) ?                    
+            pb.Add(parameter => typeof(HttpContent).IsAssignableFrom(parameter.ParameterType) ?
                                     parameter.BindAsError(Error.Format(SRResources.ParameterBindingIllegalType, parameter.ParameterType.Name, parameter.ParameterName))
                                     : null);
 

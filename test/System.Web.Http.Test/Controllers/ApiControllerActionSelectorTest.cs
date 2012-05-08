@@ -15,14 +15,14 @@ namespace System.Web.Http
             ApiControllerActionSelector actionSelector = new ApiControllerActionSelector();
             HttpControllerContext GetContext = ContextUtil.CreateControllerContext();
             HttpControllerDescriptor usersControllerDescriptor = new HttpControllerDescriptor(GetContext.Configuration, "Users", typeof(UsersController));
-            usersControllerDescriptor.ControllerServices.Replace(typeof(IHttpActionSelector), actionSelector);
+            usersControllerDescriptor.Configuration.Services.Replace(typeof(IHttpActionSelector), actionSelector);
             GetContext.ControllerDescriptor = usersControllerDescriptor;
             GetContext.Request = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get
                 };
             HttpControllerContext PostContext = ContextUtil.CreateControllerContext();
-            usersControllerDescriptor.ControllerServices.Replace(typeof(IHttpActionSelector), actionSelector);
+            usersControllerDescriptor.Configuration.Services.Replace(typeof(IHttpActionSelector), actionSelector);
             PostContext.ControllerDescriptor = usersControllerDescriptor;
             PostContext.Request = new HttpRequestMessage
             {

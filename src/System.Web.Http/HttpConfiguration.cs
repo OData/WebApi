@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
@@ -51,6 +52,21 @@ namespace System.Web.Http
             _routes = routes;
             Services = new DefaultServices(this);
             ParameterBindingRules = DefaultActionValueBinder.GetDefaultParameterBinders();
+        }
+
+        private HttpConfiguration(HttpConfiguration configuration, HttpControllerSettings settings)
+        {
+            _routes = configuration.Routes;
+            _filters = configuration.Filters;
+            _messageHandlers = configuration.MessageHandlers;
+            _properties = configuration.Properties;
+            _dependencyResolver = configuration.DependencyResolver;
+            IncludeErrorDetailPolicy = configuration.IncludeErrorDetailPolicy;
+
+            // per-controller settings
+            Services = settings.IsServiceCollectionInitialized ? settings.Services : configuration.Services;
+            _formatters = settings.IsFormatterCollectionInitialized ? settings.Formatters : configuration.Formatters;
+            ParameterBindingRules = settings.IsParameterBindingRuleCollectionInitialized ? settings.ParameterBindingRules : configuration.ParameterBindingRules;
         }
 
         /// <summary>
@@ -126,7 +142,7 @@ namespace System.Web.Http
         /// Only supports the list of service types documented on <see cref="DefaultServices"/>. For general
         /// purpose types, please use <see cref="DependencyResolver"/>.
         /// </summary>
-        public DefaultServices Services { get; internal set; }
+        public ServicesContainer Services { get; internal set; }
 
         /// <summary>
         /// Top level hook for how parameters should be bound. 
@@ -156,6 +172,16 @@ namespace System.Web.Http
             formatters.Add(new JQueryMvcFormUrlEncodedFormatter());
 
             return formatters;
+        }
+
+        internal static HttpConfiguration ApplyControllerSettings(HttpControllerSettings settings, HttpConfiguration configuration)
+        {
+            if (!settings.IsFormatterCollectionInitialized && !settings.IsParameterBindingRuleCollectionInitialized && !settings.IsServiceCollectionInitialized)
+            {
+                return configuration;
+            }
+
+            return new HttpConfiguration(configuration, settings);
         }
 
         internal bool ShouldIncludeErrorDetail(HttpRequestMessage request)

@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.Properties;
 using System.Web.Http.Validation;
 
 namespace System.Web.Http.Controllers
@@ -28,7 +27,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return actionContext.ControllerContext.ControllerDescriptor.ControllerServices.GetModelMetadataProvider();
+            return actionContext.ControllerContext.Configuration.Services.GetModelMetadataProvider();
         }
 
         /// <summary>
@@ -43,7 +42,7 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            return actionContext.ControllerContext.ControllerDescriptor.ControllerServices.GetModelValidatorProviders();
+            return actionContext.ControllerContext.Configuration.Services.GetModelValidatorProviders();
         }
 
         /// <summary>
@@ -91,11 +90,10 @@ namespace System.Web.Http.Controllers
         // Pulls binders from the config
         public static bool Bind(this HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
-            Type modelType = bindingContext.ModelType;            
-            HttpControllerDescriptor cd = actionContext.ControllerContext.ControllerDescriptor;
-            HttpConfiguration config = cd.Configuration;
+            Type modelType = bindingContext.ModelType;
+            HttpConfiguration config = actionContext.ControllerContext.Configuration;
 
-            IEnumerable<IModelBinder> binders = from provider in cd.ControllerServices.GetModelBinderProviders()
+            IEnumerable<IModelBinder> binders = from provider in config.Services.GetModelBinderProviders()
                                                 select provider.GetBinder(config, modelType);
 
             return Bind(actionContext, bindingContext, binders);
@@ -125,7 +123,7 @@ namespace System.Web.Http.Controllers
 
             Type modelType = bindingContext.ModelType;
             HttpConfiguration config = actionContext.ControllerContext.Configuration;
-            
+
             ModelBinderProvider providerFromAttr;
             if (ModelBindingHelper.TryGetProviderFromAttributes(modelType, out providerFromAttr))
             {
@@ -135,9 +133,9 @@ namespace System.Web.Http.Controllers
                     return binder.BindModel(actionContext, bindingContext);
                 }
             }
-            
+
             foreach (IModelBinder binder in binders)
-            {                
+            {
                 if (binder != null)
                 {
                     if (binder.BindModel(actionContext, bindingContext))

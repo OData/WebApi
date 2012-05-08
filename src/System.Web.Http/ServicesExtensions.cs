@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -14,7 +13,6 @@ using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
-using System.Web.Http.Services;
 using System.Web.Http.Tracing;
 using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
@@ -33,8 +31,6 @@ namespace System.Web.Http
     /// <item>is it optional or mandatory?</item>
     /// <item>what are the ordering semantics</item>
     /// </list>
-    /// Services that are per-controller extend <see cref="ControllerServices"/>, 
-    /// whereas global services extend off <see cref="DefaultServices"/>
     /// Expected that any <see cref="IEnumerable{T}"/> we return is non-null, although possibly empty.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -44,17 +40,17 @@ namespace System.Web.Http
         {
             return services.GetServices<ModelBinderProvider>();
         }
-                
+
         public static ModelMetadataProvider GetModelMetadataProvider(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<ModelMetadataProvider>();
         }
-                
+
         public static IEnumerable<ModelValidatorProvider> GetModelValidatorProviders(this ServicesContainer services)
         {
             return services.GetServices<ModelValidatorProvider>();
         }
-                
+
         public static IContentNegotiator GetContentNegotiator(this ServicesContainer services)
         {
             return services.GetService<IContentNegotiator>();
@@ -66,26 +62,22 @@ namespace System.Web.Http
         /// <returns>
         /// An <see cref="IHttpControllerActivator"/> instance or null if none are registered.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IHttpControllerActivator GetHttpControllerActivator(this ControllerServices services)
+        public static IHttpControllerActivator GetHttpControllerActivator(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IHttpControllerActivator>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IHttpActionSelector GetActionSelector(this ControllerServices services)
+        public static IHttpActionSelector GetActionSelector(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IHttpActionSelector>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IHttpActionInvoker GetActionInvoker(this ControllerServices services)
+        public static IHttpActionInvoker GetActionInvoker(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IHttpActionInvoker>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IActionValueBinder GetActionValueBinder(this ControllerServices services)
+        public static IActionValueBinder GetActionValueBinder(this ServicesContainer services)
         {
             return services.GetService<IActionValueBinder>();
         }
@@ -93,20 +85,17 @@ namespace System.Web.Http
         /// <summary>
         /// Get ValueProviderFactories. The order of returned providers is the priority order that we search the factories.
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IEnumerable<ValueProviderFactory> GetValueProviderFactories(this ControllerServices services)
+        public static IEnumerable<ValueProviderFactory> GetValueProviderFactories(this ServicesContainer services)
         {
             return services.GetServices<ValueProviderFactory>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IBodyModelValidator GetBodyModelValidator(this ControllerServices services)
+        public static IBodyModelValidator GetBodyModelValidator(this ServicesContainer services)
         {
             return services.GetService<IBodyModelValidator>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IHostBufferPolicySelector GetHostBufferPolicySelector(this DefaultServices services)
+        public static IHostBufferPolicySelector GetHostBufferPolicySelector(this ServicesContainer services)
         {
             return services.GetService<IHostBufferPolicySelector>();
         }
@@ -114,50 +103,42 @@ namespace System.Web.Http
         /// <summary>
         /// Get a controller selector, which selects an <see cref="HttpControllerDescriptor"/> given an <see cref="HttpRequestMessage"/>.
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IHttpControllerSelector GetHttpControllerSelector(this DefaultServices services)
+        public static IHttpControllerSelector GetHttpControllerSelector(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IHttpControllerSelector>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IAssembliesResolver GetAssembliesResolver(this DefaultServices services)
+        public static IAssembliesResolver GetAssembliesResolver(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IAssembliesResolver>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IHttpControllerTypeResolver GetHttpControllerTypeResolver(this DefaultServices services)
+        public static IHttpControllerTypeResolver GetHttpControllerTypeResolver(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IHttpControllerTypeResolver>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IApiExplorer GetApiExplorer(this DefaultServices services)
+        public static IApiExplorer GetApiExplorer(this ServicesContainer services)
         {
             return services.GetServiceOrThrow<IApiExplorer>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IDocumentationProvider GetDocumentationProvider(this DefaultServices services)
+        public static IDocumentationProvider GetDocumentationProvider(this ServicesContainer services)
         {
             return services.GetService<IDocumentationProvider>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static IEnumerable<IFilterProvider> GetFilterProviders(this DefaultServices services)
+        public static IEnumerable<IFilterProvider> GetFilterProviders(this ServicesContainer services)
         {
             return services.GetServices<IFilterProvider>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static ITraceManager GetTraceManager(this DefaultServices services)
+        public static ITraceManager GetTraceManager(this ServicesContainer services)
         {
             return services.GetService<ITraceManager>();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "derived type determines global vs. controller service")]
-        public static ITraceWriter GetTraceWriter(this DefaultServices services)
+        public static ITraceWriter GetTraceWriter(this ServicesContainer services)
         {
             return services.GetService<ITraceWriter>();
         }

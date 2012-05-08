@@ -23,7 +23,9 @@ namespace System.Net.Http
         [Fact]
         public void Constructor_SetsFormatterProperty()
         {
-            var formatter = new Mock<MediaTypeFormatter>().Object;
+            var formatterMock = new Mock<MediaTypeFormatter>();
+            formatterMock.Setup(f => f.CanWriteType(typeof(String))).Returns(true);
+            var formatter = formatterMock.Object;
 
             var content = new ObjectContent<string>(null, formatter, mediaType: (MediaTypeHeaderValue)null);
 

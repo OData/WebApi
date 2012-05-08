@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using System.Xml;
 using Newtonsoft.Json.Linq;
 
@@ -110,6 +111,11 @@ namespace System.Net.Http
         /// A <see cref="Type"/> representing <see cref="IQueryable{T}"/>.
         /// </summary>
         public static readonly Type QueryableInterfaceGenericType = typeof(IQueryable<>);
+
+        /// <summary>
+        /// An instance of <see cref="XsdDataContractExporter"/>.
+        /// </summary>
+        public static readonly XsdDataContractExporter XsdDataContractExporter = new XsdDataContractExporter();
 
         /// <summary>
         /// Determines whether <paramref name="type"/> is a <see cref="JToken"/> type.

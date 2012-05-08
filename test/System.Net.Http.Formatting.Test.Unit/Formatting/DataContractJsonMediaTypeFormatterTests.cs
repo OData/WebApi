@@ -101,6 +101,30 @@ namespace System.Net.Http.Formatting
             Assert.False(isSerializable != canSupport && isSerializable, String.Format("2nd CanReadType returned wrong value for '{0}'.", variationType));
         }
 
+        [Fact]
+        public void CanReadType_ReturnsFalse_ForInvalidDataContracts()
+        {
+            JsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
+
+            Assert.False(formatter.CanReadType(typeof(InvalidDataContract)));
+        }
+
+        [Fact]
+        public void CanWriteType_ReturnsFalse_ForInvalidDataContracts()
+        {
+            JsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
+
+            Assert.False(formatter.CanWriteType(typeof(InvalidDataContract)));
+        }
+
+        public class InvalidDataContract
+        {
+            // removing the default ctor makes this invalid
+            public InvalidDataContract(string s)
+            {
+            }
+        }
+
         [Theory]
         [InlineData(typeof(IQueryable<string>))]
         [InlineData(typeof(IEnumerable<string>))]

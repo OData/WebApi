@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
+using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Services;
 
@@ -162,13 +163,17 @@ namespace System.Web.Http
             switch (IncludeErrorDetailPolicy)
             {
                 case IncludeErrorDetailPolicy.LocalOnly:
-                    if (request == null || request.RequestUri == null)
+                    if (request == null)
                     {
                         return false;
                     }
 
-                    Uri requestUri = request.RequestUri;
-                    return requestUri.IsAbsoluteUri && requestUri.IsLoopback;
+                    Lazy<bool> isLocal;
+                    if (request.Properties.TryGetValue<Lazy<bool>>(HttpPropertyKeys.IsLocalKey, out isLocal))
+                    {
+                        return isLocal.Value;
+                    }
+                    return false;
 
                 case IncludeErrorDetailPolicy.Always:
                     return true;

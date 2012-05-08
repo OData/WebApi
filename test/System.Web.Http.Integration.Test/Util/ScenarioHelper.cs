@@ -12,7 +12,7 @@ namespace System.Web.Http
             Action<HttpResponseMessage> assert, Action<HttpConfiguration> configurer = null)
         {
             // Arrange
-            HttpConfiguration config = new HttpConfiguration();
+            HttpConfiguration config = new HttpConfiguration() { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always };
 
             config.Routes.MapHttpRoute("Default", "{controller}" + routeSuffix, new { controller = controllerName });
             if (configurer != null)

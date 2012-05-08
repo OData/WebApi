@@ -680,6 +680,7 @@ namespace System.Web.Http
             mockSelector.Setup(s => s.SelectController(It.IsAny<HttpRequestMessage>())).Returns(mockDescriptor.Object);
             config.Routes.MapHttpRoute("default", "", new { controller = "MyMock" });
             config.Services.Replace(typeof(IHttpControllerSelector), mockSelector.Object);
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             var server = new HttpServer(config);
             var invoker = new HttpMessageInvoker(server);
 

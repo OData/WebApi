@@ -368,6 +368,9 @@ namespace System.Web.Http.WebHost
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
             request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
 
+            // Add information about whether the request is local or not
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => requestBase.IsLocal));
+
             return request;
         }
 

@@ -184,6 +184,9 @@ namespace System.Web.Http.SelfHost
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
             request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
 
+            // Add information about whether the request is local or not
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => IsLocal(requestContext.RequestMessage)));
+
             // Submit request up the stack
             try
             {
@@ -216,6 +219,20 @@ namespace System.Web.Http.SelfHost
                 Message reply = response.ToMessage();
                 BeginReply(new ReplyContext(channelContext, requestContext, reply));
             }
+        }
+
+        private static bool IsLocal(Message message)
+        {
+            RemoteEndpointMessageProperty remoteEndpointProperty;
+            if (message.Properties.TryGetValue(RemoteEndpointMessageProperty.Name, out remoteEndpointProperty))
+            {
+                IPAddress remoteAddress;
+                if (IPAddress.TryParse(remoteEndpointProperty.Address, out remoteAddress))
+                {
+                    return IPAddress.IsLoopback(remoteAddress);
+                }
+            }
+            return false;
         }
 
         private static void SetCurrentPrincipal(HttpRequestMessage request)

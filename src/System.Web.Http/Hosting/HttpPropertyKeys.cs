@@ -58,5 +58,10 @@ namespace System.Web.Http.Hosting
         /// This is the correlation id for that request.
         /// </summary>
         public static readonly string RequestCorrelationKey = "MS_RequestId";
+
+        /// <summary>
+        /// Provides a key that indicates whether the request originates from a local address
+        /// </summary>
+        public static readonly string IsLocalKey = "MS_IsLocal";
     }
 }

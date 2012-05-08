@@ -227,7 +227,7 @@ namespace System.Web.Http
         [Fact]
         public void GenericMethod_Throws_InvalidOperationException()
         {
-            HttpConfiguration config = new HttpConfiguration();
+            HttpConfiguration config = new HttpConfiguration() { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always };
             config.Routes.MapHttpRoute("Default", "Exception/{action}", new { controller = "Exception" });
             HttpServer server = new HttpServer(config);
             HttpClient client = new HttpClient(server);

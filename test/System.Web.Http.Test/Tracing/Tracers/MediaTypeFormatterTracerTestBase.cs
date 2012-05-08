@@ -87,7 +87,7 @@ namespace System.Web.Http.Tracing.Tracers
             HttpRequestMessage request = new HttpRequestMessage();
             Type randomType = typeof(string);
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
-            string mediaType = "plain/text";
+            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("plain/text");
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
             MediaTypeFormatter formatterObject = mockFormatter.Object;
 

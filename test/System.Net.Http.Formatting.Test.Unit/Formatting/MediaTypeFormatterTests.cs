@@ -18,6 +18,7 @@ namespace System.Net.Http.Formatting
     public class MediaTypeFormatterTests
     {
         private const string TestMediaType = "text/test";
+        private MediaTypeHeaderValue TestMediaTypeHeader = new MediaTypeHeaderValue(TestMediaType);
 
         public static TheoryDataSet<string, string[], string> SelectCharacterEncodingTestData
         {
@@ -516,7 +517,7 @@ namespace System.Net.Http.Formatting
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
-            Assert.ThrowsArgumentNull(() => formatter.SetDefaultContentHeaders(null, contentHeaders, TestMediaType), "type");
+            Assert.ThrowsArgumentNull(() => formatter.SetDefaultContentHeaders(null, contentHeaders, TestMediaTypeHeader), "type");
         }
 
         [Fact]
@@ -524,11 +525,11 @@ namespace System.Net.Http.Formatting
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Type type = typeof(object);
-            Assert.ThrowsArgumentNull(() => formatter.SetDefaultContentHeaders(type, null, TestMediaType), "headers");
+            Assert.ThrowsArgumentNull(() => formatter.SetDefaultContentHeaders(type, null, TestMediaTypeHeader), "headers");
         }
 
         [Fact]
-        public void SetDefaultContentHeaders_UsesNonNullMediaType()
+        public void SetDefaultContentHeaders_UsesNonNullMediaTypeClone()
         {
             // Arrange
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -536,18 +537,19 @@ namespace System.Net.Http.Formatting
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
 
             // Act
-            formatter.SetDefaultContentHeaders(type, contentHeaders, TestMediaType);
+            formatter.SetDefaultContentHeaders(type, contentHeaders, TestMediaTypeHeader);
 
             // Assert
+            Assert.NotSame(TestMediaTypeHeader, contentHeaders.ContentType);
             Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
         }
 
         [Fact]
-        public void SetDefaultContentHeaders_UsesDefaultSupportedMediaType()
+        public void SetDefaultContentHeaders_UsesDefaultSupportedMediaTypeClone()
         {
             // Arrange
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
-            formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(TestMediaType));
+            formatter.SupportedMediaTypes.Add(TestMediaTypeHeader);
             Type type = typeof(object);
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
 
@@ -555,6 +557,7 @@ namespace System.Net.Http.Formatting
             formatter.SetDefaultContentHeaders(type, contentHeaders, null);
 
             // Assert
+            Assert.NotSame(TestMediaTypeHeader, contentHeaders.ContentType);
             Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);
         }
 
@@ -569,7 +572,7 @@ namespace System.Net.Http.Formatting
             HttpContentHeaders contentHeaders = FormattingUtilities.CreateEmptyContentHeaders();
 
             // Act
-            formatter.SetDefaultContentHeaders(type, contentHeaders, TestMediaType);
+            formatter.SetDefaultContentHeaders(type, contentHeaders, TestMediaTypeHeader);
 
             // Assert
             Assert.Equal(TestMediaType, contentHeaders.ContentType.MediaType);

@@ -372,7 +372,8 @@ namespace System.Net.Http
                 MediaTypeHeaderValue mediaType = result.MediaType;
                 return new HttpResponseMessage
                 {
-                    Content = new ObjectContent<T>(value, result.Formatter, mediaType != null ? mediaType.ToString() : null),
+                    // At this point mediaType should be a cloned value (the content negotiator is responsible for returning a new copy)
+                    Content = new ObjectContent<T>(value, result.Formatter, mediaType),
                     StatusCode = statusCode,
                     RequestMessage = request
                 };
@@ -490,9 +491,7 @@ namespace System.Net.Http
             }
 
             HttpResponseMessage response = request.CreateResponse(statusCode);
-            // TODO pass in full mediaType when OC gets the right ctor overload.
-            string mediaTypeValue = mediaType != null ? mediaType.MediaType : null;
-            response.Content = new ObjectContent<T>(value, formatter, mediaTypeValue);
+            response.Content = new ObjectContent<T>(value, formatter, mediaType);
             return response;
         }
 

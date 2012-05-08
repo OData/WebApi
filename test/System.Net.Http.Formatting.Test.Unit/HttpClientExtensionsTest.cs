@@ -2,6 +2,7 @@
 
 using System.Net.Http.Formatting;
 using System.Net.Http.Formatting.Mocks;
+using System.Net.Http.Headers;
 using System.Net.Http.Mocks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace System.Net.Http
     {
         private readonly MediaTypeFormatter _formatter = new MockMediaTypeFormatter { CallBase = true };
         private readonly HttpClient _client;
+        private readonly MediaTypeHeaderValue _mediaTypeHeader = MediaTypeHeaderValue.Parse("foo/bar; charset=utf-16");
 
         public HttpClientExtensionsTest()
         {
@@ -105,7 +107,7 @@ namespace System.Net.Http
         [Fact]
         public void PostAsync_WhenAuthoritativeMediaTypeIsSet_CreatesRequestWithAppropriateContentType()
         {
-            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
+            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter, _mediaTypeHeader, CancellationToken.None);
 
             var request = result.Result.RequestMessage;
             Assert.Equal("foo/bar", request.Content.Headers.ContentType.MediaType);
@@ -115,7 +117,7 @@ namespace System.Net.Http
         [Fact]
         public void PostAsync_WhenFormatterIsSet_CreatesRequestWithObjectContentAndCorrectFormatter()
         {
-            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
+            var result = _client.PostAsync("http://example.com/myapi/", new object(), _formatter, _mediaTypeHeader, CancellationToken.None);
 
             var request = result.Result.RequestMessage;
             var content = Assert.IsType<ObjectContent<object>>(request.Content);
@@ -216,7 +218,7 @@ namespace System.Net.Http
         [Fact]
         public void PutAsync_WhenAuthoritativeMediaTypeIsSet_CreatesRequestWithAppropriateContentType()
         {
-            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
+            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter, _mediaTypeHeader, CancellationToken.None);
 
             var request = result.Result.RequestMessage;
             Assert.Equal("foo/bar", request.Content.Headers.ContentType.MediaType);
@@ -226,7 +228,7 @@ namespace System.Net.Http
         [Fact]
         public void PutAsync_WhenFormatterIsSet_CreatesRequestWithObjectContentAndCorrectFormatter()
         {
-            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter, "foo/bar; charset=utf-16");
+            var result = _client.PutAsync("http://example.com/myapi/", new object(), _formatter, _mediaTypeHeader, CancellationToken.None);
 
             var request = result.Result.RequestMessage;
             var content = Assert.IsType<ObjectContent<object>>(request.Content);

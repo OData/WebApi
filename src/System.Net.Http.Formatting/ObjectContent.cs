@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -25,7 +26,7 @@ namespace System.Net.Http
         /// <param name="value">The value of the object this instance will contain.</param>
         /// <param name="formatter">The formatter to use when serializing the value.</param>
         public ObjectContent(Type type, object value, MediaTypeFormatter formatter)
-            : this(type, value, formatter, null)
+            : this(type, value, formatter, (MediaTypeHeaderValue)null)
         {
         }
 
@@ -35,8 +36,22 @@ namespace System.Net.Http
         /// <param name="type">The type of object this instance will contain.</param>
         /// <param name="value">The value of the object this instance will contain.</param>
         /// <param name="formatter">The formatter to use when serializing the value.</param>
-        /// <param name="mediaType">The media type to associate with this object.</param>
+        /// <param name="mediaType">The authoritative value of the content's Content-Type header. Can be <c>null</c> in which case the
+        /// <paramref name="formatter">formatter's</paramref> default content type will be used.</param>
         public ObjectContent(Type type, object value, MediaTypeFormatter formatter, string mediaType)
+            : this(type, value, formatter, BuildHeaderValue(mediaType))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectContent"/> class.
+        /// </summary>
+        /// <param name="type">The type of object this instance will contain.</param>
+        /// <param name="value">The value of the object this instance will contain.</param>
+        /// <param name="formatter">The formatter to use when serializing the value.</param>
+        /// <param name="mediaType">The authoritative value of the content's Content-Type header. Can be <c>null</c> in which case the
+        /// <paramref name="formatter">formatter's</paramref> default content type will be used.</param>
+        public ObjectContent(Type type, object value, MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
         {
             if (type == null)
             {
@@ -74,6 +89,11 @@ namespace System.Net.Http
         {
             get { return _value; }
             set { VerifyAndSetObject(value); }
+        }
+
+        internal static MediaTypeHeaderValue BuildHeaderValue(string mediaType)
+        {
+            return mediaType != null ? new MediaTypeHeaderValue(mediaType) : null;
         }
 
         /// <summary>
@@ -149,7 +169,7 @@ namespace System.Net.Http
         /// <param name="value">The value of the object this instance will contain.</param>
         /// <param name="formatter">The formatter to use when serializing the value.</param>
         public ObjectContent(T value, MediaTypeFormatter formatter)
-            : this(value, formatter, null)
+            : this(value, formatter, (MediaTypeHeaderValue)null)
         {
         }
 
@@ -158,8 +178,21 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="value">The value of the object this instance will contain.</param>
         /// <param name="formatter">The formatter to use when serializing the value.</param>
-        /// <param name="mediaType">The media type to associate with this object.</param>
+        /// <param name="mediaType">The authoritative value of the content's Content-Type header. Can be <c>null</c> in which case the
+        /// <paramref name="formatter">formatter's</paramref> default content type will be used.</param>
         public ObjectContent(T value, MediaTypeFormatter formatter, string mediaType)
+            : this(value, formatter, BuildHeaderValue(mediaType))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectContent{T}"/> class.
+        /// </summary>
+        /// <param name="value">The value of the object this instance will contain.</param>
+        /// <param name="formatter">The formatter to use when serializing the value.</param>
+        /// <param name="mediaType">The authoritative value of the content's Content-Type header. Can be <c>null</c> in which case the
+        /// <paramref name="formatter">formatter's</paramref> default content type will be used.</param>
+        public ObjectContent(T value, MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType)
             : base(typeof(T), value, formatter, mediaType)
         {
         }

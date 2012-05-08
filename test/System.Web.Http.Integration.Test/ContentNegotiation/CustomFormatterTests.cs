@@ -152,7 +152,7 @@ namespace System.Web.Http.ContentNegotiation
             return true;
         }
 
-        public override void SetDefaultContentHeaders(Type objectType, HttpContentHeaders contentHeaders, string mediaType)
+        public override void SetDefaultContentHeaders(Type objectType, HttpContentHeaders contentHeaders, MediaTypeHeaderValue mediaType)
         {
             base.SetDefaultContentHeaders(objectType, contentHeaders, mediaType);
             contentHeaders.TryAddWithoutValidation("Version", "1.3.5.0");

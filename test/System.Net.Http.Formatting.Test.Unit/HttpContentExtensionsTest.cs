@@ -164,7 +164,7 @@ namespace System.Net.Http
         {
             _formatterMock.Setup(f => f.CanWriteType(typeof(object))).Returns(true);
             _formatterMock.Setup(f => f.CanReadType(typeof(Int32))).Returns(true);
-            var content = new ObjectContent<object>(null, _formatterMock.Object, _mediaType.MediaType);
+            var content = new ObjectContent<object>(null, _formatterMock.Object, _mediaType);
             SetupUpRoundTripSerialization();
 
             Assert.IsType<Int32>(content.ReadAsAsync<Int32>(_formatters).Result);
@@ -179,7 +179,7 @@ namespace System.Net.Http
             _formatterMock.Setup(f => f.CanWriteType(typeof(TestClass))).Returns(true);
             _formatterMock.Setup(f => f.CanReadType(typeof(string))).Returns(true);
             var value = new TestClass();
-            var content = new ObjectContent<TestClass>(value, _formatterMock.Object, _mediaType.MediaType);
+            var content = new ObjectContent<TestClass>(value, _formatterMock.Object, _mediaType);
             SetupUpRoundTripSerialization(type => new TestClass());
 
             Assert.Throws<InvalidCastException>(() => content.ReadAsAsync<string>(_formatters).RethrowFaultedTaskException());

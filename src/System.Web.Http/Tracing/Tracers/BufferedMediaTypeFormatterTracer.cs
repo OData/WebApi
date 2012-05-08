@@ -50,7 +50,7 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerTracer.GetPerRequestFormatterInstance(type, request, mediaType);
         }
 
-        public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, string mediaType)
+        public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
         }

@@ -17,12 +17,14 @@ namespace System.Net.Http
     {
         private readonly object _value = new object();
         private readonly MediaTypeFormatter _formatter = new TestableMediaTypeFormatter();
+        private readonly MediaTypeHeaderValue _jsonHeaderValue = new MediaTypeHeaderValue("application/json");
 
         [Fact]
         public void Constructor_WhenTypeArgumentIsNull_ThrowsEsxception()
         {
             Assert.ThrowsArgumentNull(() => new ObjectContent(null, _value, _formatter), "type");
             Assert.ThrowsArgumentNull(() => new ObjectContent(null, _value, _formatter, mediaType: "foo/bar"), "type");
+            Assert.ThrowsArgumentNull(() => new ObjectContent(null, _value, _formatter, mediaType: _jsonHeaderValue), "type");
         }
 
         [Fact]
@@ -30,6 +32,7 @@ namespace System.Net.Http
         {
             Assert.ThrowsArgumentNull(() => new ObjectContent(typeof(Object), _value, formatter: null), "formatter");
             Assert.ThrowsArgumentNull(() => new ObjectContent(typeof(Object), _value, formatter: null, mediaType: "foo/bar"), "formatter");
+            Assert.ThrowsArgumentNull(() => new ObjectContent(typeof(Object), _value, formatter: null, mediaType: _jsonHeaderValue), "formatter");
         }
 
         [Fact]
@@ -67,7 +70,7 @@ namespace System.Net.Http
         [Fact]
         public void Constructor_SetsFormatterProperty()
         {
-            var content = new ObjectContent(typeof(object), _value, _formatter, mediaType: null);
+            var content = new ObjectContent(typeof(object), _value, _formatter, mediaType: (MediaTypeHeaderValue)null);
 
             Assert.Same(_formatter, content.Formatter);
         }
@@ -78,9 +81,9 @@ namespace System.Net.Http
             var formatterMock = new Mock<MediaTypeFormatter>();
             formatterMock.Setup(f => f.CanWriteType(typeof(String))).Returns(true);
 
-            var content = new ObjectContent(typeof(string), "", formatterMock.Object, "foo/bar");
+            var content = new ObjectContent(typeof(string), "", formatterMock.Object, _jsonHeaderValue);
 
-            formatterMock.Verify(f => f.SetDefaultContentHeaders(typeof(string), content.Headers, "foo/bar"),
+            formatterMock.Verify(f => f.SetDefaultContentHeaders(typeof(string), content.Headers, _jsonHeaderValue),
                                  Times.Once());
         }
 

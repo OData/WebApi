@@ -479,7 +479,7 @@ namespace System.Net.Http.Formatting
         /// <param name="type">The type of the object being serialized. See <see cref="ObjectContent"/>.</param>
         /// <param name="headers">The content headers that should be configured.</param>
         /// <param name="mediaType">The authoritative media type. Can be <c>null</c>.</param>
-        public virtual void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, string mediaType)
+        public virtual void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
             if (type == null)
             {
@@ -490,10 +490,9 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("headers");
             }
 
-            if (!String.IsNullOrEmpty(mediaType))
+            if (mediaType != null)
             {
-                var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
-                headers.ContentType = parsedMediaType;
+                headers.ContentType = mediaType.Clone();
             }
 
             // If content type is not set then set it based on supported media types.

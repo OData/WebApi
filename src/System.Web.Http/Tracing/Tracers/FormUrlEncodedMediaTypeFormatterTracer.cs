@@ -61,7 +61,7 @@ namespace System.Web.Http.Tracing.Tracers
             return _innerTracer.WriteToStreamAsync(type, value, writeStream, content, transportContext);
         }
 
-        public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, string mediaType)
+        public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
             _innerTracer.SetDefaultContentHeaders(type, headers, mediaType);
         }

@@ -163,7 +163,7 @@ namespace System.Web.Http.Tracing.Tracers
             return InnerFormatter.GetHashCode();
         }
 
-        public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, string mediaType)
+        public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
             InnerFormatter.SetDefaultContentHeaders(type, headers, mediaType);
         }

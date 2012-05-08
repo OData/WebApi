@@ -606,6 +606,19 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void HttpRouteUrlFindsHttpRoute()
+        {
+            // Arrange
+            UrlHelper urlHelper = GetUrlHelper();
+
+            // Act
+            string url = urlHelper.HttpRouteUrl("httproute", new { Action = "newaction", Controller = "home2", id = "someid" });
+
+            // Assert
+            Assert.Equal(MvcHelper.AppPathModifier + "/app/mock/http/route", url);
+        }
+
+        [Fact]
         public void UrlGenerationDoesNotChangeProvidedDictionary()
         {
             // Arrange
@@ -661,6 +674,13 @@ namespace System.Web.Mvc.Test
             RouteCollection rt = new RouteCollection();
             rt.Add(new Route("{controller}/{action}/{id}", null) { Defaults = new RouteValueDictionary(new { id = "defaultid" }) });
             rt.Add("namedroute", new Route("named/{controller}/{action}/{id}", null) { Defaults = new RouteValueDictionary(new { id = "defaultid" }) });
+
+            // Adding a route that recognizes the httproute value for the HttpRouteUrl tests
+            Mock<RouteBase> mockHttpRoute = new Mock<RouteBase>();
+            mockHttpRoute.Setup(mock => mock.GetVirtualPath(It.IsAny<RequestContext>(), It.Is<RouteValueDictionary>(routeValues => routeValues.ContainsKey("httproute"))))
+                .Returns(new VirtualPathData(null, "mock/http/route"));
+            rt.Add("httproute", mockHttpRoute.Object);
+
             return rt;
         }
 

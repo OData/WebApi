@@ -15,7 +15,6 @@ namespace System.Web.Helpers.Test
         private static readonly byte[] _JpgImageBytes = TestFile.Create("LambdaFinal.jpg").ReadAllBytes();
         private static readonly byte[] _BmpImageBytes = TestFile.Create("logo.bmp").ReadAllBytes();
         private static readonly byte[] _PngImageBytes = TestFile.Create("NETLogo.png").ReadAllBytes();
-        private static readonly byte[] _HiResImageBytes = TestFile.Create("HiRes.jpg").ReadAllBytes();
 
         [Fact]
         public void ConstructorThrowsWhenFilePathIsNull()
@@ -343,12 +342,12 @@ namespace System.Web.Helpers.Test
             MemoryStream output = null;
             Action<string, byte[]> saveAction = (_, content) => { output = new MemoryStream(content); };
 
-            WebImage image = new WebImage(_HiResImageBytes);
+            WebImage image = new WebImage(_PngImageBytes);
 
-            image.Resize(200, 100, preserveAspectRatio: true, preventEnlarge: true);
+            image.Resize(100, 50, preserveAspectRatio: true, preventEnlarge: true);
 
             image.Save(GetContext(), saveAction, @"x:\ResizePreservesResolution.jpg", "jpeg", forceWellKnownExtension: true);
-            using (Image original = Image.FromStream(new MemoryStream(_HiResImageBytes)))
+            using (Image original = Image.FromStream(new MemoryStream(_PngImageBytes)))
             {
                 using (Image modified = Image.FromStream(output))
                 {

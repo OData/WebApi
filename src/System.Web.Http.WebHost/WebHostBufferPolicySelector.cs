@@ -11,6 +11,28 @@ namespace System.Web.Http.WebHost
     /// </summary>
     public class WebHostBufferPolicySelector : IHostBufferPolicySelector
     {
+        /// <summary>
+        /// Determines whether the host should buffer the <see cref="HttpRequestMessage"/> entity body.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/> request for which to determine
+        /// whether host input buffering should be used for the request entity body.</param>
+        /// <returns><c>true</c> if buffering should be used; otherwise a streamed request should be used.</returns>
+        public virtual bool UseBufferedInputStream(HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether the host should buffer the <see cref="HttpResponseMessage"/> entity body.
+        /// </summary>
+        /// <param name="response">The <see cref="HttpResponseMessage"/>response for which to determine
+        /// whether host output buffering should be used for the response entity body.</param>
+        /// <returns><c>true</c> if buffering should be used; otherwise a streamed response should be used.</returns>
         public virtual bool UseBufferedOutputStream(HttpResponseMessage response)
         {
             if (response == null)

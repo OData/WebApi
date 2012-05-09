@@ -263,11 +263,6 @@ namespace WebMatrix.WebData
                     db.Execute(@"CREATE TABLE " + OAuthMembershipTableName + " (Provider nvarchar(30) NOT NULL, ProviderUserId nvarchar(100) NOT NULL, UserId int NOT NULL, PRIMARY KEY (Provider, ProviderUserId))");
                 }
 
-                if (!CheckTableExists(db, OAuthTokenTableName))
-                {
-                    db.Execute(@"CREATE TABLE " + OAuthTokenTableName + " (Token nvarchar(100) NOT NULL, Secret nvarchar(100) NOT NULL, PRIMARY KEY (Token))");
-                }
-
                 if (!CheckTableExists(db, MembershipTableName))
                 {
                     db.Execute(@"CREATE TABLE " + MembershipTableName + @" (
@@ -285,6 +280,14 @@ namespace WebMatrix.WebData
                     // TODO: Do we want to add FK constraint to user table too?
                     //                        CONSTRAINT fk_UserId FOREIGN KEY (UserId) REFERENCES "+UserTableName+"("+UserIdColumn+"))");
                 }
+            }
+        }
+
+        private static void CreateOAuthTokenTableIfNeeded(IDatabase db)
+        {
+            if (!CheckTableExists(db, OAuthTokenTableName))
+            {
+                db.Execute(@"CREATE TABLE " + OAuthTokenTableName + " (Token nvarchar(100) NOT NULL, Secret nvarchar(100) NOT NULL, PRIMARY KEY (Token))");
             }
         }
 
@@ -1125,6 +1128,8 @@ namespace WebMatrix.WebData
 
             using (var db = ConnectToDatabase())
             {
+                CreateOAuthTokenTableIfNeeded(db);
+
                 // Note that token is case-sensitive
                 dynamic secret = db.QueryValue(@"SELECT Secret FROM [" + OAuthTokenTableName + "] WHERE Token=@0", token);
                 return (string)secret;
@@ -1146,6 +1151,8 @@ namespace WebMatrix.WebData
 
                 using (var db = ConnectToDatabase())
                 {
+                    CreateOAuthTokenTableIfNeeded(db);
+
                     // the token exists with old secret, update it to new secret
                     db.Execute(@"UPDATE [" + OAuthTokenTableName + "] SET Secret = @1 WHERE Token = @0", requestToken, requestTokenSecret);
                 }
@@ -1154,6 +1161,8 @@ namespace WebMatrix.WebData
             {
                 using (var db = ConnectToDatabase())
                 {
+                    CreateOAuthTokenTableIfNeeded(db);
+
                     // insert new record
                     int insert = db.Execute(@"INSERT INTO [" + OAuthTokenTableName + "] (Token, Secret) VALUES(@0, @1)", requestToken, requestTokenSecret);
                     if (insert != 1)
@@ -1176,6 +1185,8 @@ namespace WebMatrix.WebData
 
             using (var db = ConnectToDatabase())
             {
+                CreateOAuthTokenTableIfNeeded(db);
+
                 // insert new record
                 db.Execute(@"DELETE FROM [" + OAuthTokenTableName + "] WHERE Token = @0", requestToken);
 
@@ -1195,6 +1206,8 @@ namespace WebMatrix.WebData
 
             using (var db = ConnectToDatabase())
             {
+                CreateOAuthTokenTableIfNeeded(db);
+
                 // Note that token is case-sensitive
                 db.Execute(@"DELETE FROM [" + OAuthTokenTableName + "] WHERE Token=@0", token);
             }

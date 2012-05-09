@@ -130,7 +130,6 @@
     <Compile Include="Formatting\DefaultContentNegotiatorTests.cs" />
     <Compile Include="Formatting\FormUrlEncodedMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\JsonMediaTypeFormatterTests.cs" />
-    <Compile Include="Formatting\MediaRangeMappingTests.cs" />
     <Compile Include="Formatting\MediaTypeConstantsTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterCollectionTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterExtensionsTests.cs" />

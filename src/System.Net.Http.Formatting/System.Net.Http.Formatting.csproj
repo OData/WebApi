@@ -127,7 +127,6 @@
     <Compile Include="Formatting\FormUrlEncodedMediaTypeFormatter.cs" />
     <Compile Include="Formatting\IContentNegotiator.cs" />
     <Compile Include="Formatting\JsonMediaTypeFormatter.cs" />
-    <Compile Include="Formatting\MediaRangeMapping.cs" />
     <Compile Include="Formatting\MediaTypeConstants.cs" />
     <Compile Include="Formatting\MediaTypeFormatter.cs" />
     <Compile Include="Formatting\MediaTypeFormatterCollection.cs" />

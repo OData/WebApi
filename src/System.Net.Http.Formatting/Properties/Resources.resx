@@ -162,9 +162,6 @@
   <data name="HttpMessageParserInvalidUriScheme" xml:space="preserve">
     <value>Invalid URI scheme: '{0}'. The URI scheme must be a valid '{1}' scheme.</value>
   </data>
-  <data name="InvalidMediaRange" xml:space="preserve">
-    <value>The value '{0}' is not a valid media range.</value>
-  </data>
   <data name="MimeMultipartParserBadBoundary" xml:space="preserve">
     <value>MIME multipart boundary cannot end with an empty space.</value>
   </data>

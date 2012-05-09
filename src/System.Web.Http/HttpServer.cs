@@ -1,20 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
-using System.Web.Http.Metadata;
 using System.Web.Http.Properties;
-using System.Web.Http.Tracing;
-using System.Web.Http.Validation;
 
 namespace System.Web.Http
 {
@@ -167,15 +161,6 @@ namespace System.Web.Http
             LazyInitializer.EnsureInitialized(ref _initializationTarget, ref _initialized, ref _initializationLock, () =>
             {
                 Initialize();
-
-                // Attach tracing before creating pipeline to allow injection of message handlers
-                ITraceManager traceManager = _configuration.Services.GetTraceManager();
-                Contract.Assert(traceManager != null);
-                traceManager.Initialize(_configuration);
-
-                // Create pipeline
-                InnerHandler = HttpClientFactory.CreatePipeline(_dispatcher, _configuration.MessageHandlers);
-
                 return null;
             });
         }
@@ -189,18 +174,12 @@ namespace System.Web.Http
         /// </remarks>
         protected virtual void Initialize()
         {
-            // Register the default IRequiredMemberSelector for formatters that haven't been assigned one
-            ModelMetadataProvider metadataProvider = _configuration.Services.GetModelMetadataProvider();
-            IEnumerable<ModelValidatorProvider> validatorProviders = _configuration.Services.GetModelValidatorProviders();
-            IRequiredMemberSelector defaultRequiredMemberSelector = new ModelValidationRequiredMemberSelector(metadataProvider, validatorProviders);
+            // Do final initialization of the configuration.
+            // It is considered immutable from this point forward.
+            _configuration.Initializer(_configuration);
 
-            foreach (MediaTypeFormatter formatter in _configuration.Formatters)
-            {
-                if (formatter.RequiredMemberSelector == null)
-                {
-                    formatter.RequiredMemberSelector = defaultRequiredMemberSelector;
-                }
-            }
+            // Create pipeline
+            InnerHandler = HttpClientFactory.CreatePipeline(_dispatcher, _configuration.MessageHandlers);
         }
     }
 }

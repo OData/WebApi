@@ -1,16 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
+using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
+using System.Web.Http.Properties;
 using System.Web.Http.Services;
+using System.Web.Http.Tracing;
+using System.Web.Http.Validation;
 
 namespace System.Web.Http
 {
@@ -26,6 +32,7 @@ namespace System.Web.Http
         private readonly HttpFilterCollection _filters = new HttpFilterCollection();
 
         private IDependencyResolver _dependencyResolver = EmptyResolver.Instance;
+        private Action<HttpConfiguration> _initializer = DefaultInitializer; 
         private bool _disposed;
 
         /// <summary>
@@ -67,8 +74,42 @@ namespace System.Web.Http
             Services = settings.IsServiceCollectionInitialized ? settings.Services : configuration.Services;
             _formatters = settings.IsFormatterCollectionInitialized ? settings.Formatters : configuration.Formatters;
             ParameterBindingRules = settings.IsParameterBindingRuleCollectionInitialized ? settings.ParameterBindingRules : configuration.ParameterBindingRules;
+
+            // Use the original configuration's initializer so that its Initialize()
+            // will perform the same logic on this clone as on the original.
+            Initializer = configuration.Initializer;
         }
 
+        /// <summary>
+        /// Gets or sets the action that will perform final initialization
+        /// of the <see cref="HttpConfiguration"/> instance before it is used
+        /// to process requests.
+        /// </summary>
+        /// <remarks>The Action returned by this property will be called to perform
+        /// final initialization of an <see cref="HttpConfiguration"/> before it is
+        /// used to process a request.
+        /// <para>
+        /// The <see cref="HttpConfiguration"/> passed to this action should be
+        /// considered immutable after the action returns.
+        /// </para>
+        /// </remarks>
+        public Action<HttpConfiguration> Initializer
+        {
+            get
+            {
+                return _initializer;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _initializer = value;
+            }
+        }
+        
         /// <summary>
         /// Gets the list of filters that apply to all requests served using this HttpConfiguration instance.
         /// </summary>
@@ -174,6 +215,7 @@ namespace System.Web.Http
             return formatters;
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns the disposable object")]
         internal static HttpConfiguration ApplyControllerSettings(HttpControllerSettings settings, HttpConfiguration configuration)
         {
             if (!settings.IsFormatterCollectionInitialized && !settings.IsParameterBindingRuleCollectionInitialized && !settings.IsServiceCollectionInitialized)
@@ -181,7 +223,36 @@ namespace System.Web.Http
                 return configuration;
             }
 
-            return new HttpConfiguration(configuration, settings);
+            // Create a clone of the original configuration, including its initialization rules.
+            // Invoking Initialize therefore initializes the cloned config the same way as the original.
+            HttpConfiguration newConfiguration = new HttpConfiguration(configuration, settings);
+            newConfiguration.Initializer(newConfiguration);
+            return newConfiguration;
+        }
+        
+        private static void DefaultInitializer(HttpConfiguration configuration)
+        {
+            // Register the default IRequiredMemberSelector for formatters that haven't been assigned one
+            ModelMetadataProvider metadataProvider = configuration.Services.GetModelMetadataProvider();
+            IEnumerable<ModelValidatorProvider> validatorProviders = configuration.Services.GetModelValidatorProviders();
+            IRequiredMemberSelector defaultRequiredMemberSelector = new ModelValidationRequiredMemberSelector(metadataProvider, validatorProviders);
+
+            foreach (MediaTypeFormatter formatter in configuration.Formatters)
+            {
+                if (formatter.RequiredMemberSelector == null)
+                {
+                    formatter.RequiredMemberSelector = defaultRequiredMemberSelector;
+                }
+            }
+
+            // Initialize the tracing layer.
+            // This must be the last initialization code to execute
+            // because it alters the configuration and expects no
+            // further changes.  As a default service, we know it
+            // must be present.
+            ITraceManager traceManager = configuration.Services.GetTraceManager();
+            Contract.Assert(traceManager != null);
+            traceManager.Initialize(configuration);
         }
 
         internal bool ShouldIncludeErrorDetail(HttpRequestMessage request)

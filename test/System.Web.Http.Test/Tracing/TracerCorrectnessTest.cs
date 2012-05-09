@@ -64,7 +64,8 @@ namespace System.Web.Http.Tracing
                             "get_BodyModelValidator", "set_BodyModelValidator", 
                             "get_Descriptor",
                             // Cannot override but handled by overriding ErrorMessage
-                            "get_IsValid"
+                            "get_IsValid",
+                            "GetValue", "SetValue"
                         }
                     },
                     { typeof(FormUrlEncodedMediaTypeFormatter), typeof(FormUrlEncodedMediaTypeFormatterTracer), new string[] 
@@ -116,7 +117,8 @@ namespace System.Web.Http.Tracing
                             // Handled in base ctor
                             "get_Descriptor",
                             // Cannot override but handled by overriding ErrorMessage
-                            "get_IsValid"
+                            "get_IsValid",
+                            "GetValue", "SetValue",
                         }
                     },
                     { typeof(JsonMediaTypeFormatter), typeof(JsonMediaTypeFormatterTracer), new string[] 

@@ -91,6 +91,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>WebResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ProviderUserIdSerializationHelper.cs" />
     <Compile Include="Resources\OAuthResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

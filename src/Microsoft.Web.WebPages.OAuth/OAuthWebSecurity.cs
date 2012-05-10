@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -534,6 +533,46 @@ namespace Microsoft.Web.WebPages.OAuth
                 throw new InvalidOperationException();
             }
             return provider;
+        }
+
+        /// <summary>
+        /// Securely serializes a providerName/providerUserId pair.
+        /// </summary>
+        /// <param name="providerName">The provider name.</param>
+        /// <param name="providerUserId">The provider-specific user id.</param>
+        /// <returns>A cryptographically protected serialization of the inputs which is suitable for round-tripping.</returns>
+        /// <remarks>Do not persist the return value to permanent storage. This implementation is subject to change.</remarks>
+        public static string SerializeProviderUserId(string providerName, string providerUserId)
+        {
+            if (providerName == null)
+            {
+                throw new ArgumentNullException("providerName");
+            }
+            if (providerUserId == null)
+            {
+                throw new ArgumentNullException("providerUserId");
+            }
+
+            return ProviderUserIdSerializationHelper.ProtectData(providerName, providerUserId);
+        }
+
+        /// <summary>
+        /// Deserializes a string obtained from <see cref="SerializeProviderUserId(string, string)"/> back into a 
+        /// providerName/providerUserId pair.
+        /// </summary>
+        /// <param name="data">The input data.</param>
+        /// <param name="providerName">Will contain the deserialized provider name.</param>
+        /// <param name="providerUserId">Will contain the deserialized provider user id.</param>
+        /// <returns><c>True</c> if successful.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "This design is acceptable")]
+        public static bool TryDeserializeProviderUserId(string data, out string providerName, out string providerUserId)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            return ProviderUserIdSerializationHelper.UnprotectData(data, out providerName, out providerUserId);
         }
     }
 }

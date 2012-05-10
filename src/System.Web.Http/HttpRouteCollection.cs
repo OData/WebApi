@@ -125,19 +125,19 @@ namespace System.Web.Http
             return new HttpVirtualPathData(virtualPath.Route, virtualPathRoot + virtualPath.VirtualPath);
         }
 
-        public IHttpRoute CreateRoute(string routeTemplate, object defaults, object constraints, IDictionary<string, object> parameters)
+        public IHttpRoute CreateRoute(string routeTemplate, object defaults, object constraints)
         {
             IDictionary<string, object> dataTokens = new Dictionary<string, object>();
 
-            return CreateRoute(routeTemplate, GetTypeProperties(defaults), GetTypeProperties(constraints), dataTokens, parameters, handler: null);
+            return CreateRoute(routeTemplate, GetTypeProperties(defaults), GetTypeProperties(constraints), dataTokens, handler: null);
         }
 
-        public IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters)
+        public IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens)
         {
-            return CreateRoute(routeTemplate, defaults, constraints, dataTokens, parameters, handler: null);
+            return CreateRoute(routeTemplate, defaults, constraints, dataTokens, handler: null);
         }
 
-        public virtual IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters, HttpMessageHandler handler)
+        public virtual IHttpRoute CreateRoute(string routeTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, HttpMessageHandler handler)
         {
             HttpRouteValueDictionary routeDefaults = defaults != null ? new HttpRouteValueDictionary(defaults) : null;
             HttpRouteValueDictionary routeConstraints = constraints != null ? new HttpRouteValueDictionary(constraints) : null;

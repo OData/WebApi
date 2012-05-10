@@ -25,44 +25,49 @@ namespace System.Web.Http.WebHost.Routing
             _routeCollection = routeCollection;
         }
 
+        /// <inheritdoc/>
         public override string VirtualPathRoot
         {
             get { return HostingEnvironment.ApplicationVirtualPath; }
         }
 
+        /// <inheritdoc/>
         public override int Count
         {
             get { return _routeCollection.Count; }
         }
 
+        /// <inheritdoc/>
         public override IHttpRoute this[string name]
         {
             get
             {
-                Route route = _routeCollection[name] as Route;
+                HttpWebRoute route = _routeCollection[name] as HttpWebRoute;
                 if (route != null)
                 {
-                    return new HostedHttpRoute(route);
+                    return route.HttpRoute;
                 }
 
                 throw Error.KeyNotFound();
             }
         }
 
+        /// <inheritdoc/>
         public override IHttpRoute this[int index]
         {
             get
             {
-                Route route = _routeCollection[index] as Route;
+                HttpWebRoute route = _routeCollection[index] as HttpWebRoute;
                 if (route != null)
                 {
-                    return new HostedHttpRoute(route);
+                    return route.HttpRoute;
                 }
 
                 throw Error.ArgumentOutOfRange("index", index, SRResources.RouteCollectionOutOfRange);
             }
         }
 
+        /// <inheritdoc/>
         public override IHttpRouteData GetRouteData(HttpRequestMessage request)
         {
             if (request == null)
@@ -83,6 +88,7 @@ namespace System.Web.Http.WebHost.Routing
             return null;
         }
 
+        /// <inheritdoc/>
         public override IHttpVirtualPathData GetVirtualPath(HttpControllerContext controllerContext, string name, IDictionary<string, object> values)
         {
             if (controllerContext == null)
@@ -99,83 +105,93 @@ namespace System.Web.Http.WebHost.Routing
                 VirtualPathData virtualPathData = _routeCollection.GetVirtualPath(requestContext, name, routeValues);
                 if (virtualPathData != null)
                 {
-                    return new HostedHttpVirtualPathData(virtualPathData);
+                    return new HostedHttpVirtualPathData(virtualPathData, controllerContext.RouteData.Route);
                 }
             }
 
             return null;
         }
 
-        public override IHttpRoute CreateRoute(string uriTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, IDictionary<string, object> parameters, HttpMessageHandler handler)
+        /// <inheritdoc/>
+        public override IHttpRoute CreateRoute(string uriTemplate, IDictionary<string, object> defaults, IDictionary<string, object> constraints, IDictionary<string, object> dataTokens, HttpMessageHandler handler)
         {
-            RouteValueDictionary routeDefaults = defaults != null ? new RouteValueDictionary(defaults) : null;
-            RouteValueDictionary routeConstraints = constraints != null ? new RouteValueDictionary(constraints) : null;
-            RouteValueDictionary routeDataTokens = dataTokens != null ? new RouteValueDictionary(dataTokens) : null;
-            HttpWebRoute route = new HttpWebRoute(uriTemplate, routeDefaults, routeConstraints, routeDataTokens, HttpControllerRouteHandler.Instance);
-            return new HostedHttpRoute(route, handler);
+            return new HostedHttpRoute(uriTemplate, defaults, constraints, dataTokens, handler);
         }
 
+        /// <inheritdoc/>
         public override void Add(string name, IHttpRoute route)
         {
             _routeCollection.Add(name, route.ToRoute());
         }
 
+        /// <inheritdoc/>
         public override void Clear()
         {
             _routeCollection.Clear();
         }
 
+        /// <inheritdoc/>
         public override bool Contains(IHttpRoute item)
         {
-            HostedHttpRoute hostedHttpRoute = item as HostedHttpRoute;
-            if (hostedHttpRoute != null)
+            foreach (RouteBase route in _routeCollection)
             {
-                return _routeCollection.Contains(hostedHttpRoute.OriginalRoute);
+                HttpWebRoute webRoute = route as HttpWebRoute;
+                if (webRoute != null && webRoute.HttpRoute == item)
+                {
+                    return true;
+                }
             }
 
             return false;
         }
 
+        /// <inheritdoc/>
         public override bool ContainsKey(string name)
         {
             return _routeCollection[name] != null;
         }
 
+        /// <inheritdoc/>
         public override void CopyTo(IHttpRoute[] array, int arrayIndex)
         {
             throw NotSupportedByHostedRouteCollection();
         }
 
+        /// <inheritdoc/>
         public override void CopyTo(KeyValuePair<string, IHttpRoute>[] array, int arrayIndex)
         {
             throw NotSupportedByRouteCollection();
         }
 
+        /// <inheritdoc/>
         public override void Insert(int index, string name, IHttpRoute value)
         {
             throw NotSupportedByRouteCollection();
         }
 
+        /// <inheritdoc/>
         public override bool Remove(string name)
         {
             throw NotSupportedByRouteCollection();
         }
 
+        /// <inheritdoc/>
         public override IEnumerator<IHttpRoute> GetEnumerator()
         {
             // Here we only care about Web API routes.
             return _routeCollection
                 .OfType<HttpWebRoute>()
-                .Select(httpWebRoute => new HostedHttpRoute(httpWebRoute))
+                .Select(httpWebRoute => httpWebRoute.HttpRoute)
                 .GetEnumerator();
         }
 
+        /// <inheritdoc/>
         public override bool TryGetValue(string name, out IHttpRoute route)
         {
-            Route rt = _routeCollection[name] as Route;
+            HttpWebRoute rt = _routeCollection[name] as HttpWebRoute;
             if (rt != null)
             {
-                route = new HostedHttpRoute(rt);
+                route = rt.HttpRoute;
                 return true;
             }
 
@@ -185,7 +201,7 @@ namespace System.Web.Http.WebHost.Routing
 
         private static NotSupportedException NotSupportedByRouteCollection()
         {
-            return Error.NotSupported(SRResources.RouteCollectionNotSupported, typeof(RouteCollection).Name);
+            return Error.NotSupported(SRResources.RouteCollectionNotSupported, typeof(HostedHttpRouteCollection).Name);
         }
 
         private static NotSupportedException NotSupportedByHostedRouteCollection()

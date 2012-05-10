@@ -113,7 +113,6 @@ namespace System.Web.Http.Dispatcher
                                                   defaults: new Dictionary<string, object> { { "id", RouteParameter.Optional } },
                                                   constraints: null,
                                                   dataTokens: null,
-                                                  parameters: null,
                                                   handler: routeHandler);
             config.Routes.Add("default", route);
 

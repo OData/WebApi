@@ -138,7 +138,6 @@
     <Compile Include="Test\ImageExtensionsTest.cs" />
     <Compile Include="Test\SubmitButtonExtensionsTest.cs" />
     <Compile Include="Test\TypeHelpersTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.Web.Mvc\Microsoft.Web.Mvc.csproj">

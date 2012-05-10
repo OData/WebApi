@@ -72,7 +72,6 @@
     <Compile Include="PreComputedGridDataSourceTest.cs" />
     <Compile Include="WebCacheTest.cs" />
     <Compile Include="HelperResultTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerInfoTest.cs" />
     <Compile Include="WebGridDataSourceTest.cs" />
     <Compile Include="WebGridTest.cs" />

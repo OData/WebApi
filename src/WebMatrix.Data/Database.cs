@@ -83,7 +83,7 @@ namespace WebMatrix.Data
         {
             if (String.IsNullOrEmpty(commandText))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("commandText");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "commandText");
             }
 
             return QueryInternal(commandText, args).FirstOrDefault();
@@ -93,7 +93,7 @@ namespace WebMatrix.Data
         {
             if (String.IsNullOrEmpty(commandText))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("commandText");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "commandText");
             }
             // Return a readonly collection
             return QueryInternal(commandText, parameters).ToList().AsReadOnly();
@@ -139,7 +139,7 @@ namespace WebMatrix.Data
         {
             if (String.IsNullOrEmpty(commandText))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("commandText");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "commandText");
             }
 
             EnsureConnectionOpen();
@@ -166,7 +166,7 @@ namespace WebMatrix.Data
         {
             if (String.IsNullOrEmpty(commandText))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("commandText");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "commandText");
             }
 
             EnsureConnectionOpen();
@@ -232,7 +232,7 @@ namespace WebMatrix.Data
         {
             if (String.IsNullOrEmpty(connectionString))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("connectionString");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "connectionString");
             }
 
             return OpenConnectionStringInternal(providerName, connectionString);
@@ -242,7 +242,7 @@ namespace WebMatrix.Data
         {
             if (String.IsNullOrEmpty(name))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("name");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "name");
             }
             return OpenNamedConnection(name, _configurationManager);
         }

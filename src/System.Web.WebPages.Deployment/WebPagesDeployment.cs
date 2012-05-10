@@ -63,7 +63,7 @@ namespace System.Web.WebPages.Deployment
         {
             if (String.IsNullOrEmpty(path))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
 
             var binDirectory = GetBinDirectory(path);
@@ -103,7 +103,7 @@ namespace System.Web.WebPages.Deployment
         {
             if (String.IsNullOrEmpty(path))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
 
             return IsEnabled(_fileSystem, path, GetAppSettings(path));
@@ -117,7 +117,7 @@ namespace System.Web.WebPages.Deployment
         {
             if (String.IsNullOrEmpty(path))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
             return IsExplicitlyDisabled(GetAppSettings(path));
         }
@@ -187,7 +187,7 @@ namespace System.Web.WebPages.Deployment
         {
             if (String.IsNullOrEmpty(path))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
 
             var binDirectory = GetBinDirectory(path);

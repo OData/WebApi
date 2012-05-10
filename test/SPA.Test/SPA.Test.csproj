@@ -82,9 +82,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\src\SPA\SPA.csproj">
       <Project>{1ACEF677-B6A0-4680-A076-7893DE176D6B}</Project>
       <Name>SPA</Name>

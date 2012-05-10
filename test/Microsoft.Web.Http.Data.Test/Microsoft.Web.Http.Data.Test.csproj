@@ -94,7 +94,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Northwind.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\CatalogController.cs" />
     <Compile Include="TestHelpers.cs" />
   </ItemGroup>

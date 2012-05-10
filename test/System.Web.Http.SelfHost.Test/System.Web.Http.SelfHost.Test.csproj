@@ -80,7 +80,6 @@
     <Compile Include="HttpSelfHostConfigurationTest.cs" />
     <Compile Include="HttpSelfHostServerTest.cs" />
     <Compile Include="MaxHttpCollectionKeyTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpSelfHostResponseTest.cs" />
     <Compile Include="ServiceModel\TransferModeHelperTest.cs" />
     <Compile Include="ServiceModel\HostNameComparisonModeHelperTest.cs" />

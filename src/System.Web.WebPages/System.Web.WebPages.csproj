@@ -70,14 +70,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="..\ExceptionHelper.cs">
-      <Link>Common\ExceptionHelper.cs</Link>
+    <Compile Include="..\Common\HashCodeCombiner.cs">
+      <Link>Common\HashCodeCombiner.cs</Link>
     </Compile>
     <Compile Include="..\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
-    </Compile>
-    <Compile Include="..\HashCodeCombiner.cs">
-      <Link>Common\HashCodeCombiner.cs</Link>
     </Compile>
     <Compile Include="..\TransparentCommonAssemblyInfo.cs">
       <Link>Properties\TransparentCommonAssemblyInfo.cs</Link>
@@ -87,9 +84,6 @@
     <Compile Include="ApplicationParts\DictionaryBasedVirtualPathFactory.cs" />
     <Compile Include="ApplicationParts\IResourceAssembly.cs" />
     <Compile Include="ApplicationParts\LazyAction.cs" />
-    <Compile Include="..\MimeMapping.cs">
-      <Link>Common\MimeMapping.cs</Link>
-    </Compile>
     <Compile Include="ApplicationParts\ResourceAssembly.cs" />
     <Compile Include="ApplicationParts\ResourceHandler.cs" />
     <Compile Include="ApplicationParts\ResourceRouteHandler.cs" />
@@ -149,6 +143,8 @@
     </Compile>
     <Compile Include="Instrumentation\PageInstrumentationServiceAdapter.cs" />
     <Compile Include="Instrumentation\PositionTagged.cs" />
+    <Compile Include="IVirtualPathUtility.cs" />
+    <Compile Include="MimeMapping.cs" />
     <Compile Include="Mvc\ModelClientValidationEqualToRule.cs" />
     <Compile Include="Mvc\ModelClientValidationMembershipPasswordRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRangeRule.cs" />
@@ -205,6 +201,7 @@
     <Compile Include="TemplateStack.cs" />
     <Compile Include="Utils\CultureUtil.cs" />
     <Compile Include="Utils\PathUtil.cs" />
+    <Compile Include="VirtualPathUtilityWrapper.cs" />
     <Compile Include="WebPageHttpModule.cs" />
     <Compile Include="HelperPage.cs" />
     <Compile Include="HelperResult.cs" />
@@ -236,12 +233,6 @@
     <Compile Include="Utils\BuildManagerExceptionUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebPage.cs" />
-    <Compile Include="..\IVirtualPathUtility.cs">
-      <Link>Common\IVirtualPathUtility.cs</Link>
-    </Compile>
-    <Compile Include="..\VirtualPathUtilityWrapper.cs">
-      <Link>Common\VirtualPathUtilityWrapper.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

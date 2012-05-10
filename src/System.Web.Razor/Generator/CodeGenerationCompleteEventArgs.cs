@@ -11,7 +11,7 @@ namespace System.Web.Razor.Generator
         {
             if (String.IsNullOrEmpty(virtualPath))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("virtualPath");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "virtualPath");
             }
             if (generatedCode == null)
             {

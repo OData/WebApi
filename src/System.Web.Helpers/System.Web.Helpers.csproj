@@ -56,9 +56,6 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\DynamicHelper.cs">
-      <Link>Common\DynamicHelper.cs</Link>
-    </Compile>
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
@@ -73,6 +70,7 @@
     <Compile Include="Common\VirtualPathUtil.cs" />
     <Compile Include="ConversionUtil.cs" />
     <Compile Include="Crypto.cs" />
+    <Compile Include="DynamicHelper.cs" />
     <Compile Include="DynamicJavaScriptConverter.cs" />
     <Compile Include="DynamicJsonArray.cs" />
     <Compile Include="DynamicJsonObject.cs" />

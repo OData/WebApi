@@ -60,7 +60,6 @@
     <Compile Include="DeploymentUtil.cs" />
     <Compile Include="PreApplicationStartCodeTest.cs" />
     <Compile Include="TestFileSystem.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebPagesDeploymentTest.cs">
       <SubType>Code</SubType>
     </Compile>

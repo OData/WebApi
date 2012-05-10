@@ -345,7 +345,7 @@ namespace System.Web.WebPages
         {
             if (String.IsNullOrEmpty(path))
             {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
 
             return new HelperResult(writer =>

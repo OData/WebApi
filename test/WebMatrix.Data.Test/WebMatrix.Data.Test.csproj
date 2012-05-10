@@ -82,7 +82,6 @@
     <Compile Include="Mocks\MockConnectionConfiguration.cs" />
     <Compile Include="Mocks\MockDbFileHandler.cs" />
     <Compile Include="Mocks\MockDbProviderFactory.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DatabaseTest.cs" />
   </ItemGroup>
   <ItemGroup>

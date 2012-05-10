@@ -74,7 +74,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PreAppStartCodeTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

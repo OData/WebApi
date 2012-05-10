@@ -63,7 +63,6 @@
   <ItemGroup>
     <Compile Include="MockDatabase.cs" />
     <Compile Include="PreApplicationStartCodeTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleMembershipProviderTest.cs" />
     <Compile Include="WebSecurityTest.cs" />
   </ItemGroup>

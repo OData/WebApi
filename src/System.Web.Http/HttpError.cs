@@ -9,10 +9,10 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace System.Web.Http.Dispatcher
+namespace System.Web.Http
 {
     /// <summary>
-    /// Defines a container for arbitrary error information.
+    /// Defines a serializable container for arbitrary error information.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "This type is only a dictionary to get the right serialization format")]
     [SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable", Justification = "DCS does not support IXmlSerializable types that are also marked as [Serializable]")]
@@ -20,6 +20,8 @@ namespace System.Web.Http.Dispatcher
     public sealed class HttpError : Dictionary<string, object>, IXmlSerializable
     {
         private const string MessageKey = "Message";
+        private const string MessageDetailKey = "MessageDetail";
+        private const string ModelStateKey = "ModelState";
         private const string ExceptionMessageKey = "ExceptionMessage";
         private const string ExceptionTypeKey = "ExceptionType";
         private const string StackTraceKey = "StackTrace";
@@ -35,9 +37,6 @@ namespace System.Web.Http.Dispatcher
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpError"/> class containing error message <paramref name="message"/>.
         /// </summary>
-        /// <remarks>
-        /// <paramref name="message"/> can be sent to remote clients, so avoid disclosing any security-sensitive information.
-        /// </remarks>
         /// <param name="message">The error message to associate with this instance.</param>
         public HttpError(string message)
         {
@@ -53,21 +52,25 @@ namespace System.Web.Http.Dispatcher
         /// Initializes a new instance of the <see cref="HttpError"/> class for <paramref name="exception"/>.
         /// </summary>
         /// <param name="exception">The exception to use for error information.</param>
-        public HttpError(Exception exception)
+        /// <param name="includeErrorDetail"><c>true</c> to include the exception information in the error; <c>false</c> otherwise</param>
+        public HttpError(Exception exception, bool includeErrorDetail)
         {
             if (exception == null)
             {
                 throw Error.ArgumentNull("exception");
             }
 
-            Message = SRResources.ExceptionOccurred;
+            Message = SRResources.ErrorOccurred;
 
-            Add(ExceptionMessageKey, exception.Message);
-            Add(ExceptionTypeKey, exception.GetType().FullName);
-            Add(StackTraceKey, exception.StackTrace);
-            if (exception.InnerException != null)
+            if (includeErrorDetail)
             {
-                Add(InnerExceptionKey, exception.InnerException);
+                Add(ExceptionMessageKey, exception.Message);
+                Add(ExceptionTypeKey, exception.GetType().FullName);
+                Add(StackTraceKey, exception.StackTrace);
+                if (exception.InnerException != null)
+                {
+                    Add(InnerExceptionKey, exception.InnerException);
+                }
             }
         }
 
@@ -75,7 +78,8 @@ namespace System.Web.Http.Dispatcher
         /// Initializes a new instance of the <see cref="HttpError"/> class for <paramref name="modelState"/>.
         /// </summary>
         /// <param name="modelState">The invalid model state to use for error information.</param>
-        public HttpError(ModelStateDictionary modelState)
+        /// <param name="includeErrorDetail"><c>true</c> to include exception messages in the error; <c>false</c> otherwise</param>
+        public HttpError(ModelStateDictionary modelState, bool includeErrorDetail)
         {
             if (modelState == null)
             {
@@ -87,26 +91,52 @@ namespace System.Web.Http.Dispatcher
                 throw Error.Argument("modelState", SRResources.ValidModelState);
             }
 
-            Message = SRResources.InvalidModelState;
+            Message = SRResources.BadRequest;
+
+            HttpError modelStateError = new HttpError();
             foreach (KeyValuePair<string, ModelState> keyModelStatePair in modelState)
             {
                 string key = keyModelStatePair.Key;
                 ModelErrorCollection errors = keyModelStatePair.Value.Errors;
                 if (errors != null && errors.Count > 0)
                 {
-                    // Combine the error messages for the key to avoid duplicate keys being added to the dictionary
-                    string commaSeparatedErrorString = String.Join(", ", errors.Select(error => error.Exception == null ? error.ErrorMessage : error.Exception.ToString()));
-                    Add(key, commaSeparatedErrorString);
+                    IEnumerable<string> errorMessages = errors.Select(error =>
+                    {
+                        if (includeErrorDetail && error.Exception != null)
+                        {
+                            return error.Exception.Message;
+                        }
+                        else
+                        {
+                            return String.IsNullOrEmpty(error.ErrorMessage) ? SRResources.ErrorOccurred : error.ErrorMessage;
+                        }
+                    }).ToArray();
+                    modelStateError.Add(key, errorMessages);
                 }
             }
+
+            Add(ModelStateKey, modelStateError);                        
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpError"/> class containing error message <paramref name="message"/> and error message detail <paramref name="messageDetail"/>.
+        /// </summary>
+        /// <param name="message">The error message to associate with this instance.</param>
+        /// <param name="messageDetail">The error message detail to associate with this instance.</param>
+        internal HttpError(string message, string messageDetail)
+            : this(message)
+        {
+            if (messageDetail == null)
+            {
+                throw Error.ArgumentNull("message");
+            }
+
+            Add(MessageDetailKey, messageDetail);
         }
 
         /// <summary>
         /// The error message associated with this instance.
         /// </summary>
-        /// <remarks>
-        /// This message can be sent to remote clients, so avoid disclosing any security-sensitive information.
-        /// </remarks>
         public string Message
         {
             get
@@ -122,15 +152,6 @@ namespace System.Web.Http.Dispatcher
             }
 
             set { this[MessageKey] = value; }
-        }
-
-        /// <summary>
-        /// Returns a value indicating whether or not this instance contains error information beyond the error message
-        /// </summary>
-        /// <returns><c>true</c> if this instance contains information that isn't in the error message, <c>false</c> otherwise</returns>
-        internal bool ContainsErrorDetail()
-        {
-            return Keys.Any(key => key != MessageKey);
         }
 
         XmlSchema IXmlSerializable.GetSchema()
@@ -149,7 +170,7 @@ namespace System.Web.Http.Dispatcher
             reader.ReadStartElement();
             while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
             {
-                string key = reader.LocalName;
+                string key = XmlConvert.DecodeName(reader.LocalName);
                 reader.ReadStartElement();
                 string value = reader.Value;
                 reader.Read();
@@ -167,10 +188,18 @@ namespace System.Web.Http.Dispatcher
             {
                 string key = keyValuePair.Key;
                 object value = keyValuePair.Value;
-                writer.WriteStartElement(key);
+                writer.WriteStartElement(XmlConvert.EncodeLocalName(key));
                 if (value != null)
                 {
-                    writer.WriteValue(value);
+                    HttpError innerError = value as HttpError;
+                    if (innerError == null)
+                    {
+                        writer.WriteValue(value);
+                    }
+                    else
+                    {
+                        ((IXmlSerializable)innerError).WriteXml(writer);
+                    }
                 }
                 writer.WriteEndElement();
             }

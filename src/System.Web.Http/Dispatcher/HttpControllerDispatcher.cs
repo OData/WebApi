@@ -89,13 +89,19 @@ namespace System.Web.Http.Dispatcher
             HttpControllerDescriptor httpControllerDescriptor = ControllerSelector.SelectController(request);
             if (httpControllerDescriptor == null)
             {
-                return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoControllerSelected));
+                return TaskHelpers.FromResult(request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
+                    SRResources.NoControllerSelected));
             }
 
             IHttpController httpController = httpControllerDescriptor.CreateController(request);
             if (httpController == null)
             {
-                return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoControllerCreated));
+                return TaskHelpers.FromResult(request.CreateErrorResponse(
+                    HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
+                    SRResources.NoControllerCreated));
             }
 
             // Set the controller configuration on the request properties

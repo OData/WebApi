@@ -249,7 +249,7 @@ namespace System.Net.Http.Formatting
                                 jsonSerializer.Error += (sender, e) =>
                                 {
                                     Exception exception = e.ErrorContext.Error;
-                                    formatterLogger.LogError(e.ErrorContext.Path, exception.Message);
+                                    formatterLogger.LogError(e.ErrorContext.Path, exception);
                                     e.ErrorContext.Handled = true;
                                 };
                             }
@@ -263,7 +263,7 @@ namespace System.Net.Http.Formatting
                     {
                         throw;
                     }
-                    formatterLogger.LogError(String.Empty, e.Message);
+                    formatterLogger.LogError(String.Empty, e);
                     return GetDefaultValueForType(type);
                 }
             });

@@ -258,7 +258,7 @@ namespace System.Web.Http.Dispatcher
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, ex.Response.StatusCode);
-            string response = ex.Response.Content.ReadAsAsync<HttpError>().Result.Message;
+            string response = ex.Response.Content.ReadAsAsync<HttpError>().Result["MessageDetail"] as string;
             Assert.Equal("No type was found that matches the controller named 'Sample'.", response);
         }
 
@@ -283,17 +283,16 @@ namespace System.Web.Http.Dispatcher
             DefaultHttpControllerSelector selector = new DefaultHttpControllerSelector(configuration);
 
             // Act 
-            var ex = Assert.Throws<HttpResponseException>(
+            var ex = Assert.Throws<InvalidOperationException>(
                 () => selector.SelectController(request));
 
             // Assert
-            Assert.Equal(HttpStatusCode.InternalServerError, ex.Response.StatusCode);
-            string response = ex.Response.Content.ReadAsAsync<HttpError>().Result.Message;
+            string message = ex.Message;
             Assert.Contains(
                 "Multiple types were found that match the controller named 'Sample'. This can happen if the route that services this request ('') found multiple controllers defined with the same name but differing namespaces, which is not supported.\r\n\r\nThe request for 'Sample' has found the following matching controllers:",
-                response);
+                message);
 
-            var duplicateControllers = response.Split(':')[1].Split('\n').Select(str => str.Trim());
+            var duplicateControllers = message.Split(':')[1].Split('\n').Select(str => str.Trim());
             Assert.Contains("FullSampleController", duplicateControllers);
             Assert.Contains("FullSampLeController", duplicateControllers);
             Assert.Contains("FullSAmpLEController", duplicateControllers);

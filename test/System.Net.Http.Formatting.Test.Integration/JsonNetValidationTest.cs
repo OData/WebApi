@@ -55,7 +55,7 @@ namespace System.Net.Http.Formatting
 
             JsonNetSerializationTest.Deserialize(json, type, formatter, mockLogger.Object);
 
-            mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(expectedErrors));
+            mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<Exception>()), Times.Exactly(expectedErrors));
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace System.Net.Http.Formatting
             JsonNetSerializationTest.Deserialize(json, typeof(Nest), formatter, mockLogger.Object);
 
             // Assert
-            mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+            mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<Exception>()), Times.Once());
         }
     }
 

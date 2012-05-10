@@ -57,6 +57,7 @@ namespace System.Web.Http.Dispatcher
             {
                 throw new HttpResponseException(request.CreateErrorResponse(
                     HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
                     Error.Format(SRResources.ControllerNameNotFound, request.RequestUri)));
             }
 
@@ -76,14 +77,13 @@ namespace System.Web.Http.Dispatcher
                 // no matching types
                 throw new HttpResponseException(request.CreateErrorResponse(
                     HttpStatusCode.NotFound,
+                    Error.Format(SRResources.ResourceNotFound, request.RequestUri),
                     Error.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName)));
             }
             else
             {
                 // multiple matching types
-                throw new HttpResponseException(request.CreateErrorResponse(
-                    HttpStatusCode.InternalServerError,
-                    CreateAmbiguousControllerExceptionMessage(request.GetRouteData().Route, controllerName, matchingTypes)));
+                throw CreateAmbiguousControllerException(request.GetRouteData().Route, controllerName, matchingTypes);
             }
         }
 
@@ -111,7 +111,7 @@ namespace System.Web.Http.Dispatcher
             return controllerName;
         }
 
-        private static string CreateAmbiguousControllerExceptionMessage(IHttpRoute route, string controllerName, ICollection<Type> matchingTypes)
+        private static Exception CreateAmbiguousControllerException(IHttpRoute route, string controllerName, ICollection<Type> matchingTypes)
         {
             Contract.Assert(route != null);
             Contract.Assert(controllerName != null);
@@ -125,7 +125,8 @@ namespace System.Web.Http.Dispatcher
                 typeList.Append(matchedType.FullName);
             }
 
-            return Error.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, route.RouteTemplate, typeList);
+            string errorMessage = Error.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, route.RouteTemplate, typeList);
+            return new InvalidOperationException(errorMessage);
         }
 
         private ConcurrentDictionary<string, HttpControllerDescriptor> InitializeControllerInfoCache()

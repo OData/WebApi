@@ -292,7 +292,7 @@ namespace System.Web.Http
             Assert.Equal(HttpStatusCode.NotFound, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("No action was found on the controller 'UsersController' that matches the name 'invalidOp'.",
-                ((HttpError)content.Value).Message);
+                ((HttpError)content.Value)["MessageDetail"]);
         }
 
         [Fact]
@@ -672,7 +672,7 @@ namespace System.Web.Http
         public void ApiControllerCannotBeReused()
         {
             // Arrange
-            var config = new HttpConfiguration();
+            var config = new HttpConfiguration() { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always };
             var singletonController = new Mock<ApiController> { CallBase = true }.Object;
             var mockDescriptor = new Mock<HttpControllerDescriptor>(config, "MyMock", singletonController.GetType()) { CallBase = true };
             mockDescriptor.Setup(d => d.CreateController(It.IsAny<HttpRequestMessage>())).Returns(singletonController);
@@ -680,7 +680,6 @@ namespace System.Web.Http
             mockSelector.Setup(s => s.SelectController(It.IsAny<HttpRequestMessage>())).Returns(mockDescriptor.Object);
             config.Routes.MapHttpRoute("default", "", new { controller = "MyMock" });
             config.Services.Replace(typeof(IHttpControllerSelector), mockSelector.Object);
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             var server = new HttpServer(config);
             var invoker = new HttpMessageInvoker(server);
 

@@ -19,10 +19,10 @@ namespace System.Web.Http.Dispatcher
                 () => new HttpError(message: null),
                 "message");
             Assert.ThrowsArgumentNull(
-                () => new HttpError(exception: null),
+                () => new HttpError(exception: null, includeErrorDetail: false),
                 "exception");
             Assert.ThrowsArgumentNull(
-                () => new HttpError(modelState: null),
+                () => new HttpError(modelState: null, includeErrorDetail: false),
                 "modelState");
         }
 
@@ -35,11 +35,11 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void ExceptionConstructor_AddsCorrectDictionaryItems()
+        public void ExceptionConstructorWithDetail_AddsCorrectDictionaryItems()
         {
-            HttpError error = new HttpError(new ArgumentException("error", new Exception()));
+            HttpError error = new HttpError(new ArgumentException("error", new Exception()), true);
 
-            Assert.Contains(new KeyValuePair<string, object>("Message", "An exception has occurred."), error);
+            Assert.Contains(new KeyValuePair<string, object>("Message", "An error has occurred."), error);
             Assert.Contains(new KeyValuePair<string, object>("ExceptionMessage", "error"), error);
             Assert.Contains(new KeyValuePair<string, object>("ExceptionType", "System.ArgumentException"), error);
             Assert.True(error.ContainsKey("StackTrace"));
@@ -47,20 +47,55 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void ModelStateConstructor_AddsCorrectDictionaryItems()
+        public void ModelStateConstructorWithDetail_AddsCorrectDictionaryItems()
         {
             ModelStateDictionary modelState = new ModelStateDictionary();
             modelState.AddModelError("[0].Name", "error1");
             modelState.AddModelError("[0].Name", "error2");
             modelState.AddModelError("[0].Address", "error");
-            modelState.AddModelError("[2].Name", new Exception("exception"));
+            modelState.AddModelError("[2].Name", new Exception("OH NO"));
 
-            HttpError error = new HttpError(modelState);
+            HttpError error = new HttpError(modelState, true);
+            HttpError modelStateError = error["ModelState"] as HttpError;
 
-            Assert.Contains(new KeyValuePair<string, object>("Message", "The model state is invalid."), error);
-            Assert.Contains(new KeyValuePair<string, object>("[0].Name", "error1, error2"), error);
-            Assert.Contains(new KeyValuePair<string, object>("[0].Address", "error"), error);
-            Assert.True(error.ContainsKey("[2].Name"));
+            Assert.Contains(new KeyValuePair<string, object>("Message", "The request is invalid."), error);
+            Assert.Contains("error1", modelStateError["[0].Name"] as IEnumerable<string>);
+            Assert.Contains("error2", modelStateError["[0].Name"] as IEnumerable<string>);
+            Assert.Contains("error", modelStateError["[0].Address"] as IEnumerable<string>);
+            Assert.True(modelStateError.ContainsKey("[2].Name"));
+            Assert.Contains("OH NO", modelStateError["[2].Name"] as IEnumerable<string>);
+        }
+
+        [Fact]
+        public void ExceptionConstructorWithoutDetail_AddsCorrectDictionaryItems()
+        {
+            HttpError error = new HttpError(new ArgumentException("error", new Exception()), false);
+
+            Assert.Contains(new KeyValuePair<string, object>("Message", "An error has occurred."), error);
+            Assert.False(error.ContainsKey("ExceptionMessage"));
+            Assert.False(error.ContainsKey("ExceptionType"));
+            Assert.False(error.ContainsKey("StackTrace"));
+            Assert.False(error.ContainsKey("InnerException"));
+        }
+
+        [Fact]
+        public void ModelStateConstructorWithoutDetail_AddsCorrectDictionaryItems()
+        {
+            ModelStateDictionary modelState = new ModelStateDictionary();
+            modelState.AddModelError("[0].Name", "error1");
+            modelState.AddModelError("[0].Name", "error2");
+            modelState.AddModelError("[0].Address", "error");
+            modelState.AddModelError("[2].Name", new Exception("OH NO"));
+
+            HttpError error = new HttpError(modelState, false);
+            HttpError modelStateError = error["ModelState"] as HttpError;
+
+            Assert.Contains(new KeyValuePair<string, object>("Message", "The request is invalid."), error);
+            Assert.Contains("error1", modelStateError["[0].Name"] as IEnumerable<string>);
+            Assert.Contains("error2", modelStateError["[0].Name"] as IEnumerable<string>);
+            Assert.Contains("error", modelStateError["[0].Address"] as IEnumerable<string>);
+            Assert.True(modelStateError.ContainsKey("[2].Name"));
+            Assert.DoesNotContain("OH NO", modelStateError["[2].Name"] as IEnumerable<string>);
         }
 
         [Fact]

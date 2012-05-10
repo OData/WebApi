@@ -130,7 +130,7 @@
     <Compile Include="ActionNameAttribute.cs" />
     <Compile Include="Controllers\ReflectedHttpActionDescriptor.cs" />
     <Compile Include="AllowAnonymousAttribute.cs" />
-    <Compile Include="Dispatcher\HttpError.cs" />
+    <Compile Include="HttpError.cs" />
     <Compile Include="HttpResponseException.cs" />
     <Compile Include="ModelBinding\HttpRequestParameterBinding.cs" />
     <Compile Include="ModelBinding\IValueProviderParameterBinding.cs" />

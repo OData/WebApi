@@ -151,6 +151,15 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The request is invalid..
+        /// </summary>
+        internal static string BadRequest {
+            get {
+                return ResourceManager.GetString("BadRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot reuse an &apos;{0}&apos; instance. &apos;{0}&apos; has to be constructed per incoming message. Check your custom &apos;{1}&apos; and make sure that it will not manufacture the same instance..
         /// </summary>
         internal static string CannotSupportSingletonInstance {
@@ -174,15 +183,6 @@ namespace System.Web.Http.Properties {
         internal static string CloseParenOrOperatorExpected {
             get {
                 return ResourceManager.GetString("CloseParenOrOperatorExpected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} {1}.
-        /// </summary>
-        internal static string CombineErrorMessages {
-            get {
-                return ResourceManager.GetString("CombineErrorMessages", resourceCulture);
             }
         }
         
@@ -297,20 +297,11 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For more information about the error, consider setting IncludeErrorDetailPolicy on your server&apos;s HttpConfiguration to Always..
+        ///   Looks up a localized string similar to An error has occurred..
         /// </summary>
-        internal static string EnableErrorDetailHint {
+        internal static string ErrorOccurred {
             get {
-                return ResourceManager.GetString("EnableErrorDetailHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to An exception has occurred..
-        /// </summary>
-        internal static string ExceptionOccurred {
-            get {
-                return ResourceManager.GetString("ExceptionOccurred", resourceCulture);
+                return ResourceManager.GetString("ErrorOccurred", resourceCulture);
             }
         }
         
@@ -378,7 +369,7 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This HttpServer instance has already been disposed..
+        ///   Looks up a localized string similar to The server is no longer available..
         /// </summary>
         internal static string HttpServerDisposed {
             get {
@@ -446,15 +437,6 @@ namespace System.Web.Http.Properties {
         internal static string InvalidIntegerLiteral {
             get {
                 return ResourceManager.GetString("InvalidIntegerLiteral", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The model state is invalid..
-        /// </summary>
-        internal static string InvalidModelState {
-            get {
-                return ResourceManager.GetString("InvalidModelState", resourceCulture);
             }
         }
         
@@ -743,6 +725,15 @@ namespace System.Web.Http.Properties {
         internal static string RequestNotAuthorized {
             get {
                 return ResourceManager.GetString("RequestNotAuthorized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No HTTP resource was found that matches the request URI &apos;{0}&apos;..
+        /// </summary>
+        internal static string ResourceNotFound {
+            get {
+                return ResourceManager.GetString("ResourceNotFound", resourceCulture);
             }
         }
         
@@ -1116,7 +1107,7 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The query specified in the URI is not valid. {0}.
+        ///   Looks up a localized string similar to The query specified in the URI is not valid..
         /// </summary>
         internal static string UriQueryStringInvalid {
             get {

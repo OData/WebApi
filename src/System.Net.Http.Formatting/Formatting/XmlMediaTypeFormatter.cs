@@ -266,7 +266,7 @@ namespace System.Net.Http.Formatting
                     {
                         throw;
                     }
-                    formatterLogger.LogError(String.Empty, e.Message);
+                    formatterLogger.LogError(String.Empty, e);
                     return GetDefaultValueForType(type);
                 }
             });

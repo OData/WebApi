@@ -137,7 +137,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                     Assert.Equal(
                         String.Format(SRResources.DefaultControllerFactory_ControllerNameNotFound, controllerName),
-                        response.Content.ReadAsAsync<HttpError>().Result.Message);
+                        response.Content.ReadAsAsync<HttpError>().Result["MessageDetail"]);
                 }
             );
         }
@@ -158,7 +158,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                     Assert.Equal(
                         String.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, controllerName, actionName),
-                        response.Content.ReadAsAsync<HttpError>().Result.Message);
+                        response.Content.ReadAsAsync<HttpError>().Result["MessageDetail"]);
                 }
             );
         }
@@ -199,7 +199,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     Assert.Contains(
                         String.Format(SRResources.ApiControllerActionSelector_AmbiguousMatch, String.Empty),
-                        response.Content.ReadAsAsync<HttpError>().Result.Message);
+                        response.Content.ReadAsAsync<HttpError>().Result["ExceptionMessage"] as string);
                 }
             );
         }
@@ -219,7 +219,7 @@ namespace System.Web.Http
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     Assert.Contains(
                         String.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, "{controller}", String.Empty),
-                        response.Content.ReadAsAsync<HttpError>().Result.Message);
+                        response.Content.ReadAsAsync<HttpError>().Result["ExceptionMessage"] as string);
                 }
             );
         }

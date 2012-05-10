@@ -300,7 +300,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
     <value>Unterminated string literal</value>
   </data>
   <data name="UriQueryStringInvalid" xml:space="preserve">
-    <value>The query specified in the URI is not valid. {0}</value>
+    <value>The query specified in the URI is not valid.</value>
   </data>
   <data name="ValueProviderFactory_Cannot_Create" xml:space="preserve">
     <value>Could not create a '{0}' from '{1}'. Please ensure it derives from '{0}' and has a public parameterless constructor.</value>
@@ -462,7 +462,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
     <value>No route providing a controller name was found to match request URI '{0}'</value>
   </data>
   <data name="HttpServerDisposed" xml:space="preserve">
-    <value>This HttpServer instance has already been disposed.</value>
+    <value>The server is no longer available.</value>
   </data>
   <data name="NoControllerCreated" xml:space="preserve">
     <value>No controller was created to handle this request.</value>
@@ -476,20 +476,16 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="RequestNotAuthorized" xml:space="preserve">
     <value>Authorization has been denied for this request.</value>
   </data>
-  <data name="InvalidModelState" xml:space="preserve">
-    <value>The model state is invalid.</value>
-  </data>
   <data name="ValidModelState" xml:space="preserve">
     <value>The model state is valid.</value>
   </data>
-  <data name="CombineErrorMessages" xml:space="preserve">
-    <value>{0} {1}</value>
-    <comment>Defines a way to combine two error messages</comment>
+  <data name="ErrorOccurred" xml:space="preserve">
+    <value>An error has occurred.</value>
   </data>
-  <data name="EnableErrorDetailHint" xml:space="preserve">
-    <value>For more information about the error, consider setting IncludeErrorDetailPolicy on your server's HttpConfiguration to Always.</value>
+  <data name="BadRequest" xml:space="preserve">
+    <value>The request is invalid.</value>
   </data>
-  <data name="ExceptionOccurred" xml:space="preserve">
-    <value>An exception has occurred.</value>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>No HTTP resource was found that matches the request URI '{0}'.</value>
   </data>
 </root>

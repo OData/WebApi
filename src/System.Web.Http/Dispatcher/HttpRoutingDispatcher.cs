@@ -71,7 +71,10 @@ namespace System.Web.Http.Dispatcher
                 }
                 else
                 {
-                    return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoRouteData));
+                    return TaskHelpers.FromResult(request.CreateErrorResponse(
+                        HttpStatusCode.NotFound,
+                        Error.Format(SRResources.ResourceNotFound, request.RequestUri),
+                        SRResources.NoRouteData));
                 }
             }
 

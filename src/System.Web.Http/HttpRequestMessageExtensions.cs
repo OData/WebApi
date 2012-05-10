@@ -139,8 +139,8 @@ namespace System.Net.Http
         /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
-        /// This method requires that <paramref name="request"/> has been associated with an instance of <see cref="HttpConfiguration"/>.
-        /// <paramref name="message"/> can be sent to remote clients, so avoid disclosing any security-sensitive information.
+        /// This method requires that <paramref name="request"/> has been associated with an instance of 
+        /// <see cref="HttpConfiguration"/>.
         /// </remarks>
         /// <param name="request">The request.</param>
         /// <param name="statusCode">The status code of the created response.</param>
@@ -149,6 +149,52 @@ namespace System.Net.Http
         public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, string message)
         {
             return request.CreateErrorResponse(statusCode, new HttpError(message));
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with message <paramref name="message"/>
+        /// and message detail <paramref name="messageDetail"/>.If no formatter is found, this method returns a response with 
+        /// status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of 
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="message">The error message. This message will always be seen by clients.</param>
+        /// <param name="messageDetail">The error message detail. This message will only be seen by clients if we should include error detail.</param>
+        /// <returns>An error response with error message <paramref name="message"/> and message detail <paramref name="messageDetail"/>
+        /// and status code <paramref name="statusCode"/>.</returns>
+        internal static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, string message, string messageDetail)
+        {
+            return request.CreateErrorResponse(statusCode, includeErrorDetail => includeErrorDetail ? new HttpError(message, messageDetail) : new HttpError(message));
+        }
+
+        /// <summary>
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with error message <paramref name="message"/>
+        /// for exception <paramref name="exception"/>. If no formatter is found, this method returns a response with status 406 NotAcceptable.
+        /// </summary>
+        /// <remarks>
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
+        /// <see cref="HttpConfiguration"/>.
+        /// </remarks>
+        /// <param name="request">The request.</param>
+        /// <param name="statusCode">The status code of the created response.</param>
+        /// <param name="message">The error message.</param>
+        /// <param name="exception">The exception.</param>
+        /// <returns>An error response for <paramref name="exception"/> with error message <paramref name="message"/>
+        /// and status code <paramref name="statusCode"/>.</returns>
+        public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, string message, Exception exception)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.CreateErrorResponse(statusCode, includeErrorDetail => new HttpError(exception, includeErrorDetail) { Message = message });
         }
 
         /// <summary>
@@ -166,7 +212,12 @@ namespace System.Net.Http
         /// <returns>An error response for <paramref name="exception"/> with status code <paramref name="statusCode"/>.</returns>
         public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, Exception exception)
         {
-            return request.CreateErrorResponse(statusCode, new HttpError(exception));
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.CreateErrorResponse(statusCode, includeErrorDetail => new HttpError(exception, includeErrorDetail));
         }
 
         /// <summary>
@@ -184,7 +235,12 @@ namespace System.Net.Http
         /// <returns>An error response for <paramref name="modelState"/> with status code <paramref name="statusCode"/>.</returns>
         public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, ModelStateDictionary modelState)
         {
-            return request.CreateErrorResponse(statusCode, new HttpError(modelState));
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.CreateErrorResponse(statusCode, includeErrorDetail => new HttpError(modelState, includeErrorDetail));
         }
 
         /// <summary>
@@ -207,6 +263,11 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
+            return request.CreateErrorResponse(statusCode, includeErrorDetail => error);
+        }
+
+        private static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, Func<bool, HttpError> errorCreator)
+        {
             HttpConfiguration configuration = request.GetConfiguration();
 
             // CreateErrorResponse should never fail, even if there is no configuration associated with the request
@@ -215,26 +276,13 @@ namespace System.Net.Http
             {
                 using (HttpConfiguration defaultConfig = new HttpConfiguration())
                 {
-                    return request.CreateErrorResponse(statusCode, error, defaultConfig);
+                    HttpError error = errorCreator(defaultConfig.ShouldIncludeErrorDetail(request));
+                    return request.CreateResponse<HttpError>(statusCode, error, defaultConfig);
                 }
             }
             else
             {
-                return request.CreateErrorResponse(statusCode, error, configuration);
-            }
-        }
-
-        private static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, HttpError error, HttpConfiguration configuration)
-        {
-            if (error.ContainsErrorDetail() && !configuration.ShouldIncludeErrorDetail(request))
-            {
-                // return only the error message and no additional details
-                // appends suggestion to enable error details on the configuration
-                string errorMessage = error.Message == null ? SRResources.EnableErrorDetailHint : Error.Format(SRResources.CombineErrorMessages, error.Message, SRResources.EnableErrorDetailHint);
-                return request.CreateResponse<HttpError>(statusCode, new HttpError(errorMessage), configuration);
-            }
-            else
-            {
+                HttpError error = errorCreator(configuration.ShouldIncludeErrorDetail(request));
                 return request.CreateResponse<HttpError>(statusCode, error, configuration);
             }
         }

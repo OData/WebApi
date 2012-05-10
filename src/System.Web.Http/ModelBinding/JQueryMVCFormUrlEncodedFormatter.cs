@@ -53,7 +53,7 @@ namespace System.Web.Http.ModelBinding
                         {
                             throw;
                         }
-                        formatterLogger.LogError(String.Empty, e.Message);
+                        formatterLogger.LogError(String.Empty, e);
                         return GetDefaultValueForType(type);
                     }
                 });

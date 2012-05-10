@@ -180,7 +180,7 @@ namespace System.Web.Http
 
             // This would result in ambiguous match because complex parameter is not considered for matching.
             // Therefore, PostUserByNameAndAddress(string name, Address address) would conflicts with PostUserByName(string name)
-            Assert.Throws<HttpResponseException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
                 {
                     HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
                     context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));

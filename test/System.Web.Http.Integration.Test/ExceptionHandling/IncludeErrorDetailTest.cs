@@ -73,7 +73,7 @@ namespace System.Web.Http
             JObject json = JToken.Parse(response.Content.ReadAsStringAsync().Result) as JObject;
             Assert.Equal(1, json.Count);
             string errorMessage = ((JValue)json["Message"]).ToString();
-            Assert.Equal("An exception has occurred. For more information about the error, consider setting IncludeErrorDetailPolicy on your server's HttpConfiguration to Always.", errorMessage);
+            Assert.Equal("An error has occurred.", errorMessage);
         }
     }
 }

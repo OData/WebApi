@@ -103,9 +103,11 @@ namespace System.Web.Http
                     }
                     catch (ParseException e)
                     {
+                        HttpConfiguration configuration = actionExecutedContext.ActionContext.ControllerContext.Configuration;
                         actionExecutedContext.Response = request.CreateErrorResponse(
                             HttpStatusCode.BadRequest,
-                            new HttpError(e) { Message = Error.Format(SRResources.UriQueryStringInvalid, e.Message) });
+                            SRResources.UriQueryStringInvalid,
+                            e);
                         return;
                     }
                 }

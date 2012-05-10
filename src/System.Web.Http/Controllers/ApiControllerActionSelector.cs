@@ -163,6 +163,7 @@ namespace System.Web.Http.Controllers
                     {
                         throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                             HttpStatusCode.NotFound,
+                            Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNameNotFound, _controllerDescriptor.ControllerName, actionName)));
                     }
 
@@ -198,15 +199,14 @@ namespace System.Web.Http.Controllers
                         // Throws HttpResponseException with NotFound status because no action matches the request
                         throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
                             HttpStatusCode.NotFound,
+                            Error.Format(SRResources.ResourceNotFound, controllerContext.Request.RequestUri),
                             Error.Format(SRResources.ApiControllerActionSelector_ActionNotFound, _controllerDescriptor.ControllerName)));
                     case 1:
                         return selectedActions[0];
                     default:
-                        // Throws HttpResponseException with InternalServerError status because multiple action matches the request
+                        // Throws exception because multiple actions match the request
                         string ambiguityList = CreateAmbiguousMatchList(selectedActions);
-                        throw new HttpResponseException(controllerContext.Request.CreateErrorResponse(
-                            HttpStatusCode.InternalServerError,
-                            Error.Format(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList)));
+                        throw Error.InvalidOperation(SRResources.ApiControllerActionSelector_AmbiguousMatch, ambiguityList);
                 }
             }
 

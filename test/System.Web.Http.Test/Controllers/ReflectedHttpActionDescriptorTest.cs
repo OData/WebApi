@@ -282,7 +282,7 @@ namespace System.Web.Http
             Assert.Equal("The parameters dictionary contains a null entry for parameter 'id' of non-nullable type 'System.Int32' " +
                 "for method 'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. An optional parameter " +
                 "must be a reference type, a nullable type, or be declared as an optional parameter.",
-                ((HttpError)content.Value).Message);
+                ((HttpError)content.Value)["MessageDetail"]);
         }
 
         [Fact]
@@ -300,7 +300,7 @@ namespace System.Web.Http
             Assert.Equal("The parameters dictionary does not contain an entry for parameter 'id' of type 'System.Int32' " +
                 "for method 'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. " +
                 "The dictionary must contain an entry for each parameter, including parameters that have null values.",
-                ((HttpError)content.Value).Message);
+                ((HttpError)content.Value)["MessageDetail"]);
         }
 
         [Fact]
@@ -319,7 +319,7 @@ namespace System.Web.Http
                 "'System.Web.Http.User RetriveUser(Int32)' in 'System.Web.Http.UsersRpcController'. " +
                 "The dictionary contains a value of type 'System.DateTime', but the parameter requires a value " +
                 "of type 'System.Int32'.",
-                ((HttpError)content.Value).Message);
+                ((HttpError)content.Value)["MessageDetail"]);
         }
 
         [Fact]

@@ -171,7 +171,7 @@ namespace System.Web.Http.SelfHost
                 HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
                 ModelBinding.ModelState value = null;
                 ModelState.TryGetValue("a", out value);
-                response.Content = new StringContent(value.Errors[0].ErrorMessage);
+                response.Content = new StringContent(value.Errors[0].Exception.Message);
                 throw new HttpResponseException(response);
             }
 

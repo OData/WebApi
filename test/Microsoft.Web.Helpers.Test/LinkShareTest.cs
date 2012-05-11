@@ -15,7 +15,7 @@ namespace Microsoft.Web.Helpers.Test
     {
         private static LinkShareSite[] _allLinkShareSites = new[]
         {
-            LinkShareSite.Delicious, LinkShareSite.Digg, LinkShareSite.GoogleBuzz,
+            LinkShareSite.Delicious, LinkShareSite.Digg,
             LinkShareSite.Facebook, LinkShareSite.Reddit, LinkShareSite.StumbleUpon, LinkShareSite.Twitter
         };
 
@@ -134,6 +134,17 @@ namespace Microsoft.Web.Helpers.Test
         }
 
         [Fact]
+        public void LinkShare_GetSitesInOrderDoesNotReturnsGoogleBuzzForAll() {
+            // Act
+            var result = LinkShare.GetSitesInOrder(linkSites: new LinkShareSite[] { LinkShareSite.All });
+
+            // Assert
+#pragma warning disable 0618
+            Assert.DoesNotContain(LinkShareSite.GoogleBuzz, result.ToArray());
+#pragma warning restore 0618
+        }
+
+        [Fact]
         public void LinkShare_GetSitesInOrderReturnsAllSitesWhenAllIsFirstItem()
         {
             // Act
@@ -152,8 +163,7 @@ namespace Microsoft.Web.Helpers.Test
             // Assert
             Assert.Equal(new[]
             {
-                LinkShareSite.Reddit, LinkShareSite.Facebook, LinkShareSite.Delicious, LinkShareSite.Digg,
-                LinkShareSite.GoogleBuzz, LinkShareSite.StumbleUpon, LinkShareSite.Twitter
+                LinkShareSite.Reddit, LinkShareSite.Facebook, LinkShareSite.Delicious, LinkShareSite.Digg, LinkShareSite.StumbleUpon, LinkShareSite.Twitter
             }, result.ToArray());
         }
 

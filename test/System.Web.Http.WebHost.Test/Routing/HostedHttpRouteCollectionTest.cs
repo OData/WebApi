@@ -128,17 +128,6 @@ namespace System.Web.Http.WebHost.Routing
         }
 
         [Fact]
-        public void GetRouteData_NoHttpContext_ReturnsNull()
-        {
-            var request = new HttpRequestMessage();
-            _webApiRoutes.Add("default", _webApiRoutes.CreateRoute("api", null, null));
-
-            IHttpRouteData result = _webApiRoutes.GetRouteData(request);
-
-            Assert.Null(result);
-        }
-
-        [Fact]
         public void GetRouteData_WithHttpContext_UnmatchedRoute_ReturnsNull()
         {
             var request = new HttpRequestMessage();

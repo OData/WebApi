@@ -56,13 +56,15 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             HttpContextBase httpContextBase;
-            if (request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
-                RouteData routeData = OriginalRoute.GetRouteData(httpContextBase);
-                if (routeData != null)
-                {
-                    return new HostedHttpRouteData(routeData);
-                }
+                httpContextBase = new HttpRequestMessageContextWrapper(rootVirtualPath, request);
+            } 
+
+            RouteData routeData = OriginalRoute.GetRouteData(httpContextBase);
+            if (routeData != null)
+            {
+                return new HostedHttpRouteData(routeData);
             }
 
             return null;

@@ -76,13 +76,15 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             HttpContextBase httpContextBase;
-            if (request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
-                RouteData routeData = _routeCollection.GetRouteData(httpContextBase);
-                if (routeData != null)
-                {
-                    return new HostedHttpRouteData(routeData);
-                }
+                httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
+            }
+
+            RouteData routeData = _routeCollection.GetRouteData(httpContextBase);
+            if (routeData != null)
+            {
+                return new HostedHttpRouteData(routeData);
             }
 
             return null;
@@ -98,15 +100,17 @@ namespace System.Web.Http.WebHost.Routing
 
             HttpRequestMessage request = controllerContext.Request;
             HttpContextBase httpContextBase;
-            if (request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
-                RequestContext requestContext = new RequestContext(httpContextBase, controllerContext.RouteData.ToRouteData());
-                RouteValueDictionary routeValues = values != null ? new RouteValueDictionary(values) : new RouteValueDictionary();
-                VirtualPathData virtualPathData = _routeCollection.GetVirtualPath(requestContext, name, routeValues);
-                if (virtualPathData != null)
-                {
-                    return new HostedHttpVirtualPathData(virtualPathData, controllerContext.RouteData.Route);
-                }
+                httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
+            }
+
+            RequestContext requestContext = new RequestContext(httpContextBase, controllerContext.RouteData.ToRouteData());
+            RouteValueDictionary routeValues = values != null ? new RouteValueDictionary(values) : new RouteValueDictionary();
+            VirtualPathData virtualPathData = _routeCollection.GetVirtualPath(requestContext, name, routeValues);
+            if (virtualPathData != null)
+            {
+                return new HostedHttpVirtualPathData(virtualPathData, controllerContext.RouteData.Route);
             }
 
             return null;

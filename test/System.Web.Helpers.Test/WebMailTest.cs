@@ -183,7 +183,7 @@ namespace System.Web.Helpers.Test
             string body = "body1";
             string from = FromAddress;
             string cc = "cc@xyz.com";
-            string attachmentName = "HiRes.jpg";
+            string attachmentName = "NETLogo.png";
             string bcc = "foo@bar.com";
             string replyTo = "x@y.com,z@pqr.com";
             string contentEncoding = "utf-8";

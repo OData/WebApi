@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Web.Http.Routing;
 using System.Web.Routing;
 
@@ -20,12 +21,20 @@ namespace System.Web.Http.WebHost.Routing
                 return hostedHttpRoute.OriginalRoute;
             }
 
-            return new HttpWebRoute(httpRoute.RouteTemplate, HttpControllerRouteHandler.Instance)
-            {
-                Defaults = new RouteValueDictionary(httpRoute.Defaults),
-                Constraints = new RouteValueDictionary(httpRoute.Constraints),
-                DataTokens = new RouteValueDictionary(httpRoute.DataTokens),
-            };
+            return new HttpWebRoute(
+                httpRoute.RouteTemplate,
+                MakeRouteValueDictionary(httpRoute.Defaults),
+                MakeRouteValueDictionary(httpRoute.Constraints),
+                MakeRouteValueDictionary(httpRoute.DataTokens),
+                HttpControllerRouteHandler.Instance,
+                httpRoute);
+        }
+
+        private static RouteValueDictionary MakeRouteValueDictionary(IDictionary<string, object> dictionary)
+        {
+            return dictionary == null
+                ? new RouteValueDictionary()
+                : new RouteValueDictionary(dictionary);
         }
     }
 }

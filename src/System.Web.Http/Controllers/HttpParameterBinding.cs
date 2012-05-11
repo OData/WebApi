@@ -66,5 +66,36 @@ namespace System.Web.Http.Controllers
         /// <returns>Task that is signaled when the binding is complete. For simple bindings from a URI, this should be signalled immediately.
         /// For bindings that read the content body, this may do network IO.</returns>
         public abstract Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Helper to get the parameter value from the action context's argument dictionary
+        /// </summary>
+        /// <param name="actionContext">action context </param>
+        /// <returns>the value for this parameter in the given action context, or null if the parameter has not yet been set.</returns>
+        protected object GetValue(HttpActionContext actionContext)
+        {
+            if (actionContext == null)
+            {
+                throw Error.ArgumentNull("actionContext");
+            }
+
+            object value;
+            actionContext.ActionArguments.TryGetValue(Descriptor.ParameterName, out value);
+            return value;
+        }
+
+        /// <summary>
+        /// Helper to set the result of this parameter binding in the action context's argument dictionary. 
+        /// </summary>
+        /// <param name="actionContext">action context.</param>
+        /// <param name="value">parameter value.</param>
+        protected void SetValue(HttpActionContext actionContext, object value)
+        {
+            if (actionContext == null)
+            {
+                throw Error.ArgumentNull("actionContext");
+            }
+            actionContext.ActionArguments[Descriptor.ParameterName] = value;
+        }
     }
 }

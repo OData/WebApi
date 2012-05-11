@@ -9,7 +9,7 @@ namespace System.Web.Http.Controllers
 {
     // This is common to both per-controller and global config. 
     // It facilitates sharing all the mutation operations between them.
-    public abstract class ServicesContainer
+    public abstract class ServicesContainer : IDisposable
     {
         public abstract object GetService(Type serviceType);
         public abstract IEnumerable<object> GetServices(Type serviceType);
@@ -70,12 +70,12 @@ namespace System.Web.Http.Controllers
             else
             {
                 ClearMultiple(serviceType);
-            }                        
+            }
             ResetCache(serviceType);
         }
 
         protected abstract void ClearSingle(Type serviceType);
-        
+
         protected virtual void ClearMultiple(Type serviceType)
         {
             List<object> instances = GetServiceInstances(serviceType);
@@ -256,11 +256,11 @@ namespace System.Web.Http.Controllers
             {
                 throw Error.ArgumentNull("serviceType");
             }
-            
+
             if ((service != null) && (!serviceType.IsAssignableFrom(service.GetType())))
             {
                 throw Error.Argument("service", SRResources.Common_TypeMustDriveFromType, service.GetType().Name, serviceType.Name);
-            }            
+            }
 
             if (IsSingleService(serviceType))
             {
@@ -280,7 +280,7 @@ namespace System.Web.Http.Controllers
             RemoveAll(serviceType, _ => true);
             Insert(serviceType, 0, service);
         }
-        
+
         /// <summary>
         /// Replaces all existing services for the given service type with the given
         /// service instances.
@@ -297,6 +297,13 @@ namespace System.Web.Http.Controllers
 
             RemoveAll(serviceType, _ => true);
             InsertRange(serviceType, 0, services);
+        }
+
+        /// <inheritdoc/>
+        [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
+        [SuppressMessage("Microsoft.Usage", "CA1816:CallGCSuppressFinalizeCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
+        public virtual void Dispose()
+        {
         }
     }
 }

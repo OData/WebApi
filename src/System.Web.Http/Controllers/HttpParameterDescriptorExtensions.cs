@@ -7,13 +7,13 @@ using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.Controllers
-{    
+{
     /// <summary>
     /// Convenience helpers to easily create specific types of parameter bindings
     /// These provide a direct programmatic counterpart to the <see cref="ParameterBindingAttribute"/> attributes. 
     /// </summary>
     public static class ParameterBindingExtensions
-    {        
+    {
         /// <summary>
         /// If we know statically that this binding can never succeed, then use an error binding.
         /// This will prevent the action from executing.
@@ -36,7 +36,7 @@ namespace System.Web.Http.Controllers
         {
             return attribute.GetBinding(parameter);
         }
-                
+
         /// <summary>
         /// Bind the parameter using model binding. Get all other information from the configuration.
         /// This is the same as having a plain ModelBinderAttribute on the parameter.
@@ -56,12 +56,12 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter, IModelBinder binder)
         {
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-            IEnumerable<ValueProviderFactory> valueProviderFactories = new ModelBinderAttribute().GetValueProviderFactories(controllerDescriptor);
+            HttpConfiguration config = parameter.Configuration;
+            IEnumerable<ValueProviderFactory> valueProviderFactories = new ModelBinderAttribute().GetValueProviderFactories(config);
 
             return BindWithModelBinding(parameter, binder, valueProviderFactories);
         }
-        
+
         /// <summary>
         /// Bind the parameter using default model binding but with the supplied value providers.
         /// </summary>
@@ -81,8 +81,8 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithModelBinding(this HttpParameterDescriptor parameter, IEnumerable<ValueProviderFactory> valueProviderFactories)
         {
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-            IModelBinder binder = new ModelBinderAttribute().GetModelBinder(controllerDescriptor, parameter.ParameterType);
+            HttpConfiguration config = parameter.Configuration;
+            IModelBinder binder = new ModelBinderAttribute().GetModelBinder(config, parameter.ParameterType);
 
             return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories);
         }
@@ -98,7 +98,7 @@ namespace System.Web.Http.Controllers
         {
             return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories);
         }
-                
+
         /// <summary>
         /// Bind the parameter from the body using the formatters from the configuration. 
         /// This is like having a [FromBody] attribute on the parameter
@@ -107,10 +107,9 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithFormatter(this HttpParameterDescriptor parameter)
         {
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-
-            IEnumerable<MediaTypeFormatter> formatters = controllerDescriptor.Formatters;
-            IBodyModelValidator validators = controllerDescriptor.ControllerServices.GetBodyModelValidator();
+            HttpConfiguration config = parameter.Configuration;
+            IEnumerable<MediaTypeFormatter> formatters = config.Formatters;
+            IBodyModelValidator validators = config.Services.GetBodyModelValidator();
 
             return new FormatterParameterBinding(parameter, formatters, validators);
         }
@@ -134,8 +133,8 @@ namespace System.Web.Http.Controllers
         /// <returns>a binding</returns>
         public static HttpParameterBinding BindWithFormatter(this HttpParameterDescriptor parameter, IEnumerable<MediaTypeFormatter> formatters)
         {
-            HttpControllerDescriptor controllerDescriptor = parameter.ActionDescriptor.ControllerDescriptor;
-            IBodyModelValidator validators = controllerDescriptor.ControllerServices.GetBodyModelValidator();
+            HttpConfiguration config = parameter.Configuration;
+            IBodyModelValidator validators = config.Services.GetBodyModelValidator();
             return new FormatterParameterBinding(parameter, formatters, validators);
         }
 

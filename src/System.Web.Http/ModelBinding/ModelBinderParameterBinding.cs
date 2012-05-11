@@ -56,7 +56,7 @@ namespace System.Web.Http.ModelBinding
 
             bool haveResult = _binder.BindModel(actionContext, ctx);
             object model = haveResult ? ctx.Model : Descriptor.DefaultValue;
-            actionContext.ActionArguments.Add(name, model);
+            SetValue(actionContext, model);
 
             return TaskHelpers.Completed();
         }

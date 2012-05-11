@@ -72,7 +72,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Formatting\XmlHttpRequestHeaderMappingTest.cs" />
+    <Compile Include="Formatting\MediaTypeFormatterMatchTest.cs" />
     <Compile Include="HttpContentFormDataExtensionsTest.cs" />
+    <Compile Include="Mocks\MockMediaTypeMapping.cs" />
+    <Compile Include="Mocks\MockContentNegotiator.cs" />
     <Compile Include="PushStreamContentTest.cs" />
     <Compile Include="HttpClientFactoryTest.cs" />
     <Compile Include="Handlers\ProgressContentTest.cs" />
@@ -127,7 +130,6 @@
     <Compile Include="Formatting\DefaultContentNegotiatorTests.cs" />
     <Compile Include="Formatting\FormUrlEncodedMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\JsonMediaTypeFormatterTests.cs" />
-    <Compile Include="Formatting\MediaRangeMappingTests.cs" />
     <Compile Include="Formatting\MediaTypeConstantsTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterCollectionTests.cs" />
     <Compile Include="Formatting\MediaTypeFormatterExtensionsTests.cs" />

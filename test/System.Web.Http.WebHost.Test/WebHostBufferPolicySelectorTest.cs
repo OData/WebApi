@@ -44,6 +44,30 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        void UseBufferedInputStream_Returns_True()
+        {
+            Assert.True(new WebHostBufferPolicySelector().UseBufferedInputStream(new HttpRequestMessage()));
+        }
+
+        [Fact]
+        void UseBufferedInputStream_ThrowsOnNull()
+        {
+            WebHostBufferPolicySelector selector = new WebHostBufferPolicySelector();
+            Assert.ThrowsArgumentNull(() => selector.UseBufferedInputStream(null), "request");
+        }
+
+        [Fact]
+        void UseBufferedInputStream_Can_Be_Overridden()
+        {
+            // Arrange
+            Mock<WebHostBufferPolicySelector> mock = new Mock<WebHostBufferPolicySelector>();
+            mock.Setup((w) => w.UseBufferedInputStream(It.IsAny<HttpRequestMessage>())).Returns(false);
+
+            // Act & Assert
+            Assert.False(mock.Object.UseBufferedInputStream(new HttpRequestMessage()));
+        }
+
+        [Fact]
         public void UseBufferedOutputStream_ThrowsOnNull()
         {
             WebHostBufferPolicySelector selector = new WebHostBufferPolicySelector();

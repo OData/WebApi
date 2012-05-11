@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Internal;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -152,7 +152,7 @@ namespace System.Net.Http.Formatting
             {
                 // If there is a registered non-null serializer, we can support this type.
                 DataContractJsonSerializer serializer =
-                    _dataContractSerializerCache.GetOrAdd(type, (t) => CreateDataContractSerializer(t));
+                    _dataContractSerializerCache.GetOrAdd(type, (t) => CreateDataContractSerializer(t, throwOnError: false));
 
                 // Null means we tested it before and know it is not supported
                 return serializer != null;
@@ -182,7 +182,7 @@ namespace System.Net.Http.Formatting
 
                 // If there is a registered non-null serializer, we can support this type.
                 object serializer =
-                    _dataContractSerializerCache.GetOrAdd(type, (t) => CreateDataContractSerializer(t));
+                    _dataContractSerializerCache.GetOrAdd(type, (t) => CreateDataContractSerializer(t, throwOnError: false));
 
                 // Null means we tested it before and know it is not supported
                 return serializer != null;
@@ -332,8 +332,7 @@ namespace System.Net.Http.Formatting
             });
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        private static DataContractJsonSerializer CreateDataContractSerializer(Type type)
+        private static DataContractJsonSerializer CreateDataContractSerializer(Type type, bool throwOnError)
         {
             if (type == null)
             {
@@ -341,46 +340,30 @@ namespace System.Net.Http.Formatting
             }
 
             DataContractJsonSerializer serializer = null;
+            Exception exception = null;
 
             try
             {
-                if (IsKnownUnserializableType(type))
-                {
-                    return null;
-                }
-
-                //// TODO: CSDMAIN 211321 -- determine the correct algorithm to know what is serializable.
+                // Verify that type is a valid data contract by forcing the serializer to try to create a data contract
+                FormattingUtilities.XsdDataContractExporter.GetRootElementName(type);
                 serializer = new DataContractJsonSerializer(type);
             }
-            catch (Exception)
+            catch (InvalidDataContractException invalidDataContractException)
             {
-                //// TODO: CSDMain 232171 -- review and fix swallowed exception
+                exception = invalidDataContractException;
+            }
+
+            if (exception != null)
+            {
+                if (throwOnError)
+                {
+                    throw Error.InvalidOperation(exception, Properties.Resources.SerializerCannotSerializeType,
+                                  typeof(DataContractJsonSerializer).Name,
+                                  type.Name);
+                }
             }
 
             return serializer;
-        }
-
-        private static bool IsKnownUnserializableType(Type type)
-        {
-            if (type.IsGenericType)
-            {
-                if (typeof(IEnumerable).IsAssignableFrom(type))
-                {
-                    return IsKnownUnserializableType(type.GetGenericArguments()[0]);
-                }
-            }
-
-            if (!type.IsVisible)
-            {
-                return true;
-            }
-
-            if (type.HasElementType && IsKnownUnserializableType(type.GetElementType()))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private DataContractJsonSerializer GetDataContractSerializer(Type type)
@@ -388,7 +371,7 @@ namespace System.Net.Http.Formatting
             Contract.Assert(type != null, "Type cannot be null");
 
             DataContractJsonSerializer serializer =
-                _dataContractSerializerCache.GetOrAdd(type, (t) => CreateDataContractSerializer(type));
+                _dataContractSerializerCache.GetOrAdd(type, (t) => CreateDataContractSerializer(type, throwOnError: true));
 
             if (serializer == null)
             {

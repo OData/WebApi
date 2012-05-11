@@ -6,7 +6,6 @@ using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
@@ -186,35 +185,35 @@ namespace System.Net.Http
             Assert.Same(formatter, objectContent.Formatter);
         }
 
-        [Fact]
-        public void CreateResponse_Uses_Per_Controller_Services()
-        {
-            // Arrange
-            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+        //[Fact]
+        //public void CreateResponse_Uses_Per_Controller_Services()
+        //{
+        //    // Arrange
+        //    XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
 
-            HttpConfiguration config = new HttpConfiguration();
-            HttpControllerDescriptor cd = new HttpControllerDescriptor(config);
+        //    HttpConfiguration config = new HttpConfiguration();
+        //    HttpControllerDescriptor cd = new HttpControllerDescriptor(config);
 
-            cd.Formatters.Clear();
-            cd.Formatters.Add(formatter);
+        //    cd.Configuration.Formatters.Clear();
+        //    cd.Configuration.Formatters.Add(formatter);
 
-            var negotiatorMock = new Mock<IContentNegotiator>();
-            negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, cd.Formatters))
-                        .Returns(new ContentNegotiationResult(formatter, null));
-            
-            cd.ControllerServices.Replace(typeof(IContentNegotiator), negotiatorMock.Object);
-            
-            // Act. Default call uses the controller services if it can find it in the property bag.
-            _request.Properties[HttpPropertyKeys.HttpControllerDescriptorKey] = cd;
-            var response = _request.CreateResponse<string>(HttpStatusCode.NoContent, "42");
+        //    var negotiatorMock = new Mock<IContentNegotiator>();
+        //    negotiatorMock.Setup(r => r.Negotiate(typeof(string), _request, cd.Configuration.Formatters))
+        //                .Returns(new ContentNegotiationResult(formatter, null));
 
-            // Assert
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-            Assert.Same(_request, response.RequestMessage);
-            var objectContent = Assert.IsType<ObjectContent<string>>(response.Content);
-            Assert.Equal("42", objectContent.Value);
-            Assert.Same(formatter, objectContent.Formatter); // if this failed, then we didn't puck up the formatter from the controller.
-        }
+        //    cd.Configuration.Services.Replace(typeof(IContentNegotiator), negotiatorMock.Object);
+
+        //    // Act. Default call uses the controller services if it can find it in the property bag.
+        //    _request.Properties[HttpPropertyKeys.HttpControllerDescriptorKey] = cd;
+        //    var response = _request.CreateResponse<string>(HttpStatusCode.NoContent, "42");
+
+        //    // Assert
+        //    Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        //    Assert.Same(_request, response.RequestMessage);
+        //    var objectContent = Assert.IsType<ObjectContent<string>>(response.Content);
+        //    Assert.Equal("42", objectContent.Value);
+        //    Assert.Same(formatter, objectContent.Formatter); // if this failed, then we didn't puck up the formatter from the controller.
+        //}
 
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenRequestIsNull_Throws()

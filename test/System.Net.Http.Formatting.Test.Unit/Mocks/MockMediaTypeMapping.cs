@@ -1,0 +1,33 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http.Headers;
+namespace System.Net.Http.Formatting.Mocks
+{
+    public class MockMediaTypeMapping : MediaTypeMapping
+    {
+        public MockMediaTypeMapping(string mediaType, double matchQuality)
+            : base(mediaType)
+        {
+            MatchQuality = matchQuality;
+        }
+
+        public MockMediaTypeMapping(MediaTypeHeaderValue mediaType, double matchQuality)
+            : base(mediaType)
+        {
+            MatchQuality = matchQuality;
+        }
+
+        public double MatchQuality { get; private set; }
+
+        public HttpRequestMessage Request { get; private set; }
+
+        public bool WasInvoked { get; private set; }
+
+        public override double TryMatchMediaType(HttpRequestMessage request)
+        {
+            WasInvoked = true;
+            Request = request;
+            return MatchQuality;
+        }
+    }
+}

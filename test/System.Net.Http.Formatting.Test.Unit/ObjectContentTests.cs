@@ -97,6 +97,21 @@ namespace System.Net.Http
             Assert.Equal(type, oc.ObjectType);
         }
 
+        [Fact]
+        public void Constructor_WhenTypeIsNotSupportedByFormatter_ThrowsException()
+        {
+            Mock<MediaTypeFormatter> formatterMock = new Mock<MediaTypeFormatter>();
+            formatterMock.Setup(f => f.CanWriteType(typeof(string))).Returns(true);
+            formatterMock.Setup(f => f.CanWriteType(typeof(object))).Returns(false).Verifiable();
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                var content = new ObjectContent(typeof(object), "", formatterMock.Object);
+            }, "The configured formatter 'Castle.Proxies.MediaTypeFormatterProxy' cannot write an object of type 'Object'.");
+
+            formatterMock.Verify();
+        }
+
         public static TheoryDataSet<Type, object> ValidValueTypePairs
         {
             get
@@ -141,22 +156,6 @@ namespace System.Net.Http
 
             Assert.False(result);
             Assert.Equal(-1, length);
-        }
-
-        [Fact]
-        public void Value_WhenValueIsNotSupportedByFormatter_ThrowsException()
-        {
-            Mock<MediaTypeFormatter> formatterMock = new Mock<MediaTypeFormatter>();
-            formatterMock.Setup(f => f.CanWriteType(typeof(string))).Returns(true);
-            formatterMock.Setup(f => f.CanWriteType(typeof(List<string>))).Returns(false).Verifiable();
-            var content = new ObjectContent(typeof(object), "", formatterMock.Object);
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                content.Value = new List<string>();
-            }, "The configured formatter 'Castle.Proxies.MediaTypeFormatterProxy' cannot write an object of type 'List`1'.");
-
-            formatterMock.Verify();
         }
 
         public class TestableObjectContent : ObjectContent

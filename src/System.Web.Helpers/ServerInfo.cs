@@ -240,7 +240,7 @@ namespace System.Web.Helpers
 
             var configuration = Configuration();
             Debug.Assert((configuration != null) && (configuration.Count > 0));
-            PrintInfoSection(sb, HttpUtility.HtmlEncode(HelpersResources.ServerInfo_ServerConfigTable), configuration);
+            PrintInfoSection(sb, HelpersResources.ServerInfo_ServerConfigTable, configuration);
 
             var serverVariables = ServerVariables();
             Debug.Assert((serverVariables != null));

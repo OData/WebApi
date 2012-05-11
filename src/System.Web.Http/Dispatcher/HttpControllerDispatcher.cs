@@ -98,12 +98,24 @@ namespace System.Web.Http.Dispatcher
                 return TaskHelpers.FromResult(request.CreateErrorResponse(HttpStatusCode.NotFound, SRResources.NoControllerCreated));
             }
 
-            request.Properties.Add(HttpPropertyKeys.HttpControllerDescriptorKey, httpControllerDescriptor);
-                        
+            // Set the controller configuration on the request properties
+            HttpConfiguration requestConfig = request.GetConfiguration();
+            if (requestConfig == null)
+            {
+                request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, httpControllerDescriptor.Configuration);
+            }
+            else
+            {
+                if (requestConfig != httpControllerDescriptor.Configuration)
+                {
+                    request.Properties[HttpPropertyKeys.HttpConfigurationKey] = httpControllerDescriptor.Configuration;
+                }
+            }
+
             // Create context
-            HttpControllerContext controllerContext = new HttpControllerContext(_configuration, routeData, request);
+            HttpControllerContext controllerContext = new HttpControllerContext(httpControllerDescriptor.Configuration, routeData, request);
             controllerContext.Controller = httpController;
-            controllerContext.ControllerDescriptor = httpControllerDescriptor;            
+            controllerContext.ControllerDescriptor = httpControllerDescriptor;
 
             return httpController.ExecuteAsync(controllerContext, cancellationToken);
         }

@@ -352,6 +352,8 @@ namespace System.Net.Http.Formatting
                 }
                 else
                 {
+                    // Verify that type is a valid data contract by forcing the serializer to try to create a data contract
+                    FormattingUtilities.XsdDataContractExporter.GetRootElementName(type);
                     serializer = new DataContractSerializer(type);
                 }
             }
@@ -363,9 +365,11 @@ namespace System.Net.Http.Formatting
             {
                 exception = notSupportedException;
             }
+            catch (InvalidDataContractException invalidDataContractException)
+            {
+                exception = invalidDataContractException;
+            }
 
-            // The serializer throws one of the exceptions above if it cannot
-            // support this type.
             if (exception != null)
             {
                 if (throwOnError)

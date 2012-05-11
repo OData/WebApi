@@ -640,7 +640,7 @@ namespace System.Threading.Tasks
 
             // Act 
             Task faultedTask = TaskHelpers.FromError(exception1);
-            Task t =faultedTask.Finally(() => { throw exception2; });
+            Task t = faultedTask.Finally(() => { throw exception2; });
 
             // Assert
             Assert.True(t.IsFaulted);
@@ -658,21 +658,21 @@ namespace System.Threading.Tasks
             // Like test Finally_CompletedTaskOfFault_ExceptionInFinally, but exercises when the original task doesn't complete synchronously
 
             // Act 
-            Task incompleteTask = new Task(() => { throw exception1;  });
+            Task incompleteTask = new Task(() => { throw exception1; });
             Task t = incompleteTask.Finally(() => { throw exception2; });
 
             incompleteTask.Start();
-            
+
             // Assert
             return t.ContinueWith(prevTask =>
-                {
-                    Assert.Equal(t, prevTask);
+            {
+                Assert.Equal(t, prevTask);
 
-                    Assert.True(t.IsFaulted);
-                    Assert.IsType<AggregateException>(t.Exception);
-                    Assert.Equal(1, t.Exception.InnerExceptions.Count);
-                    Assert.Equal(exception2, t.Exception.InnerException);
-                });
+                Assert.True(t.IsFaulted);
+                Assert.IsType<AggregateException>(t.Exception);
+                Assert.Equal(1, t.Exception.InnerExceptions.Count);
+                Assert.Equal(exception2, t.Exception.InnerException);
+            });
         }
 
         [Fact, ForceGC, PreserveSyncContext]
@@ -1356,7 +1356,7 @@ namespace System.Threading.Tasks
         }
 
         // -----------------------------------------------------------------
-        //  Task<T> Task.Then(Func<T>)
+        //  Task<TOut> Task.Then(Func<TOut>)
 
         [Fact, ForceGC]
         public Task Then_NoInputValue_WithReturnValue_CallsContinuation()
@@ -1525,7 +1525,7 @@ namespace System.Threading.Tasks
         }
 
         // -----------------------------------------------------------------
-        //  Task<T> Task.Then(Func<Task<T>>)
+        //  Task<TOut> Task.Then(Func<Task<TOut>>)
 
         [Fact, ForceGC]
         public Task Then_NoInputValue_WithTaskReturnValue_CallsContinuation()
@@ -1694,7 +1694,7 @@ namespace System.Threading.Tasks
         }
 
         // -----------------------------------------------------------------
-        //  Task Task<T>.Then(Action)
+        //  Task Task<TIn>.Then(Action<TIn>)
 
         [Fact, ForceGC]
         public Task Then_WithInputValue_NoReturnValue_CallsContinuationWithPriorTaskResult()
@@ -1859,7 +1859,7 @@ namespace System.Threading.Tasks
         }
 
         // -----------------------------------------------------------------
-        //  Task<T> Task.Then(Func<T>)
+        //  Task<TOut> Task<TIn>.Then(Func<TIn, TOut>)
 
         [Fact, ForceGC]
         public Task Then_WithInputValue_WithReturnValue_CallsContinuation()
@@ -2028,7 +2028,175 @@ namespace System.Threading.Tasks
         }
 
         // -----------------------------------------------------------------
-        //  Task<T> Task.Then(Func<Task<T>>)
+        //  Task Task<TIn>.Then(Func<TIn, Task>)
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_ReturnsTask_CallsContinuation()
+        {
+            // Arrange
+            return TaskHelpers.FromResult(21)
+
+            // Act
+                              .Then(result =>
+                              {
+                                  return TaskHelpers.Completed();
+                              })
+
+            // Assert
+                              .ContinueWith(task =>
+                              {
+                                  Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                              });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_ReturnsTask_ThrownExceptionIsRethrowd()
+        {
+            // Arrange
+            return TaskHelpers.FromResult(21)
+
+            // Act
+                              .Then(result =>
+                              {
+                                  throw new NotImplementedException();
+                                  return TaskHelpers.Completed();  // Return-after-throw to guarantee correct lambda signature
+                              })
+
+            // Assert
+                              .ContinueWith(task =>
+                              {
+                                  Assert.Equal(TaskStatus.Faulted, task.Status);
+                                  var ex = Assert.Single(task.Exception.InnerExceptions);
+                                  Assert.IsType<NotImplementedException>(ex);
+                              });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_ReturnsTask_FaultPreventsFurtherThenStatementsFromExecuting()
+        {
+            // Arrange
+            bool ranContinuation = false;
+
+            return TaskHelpers.FromError<int>(new NotImplementedException())
+
+            // Act
+                              .Then(result =>
+                              {
+                                  ranContinuation = true;
+                                  return TaskHelpers.Completed();
+                              })
+
+            // Assert
+                              .ContinueWith(task =>
+                              {
+                                  var ex = task.Exception;  // Observe the exception
+                                  Assert.False(ranContinuation);
+                              });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_ReturnsTask_ManualCancellationPreventsFurtherThenStatementsFromExecuting()
+        {
+            // Arrange
+            bool ranContinuation = false;
+
+            return TaskHelpers.Canceled<int>()
+
+            // Act
+                              .Then(result =>
+                              {
+                                  ranContinuation = true;
+                                  return TaskHelpers.Completed();
+                              })
+
+            // Assert
+                              .ContinueWith(task =>
+                              {
+                                  Assert.Equal(TaskStatus.Canceled, task.Status);
+                                  Assert.False(ranContinuation);
+                              });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_ReturnsTask_TokenCancellationPreventsFurtherThenStatementsFromExecuting()
+        {
+            // Arrange
+            bool ranContinuation = false;
+            CancellationToken cancellationToken = new CancellationToken(canceled: true);
+
+            return TaskHelpers.FromResult(21)
+
+            // Act
+                              .Then(result =>
+                              {
+                                  ranContinuation = true;
+                                  return TaskHelpers.Completed();
+                              }, cancellationToken)
+
+            // Assert
+                              .ContinueWith(task =>
+                              {
+                                  Assert.Equal(TaskStatus.Canceled, task.Status);
+                                  Assert.False(ranContinuation);
+                              });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_WithInputValue_ReturnsTask_IncompleteTask_RunsOnNewThreadAndPostsContinuationToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                return TaskHelpers.Completed();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Once());
+            });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_WithInputValue_ReturnsTask_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            return TaskHelpers.FromResult(21)
+
+            // Act
+                              .Then(result =>
+                              {
+                                  callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                                  return TaskHelpers.Completed();
+                              })
+
+            // Assert
+                              .ContinueWith(task =>
+                              {
+                                  Assert.Equal(originalThreadId, callbackThreadId);
+                                  syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Never());
+                              });
+        }
+
+        // -----------------------------------------------------------------
+        //  Task<TOut> Task<TIn>.Then(Func<TIn, Task<TOut>>)
 
         [Fact, ForceGC]
         public Task Then_WithInputValue_WithTaskReturnValue_CallsContinuation()

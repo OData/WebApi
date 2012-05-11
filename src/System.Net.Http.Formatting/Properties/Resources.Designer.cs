@@ -295,15 +295,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The value &apos;{0}&apos; is not a valid media range..
-        /// </summary>
-        internal static string InvalidMediaRange {
-            get {
-                return ResourceManager.GetString("InvalidMediaRange", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Traditional style array without &apos;[]&apos; is not supported with nested object at location {0}..
         /// </summary>
         internal static string JQuery13CompatModeNotSupportNestedJson {

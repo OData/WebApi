@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
@@ -16,6 +17,169 @@ namespace System.Net.Http.Formatting
     {
         private readonly DefaultContentNegotiator _negotiator = new DefaultContentNegotiator();
         private readonly HttpRequestMessage _request = new HttpRequestMessage();
+
+        public static TheoryDataSet<string, string[], string> MatchRequestMediaTypeData
+        {
+            get
+            {
+                // string requestMediaType, string[] supportedMediaTypes, string expectedMediaType
+                return new TheoryDataSet<string, string[], string>
+                {
+                    { "text/plain", new string[0], null }, 
+                    { "text/plain", new string[] { "text/xml", "application/xml" }, null }, 
+                    { "application/xml", new string[] { "application/xml", "text/xml" }, "application/xml" }, 
+                    { "APPLICATION/XML", new string[] { "text/xml", "application/xml" }, "application/xml" }, 
+                    { "application/xml; charset=utf-8", new string[] { "text/xml", "application/xml" }, "application/xml" }, 
+                    { "application/xml; charset=utf-8; parameter=value", new string[] { "text/xml", "application/xml" }, "application/xml" }, 
+                };
+            }
+        }
+
+        public static TheoryDataSet<string[], string[], string, double> MatchAcceptHeaderData
+        {
+            get
+            {
+                // string[] acceptHeader, string[] supportedMediaTypes, string expectedMediaType, double matchQuality
+                return new TheoryDataSet<string[], string[], string, double>
+                {
+                    { new string[] { "text/plain" }, new string[0], null, 0.0 }, 
+
+                    { new string[] { "text/plain" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+                    { new string[] { "text/plain; q=0.5" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+
+                    { new string[] { "application/xml" }, new string[] { "application/xml", "text/xml" }, "application/xml", 1.0 }, 
+                    { new string[] { "APPLICATION/XML; q=0.5" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.5 }, 
+                    { new string[] { "text/xml; q=0.5", "APPLICATION/XML; q=0.7" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.7 }, 
+                    { new string[] { "application/xml; q=0.0" }, new string[] { "application/xml", "text/xml" }, null, 0.0 }, 
+                    { new string[] { "APPLICATION/XML; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+                    { new string[] { "text/xml; q=0.0", "APPLICATION/XML; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+
+                    { new string[] { "test/*", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+                    { new string[] { "test/*; q=0.5", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+                    { new string[] { "test/*; q=0.0", "application/xml; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+                    { new string[] { "test/*; q=0.0", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+
+                    { new string[] { "*/*; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 0.5 }, 
+                    { new string[] { "*/*; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+                    { new string[] { "*/*; q=0.5", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+                    { new string[] { "*/*; q=1.0", "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 1.0 }, 
+
+                    { new string[] { "text/*; q=0.5", "*/*; q=0.2", "application/xml; q=1.0" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+
+                    { new string[] { "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.5 }, 
+                };
+            }
+        }
+
+        public static TheoryDataSet<bool, string[], string> MatchTypeData
+        {
+            get
+            {
+                // bool excludeMatchOnTypeOnly, string[] supportedMediaTypes, string expectedMediaType
+                return new TheoryDataSet<bool, string[], string>
+                {
+                    { false, new string[0], "application/octet-stream" }, 
+
+                    { false, new string[] { "text/xml", "application/xml" }, "text/xml" }, 
+                    { false, new string[] { "application/xml", "text/xml" }, "application/xml" }, 
+
+                    { true, new string[] { "text/xml", "application/xml" }, null }, 
+                    { true, new string[] { "application/xml", "text/xml" }, null }, 
+                };
+            }
+        }
+
+        public static TheoryDataSet<string[], string, string[], string> SelectResponseCharacterEncodingData
+        {
+            get
+            {
+                // string[] acceptEncodings, string requestEncoding, string[] supportedEncodings, string expectedEncoding
+                return new TheoryDataSet<string[], string, string[], string>
+                {
+                    { new string[] { "utf-8" }, null, new string[0], null },
+                    { new string[0], "utf-8", new string[0], null },
+
+                    { new string[0], null, new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[0], "utf-16", new string[] { "utf-8", "utf-16"}, "utf-16" },
+
+                    { new string[] { "utf-8" }, null, new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[] { "utf-16" }, "utf-8", new string[] { "utf-8", "utf-16"}, "utf-16" },
+                    { new string[] { "utf-16; q=0.5" }, "utf-8", new string[] { "utf-8", "utf-16"}, "utf-16" },
+
+                    { new string[] { "utf-8; q=0.0" }, null, new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[] { "utf-8; q=0.0" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-16" },
+                    { new string[] { "utf-8; q=0.0", "utf-16; q=0.0" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-16" },
+                    { new string[] { "utf-8; q=0.0", "utf-16; q=0.0" }, null, new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[] { "*; q=0.0" }, null, new string[] { "utf-8", "utf-16"}, "utf-8" },
+                    { new string[] { "*; q=0.0" }, "utf-16", new string[] { "utf-8", "utf-16"}, "utf-16" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<ICollection<MediaTypeFormatterMatch>, MediaTypeFormatterMatch> SelectResponseMediaTypeData
+        {
+            get
+            {
+                // Only mapping and accept makes sense with q != 1.0
+                MediaTypeFormatterMatch matchMapping10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestWithMediaTypeMapping);
+                MediaTypeFormatterMatch matchMapping05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestWithMediaTypeMapping);
+
+                MediaTypeFormatterMatch matchAccept10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader);
+                MediaTypeFormatterMatch matchAccept05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader);
+
+                MediaTypeFormatterMatch matchRequest10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestMediaType);
+                MediaTypeFormatterMatch matchType10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnCanWriteType);
+
+                // ICollection<MediaTypeFormatterMatch> candidateMatches, MediaTypeFormatterMatch winner
+                return new TheoryDataSet<ICollection<MediaTypeFormatterMatch>, MediaTypeFormatterMatch>
+                {
+                    { new List<MediaTypeFormatterMatch>(), null },
+                    { new List<MediaTypeFormatterMatch>() { matchType10 }, matchType10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10 }, matchRequest10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAccept10 }, matchAccept10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAccept10, matchMapping10 }, matchMapping10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchAccept05, matchAccept10 }, matchAccept10 },
+                    { new List<MediaTypeFormatterMatch>() { matchAccept10, matchAccept05 }, matchAccept10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchMapping10 }, matchMapping10 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping10, matchMapping05 }, matchMapping10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAccept05 }, matchMapping05 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping10, matchAccept10 }, matchMapping10 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAccept10 }, matchAccept10 },
+                };
+            }
+        }
+
+        public static TheoryDataSet<MediaTypeFormatterMatch, MediaTypeFormatterMatch, bool> UpdateBestMatchData
+        {
+            get
+            {
+                MediaTypeFormatterMatch matchMapping10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.None);
+                MediaTypeFormatterMatch matchMapping05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.None);
+
+                // MediaTypeFormatterMatch current, MediaTypeFormatterMatch potentialReplacement, currentWins
+                return new TheoryDataSet<MediaTypeFormatterMatch, MediaTypeFormatterMatch, bool>
+                {
+                    { null, matchMapping10, false },
+                    { null, matchMapping05, false },
+
+                    { matchMapping10, matchMapping10, true },
+                    { matchMapping10, matchMapping05, true },
+
+                    { matchMapping05, matchMapping10, false },
+                    { matchMapping05, matchMapping05, true },
+                };
+            }
+        }
+
+        private static MediaTypeFormatterMatch CreateMatch(double? quality, MediaTypeFormatterMatchRanking ranking)
+        {
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/test");
+            return new MediaTypeFormatterMatch(formatter, mediaType, quality, ranking);
+        }
 
         [Fact]
         public void TypeIsCorrect()
@@ -50,7 +214,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void MediaTypeMappingTakesPrecedenceOverAcceptHeader()
+        public void Negotiate_MediaTypeMappingTakesPrecedenceOverAcceptHeader()
         {
             // Prepare the request message
             _request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
@@ -219,6 +383,343 @@ namespace System.Net.Http.Formatting
             // Assert
             Assert.Equal("application/xml", result.MediaType.MediaType);
             Assert.IsType<XmlMediaTypeFormatter>(result.Formatter);
+        }
+
+        [Fact]
+        public void ComputeFormatterMatches_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            Type type = typeof(object);
+            HttpRequestMessage request = new HttpRequestMessage();
+            List<MediaTypeFormatter> formatters = new List<MediaTypeFormatter>();
+
+            Assert.ThrowsArgumentNull(() => negotiator.ComputeFormatterMatches(type: null, request: request, formatters: formatters), "type");
+            Assert.ThrowsArgumentNull(() => negotiator.ComputeFormatterMatches(type: type, request: null, formatters: formatters), "request");
+            Assert.ThrowsArgumentNull(() => negotiator.ComputeFormatterMatches(type: type, request: request, formatters: null), "formatters");
+        }
+
+        [Fact]
+        public void MatchMediaTypeMapping_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            HttpRequestMessage request = new HttpRequestMessage();
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+
+            Assert.ThrowsArgumentNull(() => negotiator.MatchMediaTypeMapping(request: null, formatter: formatter), "request");
+            Assert.ThrowsArgumentNull(() => negotiator.MatchMediaTypeMapping(request: request, formatter: null), "formatter");
+        }
+
+        [Fact]
+        public void MatchMediaTypeMapping_ReturnsMatch()
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            MediaTypeHeaderValue mappingMediatype = MediaTypeHeaderValue.Parse("application/other");
+            MockMediaTypeMapping mockMediaTypeMapping = new MockMediaTypeMapping(mappingMediatype, 0.75);
+
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            formatter.MediaTypeMappings.Add(mockMediaTypeMapping);
+
+            // Act
+            MediaTypeFormatterMatch match = negotiator.MatchMediaTypeMapping(request, formatter);
+
+            // Assert
+            Assert.True(mockMediaTypeMapping.WasInvoked);
+            Assert.Same(request, mockMediaTypeMapping.Request);
+
+            Assert.Same(formatter, match.Formatter);
+            Assert.Equal(mockMediaTypeMapping.MediaType, match.MediaType);
+            Assert.Equal(mockMediaTypeMapping.MatchQuality, match.Quality);
+            Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnRequestWithMediaTypeMapping, match.Ranking);
+        }
+
+        [Fact]
+        public void MatchAcceptHeader_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            List<MediaTypeWithQualityHeaderValue> sortedAcceptValues = new List<MediaTypeWithQualityHeaderValue>();
+
+            Assert.ThrowsArgumentNull(() => negotiator.MatchAcceptHeader(sortedAcceptValues: null, formatter: formatter), "sortedAcceptValues");
+            Assert.ThrowsArgumentNull(() => negotiator.MatchAcceptHeader(sortedAcceptValues: sortedAcceptValues, formatter: null), "formatter");
+        }
+
+        [Theory]
+        [PropertyData("MatchAcceptHeaderData")]
+        public void MatchAcceptHeader_ReturnsMatch(string[] acceptHeaders, string[] supportedMediaTypes, string expectedMediaType, double expectedQuality)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            List<MediaTypeWithQualityHeaderValue> unsortedAcceptHeaders = acceptHeaders.Select(a => MediaTypeWithQualityHeaderValue.Parse(a)).ToList();
+            IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptHeaders = negotiator.SortMediaTypeWithQualityHeaderValuesByQFactor(unsortedAcceptHeaders);
+
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            foreach (string supportedMediaType in supportedMediaTypes)
+            {
+                formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(supportedMediaType));
+            }
+
+            // Act
+            MediaTypeFormatterMatch match = negotiator.MatchAcceptHeader(sortedAcceptHeaders, formatter);
+
+            // Assert
+            if (expectedMediaType == null)
+            {
+                Assert.Null(match);
+            }
+            else
+            {
+                Assert.Same(formatter, match.Formatter);
+                Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), match.MediaType);
+                Assert.Equal(expectedQuality, match.Quality);
+                Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader, match.Ranking);
+            }
+        }
+
+        [Fact]
+        public void MatchRequestMediaType_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            HttpRequestMessage request = new HttpRequestMessage();
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+
+            Assert.ThrowsArgumentNull(() => negotiator.MatchRequestMediaType(request: null, formatter: formatter), "request");
+            Assert.ThrowsArgumentNull(() => negotiator.MatchRequestMediaType(request: request, formatter: null), "formatter");
+        }
+
+        [Theory]
+        [PropertyData("MatchRequestMediaTypeData")]
+        public void MatchRequestMediaType_ReturnsMatch(string requestMediaType, string[] supportedMediaTypes, string expectedMediaType)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Content = new StringContent(String.Empty);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(requestMediaType);
+
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            foreach (string supportedMediaType in supportedMediaTypes)
+            {
+                formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(supportedMediaType));
+            }
+
+            // Act
+            MediaTypeFormatterMatch match = negotiator.MatchRequestMediaType(request, formatter);
+
+            // Assert
+            if (expectedMediaType == null)
+            {
+                Assert.Null(match);
+            }
+            else
+            {
+                Assert.Same(formatter, match.Formatter);
+                Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), match.MediaType);
+                Assert.Equal(1.0, match.Quality);
+                Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnRequestMediaType, match.Ranking);
+            }
+        }
+
+        [Fact]
+        public void MatchType_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            Type type = typeof(object);
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+
+            Assert.ThrowsArgumentNull(() => negotiator.MatchType(type: null, formatter: formatter), "type");
+            Assert.ThrowsArgumentNull(() => negotiator.MatchType(type: type, formatter: null), "formatter");
+        }
+
+        [Theory]
+        [PropertyData("MatchTypeData")]
+        public void MatchType_ReturnsMatch(bool excludeMatchOnTypeOnly, string[] supportedMediaTypes, string expectedMediaType)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator(excludeMatchOnTypeOnly);
+
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+            foreach (string supportedMediaType in supportedMediaTypes)
+            {
+                formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(supportedMediaType));
+            }
+
+            // Act
+            MediaTypeFormatterMatch match = negotiator.MatchType(typeof(object), formatter);
+
+            // Assert
+            if (expectedMediaType == null)
+            {
+                Assert.Null(match);
+            }
+            else
+            {
+                Assert.Same(formatter, match.Formatter);
+                Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), match.MediaType);
+                Assert.Equal(1.0, match.Quality);
+                Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnCanWriteType, match.Ranking);
+            }
+        }
+
+        [Fact]
+        public void SelectResponseMediaTypeFormatter_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            HttpRequestMessage request = new HttpRequestMessage();
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+
+            Assert.ThrowsArgumentNull(() => negotiator.SelectResponseMediaTypeFormatter(matches: null), "matches");
+        }
+
+        [Theory]
+        [PropertyData("SelectResponseMediaTypeData")]
+        public void SelectResponseMediaTypeFormatter_SelectsMediaType(ICollection<MediaTypeFormatterMatch> matches, MediaTypeFormatterMatch expectedWinner)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            // Act
+            MediaTypeFormatterMatch actualWinner = negotiator.SelectResponseMediaTypeFormatter(matches);
+
+            // Assert
+            Assert.Same(expectedWinner, actualWinner);
+        }
+
+        [Fact]
+        public void SelectResponseCharacterEncoding_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            HttpRequestMessage request = new HttpRequestMessage();
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
+
+            Assert.ThrowsArgumentNull(() => negotiator.SelectResponseCharacterEncoding(request: null, formatter: formatter), "request");
+            Assert.ThrowsArgumentNull(() => negotiator.SelectResponseCharacterEncoding(request: request, formatter: null), "formatter");
+        }
+
+        [Theory]
+        [PropertyData("SelectResponseCharacterEncodingData")]
+        public void SelectResponseCharacterEncoding_SelectsEncoding(string[] acceptCharsetHeaders, string requestEncoding, string[] supportedEncodings, string expectedEncoding)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            foreach (string acceptCharsetHeader in acceptCharsetHeaders)
+            {
+                request.Headers.AcceptCharset.Add(StringWithQualityHeaderValue.Parse(acceptCharsetHeader));
+            }
+
+            if (requestEncoding != null)
+            {
+                Encoding reqEncoding = Encoding.GetEncoding(requestEncoding);
+                StringContent content = new StringContent("", reqEncoding, "text/plain");
+                request.Content = content;
+            }
+
+            MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
+            foreach (string supportedEncoding in supportedEncodings)
+            {
+                formatter.SupportedEncodings.Add(Encoding.GetEncoding(supportedEncoding));
+            }
+
+            // Act
+            Encoding actualEncoding = negotiator.SelectResponseCharacterEncoding(request, formatter);
+
+            // Assert
+            if (expectedEncoding == null)
+            {
+                Assert.Null(actualEncoding);
+            }
+            else
+            {
+                Assert.Equal(Encoding.GetEncoding(expectedEncoding), actualEncoding);
+            }
+        }
+
+        [Fact]
+        public void SortMediaTypeWithQualityHeaderValuesByQFactor_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            Assert.ThrowsArgumentNull(() => negotiator.SortMediaTypeWithQualityHeaderValuesByQFactor((HttpHeaderValueCollection<MediaTypeWithQualityHeaderValue>)null), "headerValues");
+        }
+
+        [Theory]
+        [TestDataSet(typeof(MediaTypeWithQualityHeaderValueComparerTests), "BeforeAfterSortedValues")]
+        public void SortMediaTypeWithQualityHeaderValuesByQFactor_SortsCorrectly(IEnumerable<string> unsorted, IEnumerable<string> expectedSorted)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            List<MediaTypeWithQualityHeaderValue> unsortedValues =
+                new List<MediaTypeWithQualityHeaderValue>(unsorted.Select(u => MediaTypeWithQualityHeaderValue.Parse(u)));
+
+            List<MediaTypeWithQualityHeaderValue> expectedSortedValues =
+                new List<MediaTypeWithQualityHeaderValue>(expectedSorted.Select(u => MediaTypeWithQualityHeaderValue.Parse(u)));
+
+            // Act
+            IEnumerable<MediaTypeWithQualityHeaderValue> actualSorted = negotiator.SortMediaTypeWithQualityHeaderValuesByQFactor(unsortedValues);
+
+            // Assert
+            Assert.True(expectedSortedValues.SequenceEqual(actualSorted));
+        }
+
+        [Fact]
+        public void SortStringWithQualityHeaderValuesByQFactor_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            Assert.ThrowsArgumentNull(() => negotiator.SortStringWithQualityHeaderValuesByQFactor((HttpHeaderValueCollection<StringWithQualityHeaderValue>)null), "headerValues");
+        }
+
+        [Theory]
+        [TestDataSet(typeof(StringWithQualityHeaderValueComparerTests), "BeforeAfterSortedValues")]
+        public void SortStringWithQualityHeaderValuesByQFactor_SortsCorrectly(IEnumerable<string> unsorted, IEnumerable<string> expectedSorted)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            List<StringWithQualityHeaderValue> unsortedValues =
+                new List<StringWithQualityHeaderValue>(unsorted.Select(u => StringWithQualityHeaderValue.Parse(u)));
+
+            List<StringWithQualityHeaderValue> expectedSortedValues =
+                new List<StringWithQualityHeaderValue>(expectedSorted.Select(u => StringWithQualityHeaderValue.Parse(u)));
+
+            // Act
+            IEnumerable<StringWithQualityHeaderValue> actualSorted = negotiator.SortStringWithQualityHeaderValuesByQFactor(unsortedValues);
+
+            // Assert
+            Assert.True(expectedSortedValues.SequenceEqual(actualSorted));
+        }
+
+        [Fact]
+        public void UpdateBestMatch_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            Assert.ThrowsArgumentNull(() => negotiator.UpdateBestMatch(current: null, potentialReplacement: null), "potentialReplacement");
+        }
+
+        [Theory]
+        [PropertyData("UpdateBestMatchData")]
+        public void UpdateBestMatch_SelectsCorrectly(MediaTypeFormatterMatch current, MediaTypeFormatterMatch replacement, bool currentWins)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+
+            // Act
+            MediaTypeFormatterMatch actualResult = negotiator.UpdateBestMatch(current, replacement);
+
+            // Assert
+            if (currentWins)
+            {
+                Assert.Same(current, actualResult);
+            }
+            else
+            {
+                Assert.Same(replacement, actualResult);
+            }
         }
 
         private class PlainTextFormatter : MediaTypeFormatter

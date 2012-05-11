@@ -8,9 +8,8 @@ namespace System.Web.Http.WebHost.Routing
     internal class HostedHttpVirtualPathData : IHttpVirtualPathData
     {
         private readonly VirtualPathData _virtualPath;
-        private readonly HostedHttpRoute _hostedHttpRoute;
 
-        public HostedHttpVirtualPathData(VirtualPathData virtualPath)
+        public HostedHttpVirtualPathData(VirtualPathData virtualPath, IHttpRoute httpRoute)
         {
             if (virtualPath == null)
             {
@@ -18,13 +17,10 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             _virtualPath = virtualPath;
-            _hostedHttpRoute = new HostedHttpRoute(_virtualPath.Route as Route);
+            Route = httpRoute;
         }
 
-        public IHttpRoute Route
-        {
-            get { return _hostedHttpRoute; }
-        }
+        public IHttpRoute Route { get; private set; }
 
         public string VirtualPath
         {

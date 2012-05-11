@@ -24,7 +24,6 @@
 *.cshtml text
 *.htm text
 *.html text
-*.htm text
 *.js text
 *.msbuild text
 *.resx text merge=union

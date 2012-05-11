@@ -100,7 +100,7 @@ namespace System.Web.Http.ModelBinding
                 ThrowIfMaxHttpCollectionKeysExceeded(count);
 
                 string key = NormalizeJQueryToMvc(kv.Key);
-                string value = kv.Value ?? String.Empty;                
+                string value = kv.Value ?? String.Empty;
                 yield return new KeyValuePair<string, string>(key, value);
 
                 count++;
@@ -131,7 +131,7 @@ namespace System.Web.Http.ModelBinding
         {
             return (T)ReadAs(formData, typeof(T));
         }
-                
+
         public static object ReadAs(this FormDataCollection formData, Type type)
         {
             return ReadAs(formData, type, string.Empty, requiredMemberSelector: null, formatterLogger: null);
@@ -141,7 +141,7 @@ namespace System.Web.Http.ModelBinding
         {
             return (T)ReadAs(formData, typeof(T), modelName, requiredMemberSelector, formatterLogger);
         }
-        
+
         /// <summary>
         /// Deserialize the form data to the given type, using model binding.  
         /// </summary>
@@ -221,7 +221,7 @@ namespace System.Web.Http.ModelBinding
         {
             Contract.Assert(actionContext != null);
 
-            ControllerServices cs = actionContext.ControllerContext.ControllerDescriptor.ControllerServices;
+            ServicesContainer cs = actionContext.ControllerContext.Configuration.Services;
             IEnumerable<ModelBinderProvider> providers = cs.GetModelBinderProviders();
             ModelBinderProvider modelBinderProvider = new CompositeModelBinderProvider(providers);
             return modelBinderProvider;
@@ -234,9 +234,9 @@ namespace System.Web.Http.ModelBinding
             Contract.Assert(type != null);
             Contract.Assert(vp != null);
 
-            ControllerServices cs = actionContext.ControllerContext.ControllerDescriptor.ControllerServices;
+            ServicesContainer cs = actionContext.ControllerContext.Configuration.Services;
             ModelMetadataProvider metadataProvider = cs.GetModelMetadataProvider();
-            
+
             ModelBindingContext ctx = new ModelBindingContext()
             {
                 ModelName = modelName,

@@ -213,18 +213,12 @@ namespace System.Net.Http.Formatting.DataSets.Types
         //// TODO: make this list compose from other data?
         // Collection of legal instances of all standard MediaTypeMapping types
         public static readonly TestData<MediaTypeMapping> StandardMediaTypeMappings = new RefTypeTestData<MediaTypeMapping>(() =>
-            QueryStringMappings.Cast<MediaTypeMapping>().Concat(
-                    MediaRangeMappings.Cast<MediaTypeMapping>()).ToList()
+            QueryStringMappings.Cast<MediaTypeMapping>().ToList()
         );
 
         public static readonly TestData<QueryStringMapping> QueryStringMappings = new RefTypeTestData<QueryStringMapping>(() => new List<QueryStringMapping>() 
         { 
             new QueryStringMapping("format", "json", new MediaTypeHeaderValue("application/json"))
-        });
-
-        public static readonly TestData<MediaRangeMapping> MediaRangeMappings = new RefTypeTestData<MediaRangeMapping>(() => new List<MediaRangeMapping>() 
-        { 
-            new MediaRangeMapping(new MediaTypeHeaderValue("application/*"), new MediaTypeHeaderValue("application/xml"))
         });
 
         public static readonly TestData<string> LegalUriPathExtensions = new RefTypeTestData<string>(() => new List<string>()

@@ -57,7 +57,7 @@ namespace System.Web.Http.WebHost
                     return new HttpMessageInvoker(server);
                 });
 
-        private static readonly Lazy<IHostBufferPolicySelector> _bufferPolicySelector = 
+        private static readonly Lazy<IHostBufferPolicySelector> _bufferPolicySelector =
             new Lazy<IHostBufferPolicySelector>(() => GlobalConfiguration.Configuration.Services.GetHostBufferPolicySelector());
 
         private static readonly Func<HttpRequestMessage, X509Certificate2> _retrieveClientCertificate = new Func<HttpRequestMessage, X509Certificate2>(RetrieveClientCertificate);
@@ -152,8 +152,7 @@ namespace System.Web.Http.WebHost
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _routeData;
 
             Task responseBodyTask = _server.Value.SendAsync(request, CancellationToken.None)
-                .Then(response => ConvertResponse(httpContextBase, response, request))
-                .FastUnwrap();
+                .Then(response => ConvertResponse(httpContextBase, response, request));
 
             TaskWrapperAsyncResult result = new TaskWrapperAsyncResult(responseBodyTask, state);
 
@@ -367,6 +366,9 @@ namespace System.Web.Http.WebHost
 
             // Add the retrieve client certificate delegate to the property bag to enable lookup later on
             request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
+
+            // Add information about whether the request is local or not
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => requestBase.IsLocal));
 
             return request;
         }

@@ -276,6 +276,30 @@ namespace System.Net.Http.Formatting
             return WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
+        [Fact]
+        public void CanReadType_ReturnsFalse_ForInvalidDataContracts()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+
+            Assert.False(formatter.CanReadType(typeof(InvalidDataContract)));
+        }
+
+        [Fact]
+        public void CanWriteType_ReturnsFalse_ForInvalidDataContracts()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+
+            Assert.False(formatter.CanWriteType(typeof(InvalidDataContract)));
+        }
+
+        public class InvalidDataContract
+        {
+            // removing the default ctor makes this invalid
+            public InvalidDataContract(string s)
+            {
+            }
+        }
+
         public class TestXmlMediaTypeFormatter : XmlMediaTypeFormatter
         {
             public bool CanReadTypeCaller(Type type)

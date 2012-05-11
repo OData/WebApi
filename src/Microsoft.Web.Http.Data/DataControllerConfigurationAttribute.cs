@@ -8,8 +8,6 @@ using System.Net.Http.Formatting;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dependencies;
-using System.Web.Http.ModelBinding;
 using System.Web.Http.Validation;
 using Newtonsoft.Json;
 
@@ -20,21 +18,21 @@ namespace Microsoft.Web.Http.Data
     {
         private static ConcurrentDictionary<Type, IEnumerable<SerializerInfo>> _serializerCache = new ConcurrentDictionary<Type, IEnumerable<SerializerInfo>>();
 
-        public void Initialize(HttpControllerDescriptor controllerDescriptor)
+        public void Initialize(HttpControllerSettings settings, HttpControllerDescriptor controllerDescriptor)
         {
-            controllerDescriptor.Formatters.Clear();
+            settings.Formatters.Clear();
             foreach (MediaTypeFormatter formatter in GetFormatters(controllerDescriptor))
             {
-                controllerDescriptor.Formatters.Add(formatter);
+                settings.Formatters.Add(formatter);
             }
 
-            controllerDescriptor.ReplaceService<IHttpActionInvoker>(new DataControllerActionInvoker());
-            controllerDescriptor.ReplaceService<IHttpActionSelector>(new DataControllerActionSelector());
+            settings.Services.Replace(typeof(IHttpActionInvoker), new DataControllerActionInvoker());
+            settings.Services.Replace(typeof(IHttpActionSelector), new DataControllerActionSelector());
 
             // Clear the validator to disable validation.
-            controllerDescriptor.ControllerServices.Replace(typeof(IBodyModelValidator), null);
+            settings.Services.Replace(typeof(IBodyModelValidator), null);
         }
-            
+
         private static IEnumerable<MediaTypeFormatter> GetFormatters(HttpControllerDescriptor descr)
         {
             HttpConfiguration config = descr.Configuration;
@@ -43,9 +41,9 @@ namespace Microsoft.Web.Http.Data
             List<MediaTypeFormatter> list = new List<MediaTypeFormatter>();
             AddFormattersFromConfig(list, config);
             AddDataControllerFormatters(list, dataDesc);
-                
+
             return list;
-        } 
+        }
 
         private static void AddDataControllerFormatters(List<MediaTypeFormatter> formatters, DataControllerDescription description)
         {
@@ -72,9 +70,9 @@ namespace Microsoft.Web.Http.Data
             {
                 formatterXml.SetSerializer(serializerInfo.ObjectType, serializerInfo.XmlSerializer);
             }
-            
+
             formatters.Add(formatterJson);
-            formatters.Add(formatterXml);            
+            formatters.Add(formatterXml);
         }
 
         // Get existing formatters from config, excluding Json/Xml formatters. 
@@ -92,7 +90,7 @@ namespace Microsoft.Web.Http.Data
                 }
                 formatters.Add(formatter);
             }
-        }        
+        }
 
         private static SerializerInfo GetSerializerInfo(Type type, IEnumerable<Type> knownTypes)
         {

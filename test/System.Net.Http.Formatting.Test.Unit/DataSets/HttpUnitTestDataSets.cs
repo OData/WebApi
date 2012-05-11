@@ -55,8 +55,6 @@ namespace System.Net.Http.Formatting.DataSets
 
         public static TestData<QueryStringMapping> QueryStringMappings { get { return HttpTestData.QueryStringMappings; } }
 
-        public static TestData<MediaRangeMapping> MediaRangeMappings { get { return HttpTestData.MediaRangeMappings; } }
-
         public static TestData<string> LegalUriPathExtensions { get { return HttpTestData.LegalUriPathExtensions; } }
 
         public static TestData<string> LegalQueryStringParameterNames { get { return HttpTestData.LegalQueryStringParameterNames; } }

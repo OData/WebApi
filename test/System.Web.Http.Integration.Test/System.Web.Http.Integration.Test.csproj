@@ -78,10 +78,13 @@
     <Compile Include="ApiExplorer\DocumentationTest.cs" />
     <Compile Include="ApiExplorer\RouteConstraintsTest.cs" />
     <Compile Include="ApiExplorer\RoutesTest.cs" />
+    <Compile Include="Controllers\Apis\SpecialConfigController.cs" />
+    <Compile Include="Controllers\Apis\RegularConfigController.cs" />
     <Compile Include="Controllers\Apis\ParameterAttributeController.cs" />
     <Compile Include="Controllers\Apis\UsersController.cs" />
     <Compile Include="Controllers\ActionReachabilityTest.cs" />
     <Compile Include="Controllers\Apis\ValuesController.cs" />
+    <Compile Include="Controllers\ControllerConfigurationTest.cs" />
     <Compile Include="Tracing\ITestTraceWriter.cs" />
     <Compile Include="Tracing\MemoryTraceWriter.cs" />
     <Compile Include="Tracing\NeverTracesTraceWriter.cs" />

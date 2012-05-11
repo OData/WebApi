@@ -73,7 +73,7 @@ namespace System.Web.Http.Services
             Assert.IsType<ComplexModelDtoModelBinderProvider>(modelBinderProviders[3]);
             Assert.IsType<ArrayModelBinderProvider>(modelBinderProviders[4]);
             Assert.IsType<DictionaryModelBinderProvider>(modelBinderProviders[5]);
-            Assert.IsType<CollectionModelBinderProvider>(modelBinderProviders[6]);            
+            Assert.IsType<CollectionModelBinderProvider>(modelBinderProviders[6]);
             Assert.IsType<MutableObjectModelBinderProvider>(modelBinderProviders[7]);
 
             object[] validatorProviders = defaultServices.GetServices(typeof(ModelValidatorProvider)).ToArray();
@@ -82,7 +82,7 @@ namespace System.Web.Http.Services
             Assert.IsType<DataMemberModelValidatorProvider>(validatorProviders[1]);
 
             object[] valueProviderFactories = defaultServices.GetServices(typeof(ValueProviderFactory)).ToArray();
-            Assert.Equal(2, valueProviderFactories.Length);            
+            Assert.Equal(2, valueProviderFactories.Length);
             Assert.IsType<QueryStringValueProviderFactory>(valueProviderFactories[0]);
             Assert.IsType<RouteDataValueProviderFactory>(valueProviderFactories[1]);
         }

@@ -59,7 +59,7 @@ namespace System.Web.Http.Services
     ///     </para>
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
-    public class DefaultServices : ServicesContainer, IDisposable
+    public class DefaultServices : ServicesContainer
     {
         // This lock protects both caches (and _lastKnownDependencyResolver is updated under it as well)
         private readonly ReaderWriterLockSlim _cacheLock = new ReaderWriterLockSlim();
@@ -141,7 +141,7 @@ namespace System.Web.Http.Services
             SetMultiple<ValueProviderFactory>(new QueryStringValueProviderFactory(),
                                            new RouteDataValueProviderFactory());
 
-            _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);            
+            _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);
             _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);
 
             // Reset the caches and the known dependency scope
@@ -160,7 +160,7 @@ namespace System.Web.Http.Services
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
         [SuppressMessage("Microsoft.Usage", "CA1816:CallGCSuppressFinalizeCorrectly", Justification = "Although this class is not sealed, end users cannot set instances of it so in practice it is sealed.")]
-        public virtual void Dispose()
+        public override void Dispose()
         {
             _cacheLock.Dispose();
         }

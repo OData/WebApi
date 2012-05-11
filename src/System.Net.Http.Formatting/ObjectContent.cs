@@ -62,6 +62,11 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("formatter");
             }
 
+            if (!formatter.CanWriteType(type))
+            {
+                throw Error.InvalidOperation(Properties.Resources.ObjectContent_FormatterCannotWriteType, formatter.GetType().FullName, type.Name);
+            }
+
             _formatter = formatter;
             ObjectType = type;
 
@@ -144,11 +149,6 @@ namespace System.Net.Http
                 if (!ObjectType.IsAssignableFrom(objectType))
                 {
                     throw Error.Argument("value", Properties.Resources.ObjectAndTypeDisagree, objectType.Name, ObjectType.Name);
-                }
-
-                if (!_formatter.CanWriteType(objectType))
-                {
-                    throw Error.InvalidOperation(Properties.Resources.ObjectContent_FormatterCannotWriteType, _formatter.GetType().FullName, objectType.Name);
                 }
             }
 

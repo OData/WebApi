@@ -64,7 +64,8 @@ namespace System.Web.Http.Tracing
                             "get_BodyModelValidator", "set_BodyModelValidator", 
                             "get_Descriptor",
                             // Cannot override but handled by overriding ErrorMessage
-                            "get_IsValid"
+                            "get_IsValid",
+                            "GetValue", "SetValue"
                         }
                     },
                     { typeof(FormUrlEncodedMediaTypeFormatter), typeof(FormUrlEncodedMediaTypeFormatterTracer), new string[] 
@@ -103,10 +104,7 @@ namespace System.Web.Http.Tracing
                             // Values copied in ctor
                             "get_Configuration", "set_Configuration", 
                             "get_ControllerType", "set_ControllerType",
-                            "get_ControllerName", "set_ControllerName",
-                            "get_Formatters", "set_Formatters",
-                            "get_ParameterBindingRules", "set_ParameterBindingRules",
-                            "get_ControllerServices"
+                            "get_ControllerName", "set_ControllerName"
                         }
                     },
                     { typeof(IHttpControllerSelector), typeof(HttpControllerSelectorTracer), new string[0] },
@@ -116,7 +114,8 @@ namespace System.Web.Http.Tracing
                             // Handled in base ctor
                             "get_Descriptor",
                             // Cannot override but handled by overriding ErrorMessage
-                            "get_IsValid"
+                            "get_IsValid",
+                            "GetValue", "SetValue",
                         }
                     },
                     { typeof(JsonMediaTypeFormatter), typeof(JsonMediaTypeFormatterTracer), new string[] 
@@ -235,7 +234,7 @@ namespace System.Web.Http.Tracing
             // Arrange & Act
             string[] declaredMembers = tracerType.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Select<MemberInfo, string>(m => m.Name).ToArray();
             string[] unDeclaredExcludedMembers = exclusions.Where(e => !declaredMembers.Contains(e.Substring(e.LastIndexOf('.') + 1))).ToArray();
-            
+
             // Assert
             Assert.True(unDeclaredExcludedMembers.Length == 0,
                         String.Format("The tracer '{0}' does not declare these members listed for exclusion: {1}",
@@ -251,7 +250,7 @@ namespace System.Web.Http.Tracing
             IList<string> issues = DetermineIssues(innerType, tracerType, excludedMembers);
 
             // Assert
-            Assert.True(issues.Count == 0, 
+            Assert.True(issues.Count == 0,
                         String.Format("'{0}' does not handle these members from '{1}':{2}        {3}",
                         tracerType.Name,
                         innerType.Name,
@@ -297,10 +296,10 @@ namespace System.Web.Http.Tracing
                 bool isOverrideable = IsOverrideable(methodInfo);
                 bool isSetter = methodInfo.IsSpecialName && methodInfo.Name.StartsWith("set_");
                 bool isGetter = methodInfo.IsSpecialName && methodInfo.Name.StartsWith("get_");
-                issues.Add(String.Format("{0} [{1}]", 
+                issues.Add(String.Format("{0} [{1}]",
                             visibleMemberName,
-                            isOverrideable 
-                                ? "Override this virtual in the tracer" 
+                            isOverrideable
+                                ? "Override this virtual in the tracer"
                                 : isGetter
                                     ? "Capture this value from inner in the tracer's ctor, and add to it to the exclude list"
                                     : isSetter

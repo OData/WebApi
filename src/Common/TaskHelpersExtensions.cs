@@ -84,7 +84,7 @@ namespace System.Threading.Tasks
                 }
 
                 if (task.Status == TaskStatus.RanToCompletion)
-                {                    
+                {
                     TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
                     tcs.TrySetFromTask(task);
                     return tcs.Task;
@@ -465,6 +465,17 @@ namespace System.Threading.Tasks
         internal static Task<TOuterResult> Then<TInnerResult, TOuterResult>(this Task<TInnerResult> task, Func<TInnerResult, TOuterResult> continuation, CancellationToken cancellationToken = default(CancellationToken))
         {
             return task.ThenImpl(t => TaskHelpers.FromResult(continuation(t.Result)), cancellationToken);
+        }
+
+        /// <summary>
+        /// Calls the given continuation, after the given task has completed, if the task successfully ran
+        /// to completion (i.e., was not cancelled and did not fault). The continuation is provided with the
+        /// result of the task as its sole parameter.
+        /// </summary>
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
+        internal static Task Then<TInnerResult>(this Task<TInnerResult> task, Func<TInnerResult, Task> continuation, CancellationToken token = default(CancellationToken))
+        {
+            return task.ThenImpl(t => continuation(t.Result).ToTask<AsyncVoid>(), token);
         }
 
         /// <summary>

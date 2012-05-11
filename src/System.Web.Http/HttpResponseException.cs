@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http.Properties;
 
@@ -15,6 +16,16 @@ namespace System.Web.Http
     [SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors", Justification = "HttpResponseException is not a real exception and is just an easy way to return HttpResponseMessage")]
     public class HttpResponseException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpResponseException"/> class.
+        /// </summary>
+        /// <param name="statusCode">The status code of the response.</param>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Instance is disposed elsewhere")]
+        public HttpResponseException(HttpStatusCode statusCode)
+            : this(new HttpResponseMessage(statusCode))
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpResponseException"/> class.
         /// </summary>

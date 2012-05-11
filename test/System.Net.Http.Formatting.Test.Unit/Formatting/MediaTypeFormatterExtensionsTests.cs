@@ -33,22 +33,6 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void AddMediaRangeMappingThrowsWithNullThis()
-        {
-            MediaTypeFormatter formatter = null;
-            Assert.ThrowsArgumentNull(() => formatter.AddMediaRangeMapping(new MediaTypeHeaderValue("application/*"), new MediaTypeHeaderValue("application/xml")), "formatter");
-        }
-
-        [Fact]
-        public void AddMediaRangeMapping1ThrowsWithNullThis()
-        {
-            MediaTypeFormatter formatter = null;
-            Assert.ThrowsArgumentNull(() => formatter.AddMediaRangeMapping("application/*", "application/xml"), "formatter");
-        }
-
-
-
-        [Fact]
         public void AddRequestHeaderMappingThrowsWithNullThis()
         {
             MediaTypeFormatter formatter = null;

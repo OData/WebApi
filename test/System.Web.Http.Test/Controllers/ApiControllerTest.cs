@@ -50,7 +50,7 @@ namespace System.Web.Http
                     tcs.TrySetResult(new HttpResponseMessage() { Content = new StringContent(responseText) });
                     return tcs.Task;
                 });
-            controllerDescriptor.ControllerServices.Replace(typeof(IHttpActionInvoker), mockInvoker.Object);
+            controllerDescriptor.Configuration.Services.Replace(typeof(IHttpActionInvoker), mockInvoker.Object);
 
             // Act
             HttpResponseMessage message = api.ExecuteAsync(
@@ -85,7 +85,7 @@ namespace System.Web.Http
                         MethodInfo = testDelegate.Method
                     };
                 });
-            controllerDescriptor.ControllerServices.Replace(typeof(IHttpActionSelector), mockSelector.Object);
+            controllerDescriptor.Configuration.Services.Replace(typeof(IHttpActionSelector), mockSelector.Object);
 
             // Act
             HttpResponseMessage message = api.ExecuteAsync(
@@ -339,9 +339,9 @@ namespace System.Web.Http
                            log.Add("action");
                            return new HttpResponseMessage();
                        }));
-            controllerContext.ControllerDescriptor.ControllerServices.Replace(typeof(IHttpActionInvoker), invokerMock.Object);
-            controllerContext.ControllerDescriptor.ControllerServices.Replace(typeof(IHttpActionSelector), selectorMock.Object);
-            controllerContext.ControllerDescriptor.ControllerServices.Replace(typeof(IActionValueBinder), binderMock.Object);
+            controllerContext.Configuration.Services.Replace(typeof(IHttpActionInvoker), invokerMock.Object);
+            controllerContext.Configuration.Services.Replace(typeof(IHttpActionSelector), selectorMock.Object);
+            controllerContext.Configuration.Services.Replace(typeof(IActionValueBinder), binderMock.Object);
 
             var task = controller.ExecuteAsync(controllerContext, CancellationToken.None);
 
@@ -680,6 +680,7 @@ namespace System.Web.Http
             mockSelector.Setup(s => s.SelectController(It.IsAny<HttpRequestMessage>())).Returns(mockDescriptor.Object);
             config.Routes.MapHttpRoute("default", "", new { controller = "MyMock" });
             config.Services.Replace(typeof(IHttpControllerSelector), mockSelector.Object);
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             var server = new HttpServer(config);
             var invoker = new HttpMessageInvoker(server);
 

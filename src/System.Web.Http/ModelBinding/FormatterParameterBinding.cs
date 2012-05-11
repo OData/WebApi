@@ -80,8 +80,7 @@ namespace System.Web.Http.ModelBinding
                 (model) =>
                 {
                     // Put the parameter result into the action context.
-                    string name = paramFromBody.ParameterName;
-                    actionContext.ActionArguments.Add(name, model);
+                    SetValue(actionContext, model);
 
                     // validate the object graph. 
                     // null indicates we want no body parameter validation

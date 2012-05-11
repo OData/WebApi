@@ -93,7 +93,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TestFiles\HiRes.jpg" />
     <EmbeddedResource Include="TestFiles\LambdaFinal.jpg" />
     <EmbeddedResource Include="TestFiles\logo.bmp" />
     <EmbeddedResource Include="TestFiles\NETLogo.png" />

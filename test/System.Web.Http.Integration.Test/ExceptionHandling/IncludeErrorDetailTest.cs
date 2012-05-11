@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
@@ -11,38 +11,39 @@ namespace System.Web.Http
 {
     public class IncludeErrorDetailTest
     {
-        public static IEnumerable<object[]> Data
+        public static TheoryDataSet ThrowingOnActionIncludesErrorDetailData
         {
             get
             {
-                return new object[][]
+                return new TheoryDataSet<bool, IncludeErrorDetailPolicy, bool>()
                 {
-                    new object[] { "localhost", null, true },
-                    new object[] { "127.0.0.1", null, true },
-                    new object[] { "www.foo.com", null, false },
-                    new object[] { "localhost", IncludeErrorDetailPolicy.LocalOnly, true },
-                    new object[] { "www.foo.com", IncludeErrorDetailPolicy.LocalOnly, false },
-                    new object[] { "localhost", IncludeErrorDetailPolicy.Always, true },
-                    new object[] { "www.foo.com", IncludeErrorDetailPolicy.Always, true },
-                    new object[] { "localhost", IncludeErrorDetailPolicy.Never, false },
-                    new object[] { "www.foo.com", IncludeErrorDetailPolicy.Never, false }
+                    // isLocal, includeErrorDetail, expectErrorDetail
+                    { true, IncludeErrorDetailPolicy.LocalOnly, true },
+                    { false, IncludeErrorDetailPolicy.LocalOnly, false },
+                    { true, IncludeErrorDetailPolicy.Always, true },
+                    { false, IncludeErrorDetailPolicy.Always, true },
+                    { true, IncludeErrorDetailPolicy.Never, false },
+                    { false, IncludeErrorDetailPolicy.Never, false }
                 };
             }
         }
 
         [Theory]
-        [PropertyData("Data")]
-        public void ThrowingOnActionIncludesErrorDetail(string hostName, IncludeErrorDetailPolicy? includeErrorDetail, bool shouldIncludeErrorDetail)
+        [PropertyData("ThrowingOnActionIncludesErrorDetailData")]
+        public void ThrowingOnActionIncludesErrorDetail(bool isLocal, IncludeErrorDetailPolicy includeErrorDetail, bool expectErrorDetail)
         {
             string controllerName = "Exception";
-            string requestUrl = String.Format("{0}/{1}/{2}", "http://" + hostName, controllerName, "ArgumentNull");
+            string requestUrl = String.Format("{0}/{1}/{2}", "http://www.foo.com", controllerName, "ArgumentNull");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+            request.Properties["MS_IsLocal"] = new Lazy<bool>(() => isLocal);
+
             ScenarioHelper.RunTest(
                 controllerName,
                 "/{action}",
-                new HttpRequestMessage(HttpMethod.Post, requestUrl),
+                request,
                 (response) =>
                 {
-                    if (shouldIncludeErrorDetail)
+                    if (expectErrorDetail)
                     {
                         AssertResponseIncludesErrorDetail(response);
                     }
@@ -53,10 +54,7 @@ namespace System.Web.Http
                 },
                 (config) =>
                 {
-                    if (includeErrorDetail.HasValue)
-                    {
-                        config.IncludeErrorDetailPolicy = includeErrorDetail.Value;
-                    }
+                    config.IncludeErrorDetailPolicy = includeErrorDetail;
                 }
             );
         }

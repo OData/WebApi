@@ -14,7 +14,7 @@ namespace System.Web.Http.WebHost.Routing
     /// a special "httproute" key is specified when generating URLs. There is no special behavior
     /// for incoming URLs.
     /// </summary>
-    public class HttpWebRoute : Route
+    internal class HttpWebRoute : Route
     {
         /// <summary>
         /// Key used to signify that a route URL generation request should include HTTP routes (e.g. Web API).
@@ -23,28 +23,21 @@ namespace System.Web.Http.WebHost.Routing
         private const string HttpRouteKey = "httproute";
 
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Matches the base class's parameter names.")]
-        public HttpWebRoute(string url, IRouteHandler routeHandler)
-            : base(url, routeHandler)
-        {
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Matches the base class's parameter names.")]
-        public HttpWebRoute(string url, RouteValueDictionary defaults, IRouteHandler routeHandler)
-            : base(url, defaults, routeHandler)
-        {
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Matches the base class's parameter names.")]
-        public HttpWebRoute(string url, RouteValueDictionary defaults, RouteValueDictionary constraints, IRouteHandler routeHandler)
-            : base(url, defaults, constraints, routeHandler)
-        {
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Matches the base class's parameter names.")]
-        public HttpWebRoute(string url, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens, IRouteHandler routeHandler)
+        public HttpWebRoute(string url, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens, IRouteHandler routeHandler, IHttpRoute httpRoute)
             : base(url, defaults, constraints, dataTokens, routeHandler)
         {
+            if (httpRoute == null)
+            {
+                throw Error.ArgumentNull("httpRoute");
+            }
+
+            HttpRoute = httpRoute;
         }
+
+        /// <summary>
+        /// Gets the <see cref="IHttpRoute"/> associated with this <see cref="HttpWebRoute"/>.
+        /// </summary>
+        public IHttpRoute HttpRoute { get; private set; }
 
         protected override bool ProcessConstraint(HttpContextBase httpContext, object constraint, string parameterName, RouteValueDictionary values, RouteDirection routeDirection)
         {
@@ -58,7 +51,7 @@ namespace System.Web.Http.WebHost.Routing
                     httpContext.SetHttpRequestMessage(request);
                 }
 
-                return httpRouteConstraint.Match(request, new HostedHttpRoute(this), parameterName, values, ConvertRouteDirection(routeDirection));
+                return httpRouteConstraint.Match(request, HttpRoute, parameterName, values, ConvertRouteDirection(routeDirection));
             }
 
             return base.ProcessConstraint(httpContext, constraint, parameterName, values, routeDirection);

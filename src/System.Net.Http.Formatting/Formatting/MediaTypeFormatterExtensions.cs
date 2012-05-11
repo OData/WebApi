@@ -66,53 +66,12 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Updates the given <paramref name="formatter"/>'s set of <see cref="MediaTypeMapping"/> elements
-        /// so that it associates the <paramref name="mediaType"/> with requests or responses containing
-        /// <paramref name="mediaRange"/> in the content headers.
-        /// </summary>
-        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="MediaRangeMapping"/> item.</param>
-        /// <param name="mediaRange">The media range that will appear in the content headers.</param>
-        /// <param name="mediaType">The media type to associate with that <paramref name="mediaRange"/>.</param>
-        public static void AddMediaRangeMapping(this MediaTypeFormatter formatter, string mediaRange, string mediaType)
-        {
-            if (formatter == null)
-            {
-                throw Error.ArgumentNull("formatter");
-            }
-
-            MediaRangeMapping mapping = new MediaRangeMapping(mediaRange, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-        }
-
-        /// <summary>
-        /// Updates the given <paramref name="formatter"/>'s set of <see cref="MediaTypeMapping"/> elements
-        /// so that it associates the <paramref name="mediaType"/> with requests or responses containing
-        /// <paramref name="mediaRange"/> in the content headers.
-        /// </summary>
-        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="MediaRangeMapping"/> item.</param>
-        /// <param name="mediaRange">The media range that will appear in the content headers.</param>
-        /// <param name="mediaType">The media type to associate with that <paramref name="mediaRange"/>.</param>
-        public static void AddMediaRangeMapping(
-            this MediaTypeFormatter formatter,
-            MediaTypeHeaderValue mediaRange,
-            MediaTypeHeaderValue mediaType)
-        {
-            if (formatter == null)
-            {
-                throw Error.ArgumentNull("formatter");
-            }
-
-            MediaRangeMapping mapping = new MediaRangeMapping(mediaRange, mediaType);
-            formatter.MediaTypeMappings.Add(mapping);
-        }
-
-        /// <summary>
-        /// Updates the given <paramref name="formatter"/>'s set of <see cref="MediaTypeMapping"/> elements
         /// so that it associates the <paramref name="mediaType"/> with a specific HTTP request header field
         /// with a specific value.
         /// </summary>
         /// <remarks><see cref="RequestHeaderMapping"/> checks header fields associated with <see cref="M:HttpRequestMessage.Headers"/> for a match. It does
         /// not check header fields associated with <see cref="M:HttpResponseMessage.Headers"/> or <see cref="M:HttpContent.Headers"/> instances.</remarks>
-        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="MediaRangeMapping"/> item.</param>
+        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="MediaTypeMapping"/> item.</param>
         /// <param name="headerName">Name of the header to match.</param>
         /// <param name="headerValue">The header value to match.</param>
         /// <param name="valueComparison">The <see cref="StringComparison"/> to use when matching <paramref name="headerValue"/>.</param>
@@ -145,7 +104,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         /// <remarks><see cref="RequestHeaderMapping"/> checks header fields associated with <see cref="M:HttpRequestMessage.Headers"/> for a match. It does
         /// not check header fields associated with <see cref="M:HttpResponseMessage.Headers"/> or <see cref="M:HttpContent.Headers"/> instances.</remarks>
-        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="MediaRangeMapping"/> item.</param>
+        /// <param name="formatter">The <see cref="MediaTypeFormatter"/> to receive the new <see cref="MediaTypeMapping"/> item.</param>
         /// <param name="headerName">Name of the header to match.</param>
         /// <param name="headerValue">The header value to match.</param>
         /// <param name="valueComparison">The <see cref="StringComparison"/> to use when matching <paramref name="headerValue"/>.</param>

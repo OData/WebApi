@@ -106,7 +106,7 @@ namespace System.Web.Http.Dispatcher
         [Fact]
         public void SendAsync_Returns500WithHttpErrorWhenControllerThrows()
         {
-            var config = new HttpConfiguration();
+            var config = new HttpConfiguration() { IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always };
             var request = CreateRequest(config, "http://localhost/api/HttpControllerDispatcherThrowing");
             var dispatcher = new HttpControllerDispatcher(config);
             var invoker = new HttpMessageInvoker(dispatcher);

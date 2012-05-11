@@ -18,11 +18,6 @@ namespace System.Web.Http.Hosting
         public static readonly string HttpConfigurationKey = "MS_HttpConfiguration";
 
         /// <summary>
-        /// Provides a key for the <see cref="HttpControllerDescriptor"/> associated with this request.
-        /// </summary>
-        public static readonly string HttpControllerDescriptorKey = "MS_HttpControllerDescriptor";
-
-        /// <summary>
         /// Provides a key for the <see cref="IHttpRouteData"/> associated with this request.
         /// </summary>
         public static readonly string HttpRouteDataKey = "MS_HttpRouteData";
@@ -58,5 +53,10 @@ namespace System.Web.Http.Hosting
         /// This is the correlation id for that request.
         /// </summary>
         public static readonly string RequestCorrelationKey = "MS_RequestId";
+
+        /// <summary>
+        /// Provides a key that indicates whether the request originates from a local address
+        /// </summary>
+        public static readonly string IsLocalKey = "MS_IsLocal";
     }
 }

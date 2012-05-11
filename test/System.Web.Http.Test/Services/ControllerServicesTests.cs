@@ -92,7 +92,7 @@ namespace System.Web.Http.Services
             // It can get the inherited list and mutate it. 
 
             HttpConfiguration config = new HttpConfiguration();
-            DefaultServices global = config.Services;
+            ServicesContainer global = config.Services;
 
             ControllerServices cs = new ControllerServices(config.Services);
 
@@ -114,7 +114,7 @@ namespace System.Web.Http.Services
         public void Controller_Clear_Single_Item()
         {
             HttpConfiguration config = new HttpConfiguration();
-            DefaultServices global = config.Services;
+            ServicesContainer global = config.Services;
 
             ControllerServices cs = new ControllerServices(config.Services);
             IActionValueBinder newLocalService = new Mock<IActionValueBinder>().Object;
@@ -134,7 +134,7 @@ namespace System.Web.Http.Services
         public void Controller_Set_Null()
         {
             HttpConfiguration config = new HttpConfiguration();
-            DefaultServices global = config.Services;
+            ServicesContainer global = config.Services;
 
             ControllerServices cs = new ControllerServices(config.Services);
 

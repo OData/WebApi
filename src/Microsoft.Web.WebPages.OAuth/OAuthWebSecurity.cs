@@ -24,7 +24,7 @@ namespace Microsoft.Web.WebPages.OAuth
 
         // contains all registered authentication clients
         private static readonly Dictionary<string, AuthenticationClientData> _authenticationClients =
-            new Dictionary<string, AuthenticationClientData>();
+            new Dictionary<string, AuthenticationClientData>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets a value indicating whether the current user is authenticated by an OAuth provider.

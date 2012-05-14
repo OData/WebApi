@@ -323,19 +323,20 @@ namespace Microsoft.Web.WebPages.OAuth
         /// <summary>
         /// Checks if user is successfully authenticated when user is redirected back to this user.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care if the operation fails.")]
         [CLSCompliant(false)]
-        public static AuthenticationResult VerifyAuthentication()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "We want to allow relative app path, and support ~/")]
+        public static AuthenticationResult VerifyAuthentication(string returnUrl)
         {
             if (HttpContext.Current == null)
             {
                 throw new InvalidOperationException(WebResources.HttpContextNotAvailable);
             }
 
-            return VerifyAuthenticationCore(new HttpContextWrapper(HttpContext.Current));
+            return VerifyAuthenticationCore(new HttpContextWrapper(HttpContext.Current), returnUrl);
         }
 
-        internal static AuthenticationResult VerifyAuthenticationCore(HttpContextBase context)
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "We want to allow relative app path, and support ~/")]
+        internal static AuthenticationResult VerifyAuthenticationCore(HttpContextBase context, string returnUrl)
         {
             string providerName = OpenAuthSecurityManager.GetProviderName(context);
             if (String.IsNullOrEmpty(providerName))
@@ -347,7 +348,7 @@ namespace Microsoft.Web.WebPages.OAuth
             if (TryGetOAuthClient(providerName, out client))
             {
                 var securityManager = new OpenAuthSecurityManager(context, client, OAuthDataProvider);
-                return securityManager.VerifyAuthentication();
+                return securityManager.VerifyAuthentication(returnUrl);
             }
             else
             {

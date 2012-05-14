@@ -127,7 +127,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             OAuthWebSecurity.RegisterClient(anotherClient.Object);
 
             // Act
-            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object);
+            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object, "one.aspx");
 
             // Assert
             Assert.True(result.IsSuccessful);
@@ -161,7 +161,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             OAuthWebSecurity.RegisterClient(anotherClient.Object);
 
             // Act
-            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object);
+            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object, "one.aspx");
 
             // Assert
             Assert.False(result.IsSuccessful);
@@ -185,7 +185,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             OAuthWebSecurity.RegisterClient(anotherClient.Object);
 
             // Act
-            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object);
+            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object, "");
 
             // Assert
             Assert.False(result.IsSuccessful);

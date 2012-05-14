@@ -46,25 +46,30 @@ namespace System.Web.Http.WebHost
         [Fact]
         void UseBufferedInputStream_Returns_True()
         {
-            Assert.True(new WebHostBufferPolicySelector().UseBufferedInputStream(new HttpRequestMessage()));
+            // Arrange
+            Mock<HttpContextBase> mockContext = new Mock<HttpContextBase>() { CallBase = true };
+
+            // Act & Assert
+            Assert.True(new WebHostBufferPolicySelector().UseBufferedInputStream(mockContext.Object));
         }
 
         [Fact]
         void UseBufferedInputStream_ThrowsOnNull()
         {
             WebHostBufferPolicySelector selector = new WebHostBufferPolicySelector();
-            Assert.ThrowsArgumentNull(() => selector.UseBufferedInputStream(null), "request");
+            Assert.ThrowsArgumentNull(() => selector.UseBufferedInputStream(null), "hostContext");
         }
 
         [Fact]
         void UseBufferedInputStream_Can_Be_Overridden()
         {
             // Arrange
-            Mock<WebHostBufferPolicySelector> mock = new Mock<WebHostBufferPolicySelector>();
-            mock.Setup((w) => w.UseBufferedInputStream(It.IsAny<HttpRequestMessage>())).Returns(false);
+            Mock<WebHostBufferPolicySelector> mockSelector = new Mock<WebHostBufferPolicySelector>();
+            mockSelector.Setup((w) => w.UseBufferedInputStream(It.IsAny<HttpContextBase>())).Returns(false);
+            Mock<HttpContextBase> mockContext = new Mock<HttpContextBase>() { CallBase = true };
 
             // Act & Assert
-            Assert.False(mock.Object.UseBufferedInputStream(new HttpRequestMessage()));
+            Assert.False(mockSelector.Object.UseBufferedInputStream(mockContext.Object));
         }
 
         [Fact]

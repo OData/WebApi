@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -353,8 +354,14 @@ namespace System.Web.Http.WebHost
             Uri uri = requestBase.Url;
             HttpRequestMessage request = new HttpRequestMessage(method, uri);
 
-            // TODO: Should we use GetBufferlessInputStream? Yes, as we don't need any of the parsing from ASP
-            request.Content = new StreamContent(requestBase.InputStream);
+            // Choose a buffered or bufferless input stream based on user's policy
+            IHostBufferPolicySelector policySelector = _bufferPolicySelector.Value;
+            bool isInputBuffered = policySelector == null ? true : policySelector.UseBufferedInputStream(httpContextBase);
+            Stream inputStream = isInputBuffered
+                                    ? requestBase.InputStream
+                                    : httpContextBase.ApplicationInstance.Request.GetBufferlessInputStream();
+
+            request.Content = new StreamContent(inputStream);
             foreach (string headerName in requestBase.Headers)
             {
                 string[] values = requestBase.Headers.GetValues(headerName);

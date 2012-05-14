@@ -12,12 +12,11 @@ namespace System.Web.Http.Hosting
     public interface IHostBufferPolicySelector
     {
         /// <summary>
-        /// Determines whether the host should buffer the <see cref="HttpRequestMessage"/> entity body.
+        /// Determines whether the host should buffer the entity body when processing a request with content.
         /// </summary>
-        /// <param name="request">The <see cref="HttpRequestMessage"/> request for which to determine
-        /// whether host input buffering should be used for the request entity body.</param>
+        /// <param name="hostContext">The host-specific context.</param>
         /// <returns><c>true</c> if buffering should be used; otherwise a streamed request should be used.</returns>
-        bool UseBufferedInputStream(HttpRequestMessage request);
+        bool UseBufferedInputStream(object hostContext);
 
         /// <summary>
         /// Determines whether the host should buffer the <see cref="HttpResponseMessage"/> entity body.

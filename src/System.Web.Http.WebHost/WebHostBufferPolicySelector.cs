@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web;
 using System.Web.Http.Hosting;
 
 namespace System.Web.Http.WebHost
@@ -12,16 +13,16 @@ namespace System.Web.Http.WebHost
     public class WebHostBufferPolicySelector : IHostBufferPolicySelector
     {
         /// <summary>
-        /// Determines whether the host should buffer the <see cref="HttpRequestMessage"/> entity body.
+        /// Determines whether the host should buffer the entity body when processing a request with content.
         /// </summary>
-        /// <param name="request">The <see cref="HttpRequestMessage"/> request for which to determine
-        /// whether host input buffering should be used for the request entity body.</param>
+        /// <param name="hostContext">The host-specific context.  In this case, it is an instance
+        /// of <see cref="HttpContextBase"/>.</param>
         /// <returns><c>true</c> if buffering should be used; otherwise a streamed request should be used.</returns>
-        public virtual bool UseBufferedInputStream(HttpRequestMessage request)
+        public virtual bool UseBufferedInputStream(object hostContext)
         {
-            if (request == null)
+            if (hostContext == null)
             {
-                throw Error.ArgumentNull("request");
+                throw Error.ArgumentNull("hostContext");
             }
 
             return true;

@@ -324,6 +324,16 @@ namespace Microsoft.Web.WebPages.OAuth
         /// Checks if user is successfully authenticated when user is redirected back to this user.
         /// </summary>
         [CLSCompliant(false)]
+        public static AuthenticationResult VerifyAuthentication()
+        {
+            return VerifyAuthentication(returnUrl: null);
+        }
+
+        /// <summary>
+        /// Checks if user is successfully authenticated when user is redirected back to this user.
+        /// </summary>
+        /// <param name="returnUrl">The return URL which must match the one passed to RequestAuthentication earlier.</param>
+        [CLSCompliant(false)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "We want to allow relative app path, and support ~/")]
         public static AuthenticationResult VerifyAuthentication(string returnUrl)
         {

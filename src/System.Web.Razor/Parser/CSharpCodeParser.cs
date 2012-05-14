@@ -192,70 +192,77 @@ namespace System.Web.Razor.Parser
             using (PushSpanConfig(DefaultSpanConfig))
             {
                 EnsureCurrent();
-                // What type of block is this?
-                if (!EndOfFile)
+                try
                 {
-                    if (CurrentSymbol.Type == CSharpSymbolType.LeftParenthesis)
+                    // What type of block is this?
+                    if (!EndOfFile)
                     {
-                        Context.CurrentBlock.Type = BlockType.Expression;
-                        Context.CurrentBlock.CodeGenerator = new ExpressionCodeGenerator();
-                        ExplicitExpression();
-                        return;
-                    }
-                    else if (CurrentSymbol.Type == CSharpSymbolType.Identifier)
-                    {
-                        Action handler;
-                        if (TryGetDirectiveHandler(CurrentSymbol.Content, out handler))
-                        {
-                            Span.CodeGenerator = SpanCodeGenerator.Null;
-                            handler();
-                            return;
-                        }
-                        else
+                        if (CurrentSymbol.Type == CSharpSymbolType.LeftParenthesis)
                         {
                             Context.CurrentBlock.Type = BlockType.Expression;
                             Context.CurrentBlock.CodeGenerator = new ExpressionCodeGenerator();
-                            ImplicitExpression();
+                            ExplicitExpression();
+                            return;
+                        }
+                        else if (CurrentSymbol.Type == CSharpSymbolType.Identifier)
+                        {
+                            Action handler;
+                            if (TryGetDirectiveHandler(CurrentSymbol.Content, out handler))
+                            {
+                                Span.CodeGenerator = SpanCodeGenerator.Null;
+                                handler();
+                                return;
+                            }
+                            else
+                            {
+                                Context.CurrentBlock.Type = BlockType.Expression;
+                                Context.CurrentBlock.CodeGenerator = new ExpressionCodeGenerator();
+                                ImplicitExpression();
+                                return;
+                            }
+                        }
+                        else if (CurrentSymbol.Type == CSharpSymbolType.Keyword)
+                        {
+                            KeywordBlock(topLevel: true);
+                            return;
+                        }
+                        else if (CurrentSymbol.Type == CSharpSymbolType.LeftBrace)
+                        {
+                            VerbatimBlock();
                             return;
                         }
                     }
-                    else if (CurrentSymbol.Type == CSharpSymbolType.Keyword)
-                    {
-                        KeywordBlock(topLevel: true);
-                        return;
-                    }
-                    else if (CurrentSymbol.Type == CSharpSymbolType.LeftBrace)
-                    {
-                        VerbatimBlock();
-                        return;
-                    }
-                }
 
-                // Invalid character
-                Context.CurrentBlock.Type = BlockType.Expression;
-                Context.CurrentBlock.CodeGenerator = new ExpressionCodeGenerator();
-                AddMarkerSymbolIfNecessary();
-                Span.CodeGenerator = new ExpressionCodeGenerator();
-                Span.EditHandler = new ImplicitExpressionEditHandler(
-                    Language.TokenizeString,
-                    DefaultKeywords,
-                    acceptTrailingDot: IsNested)
-                {
-                    AcceptedCharacters = AcceptedCharacters.NonWhiteSpace
-                };
-                if (At(CSharpSymbolType.WhiteSpace) || At(CSharpSymbolType.NewLine))
-                {
-                    Context.OnError(CurrentLocation, RazorResources.ParseError_Unexpected_WhiteSpace_At_Start_Of_CodeBlock_CS);
+                    // Invalid character
+                    Context.CurrentBlock.Type = BlockType.Expression;
+                    Context.CurrentBlock.CodeGenerator = new ExpressionCodeGenerator();
+                    AddMarkerSymbolIfNecessary();
+                    Span.CodeGenerator = new ExpressionCodeGenerator();
+                    Span.EditHandler = new ImplicitExpressionEditHandler(
+                        Language.TokenizeString,
+                        DefaultKeywords,
+                        acceptTrailingDot: IsNested)
+                        {
+                            AcceptedCharacters = AcceptedCharacters.NonWhiteSpace
+                        };
+                    if (At(CSharpSymbolType.WhiteSpace) || At(CSharpSymbolType.NewLine))
+                    {
+                        Context.OnError(CurrentLocation, RazorResources.ParseError_Unexpected_WhiteSpace_At_Start_Of_CodeBlock_CS);
+                    }
+                    else if (EndOfFile)
+                    {
+                        Context.OnError(CurrentLocation, RazorResources.ParseError_Unexpected_EndOfFile_At_Start_Of_CodeBlock);
+                    }
+                    else
+                    {
+                        Context.OnError(CurrentLocation, RazorResources.ParseError_Unexpected_Character_At_Start_Of_CodeBlock_CS, CurrentSymbol.Content);
+                    }
                 }
-                else if (EndOfFile)
+                finally
                 {
-                    Context.OnError(CurrentLocation, RazorResources.ParseError_Unexpected_EndOfFile_At_Start_Of_CodeBlock);
+                    // Always put current character back in the buffer for the next parser.
+                    PutCurrentBack();
                 }
-                else
-                {
-                    Context.OnError(CurrentLocation, RazorResources.ParseError_Unexpected_Character_At_Start_Of_CodeBlock_CS, CurrentSymbol.Content);
-                }
-                PutCurrentBack();
             }
         }
 

@@ -82,5 +82,29 @@ namespace System.Web.Razor.Test.Parser.CSharp
                 )
             );
         }
+
+        [Fact]
+        public void LayoutDirectiveCorrectlyRestoresContextAfterCompleting()
+        {
+            ParseDocumentTest(@"@layout Foo
+@foo",
+                new MarkupBlock(
+                    Factory.EmptyHtml(),
+                    new DirectiveBlock(
+                        Factory.CodeTransition(),
+                        Factory.MetaCode("layout ").Accepts(AcceptedCharacters.None),
+                        Factory.MetaCode("Foo\r\n")
+                               .With(new SetLayoutCodeGenerator("Foo"))
+                               .Accepts(AcceptedCharacters.None)
+                               .WithEditorHints(EditorHints.VirtualPath | EditorHints.LayoutPage)
+                    ),
+                    Factory.EmptyHtml(),
+                    new ExpressionBlock(
+                        Factory.CodeTransition(),
+                        Factory.Code("foo")
+                               .AsImplicitExpression(CSharpCodeParser.DefaultKeywords, acceptTrailingDot: false)
+                               .Accepts(AcceptedCharacters.NonWhiteSpace)),
+                    Factory.EmptyHtml()));
+        }
     }
 }

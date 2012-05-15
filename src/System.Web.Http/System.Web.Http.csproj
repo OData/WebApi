@@ -46,6 +46,9 @@
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -55,9 +58,6 @@
     </Reference>
     <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20326.1\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.4.5.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />

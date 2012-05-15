@@ -23,6 +23,7 @@ namespace System.Web.Http
         public User PostUserByNameAndAge(string name, int age) { return null; }
         public User PostUserByName(string name) { return null; }
         public User PostUserByNameAndAddress(string name, UserAddress address) { return null; }
+        public User DeleteUserByOptName(string name = null) { return null; }
         public User DeleteUserByIdAndOptName(int id, string name = "DefaultName") { return null; }
         public User DeleteUserByIdNameAndAge(int id, string name, int age) { return null; }
     }

@@ -118,11 +118,11 @@ namespace System.Web.Http.Controllers
                     _actionDescriptors[i] = actionDescriptor;
                     HttpActionBinding actionBinding = actionDescriptor.ActionBinding;
 
-                    // Build action parameter name mapping, only consider parameters that are simple types, do not have default values and come from URI
+                    // Building an action parameter name mapping to compare against the URI parameters coming from the request. Here we only take into account required parameters that are simple types and come from URI.
                     _actionParameterNames.Add(
                         actionDescriptor,
                         actionBinding.ParameterBindings
-                            .Where(binding => TypeHelper.IsSimpleUnderlyingType(binding.Descriptor.ParameterType) && !binding.HasDefaultValue() && binding.WillReadUri())
+                            .Where(binding => !binding.Descriptor.IsOptional && TypeHelper.IsSimpleUnderlyingType(binding.Descriptor.ParameterType) && binding.WillReadUri())
                             .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName));
                 }
 

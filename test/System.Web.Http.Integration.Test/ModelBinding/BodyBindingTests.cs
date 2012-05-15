@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Web.Http.Properties;
 using Xunit;
 using Xunit.Extensions;
 
@@ -57,6 +58,29 @@ namespace System.Web.Http.ModelBinding
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal("111", response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Theory]
+        [InlineData("PostWithOptionalBodyParameter")]
+        [InlineData("PostWithOptionalBodyParameterAndUriParameter")]
+        public void Body_OptionalParameter_Throws(string actionName)
+        {
+            // Arrange
+            StringContent stringContent = new StringContent(@"""string value""", Encoding.UTF8, "application/json");
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(baseAddress + "ModelBinding/" + actionName),
+                Method = HttpMethod.Post,
+                Content = stringContent,
+            };
+
+            // Act
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpError error = response.Content.ReadAsAsync<HttpError>().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.Equal(String.Format(SRResources.OptionalBodyParameterNotSupported, "value", typeof(FormatterParameterBinding).Name), error["ExceptionMessage"]);
         }
 
         [Theory]

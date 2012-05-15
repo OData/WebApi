@@ -3,7 +3,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -27,6 +26,8 @@ namespace System.Web.Http
         /// Note: Normally the following would not match DeleteUserByIdAndOptName because it has 'id' and 'age' as parameters while the DeleteUserByIdAndOptName action has 'id' and 'name'. 
         /// However, because the default value is provided on action parameter 'name', having the 'id' in the request was enough to match the action.
         [InlineData("Delete", "Test/6?age=10", "DeleteUserByIdAndOptName")]
+        [InlineData("Delete", "Test", "DeleteUserByOptName")]
+        [InlineData("Delete", "Test?name=user", "DeleteUserByOptName")]
         public void Route_Parameters_Default(string httpMethod, string requestUrl, string expectedActionName)
         {
             string routeUrl = "{controller}/{id}";

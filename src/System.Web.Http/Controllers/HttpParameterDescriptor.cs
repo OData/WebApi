@@ -3,7 +3,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Web.Http.Internal;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
@@ -87,6 +86,17 @@ namespace System.Web.Http.Controllers
                            ? modelAttribute.Name
                            : null;
             }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the parameter is optional.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the parameter is optional; otherwise, <c>false</c>.
+        /// </value>
+        public virtual bool IsOptional
+        {
+            get { return false; }
         }
 
         /// <summary>

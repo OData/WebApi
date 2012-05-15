@@ -27,15 +27,5 @@ namespace System.Web.Http.Internal
 
             return false;
         }
-
-        public static bool HasDefaultValue(this HttpParameterBinding parameterBinding)
-        {
-            if (parameterBinding == null)
-            {
-                throw Error.ArgumentNull("parameterBinding");
-            }
-
-            return parameterBinding.Descriptor.DefaultValue != null;
-        }
     }
 }

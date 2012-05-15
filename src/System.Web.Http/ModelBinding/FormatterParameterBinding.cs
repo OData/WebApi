@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
+using System.Web.Http.Properties;
 using System.Web.Http.Validation;
 
 namespace System.Web.Http.ModelBinding
@@ -17,10 +18,15 @@ namespace System.Web.Http.ModelBinding
     public class FormatterParameterBinding : HttpParameterBinding
     {
         private IEnumerable<MediaTypeFormatter> _formatters;
+        private string _errorMessage;
 
         public FormatterParameterBinding(HttpParameterDescriptor descriptor, IEnumerable<MediaTypeFormatter> formatters, IBodyModelValidator bodyModelValidator)
             : base(descriptor)
         {
+            if (descriptor.IsOptional)
+            {
+                _errorMessage = Error.Format(SRResources.OptionalBodyParameterNotSupported, descriptor.Prefix ?? descriptor.ParameterName, GetType().Name);
+            }
             Formatters = formatters;
             BodyModelValidator = bodyModelValidator;
         }
@@ -28,6 +34,14 @@ namespace System.Web.Http.ModelBinding
         public override bool WillReadBody
         {
             get { return true; }
+        }
+
+        public override string ErrorMessage
+        {
+            get
+            {
+                return _errorMessage;
+            }
         }
 
         public IEnumerable<MediaTypeFormatter> Formatters
@@ -70,7 +84,6 @@ namespace System.Web.Http.ModelBinding
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             HttpParameterDescriptor paramFromBody = this.Descriptor;
-
             Type type = paramFromBody.ParameterType;
             HttpRequestMessage request = actionContext.ControllerContext.Request;
             IFormatterLogger formatterLogger = new ModelStateFormatterLogger(actionContext.ModelState, paramFromBody.ParameterName);

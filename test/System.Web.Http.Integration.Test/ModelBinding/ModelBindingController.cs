@@ -36,6 +36,11 @@ namespace System.Web.Http.ModelBinding
             return value;
         }
 
+        public string GetStringWithDefault(string value = null)
+        {
+            return value;
+        }
+
         public int GetIntFromUri([FromUri] int value)
         {
             return value;
@@ -167,6 +172,16 @@ namespace System.Web.Http.ModelBinding
         public int PostComplexTypeHttpRequestMessage(HttpRequestMessage request, ModelBindOrder order)
         {
             return Int32.Parse(order.ItemName) + order.Quantity;
+        }
+
+        public string PostWithOptionalBodyParameter([FromBody] string value = "default")
+        {
+            return value;
+        }
+
+        public string PostWithOptionalBodyParameterAndUriParameter([FromUri]int id, [FromBody] string value = "default")
+        {
+            return value;
         }
     }
 

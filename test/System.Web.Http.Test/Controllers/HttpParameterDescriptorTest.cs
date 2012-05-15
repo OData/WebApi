@@ -24,6 +24,7 @@ namespace System.Web.Http
             Assert.Null(parameterDescriptor.ActionDescriptor);
             Assert.Null(parameterDescriptor.DefaultValue);
             Assert.NotNull(parameterDescriptor.Properties);
+            Assert.False(parameterDescriptor.IsOptional);
         }
 
         [Fact]

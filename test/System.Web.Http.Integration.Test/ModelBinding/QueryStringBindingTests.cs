@@ -18,6 +18,7 @@ namespace System.Web.Http.ModelBinding
         [InlineData("GetBool", "?value=true", "true")]
         [InlineData("GetIntWithDefault", "?value=99", "99")]    // action has default, but we provide value
         [InlineData("GetIntWithDefault", "", "-1")]             // action has default, we provide no value
+        [InlineData("GetStringWithDefault", "", "null")]        // action has null default, we provide no value
         [InlineData("GetIntFromUri", "?value=99", "99")]        // [FromUri]
         [InlineData("GetIntPrefixed", "?somePrefix=99", "99")]  // [FromUri(Prefix=somePrefix)]
         [InlineData("GetIntAsync", "?value=5", "5")]

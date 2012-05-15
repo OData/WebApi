@@ -58,6 +58,17 @@ namespace System.Web.Http.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the parameter is optional.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the parameter is optional; otherwise, <c>false</c>.
+        /// </value>
+        public override bool IsOptional
+        {
+            get { return ParameterInfo.IsOptional; }
+        }
+
         public override string ParameterName
         {
             get { return ParameterInfo.Name; }

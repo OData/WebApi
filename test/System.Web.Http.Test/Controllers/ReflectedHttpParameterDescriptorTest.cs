@@ -28,6 +28,7 @@ namespace System.Web.Http
             Assert.Equal(typeof(string), parameterDescriptor.ParameterType);
             Assert.Null(parameterDescriptor.Prefix);
             Assert.Null(parameterDescriptor.ParameterBinderAttribute);
+            Assert.False(parameterDescriptor.IsOptional);
         }
 
         [Fact]
@@ -54,13 +55,27 @@ namespace System.Web.Http
         }
 
         [Fact]
-        public void IsDefined_Retruns_True_WhenParameterAttributeIsFound()
+        public void ParameterBinderAttribute_NotNull_WhenParameterAttributeIsFound()
         {
             UsersRpcController controller = new UsersRpcController();
             Action<User> addUserMethod = controller.AddUser;
             ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = addUserMethod.Method };
             ParameterInfo parameterInfo = addUserMethod.Method.GetParameters()[0];
             ReflectedHttpParameterDescriptor parameterDescriptor = new ReflectedHttpParameterDescriptor(actionDescriptor, parameterInfo);
+            Assert.NotNull(parameterDescriptor.ParameterBinderAttribute);
+        }
+
+        private static void MethodWithOptionalParam(int id = 7) { }
+
+        [Fact]
+        public void IsOptional_Returns_True_ForOptionalParameter()
+        {
+            UsersRpcController controller = new UsersRpcController();
+            MethodInfo methodWithOptionalParam = GetType().GetMethod("MethodWithOptionalParam", BindingFlags.Static | BindingFlags.NonPublic);
+            ReflectedHttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor { MethodInfo = methodWithOptionalParam };
+            ParameterInfo parameterInfo = methodWithOptionalParam.GetParameters()[0];
+            ReflectedHttpParameterDescriptor parameterDescriptor = new ReflectedHttpParameterDescriptor(actionDescriptor, parameterInfo);
+            Assert.True(parameterDescriptor.IsOptional);
         }
 
         [Fact]

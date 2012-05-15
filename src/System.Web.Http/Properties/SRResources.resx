@@ -488,4 +488,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ResourceNotFound" xml:space="preserve">
     <value>No HTTP resource was found that matches the request URI '{0}'.</value>
   </data>
+  <data name="OptionalBodyParameterNotSupported" xml:space="preserve">
+    <value>Optional parameter '{0}' is not supported by '{1}'.</value>
+  </data>
 </root>

@@ -16,11 +16,6 @@ namespace System.Web.Http.Tracing
     /// </para>
     public class NeverTracesTraceWriter : ITestTraceWriter
     {
-        public bool IsEnabled(string category, TraceLevel level)
-        {
-            return false;
-        }
-
         public void Trace(HttpRequestMessage request, string category, TraceLevel level, Action<TraceRecord> traceAction)
         {
             DidReceiveTraceRequests = true;

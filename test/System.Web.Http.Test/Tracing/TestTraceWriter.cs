@@ -14,11 +14,6 @@ namespace System.Web.Http.Tracing
 
         public IList<TraceRecord> Traces { get { return _traceRecords;  } }
 
-        public bool IsEnabled(string category, TraceLevel level)
-        {
-            return true;
-        }
-
         public void Trace(HttpRequestMessage request, string category, TraceLevel level, Action<TraceRecord> traceAction)
         {
             TraceRecord traceRecord = new TraceRecord(request, category, level);

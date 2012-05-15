@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Web.Http;
 
 namespace System.Net.Http
@@ -15,8 +16,8 @@ namespace System.Net.Http
         /// <param name="handlers">An ordered list of <see cref="DelegatingHandler"/> instances to be invoked as an 
         /// <see cref="HttpRequestMessage"/> travels from the <see cref="HttpClient"/> to the network and an 
         /// <see cref="HttpResponseMessage"/> travels from the network back to <see cref="HttpClient"/>.
-        /// The handlers are invoked in a bottom-up fashion. That is, the last entry is called first for 
-        /// an outbound request message but called last for an inbound response message.</param>
+        /// The handlers are invoked in a top-down fashion. That is, the first entry is invoked first for 
+        /// an outbound request message but last for an inbound response message.</param>
         /// <returns>An <see cref="HttpClient"/> instance with the configured handlers.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Handler is disposed with HttpClient")]
         public static HttpClient Create(params DelegatingHandler[] handlers)
@@ -32,8 +33,8 @@ namespace System.Net.Http
         /// <param name="handlers">An ordered list of <see cref="DelegatingHandler"/> instances to be invoked as an 
         /// <see cref="HttpRequestMessage"/> travels from the <see cref="HttpClient"/> to the network and an 
         /// <see cref="HttpResponseMessage"/> travels from the network back to <see cref="HttpClient"/>.
-        /// The handlers are invoked in a bottom-up fashion. That is, the last entry is called first for 
-        /// an outbound request message but called last for an inbound response message.</param>
+        /// The handlers are invoked in a top-down fashion. That is, the first entry is invoked first for 
+        /// an outbound request message but last for an inbound response message.</param>
         /// <returns>An <see cref="HttpClient"/> instance with the configured handlers.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Handler is disposed with HttpClient")]
         public static HttpClient Create(HttpMessageHandler innerHandler, params DelegatingHandler[] handlers)
@@ -50,8 +51,8 @@ namespace System.Net.Http
         /// <param name="innerHandler">The inner handler represents the destination of the HTTP message channel.</param>
         /// <param name="handlers">An ordered list of <see cref="DelegatingHandler"/> instances to be invoked as part 
         /// of sending an <see cref="HttpRequestMessage"/> and receiving an <see cref="HttpResponseMessage"/>.
-        /// The handlers are invoked in a bottom-up fashion. That is, the last entry is called first for 
-        /// an outbound request message but invoked last for an inbound response message.</param>
+        /// The handlers are invoked in a top-down fashion. That is, the first entry is invoked first for 
+        /// an outbound request message but last for an inbound response message.</param>
         /// <returns>The HTTP message channel.</returns>
         public static HttpMessageHandler CreatePipeline(HttpMessageHandler innerHandler, IEnumerable<DelegatingHandler> handlers)
         {
@@ -65,9 +66,10 @@ namespace System.Net.Http
                 return innerHandler;
             }
 
-            // Wire handlers up
+            // Wire handlers up in reverse order starting with the inner handler
             HttpMessageHandler pipeline = innerHandler;
-            foreach (DelegatingHandler handler in handlers)
+            IEnumerable<DelegatingHandler> reversedHandlers = handlers.Reverse();
+            foreach (DelegatingHandler handler in reversedHandlers)
             {
                 if (handler == null)
                 {

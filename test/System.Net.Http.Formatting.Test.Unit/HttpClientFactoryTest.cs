@@ -116,7 +116,7 @@ namespace System.Net.Http
             // Assert
             for (int index = 0; index < handlers.Count - 1; index++)
             {
-                Assert.Same(handlers[handlers.Count - index - 1], pipeline);
+                Assert.Same(handlers[index], pipeline);
                 pipeline = pipeline.InnerHandler as DelegatingHandler;
             }
             Assert.Same(innerHandler, pipeline.InnerHandler);

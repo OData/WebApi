@@ -13,7 +13,6 @@ using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
-using System.Web.Http.Properties;
 using System.Web.Http.Services;
 using System.Web.Http.Tracing;
 using System.Web.Http.Validation;
@@ -32,7 +31,7 @@ namespace System.Web.Http
         private readonly HttpFilterCollection _filters = new HttpFilterCollection();
 
         private IDependencyResolver _dependencyResolver = EmptyResolver.Instance;
-        private Action<HttpConfiguration> _initializer = DefaultInitializer; 
+        private Action<HttpConfiguration> _initializer = DefaultInitializer;
         private bool _disposed;
 
         /// <summary>
@@ -109,7 +108,7 @@ namespace System.Web.Http
                 _initializer = value;
             }
         }
-        
+
         /// <summary>
         /// Gets the list of filters that apply to all requests served using this HttpConfiguration instance.
         /// </summary>
@@ -121,8 +120,8 @@ namespace System.Web.Http
         /// <summary>
         /// Gets an ordered list of <see cref="DelegatingHandler"/> instances to be invoked as an
         /// <see cref="HttpRequestMessage"/> travels up the stack and an <see cref="HttpResponseMessage"/> travels down in
-        /// stack in return. The handlers are invoked in a bottom-up fashion in the incoming path and top-down in the outgoing 
-        /// path. That is, the last entry is called first for an incoming request message but invoked last for an outgoing 
+        /// stack in return. The handlers are invoked in a top-down fashion in the incoming path and bottom-up in the outgoing 
+        /// path. That is, the first entry is invoked first for an incoming request message but last for an outgoing 
         /// response message.
         /// </summary>
         /// <value>
@@ -229,7 +228,7 @@ namespace System.Web.Http
             newConfiguration.Initializer(newConfiguration);
             return newConfiguration;
         }
-        
+
         private static void DefaultInitializer(HttpConfiguration configuration)
         {
             // Register the default IRequiredMemberSelector for formatters that haven't been assigned one

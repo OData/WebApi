@@ -99,6 +99,7 @@
     <Compile Include="Controllers\HttpControllerContextTest.cs" />
     <Compile Include="Controllers\HttpConfigurationTest.cs" />
     <Compile Include="Controllers\VoidResultConverterTest.cs" />
+    <Compile Include="Dispatcher\DefaultHttpControllerTypeResolverTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerSelectorTest.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerActivatorTest.cs" />
     <Compile Include="Dispatcher\HttpControllerDispatcherTest.cs" />

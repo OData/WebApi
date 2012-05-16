@@ -7,7 +7,8 @@ namespace Microsoft.Web.WebPages.OAuth
 {
     internal static class ProviderUserIdSerializationHelper
     {
-        private static byte[] padding = new byte[] { 0x85, 0xC5, 0x65, 0x72 };
+        // Custom message purpose to prevent this data from being readable by a different subsystem.
+        private static byte[] _padding = new byte[] { 0x85, 0xC5, 0x65, 0x72 };
 
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "The instances are disposed correctly.")]
         public static string ProtectData(string providerName, string providerUserId)
@@ -18,9 +19,9 @@ namespace Microsoft.Web.WebPages.OAuth
                 bw.Write(providerName);
                 bw.Write(providerUserId);
                 bw.Flush();
-                byte[] serializedWithPadding = new byte[ms.Length + padding.Length];
-                Buffer.BlockCopy(padding, 0, serializedWithPadding, 0, padding.Length);
-                Buffer.BlockCopy(ms.GetBuffer(), 0, serializedWithPadding, padding.Length, (int)ms.Length);
+                byte[] serializedWithPadding = new byte[ms.Length + _padding.Length];
+                Buffer.BlockCopy(_padding, 0, serializedWithPadding, 0, _padding.Length);
+                Buffer.BlockCopy(ms.GetBuffer(), 0, serializedWithPadding, _padding.Length, (int)ms.Length);
                 return MachineKey.Encode(serializedWithPadding, MachineKeyProtection.All);
             }
         }
@@ -38,30 +39,33 @@ namespace Microsoft.Web.WebPages.OAuth
 
             byte[] decodedWithPadding = MachineKey.Decode(protectedData, MachineKeyProtection.All);
 
-            if (decodedWithPadding.Length < padding.Length)
+            if (decodedWithPadding.Length < _padding.Length)
             {
                 return false;
             }
 
-            for (int i = 0; i < padding.Length; i++)
+            // timing attacks aren't really applicable to this, so we just do the simple check.
+            for (int i = 0; i < _padding.Length; i++)
             {
-                if (padding[i] != decodedWithPadding[i])
+                if (_padding[i] != decodedWithPadding[i])
                 {
                     return false;
                 }
             }
 
-            using (MemoryStream ms = new MemoryStream(decodedWithPadding, padding.Length, decodedWithPadding.Length - padding.Length))
+            using (MemoryStream ms = new MemoryStream(decodedWithPadding, _padding.Length, decodedWithPadding.Length - _padding.Length))
             using (BinaryReader br = new BinaryReader(ms))
             {
                 try
                 {
-                    string a = br.ReadString();
-                    string b = br.ReadString();
+                    // use temp variable to keep both out parameters consistent and only set them when the input stream is read completely
+                    string name = br.ReadString();
+                    string userId = br.ReadString();
+                    // make sure that we consume the entire input stream
                     if (ms.ReadByte() == -1)
                     {
-                        providerName = a;
-                        providerUserId = b;
+                        providerName = name;
+                        providerUserId = userId;
                         return true;
                     }
                 }

@@ -11,12 +11,6 @@ namespace System.Net.Http.Formatting
     /// </summary>
     internal static class MediaTypeHeaderValueExtensions
     {
-        public static bool IsMediaRange(this MediaTypeHeaderValue mediaType)
-        {
-            Contract.Assert(mediaType != null, "The 'mediaType' parameter should not be null.");
-            return new ParsedMediaTypeHeaderValue(mediaType).IsSubTypeMediaRange;
-        }
-
         /// <summary>
         /// Determines whether two <see cref="MediaTypeHeaderValue"/> instances match. The instance
         /// <paramref name="mediaType1"/> is said to match <paramref name="mediaType2"/> if and only if

@@ -91,31 +91,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        public static IEnumerable<object[]> MediaRanges
-        {
-            get
-            {
-                yield return new[] { "text/*" };
-                yield return new[] { "TEXT/*" };
-                yield return new[] { "application/*; charset=utf-8" };
-                yield return new[] { "APPLICATION/*; charset=utf-8" };
-                yield return new[] { "*/*" };
-                yield return new[] { "*/*; charset=utf-8" };
-                yield return new[] { "*/*; charset=utf-8" };
-            }
-        }
-
-        public static IEnumerable<object[]> NonMediaRanges
-        {
-            get
-            {
-                yield return new[] { "text/plain" };
-                yield return new[] { "TEXT/XML" };
-                yield return new[] { "application/xml; charset=utf-8" };
-                yield return new[] { "APPLICATION/xml; charset=utf-8" };
-            }
-        }
-
         [Theory]
         [PropertyData("EqualValues")]
         public void IsSubsetOf_ReturnsTrueForEqualValues(string mediaType1, string mediaType2)
@@ -146,22 +121,6 @@ namespace System.Net.Http.Formatting
             MediaTypeHeaderValue mediaTypeHeaderValue2 = MediaTypeHeaderValue.Parse(mediaType2);
 
             Assert.False(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2));
-        }
-
-        [Theory]
-        [PropertyData("MediaRanges")]
-        public void IsMediaRange_ReturnsTrueForMediaRanges(string mediaRange)
-        {
-            MediaTypeHeaderValue mediaTypeHeader = MediaTypeHeaderValue.Parse(mediaRange);
-            Assert.True(mediaTypeHeader.IsMediaRange());
-        }
-
-        [Theory]
-        [PropertyData("NonMediaRanges")]
-        public void IsMediaRange_ReturnsFalseForNonMediaRanges(string nonMediaRange)
-        {
-            MediaTypeHeaderValue mediaTypeHeader = MediaTypeHeaderValue.Parse(nonMediaRange);
-            Assert.False(mediaTypeHeader.IsMediaRange());
         }
     }
 }

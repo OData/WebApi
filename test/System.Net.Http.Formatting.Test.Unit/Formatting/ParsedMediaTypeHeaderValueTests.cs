@@ -1,82 +1,165 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http.Headers;
-using Xunit;
+using Microsoft.TestCommon;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {
     public class ParsedMediaTypeHeadeValueTests
     {
-        [Fact]
-        public void MediaTypeHeaderValue_Ensures_Valid_MediaType()
+        public static TheoryDataSet<string> FullMediaRanges
         {
-            string[] invalidMediaTypes = new string[] { "", " ", "\n", "\t", "text", "text/", "text\\", "\\", "//", "text/[", "text/ ", " text/", " text/ ", "text\\ ", " text\\", " text\\ ", "text\\xml", "text//xml" };
-
-            foreach (string invalidMediaType in invalidMediaTypes)
+            get
             {
-                Assert.Throws<Exception>(() => new MediaTypeHeaderValue(invalidMediaType), exceptionMessage: null, allowDerivedExceptions: true);
+                return new TheoryDataSet<string>
+                {
+                    "*/*",
+                    "*/*; charset=utf-8",
+                    "*/*; charset=utf-8; q=1.0",
+                };
             }
         }
 
-        [Fact]
-        public void Type_Returns_Just_The_Type()
+        public static TheoryDataSet<string> SubTypeMediaRanges
         {
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/xml");
-            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.Equal("text", parsedMediaType.Type);
-
-            mediaType = new MediaTypeHeaderValue("text/*");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.Equal("text", parsedMediaType.Type);
-
-            mediaType = new MediaTypeHeaderValue("*/*");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.Equal("*", parsedMediaType.Type);
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "text/*",
+                    "TEXT/*",
+                    "application/*; charset=utf-8",
+                    "APPLICATION/*; charset=utf-8",
+                    "APPLICATION/*; charset=utf-8; q=1.0",
+                };
+            }
         }
 
-        [Fact]
-        public void SubType_Returns_Just_The_Sub_Type()
+        public static TheoryDataSet<string> InvalidMediaRanges
         {
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/xml");
-            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.Equal("xml", parsedMediaType.SubType);
-
-            mediaType = new MediaTypeHeaderValue("text/*");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.Equal("*", parsedMediaType.SubType);
-
-            mediaType = new MediaTypeHeaderValue("*/*");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.Equal("*", parsedMediaType.SubType);
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "*/text",
+                    "*/XML",
+                };
+            }
+        }
+        public static TheoryDataSet<string> NonMediaRanges
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "text/plain",
+                    "TEXT/XML",
+                    "application/xml; charset=utf-8",
+                    "APPLICATION/xml; charset=utf-8",
+                };
+            }
         }
 
-        [Fact]
-        public void IsSubTypeMediaRange_Returns_True_For_Media_Ranges()
+        public static TheoryDataSet<string> InvalidNonMediaRanges
         {
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/*");
-            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.True(parsedMediaType.IsSubTypeMediaRange, "ParsedMediaTypeHeadeValue.IsSubTypeMediaRange should have returned true.");
-
-            mediaType = new MediaTypeHeaderValue("*/*");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.True(parsedMediaType.IsSubTypeMediaRange, "ParsedMediaTypeHeadeValue.IsSubTypeMediaRange should have returned true.");
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "",
+                    " ",
+                    "\n",
+                    "\t",
+                    "text",
+                    "text/",
+                    "text\\", 
+                    "\\", "//", 
+                    "text/[", 
+                    "text/ ", 
+                    " text/", 
+                    " text/ ", 
+                    "text\\ ", 
+                    " text\\", 
+                    " text\\ ", 
+                    "text\\xml", 
+                    "text//xml" 
+                };
+            }
         }
 
-        [Fact]
-        public void IsAllMediaRange_Returns_True_Only_When_Type_And_SubType_Are_Wildcards()
+        [Theory]
+        [PropertyData("InvalidNonMediaRanges")]
+        public void MediaTypeHeaderValue_EnsuresValidMediaType(string invalidMediaType)
         {
-            MediaTypeHeaderValue mediaType = new MediaTypeHeaderValue("text/*");
-            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.False(parsedMediaType.IsAllMediaRange, "ParsedMediaTypeHeadeValue.IsAllMediaRange should have returned false.");
+            Assert.Throws<Exception>(() => new MediaTypeHeaderValue(invalidMediaType), exceptionMessage: null, allowDerivedExceptions: true);
+        }
 
-            mediaType = new MediaTypeHeaderValue("*/*");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.True(parsedMediaType.IsAllMediaRange, "ParsedMediaTypeHeadeValue.IsAllMediaRange should have returned true.");
+        [Theory]
+        [PropertyData("FullMediaRanges")]
+        [PropertyData("SubTypeMediaRanges")]
+        [PropertyData("InvalidMediaRanges")]
+        [PropertyData("NonMediaRanges")]
+        public void Type_ReturnsJustTheType(string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
+            string type = mediaTypeHeaderValue.MediaType.Split('/')[0];
+            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
+            Assert.Equal(type, parsedMediaType.Type);
+        }
 
-            mediaType = new MediaTypeHeaderValue("*/xml");
-            parsedMediaType = new ParsedMediaTypeHeaderValue(mediaType);
-            Assert.False(parsedMediaType.IsAllMediaRange, "ParsedMediaTypeHeadeValue.IsAllMediaRange should have returned false.");
+        [Theory]
+        [PropertyData("FullMediaRanges")]
+        [PropertyData("SubTypeMediaRanges")]
+        [PropertyData("InvalidMediaRanges")]
+        [PropertyData("NonMediaRanges")]
+        public void SubType_ReturnsJustTheSubType(string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
+            string subtype = mediaTypeHeaderValue.MediaType.Split('/')[1];
+            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
+            Assert.Equal(subtype, parsedMediaType.SubType);
+        }
+
+        [Theory]
+        [PropertyData("FullMediaRanges")]
+        [PropertyData("SubTypeMediaRanges")]
+        public void IsSubTypeMediaRange_ReturnsTrueForSubTypeMediaRanges(string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
+            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
+            Assert.True(parsedMediaType.IsSubTypeMediaRange);
+        }
+
+        [Theory]
+        [PropertyData("InvalidMediaRanges")]
+        [PropertyData("NonMediaRanges")]
+        public void IsSubTypeMediaRange_ReturnsFalseForNonSubTypeMediaRanges(string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
+            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
+            Assert.False(parsedMediaType.IsSubTypeMediaRange);
+        }
+
+        [Theory]
+        [PropertyData("FullMediaRanges")]
+        public void IsAllMediaRange_ReturnsTrueForFullMediaTypeRanges(string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
+            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
+            Assert.True(parsedMediaType.IsAllMediaRange);
+        }
+
+        [Theory]
+        [PropertyData("SubTypeMediaRanges")]
+        [PropertyData("InvalidMediaRanges")]
+        [PropertyData("NonMediaRanges")]
+        public void IsAllMediaRange_ReturnsFalseForNonFullMediaTypeRanges(string mediaType)
+        {
+            MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
+            ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
+            Assert.False(parsedMediaType.IsAllMediaRange);
         }
     }
 }

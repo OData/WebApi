@@ -55,10 +55,12 @@ namespace Microsoft.Web.WebPages.OAuth.Test
         [Fact]
         public void RequestAuthenticationRedirectsToProviderWithNullReturnUrl()
         {
+            var cookies = new HttpCookieCollection();
+
             // Arrange
             var context = new Mock<HttpContextBase>();
-            context.Setup(c => c.Request.ServerVariables).Returns(
-                new NameValueCollection());
+            context.Setup(c => c.Response.Cookies).Returns(cookies);
+            context.Setup(c => c.Request.ServerVariables).Returns(new NameValueCollection());
             context.Setup(c => c.Request.Url).Returns(new Uri("http://live.com/login.aspx"));
             context.Setup(c => c.Request.RawUrl).Returns("/login.aspx");
 
@@ -66,7 +68,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             client.Setup(c => c.ProviderName).Returns("windowslive");
             client.Setup(c => c.RequestAuthentication(
                                     context.Object,
-                                    It.Is<Uri>(u => u.AbsoluteUri.Equals("http://live.com/login.aspx?__provider__=windowslive", StringComparison.OrdinalIgnoreCase))))
+                                    It.Is<Uri>(u => u.AbsoluteUri.StartsWith("http://live.com/login.aspx?__provider__=windowslive", StringComparison.OrdinalIgnoreCase))))
                   .Verifiable();
 
             OAuthWebSecurity.RegisterClient(client.Object);
@@ -81,18 +83,20 @@ namespace Microsoft.Web.WebPages.OAuth.Test
         [Fact]
         public void RequestAuthenticationRedirectsToProviderWithReturnUrl()
         {
+            var cookies = new HttpCookieCollection();
+
             // Arrange
             var context = new Mock<HttpContextBase>();
-            context.Setup(c => c.Request.ServerVariables).Returns(
-                new NameValueCollection());
+            context.Setup(c => c.Request.ServerVariables).Returns(new NameValueCollection());
             context.Setup(c => c.Request.Url).Returns(new Uri("http://live.com/login.aspx"));
             context.Setup(c => c.Request.RawUrl).Returns("/login.aspx");
+            context.Setup(c => c.Response.Cookies).Returns(cookies);
 
             var client = new Mock<IAuthenticationClient>();
             client.Setup(c => c.ProviderName).Returns("yahoo");
             client.Setup(c => c.RequestAuthentication(
                                     context.Object,
-                                    It.Is<Uri>(u => u.AbsoluteUri.Equals("http://yahoo.com/?__provider__=yahoo", StringComparison.OrdinalIgnoreCase))))
+                                    It.Is<Uri>(u => u.AbsoluteUri.StartsWith("http://yahoo.com/?__provider__=yahoo", StringComparison.OrdinalIgnoreCase))))
                   .Verifiable();
 
             OAuthWebSecurity.RegisterClient(client.Object);
@@ -110,9 +114,15 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             // Arrange
             var queryStrings = new NameValueCollection();
             queryStrings.Add("__provider__", "facebook");
+            queryStrings.Add("__sid__", "2C5FA1BBDF9343F8994E20ABB416CCA7"); 
+
+            var cookies = new HttpCookieCollection();
+            cookies.Add(new HttpCookie("__csid__", "2C5FA1BBDF9343F8994E20ABB416CCA7"));
 
             var context = new Mock<HttpContextBase>();
             context.Setup(c => c.Request.QueryString).Returns(queryStrings);
+            context.Setup(c => c.Request.Cookies).Returns(cookies);
+            context.Setup(c => c.Response.Cookies).Returns(cookies);
 
             var client = new Mock<IAuthenticationClient>(MockBehavior.Strict);
             client.Setup(c => c.ProviderName).Returns("facebook");

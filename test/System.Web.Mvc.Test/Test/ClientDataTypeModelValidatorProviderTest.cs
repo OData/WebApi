@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Xunit;
 using Xunit.Extensions;
@@ -11,8 +12,8 @@ namespace System.Web.Mvc.Test
     [CLSCompliant(false)]
     public class ClientDataTypeModelValidatorProviderTest
     {
-        private static readonly EmptyModelMetadataProvider _metadataProvider = new EmptyModelMetadataProvider();
-        private static readonly ClientDataTypeModelValidatorProvider _validatorProvider = new ClientDataTypeModelValidatorProvider();
+        private static readonly ModelMetadataProvider _metadataProvider = new DataAnnotationsModelMetadataProvider();
+        private static readonly ModelValidatorProvider _validatorProvider = new ClientDataTypeModelValidatorProvider();
 
         private bool ReturnsValidator<TValidator>(string propertyName)
         {
@@ -48,7 +49,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Theory]
-        [InlineData("Int32"), InlineData("NullableInt32"), InlineData("String"), InlineData("Object")]
+        [InlineData("Int32"), InlineData("NullableInt32"), InlineData("String"), InlineData("Object"), InlineData("Time")]
         public void GetValidators_NonDateTimeValidatorTypes(string propertyName)
         {
             // Act & assert
@@ -189,6 +190,9 @@ namespace System.Web.Mvc.Test
 
             // this should also have a 'date' validator associated with it
             public DateTime? NullableDateTime { get; set; }
+
+            [DataType(DataType.Time)]
+            public DateTime Time { get; set; }
 
             // these shouldn't have any validators
             public string String { get; set; }

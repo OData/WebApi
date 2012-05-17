@@ -12,12 +12,6 @@ namespace System.Web.Helpers.AntiXsrf
         private const byte TokenVersion = 0x01;
         private readonly ICryptoSystem _cryptoSystem;
 
-        public AntiForgeryTokenSerializer()
-            : this(new MachineKeyCryptoSystem())
-        {
-        }
-
-        // for unit testing
         internal AntiForgeryTokenSerializer(ICryptoSystem cryptoSystem)
         {
             _cryptoSystem = cryptoSystem;

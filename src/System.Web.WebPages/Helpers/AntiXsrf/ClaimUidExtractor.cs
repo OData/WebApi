@@ -16,12 +16,6 @@ namespace System.Web.Helpers.AntiXsrf
         private readonly ClaimsIdentityConverter _claimsIdentityConverter;
         private readonly IAntiForgeryConfig _config;
 
-        public ClaimUidExtractor()
-            : this(new AntiForgeryConfigWrapper(), ClaimsIdentityConverter.Default)
-        {
-        }
-
-        // for unit testing
         internal ClaimUidExtractor(IAntiForgeryConfig config, ClaimsIdentityConverter claimsIdentityConverter)
         {
             _config = config;

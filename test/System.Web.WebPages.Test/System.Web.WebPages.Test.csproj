@@ -66,13 +66,14 @@
     <Compile Include="ApplicationParts\ResourceHandlerTest.cs" />
     <Compile Include="ApplicationParts\TestResourceAssembly.cs" />
     <Compile Include="Helpers\AntiXsrf\AntiForgeryTokenStoreTest.cs" />
+    <Compile Include="Helpers\AntiXsrf\MachineKey45CryptoSystemTest.cs" />
     <Compile Include="Helpers\AntiXsrf\MockableTokenStore.cs" />
     <Compile Include="Helpers\AntiXsrf\MockableTokenValidator.cs" />
     <Compile Include="Helpers\AntiXsrf\TokenValidatorTest.cs" />
     <Compile Include="Helpers\AntiXsrf\MockableClaimUidExtractor.cs" />
     <Compile Include="Helpers\AntiXsrf\MockableCryptoSystem.cs" />
     <Compile Include="Helpers\AntiXsrf\HexUtil.cs" />
-    <Compile Include="Helpers\AntiXsrf\MachineKeyCryptoSystemTest.cs" />
+    <Compile Include="Helpers\AntiXsrf\MachineKey40CryptoSystemTest.cs" />
     <Compile Include="Helpers\Claims\ClaimTest.cs" />
     <Compile Include="Helpers\Claims\ClaimsIdentityTest.cs" />
     <Compile Include="Helpers\Claims\ClaimsIdentityConverterTest.cs" />

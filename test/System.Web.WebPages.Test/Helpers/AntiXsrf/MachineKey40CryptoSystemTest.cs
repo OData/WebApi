@@ -7,9 +7,9 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Helpers.AntiXsrf.Test
 {
-    public class MachineKeyCryptoSystemTest
+    public class MachineKey40CryptoSystemTest
     {
-        private static readonly MachineKeyCryptoSystem _dummyCryptoSystem = new MachineKeyCryptoSystem(HexEncoder, HexDecoder);
+        private static readonly MachineKey40CryptoSystem _dummyCryptoSystem = new MachineKey40CryptoSystem(HexEncoder, HexDecoder);
 
         [Fact]
         public void Base64ToHex()
@@ -19,7 +19,7 @@ namespace System.Web.Helpers.AntiXsrf.Test
             string hex = "00108310518720928B30D38F41149351559761969B71D79F8218A39259A7A29AABB2DBAFC31CB3D35DB7E39EBBF3DFBF";
 
             // Act
-            string retVal = MachineKeyCryptoSystem.Base64ToHex(base64);
+            string retVal = MachineKey40CryptoSystem.Base64ToHex(base64);
 
             // Assert
             Assert.Equal(hex, retVal);
@@ -34,7 +34,7 @@ namespace System.Web.Helpers.AntiXsrf.Test
                 string hex = String.Format("{0:X2}", i);
 
                 // Act
-                string retVal = MachineKeyCryptoSystem.Base64ToHex(MachineKeyCryptoSystem.HexToBase64(hex));
+                string retVal = MachineKey40CryptoSystem.Base64ToHex(MachineKey40CryptoSystem.HexToBase64(hex));
 
                 // Assert
                 Assert.Equal(hex, retVal);
@@ -49,7 +49,7 @@ namespace System.Web.Helpers.AntiXsrf.Test
             string hex = "00108310518720928B30D38F41149351559761969B71D79F8218A39259A7A29AABB2DBAFC31CB3D35DB7E39EBBF3DFBF";
 
             // Act
-            string retVal = MachineKeyCryptoSystem.HexToBase64(hex);
+            string retVal = MachineKey40CryptoSystem.HexToBase64(hex);
 
             // Assert
             Assert.Equal(base64, retVal);

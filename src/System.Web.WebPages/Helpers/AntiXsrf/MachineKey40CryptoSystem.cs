@@ -6,8 +6,8 @@ using System.Web.Security;
 
 namespace System.Web.Helpers.AntiXsrf
 {
-    // Interfaces with the System.Web.MachineKey static class
-    internal sealed class MachineKeyCryptoSystem : ICryptoSystem
+    // Interfaces with the System.Web.MachineKey static class using the 4.0 Encode / Decode methods.
+    internal sealed class MachineKey40CryptoSystem : ICryptoSystem
     {
         // This is the magic header that identifies an AntiForgeryToken payload.
         // It helps differentiate this from other encrypted payloads.
@@ -16,13 +16,15 @@ namespace System.Web.Helpers.AntiXsrf
         private readonly Func<string, MachineKeyProtection, byte[]> _decoder;
         private readonly Func<byte[], MachineKeyProtection, string> _encoder;
 
-        public MachineKeyCryptoSystem()
+#pragma warning disable 0618 // since Encode & Decode are [Obsolete] in 4.5
+        public MachineKey40CryptoSystem()
             : this(MachineKey.Encode, MachineKey.Decode)
         {
         }
+#pragma warning restore 0618
 
         // for unit testing
-        internal MachineKeyCryptoSystem(Func<byte[], MachineKeyProtection, string> encoder, Func<string, MachineKeyProtection, byte[]> decoder)
+        internal MachineKey40CryptoSystem(Func<byte[], MachineKeyProtection, string> encoder, Func<string, MachineKeyProtection, byte[]> decoder)
         {
             _encoder = encoder;
             _decoder = decoder;

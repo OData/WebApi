@@ -15,12 +15,6 @@ namespace System.Web.Helpers.AntiXsrf
         private readonly ITokenStore _tokenStore;
         private readonly ITokenValidator _validator;
 
-        public AntiForgeryWorker()
-            : this(new AntiForgeryTokenSerializer(), new AntiForgeryConfigWrapper(), new AntiForgeryTokenStore(), new TokenValidator())
-        {
-        }
-
-        // for unit testing
         internal AntiForgeryWorker(IAntiForgeryTokenSerializer serializer, IAntiForgeryConfig config, ITokenStore tokenStore, ITokenValidator validator)
         {
             _serializer = serializer;

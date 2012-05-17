@@ -3,6 +3,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Helpers.AntiXsrf;
+using System.Web.Helpers.Claims;
 using System.Web.Mvc;
 using System.Web.WebPages.Resources;
 
@@ -14,7 +15,29 @@ namespace System.Web.Helpers
     /// </summary>
     public static class AntiForgery
     {
-        private static readonly AntiForgeryWorker _worker = new AntiForgeryWorker();
+        private static readonly AntiForgeryWorker _worker = CreateSingletonAntiForgeryWorker();
+
+        private static AntiForgeryWorker CreateSingletonAntiForgeryWorker()
+        {
+            // initialize the dependency chain
+
+            // The 'Instance' property can return null, in which case we should fall back to using
+            // the 4.0 crypto code paths. We need to use an 'if' block rather than the null coalescing
+            // operator due to a CLR bug (DevDiv #424203).
+            ICryptoSystem cryptoSystem = MachineKey45CryptoSystem.Instance;
+            if (cryptoSystem == null)
+            {
+                cryptoSystem = new MachineKey40CryptoSystem();
+            }
+
+            IAntiForgeryConfig config = new AntiForgeryConfigWrapper();
+            IAntiForgeryTokenSerializer serializer = new AntiForgeryTokenSerializer(cryptoSystem);
+            ITokenStore tokenStore = new AntiForgeryTokenStore(config, serializer);
+            IClaimUidExtractor claimUidExtractor = new ClaimUidExtractor(config, ClaimsIdentityConverter.Default);
+            ITokenValidator tokenValidator = new TokenValidator(config, claimUidExtractor);
+
+            return new AntiForgeryWorker(serializer, config, tokenStore, tokenValidator);
+        }
 
         /// <summary>
         /// Generates an anti-forgery token for this request. This token can

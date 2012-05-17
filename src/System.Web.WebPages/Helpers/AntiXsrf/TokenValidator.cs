@@ -13,12 +13,6 @@ namespace System.Web.Helpers.AntiXsrf
         private readonly IClaimUidExtractor _claimUidExtractor;
         private readonly IAntiForgeryConfig _config;
 
-        public TokenValidator()
-            : this(new AntiForgeryConfigWrapper(), new ClaimUidExtractor())
-        {
-        }
-
-        // for unit testing
         internal TokenValidator(IAntiForgeryConfig config, IClaimUidExtractor claimUidExtractor)
         {
             _config = config;

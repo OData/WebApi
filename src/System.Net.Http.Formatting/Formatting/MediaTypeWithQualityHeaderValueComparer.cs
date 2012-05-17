@@ -60,14 +60,22 @@ namespace System.Net.Http.Formatting
                     {
                         return 1;
                     }
-                }
-                else if (!String.Equals(parsedMediaType1.SubType, parsedMediaType2.SubType, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (parsedMediaType1.IsSubTypeMediaRange)
+                    else if (parsedMediaType1.IsSubtypeMediaRange && !parsedMediaType2.IsSubtypeMediaRange)
                     {
                         return -1;
                     }
-                    else if (parsedMediaType2.IsSubTypeMediaRange)
+                    else if (!parsedMediaType1.IsSubtypeMediaRange && parsedMediaType2.IsSubtypeMediaRange)
+                    {
+                        return 1;
+                    }
+                }
+                else if (!String.Equals(parsedMediaType1.Subtype, parsedMediaType2.Subtype, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (parsedMediaType1.IsSubtypeMediaRange)
+                    {
+                        return -1;
+                    }
+                    else if (parsedMediaType2.IsSubtypeMediaRange)
                     {
                         return 1;
                     }
@@ -82,7 +90,9 @@ namespace System.Net.Http.Formatting
             Contract.Assert(mediaType1 != null);
             Contract.Assert(mediaType2 != null);
 
-            double? qualityDifference = mediaType1.Quality - mediaType2.Quality;
+            double mediaType1Quality = mediaType1.Quality ?? FormattingUtilities.Match;
+            double mediaType2Quality = mediaType2.Quality ?? FormattingUtilities.Match;
+            double qualityDifference = mediaType1Quality - mediaType2Quality;
             if (qualityDifference < 0)
             {
                 return -1;

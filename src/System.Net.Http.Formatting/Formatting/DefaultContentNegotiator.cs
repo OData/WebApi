@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -186,7 +185,9 @@ namespace System.Net.Http.Formatting
             }
 
             MediaTypeFormatterMatch bestMatchOnType = null;
-            MediaTypeFormatterMatch bestMatchOnAcceptHeader = null;
+            MediaTypeFormatterMatch bestMatchOnAcceptHeaderLiteral = null;
+            MediaTypeFormatterMatch bestMatchOnAcceptHeaderSubtypeMediaRange = null;
+            MediaTypeFormatterMatch bestMatchOnAcceptHeaderAllMediaRange = null;
             MediaTypeFormatterMatch bestMatchOnMediaTypeMapping = null;
             MediaTypeFormatterMatch bestMatchOnRequestMediaType = null;
 
@@ -208,10 +209,22 @@ namespace System.Net.Http.Formatting
                         bestMatchOnMediaTypeMapping = UpdateBestMatch(bestMatchOnMediaTypeMapping, match);
                         break;
 
-                    case MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader:
+                    case MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral:
                         // Matches on accept headers must choose the highest quality match.
                         // A match of 0.0 means we won't use it at all.
-                        bestMatchOnAcceptHeader = UpdateBestMatch(bestMatchOnAcceptHeader, match);
+                        bestMatchOnAcceptHeaderLiteral = UpdateBestMatch(bestMatchOnAcceptHeaderLiteral, match);
+                        break;
+
+                    case MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange:
+                        // Matches on accept headers must choose the highest quality match.
+                        // A match of 0.0 means we won't use it at all.
+                        bestMatchOnAcceptHeaderSubtypeMediaRange = UpdateBestMatch(bestMatchOnAcceptHeaderSubtypeMediaRange, match);
+                        break;
+
+                    case MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderAllMediaRange:
+                        // Matches on accept headers must choose the highest quality match.
+                        // A match of 0.0 means we won't use it at all.
+                        bestMatchOnAcceptHeaderAllMediaRange = UpdateBestMatch(bestMatchOnAcceptHeaderAllMediaRange, match);
                         break;
 
                     case MediaTypeFormatterMatchRanking.MatchOnRequestMediaType:
@@ -228,9 +241,13 @@ namespace System.Net.Http.Formatting
             // we want to give precedence to the media type mappings, but only if their quality is >= that of the supported media type.
             // We do this because media type mappings are the user's extensibility point and must take precedence over normal
             // supported media types in the case of a tie. The 99% case is where both have quality 1.0.
-            if (bestMatchOnMediaTypeMapping != null && bestMatchOnAcceptHeader != null)
+            if (bestMatchOnMediaTypeMapping != null)
             {
-                if (bestMatchOnAcceptHeader.Quality > bestMatchOnMediaTypeMapping.Quality)
+                MediaTypeFormatterMatch mappingOverride = bestMatchOnMediaTypeMapping;
+                mappingOverride = UpdateBestMatch(mappingOverride, bestMatchOnAcceptHeaderLiteral);
+                mappingOverride = UpdateBestMatch(mappingOverride, bestMatchOnAcceptHeaderSubtypeMediaRange);
+                mappingOverride = UpdateBestMatch(mappingOverride, bestMatchOnAcceptHeaderAllMediaRange);
+                if (mappingOverride != bestMatchOnMediaTypeMapping)
                 {
                     bestMatchOnMediaTypeMapping = null;
                 }
@@ -244,9 +261,13 @@ namespace System.Net.Http.Formatting
             {
                 bestMatch = bestMatchOnMediaTypeMapping;
             }
-            else if (bestMatchOnAcceptHeader != null)
+            else if (bestMatchOnAcceptHeaderLiteral != null ||
+                bestMatchOnAcceptHeaderSubtypeMediaRange != null ||
+                bestMatchOnAcceptHeaderAllMediaRange != null)
             {
-                bestMatch = bestMatchOnAcceptHeader;
+                bestMatch = UpdateBestMatch(bestMatch, bestMatchOnAcceptHeaderLiteral);
+                bestMatch = UpdateBestMatch(bestMatch, bestMatchOnAcceptHeaderSubtypeMediaRange);
+                bestMatch = UpdateBestMatch(bestMatch, bestMatchOnAcceptHeaderAllMediaRange);
             }
             else if (bestMatchOnRequestMediaType != null)
             {
@@ -355,10 +376,27 @@ namespace System.Net.Http.Formatting
             {
                 foreach (MediaTypeHeaderValue supportedMediaType in formatter.SupportedMediaTypes)
                 {
+                    MediaTypeHeaderValueRange range;
                     if (supportedMediaType != null && acceptMediaTypeValue.Quality != FormattingUtilities.NoMatch &&
-                        supportedMediaType.IsSubsetOf(acceptMediaTypeValue))
+                        supportedMediaType.IsSubsetOf(acceptMediaTypeValue, out range))
                     {
-                        return new MediaTypeFormatterMatch(formatter, supportedMediaType, acceptMediaTypeValue.Quality, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader);
+                        MediaTypeFormatterMatchRanking ranking;
+                        switch (range)
+                        {
+                            case MediaTypeHeaderValueRange.AllMediaRange:
+                                ranking = MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderAllMediaRange;
+                                break;
+
+                            case MediaTypeHeaderValueRange.SubtypeMediaRange:
+                                ranking = MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange;
+                                break;
+
+                            default:
+                                ranking = MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral;
+                                break;
+                        }
+
+                        return new MediaTypeFormatterMatch(formatter, supportedMediaType, acceptMediaTypeValue.Quality, ranking);
                     }
                 }
             }
@@ -491,7 +529,7 @@ namespace System.Net.Http.Formatting
         {
             if (potentialReplacement == null)
             {
-                throw Error.ArgumentNull("potentialReplacement");
+                return current;
             }
 
             if (current != null)

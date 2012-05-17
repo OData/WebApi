@@ -422,7 +422,7 @@ namespace System.Net.Http.Formatting
                 }
 
                 ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(item);
-                if (parsedMediaType.IsAllMediaRange || parsedMediaType.IsSubTypeMediaRange)
+                if (parsedMediaType.IsAllMediaRange || parsedMediaType.IsSubtypeMediaRange)
                 {
                     throw Error.Argument("item", Properties.Resources.CannotUseMediaRangeForSupportedMediaType, _mediaTypeHeaderValueType.Name, item.MediaType);
                 }

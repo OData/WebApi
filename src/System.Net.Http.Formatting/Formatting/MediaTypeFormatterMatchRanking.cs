@@ -11,7 +11,7 @@ namespace System.Net.Http.Formatting
         /// <summary>
         /// No match was found
         /// </summary>
-        None,
+        None = 0,
 
         /// <summary>
         /// Matched on type meaning that the formatter is able to serialize the type
@@ -19,9 +19,22 @@ namespace System.Net.Http.Formatting
         MatchOnCanWriteType,
 
         /// <summary>
-        /// Matched on explicit accept header set in <see cref="HttpRequestMessage"/>.
+        /// Matched on explicit literal accept header in <see cref="HttpRequestMessage"/>, 
+        /// e.g. "application/json".
         /// </summary>
-        MatchOnRequestAcceptHeader,
+        MatchOnRequestAcceptHeaderLiteral,
+
+        /// <summary>
+        /// Matched on explicit subtype range accept header in <see cref="HttpRequestMessage"/>,
+        /// e.g. "application/*".
+        /// </summary>
+        MatchOnRequestAcceptHeaderSubtypeMediaRange,
+
+        /// <summary>
+        /// Matched on explicit all media type range accept header in <see cref="HttpRequestMessage"/>,
+        /// e.g. "*/*"
+        /// </summary>
+        MatchOnRequestAcceptHeaderAllMediaRange,
 
         /// <summary>
         /// Matched on <see cref="HttpRequestMessage"/> after having applied

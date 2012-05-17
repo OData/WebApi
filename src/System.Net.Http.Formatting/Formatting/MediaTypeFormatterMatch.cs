@@ -26,7 +26,7 @@ namespace System.Net.Http.Formatting
 
             Formatter = formatter;
             MediaType = mediaType != null ? mediaType.Clone() : MediaTypeConstants.ApplicationOctetStreamMediaType;
-            Quality = quality.HasValue ? quality.Value : FormattingUtilities.Match;
+            Quality = quality ?? FormattingUtilities.Match;
             Ranking = ranking;
         }
 

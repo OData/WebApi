@@ -35,38 +35,42 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        public static TheoryDataSet<string[], string[], string, double> MatchAcceptHeaderData
+        public static TheoryDataSet<string[], string[], string, double, int> MatchAcceptHeaderData
         {
             get
             {
-                // string[] acceptHeader, string[] supportedMediaTypes, string expectedMediaType, double matchQuality
-                return new TheoryDataSet<string[], string[], string, double>
+                // string[] acceptHeader, string[] supportedMediaTypes, string expectedMediaType, double matchQuality, int range
+                return new TheoryDataSet<string[], string[], string, double, int>
                 {
-                    { new string[] { "text/plain" }, new string[0], null, 0.0 }, 
+                    { new string[] { "text/plain" }, new string[0], null, 0.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
 
-                    { new string[] { "text/plain" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
-                    { new string[] { "text/plain; q=0.5" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+                    { new string[] { "text/plain" }, new string[] { "text/xml", "application/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
+                    { new string[] { "text/plain; q=0.5" }, new string[] { "text/xml", "application/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
 
-                    { new string[] { "application/xml" }, new string[] { "application/xml", "text/xml" }, "application/xml", 1.0 }, 
-                    { new string[] { "APPLICATION/XML; q=0.5" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.5 }, 
-                    { new string[] { "text/xml; q=0.5", "APPLICATION/XML; q=0.7" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.7 }, 
-                    { new string[] { "application/xml; q=0.0" }, new string[] { "application/xml", "text/xml" }, null, 0.0 }, 
-                    { new string[] { "APPLICATION/XML; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
-                    { new string[] { "text/xml; q=0.0", "APPLICATION/XML; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
+                    { new string[] { "application/xml" }, new string[] { "application/xml", "text/xml" }, "application/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
+                    { new string[] { "APPLICATION/XML; q=0.5" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.5, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
+                    { new string[] { "text/xml; q=0.5", "APPLICATION/XML; q=0.7" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.7, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
+                    { new string[] { "application/xml; q=0.0" }, new string[] { "application/xml", "text/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
+                    { new string[] { "APPLICATION/XML; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
+                    { new string[] { "text/xml; q=0.0", "APPLICATION/XML; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
 
-                    { new string[] { "test/*", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
-                    { new string[] { "test/*; q=0.5", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
-                    { new string[] { "test/*; q=0.0", "application/xml; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
-                    { new string[] { "test/*; q=0.0", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+                    { new string[] { "text/*" }, new string[] { "text/xml", "application/xml" }, "text/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange }, 
+                    { new string[] { "text/*", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
+                    { new string[] { "text/*", "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange }, 
+                    { new string[] { "text/*; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 0.5, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange }, 
+                    { new string[] { "text/*; q=0.5", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
+                    { new string[] { "text/*; q=0.0", "application/xml; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
+                    { new string[] { "text/*; q=0.0", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
 
-                    { new string[] { "*/*; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 0.5 }, 
-                    { new string[] { "*/*; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0 }, 
-                    { new string[] { "*/*; q=0.5", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
-                    { new string[] { "*/*; q=1.0", "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 1.0 }, 
+                    { new string[] { "*/*; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 0.5, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderAllMediaRange }, 
+                    { new string[] { "*/*; q=0.0" }, new string[] { "text/xml", "application/xml" }, null, 0.0, (int)MediaTypeFormatterMatchRanking.None }, 
+                    { new string[] { "*/*; q=0.5", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
+                    { new string[] { "*/*; q=1.0", "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "text/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderAllMediaRange }, 
+                    { new string[] { "*/*", "application/xml" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral },
 
-                    { new string[] { "text/*; q=0.5", "*/*; q=0.2", "application/xml; q=1.0" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0 }, 
+                    { new string[] { "text/*; q=0.5", "*/*; q=0.2", "application/xml; q=1.0" }, new string[] { "text/xml", "application/xml" }, "application/xml", 1.0,  (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
 
-                    { new string[] { "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.5 }, 
+                    { new string[] { "application/xml; q=0.5" }, new string[] { "text/xml", "application/xml" }, "application/xml", 0.5, (int)MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral }, 
                 };
             }
         }
@@ -124,8 +128,14 @@ namespace System.Net.Http.Formatting
                 MediaTypeFormatterMatch matchMapping10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestWithMediaTypeMapping);
                 MediaTypeFormatterMatch matchMapping05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestWithMediaTypeMapping);
 
-                MediaTypeFormatterMatch matchAccept10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader);
-                MediaTypeFormatterMatch matchAccept05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader);
+                MediaTypeFormatterMatch matchAccept10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral);
+                MediaTypeFormatterMatch matchAccept05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderLiteral);
+
+                MediaTypeFormatterMatch matchAcceptSubTypeRange10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange);
+                MediaTypeFormatterMatch matchAcceptSubTypeRange05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderSubtypeMediaRange);
+
+                MediaTypeFormatterMatch matchAcceptAllRange10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderAllMediaRange);
+                MediaTypeFormatterMatch matchAcceptAllRange05 = CreateMatch(0.5, MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeaderAllMediaRange);
 
                 MediaTypeFormatterMatch matchRequest10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnRequestMediaType);
                 MediaTypeFormatterMatch matchType10 = CreateMatch(1.0, MediaTypeFormatterMatchRanking.MatchOnCanWriteType);
@@ -136,18 +146,35 @@ namespace System.Net.Http.Formatting
                     { new List<MediaTypeFormatterMatch>(), null },
                     { new List<MediaTypeFormatterMatch>() { matchType10 }, matchType10 },
                     { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10 }, matchRequest10 },
-                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAccept10 }, matchAccept10 },
-                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAccept10, matchMapping10 }, matchMapping10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAcceptAllRange10 }, matchAcceptAllRange10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAcceptAllRange10, matchAcceptSubTypeRange10 }, matchAcceptSubTypeRange10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAcceptAllRange10, matchAcceptSubTypeRange10, matchAccept10 }, matchAccept10 },
+                    { new List<MediaTypeFormatterMatch>() { matchType10, matchRequest10, matchAcceptAllRange10, matchAcceptSubTypeRange10, matchAccept10, matchMapping10 }, matchMapping10 },
 
                     { new List<MediaTypeFormatterMatch>() { matchAccept05, matchAccept10 }, matchAccept10 },
                     { new List<MediaTypeFormatterMatch>() { matchAccept10, matchAccept05 }, matchAccept10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchAcceptSubTypeRange05, matchAcceptSubTypeRange10 }, matchAcceptSubTypeRange10 },
+                    { new List<MediaTypeFormatterMatch>() { matchAcceptSubTypeRange10, matchAcceptSubTypeRange05 }, matchAcceptSubTypeRange10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchAcceptAllRange05, matchAcceptAllRange10 }, matchAcceptAllRange10 },
+                    { new List<MediaTypeFormatterMatch>() { matchAcceptAllRange10, matchAcceptAllRange05 }, matchAcceptAllRange10 },
 
                     { new List<MediaTypeFormatterMatch>() { matchMapping05, matchMapping10 }, matchMapping10 },
                     { new List<MediaTypeFormatterMatch>() { matchMapping10, matchMapping05 }, matchMapping10 },
 
                     { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAccept05 }, matchMapping05 },
                     { new List<MediaTypeFormatterMatch>() { matchMapping10, matchAccept10 }, matchMapping10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAcceptSubTypeRange05 }, matchMapping05 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping10, matchAcceptSubTypeRange10 }, matchMapping10 },
+
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAcceptAllRange05 }, matchMapping05 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping10, matchAcceptAllRange10 }, matchMapping10 },
+
                     { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAccept10 }, matchAccept10 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAcceptSubTypeRange10 }, matchAcceptSubTypeRange10 },
+                    { new List<MediaTypeFormatterMatch>() { matchMapping05, matchAcceptAllRange10 }, matchAcceptAllRange10 },
                 };
             }
         }
@@ -448,7 +475,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [PropertyData("MatchAcceptHeaderData")]
-        public void MatchAcceptHeader_ReturnsMatch(string[] acceptHeaders, string[] supportedMediaTypes, string expectedMediaType, double expectedQuality)
+        public void MatchAcceptHeader_ReturnsMatch(string[] acceptHeaders, string[] supportedMediaTypes, string expectedMediaType, double expectedQuality, int ranking)
         {
             // Arrange
             MockContentNegotiator negotiator = new MockContentNegotiator();
@@ -475,7 +502,7 @@ namespace System.Net.Http.Formatting
                 Assert.Same(formatter, match.Formatter);
                 Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), match.MediaType);
                 Assert.Equal(expectedQuality, match.Quality);
-                Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnRequestAcceptHeader, match.Ranking);
+                Assert.Equal(ranking, (int)match.Ranking);
             }
         }
 
@@ -692,13 +719,6 @@ namespace System.Net.Http.Formatting
 
             // Assert
             Assert.True(expectedSortedValues.SequenceEqual(actualSorted));
-        }
-
-        [Fact]
-        public void UpdateBestMatch_ThrowsOnNull()
-        {
-            MockContentNegotiator negotiator = new MockContentNegotiator();
-            Assert.ThrowsArgumentNull(() => negotiator.UpdateBestMatch(current: null, potentialReplacement: null), "potentialReplacement");
         }
 
         [Theory]

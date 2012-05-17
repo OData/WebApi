@@ -119,7 +119,7 @@ namespace System.Net.Http.Formatting
             MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
             string subtype = mediaTypeHeaderValue.MediaType.Split('/')[1];
             ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
-            Assert.Equal(subtype, parsedMediaType.SubType);
+            Assert.Equal(subtype, parsedMediaType.Subtype);
         }
 
         [Theory]
@@ -129,7 +129,7 @@ namespace System.Net.Http.Formatting
         {
             MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
             ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
-            Assert.True(parsedMediaType.IsSubTypeMediaRange);
+            Assert.True(parsedMediaType.IsSubtypeMediaRange);
         }
 
         [Theory]
@@ -139,7 +139,7 @@ namespace System.Net.Http.Formatting
         {
             MediaTypeHeaderValue mediaTypeHeaderValue = MediaTypeHeaderValue.Parse(mediaType);
             ParsedMediaTypeHeaderValue parsedMediaType = new ParsedMediaTypeHeaderValue(mediaTypeHeaderValue);
-            Assert.False(parsedMediaType.IsSubTypeMediaRange);
+            Assert.False(parsedMediaType.IsSubtypeMediaRange);
         }
 
         [Theory]

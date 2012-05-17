@@ -43,9 +43,8 @@ namespace System.Net.Http.Formatting
             Contract.Assert(stringWithQuality1 != null);
             Contract.Assert(stringWithQuality2 != null);
 
-            double quality1 = stringWithQuality1.Quality.HasValue ? stringWithQuality1.Quality.Value : 1.0;
-            double quality2 = stringWithQuality2.Quality.HasValue ? stringWithQuality2.Quality.Value : 1.0;
-
+            double quality1 = stringWithQuality1.Quality ?? FormattingUtilities.Match;
+            double quality2 = stringWithQuality2.Quality ?? FormattingUtilities.Match;
             double qualityDifference = quality1 - quality2;
             if (qualityDifference < 0)
             {

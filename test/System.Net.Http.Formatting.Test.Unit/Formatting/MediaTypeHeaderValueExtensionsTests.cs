@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Net.Http.Headers;
+using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 
@@ -9,118 +9,135 @@ namespace System.Net.Http.Formatting
 {
     public class MediaTypeHeaderValueExtensionsTests
     {
-        public static IEnumerable<object[]> EqualValues
+        public static TheoryDataSet<string, string, int> EqualValues
         {
             get
             {
                 // These values are all equal
-                yield return new[] { "text/xml", "text/xml" };
-                yield return new[] { "text/xml", "TEXT/XML" };
-                yield return new[] { "text/xml; charset=utf-8", "text/xml; charset=utf-8" };
-                yield return new[] { "text/xml; parameter=value", "text/xml; parameter=value" };
-                yield return new[] { "text/xml; charset=utf-8; parameter=value", "text/xml; parameter=value; charset=utf-8" };
+                return new TheoryDataSet<string, string, int>
+                {
+                    { "text/xml", "text/xml", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "TEXT/XML", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8", "text/xml; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; parameter=value", "text/xml; parameter=value", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8; parameter=value", "text/xml; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
 
-                yield return new[] { "text/*", "text/*" };
-                yield return new[] { "text/*", "TEXT/*" };
-                yield return new[] { "text/*; charset=utf-8", "text/*; charset=utf-8" };
-                yield return new[] { "text/*; parameter=value", "text/*; parameter=value" };
-                yield return new[] { "text/*; charset=utf-8; parameter=value", "text/*; parameter=value; charset=utf-8" };
+                    { "text/*", "text/*", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*", "TEXT/*", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*; charset=utf-8", "text/*; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*; parameter=value", "text/*; parameter=value", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*; charset=utf-8; parameter=value", "text/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
 
-                yield return new[] { "*/*", "*/*" };
-                yield return new[] { "*/*; charset=utf-8", "*/*; charset=utf-8" };
-                yield return new[] { "*/*; parameter=value", "*/*; parameter=value" };
-                yield return new[] { "*/*; charset=utf-8; parameter=value", "*/*; parameter=value; charset=utf-8" };
+                    { "*/*", "*/*", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "*/*; charset=utf-8", "*/*; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "*/*; parameter=value", "*/*; parameter=value", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "*/*; charset=utf-8; parameter=value", "*/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                };
             }
         }
 
-        public static IEnumerable<object[]> NonEqualValues
+        public static TheoryDataSet<string, string, int> NonEqualValues
         {
             get
             {
-                // These values are all subsets. If compared in reverse they are all non-subsets.
-                yield return new[] { "text/xml", "text/xml; charset=utf-8" };
-                yield return new[] { "text/xml", "TEXT/XML; charset=utf-8" };
-                yield return new[] { "text/xml", "text/xml; parameter=value" };
-                yield return new[] { "text/xml; charset=utf-8", "text/xml; parameter=value; charset=utf-8" };
+                return new TheoryDataSet<string, string, int>
+                {
+                    // These values are all subsets. If compared in reverse they are all non-subsets.
+                    { "text/xml", "text/xml; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "TEXT/XML; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "text/xml; parameter=value", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8", "text/xml; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
 
-                yield return new[] { "text/*", "text/*; charset=utf-8" };
-                yield return new[] { "text/*", "TEXT/*; charset=utf-8" };
-                yield return new[] { "text/*", "text/*; parameter=value" };
-                yield return new[] { "text/*; charset=utf-8", "text/*; parameter=value; charset=utf-8" };
+                    { "text/*", "text/*; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*", "TEXT/*; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*", "text/*; parameter=value", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/*; charset=utf-8", "text/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
 
-                yield return new[] { "text/xml", "text/*" };
-                yield return new[] { "text/xml", "text/*; charset=utf-8" };
-                yield return new[] { "text/xml", "TEXT/*; charset=utf-8" };
-                yield return new[] { "text/xml", "text/*; parameter=value" };
-                yield return new[] { "text/xml; charset=utf-8", "text/*; parameter=value; charset=utf-8" };
+                    { "text/xml", "text/*", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/xml", "text/*; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/xml", "TEXT/*; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/xml", "text/*; parameter=value", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
+                    { "text/xml; charset=utf-8", "text/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.SubtypeMediaRange },
 
-                yield return new[] { "*/*", "*/*; charset=utf-8" };
-                yield return new[] { "*/*", "*/*; parameter=value" };
-                yield return new[] { "*/*; charset=utf-8", "*/*; parameter=value; charset=utf-8" };
+                    { "*/*", "*/*; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "*/*", "*/*; parameter=value", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "*/*; charset=utf-8", "*/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
 
-                yield return new[] { "text/*", "*/*" };
-                yield return new[] { "text/*", "*/*; charset=utf-8" };
-                yield return new[] { "text/*", "*/*; charset=utf-8" };
-                yield return new[] { "text/*", "*/*; parameter=value" };
-                yield return new[] { "text/*; charset=utf-8", "*/*; parameter=value; charset=utf-8" };
+                    { "text/*", "*/*", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/*", "*/*; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/*", "*/*; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/*", "*/*; parameter=value", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/*; charset=utf-8", "*/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
 
-                yield return new[] { "text/xml", "*/*" };
-                yield return new[] { "text/xml", "*/*; charset=utf-8" };
-                yield return new[] { "text/xml", "*/*; parameter=value" };
-                yield return new[] { "text/xml; charset=utf-8", "*/*; parameter=value; charset=utf-8" };
+                    { "text/xml", "*/*", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/xml", "*/*; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/xml", "*/*; parameter=value", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                    { "text/xml; charset=utf-8", "*/*; parameter=value; charset=utf-8", (int)MediaTypeHeaderValueRange.AllMediaRange },
+                };
             }
         }
 
-        public static IEnumerable<object[]> NonOverlappingValues
+        public static TheoryDataSet<string, string, int> NonOverlappingValues
         {
             get
             {
-                // These values are all value1 < value2 regardless of which value is first and second
-                // We do this asymmetric sorting algorithm to ensure that subsets are always <=0.
-                yield return new[] { "text/xml", "application/xml" };
-                yield return new[] { "text/xml", "APPLICATION/XML" };
-                yield return new[] { "text/xml", "application/xml; charset=utf-8" };
-                yield return new[] { "text/xml; charset=utf-8", "application/xml; charset=utf-8" };
-                yield return new[] { "text/xml; charset=utf-8", "application/xml; parameter=value" };
+                return new TheoryDataSet<string, string, int>
+                {
+                    // These values are all value1 < value2 regardless of which value is first and second
+                    // We do this asymmetric sorting algorithm to ensure that subsets are always <=0.
+                    { "text/xml", "application/xml", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "APPLICATION/XML", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "application/xml; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8", "application/xml; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8", "application/xml; parameter=value", (int)MediaTypeHeaderValueRange.None },
 
-                yield return new[] { "text/xml", "text/plain" };
-                yield return new[] { "text/xml", "TEXT/PLAIN" };
-                yield return new[] { "text/xml", "text/plain; charset=utf-8" };
-                yield return new[] { "text/xml; charset=utf-8", "text/plain; charset=utf-8" };
-                yield return new[] { "text/xml; charset=utf-8", "text/plain; parameter=value" };
+                    { "text/xml", "text/plain", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "TEXT/PLAIN", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml", "text/plain; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8", "text/plain; charset=utf-8", (int)MediaTypeHeaderValueRange.None },
+                    { "text/xml; charset=utf-8", "text/plain; parameter=value", (int)MediaTypeHeaderValueRange.None },
+                };
             }
         }
 
         [Theory]
         [PropertyData("EqualValues")]
-        public void IsSubsetOf_ReturnsTrueForEqualValues(string mediaType1, string mediaType2)
+        public void IsSubsetOf_ReturnsTrueForEqualValues(string mediaType1, string mediaType2, int range)
         {
             MediaTypeHeaderValue mediaTypeHeaderValue1 = MediaTypeHeaderValue.Parse(mediaType1);
             MediaTypeHeaderValue mediaTypeHeaderValue2 = MediaTypeHeaderValue.Parse(mediaType2);
 
-            Assert.True(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2));
-            Assert.True(mediaTypeHeaderValue2.IsSubsetOf(mediaTypeHeaderValue1));
+            MediaTypeHeaderValueRange actualRange;
+            Assert.True(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2, out actualRange));
+            Assert.Equal(range, (int)actualRange);
+
+            Assert.True(mediaTypeHeaderValue2.IsSubsetOf(mediaTypeHeaderValue1, out actualRange));
         }
 
         [Theory]
         [PropertyData("NonEqualValues")]
-        public void IsSubsetOf_ReturnsTrueForNonEqualValues(string mediaType1, string mediaType2)
+        public void IsSubsetOf_ReturnsTrueForNonEqualValues(string mediaType1, string mediaType2, int range)
         {
             MediaTypeHeaderValue mediaTypeHeaderValue1 = MediaTypeHeaderValue.Parse(mediaType1);
             MediaTypeHeaderValue mediaTypeHeaderValue2 = MediaTypeHeaderValue.Parse(mediaType2);
 
-            Assert.True(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2));
+            MediaTypeHeaderValueRange actualRange;
+            Assert.True(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2, out actualRange));
+            Assert.Equal(range, (int)actualRange);
+
             Assert.False(mediaTypeHeaderValue2.IsSubsetOf(mediaTypeHeaderValue1));
         }
 
         [Theory]
         [PropertyData("NonOverlappingValues")]
-        public void IsSubsetOf_ReturnsFalseForNonOverlappingValues(string mediaType1, string mediaType2)
+        public void IsSubsetOf_ReturnsFalseForNonOverlappingValues(string mediaType1, string mediaType2, int range)
         {
             MediaTypeHeaderValue mediaTypeHeaderValue1 = MediaTypeHeaderValue.Parse(mediaType1);
             MediaTypeHeaderValue mediaTypeHeaderValue2 = MediaTypeHeaderValue.Parse(mediaType2);
 
-            Assert.False(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2));
+            MediaTypeHeaderValueRange actualRange;
+            Assert.False(mediaTypeHeaderValue1.IsSubsetOf(mediaTypeHeaderValue2, out actualRange));
+            Assert.Equal(range, (int)actualRange);
         }
     }
 }

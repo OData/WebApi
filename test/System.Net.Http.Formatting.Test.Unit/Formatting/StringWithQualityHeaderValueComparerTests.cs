@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -11,84 +12,93 @@ namespace System.Net.Http.Formatting
 {
     public class StringWithQualityHeaderValueComparerTests
     {
-        public static IEnumerable<object[]> EqualValues
+        public static TheoryDataSet<string, string> EqualValues
         {
             get
             {
-                yield return new[] { "value", "value" };
-                yield return new[] { "value", "VALUE" };
-                yield return new[] { "value", "value;q=1" };
-                yield return new[] { "value", "value; q=1" };
-                yield return new[] { "value", "value;q=1.0" };
-                yield return new[] { "value", "value; q=1.0" };
-                yield return new[] { "value", "value; q=1.00000" };
-                yield return new[] { "value; q=0.5", "value; q=0.5" };
-                yield return new[] { "value; q=1.0", "value; q=1.0" };
-                yield return new[] { "*", "*" };
-                yield return new[] { "*", "*;q=1" };
-                yield return new[] { "*", "*; q=1" };
-                yield return new[] { "*", "*;q=1.0" };
-                yield return new[] { "*", "*; q=1.0" };
-                yield return new[] { "*; q=0.5", "*; q=0.5" };
-                yield return new[] { "*; q=1.0", "*; q=1.0" };
-                yield return new[] { "value1", "value2" };
-                yield return new[] { "value1", "value2;q=1" };
-                yield return new[] { "value1", "value2; q=1" };
-                yield return new[] { "value1", "value2;q=1.0" };
-                yield return new[] { "value1", "value2; q=1.0" };
-            }
-        }
-
-        public static IEnumerable<object[]> NonEqualValues
-        {
-            get
-            {
-                yield return new[] { "value; q=0.5", "value; q=1.0" };
-                yield return new[] { "value1; q=0.5", "value2; q=1.0" };
-                yield return new[] { "*", "value1" };
-                yield return new[] { "*;q=1", "value1" };
-                yield return new[] { "*; q=1", "value1" };
-                yield return new[] { "*;q=1.0", "value1" };
-                yield return new[] { "*; q=1.0", "value1" };
-                yield return new[] { "*; q=0.5", "value1; q=0.5" };
-                yield return new[] { "*; q=1.0", "value1; q=1.0" };
-            }
-        }
-
-        public static IEnumerable<object[]> BeforeAfterSortedValues
-        {
-            get
-            {
-                yield return new[]
+                return new TheoryDataSet<string, string>
                 {
-                    new List<string>
+                    { "value", "value" },
+                    { "value", "VALUE" },
+                    { "value", "value;q=1" },
+                    { "value", "value; q=1" },
+                    { "value", "value;q=1.0" },
+                    { "value", "value; q=1.0" },
+                    { "value", "value; q=1.00000" },
+                    { "value; q=0.5", "value; q=0.5" },
+                    { "value; q=1.0", "value; q=1.0" },
+                    { "*", "*" },
+                    { "*", "*;q=1" },
+                    { "*", "*; q=1" },
+                    { "*", "*;q=1.0" },
+                    { "*", "*; q=1.0" },
+                    { "*; q=0.5", "*; q=0.5" },
+                    { "*; q=1.0", "*; q=1.0" },
+                    { "value1", "value2" },
+                    { "value1", "value2;q=1" },
+                    { "value1", "value2; q=1" },
+                    { "value1", "value2;q=1.0" },
+                    { "value1", "value2; q=1.0" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, string> NonEqualValues
+        {
+            get
+            {
+                return new TheoryDataSet<string, string>
+                {
+                    { "value; q=0.5", "value" },
+                    { "value; q=0.5", "value; q=1.0" },
+                    { "value1; q=0.5", "value2; q=1.0" },
+                    { "*", "value1" },
+                    { "*;q=1", "value1" },
+                    { "*; q=1", "value1" },
+                    { "*;q=1.0", "value1" },
+                    { "*; q=1.0", "value1" },
+                    { "*; q=0.5", "value1; q=0.5" },
+                    { "*; q=1.0", "value1; q=1.0" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string[], string[]> BeforeAfterSortedValues
+        {
+            get
+            {
+                return new TheoryDataSet<string[], string[]>
+                {
                     {
-                        "text",
-                        "text;q=1.0",
-                        "text",
-                        "text;q=0",
-                        "*;q=0.8",
-                        "*;q=1",
-                        "text;q=0.8",
-                        "*;q=0.6",
-                        "text;q=1.0",
-                        "*;q=0.4",
-                        "text;q=0.6",
-                    }, 
-                    new List<string>
-                    {
-                        "text",
-                        "text;q=1.0",
-                        "text",
-                        "text;q=1.0",
-                        "*;q=1",
-                        "text;q=0.8",
-                        "*;q=0.8",
-                        "text;q=0.6",
-                        "*;q=0.6",
-                        "*;q=0.4",
-                        "text;q=0",
-                    }, 
+                        new string[]
+                        {
+                            "text",
+                            "text;q=1.0",
+                            "text",
+                            "text;q=0",
+                            "*;q=0.8",
+                            "*;q=1",
+                            "text;q=0.8",
+                            "*;q=0.6",
+                            "text;q=1.0",
+                            "*;q=0.4",
+                            "text;q=0.6",
+                        }, 
+                        new string[]
+                        {
+                            "text",
+                            "text;q=1.0",
+                            "text",
+                            "text;q=1.0",
+                            "*;q=1",
+                            "text;q=0.8",
+                            "*;q=0.8",
+                            "text;q=0.6",
+                            "*;q=0.6",
+                            "*;q=0.4",
+                            "text;q=0",
+                        }
+                    }
                 };
             }
         }
@@ -137,7 +147,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [PropertyData("BeforeAfterSortedValues")]
-        public void ComparerSortsListCorrectly(List<string> unsorted, List<string> expectedSorted)
+        public void ComparerSortsListCorrectly(string[] unsorted, string[] expectedSorted)
         {
             // Arrange
             IEnumerable<StringWithQualityHeaderValue> unsortedValues =

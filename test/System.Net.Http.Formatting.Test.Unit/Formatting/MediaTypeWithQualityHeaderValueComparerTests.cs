@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -11,105 +12,121 @@ namespace System.Net.Http.Formatting
 {
     public class MediaTypeWithQualityHeaderValueComparerTests
     {
-        public static IEnumerable<object[]> EqualValues
+        public static TheoryDataSet<string, string> EqualValues
         {
             get
             {
-                yield return new[] { "text/xml", "text/xml" };
-                yield return new[] { "text/xml", "TEXT/XML" };
-                yield return new[] { "text/plain", "text/xml" };
-                yield return new[] { "text/*", "text/*" };
-                yield return new[] { "text/*", "TEXT/*" };
-                yield return new[] { "*/*", "*/*" };
-                yield return new[] { "text/xml", "text/xml; charset=utf8" };
-                yield return new[] { "text/xml", "text/xml; parameter=value" };
-                yield return new[] { "text/xml; parameter=value", "text/xml; parameter=value" };
-                yield return new[] { "text/xml; parameter1=value1", "text/xml; parameter2=value2" };
-                yield return new[] { "text/xml; q=0.5", "text/xml; q=0.50" };
-                yield return new[] { "application/xml; q=0.5", "text/xml; q=0.5" };
-                yield return new[] { "application/xml; q=0.1", "text/xml; q=0.1" };
-                yield return new[] { "application/xml; parameter=value1; q=0.5", "text/xml; parameter=value2; q=0.5" };
-                yield return new[] { "text/xml", "text/xml;q=1" };
-                yield return new[] { "text/xml", "text/xml; q=1" };
-                yield return new[] { "text/xml", "text/xml;q=1.0" };
-                yield return new[] { "text/xml", "text/xml; q=1.0" };
-                yield return new[] { "text/xml", "text/xml; q=1.00000" };
-                yield return new[] { "text/xml; q=0.5", "text/xml; q=0.5" };
-                yield return new[] { "text/xml; q=1.0", "text/xml; q=1.0" };
-                yield return new[] { "*/*", "*/*;q=1" };
-                yield return new[] { "*/*", "*/*; q=1" };
-                yield return new[] { "*/*", "*/*;q=1.0" };
-                yield return new[] { "*/*", "*/*; q=1.0" };
-                yield return new[] { "*/*; q=0.5", "*/*; q=0.5" };
-                yield return new[] { "*/*; q=1.0", "*/*; q=1.0" };
-                yield return new[] { "text/xml", "text/xml;q=1" };
-                yield return new[] { "text/xml", "text/xml; q=1" };
-                yield return new[] { "text/xml", "text/xml;q=1.0" };
-                yield return new[] { "text/xml", "text/xml; q=1.0" };
-            }
-        }
-
-        public static IEnumerable<object[]> NonEqualValues
-        {
-            get
-            {
-                yield return new[] { "text/plain; q=0.5", "text/plain; q=1.0" };
-                yield return new[] { "text/plain; q=0.5", "text/xml; q=1.0" };
-                yield return new[] { "text/*", "text/plain" };
-                yield return new[] { "*/*", "text/xml" };
-                yield return new[] { "*/*", "text/*" };
-                yield return new[] { "*/*;q=0.5", "*/*;q=0.6" };
-                yield return new[] { "*/*;q=0.5", "text/*;q=0.5" };
-                yield return new[] { "*/*;q=1", "text/plain" };
-                yield return new[] { "*/*; q=1", "text/plain" };
-                yield return new[] { "*/*;q=1.0", "text/plain" };
-                yield return new[] { "*/*; q=1.0", "text/plain" };
-                yield return new[] { "*/*; q=0.5", "text/plain; q=0.5" };
-                yield return new[] { "*/*; q=1.0", "text/plain; q=1.0" };
-                yield return new[] { "*/*; q=0.5", "text/*; q=0.6" };
-            }
-        }
-
-        public static IEnumerable<object[]> BeforeAfterSortedValues
-        {
-            get
-            {
-                yield return new[]
+                return new TheoryDataSet<string, string>
                 {
-                    new List<string>
-                    {
-                        "text/plain",
-                        "text/plain;q=1.0",
-                        "text/plain",
-                        "text/plain;q=0",
-                        "*/*;q=0.8",
-                        "*/*;q=1",
-                        "text/*;q=1",
-                        "text/plain;q=0.8",
-                        "text/*;q=0.8",
-                        "text/*;q=0.6",
-                        "text/*;q=1.0",
-                        "*/*;q=0.4",
-                        "text/plain;q=0.6",
-                        "text/xml",
-                    }, 
-                    new List<string>
-                    {
-                        "text/plain",
-                        "text/plain;q=1.0",
-                        "text/plain",
-                        "text/xml",
-                        "text/*;q=1",
-                        "text/*;q=1.0",
-                        "*/*;q=1",
-                        "text/plain;q=0.8",
-                        "text/*;q=0.8",
-                        "*/*;q=0.8",
-                        "text/plain;q=0.6",
-                        "text/*;q=0.6",
-                        "*/*;q=0.4",
-                        "text/plain;q=0",
-                    }, 
+                    { "text/xml", "text/xml" },
+                    { "text/xml", "text/xml; q=1" },
+                    { "text/xml", "text/xml; q=1.0" },
+                    { "text/xml", "text/xml; q=1.0000" },
+                    { "text/xml", "TEXT/XML" },
+                    { "text/plain", "text/xml" },
+                    { "text/*", "text/*" },
+                    { "text/*", "TEXT/*" },
+                    { "*/*", "*/*" },
+                    { "text/xml", "text/xml; charset=utf8" },
+                    { "text/xml", "text/xml; parameter=value" },
+                    { "text/xml; parameter=value", "text/xml; parameter=value" },
+                    { "text/xml; parameter1=value1", "text/xml; parameter2=value2" },
+                    { "text/xml; q=0.5", "text/xml; q=0.50" },
+                    { "application/xml; q=0.5", "text/xml; q=0.5" },
+                    { "application/xml; q=0.1", "text/xml; q=0.1" },
+                    { "application/xml; parameter=value1; q=0.5", "text/xml; parameter=value2; q=0.5" },
+                    { "text/xml", "text/xml;q=1" },
+                    { "text/xml", "text/xml; q=1" },
+                    { "text/xml", "text/xml;q=1.0" },
+                    { "text/xml", "text/xml; q=1.0" },
+                    { "text/xml", "text/xml; q=1.00000" },
+                    { "text/xml; q=0.5", "text/xml; q=0.5" },
+                    { "text/xml; q=1.0", "text/xml; q=1.0" },
+                    { "*/*", "*/*;q=1" },
+                    { "*/*", "*/*; q=1" },
+                    { "*/*", "*/*;q=1.0" },
+                    { "*/*", "*/*; q=1.0" },
+                    { "*/*; q=0.5", "*/*; q=0.5" },
+                    { "*/*; q=1.0", "*/*; q=1.0" },
+                    { "text/xml", "text/xml;q=1" },
+                    { "text/xml", "text/xml; q=1" },
+                    { "text/xml", "text/xml;q=1.0" },
+                    { "text/xml", "text/xml; q=1.0" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, string> NonEqualValues
+        {
+            get
+            {
+                return new TheoryDataSet<string, string>
+                {
+                    { "text/plain; q=0.5", "text/plain" },
+                    { "text/plain; q=0.5", "application/xml" },
+                    { "text/plain; q=0.5", "text/plain; q=1.0" },
+                    { "text/plain; q=0.5", "text/xml; q=1.0" },
+                    { "text/*", "text/plain" },
+                    { "application/*", "text/plain" },
+                    { "*/*", "text/xml" },
+                    { "*/*", "text/*" },
+                    { "*/*;q=0.5", "*/*;q=0.6" },
+                    { "*/*;q=0.5", "text/*;q=0.5" },
+                    { "*/*;q=1", "text/plain" },
+                    { "*/*; q=1", "text/plain" },
+                    { "*/*;q=1.0", "text/plain" },
+                    { "*/*; q=1.0", "text/plain" },
+                    { "*/*; q=0.5", "text/plain; q=0.5" },
+                    { "*/*; q=1.0", "text/plain; q=1.0" },
+                    { "*/*; q=0.5", "text/*; q=0.6" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string[], string[]> BeforeAfterSortedValues
+        {
+            get
+            {
+                return new TheoryDataSet<string[], string[]>
+                {
+                    { 
+                        new string[]
+                        {
+                            "application/*",
+                            "text/plain",
+                            "text/plain;q=1.0",
+                            "text/plain",
+                            "text/plain;q=0",
+                            "*/*;q=0.8",
+                            "*/*;q=1",
+                            "text/*;q=1",
+                            "text/plain;q=0.8",
+                            "text/*;q=0.8",
+                            "text/*;q=0.6",
+                            "text/*;q=1.0",
+                            "*/*;q=0.4",
+                            "text/plain;q=0.6",
+                            "text/xml",
+                        }, 
+                        new string[]
+                        {
+                            "text/plain",
+                            "text/plain;q=1.0",
+                            "text/plain",
+                            "text/xml",
+                            "application/*",
+                            "text/*;q=1",
+                            "text/*;q=1.0",
+                            "*/*;q=1",
+                            "text/plain;q=0.8",
+                            "text/*;q=0.8",
+                            "*/*;q=0.8",
+                            "text/plain;q=0.6",
+                            "text/*;q=0.6",
+                            "*/*;q=0.4",
+                            "text/plain;q=0",
+                        }
+                    }
                 };
             }
         }
@@ -158,7 +175,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [PropertyData("BeforeAfterSortedValues")]
-        public void ComparerSortsListCorrectly(List<string> unsorted, List<string> expectedSorted)
+        public void ComparerSortsListCorrectly(string[] unsorted, string[] expectedSorted)
         {
             // Arrange
             IEnumerable<MediaTypeWithQualityHeaderValue> unsortedValues =

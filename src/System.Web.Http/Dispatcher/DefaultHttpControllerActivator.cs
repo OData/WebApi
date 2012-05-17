@@ -10,7 +10,7 @@ namespace System.Web.Http.Dispatcher
 {
     /// <summary>
     /// Default implementation of an <see cref="IHttpControllerActivator"/>.
-    /// A different implementation can be registered via the <see cref="T:System.Web.Http.Services.DependencyResolver"/>.   
+    /// A different implementation can be registered via the <see cref="T:System.Web.Http.Services.DependencyResolver"/>.
     /// We optimize for the case where we have an <see cref="Controllers.ApiControllerActionInvoker"/> 
     /// instance per <see cref="HttpControllerDescriptor"/> instance but can support cases where there are
     /// many <see cref="HttpControllerDescriptor"/> instances for one <see cref="System.Web.Http.Controllers.ApiControllerActionInvoker"/> 
@@ -48,17 +48,17 @@ namespace System.Web.Http.Dispatcher
 
             try
             {
+                // If dependency resolver returns controller object then use it.
+                IHttpController instance = (IHttpController)request.GetDependencyScope().GetService(controllerType);
+                if (instance != null)
+                {
+                    return instance;
+                }
+
                 // First check in the local fast cache and if not a match then look in the broader 
                 // HttpControllerDescriptor.Properties cache
                 if (_fastCache == null)
                 {
-                    // If dependency resolver returns controller object then keep asking it whenever we need a new instance
-                    IHttpController instance = (IHttpController)request.GetDependencyScope().GetService(controllerType);
-                    if (instance != null)
-                    {
-                        return instance;
-                    }
-
                     // Otherwise create a delegate for creating a new instance of the type
                     Func<IHttpController> activator = TypeActivator.Create<IHttpController>(controllerType);
                     Tuple<HttpControllerDescriptor, Func<IHttpController>> cacheItem = Tuple.Create(controllerDescriptor, activator);

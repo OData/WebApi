@@ -76,6 +76,61 @@ namespace System.Web.Http.Dispatcher
             mockScope.Verify();
         }
 
+        [Fact]
+        public void Create_DoesnotCacheControllerFromRequestLevelDependencyScope()
+        {
+            // Arrange
+            int count = 0;
+            var controller = new ControllerWithCtorParams(42);
+            var mockScope = new Mock<IDependencyScope>();
+            mockScope.Setup(r => r.GetService(typeof(ControllerWithCtorParams))).Returns(() =>
+            {
+                count++;
+                return new ControllerWithCtorParams(42);
+            }).Verifiable();
+            var config = new HttpConfiguration();
+            var request = new HttpRequestMessage();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.Properties[HttpPropertyKeys.DependencyScope] = mockScope.Object;
+            var descriptor = new HttpControllerDescriptor(config, "Name", typeof(ControllerWithCtorParams));
+            var activator = new DefaultHttpControllerActivator();
+
+            // Act
+            IHttpController result1 = activator.Create(request, descriptor, typeof(ControllerWithCtorParams));
+            IHttpController result2 = activator.Create(request, descriptor, typeof(ControllerWithCtorParams));
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+            mockScope.Verify();
+            Assert.Equal(2, count);
+        }
+
+        [Fact]
+        public void Create_MixupInstanceCreationAndDependencyScope()
+        {
+            // Arrange
+            var controller = new ControllerWithCtorParams(42);
+            var mockScope = new Mock<IDependencyScope>();
+            mockScope.Setup(r => r.GetService(typeof(ControllerWithCtorParams))).Returns(controller).Verifiable();
+            var config = new HttpConfiguration();
+            var request = new HttpRequestMessage();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.Properties[HttpPropertyKeys.DependencyScope] = mockScope.Object;
+            var descriptorControllerWithCtorParamsResult = new HttpControllerDescriptor(config, "Name", typeof(ControllerWithCtorParams));
+            var descriptorSimpleController = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
+            var activator = new DefaultHttpControllerActivator();
+
+            // Act
+            IHttpController simpleController = activator.Create(request, descriptorSimpleController, typeof(SimpleController));
+            IHttpController controllerWithCtorParamsResult = activator.Create(request, descriptorControllerWithCtorParamsResult, typeof(ControllerWithCtorParams));
+
+            // Assert
+            Assert.NotNull(simpleController);
+            Assert.IsType<SimpleController>(simpleController);
+            Assert.Same(controller, controllerWithCtorParamsResult);
+            mockScope.Verify();
+        }
+
         // Helper classes
 
         abstract class AbstractController : ApiController { }

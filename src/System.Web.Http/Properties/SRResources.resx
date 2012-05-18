@@ -491,4 +491,13 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="OptionalBodyParameterNotSupported" xml:space="preserve">
     <value>Optional parameter '{0}' is not supported by '{1}'.</value>
   </data>
+  <data name="MissingDataMemberIsRequired" xml:space="preserve">
+    <value>Property '{0}' on type '{1}' is invalid. Value-typed properties marked as [Required] must also be marked with [DataMember(IsRequired=true)] to be recognized as required. Consider attributing the declaring type with [DataContract] and the property with [DataMember(IsRequired=true)].</value>
+  </data>
+  <data name="ValidationAttributeOnField" xml:space="preserve">
+    <value>Field '{0}' on type '{1}' is attributed with one or more validation attributes. Validation attributes on fields are not supported. Consider using a public property for validation instead.</value>
+  </data>
+  <data name="ValidationAttributeOnNonPublicProperty" xml:space="preserve">
+    <value>Non-public property '{0}' on type '{1}' is attributed with one or more validation attributes. Validation attributes on non-public properties are not supported. Consider using a public property for validation instead.</value>
+  </data>
 </root>

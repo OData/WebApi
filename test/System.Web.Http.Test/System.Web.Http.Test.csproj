@@ -267,9 +267,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Validation\Providers\DataMemberModelValidatorProviderTest.cs" />
+    <Compile Include="Validation\Providers\InvalidModelValidatorProviderTest.cs" />
     <Compile Include="Validation\Validators\DataAnnotationsModelValidatorTest.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Validation\Validators\ErrorModelValidatorTest.cs" />
     <Compile Include="ValueProviders\Providers\RouteDataValueProviderFactoryTest.cs" />
     <Compile Include="ValueProviders\Providers\NameValuePairsValueProviderTest.cs" />
     <Compile Include="ValueProviders\Providers\QueryStringValueProviderFactoryTest.cs" />

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -185,15 +186,19 @@ namespace System.Web.Http.ModelBinding
         }
     }
 
+    [DataContract]
     public class CustomerNameMax6
     {
         [Required]
         [StringLength(6)]
+        [DataMember]
         public string Name { get; set; }
 
+        [DataMember]
         public int Id { get; set; }
 
         [Required]
+        [DataMember(IsRequired=true)]
         public int RequiredValue { get; set; }
     }
 

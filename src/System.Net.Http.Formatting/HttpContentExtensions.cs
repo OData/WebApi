@@ -128,6 +128,11 @@ namespace System.Net.Http
             {
                 formatter = new MediaTypeFormatterCollection(formatters).FindReader(type, mediaType);
             }
+            else
+            {
+                T defaultValue = (T)MediaTypeFormatter.GetDefaultValueForType(type);
+                return TaskHelpers.FromResult<T>(defaultValue);
+            }
 
             if (formatter == null)
             {

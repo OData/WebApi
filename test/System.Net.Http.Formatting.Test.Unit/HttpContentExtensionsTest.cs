@@ -78,14 +78,23 @@ namespace System.Net.Http
         }
 
         [Fact]
-        public void ReadAsAsyncOfT_WhenNoMatchingFormatterFoundForContentWithNoMediaType_Throws()
+        public void ReadAsAsyncOfT_WhenTypeIsReferenceTypeAndNoMediaType_ReturnsNull()
         {
             var content = new StringContent("{}");
             content.Headers.ContentType = null;
             var formatters = new MediaTypeFormatter[] { new JsonMediaTypeFormatter() };
 
-            Assert.Throws<InvalidOperationException>(() => content.ReadAsAsync<List<string>>(formatters),
-                "No MediaTypeFormatter is available to read an object of type 'List`1' from content with media type ''undefined''.");
+            Assert.Equal(null, content.ReadAsAsync<List<string>>(formatters).Result);
+        }
+
+        [Fact]
+        public void ReadAsAsyncOfT_WhenTypeIsValueTypeAndNoMediaType_ReturnsDefault()
+        {
+            var content = new StringContent("123456");
+            content.Headers.ContentType = null;
+            var formatters = new MediaTypeFormatter[] { new JsonMediaTypeFormatter() };
+
+            Assert.Equal(0, content.ReadAsAsync<int>(formatters).Result);
         }
 
         [Fact]

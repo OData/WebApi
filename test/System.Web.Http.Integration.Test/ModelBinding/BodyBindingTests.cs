@@ -84,6 +84,31 @@ namespace System.Web.Http.ModelBinding
         }
 
         [Theory]
+        [InlineData("application/json")]
+        [InlineData(null)]
+        public void Body_Binds_EmptyContentWithOrWithoutContentTypeHeader(string mediaType)
+        {
+            // Arrange
+            StringContent stringContent = new StringContent(String.Empty);
+            stringContent.Headers.ContentType = mediaType != null ? new MediaTypeHeaderValue(mediaType) : null;
+
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(baseAddress + "ModelBinding/PostComplexTypeFromBody"),
+                Method = HttpMethod.Post,
+                Content = stringContent,
+            };
+
+            // Act
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            ModelBindOrder actualItem = response.Content.ReadAsAsync<ModelBindOrder>().Result;
+            Assert.Equal(null, actualItem);
+        }
+
+        [Theory]
         [InlineData("PostComplexType", "application/json")]
         [InlineData("PostComplexType", "application/xml")]
         [InlineData("PostComplexTypeFromBody", "application/json")]

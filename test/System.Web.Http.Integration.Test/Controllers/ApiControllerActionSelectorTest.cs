@@ -28,6 +28,21 @@ namespace System.Web.Http
         [InlineData("Delete", "Test/6?age=10", "DeleteUserByIdAndOptName")]
         [InlineData("Delete", "Test", "DeleteUserByOptName")]
         [InlineData("Delete", "Test?name=user", "DeleteUserByOptName")]
+        [InlineData("Delete", "Test/6?email=user@test.com", "DeleteUserById_Email_OptName_OptPhone")]
+        [InlineData("Delete", "Test/6?email=user@test.com&name=user", "DeleteUserById_Email_OptName_OptPhone")]
+        [InlineData("Delete", "Test/6?email=user@test.com&name=user&phone=123456789", "DeleteUserById_Email_OptName_OptPhone")]
+        [InlineData("Delete", "Test/6?email=user@test.com&height=1.8", "DeleteUserById_Email_Height_OptName_OptPhone")]
+        [InlineData("Delete", "Test/6?email=user@test.com&height=1.8&name=user", "DeleteUserById_Email_Height_OptName_OptPhone")]
+        [InlineData("Delete", "Test/6?email=user@test.com&height=1.8&name=user&phone=12345678", "DeleteUserById_Email_Height_OptName_OptPhone")]
+        [InlineData("Head", "Test/6", "Head_Id_OptSize_OptIndex")]
+        [InlineData("Head", "Test/6?size=2", "Head_Id_OptSize_OptIndex")]
+        [InlineData("Head", "Test/6?index=2", "Head_Id_OptSize_OptIndex")]
+        [InlineData("Head", "Test/6?index=2&size=10", "Head_Id_OptSize_OptIndex")]
+        [InlineData("Head", "Test/6?index=2&otherParameter=10", "Head_Id_OptSize_OptIndex")]
+        [InlineData("Head", "Test/6?otherQueryParameter=1234", "Head_Id_OptSize_OptIndex")]
+        [InlineData("Head", "Test", "Head")]
+        [InlineData("Head", "Test?otherParam=2", "Head")]
+        [InlineData("Head", "Test?index=2&size=10", "Head")]
         public void Route_Parameters_Default(string httpMethod, string requestUrl, string expectedActionName)
         {
             string routeUrl = "{controller}/{id}";

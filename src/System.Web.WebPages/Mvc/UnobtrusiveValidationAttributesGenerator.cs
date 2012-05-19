@@ -29,12 +29,12 @@ namespace System.Web.Mvc
 
                 ValidateUnobtrusiveValidationRule(rule, results, ruleName);
 
-                results.Add(ruleName, HttpUtility.HtmlEncode(rule.ErrorMessage ?? String.Empty));
+                results.Add(ruleName, rule.ErrorMessage ?? String.Empty);
                 ruleName += "-";
 
                 foreach (var kvp in rule.ValidationParameters)
                 {
-                    results.Add(ruleName + kvp.Key, HttpUtility.HtmlEncode(kvp.Value ?? String.Empty));
+                    results.Add(ruleName + kvp.Key, kvp.Value ?? String.Empty);
                 }
             }
 

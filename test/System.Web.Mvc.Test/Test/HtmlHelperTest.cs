@@ -777,7 +777,7 @@ Parameter name: httpMethod"
         }
 
         [Fact]
-        public void GetUnobtrusiveValidationAttributesMessageIsHtmlEncoded()
+        public void GetUnobtrusiveValidationAttributesMessageIsNotHtmlEncoded()
         {
             // Arrange
             var formContext = new FormContext();
@@ -793,7 +793,7 @@ Parameter name: httpMethod"
             IDictionary<string, object> result = htmlHelper.GetUnobtrusiveValidationAttributes("foobar");
 
             // Assert
-            Assert.Equal("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;", result["data-val-type"]);
+            Assert.Equal("<script>alert('xss')</script>", result["data-val-type"]);
         }
 
         [Fact]

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Web.Http.Controllers;
@@ -48,44 +49,79 @@ namespace System.Web.Http.Dispatcher
 
             try
             {
-                // If dependency resolver returns controller object then use it.
-                IHttpController instance = (IHttpController)request.GetDependencyScope().GetService(controllerType);
-                if (instance != null)
-                {
-                    return instance;
-                }
+                Func<IHttpController> activator;
 
                 // First check in the local fast cache and if not a match then look in the broader 
                 // HttpControllerDescriptor.Properties cache
                 if (_fastCache == null)
                 {
-                    // Otherwise create a delegate for creating a new instance of the type
-                    Func<IHttpController> activator = TypeActivator.Create<IHttpController>(controllerType);
-                    Tuple<HttpControllerDescriptor, Func<IHttpController>> cacheItem = Tuple.Create(controllerDescriptor, activator);
-                    Interlocked.CompareExchange(ref _fastCache, cacheItem, null);
-
-                    // Execute the delegate
-                    return activator();
+                    IHttpController controller = GetInstanceOrActivator(request, controllerType, out activator);
+                    if (controller != null)
+                    {
+                        // we have a controller registered with the dependency resolver for this controller type
+                        return controller;
+                    }
+                    else
+                    {
+                        Tuple<HttpControllerDescriptor, Func<IHttpController>> cacheItem = Tuple.Create(controllerDescriptor, activator);
+                        Interlocked.CompareExchange(ref _fastCache, cacheItem, null);
+                    }
                 }
                 else if (_fastCache.Item1 == controllerDescriptor)
                 {
-                    // If the key matches and we already have the delegate for creating an instance then just execute it
-                    return _fastCache.Item2();
+                    // If the key matches and we already have the delegate for creating an instance.
+                    activator = _fastCache.Item2;
                 }
                 else
                 {
                     // If the key doesn't match then lookup/create delegate in the HttpControllerDescriptor.Properties for
                     // that HttpControllerDescriptor instance
-                    Func<IHttpController> activator = (Func<IHttpController>)controllerDescriptor.Properties.GetOrAdd(
-                        _cacheKey,
-                        key => TypeActivator.Create<IHttpController>(controllerType));
-                    return activator();
+                    object value;
+                    if (controllerDescriptor.Properties.TryGetValue(_cacheKey, out value))
+                    {
+                        activator = (Func<IHttpController>)value;
+                    }
+                    else
+                    {
+                        IHttpController controller = GetInstanceOrActivator(request, controllerType, out activator);
+                        if (controller != null)
+                        {
+                            // we have a controller registered with the dependency resolver for this controller type
+                            return controller;
+                        }
+                        else
+                        {
+                            controllerDescriptor.Properties.TryAdd(_cacheKey, activator);
+                        }
+                    }
                 }
+
+                return activator();
             }
             catch (Exception ex)
             {
                 throw Error.InvalidOperation(ex, SRResources.DefaultControllerFactory_ErrorCreatingController, controllerType.Name);
             }
+        }
+
+        // Returns the controller instance from the dependency resolver if there is one registered
+        // else returns the activator that calls the default ctor for the give controllerType.
+        private static IHttpController GetInstanceOrActivator(HttpRequestMessage request, Type controllerType, out Func<IHttpController> activator)
+        {
+            Contract.Assert(request != null);
+            Contract.Assert(controllerType != null);
+
+            // If dependency resolver returns controller object then use it.
+            IHttpController instance = (IHttpController)request.GetDependencyScope().GetService(controllerType);
+            if (instance != null)
+            {
+                activator = null;
+                return instance;
+            }
+
+            // Otherwise create a delegate for creating a new instance of the type
+            activator = TypeActivator.Create<IHttpController>(controllerType);
+            return null;
         }
     }
 }

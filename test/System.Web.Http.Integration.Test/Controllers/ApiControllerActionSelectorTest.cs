@@ -3,6 +3,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.ValueProviders;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -93,12 +94,12 @@ namespace System.Web.Http
 
         [Theory]
         [InlineData("GET", "Test/GetUsers", "GetUsers")]
-        [InlineData("GET", "Test/GetUser", "GetUser")]
+        [InlineData("GET", "Test/GetUser/7", "GetUser")]
         [InlineData("GET", "Test/GetUser?id=3", "GetUser")]
         [InlineData("GET", "Test/GetUser/4?id=3", "GetUser")]
-        [InlineData("GET", "Test/GetUserByNameAgeAndSsn", "GetUserByNameAgeAndSsn")]
-        [InlineData("GET", "Test/GetUserByNameAndSsn", "GetUserByNameAndSsn")]
-        [InlineData("POST", "Test/PostUserByNameAndAddress", "PostUserByNameAndAddress")]
+        [InlineData("GET", "Test/GetUserByNameAgeAndSsn?name=user&age=90&ssn=123456789", "GetUserByNameAgeAndSsn")]
+        [InlineData("GET", "Test/GetUserByNameAndSsn?name=user&ssn=123456789", "GetUserByNameAndSsn")]
+        [InlineData("POST", "Test/PostUserByNameAndAddress?name=user", "PostUserByNameAndAddress")]
         public void Route_Action(string httpMethod, string requestUrl, string expectedActionName)
         {
             string routeUrl = "{controller}/{action}/{id}";
@@ -113,12 +114,12 @@ namespace System.Web.Http
 
         [Theory]
         [InlineData("GET", "Test/getusers", "GetUsers")]
-        [InlineData("GET", "Test/getuseR", "GetUser")]
+        [InlineData("GET", "Test/getuseR/1", "GetUser")]
         [InlineData("GET", "Test/Getuser?iD=3", "GetUser")]
         [InlineData("GET", "Test/GetUser/4?Id=3", "GetUser")]
-        [InlineData("GET", "Test/GetUserByNameAgeandSsn", "GetUserByNameAgeAndSsn")]
-        [InlineData("GET", "Test/getUserByNameAndSsn", "GetUserByNameAndSsn")]
-        [InlineData("POST", "Test/PostUserByNameAndAddress", "PostUserByNameAndAddress")]
+        [InlineData("GET", "Test/GetUserByNameAgeandSsn?name=user&age=90&ssn=123456789", "GetUserByNameAgeAndSsn")]
+        [InlineData("GET", "Test/getUserByNameAndSsn?name=user&ssn=123456789", "GetUserByNameAndSsn")]
+        [InlineData("POST", "Test/PostUserByNameAndAddress?name=user", "PostUserByNameAndAddress")]
         public void Route_Action_Name_Casing(string httpMethod, string requestUrl, string expectedActionName)
         {
             string routeUrl = "{controller}/{action}/{id}";
@@ -249,6 +250,27 @@ namespace System.Web.Http
             Assert.Equal(HttpStatusCode.MethodNotAllowed, exception.Response.StatusCode);
             var content = Assert.IsType<ObjectContent<HttpError>>(exception.Response.Content);
             Assert.Equal("The requested resource does not support http method 'PUT'.", ((HttpError)content.Value).Message);
+        }
+
+        [Theory]
+        [InlineData("GET", "Test", "GetUsers")]
+        [InlineData("GET", "Test/2", "GetUser")]
+        [InlineData("GET", "Test/3?name=mario", "GetUserByNameAndId")]
+        [InlineData("GET", "Test/3?name=mario&ssn=123456", "GetUserByNameIdAndSsn")]
+        [InlineData("GET", "Test?name=mario&ssn=123456", "GetUserByNameAndSsn")]
+        [InlineData("GET", "Test?name=mario&ssn=123456&age=3", "GetUserByNameAgeAndSsn")]
+        [InlineData("GET", "Test/5?random=9", "GetUser")]
+        public void SelectionBasedOnParameter_IsNotAffectedBy_AddingGlobalValueProvider(string httpMethod, string requestUrl, string expectedActionName)
+        {
+            string routeUrl = "{controller}/{id}";
+            object routeDefault = new { id = RouteParameter.Optional };
+
+            HttpControllerContext context = ApiControllerHelper.CreateControllerContext(httpMethod, requestUrl, routeUrl, routeDefault);
+            context.Configuration.Services.Add(typeof(ValueProviderFactory), new HeaderValueProviderFactory());
+            context.ControllerDescriptor = new HttpControllerDescriptor(context.Configuration, "test", typeof(TestController));
+            HttpActionDescriptor descriptor = ApiControllerHelper.SelectAction(context);
+
+            Assert.Equal(expectedActionName, descriptor.ActionName);
         }
     }
 }

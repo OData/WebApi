@@ -15,10 +15,19 @@ namespace System.Web.Http
         [InlineData("DELETE", "Users", HttpStatusCode.OK, "Remove")]
         [InlineData("OPTIONS", "Users", HttpStatusCode.OK, "Assist")]
         [InlineData("PUT", "Users", HttpStatusCode.OK, "PutUserWithEmptyName")]
+        [InlineData("GET", "ParameterTest", HttpStatusCode.OK, "Get(-1)")]
+        [InlineData("GET", "ParameterTest?id=2", HttpStatusCode.OK, "Get(2)")]
+        [InlineData("POST", "ParameterTest", HttpStatusCode.OK, "POST(null)")]
+        [InlineData("POST", "ParameterTest?id=myId", HttpStatusCode.OK, "POST(myId)")]
+        [InlineData("Put", "ParameterTest?id=1&value=myvalue", HttpStatusCode.OK, "Put(1, myvalue)")]
+        [InlineData("DELETE", "ParameterTest?id=1", HttpStatusCode.NoContent, "")]
         [InlineData("POST", "Users", HttpStatusCode.InternalServerError, "")] // InternalServerError because of ambiguous match, there're multiple POST actions given that every action is POST by default
         [InlineData("POST", "Users/Approve", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
         [InlineData("DELETE", "Users/Remove", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
         [InlineData("POST", "Users/DefaultActionWithEmptyActionName", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
+        [InlineData("DELETE", "ParameterTest", HttpStatusCode.NotFound, "")] // NotFound because Delete requires 'id' as parameter
+        [InlineData("Put", "ParameterTest", HttpStatusCode.NotFound, "")] // NotFound because Put requires 'id' and 'value' as parameters
+        [InlineData("Put", "ParameterTest?id=1", HttpStatusCode.NotFound, "")] // NotFound because Put requires 'id' and 'value' as parameters
         public void ActionReachability_UsingResourceOrientedRoute(string httpMethod, string requestUrl, HttpStatusCode expectedStatusCode, string expectedActionName)
         {
             HttpConfiguration config = new HttpConfiguration();
@@ -45,6 +54,12 @@ namespace System.Web.Http
         [InlineData("DELETE", "Users/Remove", HttpStatusCode.OK, "Remove")]
         [InlineData("POST", "Users/Reject", HttpStatusCode.OK, "Deny")]
         [InlineData("OPTIONS", "Users/Help", HttpStatusCode.OK, "Assist")]
+        [InlineData("GET", "ParameterTest/Get", HttpStatusCode.OK, "Get(-1)")]
+        [InlineData("GET", "ParameterTest/Get?id=2", HttpStatusCode.OK, "Get(2)")]
+        [InlineData("POST", "ParameterTest/post", HttpStatusCode.OK, "POST(null)")]
+        [InlineData("POST", "ParameterTest/post?id=myId", HttpStatusCode.OK, "POST(myId)")]
+        [InlineData("Put", "ParameterTest/put?id=1&value=myvalue", HttpStatusCode.OK, "Put(1, myvalue)")]
+        [InlineData("DELETE", "ParameterTest/Delete?id=1", HttpStatusCode.NoContent, "")]
         [InlineData("POST", "Users/GetUser", HttpStatusCode.MethodNotAllowed, "")] // MethodNotAllowed because the convention implies it's a GET
         [InlineData("GET", "Users", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
         [InlineData("PUT", "Users", HttpStatusCode.NotFound, "")] // NotFound because it doesn't match the route
@@ -53,6 +68,9 @@ namespace System.Web.Http
         [InlineData("GET", "Users/Approve", HttpStatusCode.MethodNotAllowed, "")] // MethodNotAllowed because only POST is allowed by default for action that has no HttpMethd declared or implied
         [InlineData("POST", "Users/Remove", HttpStatusCode.MethodNotAllowed, "")] // MethodNotAllowed because the action has the attribute HttpDelete
         [InlineData("POST", "Users/DefaultActionWithEmptyActionName", HttpStatusCode.NotFound, "")] // NotFound because the action has an empty name and it's not reachable through {action}
+        [InlineData("DELETE", "ParameterTest/Delete", HttpStatusCode.NotFound, "")] // NotFound because Delete requires 'id' as parameter
+        [InlineData("Put", "ParameterTest/put", HttpStatusCode.NotFound, "")] // NotFound because Put requires 'id' and 'value' as parameters
+        [InlineData("Put", "ParameterTest/put?id=1", HttpStatusCode.NotFound, "")] // NotFound because Put requires 'id' and 'value' as parameters
         public void ActionReachability_UsingRpcStyleRoute(string httpMethod, string requestUrl, HttpStatusCode expectedStatusCode, string expectedActionName)
         {
             HttpConfiguration config = new HttpConfiguration();

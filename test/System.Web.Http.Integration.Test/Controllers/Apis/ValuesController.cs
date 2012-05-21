@@ -22,7 +22,7 @@ namespace System.Web.Http
         }
 
         // POST api/values
-        public void Post(string value)
+        public void Post(string value = null)
         {
         }
 

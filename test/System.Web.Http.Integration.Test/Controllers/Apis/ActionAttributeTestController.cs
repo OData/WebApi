@@ -15,7 +15,7 @@ namespace System.Web.Http
 
         [HttpDelete]
         [ActionName("DeleteUsers")]
-        public void RemoveUsers(string name) { }
+        public void RemoveUsers(string name = null) { }
 
         [HttpOptions]
         public void Help(int id) { }

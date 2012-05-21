@@ -184,14 +184,12 @@ namespace System.Web.Http.Controllers
                         Error.Format(SRResources.ApiControllerActionSelector_HttpMethodNotSupported, incomingMethod)));
                 }
 
-                // If there are multiple candidates, then apply overload resolution logic.
-                if (actionsFoundByHttpMethods.Length > 1)
-                {
-                    actionsFoundByHttpMethods = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods, useActionName).ToArray();
-                }
+                // Make sure the action parameter matches the route and query parameters. Overload resolution logic is applied when needed.
+                IEnumerable<ReflectedHttpActionDescriptor> actionsFoundByParams = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods, useActionName);
 
-                List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByHttpMethods);
+                List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByParams);
                 actionsFoundByHttpMethods = null;
+                actionsFoundByParams = null;
 
                 switch (selectedActions.Count)
                 {

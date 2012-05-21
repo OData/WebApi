@@ -22,7 +22,7 @@ namespace System.Web.Http.ModelBinding
             return value;
         }
 
-        public string GetStringFromRoute(string controller, string action)
+        public string GetStringFromRoute(string controller = null, string action = null)
         {
             return controller + ":" + action;
         }

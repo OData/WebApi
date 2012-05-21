@@ -62,7 +62,7 @@ namespace System.Web.Http.ModelBinding
 
         [Theory]
         [InlineData("PostWithOptionalBodyParameter")]
-        [InlineData("PostWithOptionalBodyParameterAndUriParameter")]
+        [InlineData("PostWithOptionalBodyParameterAndUriParameter?id=3")]
         public void Body_OptionalParameter_Throws(string actionName)
         {
             // Arrange

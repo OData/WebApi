@@ -91,7 +91,8 @@ namespace System.Web.Http.ModelBinding
             Type type = parameter.ParameterType;
             if (TypeHelper.IsSimpleUnderlyingType(type) || TypeHelper.HasStringConverter(type))
             {
-                return parameter.BindWithModelBinding(); // use default settings
+                // For simple types, the default is to look in URI. Exactly as if the parameter had a [FromUri] attribute.
+                return parameter.BindWithAttribute(new FromUriAttribute());
             }
 
             // Fallback. Must be a complex type. Default is to look in body. Exactly as if this type had a [FromBody] attribute.

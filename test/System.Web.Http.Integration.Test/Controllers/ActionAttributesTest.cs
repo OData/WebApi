@@ -3,7 +3,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
@@ -14,11 +13,11 @@ namespace System.Web.Http
     {
         [Theory]
         [InlineData("GET", "ActionAttributeTest/RetriveUsers", "RetriveUsers")]
-        [InlineData("POST", "ActionAttributeTest/AddUsers", "AddUsers")]
+        [InlineData("POST", "ActionAttributeTest/AddUsers/1", "AddUsers")]
         [InlineData("PUT", "ActionAttributeTest/UpdateUsers", "UpdateUsers")]
         [InlineData("DELETE", "ActionAttributeTest/DeleteUsers", "DeleteUsers")]
-        [InlineData("PATCH", "ActionAttributeTest/Users", "Users")]
-        [InlineData("HEAD", "ActionAttributeTest/Users", "Users")]
+        [InlineData("PATCH", "ActionAttributeTest/Users?key=2", "Users")]
+        [InlineData("HEAD", "ActionAttributeTest/Users?key=3", "Users")]
         public void SelectAction_OnRouteWithActionParameter(string httpMethod, string requestUrl, string expectedActionName)
         {
             string routeUrl = "{controller}/{action}/{id}";

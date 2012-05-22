@@ -213,7 +213,7 @@ namespace System.Web.Http
                                        {
                                            return TaskHelpers.FromError<HttpResponseMessage>(executedContext.Exception);
                                        }
-                                   });
+                                   }, runSynchronously: true);
 
                     return info.Task(resultTask);
                 });

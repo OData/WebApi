@@ -142,7 +142,7 @@ namespace System.Net.Http
 
             return content.ReadAsStreamAsync()
                           .Then(stream => formatter.ReadFromStreamAsync(type, stream, content, formatterLogger)
-                          .Then(value => (T)value));
+                          .CastFromObject<T>());
         }
     }
 }

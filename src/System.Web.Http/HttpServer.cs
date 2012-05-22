@@ -153,7 +153,7 @@ namespace System.Web.Http
             }
 
             return base.SendAsync(request, cancellationToken)
-                       .Finally(() => Thread.CurrentPrincipal = originalPrincipal);
+                       .Finally(() => Thread.CurrentPrincipal = originalPrincipal, runSynchronously: true);
         }
 
         private void EnsureInitialized()

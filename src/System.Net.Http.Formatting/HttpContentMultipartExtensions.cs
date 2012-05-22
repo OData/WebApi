@@ -130,7 +130,7 @@ namespace System.Net.Http
                 MultipartReadAsync(context);
 
                 // Return task and complete when we have run the post processing step.
-                return taskCompletionSource.Task.Then(() => streamProvider.ExecutePostProcessingAsync().Then(() => streamProvider));
+                return taskCompletionSource.Task.Then(() => streamProvider.ExecutePostProcessingAsync().ToTask<T>(result: streamProvider));
             });
         }
 

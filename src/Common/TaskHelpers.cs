@@ -108,7 +108,7 @@ namespace System.Threading.Tasks
             {
                 enumerator = asyncIterator.GetEnumerator();
                 Task task = IterateImpl(enumerator, cancellationToken);
-                return (enumerator != null) ? task.Finally(enumerator.Dispose) : task;
+                return (enumerator != null) ? task.Finally(enumerator.Dispose, runSynchronously: true) : task;
             }
             catch (Exception ex)
             {

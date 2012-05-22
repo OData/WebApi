@@ -428,7 +428,7 @@ namespace System.Net.Http
                 }
 
                 return Content;
-            });
+            }, runSynchronously: true);
         }
 
         private byte[] SerializeHeader()

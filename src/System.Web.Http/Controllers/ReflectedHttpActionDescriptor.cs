@@ -308,7 +308,7 @@ namespace System.Web.Http.Controllers
             private static Task<object> Convert<T>(object taskAsObject)
             {
                 Task<T> task = (Task<T>)taskAsObject;
-                return task.Then(r => (object)r);
+                return task.CastToObject<T>();
             }
 
             // Do not inline or optimize this method to avoid stack-related reflection demand issues when
@@ -370,7 +370,7 @@ namespace System.Web.Http.Controllers
                         {
                             Task r = (Task)compiled(instance, methodParameters);
                             ThrowIfWrappedTaskInstance(methodInfo, r.GetType());
-                            return r.Then(() => (object)null);
+                            return r.CastToObject();
                         };
                     }
                     else if (typeof(Task).IsAssignableFrom(methodCall.Type))

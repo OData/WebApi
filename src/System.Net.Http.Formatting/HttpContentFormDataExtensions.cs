@@ -52,7 +52,7 @@ namespace System.Net.Http
 
             MediaTypeFormatter[] formatters = new MediaTypeFormatter[1] { new FormUrlEncodedMediaTypeFormatter() };
             return content.ReadAsAsync<FormDataCollection>(formatters)
-                .Then(formdata => formdata != null ? formdata.ReadAsNameValueCollection() : null);
+                .Then(formdata => formdata != null ? formdata.ReadAsNameValueCollection() : null, runSynchronously: true);
         }
     }
 }

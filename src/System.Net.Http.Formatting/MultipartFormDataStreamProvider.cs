@@ -119,7 +119,7 @@ namespace System.Net.Http
                         formFieldValue =>
                         {
                             FormData.Add(formFieldName, formFieldValue);
-                        });
+                        }, runSynchronously: true);
                 });
 
             // Actually execute the read tasks while trying to stay on the same thread

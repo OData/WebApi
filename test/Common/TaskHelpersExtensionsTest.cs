@@ -12,6 +12,249 @@ namespace System.Threading.Tasks
 {
     public class TaskHelpersExtensionsTest
     {
+        // ----------------------------------------------------------------
+        //   Task<T> Task<object>.CastFromObject()
+
+        [Fact, ForceGC]
+        public Task ConvertToTaskOfStringShouldSucceed()
+        {
+            // Arrange
+            return TaskHelpers.FromResult((object)"StringResult")
+
+            // Act
+                .CastFromObject<string>()
+
+            // Assert
+                .ContinueWith((task) =>
+                    {
+                        Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                        Assert.Equal("StringResult", task.Result);
+                    });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertToTaskOfIntShouldSucceed()
+        {
+            // Arrange
+            return TaskHelpers.FromResult((object)123)
+
+            // Act
+                .CastFromObject<int>()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                    Assert.Equal(123, task.Result);
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertToTaskOfWrongTypeShouldFail()
+        {
+            // Arrange
+            return TaskHelpers.FromResult((object)123)
+
+            // Act
+                .CastFromObject<string>()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Faulted, task.Status);
+                    Assert.IsType<InvalidCastException>(task.Exception.GetBaseException());
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromFaultedTaskOfObjectToTaskOfStringShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.FromError<object>(new InvalidOperationException())
+
+            // Act
+                .CastFromObject<string>()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Faulted, task.Status);
+                    Assert.IsType<InvalidOperationException>(task.Exception.GetBaseException());
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromFaultedTaskOfObjectToTaskOfIntShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.FromError<object>(new InvalidOperationException())
+
+            // Act
+                .CastFromObject<int>()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Faulted, task.Status);
+                    Assert.IsType<InvalidOperationException>(task.Exception.GetBaseException());
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertToCancelledTaskOfStringShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.Canceled<object>()
+
+            // Act
+                .CastFromObject<string>()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertToCancelledTaskOfIntShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.Canceled<object>()
+
+            // Act
+                .CastFromObject<int>()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
+                });
+        }
+
+        // ----------------------------------------------------------------
+        //   Task<object> Task<T>.CastToObject()
+
+        [Fact, ForceGC]
+        public Task ConvertFromTaskOfStringShouldSucceed()
+        {
+            // Arrange
+            return TaskHelpers.FromResult("StringResult")
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                    Assert.Equal("StringResult", (string)task.Result);
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromTaskOfIntShouldSucceed()
+        {
+            // Arrange
+            return TaskHelpers.FromResult(123)
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                    Assert.Equal(123, (int)task.Result);
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromFaultedTaskOfObjectShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.FromError<object>(new InvalidOperationException())
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Faulted, task.Status);
+                    Assert.IsType<InvalidOperationException>(task.Exception.GetBaseException());
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromCancelledTaskOfStringShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.Canceled<string>()
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
+                });
+        }
+
+        // ----------------------------------------------------------------
+        //   Task<object> Task.CastToObject()
+
+        [Fact, ForceGC]
+        public Task ConvertFromTaskShouldSucceed()
+        {
+            // Arrange
+            return TaskHelpers.Completed()
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.RanToCompletion, task.Status);
+                    Assert.Equal(null, task.Result);
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromFaultedTaskShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.FromError(new InvalidOperationException())
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Faulted, task.Status);
+                    Assert.IsType<InvalidOperationException>(task.Exception.GetBaseException());
+                });
+        }
+
+        [Fact, ForceGC]
+        public Task ConvertFromCancelledTaskShouldBeHandled()
+        {
+            // Arrange
+            return TaskHelpers.Canceled()
+
+            // Act
+                .CastToObject()
+
+            // Assert
+                .ContinueWith((task) =>
+                {
+                    Assert.Equal(TaskStatus.Canceled, task.Status);
+                });
+        }
+
         // -----------------------------------------------------------------
         //  Task.Catch(Func<Exception, Task>)
 

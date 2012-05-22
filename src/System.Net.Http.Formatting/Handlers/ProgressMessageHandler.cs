@@ -93,7 +93,7 @@ namespace System.Net.Http.Handlers
                         response.Content.Headers.CopyTo(progressContent.Headers);
                         response.Content = progressContent;
                         return response;
-                    });
+                    }, runSynchronously: true);
             }
             else
             {

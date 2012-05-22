@@ -129,7 +129,7 @@ namespace Microsoft.Web.Http.Data
                      }
 
                      return response;
-                 });
+                 }, cancellationToken: cancellationToken);
         }
 
         /// <summary>

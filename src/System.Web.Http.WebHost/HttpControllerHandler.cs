@@ -260,12 +260,8 @@ namespace System.Web.Http.WebHost
             Contract.Assert(response != null);
             Contract.Assert(request != null);
 
-            HttpResponseBase httpResponseBase = httpContextBase.Response;
-            httpResponseBase.StatusCode = (int)response.StatusCode;
-            httpResponseBase.StatusDescription = response.ReasonPhrase;
-            httpResponseBase.TrySkipIisCustomErrors = true;
-            EnsureSuppressFormsAuthenticationRedirect(httpContextBase);
-            CopyHeaders(response.Headers, httpContextBase);
+            CopyResponseStatusAndHeaders(httpContextBase, response);
+
             CacheControlHeaderValue cacheControl = response.Headers.CacheControl;
 
             // TODO 335085: Consider this when coming up with our caching story
@@ -281,67 +277,19 @@ namespace System.Web.Http.WebHost
                 httpContextBase.Response.Cache.SetCacheability(HttpCacheability.NoCache);
             }
 
-            Task responseTask = null;
-            bool isBuffered = false;
+            // Asynchronously write the response body.  If there is no body, we use
+            // a completed task to share the Finally() below.
+            // The response-writing task will not fault -- it handles errors internally.
+            Task writeResponseContentTask = (response.Content == null)
+                                        ? TaskHelpers.Completed()
+                                        : WriteResponseContentAsync(httpContextBase, response, request);
 
-            if (response.Content != null)
+            return writeResponseContentTask.Finally(() =>
             {
-                // Select output buffering based on the kind of HttpContent.  
-                // This is done before CopyHeaders because the ContentLength
-                // property getter will evaluate the content length and set
-                // the Content-Length header if it has not already been set.
-                // Doing this before CopyHeaders ensures the headers contain a 
-                // valid Content-Length before they are copied to HttpContextBase.
-                // Unless HttpContextBase headers contain a positive Content-Length,
-                // the Transfer-Encoding for streamed output will be chunked.
-                // Note: If no IHostBufferPolicySelector is registered we return 'true' as this is the default ASP value.
-                isBuffered = _bufferPolicySelector.Value != null ? _bufferPolicySelector.Value.UseBufferedOutputStream(response) : true;
-                httpResponseBase.BufferOutput = isBuffered;
-
-                CopyHeaders(response.Content.Headers, httpContextBase);
-
-                responseTask = response.Content.CopyToAsync(httpResponseBase.OutputStream);
-            }
-            else
-            {
-                responseTask = TaskHelpers.Completed();
-            }
-
-            return responseTask
-                .Catch((info) =>
-                {
-                    if (isBuffered)
-                    {
-                        // Failure during the CopyToAsync needs to stop any partial content from
-                        // reaching the client.  If it was during a buffered write, we will give
-                        // them InternalServerError with zero-length content.
-                        httpResponseBase.SuppressContent = true;
-                        httpResponseBase.Clear();
-                        httpResponseBase.ClearContent();
-                        httpResponseBase.ClearHeaders();
-                        httpResponseBase.StatusCode = (int)Net.HttpStatusCode.InternalServerError;
-                    }
-                    else
-                    {
-                        // Any failure in non-buffered mode has already written out StatusCode and possibly content.
-                        // This means the client will receive an OK but the content is incomplete.
-                        // The proper action here is to abort the connection, but HttpResponse.Abort is a 4.5 feature.
-                        // TODO: DevDiv bug #381233 -- call HttpResponse.Abort when it becomes available
-                        httpResponseBase.Close();
-                    }
-
-                    // We do not propagate any errors up, or we will get the
-                    // standard ASP.NET html page.   We want empty content or
-                    // a closed connection.
-                    return info.Handled();
-                })
-                .Finally(
-                () =>
-                {
-                    request.DisposeRequestResources();
-                    request.Dispose();
-                    response.Dispose();
-                });
+                request.DisposeRequestResources();
+                request.Dispose();
+                response.Dispose();
+            });
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner")]
@@ -394,6 +342,267 @@ namespace System.Web.Http.WebHost
             {
                 _suppressRedirectAction.Value(httpContextBase);
             }
+        }
+
+        /// <summary>
+        /// Asynchronously writes the response content to the ASP.NET output stream
+        /// and sets the content headers.
+        /// </summary>
+        /// <remarks>
+        /// This method returns only non-faulted tasks.  Any error encountered
+        /// writing the response will be handled within the task returned by this method.
+        /// </remarks>
+        /// <param name="httpContextBase">The context base.</param>
+        /// <param name="response">The response being written.</param>
+        /// <param name="request">The original request.</param>
+        /// <returns>The task that will write the response content.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
+        internal static Task WriteResponseContentAsync(HttpContextBase httpContextBase, HttpResponseMessage response, HttpRequestMessage request)
+        {
+            Contract.Assert(httpContextBase != null);
+            Contract.Assert(response != null);
+            Contract.Assert(request != null);
+            Contract.Assert(response.Content != null);
+
+            HttpResponseBase httpResponseBase = httpContextBase.Response;
+            HttpContent responseContent = response.Content;
+
+            // Copy the response content headers only after ensuring they are complete.
+            // We ask for Content-Length first because HttpContent lazily computes this
+            // and only afterwards writes the value into the content headers.
+            var unused = response.Content.Headers.ContentLength;
+            CopyHeaders(response.Content.Headers, httpContextBase);
+
+            // Select output buffering based on the user-controlled buffering policy
+            bool isBuffered = _bufferPolicySelector.Value != null ? _bufferPolicySelector.Value.UseBufferedOutputStream(response) : true;
+            httpResponseBase.BufferOutput = isBuffered;
+
+            return isBuffered
+                    ? WriteBufferedResponseContentAsync(httpContextBase, responseContent, request)
+                    : WriteStreamedResponseContentAsync(httpResponseBase, responseContent);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
+        internal static Task WriteStreamedResponseContentAsync(HttpResponseBase httpResponseBase, HttpContent responseContent)
+        {
+            Contract.Assert(httpResponseBase != null);
+            Contract.Assert(responseContent != null);
+
+            Task writeResponseContentTask = null;
+
+            try
+            {
+                // Copy the HttpContent into the output stream asynchronously.
+                writeResponseContentTask = responseContent.CopyToAsync(httpResponseBase.OutputStream);
+            }
+            catch
+            {
+                // Streamed content may have been written and cannot be recalled.
+                // Our only choice is to abort the connection.
+                AbortConnection(httpResponseBase);
+                return TaskHelpers.Completed();
+            }
+
+            return writeResponseContentTask
+                .Catch((info) =>
+                {
+                    // Streamed content may have been written and cannot be recalled.
+                    // Our only choice is to abort the connection.
+                    AbortConnection(httpResponseBase);
+                    return info.Handled();
+                });
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "continuation task owned by caller")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
+        internal static Task WriteBufferedResponseContentAsync(HttpContextBase httpContextBase, HttpContent responseContent, HttpRequestMessage request)
+        {
+            Contract.Assert(httpContextBase != null);
+            Contract.Assert(responseContent != null);
+            Contract.Assert(request != null);
+
+            HttpResponseBase httpResponseBase = httpContextBase.Response;
+            Task writeResponseContentTask = null;
+
+            try
+            {
+                // Copy the HttpContent into the output stream asynchronously.
+                writeResponseContentTask = responseContent.CopyToAsync(httpResponseBase.OutputStream);
+            }
+            catch (Exception ex)
+            {
+                // Immediate exception requires an error response.
+                // Create a faulted task to share the code below
+                writeResponseContentTask = TaskHelpers.FromError(ex);
+            }
+
+            // Return a task that writes the response body asynchronously.
+            // We guarantee we will handle all error responses internally
+            // and always return a non-faulted task.
+            return writeResponseContentTask
+                .Catch((info) =>
+                {
+                    // If we were using a buffered stream, we can still set the headers and status
+                    // code, and we can create an error response with the exception.
+                    // We create a continuation task to write an error response that will run after
+                    // returning from this Catch() but before other continuations the caller appends to this task.
+                    // The error response writing task handles errors internally and will not show as faulted.
+                    Task writeErrorResponseTask = CreateErrorResponseAsync(httpContextBase, responseContent, request, info.Exception);
+                    return info.Task(writeErrorResponseTask);
+                });
+        }
+
+        /// <summary>
+        /// Asynchronously creates an error response.
+        /// </summary>
+        /// <remarks>
+        /// This method returns a task that will set the headers and status code appropriately
+        /// for an error response.  If possible, it will also write the exception as an
+        /// <see cref="HttpError"/> into the response body.
+        /// <para>
+        /// Any errors during the creation of the error response itself will be handled
+        /// internally.  The task returned from this method will not show as faulted.
+        /// </para>
+        /// </remarks>
+        /// <param name="httpContextBase">The HTTP context.</param>
+        /// <param name="responseContent">The original response content we could not write.</param>
+        /// <param name="request">The original request.</param>
+        /// <param name="exception">The exception caught attempting to write <paramref name="responseContent"/>.</param>
+        /// <returns>A task that will create the error response.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "unused", Justification = "unused variable necessary to call getter")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "All exceptions caught here become error responses")]
+        internal static Task CreateErrorResponseAsync(HttpContextBase httpContextBase, HttpContent responseContent, HttpRequestMessage request, Exception exception)
+        {
+            Contract.Assert(httpContextBase != null);
+            Contract.Assert(responseContent != null);
+            Contract.Assert(exception != null);
+            Contract.Assert(request != null);
+
+            HttpResponseBase httpResponseBase = httpContextBase.Response;
+            HttpResponseMessage errorResponse = null;
+            HttpResponseException responseException = exception as HttpResponseException;
+
+            // Ensure all headers and content are cleared to eliminate any partial results.
+            ClearContentAndHeaders(httpResponseBase);
+
+            // If the exception we are handling is HttpResponseException,
+            // that becomes the error response.
+            if (responseException != null)
+            {
+                errorResponse = responseException.Response;
+            }
+            else
+            {
+                // The exception is not HttpResponseException.
+                // Create a 500 response with content containing an explanatory message and
+                // stack trace, subject to content negotiation and policy for error details.
+                try
+                {
+                    MediaTypeHeaderValue mediaType = responseContent.Headers.ContentType;
+                    string messageDetails = (mediaType != null)
+                                                ? Error.Format(
+                                                    SRResources.Serialize_Response_Failed_MediaType,
+                                                    responseContent.GetType().Name,
+                                                    mediaType)
+                                                : Error.Format(
+                                                    SRResources.Serialize_Response_Failed,
+                                                    responseContent.GetType().Name);
+
+                    errorResponse = request.CreateErrorResponse(
+                                                HttpStatusCode.InternalServerError,
+                                                new InvalidOperationException(messageDetails, exception));
+
+                    // CreateErrorResponse will choose 406 if it cannot find a formatter,
+                    // but we want our default error response to be 500 always
+                    errorResponse.StatusCode = HttpStatusCode.InternalServerError;
+                }
+                catch
+                {
+                    // Failed creating an HttpResponseMessage for the error response.
+                    // This can happen for missing config, missing conneg service, etc.
+                    // Create an empty error response and return a non-faulted task.
+                    CreateEmptyErrorResponse(httpResponseBase);
+                    return TaskHelpers.Completed();
+                }
+            }
+
+            Contract.Assert(errorResponse != null);
+            CopyResponseStatusAndHeaders(httpContextBase, errorResponse);
+
+            // The error response may return a null content if content negotiation
+            // fails to find a formatter, or this may be an HttpResponseException without
+            // content.  In either case, cleanup and return a completed task.
+
+            if (errorResponse.Content == null)
+            {
+                errorResponse.Dispose();
+                return TaskHelpers.Completed();
+            }
+
+            // Copy the headers from the newly generated HttpResponseMessage.
+            // We must ask the content for its content length because Content-Length
+            // is lazily computed and added to the headers.
+            var unused = errorResponse.Content.Headers.ContentLength;
+            CopyHeaders(errorResponse.Content.Headers, httpContextBase);
+
+            Task writeErrorResponseTask = null;
+            try
+            {
+                // Asynchronously write the content of the new error HttpResponseMessage
+                writeErrorResponseTask = errorResponse.Content.CopyToAsync(httpResponseBase.OutputStream);
+            }
+            catch (Exception ex)
+            {
+                // Failed creating the error response task.  Likely cause is a formatter exception
+                // before the write task could be created.  Create a faulted task to share
+                // the Catch() and Finally() below
+                writeErrorResponseTask = TaskHelpers.FromError(ex);
+            }
+            
+            return writeErrorResponseTask
+                .Catch((info) =>
+                {
+                    // Failure writing the error response.  Likely cause is a formatter
+                    // serialization exception.  Create empty error response and
+                    // return a non-faulted task.
+                    CreateEmptyErrorResponse(httpResponseBase);
+                    return info.Handled();
+                })
+                .Finally(() =>
+                {
+                    // Dispose the temporary HttpResponseMessage carrying the error response
+                    errorResponse.Dispose();
+                });
+        }
+
+        private static void CopyResponseStatusAndHeaders(HttpContextBase httpContextBase, HttpResponseMessage response)
+        {
+            Contract.Assert(httpContextBase != null);
+            HttpResponseBase httpResponseBase = httpContextBase.Response;
+            httpResponseBase.StatusCode = (int)response.StatusCode;
+            httpResponseBase.StatusDescription = response.ReasonPhrase;
+            httpResponseBase.TrySkipIisCustomErrors = true;
+            EnsureSuppressFormsAuthenticationRedirect(httpContextBase);
+            CopyHeaders(response.Headers, httpContextBase);
+        }
+
+        private static void ClearContentAndHeaders(HttpResponseBase httpResponseBase)
+        {
+            httpResponseBase.Clear();
+            httpResponseBase.ClearHeaders();
+        }
+
+        private static void CreateEmptyErrorResponse(HttpResponseBase httpResponseBase)
+        {
+            ClearContentAndHeaders(httpResponseBase);
+            httpResponseBase.StatusCode = (int)HttpStatusCode.InternalServerError;
+            httpResponseBase.SuppressContent = true;
+        }
+
+        private static void AbortConnection(HttpResponseBase httpResponseBase)
+        {
+            // TODO: DevDiv bug #381233 -- call HttpResponse.Abort when it becomes available in 4.5
+            httpResponseBase.Close();
         }
 
         private static X509Certificate2 RetrieveClientCertificate(HttpRequestMessage request)

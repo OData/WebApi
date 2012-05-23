@@ -10,6 +10,7 @@
         <WebStackNuGetPackages Include="DotNetOpenAuth.OpenId.Core"/>
         <WebStackNuGetPackages Include="DotNetOpenAuth.OpenId.RelyingParty"/>
         <WebStackNuGetPackages Include="EntityFramework"/>
+        <WebStackNuGetPackages Include="Microsoft.Net.Http"/>
         <WebStackNuGetPackages Include="Microsoft.Web.FxCop"/>
         <WebStackNuGetPackages Include="Microsoft.Web.Infrastructure"/>
         <WebStackNuGetPackages Include="Moq"/>

@@ -52,6 +52,11 @@ namespace System.Web.Http
             return services.GetServices<ModelValidatorProvider>();
         }
 
+        internal static ModelValidatorCache GetModelValidatorCache(this ServicesContainer services)
+        {
+            return services.GetService<ModelValidatorCache>();
+        }
+
         public static IContentNegotiator GetContentNegotiator(this ServicesContainer services)
         {
             return services.GetService<IContentNegotiator>();

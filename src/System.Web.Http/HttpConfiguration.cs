@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
@@ -32,6 +33,7 @@ namespace System.Web.Http
 
         private IDependencyResolver _dependencyResolver = EmptyResolver.Instance;
         private Action<HttpConfiguration> _initializer = DefaultInitializer;
+        private List<IDisposable> _resourcesToDispose = new List<IDisposable>();
         private bool _disposed;
 
         /// <summary>
@@ -60,6 +62,7 @@ namespace System.Web.Http
             ParameterBindingRules = DefaultActionValueBinder.GetDefaultParameterBinders();
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We're registering the ValidationCache to be disposed by the HttpConfiguration.")]
         private HttpConfiguration(HttpConfiguration configuration, HttpControllerSettings settings)
         {
             _routes = configuration.Routes;
@@ -77,6 +80,15 @@ namespace System.Web.Http
             // Use the original configuration's initializer so that its Initialize()
             // will perform the same logic on this clone as on the original.
             Initializer = configuration.Initializer;
+
+            // create a new validator cache if the validator providers have changed
+            if (settings.IsServiceCollectionInitialized &&
+                !settings.Services.GetModelValidatorProviders().SequenceEqual(configuration.Services.GetModelValidatorProviders()))
+            {
+                ModelValidatorCache validatorCache = new ModelValidatorCache(new Lazy<IEnumerable<ModelValidatorProvider>>(() => Services.GetModelValidatorProviders()));
+                RegisterForDispose(validatorCache);
+                settings.Services.Replace(typeof(ModelValidatorCache), validatorCache);
+            }
         }
 
         /// <summary>
@@ -280,6 +292,20 @@ namespace System.Web.Http
             }
         }
 
+        /// <summary>
+        /// Adds the given <paramref name="resource"/> to a list of resources that will be disposed once the configuration is disposed.
+        /// </summary>
+        /// <param name="resource">The resource to dispose. Can be <c>null</c>.</param>
+        internal void RegisterForDispose(IDisposable resource)
+        {
+            if (resource == null)
+            {
+                return;
+            }
+
+            _resourcesToDispose.Add(resource);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -296,6 +322,11 @@ namespace System.Web.Http
                     _routes.Dispose();
                     Services.Dispose();
                     DependencyResolver.Dispose();
+
+                    foreach (IDisposable resource in _resourcesToDispose)
+                    {
+                        resource.Dispose();
+                    }
                 }
             }
         }

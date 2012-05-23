@@ -58,8 +58,17 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            IEnumerable<ModelValidatorProvider> validatorProviders = GetValidatorProviders(actionContext);
-            return validatorProviders.SelectMany(provider => provider.GetValidators(metadata, validatorProviders));
+            HttpConfiguration configuration = actionContext.ControllerContext.Configuration;
+            if (configuration.Services.IsSingleService(typeof(ModelValidatorCache)))
+            {
+                ModelValidatorCache validatorCache = configuration.Services.GetModelValidatorCache();
+                return validatorCache.GetValidators(metadata);
+            }
+            else
+            {
+                // slow path: there is no validator cache on the configuration
+                return metadata.GetValidators(actionContext.GetValidatorProviders());
+            }
         }
 
         public static bool TryBindStrongModel<TModel>(this HttpActionContext actionContext, ModelBindingContext parentBindingContext, string propertyName, ModelMetadataProvider metadataProvider, out TModel model)

@@ -12,10 +12,7 @@ namespace System.Web.Http.Validation
 {
     public sealed class ModelValidationNode
     {
-        // This is a cache of the validators. 
-        // Use an array instead of IEnumerable to ensure that we've actually computed the result. 
-        // Array also reduces the memory footprint of the cache compared to other collections.
-        private ModelValidator[] _validators; 
+        private IEnumerable<ModelValidator> _validators; 
 
         public ModelValidationNode(ModelMetadata modelMetadata, string modelStateKey)
             : this(modelMetadata, modelStateKey, null)
@@ -169,7 +166,7 @@ namespace System.Web.Http.Validation
 
                 if (modelState.IsValidField(propertyKeyRoot))
                 {
-                    foreach (ModelValidator propertyValidator in propertyMetadata.GetValidators(actionContext.GetValidatorProviders()))
+                    foreach (ModelValidator propertyValidator in actionContext.GetValidators(propertyMetadata))
                     {
                         foreach (ModelValidationResult propertyResult in propertyValidator.Validate(propertyMetadata, model))
                         {
@@ -199,10 +196,7 @@ namespace System.Web.Http.Validation
                 return;
             }
 
-            if (_validators == null)
-            {
-                Interlocked.Exchange(ref _validators, ModelMetadata.GetValidators(actionContext.GetValidatorProviders()).ToArray());
-            }
+            _validators = actionContext.GetValidators(ModelMetadata);
 
             object container = TryConvertContainerToMetadataType(parentNode);
             foreach (ModelValidator validator in _validators)

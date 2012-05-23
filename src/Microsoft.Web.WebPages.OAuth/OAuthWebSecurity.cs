@@ -96,7 +96,7 @@ namespace Microsoft.Web.WebPages.OAuth
         /// <param name="clientSecret">The client secret.</param>
         public static void RegisterMicrosoftClient(string clientId, string clientSecret)
         {
-            RegisterMicrosoftClient(clientId, clientSecret, displayName: "Microsoft account");
+            RegisterMicrosoftClient(clientId, clientSecret, displayName: "Microsoft");
         }
 
         /// <summary>

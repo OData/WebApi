@@ -133,11 +133,7 @@ namespace System.Web.WebPages
 
         public virtual void ProcessRequest(HttpContext context)
         {
-            // Dev10 bug 921943 - Plan9 should lower its permissions if operating in legacy CAS
-            SecurityUtil.ProcessInApplicationTrust(() =>
-            {
-                ProcessRequestInternal(context);
-            });
+            ProcessRequestInternal(context);
         }
 
         internal void ProcessRequestInternal(HttpContext context)

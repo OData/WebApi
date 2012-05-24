@@ -160,7 +160,6 @@
     <Compile Include="MvcWebRazorHostFactory.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="RemoteAttribute.cs" />
-    <Compile Include="SecurityUtil.cs" />
     <Compile Include="SingleServiceResolver.cs" />
     <Compile Include="Razor\StartPageLookupDelegate.cs" />
     <Compile Include="TagBuilderExtensions.cs" />

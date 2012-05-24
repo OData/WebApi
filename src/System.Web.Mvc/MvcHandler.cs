@@ -68,71 +68,65 @@ namespace System.Web.Mvc
 
         protected internal virtual IAsyncResult BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, object state)
         {
-            return SecurityUtil.ProcessInApplicationTrust(() =>
+            IController controller;
+            IControllerFactory factory;
+            ProcessRequestInit(httpContext, out controller, out factory);
+
+            IAsyncController asyncController = controller as IAsyncController;
+            if (asyncController != null)
             {
-                IController controller;
-                IControllerFactory factory;
-                ProcessRequestInit(httpContext, out controller, out factory);
-
-                IAsyncController asyncController = controller as IAsyncController;
-                if (asyncController != null)
+                // asynchronous controller
+                BeginInvokeDelegate beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState)
                 {
-                    // asynchronous controller
-                    BeginInvokeDelegate beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState)
+                    try
                     {
-                        try
-                        {
-                            return asyncController.BeginExecute(RequestContext, asyncCallback, asyncState);
-                        }
-                        catch
-                        {
-                            factory.ReleaseController(asyncController);
-                            throw;
-                        }
-                    };
-
-                    EndInvokeDelegate endDelegate = delegate(IAsyncResult asyncResult)
+                        return asyncController.BeginExecute(RequestContext, asyncCallback, asyncState);
+                    }
+                    catch
                     {
-                        try
-                        {
-                            asyncController.EndExecute(asyncResult);
-                        }
-                        finally
-                        {
-                            factory.ReleaseController(asyncController);
-                        }
-                    };
+                        factory.ReleaseController(asyncController);
+                        throw;
+                    }
+                };
 
-                    SynchronizationContext syncContext = SynchronizationContextUtil.GetSynchronizationContext();
-                    AsyncCallback newCallback = AsyncUtil.WrapCallbackForSynchronizedExecution(callback, syncContext);
-                    return AsyncResultWrapper.Begin(newCallback, state, beginDelegate, endDelegate, _processRequestTag);
-                }
-                else
+                EndInvokeDelegate endDelegate = delegate(IAsyncResult asyncResult)
                 {
-                    // synchronous controller
-                    Action action = delegate
+                    try
                     {
-                        try
-                        {
-                            controller.Execute(RequestContext);
-                        }
-                        finally
-                        {
-                            factory.ReleaseController(controller);
-                        }
-                    };
+                        asyncController.EndExecute(asyncResult);
+                    }
+                    finally
+                    {
+                        factory.ReleaseController(asyncController);
+                    }
+                };
 
-                    return AsyncResultWrapper.BeginSynchronous(callback, state, action, _processRequestTag);
-                }
-            });
+                SynchronizationContext syncContext = SynchronizationContextUtil.GetSynchronizationContext();
+                AsyncCallback newCallback = AsyncUtil.WrapCallbackForSynchronizedExecution(callback, syncContext);
+                return AsyncResultWrapper.Begin(newCallback, state, beginDelegate, endDelegate, _processRequestTag);
+            }
+            else
+            {
+                // synchronous controller
+                Action action = delegate
+                {
+                    try
+                    {
+                        controller.Execute(RequestContext);
+                    }
+                    finally
+                    {
+                        factory.ReleaseController(controller);
+                    }
+                };
+
+                return AsyncResultWrapper.BeginSynchronous(callback, state, action, _processRequestTag);
+            }
         }
 
         protected internal virtual void EndProcessRequest(IAsyncResult asyncResult)
         {
-            SecurityUtil.ProcessInApplicationTrust(() =>
-            {
-                AsyncResultWrapper.End(asyncResult, _processRequestTag);
-            });
+            AsyncResultWrapper.End(asyncResult, _processRequestTag);
         }
 
         private static string GetMvcVersionString()
@@ -151,21 +145,18 @@ namespace System.Web.Mvc
 
         protected internal virtual void ProcessRequest(HttpContextBase httpContext)
         {
-            SecurityUtil.ProcessInApplicationTrust(() =>
-            {
-                IController controller;
-                IControllerFactory factory;
-                ProcessRequestInit(httpContext, out controller, out factory);
+            IController controller;
+            IControllerFactory factory;
+            ProcessRequestInit(httpContext, out controller, out factory);
 
-                try
-                {
-                    controller.Execute(RequestContext);
-                }
-                finally
-                {
-                    factory.ReleaseController(controller);
-                }
-            });
+            try
+            {
+                controller.Execute(RequestContext);
+            }
+            finally
+            {
+                factory.ReleaseController(controller);
+            }
         }
 
         private void ProcessRequestInit(HttpContextBase httpContext, out IController controller, out IControllerFactory factory)

@@ -176,7 +176,6 @@
     <Compile Include="Mvc\TagRenderMode.cs" />
     <Compile Include="StartPage.cs" />
     <Compile Include="RequestResourceTracker.cs" />
-    <Compile Include="SecurityUtil.cs" />
     <Compile Include="DynamicHttpApplicationState.cs" />
     <Compile Include="DynamicPageDataDictionary.cs" />
     <Compile Include="Html\HtmlHelper.Checkbox.cs" />

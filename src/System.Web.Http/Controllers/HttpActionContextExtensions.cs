@@ -59,15 +59,15 @@ namespace System.Web.Http.Controllers
             }
 
             HttpConfiguration configuration = actionContext.ControllerContext.Configuration;
-            if (configuration.Services.IsSingleService(typeof(ModelValidatorCache)))
-            {
-                ModelValidatorCache validatorCache = configuration.Services.GetModelValidatorCache();
-                return validatorCache.GetValidators(metadata);
-            }
-            else
+            ModelValidatorCache validatorCache = configuration.Services.GetModelValidatorCache();
+            if (validatorCache == null)
             {
                 // slow path: there is no validator cache on the configuration
                 return metadata.GetValidators(actionContext.GetValidatorProviders());
+            }
+            else
+            {
+                return validatorCache.GetValidators(metadata);
             }
         }
 

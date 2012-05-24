@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -35,25 +36,7 @@ namespace System.Web.Mvc
         internal static DataAnnotationsModelValidationFactory DefaultAttributeFactory =
             (metadata, context, attribute) => new DataAnnotationsModelValidator(metadata, context, attribute);
 
-        internal static Dictionary<Type, DataAnnotationsModelValidationFactory> AttributeFactories = new Dictionary<Type, DataAnnotationsModelValidationFactory>()
-        {
-            {
-                typeof(RangeAttribute),
-                (metadata, context, attribute) => new RangeAttributeAdapter(metadata, context, (RangeAttribute)attribute)
-                },
-            {
-                typeof(RegularExpressionAttribute),
-                (metadata, context, attribute) => new RegularExpressionAttributeAdapter(metadata, context, (RegularExpressionAttribute)attribute)
-                },
-            {
-                typeof(RequiredAttribute),
-                (metadata, context, attribute) => new RequiredAttributeAdapter(metadata, context, (RequiredAttribute)attribute)
-                },
-            {
-                typeof(StringLengthAttribute),
-                (metadata, context, attribute) => new StringLengthAttributeAdapter(metadata, context, (StringLengthAttribute)attribute)
-                },
-        };
+        internal static Dictionary<Type, DataAnnotationsModelValidationFactory> AttributeFactories = BuildAttributeFactoriesDictionary();
 
         // Factories for IValidatableObject models
 
@@ -373,5 +356,55 @@ namespace System.Web.Mvc
         }
 
         #endregion
+
+        private static Dictionary<Type, DataAnnotationsModelValidationFactory> BuildAttributeFactoriesDictionary()
+        {
+            var dict = new Dictionary<Type, DataAnnotationsModelValidationFactory>();
+
+            AddValidationAttributeAdapter(dict, typeof(RangeAttribute),
+                (metadata, context, attribute) => new RangeAttributeAdapter(metadata, context, (RangeAttribute)attribute));
+
+            AddValidationAttributeAdapter(dict, typeof(RegularExpressionAttribute),
+                (metadata, context, attribute) => new RegularExpressionAttributeAdapter(metadata, context, (RegularExpressionAttribute)attribute));
+
+            AddValidationAttributeAdapter(dict, typeof(RequiredAttribute),
+                (metadata, context, attribute) => new RequiredAttributeAdapter(metadata, context, (RequiredAttribute)attribute));
+
+            AddValidationAttributeAdapter(dict, typeof(StringLengthAttribute),
+                (metadata, context, attribute) => new StringLengthAttributeAdapter(metadata, context, (StringLengthAttribute)attribute));
+
+            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.MembershipPasswordAttributeType,
+                    (metadata, context, attribute) => new MembershipPasswordAttributeAdapter(metadata, context, attribute));
+
+            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.CompareAttributeType,
+                    (metadata, context, attribute) => new CompareAttributeAdapter(metadata, context, attribute));
+
+            AddValidationAttributeAdapter(dict, ValidationAttributeHelpers.FileExtensionsAttributeType,
+                   (metadata, context, attribute) => new FileExtensionsAttributeAdapter(metadata, context, attribute));
+
+            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.CreditCardAttributeType, "creditcard");
+            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.EmailAddressAttributeType, "email");
+            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.PhoneAttributeType, "phone");
+            AddDataTypeAttributeAdapter(dict, ValidationAttributeHelpers.UrlAttributeType, "url");
+
+            return dict;
+        }
+
+        private static void AddValidationAttributeAdapter(Dictionary<Type, DataAnnotationsModelValidationFactory> dictionary, Type validataionAttributeType, DataAnnotationsModelValidationFactory factory)
+        {
+            Contract.Assert(dictionary != null);
+            if (validataionAttributeType != null)
+            {
+                dictionary.Add(validataionAttributeType, factory);
+            }
+        }
+
+        private static void AddDataTypeAttributeAdapter(Dictionary<Type, DataAnnotationsModelValidationFactory> dictionary, Type attributeType, string ruleName)
+        {
+            AddValidationAttributeAdapter(
+                dictionary,
+                attributeType,
+                (metadata, context, attribute) => new DataTypeAttributeAdapter(metadata, context, (DataTypeAttribute)attribute, ruleName));
+        }
     }
 }

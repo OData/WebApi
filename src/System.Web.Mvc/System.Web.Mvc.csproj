@@ -92,6 +92,10 @@
     <Compile Include="CachedDataAnnotationsModelMetadataProvider.cs" />
     <Compile Include="CachedModelMetadata`1.cs" />
     <Compile Include="CancellationTokenModelBinder.cs" />
+    <Compile Include="CompareAttributeAdapter.cs" />
+    <Compile Include="DataTypeAttributeAdapter.cs" />
+    <Compile Include="FileExtensionsAttributeAdapter.cs" />
+    <Compile Include="MembershipPasswordAttributeAdapter.cs" />
     <Compile Include="CompareAttribute.cs" />
     <Compile Include="ChildActionValueProvider.cs" />
     <Compile Include="ChildActionValueProviderFactory.cs" />
@@ -164,6 +168,7 @@
     <Compile Include="Razor\StartPageLookupDelegate.cs" />
     <Compile Include="TagBuilderExtensions.cs" />
     <Compile Include="UrlRewriterHelper.cs" />
+    <Compile Include="ValidationAttributeHelpers.cs" />
     <Compile Include="ViewStartPage.cs" />
     <Compile Include="WebViewPage.cs" />
     <Compile Include="WebViewPage`1.cs" />

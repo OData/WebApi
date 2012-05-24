@@ -148,6 +148,7 @@
     <Compile Include="Instrumentation\PageInstrumentationServiceAdapter.cs" />
     <Compile Include="Instrumentation\PositionTagged.cs" />
     <Compile Include="Mvc\ModelClientValidationEqualToRule.cs" />
+    <Compile Include="Mvc\ModelClientValidationMembershipPasswordRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRangeRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRegexRule.cs" />
     <Compile Include="Mvc\ModelClientValidationRemoteRule.cs" />

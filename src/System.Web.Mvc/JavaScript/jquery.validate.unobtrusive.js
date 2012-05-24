@@ -304,6 +304,15 @@
         return (match && (match.index === 0) && (match[0].length === value.length));
     });
 
+    $jQval.addMethod("nonalphamin", function (value, element, nonalphamin) {
+        var match;
+        if (nonalphamin) {
+            match = value.match(/\W/g);
+            match = match && match.length >= nonalphamin;
+        }
+        return match;
+    });
+
     adapters.addSingleVal("accept", "exts").addSingleVal("regex", "pattern");
     adapters.addBool("creditcard").addBool("date").addBool("digits").addBool("email").addBool("number").addBool("url");
     adapters.addMinMax("length", "minlength", "maxlength", "rangelength").addMinMax("range", "min", "max", "range");
@@ -337,6 +346,17 @@
         });
 
         setValidationValues(options, "remote", value);
+    });
+    adapters.add("password", ["min", "nonalphamin", "regex"], function (options) {
+        if (options.params.min) {
+            setValidationValues(options, "minlength", options.params.min);
+        }
+        if (options.params.nonalphamin) {
+            setValidationValues(options, "nonalphamin", options.params.nonalphamin);
+        }
+        if (options.params.regex) {
+            setValidationValues(options, "regex", options.params.regex);
+        }
     });
 
     $(function () {

@@ -1,26 +1,59 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
+using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {
     public class GlobalFilterCollectionTest
     {
+        private GlobalFilterCollection _collection = new GlobalFilterCollection();
+        private object _filterInstance = GetFilterInstance<IActionFilter>();
+
+        [Theory]
+        [InlineData("string")]
+        [InlineData(42)]
+        [CLSCompliant(false)]
+        public void AddRejectsNonFilterInstances(object instance)
+        {
+            // Act + Assert
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _collection.Add(instance);
+            }, "The given filter instance must implement one or more of the following filter interfaces: IAuthorizationFilter, IActionFilter, IResultFilter, IExceptionFilter.");
+        }
+
+        [Fact]
+        public void AddAcceptsFilterInstances()
+        {
+            // Arrange
+            var filters = new object[] {
+                GetFilterInstance<IActionFilter>(),
+                GetFilterInstance<IAuthorizationFilter>(),
+                GetFilterInstance<IResultFilter>(),
+                GetFilterInstance<IExceptionFilter>() 
+            }.ToList();
+
+            // Act
+            filters.ForEach(f => _collection.Add(f));
+
+            // Assert
+            Assert.Equal(filters, _collection.Select(i => i.Instance));
+        }
+
         [Fact]
         public void AddPlacesFilterInGlobalScope()
         {
-            // Arrange
-            var filterInstance = new object();
-            var collection = new GlobalFilterCollection();
-
             // Act
-            collection.Add(filterInstance);
+            _collection.Add(_filterInstance);
 
             // Assert
-            Filter filter = Assert.Single(collection);
-            Assert.Same(filterInstance, filter.Instance);
+            Filter filter = Assert.Single(_collection);
+            Assert.Same(_filterInstance, filter.Instance);
             Assert.Equal(FilterScope.Global, filter.Scope);
             Assert.Equal(-1, filter.Order);
         }
@@ -28,16 +61,12 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void AddWithOrderPlacesFilterInGlobalScope()
         {
-            // Arrange
-            var filterInstance = new object();
-            var collection = new GlobalFilterCollection();
-
             // Act
-            collection.Add(filterInstance, 42);
+            _collection.Add(_filterInstance, 42);
 
             // Assert
-            Filter filter = Assert.Single(collection);
-            Assert.Same(filterInstance, filter.Instance);
+            Filter filter = Assert.Single(_collection);
+            Assert.Same(_filterInstance, filter.Instance);
             Assert.Equal(FilterScope.Global, filter.Scope);
             Assert.Equal(42, filter.Order);
         }
@@ -46,12 +75,10 @@ namespace System.Web.Mvc.Test
         public void ContainsFindsFilterByInstance()
         {
             // Arrange
-            var filterInstance = new object();
-            var collection = new GlobalFilterCollection();
-            collection.Add(filterInstance);
+            _collection.Add(_filterInstance);
 
             // Act
-            bool result = collection.Contains(filterInstance);
+            bool result = _collection.Contains(_filterInstance);
 
             // Assert
             Assert.True(result);
@@ -61,15 +88,13 @@ namespace System.Web.Mvc.Test
         public void RemoveDeletesFilterByInstance()
         {
             // Arrange
-            var filterInstance = new object();
-            var collection = new GlobalFilterCollection();
-            collection.Add(filterInstance);
+            _collection.Add(_filterInstance);
 
             // Act
-            collection.Remove(filterInstance);
+            _collection.Remove(_filterInstance);
 
             // Assert
-            Assert.Empty(collection);
+            Assert.Empty(_collection);
         }
 
         [Fact]
@@ -78,17 +103,20 @@ namespace System.Web.Mvc.Test
             // Arrange
             var context = new ControllerContext();
             var descriptor = new Mock<ActionDescriptor>().Object;
-            var filterInstance = new object();
-            var collection = new GlobalFilterCollection();
-            collection.Add(filterInstance);
-            var provider = (IFilterProvider)collection;
+            _collection.Add(_filterInstance);
+            var provider = (IFilterProvider)_collection;
 
             // Act
             IEnumerable<Filter> result = provider.GetFilters(context, descriptor);
 
             // Assert
             Filter filter = Assert.Single(result);
-            Assert.Same(filterInstance, filter.Instance);
+            Assert.Same(_filterInstance, filter.Instance);
+        }
+
+        private static TFilter GetFilterInstance<TFilter>() where TFilter : class
+        {
+            return new Mock<TFilter>().Object;
         }
     }
 }

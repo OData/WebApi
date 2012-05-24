@@ -27,6 +27,7 @@ namespace System.Web.Mvc
 
         private void AddInternal(object filter, int? order)
         {
+            ValidateFilterInstance(filter);
             _filters.Add(new Filter(filter, FilterScope.Global, order));
         }
 
@@ -58,6 +59,15 @@ namespace System.Web.Mvc
         public void Remove(object filter)
         {
             _filters.RemoveAll(f => f.Instance == filter);
+        }
+
+        private static void ValidateFilterInstance(object instance)
+        {
+            if (instance != null &&
+                !(instance is IActionFilter || instance is IAuthorizationFilter || instance is IExceptionFilter || instance is IResultFilter))
+            {
+                throw new InvalidOperationException(Properties.MvcResources.GlobalFilterCollection_UnsupportedFilterInstance);
+            }
         }
     }
 }

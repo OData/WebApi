@@ -436,4 +436,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="JsonValueProviderFactory_RequestTooLarge" xml:space="preserve">
     <value>The JSON request was too large to be deserialized.</value>
   </data>
+  <data name="GlobalFilterCollection_UnsupportedFilterInstance" xml:space="preserve">
+    <value>The given filter instance must implement one or more of the following filter interfaces: IAuthorizationFilter, IActionFilter, IResultFilter, IExceptionFilter.</value>
+  </data>
 </root>

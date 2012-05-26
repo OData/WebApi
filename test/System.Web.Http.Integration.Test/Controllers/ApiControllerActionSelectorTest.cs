@@ -19,7 +19,6 @@ namespace System.Web.Http
         [InlineData("GET", "Test/3?name=mario&ssn=123456", "GetUserByNameIdAndSsn")]
         [InlineData("GET", "Test?name=mario&ssn=123456", "GetUserByNameAndSsn")]
         [InlineData("GET", "Test?name=mario&ssn=123456&age=3", "GetUserByNameAgeAndSsn")]
-        [InlineData("GET", "Test/4?name=mario&age=20", "GetUserByNameAndId")]
         [InlineData("GET", "Test/5?random=9", "GetUser")]
         [InlineData("Post", "Test", "PostUser")]
         [InlineData("Post", "Test?name=mario&age=10", "PostUserByNameAndAge")]

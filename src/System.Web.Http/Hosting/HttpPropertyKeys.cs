@@ -2,7 +2,6 @@
 
 using System.Net.Http;
 using System.Threading;
-using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 
 namespace System.Web.Http.Hosting
@@ -58,5 +57,10 @@ namespace System.Web.Http.Hosting
         /// Provides a key that indicates whether the request originates from a local address
         /// </summary>
         public static readonly string IsLocalKey = "MS_IsLocal";
+
+        /// <summary>
+        /// Provides a key for the parsed query string stored in <see cref="HttpRequestMessage.Properties"/>.
+        /// </summary>
+        public static readonly string RequestQueryNameValuePairsKey = "MS_QueryNameValuePairs";
     }
 }

@@ -86,7 +86,7 @@ namespace System.Web.Http.Controllers
 
             private readonly ReflectedHttpActionDescriptor[] _actionDescriptors;
 
-            private readonly IDictionary<ReflectedHttpActionDescriptor, IEnumerable<string>> _actionParameterNames = new Dictionary<ReflectedHttpActionDescriptor, IEnumerable<string>>();
+            private readonly IDictionary<ReflectedHttpActionDescriptor, string[]> _actionParameterNames = new Dictionary<ReflectedHttpActionDescriptor, string[]>();
 
             private readonly ILookup<string, ReflectedHttpActionDescriptor> _actionNameMapping;
 
@@ -123,7 +123,7 @@ namespace System.Web.Http.Controllers
                         actionDescriptor,
                         actionBinding.ParameterBindings
                             .Where(binding => !binding.Descriptor.IsOptional && TypeHelper.IsSimpleUnderlyingType(binding.Descriptor.ParameterType) && binding.WillReadUri())
-                            .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName));
+                            .Select(binding => binding.Descriptor.Prefix ?? binding.Descriptor.ParameterName).ToArray());
                 }
 
                 _actionNameMapping = _actionDescriptors.ToLookup(actionDesc => actionDesc.ActionName, StringComparer.OrdinalIgnoreCase);
@@ -187,7 +187,7 @@ namespace System.Web.Http.Controllers
                 // If there are multiple candidates, then apply overload resolution logic.
                 if (actionsFoundByHttpMethods.Length > 1)
                 {
-                    actionsFoundByHttpMethods = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods).ToArray();
+                    actionsFoundByHttpMethods = FindActionUsingRouteAndQueryParameters(controllerContext, actionsFoundByHttpMethods, useActionName).ToArray();
                 }
 
                 List<ReflectedHttpActionDescriptor> selectedActions = RunSelectionFilters(controllerContext, actionsFoundByHttpMethods);
@@ -215,53 +215,64 @@ namespace System.Web.Http.Controllers
                 return new LookupAdapter() { Source = _actionNameMapping };
             }
 
-            private IEnumerable<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, IEnumerable<ReflectedHttpActionDescriptor> actionsFound)
+            private IEnumerable<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, IEnumerable<ReflectedHttpActionDescriptor> actionsFound, bool hasActionRouteKey)
             {
-                // TODO, DevDiv 320655, improve performance of this method.
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
-                IEnumerable<string> routeParameterNames = routeValues.Select(route => route.Key)
-                    .Where(key =>
-                           !String.Equals(key, ControllerRouteKey, StringComparison.OrdinalIgnoreCase) &&
-                           !String.Equals(key, ActionRouteKey, StringComparison.OrdinalIgnoreCase));
+                HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
+                routeParameterNames.Remove(ControllerRouteKey);
+                if (hasActionRouteKey)
+                {
+                    routeParameterNames.Remove(ActionRouteKey);
+                }
 
-                IEnumerable<string> queryParameterNames = controllerContext.Request.RequestUri.ParseQueryString().AllKeys;
-                bool hasRouteParameters = routeParameterNames.Any();
-                bool hasQueryParameters = queryParameterNames.Any();
+                HttpRequestMessage request = controllerContext.Request;
+                Uri requestUri = request.RequestUri;
+                bool hasQueryParameters = requestUri != null && !String.IsNullOrEmpty(requestUri.Query);
+                bool hasRouteParameters = routeParameterNames.Count != 0;
 
                 if (hasRouteParameters || hasQueryParameters)
                 {
-                    // refine the results making sure that action parameters is a subset of route parameters and query parameters
+                    var combinedParameterNames = new HashSet<string>(routeParameterNames, StringComparer.OrdinalIgnoreCase);
+                    if (hasQueryParameters)
+                    {
+                        foreach (var queryNameValuePair in request.GetQueryNameValuePairs())
+                        {
+                            combinedParameterNames.Add(queryNameValuePair.Key);
+                        }
+                    }
+
+                    // action parameters is a subset of route parameters and query parameters
+                    actionsFound = actionsFound.Where(descriptor => IsSubset(_actionParameterNames[descriptor], combinedParameterNames));
+
                     if (actionsFound.Count() > 1)
                     {
-                        IEnumerable<string> combinedParameterNames = queryParameterNames.Union(routeParameterNames);
-
-                        // action parameters is a subset of route parameters and query parameters
-                        actionsFound = actionsFound.Where(descriptor => !_actionParameterNames[descriptor].Except(combinedParameterNames, StringComparer.OrdinalIgnoreCase).Any());
-
-                        // select the results with the longest parameter match 
-                        if (actionsFound.Count() > 1)
-                        {
-                            actionsFound = actionsFound
-                                .GroupBy(descriptor => _actionParameterNames[descriptor].Count())
-                                .OrderByDescending(g => g.Key)
-                                .First();
-                        }
-
-                        // make sure that route parameters take precedence over query parameters by picking actions with parameters that intersects with route parameters
-                        // e.g. when you have to choose between Get(id) and Get(name) for request /4?name=user where 4 correspond to route parameter {id}, Get(id) would be a better choice.
-                        if (actionsFound.Count() > 1 && hasRouteParameters && hasQueryParameters)
-                        {
-                            actionsFound = actionsFound.Where(descriptor => routeParameterNames.Intersect(_actionParameterNames[descriptor], StringComparer.OrdinalIgnoreCase).Any());
-                        }
+                        // select the results that match the most number of required parameters 
+                        actionsFound = actionsFound
+                            .GroupBy(descriptor => _actionParameterNames[descriptor].Length)
+                            .OrderByDescending(g => g.Key)
+                            .First();
                     }
                 }
                 else
                 {
                     // return actions with no parameters
-                    actionsFound = actionsFound.Where(descriptor => !_actionParameterNames[descriptor].Any());
+                    actionsFound = actionsFound.Where(descriptor => _actionParameterNames[descriptor].Length == 0);
                 }
 
                 return actionsFound;
+            }
+
+            private static bool IsSubset(string[] actionParameters, HashSet<string> routeAndQueryParameters)
+            {
+                foreach (string actionParameter in actionParameters)
+                {
+                    if (!routeAndQueryParameters.Contains(actionParameter))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
             private static List<ReflectedHttpActionDescriptor> RunSelectionFilters(HttpControllerContext controllerContext, IEnumerable<HttpActionDescriptor> descriptorsFound)

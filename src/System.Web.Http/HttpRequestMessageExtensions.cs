@@ -3,13 +3,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Dependencies;
-using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
@@ -566,6 +566,39 @@ namespace System.Net.Http
             }
 
             return correlationId;
+        }
+
+        /// <summary>
+        /// Retrieves the parsed query string as a collection of key-value pairs.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/></param>
+        /// <returns>The query string as a collection of key-value pairs.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "NameValuePairsValueProvider takes an IEnumerable<KeyValuePair<string, string>>")]
+        public static IEnumerable<KeyValuePair<string, string>> GetQueryNameValuePairs(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            Uri uri = request.RequestUri;
+
+            // Unit tests may not always provide a Uri in the request
+            if (uri == null || String.IsNullOrEmpty(uri.Query))
+            {
+                return Enumerable.Empty<KeyValuePair<string, string>>();
+            }
+
+            IEnumerable<KeyValuePair<string, string>> queryString;
+            if (!request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out queryString))
+            {
+                // Uri --> FormData --> NVC
+                FormDataCollection formData = new FormDataCollection(uri);
+                queryString = formData.GetJQueryNameValuePairs();
+                request.Properties.Add(HttpPropertyKeys.RequestQueryNameValuePairsKey, queryString);
+            }
+
+            return queryString;
         }
     }
 }

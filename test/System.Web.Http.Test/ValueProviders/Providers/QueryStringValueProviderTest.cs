@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Xunit;
+using System.Net.Http;
 
 namespace System.Web.Http.ValueProviders.Providers
 {
@@ -10,8 +11,9 @@ namespace System.Web.Http.ValueProviders.Providers
     {
         private NameValueCollection ParseQueryString(Uri uri)
         {
+            HttpRequestMessage request = new HttpRequestMessage { RequestUri = uri };
             NameValueCollection nameValuePairs = new NameValueCollection();
-            foreach (KeyValuePair<string, string> keyValuePair in QueryStringValueProvider.ParseQueryString(uri))
+            foreach (KeyValuePair<string, string> keyValuePair in request.GetQueryNameValuePairs())
             {
                 nameValuePairs.Add(keyValuePair.Key, keyValuePair.Value);
             }

@@ -53,7 +53,7 @@ namespace System.Web.Mvc.Async.Test
 
             // Assert
             Assert.Equal(innerResult.AsyncState, outerResult.AsyncState);
-            Assert.Equal(innerResult.AsyncWaitHandle, outerResult.AsyncWaitHandle);
+            Assert.Null(outerResult.AsyncWaitHandle);
             Assert.Equal(innerResult.CompletedSynchronously, outerResult.CompletedSynchronously);
             Assert.Equal(innerResult.IsCompleted, outerResult.IsCompleted);
         }
@@ -223,6 +223,7 @@ Parameter name: asyncResult");
             // wait for the timeout
             waitHandle.WaitOne();
 
+            Assert.True(asyncResult.IsCompleted);
             Assert.Throws<TimeoutException>(
                 delegate { AsyncResultWrapper.End(asyncResult); });
         }

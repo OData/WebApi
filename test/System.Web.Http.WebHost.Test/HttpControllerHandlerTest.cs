@@ -614,6 +614,25 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
+        public void ConvertResponse_Returns_InternalServerError_And_No_Content_For_Null_HttpResponseMessage()
+        {
+            // Arrange
+            MemoryStream memoryStream = new MemoryStream();
+            Mock<HttpContextBase> contextMock = CreateMockHttpContextBaseForResponse(memoryStream);
+            HttpResponseBase responseBase = contextMock.Object.Response;
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
+            Task task = HttpControllerHandler.ConvertResponse(contextMock.Object, response: null, request: new HttpRequestMessage());
+            task.Wait();
+
+            // Assert
+            Assert.Equal<int>((int)HttpStatusCode.InternalServerError, responseBase.StatusCode);
+            Assert.Equal(0, memoryStream.Length);
+            Assert.Null(responseBase.Headers["Content-Type"]);
+        }
+
+        [Fact]
         public void WriteStreamedErrorResponseAsync_Aborts_When_Formatter_Write_Throws_Immediately()
         {
             // Arrange

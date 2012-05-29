@@ -195,7 +195,7 @@ namespace System.Web.Http.SelfHost
                 channelContext.Server.SendAsync(request, channelContext.Server._cancellationTokenSource.Token)
                     .Then(response =>
                     {
-                        responseMessage = response ?? request.CreateResponse(HttpStatusCode.OK);
+                        responseMessage = response ?? request.CreateResponse(HttpStatusCode.InternalServerError);
                     })
                     .Catch(info =>
                     {

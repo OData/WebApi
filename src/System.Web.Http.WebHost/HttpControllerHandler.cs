@@ -257,8 +257,14 @@ namespace System.Web.Http.WebHost
         internal static Task ConvertResponse(HttpContextBase httpContextBase, HttpResponseMessage response, HttpRequestMessage request)
         {
             Contract.Assert(httpContextBase != null);
-            Contract.Assert(response != null);
             Contract.Assert(request != null);
+
+            // A null response creates a 500 with no content
+            if (response == null)
+            {
+                CreateEmptyErrorResponse(httpContextBase.Response);
+                return TaskHelpers.Completed();
+            }
 
             CopyResponseStatusAndHeaders(httpContextBase, response);
 

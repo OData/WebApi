@@ -78,6 +78,7 @@
     <Compile Include="HttpSelfHostServerTest.cs" />
     <Compile Include="MaxHttpCollectionKeyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="HttpSelfHostResponseTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

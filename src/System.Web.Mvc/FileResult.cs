@@ -54,7 +54,7 @@ namespace System.Web.Mvc
 
         protected abstract void WriteFile(HttpResponseBase response);
 
-        private static class ContentDispositionUtil
+        internal static class ContentDispositionUtil
         {
             private const string HexDigits = "0123456789ABCDEF";
 
@@ -94,17 +94,26 @@ namespace System.Web.Mvc
 
             public static string GetHeaderValue(string fileName)
             {
-                try
+                // If fileName contains any Unicode characters, encode according
+                // to RFC 2231 (with clarifications from RFC 5987)
+                foreach (char c in fileName)
                 {
-                    // first, try using the .NET built-in generator
-                    ContentDisposition disposition = new ContentDisposition() { FileName = fileName };
-                    return disposition.ToString();
+                    if ((int)c > 127)
+                    {
+                        return CreateRfc2231HeaderValue(fileName);
+                    }
                 }
-                catch (FormatException)
-                {
-                    // otherwise, fall back to RFC 2231 extensions generator
-                    return CreateRfc2231HeaderValue(fileName);
-                }
+
+                // Knowing there are no Unicode characters in this fileName, rely on
+                // ContentDisposition.ToString() to encode properly.
+                // In .Net 4.0, ContentDisposition.ToString() throws FormatException if
+                // the file name contains Unicode characters.
+                // In .Net 4.5, ContentDisposition.ToString() no longer throws FormatException
+                // if it contains Unicode, and it will not encode Unicode as we require here.
+                // The Unicode test above is identical to the 4.0 FormatException test,
+                // allowing this helper to give the same results in 4.0 and 4.5.         
+                ContentDisposition disposition = new ContentDisposition() { FileName = fileName };
+                return disposition.ToString();
             }
 
             // Application of RFC 2231 Encoding to Hypertext Transfer Protocol (HTTP) Header Fields, sec. 3.2

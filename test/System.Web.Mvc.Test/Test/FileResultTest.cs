@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Mime;
+using System.Text;
 using System.Web.TestUtil;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
@@ -59,7 +61,7 @@ namespace System.Web.Mvc.Test
             mockControllerContext.Verify();
         }
 
-        [Fact(Skip="Pending fix to DevDiv 356181 -- 4.5 changed ContentDisposition.ToString()")]
+        [Fact]
         public void ContentDispositionHeaderIsEncodedCorrectlyForUnicodeCharacters()
         {
             // Arrange
@@ -137,6 +139,38 @@ namespace System.Web.Mvc.Test
 
             // Act & assert
             MemberHelper.TestStringProperty(result, "FileDownloadName", String.Empty);
+        }
+
+        [Theory]
+        [InlineData("09aAzZ", "attachment; filename=09aAzZ")]
+        [InlineData(" ", "attachment; filename=\" \"")]
+        [InlineData("a b", "attachment; filename=\"a b\"")]
+        [InlineData("a\tb", "attachment; filename=\"a\tb\"")]
+        [InlineData("a\nb", "attachment; filename=\"a\\\nb\"")]
+        [InlineData("a.b", "attachment; filename=a.b")]
+        [InlineData("-", "attachment; filename=-")]
+        [InlineData("_", "attachment; filename=_")]
+        [InlineData(":", "attachment; filename=\":\"")]
+        [InlineData(": :", "attachment; filename=\": :\"")]
+        [InlineData("~", "attachment; filename=~")]
+        [InlineData("$", "attachment; filename=$")]
+        [InlineData("&", "attachment; filename=&")]
+        [InlineData("+", "attachment; filename=+")]
+        [InlineData("@", "attachment; filename=\"@\"")]
+        [InlineData("\"", "attachment; filename=\"\\\"\"")]
+        [InlineData("#", "attachment; filename=#")]
+        [InlineData("résumé.txt", "attachment; filename*=UTF-8''r%C3%A9sum%C3%A9.txt")]
+        [InlineData("Δ", "attachment; filename*=UTF-8''%CE%94")]
+        [InlineData("Δ\t", "attachment; filename*=UTF-8''%CE%94%09")]
+        [InlineData("ABCXYZabcxyz012789!@#$%^&*()-=_+.:~Δ", @"attachment; filename*=UTF-8''ABCXYZabcxyz012789!%40%23$%25%5E&%2A%28%29-%3D_+.:~%CE%94")]
+        [CLSCompliant(false)]
+        public void GetHeaderValue_Produces_Correct_ContentDisposition(string input, string expectedOutput)
+        {
+            // Arrange & Act
+            string actual = FileResult.ContentDispositionUtil.GetHeaderValue(input);
+
+            // Assert
+            Assert.Equal(expectedOutput, actual);
         }
 
         private class EmptyFileResult : FileResult

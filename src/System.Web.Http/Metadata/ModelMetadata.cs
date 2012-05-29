@@ -66,7 +66,7 @@ namespace System.Web.Http.Metadata
 
         public virtual bool IsComplexType
         {
-            get { return !TypeDescriptor.GetConverter(ModelType).CanConvertFrom(typeof(string)); }
+            get { return !TypeHelper.HasStringConverter(ModelType); }
         }
 
         public bool IsNullableValueType

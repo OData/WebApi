@@ -101,7 +101,7 @@ namespace System.Web.Http.Controllers
 
             // Execute all the binders.
             IEnumerable<Task> tasks = from parameterBinder in ParameterBindings select parameterBinder.ExecuteBindingAsync(_metadataProvider, actionContext, cancellationToken);
-            return TaskHelpers.Iterate(tasks, cancellationToken);
+            return TaskHelpers.Iterate(tasks, cancellationToken, disposeEnumerator: false);
         }
     }
 }

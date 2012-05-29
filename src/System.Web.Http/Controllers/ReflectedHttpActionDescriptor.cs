@@ -188,10 +188,13 @@ namespace System.Web.Http.Controllers
             }
 
             ParameterInfo[] parameterInfos = MethodInfo.GetParameters();
-            var rawParameterValues = from parameterInfo in parameterInfos
-                                     select ExtractParameterFromDictionary(parameterInfo, parameters, controllerContext);
-            object[] parametersArray = rawParameterValues.ToArray();
-            return parametersArray;
+            int parameterCount = parameterInfos.Length;
+            object[] parameterValues = new object[parameterCount];
+            for (int parameterIndex = 0; parameterIndex < parameterCount; parameterIndex++)
+            {
+                parameterValues[parameterIndex] = ExtractParameterFromDictionary(parameterInfos[parameterIndex], parameters, controllerContext);
+            }
+            return parameterValues;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]

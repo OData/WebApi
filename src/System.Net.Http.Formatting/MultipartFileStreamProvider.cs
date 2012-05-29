@@ -104,7 +104,9 @@ namespace System.Net.Http
             MultipartFileData fileData = new MultipartFileData(headers, localFilePath);
             _fileData.Add(fileData);
 
-            return File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous);
+            // The WriteThrough option is required so that file caching does not keep an open handle
+            // on this file, allowing immediate disposition after we have closed it.
+            return File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous | FileOptions.WriteThrough);
         }
 
         /// <summary>

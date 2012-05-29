@@ -171,10 +171,7 @@ namespace System.Web.Http
             while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
             {
                 string key = XmlConvert.DecodeName(reader.LocalName);
-                reader.ReadStartElement();
-                string value = reader.Value;
-                reader.Read();
-                reader.ReadEndElement();
+                string value = reader.ReadInnerXml();
 
                 this.Add(key, value);
                 reader.MoveToContent();

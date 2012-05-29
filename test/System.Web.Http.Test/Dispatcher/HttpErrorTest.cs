@@ -137,6 +137,22 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
+        public void HttpErrorWithWhitespace_Roundtrips_WithXmlFormatter()
+        {
+            string message = "  foo\n bar  \n ";
+            HttpError error = new HttpError(message);
+            MediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            MemoryStream stream = new MemoryStream();
+
+            formatter.WriteToStreamAsync(typeof(HttpError), error, stream, content: null, transportContext: null).Wait();
+            stream.Position = 0;
+            HttpError roundtrippedError = formatter.ReadFromStreamAsync(typeof(HttpError), stream, content: null, formatterLogger: null).Result as HttpError;
+
+            Assert.NotNull(roundtrippedError);
+            Assert.Equal(message, roundtrippedError.Message);
+        }
+
+        [Fact]
         public void HttpError_Roundtrips_WithXmlSerializer()
         {
             HttpError error = new HttpError("error") { { "ErrorCode", 42 }, { "Data", new[] { "a", "b", "c" } } };

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace System.Web.Http.ModelBinding
 {
     internal static class ModelBindingHelper
     {
+        private static readonly ConcurrentDictionary<Type, ModelBinderAttribute> _modelBinderAttributeCache = new ConcurrentDictionary<Type, ModelBinderAttribute>();
+
         internal static TModel CastOrDefault<TModel>(object model)
         {
             return (model is TModel) ? (TModel)model : default(TModel);
@@ -145,7 +148,7 @@ namespace System.Web.Http.ModelBinding
 
         internal static bool TryGetProviderFromAttributes(Type modelType, out ModelBinderProvider provider)
         {
-            ModelBinderAttribute attr = TypeDescriptorHelper.Get(modelType).GetAttributes().OfType<ModelBinderAttribute>().FirstOrDefault();
+            ModelBinderAttribute attr = GetModelBinderAttribute(modelType);
             if (attr == null)
             {
                 provider = null;
@@ -164,7 +167,7 @@ namespace System.Web.Http.ModelBinding
             ModelBinderAttribute attr = parameterDescriptor.GetCustomAttributes<ModelBinderAttribute>().FirstOrDefault();
             if (attr == null)
             {
-                attr = TypeDescriptorHelper.Get(modelType).GetAttributes().OfType<ModelBinderAttribute>().FirstOrDefault();
+                attr = GetModelBinderAttribute(modelType);
             }
 
             if (attr == null)
@@ -174,6 +177,17 @@ namespace System.Web.Http.ModelBinding
             }
 
             return TryGetProviderFromAttribute(modelType, attr, out provider);
+        }
+
+        private static ModelBinderAttribute GetModelBinderAttribute(Type modelType)
+        {
+            ModelBinderAttribute modelBinderAttribute;
+            if (!_modelBinderAttributeCache.TryGetValue(modelType, out modelBinderAttribute))
+            {
+                modelBinderAttribute = TypeDescriptorHelper.Get(modelType).GetAttributes().OfType<ModelBinderAttribute>().FirstOrDefault();
+                _modelBinderAttributeCache.TryAdd(modelType, modelBinderAttribute);
+            }
+            return modelBinderAttribute;
         }
 
         internal static void ValidateBindingContext(ModelBindingContext bindingContext)

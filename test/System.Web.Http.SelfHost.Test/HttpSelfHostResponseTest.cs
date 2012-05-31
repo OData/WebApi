@@ -24,7 +24,7 @@ namespace System.Web.Http.SelfHost
 
         public void SetupHost()
         {
-            baseAddress = String.Format("http://localhost/");
+            baseAddress = String.Format("http://localhost:90/");
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "NullResponse" });

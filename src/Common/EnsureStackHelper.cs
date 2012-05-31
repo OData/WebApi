@@ -20,6 +20,8 @@ namespace System.Web.Http
         // Safe: RuntimeHelpers.EnsureSufficientExecutionStack is actually a safe method and was changed to be marked as safe in 4.5
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "If an exception is thrown, we should be under 4.0 partial trust.")]
+        [SuppressMessage("Microsoft.Security", "CA2136:TransparencyAnnotationsShouldNotConflictFxCopRule",
+            Justification = "Since System.Web.Mvc.dll is fully transparent, [SSC] has no effect, but this method's functionality is unaffected.")]
         [SecuritySafeCritical]
         private static Action InitializeEnsureStackDelegate()
         {

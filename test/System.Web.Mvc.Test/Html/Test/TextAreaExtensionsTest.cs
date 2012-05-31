@@ -432,12 +432,18 @@ ViewItemFoo</textarea>", html.ToHtmlString());
             helper.ViewContext.ClientValidationEnabled = true;
             helper.ViewContext.UnobtrusiveJavaScriptEnabled = true;
             helper.ViewContext.FormContext = new FormContext();
-            helper.ClientValidationRuleFactory = (name, metadata) => new[] { new ModelClientValidationRule { ValidationType = "type", ErrorMessage = "error" } };
+            ModelMetadata modelMetadata = null;
+            helper.ClientValidationRuleFactory = (name, metadata) => {
+                modelMetadata = metadata;
+                return new[] { new ModelClientValidationRule { ValidationType = "type", ErrorMessage = "error" } };
+            };
 
             // Act
             MvcHtmlString html = helper.TextAreaFor(m => m.foo, new { rows = "30" });
 
             // Assert
+            Assert.NotNull(modelMetadata);
+            Assert.Equal("foo", modelMetadata.PropertyName);
             Assert.Equal(@"<textarea cols=""20"" data-val=""true"" data-val-type=""error"" id=""foo"" name=""foo"" rows=""30"">
 ViewItemFoo</textarea>", html.ToHtmlString());
         }

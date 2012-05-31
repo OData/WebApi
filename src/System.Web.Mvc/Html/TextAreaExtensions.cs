@@ -168,7 +168,7 @@ namespace System.Web.Mvc.Html
                 tagBuilder.AddCssClass(HtmlHelper.ValidationInputCssClassName);
             }
 
-            tagBuilder.MergeAttributes(htmlHelper.GetUnobtrusiveValidationAttributes(name));
+            tagBuilder.MergeAttributes(htmlHelper.GetUnobtrusiveValidationAttributes(name, modelMetadata));
 
             string value;
             if (modelState != null && modelState.Value != null)

@@ -67,6 +67,7 @@ namespace System.Web.Http.Validation
             {
                 MetadataProvider = metadataProvider,
                 ActionContext = actionContext,
+                ValidatorCache = actionContext.GetValidatorCache(),
                 ModelState = actionContext.ModelState,
                 Visited = new HashSet<object>(),
                 KeyBuilders = new Stack<IKeyBuilder>(),
@@ -159,7 +160,7 @@ namespace System.Web.Http.Validation
         {
             bool isValid = true;
             string key = null;
-            foreach (ModelValidator validator in validationContext.ActionContext.GetValidators(metadata))
+            foreach (ModelValidator validator in validationContext.ActionContext.GetValidators(metadata, validationContext.ValidatorCache))
             {
                 foreach (ModelValidationResult error in validator.Validate(metadata, container))
                 {
@@ -228,6 +229,7 @@ namespace System.Web.Http.Validation
         {
             public ModelMetadataProvider MetadataProvider { get; set; }
             public HttpActionContext ActionContext { get; set; }
+            public ModelValidatorCache ValidatorCache { get; set; }
             public ModelStateDictionary ModelState { get; set; }
             public HashSet<object> Visited { get; set; }
             public Stack<IKeyBuilder> KeyBuilders { get; set; }

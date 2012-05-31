@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Metadata;
 using System.Web.Http.ModelBinding;
@@ -58,8 +59,12 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            HttpConfiguration configuration = actionContext.ControllerContext.Configuration;
-            ModelValidatorCache validatorCache = configuration.Services.GetModelValidatorCache();
+            ModelValidatorCache validatorCache = actionContext.GetValidatorCache();
+            return actionContext.GetValidators(metadata, validatorCache);
+        }
+
+        internal static IEnumerable<ModelValidator> GetValidators(this HttpActionContext actionContext, ModelMetadata metadata, ModelValidatorCache validatorCache)
+        {
             if (validatorCache == null)
             {
                 // slow path: there is no validator cache on the configuration
@@ -69,6 +74,14 @@ namespace System.Web.Http.Controllers
             {
                 return validatorCache.GetValidators(metadata);
             }
+        }
+
+        internal static ModelValidatorCache GetValidatorCache(this HttpActionContext actionContext)
+        {
+            Contract.Assert(actionContext != null);
+
+            HttpConfiguration configuration = actionContext.ControllerContext.Configuration;
+            return configuration.Services.GetModelValidatorCache();
         }
 
         public static bool TryBindStrongModel<TModel>(this HttpActionContext actionContext, ModelBindingContext parentBindingContext, string propertyName, ModelMetadataProvider metadataProvider, out TModel model)

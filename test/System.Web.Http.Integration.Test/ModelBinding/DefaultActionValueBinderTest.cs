@@ -943,12 +943,12 @@ namespace System.Web.Http.ModelBinding
             config.BindParameter(typeof(Data), new CustomModelBinder());
 
             HttpRequestMessage request = new HttpRequestMessage()
-                {                    
+                {
                     RequestUri = new Uri("http://localhost")
                 };
 
             HttpControllerContext controllerContext = ContextUtil.CreateControllerContext(config, request);
-            HttpActionContext actionContext = ContextUtil.CreateActionContext(controllerContext,                 
+            HttpActionContext actionContext = ContextUtil.CreateActionContext(controllerContext,
                 new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("GetData") });
 
             DefaultActionValueBinder provider = new DefaultActionValueBinder();
@@ -957,9 +957,37 @@ namespace System.Web.Http.ModelBinding
             provider.BindValuesAsync(actionContext, CancellationToken.None).Wait();
 
             // Assert                    
-            Data argData = (Data) actionContext.ActionArguments["data"];
+            Data argData = (Data)actionContext.ActionArguments["data"];
             Assert.NotNull(argData);
             Assert.Equal("testing", argData.Description);
+        }
+
+        [Fact]
+        public void BindValuesAsync_Config_BindParameter_ShouldNotBeAppliedToUnrelatedTypes()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            config.BindParameter(typeof(Data), new CustomModelBinder());
+
+            ActionValueItem item = new ActionValueItem() { Id = 7, FirstName = "testFirstName", LastName = "testLastName" };
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
+                Content = new ObjectContent(typeof(ActionValueItem), item, config.Formatters.JsonFormatter)
+            };
+            HttpActionContext context = ContextUtil.CreateActionContext(
+                ContextUtil.CreateControllerContext(config, request),
+                new ReflectedHttpActionDescriptor() { MethodInfo = typeof(ActionValueController).GetMethod("PostItem") });
+            DefaultActionValueBinder provider = new DefaultActionValueBinder();
+
+            // Act
+            provider.BindValuesAsync(context, CancellationToken.None).Wait();
+
+            // Assert
+            Assert.Equal(1, context.ActionArguments.Count);
+            ActionValueItem result = Assert.IsAssignableFrom<ActionValueItem>(context.ActionArguments.First().Value);
+            Assert.Equal(7, result.Id);
+            Assert.Equal("testFirstName", result.FirstName);
+            Assert.Equal("testLastName", result.LastName);
         }
     }
 
@@ -991,7 +1019,8 @@ namespace System.Web.Http.ModelBinding
     {
         public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
-            bindingContext.Model = new Data { Description = "testing" };            
+            Assert.Equal(typeof(Data), bindingContext.ModelType);
+            bindingContext.Model = new Data { Description = "testing" };
             return true;
         }
     }
@@ -1007,6 +1036,9 @@ namespace System.Web.Http.ModelBinding
         {
         }
 
+        public void PostItem(ActionValueItem item)
+        {
+        }
 
         // Demonstrates the use of ModelBinderAttribute with empty name
         public void Options([FromUri(Name = "")]Point data) { }

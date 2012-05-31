@@ -108,8 +108,23 @@ namespace System.Web.Http.WebHost.Routing
             RequestContext requestContext = new RequestContext(httpContextBase, controllerContext.RouteData.ToRouteData());
             RouteValueDictionary routeValues = values != null ? new RouteValueDictionary(values) : new RouteValueDictionary();
             VirtualPathData virtualPathData = _routeCollection.GetVirtualPath(requestContext, name, routeValues);
+
             if (virtualPathData != null)
             {
+                // If the route is not an HttpWebRoute, try getting a virtual path without the httproute key in the route value dictionary
+                // This ensures that httproute isn't picked up by non-WebAPI routes that might pollute the virtual path with httproute
+                if (!(virtualPathData.Route is HttpWebRoute))
+                {
+                    if (routeValues.Remove(HttpWebRoute.HttpRouteKey))
+                    {
+                        VirtualPathData virtualPathDataWithoutHttpRouteValue = _routeCollection.GetVirtualPath(requestContext, name, routeValues);
+                        if (virtualPathDataWithoutHttpRouteValue != null)
+                        {
+                            virtualPathData = virtualPathDataWithoutHttpRouteValue;
+                        }
+                    }
+                }
+
                 return new HostedHttpVirtualPathData(virtualPathData, controllerContext.RouteData.Route);
             }
 

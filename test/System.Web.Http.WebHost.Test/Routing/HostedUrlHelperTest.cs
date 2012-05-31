@@ -32,6 +32,34 @@ namespace System.Web.Http.WebHost.Routing
         [InlineData(WhichRoute.ApiRoute1)]
         [InlineData(WhichRoute.ApiRoute2)]
         [InlineData(WhichRoute.WebRoute1)]
+        public void UrlHelper_GeneratesNonApiUrl_ForMatchingData(WhichRoute whichRoute)
+        {
+            // Mixed mode app with Web API generating URLs to other non-API routes
+            var url = GetUrlHelperForMixedApp(whichRoute);
+
+            string generatedUrl = url.Route("webroute1", new { controller = "something", action = "someaction", id = 789 });
+
+            Assert.Equal("$APP$/SOMEAPP/something/someaction/789", generatedUrl);
+        }
+
+        [Theory]
+        [InlineData(WhichRoute.ApiRoute1)]
+        [InlineData(WhichRoute.ApiRoute2)]
+        [InlineData(WhichRoute.WebRoute1)]
+        public void UrlHelper_GeneratesNullUrl_ForDataNotMatching(WhichRoute whichRoute)
+        {
+            // Mixed mode app with Web API generating URLs to other non-API routes
+            var url = GetUrlHelperForMixedApp(whichRoute);
+
+            string generatedUrl = url.Route("webroute1", new { foo = "bar" });
+
+            Assert.Equal(null, generatedUrl);
+        }
+
+        [Theory]
+        [InlineData(WhichRoute.ApiRoute1)]
+        [InlineData(WhichRoute.ApiRoute2)]
+        [InlineData(WhichRoute.WebRoute1)]
         public void UrlHelper_SkipsApiRoutesAndMatchesMvcUrl_ForMatchingData(WhichRoute whichRoute)
         {
             // Mixed mode app with MVC generating URLs to other MVC URLs

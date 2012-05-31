@@ -20,7 +20,7 @@ namespace System.Web.Http.WebHost.Routing
         /// Key used to signify that a route URL generation request should include HTTP routes (e.g. Web API).
         /// If this key is not specified then no HTTP routes will match.
         /// </summary>
-        private const string HttpRouteKey = "httproute";
+        internal const string HttpRouteKey = "httproute";
 
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Matches the base class's parameter names.")]
         public HttpWebRoute(string url, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens, IRouteHandler routeHandler, IHttpRoute httpRoute)

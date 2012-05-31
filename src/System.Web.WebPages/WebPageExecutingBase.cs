@@ -197,9 +197,14 @@ namespace System.Web.WebPages
             }
             else
             {
-                foreach (AttributeValue attrVal in values)
+                for (int i = 0; i < values.Length; i++)
                 {
+                    AttributeValue attrVal = values[i];
                     PositionTagged<object> val = attrVal.Value;
+                    PositionTagged<string> next = i == values.Length - 1 ?
+                        suffix : // End of the list, grab the suffix
+                        values[i + 1].Prefix; // Still in the list, grab the next prefix
+
                     bool? boolVal = null;
                     if (val.Value is bool)
                     {
@@ -228,7 +233,11 @@ namespace System.Web.WebPages
                         {
                             WritePositionTaggedLiteral(writer, pageVirtualPath, attrVal.Prefix);
                         }
-                        BeginContext(writer, pageVirtualPath, attrVal.Value.Position, valStr.Length, isLiteral: attrVal.Literal);
+                        
+                        // Calculate length of the source span by the position of the next value (or suffix)
+                        int sourceLength = next.Position - attrVal.Value.Position;
+
+                        BeginContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
                         if (attrVal.Literal)
                         {
                             WriteLiteralTo(writer, valStr);
@@ -237,7 +246,7 @@ namespace System.Web.WebPages
                         {
                             WriteTo(writer, valStr); // Write value
                         }
-                        EndContext(writer, pageVirtualPath, attrVal.Value.Position, valStr.Length, isLiteral: attrVal.Literal);
+                        EndContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
                         wroteSomething = true;
                     }
                 }

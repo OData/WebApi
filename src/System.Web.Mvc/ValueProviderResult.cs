@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Web.Mvc.Properties;
 
@@ -42,6 +43,7 @@ namespace System.Web.Mvc
 
         public object RawValue { get; protected set; }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Conversion failure is not fatal")]
         private static object ConvertSimpleType(CultureInfo culture, object value, Type destinationType)
         {
             if (value == null || destinationType.IsInstanceOfType(value))
@@ -56,6 +58,18 @@ namespace System.Web.Mvc
                 return null;
             }
 
+            // If the source type implements IConvertible, try that first
+            IConvertible convertible = value as IConvertible;
+            if (convertible != null)
+            {
+                try
+                {
+                    return convertible.ToType(destinationType, culture);
+                }
+                catch { }
+            }
+
+            // Last resort, look for a type converter
             TypeConverter converter = TypeDescriptor.GetConverter(destinationType);
             bool canConvertFrom = converter.CanConvertFrom(value.GetType());
             if (!canConvertFrom)

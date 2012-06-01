@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.TestCommon;
 using Xunit;
+using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
@@ -385,6 +388,35 @@ namespace System.Web.Mvc.Test
 
             // Act & assert
             Assert.Same(CultureInfo.InvariantCulture, result.Culture);
+        }
+
+        [Theory]
+        [PropertyData("IntrinsicConversionData")]
+        public void ConvertToCanConvertIntrinsics<T>(object initialValue, T expectedValue)
+        {
+            // Arrange
+            var result = new ValueProviderResult(initialValue, "", CultureInfo.InvariantCulture);
+
+            // Act & Assert
+            Assert.Equal(expectedValue, result.ConvertTo(typeof(T)));
+        }
+
+        public static IEnumerable<object[]> IntrinsicConversionData
+        {
+            get
+            {
+                return new TheoryDataSet<object, object>
+                {
+                    { 42, 42M },
+                    { 42, 42L },
+                    { 42, (float)42.0 },
+                    { 42, (double)42.0 },
+                    { 42M, 42 },
+                    { 42L, 42 },
+                    { (float)42.0, 42 },
+                    { (double)42.0, 42 }
+                };
+            }
         }
 
         private class MyClassWithoutConverter

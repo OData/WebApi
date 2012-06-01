@@ -15,27 +15,52 @@ namespace System.Web.Http
         {
             get
             {
-                return new TheoryDataSet<bool, IncludeErrorDetailPolicy, bool>()
+                return new TheoryDataSet<bool, IncludeErrorDetailPolicy, bool?, bool>()
                 {
-                    // isLocal, includeErrorDetail, expectErrorDetail
-                    { true, IncludeErrorDetailPolicy.LocalOnly, true },
-                    { false, IncludeErrorDetailPolicy.LocalOnly, false },
-                    { true, IncludeErrorDetailPolicy.Always, true },
-                    { false, IncludeErrorDetailPolicy.Always, true },
-                    { true, IncludeErrorDetailPolicy.Never, false },
-                    { false, IncludeErrorDetailPolicy.Never, false }
+                    // isLocal, includeErrorDetail, customErrors, expectErrorDetail
+                    { true, IncludeErrorDetailPolicy.LocalOnly, true, true },
+                    { false, IncludeErrorDetailPolicy.LocalOnly, true, false },
+                    { true, IncludeErrorDetailPolicy.LocalOnly, false, true },
+                    { false, IncludeErrorDetailPolicy.LocalOnly, false, false },
+                    { true, IncludeErrorDetailPolicy.LocalOnly, null, true },
+                    { false, IncludeErrorDetailPolicy.LocalOnly, null, false },
+                    
+                    { true, IncludeErrorDetailPolicy.Always, true, true },
+                    { false, IncludeErrorDetailPolicy.Always, true, true },
+                    { true, IncludeErrorDetailPolicy.Always, false, true },
+                    { false, IncludeErrorDetailPolicy.Always, false, true },
+                    { true, IncludeErrorDetailPolicy.Always, null, true },
+                    { false, IncludeErrorDetailPolicy.Always, null, true },
+                    
+                    { true, IncludeErrorDetailPolicy.Never, true, false },
+                    { false, IncludeErrorDetailPolicy.Never, true, false },
+                    { true, IncludeErrorDetailPolicy.Never, false, false },
+                    { false, IncludeErrorDetailPolicy.Never, false, false },
+                    { true, IncludeErrorDetailPolicy.Never, null, false },
+                    { false, IncludeErrorDetailPolicy.Never, null, false },
+
+                    { true, IncludeErrorDetailPolicy.Default, true, false },
+                    { false, IncludeErrorDetailPolicy.Default, true, false },
+                    { true, IncludeErrorDetailPolicy.Default, false, true },
+                    { false, IncludeErrorDetailPolicy.Default, false, true },
+                    { true, IncludeErrorDetailPolicy.Default, null, true },
+                    { false, IncludeErrorDetailPolicy.Default, null, false }
                 };
             }
         }
 
         [Theory]
         [PropertyData("ThrowingOnActionIncludesErrorDetailData")]
-        public void ThrowingOnActionIncludesErrorDetail(bool isLocal, IncludeErrorDetailPolicy includeErrorDetail, bool expectErrorDetail)
+        public void ThrowingOnActionIncludesErrorDetail(bool isLocal, IncludeErrorDetailPolicy includeErrorDetail, bool? customErrors, bool expectErrorDetail)
         {
             string controllerName = "Exception";
             string requestUrl = String.Format("{0}/{1}/{2}", "http://www.foo.com", controllerName, "ArgumentNull");
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
             request.Properties["MS_IsLocal"] = new Lazy<bool>(() => isLocal);
+            if (customErrors != null)
+            {
+                request.Properties["MS_IncludeErrorDetail"] = new Lazy<bool>(() => !(bool)customErrors);
+            }
 
             ScenarioHelper.RunTest(
                 controllerName,

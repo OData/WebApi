@@ -331,6 +331,9 @@ namespace System.Web.Http.WebHost
             // Add information about whether the request is local or not
             request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => requestBase.IsLocal));
 
+            // Add information about whether custom errors are enabled for this request or not
+            request.Properties.Add(HttpPropertyKeys.IncludeErrorDetailKey, new Lazy<bool>(() => !httpContextBase.IsCustomErrorEnabled));
+
             return request;
         }
 
@@ -564,7 +567,7 @@ namespace System.Web.Http.WebHost
                 // the Catch() and Finally() below
                 writeErrorResponseTask = TaskHelpers.FromError(ex);
             }
-            
+
             return writeErrorResponseTask
                 .Catch((info) =>
                 {

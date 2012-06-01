@@ -54,9 +54,14 @@ namespace System.Web.Http.Hosting
         public static readonly string RequestCorrelationKey = "MS_RequestId";
 
         /// <summary>
-        /// Provides a key that indicates whether the request originates from a local address
+        /// Provides a key that indicates whether the request originates from a local address.
         /// </summary>
         public static readonly string IsLocalKey = "MS_IsLocal";
+
+        /// <summary>
+        /// Provides a key that indicates whether error details are to be included in the response for this HTTP request.
+        /// </summary>
+        public static readonly string IncludeErrorDetailKey = "MS_IncludeErrorDetail";
 
         /// <summary>
         /// Provides a key for the parsed query string stored in <see cref="HttpRequestMessage.Properties"/>.

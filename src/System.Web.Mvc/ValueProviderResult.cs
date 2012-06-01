@@ -66,7 +66,9 @@ namespace System.Web.Mvc
                 {
                     return convertible.ToType(destinationType, culture);
                 }
-                catch { }
+                catch
+                {
+                }
             }
 
             // Last resort, look for a type converter

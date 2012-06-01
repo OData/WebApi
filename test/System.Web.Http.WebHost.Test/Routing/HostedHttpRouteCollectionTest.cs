@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Routing;
 using Moq;
@@ -156,7 +156,7 @@ namespace System.Web.Http.WebHost.Routing
         [Fact]
         public void GetVirtualPath_GuardClauses()
         {
-            Assert.ThrowsArgumentNull(() => _webApiRoutes.GetVirtualPath(controllerContext: null, name: null, values: null), "controllerContext");
+            Assert.ThrowsArgumentNull(() => _webApiRoutes.GetVirtualPath(request: null, name: null, values: null), "request");
         }
 
         [Fact]
@@ -167,9 +167,10 @@ namespace System.Web.Http.WebHost.Routing
             var config = new HttpConfiguration(_webApiRoutes);
             IHttpRoute route = _webApiRoutes.CreateRoute("api", null, null);
             _webApiRoutes.Add("default", route);
-            var context = new HttpControllerContext(config, _webApiRoutes.GetRouteData(request), request);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = _webApiRoutes.GetRouteData(request);
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
 
-            IHttpVirtualPathData result = _webApiRoutes.GetVirtualPath(context, null, new HttpRouteValueDictionary { { "httproute", true } });
+            IHttpVirtualPathData result = _webApiRoutes.GetVirtualPath(request, null, new HttpRouteValueDictionary { { "httproute", true } });
 
             Assert.NotNull(result);
             Assert.Same(route, result.Route);

@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
@@ -17,17 +17,7 @@ namespace System.Web.Http.Routing
         {
             Assert.ThrowsArgumentNull(
                 () => new UrlHelper(null),
-                "controllerContext");
-        }
-
-        [Fact]
-        public void ControllerContext_HasUrlHelperWithValidContext()
-        {
-            HttpControllerContext cc = new HttpControllerContext();
-
-            Assert.NotNull(cc.Url);
-            Assert.IsType<UrlHelper>(cc.Url);
-            Assert.Same(cc, cc.Url.ControllerContext);
+                "request");
         }
 
         [Theory]
@@ -81,7 +71,7 @@ namespace System.Web.Http.Routing
         public void UrlHelper_LinkGeneration_GeneratesRightLinksWithDictionary(string controller, int? id, string expectedUrl, string requestUrl)
         {
             var urlHelper = GetUrlHelperForApi();
-            urlHelper.ControllerContext.Request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            urlHelper.Request.RequestUri = new Uri(requestUrl);
             Dictionary<string, object> routeValues = GetRouteValuesAsDictionary(controller, id);
             string baseUrl = new Uri(requestUrl).GetLeftPart(UriPartial.Authority);
 
@@ -97,7 +87,8 @@ namespace System.Web.Http.Routing
         public void UrlHelper_LinkGeneration_GeneratesRightLinksWithObject(string controller, int? id, string expectedUrl, string requestUrl)
         {
             var urlHelper = GetUrlHelperForApi();
-            urlHelper.ControllerContext.Request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            urlHelper.Request.Method = HttpMethod.Get;
+            urlHelper.Request.RequestUri = new Uri(requestUrl);
             object routeValues = GetRouteValuesAsObject(controller, id);
             string baseUrl = new Uri(requestUrl).GetLeftPart(UriPartial.Authority);
 
@@ -108,16 +99,15 @@ namespace System.Web.Http.Routing
 
         private static UrlHelper GetUrlHelperForApi()
         {
-            HttpControllerContext cc = new HttpControllerContext();
+            HttpRequestMessage request = new HttpRequestMessage();
 
             // Set up routes
             var routes = new HttpRouteCollection("/somerootpath");
             IHttpRoute route = routes.MapHttpRoute("route1", "{controller}/{id}");
-            cc.Configuration = new HttpConfiguration(routes);
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration(routes);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "people", id = "123" }));
 
-            cc.RouteData = new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "people", id = "123" }));
-
-            return cc.Url;
+            return new UrlHelper(request);
         }
 
         private static object GetRouteValuesAsObject(string controller, int? id)

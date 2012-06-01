@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Moq;
@@ -130,8 +130,7 @@ namespace System.Web.Http.WebHost.Routing
         {
             routes = new RouteCollection();
 
-            HttpControllerContext cc = new HttpControllerContext();
-            cc.Request = new HttpRequestMessage();
+            HttpRequestMessage request = new HttpRequestMessage();
             var mockHttpContext = new Mock<HttpContextBase>();
             var mockHttpRequest = new Mock<HttpRequestBase>();
             mockHttpRequest.SetupGet<string>(x => x.ApplicationPath).Returns("/SOMEAPP/");
@@ -139,14 +138,14 @@ namespace System.Web.Http.WebHost.Routing
             mockHttpResponse.Setup<string>(x => x.ApplyAppPathModifier(It.IsAny<string>())).Returns<string>(x => "$APP$" + x);
             mockHttpContext.SetupGet<HttpRequestBase>(x => x.Request).Returns(mockHttpRequest.Object);
             mockHttpContext.SetupGet<HttpResponseBase>(x => x.Response).Returns(mockHttpResponse.Object);
-            cc.Request.Properties["MS_HttpContext"] = mockHttpContext.Object;
+            request.Properties["MS_HttpContext"] = mockHttpContext.Object;
 
             // Set up routes
             var hostedRoutes = new HostedHttpRouteCollection(routes);
             Route apiRoute1 = routes.MapHttpRoute("apiroute1", "api/{controller}/{id}", new { action = "someaction" });
             Route apiRoute2 = routes.MapHttpRoute("apiroute2", "api/{controller}/{action}", new { id = 789 });
             Route webRoute1 = routes.MapRoute("webroute1", "{controller}/{action}/{id}");
-            cc.Configuration = new HttpConfiguration(hostedRoutes);
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration(hostedRoutes);
 
             RouteData routeData = new RouteData();
             routeData.Values.Add("controller", "people");
@@ -168,11 +167,11 @@ namespace System.Web.Http.WebHost.Routing
                 default:
                     throw new ArgumentException("Invalid route specified.", "whichRoute");
             }
-            cc.RouteData = new HostedHttpRouteData(routeData);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HostedHttpRouteData(routeData);
 
             requestContext = new RequestContext(mockHttpContext.Object, routeData);
 
-            return cc.Url;
+            return request.GetUrlHelper();
         }
 
         public enum WhichRoute

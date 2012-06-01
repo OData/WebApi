@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Hosting;
-using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.Http.WebHost.Properties;
 using System.Web.Routing;
@@ -91,21 +90,26 @@ namespace System.Web.Http.WebHost.Routing
         }
 
         /// <inheritdoc/>
-        public override IHttpVirtualPathData GetVirtualPath(HttpControllerContext controllerContext, string name, IDictionary<string, object> values)
+        public override IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, string name, IDictionary<string, object> values)
         {
-            if (controllerContext == null)
+            if (request == null)
             {
-                throw Error.ArgumentNull("controllerContext");
+                throw Error.ArgumentNull("request");
             }
 
-            HttpRequestMessage request = controllerContext.Request;
             HttpContextBase httpContextBase;
             if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
                 httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
             }
 
-            RequestContext requestContext = new RequestContext(httpContextBase, controllerContext.RouteData.ToRouteData());
+            IHttpRouteData routeData = request.GetRouteData();
+            if (routeData == null)
+            {
+                return null;
+            }
+
+            RequestContext requestContext = new RequestContext(httpContextBase, routeData.ToRouteData());
             RouteValueDictionary routeValues = values != null ? new RouteValueDictionary(values) : new RouteValueDictionary();
             VirtualPathData virtualPathData = _routeCollection.GetVirtualPath(requestContext, name, routeValues);
 
@@ -125,7 +129,7 @@ namespace System.Web.Http.WebHost.Routing
                     }
                 }
 
-                return new HostedHttpVirtualPathData(virtualPathData, controllerContext.RouteData.Route);
+                return new HostedHttpVirtualPathData(virtualPathData, routeData.Route);
             }
 
             return null;

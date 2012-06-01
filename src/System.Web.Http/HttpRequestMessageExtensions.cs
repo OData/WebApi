@@ -600,5 +600,15 @@ namespace System.Net.Http
 
             return queryString;
         }
+
+        public static UrlHelper GetUrlHelper(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return new UrlHelper(request);
+        }
     }
 }

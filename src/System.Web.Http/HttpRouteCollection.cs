@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
 
@@ -88,11 +87,11 @@ namespace System.Web.Http
             return null;
         }
 
-        public virtual IHttpVirtualPathData GetVirtualPath(HttpControllerContext controllerContext, string name, IDictionary<string, object> values)
+        public virtual IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, string name, IDictionary<string, object> values)
         {
-            if (controllerContext == null)
+            if (request == null)
             {
-                throw Error.ArgumentNull("controllerContext");
+                throw Error.ArgumentNull("request");
             }
 
             if (name == null)
@@ -105,7 +104,7 @@ namespace System.Web.Http
             {
                 throw Error.Argument("name", SRResources.RouteCollection_NameNotFound, name);
             }
-            IHttpVirtualPathData virtualPath = route.GetVirtualPath(controllerContext, values);
+            IHttpVirtualPathData virtualPath = route.GetVirtualPath(request, values);
             if (virtualPath == null)
             {
                 return null;

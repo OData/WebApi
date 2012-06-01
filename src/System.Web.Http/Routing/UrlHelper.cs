@@ -2,50 +2,51 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Web.Http.Controllers;
+using System.Net.Http;
+using System.Web.Http.Properties;
 
 namespace System.Web.Http.Routing
 {
     public class UrlHelper
     {
-        private HttpControllerContext _controllerContext;
+        private HttpRequestMessage _request;
 
-        public UrlHelper(HttpControllerContext controllerContext)
+        public UrlHelper(HttpRequestMessage request)
         {
-            if (controllerContext == null)
+            if (request == null)
             {
-                throw Error.ArgumentNull("controllerContext");
+                throw Error.ArgumentNull("request");
             }
 
-            ControllerContext = controllerContext;
+            Request = request;
         }
 
         /// <summary>
-        /// Gets the <see cref="HttpControllerContext"/> of the current <see cref="ApiController"/>.
+        /// Gets the <see cref="HttpRequestMessage"/> of the current <see cref="UrlHelper"/>.
         /// The setter is not intended to be used other than for unit testing purpose. 
         /// </summary>
-        public HttpControllerContext ControllerContext
+        public HttpRequestMessage Request
         {
-            get { return _controllerContext; }
+            get { return _request; }
             set
             {
                 if (value == null)
                 {
-                    throw Error.ArgumentNull("value");
+                    throw Error.PropertyNull();
                 }
 
-                _controllerContext = value;
+                _request = value;
             }
         }
 
         public string Route(string routeName, object routeValues)
         {
-            return GetHttpRouteHelper(ControllerContext, routeName, routeValues);
+            return GetHttpRouteHelper(Request, routeName, routeValues);
         }
 
         public string Route(string routeName, IDictionary<string, object> routeValues)
         {
-            return GetHttpRouteHelper(ControllerContext, routeName, routeValues);
+            return GetHttpRouteHelper(Request, routeName, routeValues);
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification = "It is safe to pass string here")]
@@ -54,7 +55,7 @@ namespace System.Web.Http.Routing
             string link = Route(routeName, routeValues);
             if (!String.IsNullOrEmpty(link))
             {
-                link = new Uri(ControllerContext.Request.RequestUri, link).AbsoluteUri;
+                link = new Uri(Request.RequestUri, link).AbsoluteUri;
             }
 
             return link;
@@ -66,19 +67,19 @@ namespace System.Web.Http.Routing
             string link = Route(routeName, routeValues);
             if (!String.IsNullOrEmpty(link))
             {
-                link = new Uri(ControllerContext.Request.RequestUri, link).AbsoluteUri;
+                link = new Uri(Request.RequestUri, link).AbsoluteUri;
             }
 
             return link;
         }
 
-        private static string GetHttpRouteHelper(HttpControllerContext controllerContext, string routeName, object routeValues)
+        private static string GetHttpRouteHelper(HttpRequestMessage request, string routeName, object routeValues)
         {
             HttpRouteValueDictionary routeValuesDictionary = new HttpRouteValueDictionary(routeValues);
-            return GetHttpRouteHelper(controllerContext, routeName, routeValuesDictionary);
+            return GetHttpRouteHelper(request, routeName, routeValuesDictionary);
         }
 
-        private static string GetHttpRouteHelper(HttpControllerContext controllerContext, string routeName, IDictionary<string, object> routeValues)
+        private static string GetHttpRouteHelper(HttpRequestMessage request, string routeName, IDictionary<string, object> routeValues)
         {
             if (routeValues == null)
             {
@@ -98,8 +99,14 @@ namespace System.Web.Http.Routing
                 }
             }
 
-            IHttpVirtualPathData vpd = controllerContext.Configuration.Routes.GetVirtualPath(
-                controllerContext: controllerContext,
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
+            {
+                throw Error.InvalidOperation(SRResources.HttpRequestMessageExtensions_NoConfiguration);
+            }
+
+            IHttpVirtualPathData vpd = configuration.Routes.GetVirtualPath(
+                request: request,
                 name: routeName,
                 values: routeValues);
             if (vpd == null)

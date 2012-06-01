@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.Routing;
 
@@ -59,7 +58,7 @@ namespace System.Web.Http.WebHost.Routing
             if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
                 httpContextBase = new HttpRequestMessageContextWrapper(rootVirtualPath, request);
-            } 
+            }
 
             RouteData routeData = OriginalRoute.GetRouteData(httpContextBase);
             if (routeData != null)
@@ -70,17 +69,17 @@ namespace System.Web.Http.WebHost.Routing
             return null;
         }
 
-        public IHttpVirtualPathData GetVirtualPath(HttpControllerContext controllerContext, IDictionary<string, object> values)
+        public IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values)
         {
-            if (controllerContext == null)
+            if (request == null)
             {
-                throw Error.ArgumentNull("controllerContext");
+                throw Error.ArgumentNull("request");
             }
 
             HttpContextBase httpContextBase;
-            if (controllerContext.Request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
+            if (request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
-                HostedHttpRouteData routeData = controllerContext.RouteData as HostedHttpRouteData;
+                HostedHttpRouteData routeData = request.GetRouteData() as HostedHttpRouteData;
                 if (routeData != null)
                 {
                     RequestContext requestContext = new RequestContext(httpContextBase, routeData.OriginalRouteData);

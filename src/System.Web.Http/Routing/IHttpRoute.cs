@@ -49,9 +49,9 @@ namespace System.Web.Http.Routing
         /// <summary>
         /// Compute a URI based on the route and the values provided.
         /// </summary>
-        /// <param name="controllerContext">The controller context.</param>
+        /// <param name="request">The request message.</param>
         /// <param name="values">The values.</param>
         /// <returns></returns>
-        IHttpVirtualPathData GetVirtualPath(HttpControllerContext controllerContext, IDictionary<string, object> values);
+        IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values);
     }
 }

@@ -16,7 +16,6 @@ namespace System.Web.Http.Controllers
 
         private HttpControllerDescriptor _controllerDescriptor;
         private IHttpController _controller;
-        private UrlHelper _urlHelper;
 
         public HttpControllerContext(HttpConfiguration configuration, IHttpRouteData routeData, HttpRequestMessage request)
         {
@@ -128,22 +127,6 @@ namespace System.Web.Http.Controllers
 
                 _controller = value;
             }
-        }
-
-        /// <summary>
-        /// Returns an instance of a UrlHelper, which is used to generate URLs to other APIs.
-        /// </summary>
-        public UrlHelper Url
-        {
-            get
-            {
-                if (_urlHelper == null)
-                {
-                    _urlHelper = new UrlHelper(this);
-                }
-                return _urlHelper;
-            }
-            set { _urlHelper = value; }
         }
     }
 }

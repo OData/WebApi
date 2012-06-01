@@ -442,5 +442,25 @@ namespace System.Net.Http
             _disposableMock.Verify(d => d.Dispose());
             Assert.Empty(list);
         }
+
+        [Fact]
+        public void GetUrlHelper_WhenRequestParameterIsNull_Throws()
+        {
+            HttpRequestMessage request = null;
+            Assert.ThrowsArgumentNull(() => request.GetUrlHelper(), "request");
+        }
+
+        [Fact]
+        public void GetUrlHelper_ReturnsUrlHelper()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+
+            UrlHelper urlHelper = request.GetUrlHelper();
+
+            Assert.NotNull(urlHelper);
+            Assert.Same(request, urlHelper.Request);
+        }
     }
 }

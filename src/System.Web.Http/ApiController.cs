@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
-using System.Web.Http.Internal;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
@@ -25,6 +24,7 @@ namespace System.Web.Http
         private ModelStateDictionary _modelState;
         private HttpConfiguration _configuration;
         private HttpControllerContext _controllerContext;
+        private UrlHelper _urlHelper;
 
         /// <summary>
         /// Gets the <see name="HttpRequestMessage"/> of the current ApiController.
@@ -38,7 +38,7 @@ namespace System.Web.Http
             {
                 if (value == null)
                 {
-                    throw Error.ArgumentNull("value");
+                    throw Error.PropertyNull();
                 }
 
                 _request = value;
@@ -57,7 +57,7 @@ namespace System.Web.Http
             {
                 if (value == null)
                 {
-                    throw Error.ArgumentNull("value");
+                    throw Error.PropertyNull();
                 }
 
                 _configuration = value;
@@ -76,7 +76,7 @@ namespace System.Web.Http
             {
                 if (value == null)
                 {
-                    throw Error.ArgumentNull("value");
+                    throw Error.PropertyNull();
                 }
 
                 _controllerContext = value;
@@ -102,11 +102,31 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Returns an instance of a UrlHelper, which is used to generate URLs to other APIs.
+        /// Gets an instance of a <see name="UrlHelper" />, which is used to generate URLs to other APIs.
+        /// 
+        /// The setter is not intended to be used other than for unit testing purpose. 
         /// </summary>
         public UrlHelper Url
         {
-            get { return ControllerContext.Url; }
+            get
+            {
+                if (_urlHelper == null)
+                {
+                    _urlHelper = Request.GetUrlHelper();
+                }
+
+                return _urlHelper;
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _urlHelper = value;
+            }
         }
 
         /// <summary>

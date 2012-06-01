@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Web.Http.Controllers;
 using System.Web.Http.Properties;
 
 namespace System.Web.Http.Routing
@@ -143,14 +142,14 @@ namespace System.Web.Http.Routing
         /// Attempt to generate a URI that represents the values passed in based on current
         /// values from the <see cref="HttpRouteData"/> and new values using the specified <see cref="HttpRoute"/>.
         /// </summary>
-        /// <param name="controllerContext">The HTTP execution context.</param>
+        /// <param name="request">The HTTP request message.</param>
         /// <param name="values">The route values.</param>
         /// <returns>A <see cref="HttpVirtualPathData"/> instance or null if URI cannot be generated.</returns>
-        public virtual IHttpVirtualPathData GetVirtualPath(HttpControllerContext controllerContext, IDictionary<string, object> values)
+        public virtual IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values)
         {
-            if (controllerContext == null)
+            if (request == null)
             {
-                throw Error.ArgumentNull("controllerContext");
+                throw Error.ArgumentNull("request");
             }
 
             // Only perform URL generation if the "httproute" key was specified. This allows these
@@ -164,14 +163,20 @@ namespace System.Web.Http.Routing
             // Remove the value from the collection so that it doesn't affect the generated URL
             var newValues = GetRouteDictionaryWithoutHttpRouteKey(values);
 
-            BoundRouteTemplate result = _parsedRoute.Bind(controllerContext.RouteData.Values, newValues, _defaults, _constraints);
+            IHttpRouteData routeData = request.GetRouteData();
+            if (routeData == null)
+            {
+                return null;
+            }
+
+            BoundRouteTemplate result = _parsedRoute.Bind(routeData.Values, newValues, _defaults, _constraints);
             if (result == null)
             {
                 return null;
             }
 
             // Verify that the route matches the validation rules
-            if (!ProcessConstraints(controllerContext.Request, result.Values, HttpRouteDirection.UriGeneration))
+            if (!ProcessConstraints(request, result.Values, HttpRouteDirection.UriGeneration))
             {
                 return null;
             }

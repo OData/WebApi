@@ -321,15 +321,12 @@ namespace System.Web.Http.Tracing
                 throw System.Web.Http.Error.ArgumentNull("execute");
             }
 
-            bool isTracing = false;
-
             traceWriter.Trace(
                 request,
                 category,
                 level,
                 (TraceRecord traceRecord) =>
                 {
-                    isTracing = true;
                     traceRecord.Kind = TraceKind.Begin;
                     traceRecord.Operator = operatorName;
                     traceRecord.Operation = operationName;
@@ -342,44 +339,39 @@ namespace System.Web.Http.Tracing
             {
                 execute();
 
-                if (isTracing)
-                {
-                    traceWriter.Trace(
-                        request,
-                        category,
-                        level,
-                        (TraceRecord traceRecord) =>
+                traceWriter.Trace(
+                    request,
+                    category,
+                    level,
+                    (TraceRecord traceRecord) =>
+                    {
+                        traceRecord.Kind = TraceKind.End;
+                        traceRecord.Operator = operatorName;
+                        traceRecord.Operation = operationName;
+                        if (endTrace != null)
                         {
-                            traceRecord.Kind = TraceKind.End;
-                            traceRecord.Operator = operatorName;
-                            traceRecord.Operation = operationName;
-                            if (endTrace != null)
-                            {
-                                endTrace(traceRecord);
-                            }
-                        });
-                }
+                            endTrace(traceRecord);
+                        }
+                    });
             }
             catch (Exception ex)
             {
-                if (isTracing)
-                {
-                    traceWriter.Trace(
-                        request,
-                        category,
-                        TraceLevel.Error,
-                        (TraceRecord traceRecord) =>
+                traceWriter.Trace(
+                    request,
+                    category,
+                    TraceLevel.Error,
+                    (TraceRecord traceRecord) =>
+                    {
+                        traceRecord.Kind = TraceKind.End;
+                        traceRecord.Operator = operatorName;
+                        traceRecord.Operation = operationName;
+                        traceRecord.Exception = ex;
+                        if (errorTrace != null)
                         {
-                            traceRecord.Kind = TraceKind.End;
-                            traceRecord.Operator = operatorName;
-                            traceRecord.Operation = operationName;
-                            traceRecord.Exception = ex;
-                            if (errorTrace != null)
-                            {
-                                errorTrace(traceRecord);
-                            }
-                        });
-                }
+                            errorTrace(traceRecord);
+                        }
+                    });
+
                 throw;
             }
         }
@@ -427,15 +419,12 @@ namespace System.Web.Http.Tracing
                 throw System.Web.Http.Error.ArgumentNull("execute");
             }
 
-            bool isTracing = false;
-
             traceWriter.Trace(
                 request,
                 category,
                 level,
                 (TraceRecord traceRecord) =>
                 {
-                    isTracing = true;
                     traceRecord.Kind = TraceKind.Begin;
                     traceRecord.Operator = operatorName;
                     traceRecord.Operation = operationName;
@@ -448,8 +437,10 @@ namespace System.Web.Http.Tracing
             {
                 Task<TResult> task = execute();
 
-                // If we are not tracing, there is no need to ContinueWith
-                if (!isTracing || task == null)
+                // If the operation returned a null Task, we cannot do any
+                // further tracing.  Return that null to the caller as
+                // would happen if tracing were not enabled.
+                if (task == null)
                 {
                     return task;
                 }
@@ -477,7 +468,7 @@ namespace System.Web.Http.Tracing
 
                         return TaskHelpers.Canceled<TResult>();
                     }
-                    
+
                     if (t.IsFaulted)
                     {
                         traceWriter.Trace(
@@ -525,24 +516,21 @@ namespace System.Web.Http.Tracing
             }
             catch (Exception ex)
             {
-                if (isTracing)
-                {
-                    traceWriter.Trace(
-                        request,
-                        category,
-                        TraceLevel.Error,
-                        (TraceRecord traceRecord) =>
+                traceWriter.Trace(
+                    request,
+                    category,
+                    TraceLevel.Error,
+                    (TraceRecord traceRecord) =>
+                    {
+                        traceRecord.Kind = TraceKind.End;
+                        traceRecord.Operator = operatorName;
+                        traceRecord.Operation = operationName;
+                        traceRecord.Exception = ex;
+                        if (errorTrace != null)
                         {
-                            traceRecord.Kind = TraceKind.End;
-                            traceRecord.Operator = operatorName;
-                            traceRecord.Operation = operationName;
-                            traceRecord.Exception = ex;
-                            if (errorTrace != null)
-                            {
-                                errorTrace(traceRecord);
-                            }
-                        });
-                }
+                            errorTrace(traceRecord);
+                        }
+                    });
                 throw;
             }
         }
@@ -587,15 +575,12 @@ namespace System.Web.Http.Tracing
                 throw System.Web.Http.Error.ArgumentNull("execute");
             }
 
-            bool isTracing = false;
-
             traceWriter.Trace(
                 request,
                 category,
                 level,
                 (TraceRecord traceRecord) =>
                 {
-                    isTracing = true;
                     traceRecord.Kind = TraceKind.Begin;
                     traceRecord.Operator = operatorName;
                     traceRecord.Operation = operationName;
@@ -608,8 +593,10 @@ namespace System.Web.Http.Tracing
             {
                 Task task = execute();
 
-                // If we are not tracing, there is no need to ContinueWith
-                if (!isTracing || task == null)
+                // If the operation returned a null Task, we cannot do any
+                // further tracing.  Return that null to the caller as
+                // would happen if tracing were not enabled.
+                if (task == null)
                 {
                     return task;
                 }
@@ -680,24 +667,21 @@ namespace System.Web.Http.Tracing
             }
             catch (Exception ex)
             {
-                if (isTracing)
-                {
-                    traceWriter.Trace(
-                        request,
-                        category,
-                        TraceLevel.Error,
-                        (TraceRecord traceRecord) =>
+                traceWriter.Trace(
+                    request,
+                    category,
+                    TraceLevel.Error,
+                    (TraceRecord traceRecord) =>
+                    {
+                        traceRecord.Kind = TraceKind.End;
+                        traceRecord.Operator = operatorName;
+                        traceRecord.Operation = operationName;
+                        traceRecord.Exception = ex;
+                        if (errorTrace != null)
                         {
-                            traceRecord.Kind = TraceKind.End;
-                            traceRecord.Operator = operatorName;
-                            traceRecord.Operation = operationName;
-                            traceRecord.Exception = ex;
-                            if (errorTrace != null)
-                            {
-                                errorTrace(traceRecord);
-                            }
-                        });
-                }
+                            errorTrace(traceRecord);
+                        }
+                    });
                 throw;
             }
         }

@@ -12,15 +12,20 @@ namespace System.Web.Http.Tracing
     {
         private List<TraceRecord> _traceRecords = new List<TraceRecord>();
 
+        public Func<HttpRequestMessage, string, TraceLevel, bool> TraceSelector { get; set; }
+
         public IList<TraceRecord> Traces { get { return _traceRecords;  } }
 
         public void Trace(HttpRequestMessage request, string category, TraceLevel level, Action<TraceRecord> traceAction)
         {
-            TraceRecord traceRecord = new TraceRecord(request, category, level);
-            traceAction(traceRecord);
-            lock (_traceRecords)
+            if (TraceSelector == null || TraceSelector(request, category, level))
             {
-                _traceRecords.Add(traceRecord);
+                TraceRecord traceRecord = new TraceRecord(request, category, level);
+                traceAction(traceRecord);
+                lock (_traceRecords)
+                {
+                    _traceRecords.Add(traceRecord);
+                }
             }
         }
     }

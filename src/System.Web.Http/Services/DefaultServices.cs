@@ -52,7 +52,6 @@ namespace System.Web.Http.Services
     ///         <item><see cref="IStructuredQueryBuilder"/></item>
     ///         <item><see cref="ModelBinderProvider"/></item>
     ///         <item><see cref="ModelMetadataProvider"/></item>
-    ///         <item><see cref="ModelValidatorCache"/></item>
     ///         <item><see cref="ModelValidatorProvider"/></item>
     ///         <item><see cref="ValueProviderFactory"/></item>
     ///     </list>
@@ -149,7 +148,7 @@ namespace System.Web.Http.Services
 
             ModelValidatorCache validatorCache = new ModelValidatorCache(new Lazy<IEnumerable<ModelValidatorProvider>>(() => this.GetModelValidatorProviders()));
             configuration.RegisterForDispose(validatorCache);
-            SetSingle<ModelValidatorCache>(validatorCache);
+            SetSingle<IModelValidatorCache>(validatorCache);
 
             _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);
             _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);

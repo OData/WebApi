@@ -10,7 +10,7 @@ namespace System.Web.Http.Validation
     /// <summary>
     /// Defines a cache for <see cref="ModelValidator"/>s. This cache is keyed on the type or property that the metadata is associated with.
     /// </summary>
-    internal class ModelValidatorCache : IDisposable
+    internal class ModelValidatorCache : IModelValidatorCache, IDisposable
     {
         private ReaderWriterLockSlim _cacheLock = new ReaderWriterLockSlim();
         private Dictionary<Tuple<Type, string>, ModelValidator[]> _validatorCache = new Dictionary<Tuple<Type, string>, ModelValidator[]>();

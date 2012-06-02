@@ -229,7 +229,7 @@ namespace System.Web.Http.Validation
         {
             public ModelMetadataProvider MetadataProvider { get; set; }
             public HttpActionContext ActionContext { get; set; }
-            public ModelValidatorCache ValidatorCache { get; set; }
+            public IModelValidatorCache ValidatorCache { get; set; }
             public ModelStateDictionary ModelState { get; set; }
             public HashSet<object> Visited { get; set; }
             public Stack<IKeyBuilder> KeyBuilders { get; set; }

@@ -59,7 +59,7 @@ namespace System.Web.Http.Services
             Assert.IsType<DefaultHttpControllerTypeResolver>(defaultServices.GetService(typeof(IHttpControllerTypeResolver)));
             Assert.IsType<TraceManager>(defaultServices.GetService(typeof(ITraceManager)));
             Assert.IsType<DataAnnotationsModelMetadataProvider>(defaultServices.GetService(typeof(ModelMetadataProvider)));
-            Assert.IsType<ModelValidatorCache>(defaultServices.GetService(typeof(ModelValidatorCache)));
+            Assert.IsType<ModelValidatorCache>(defaultServices.GetService(typeof(IModelValidatorCache)));
 
             object[] filterProviders = defaultServices.GetServices(typeof(IFilterProvider)).ToArray();
             Assert.Equal(2, filterProviders.Length);
@@ -661,7 +661,7 @@ namespace System.Web.Http.Services
             var defaultServices = new DefaultServices(config);
 
             // Act & assert
-            Assert.ThrowsArgumentNull(() => defaultServices.Replace(serviceType: null, service: new object()), "serviceType");            
+            Assert.ThrowsArgumentNull(() => defaultServices.Replace(serviceType: null, service: new object()), "serviceType");
             Assert.ThrowsArgument(
                 () => defaultServices.Replace(typeof(object), new object()),
                 "serviceType",

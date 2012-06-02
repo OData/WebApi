@@ -59,11 +59,11 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
-            ModelValidatorCache validatorCache = actionContext.GetValidatorCache();
+            IModelValidatorCache validatorCache = actionContext.GetValidatorCache();
             return actionContext.GetValidators(metadata, validatorCache);
         }
 
-        internal static IEnumerable<ModelValidator> GetValidators(this HttpActionContext actionContext, ModelMetadata metadata, ModelValidatorCache validatorCache)
+        internal static IEnumerable<ModelValidator> GetValidators(this HttpActionContext actionContext, ModelMetadata metadata, IModelValidatorCache validatorCache)
         {
             if (validatorCache == null)
             {
@@ -76,7 +76,7 @@ namespace System.Web.Http.Controllers
             }
         }
 
-        internal static ModelValidatorCache GetValidatorCache(this HttpActionContext actionContext)
+        internal static IModelValidatorCache GetValidatorCache(this HttpActionContext actionContext)
         {
             Contract.Assert(actionContext != null);
 

@@ -15,16 +15,21 @@ namespace System.Web.Http.Metadata.Providers
         private bool _convertEmptyStringToNull;
         private string _description;
         private bool _isReadOnly;
+        private bool _isComplexType;
 
         private bool _convertEmptyStringToNullComputed;
         private bool _descriptionComputed;
         private bool _isReadOnlyComputed;
+        private bool _isComplexTypeComputed;
 
         // Constructor for creating real instances of the metadata class based on a prototype
         protected CachedModelMetadata(CachedModelMetadata<TPrototypeCache> prototype, Func<object> modelAccessor)
             : base(prototype.Provider, prototype.ContainerType, modelAccessor, prototype.ModelType, prototype.PropertyName)
         {
             PrototypeCache = prototype.PrototypeCache;
+
+            _isComplexType = prototype.IsComplexType;
+            _isComplexTypeComputed = true;
         }
 
         // Constructor for creating the prototype instances of the metadata class
@@ -79,6 +84,16 @@ namespace System.Web.Http.Metadata.Providers
             }
         }
 
+        public sealed override bool IsComplexType
+        {
+            get
+            {
+                return CacheOrCompute(ComputeIsComplexType,
+                                      ref _isComplexType,
+                                      ref _isComplexTypeComputed);
+            }
+        }
+
         protected TPrototypeCache PrototypeCache { get; set; }
 
         private static TResult CacheOrCompute<TResult>(Func<TResult> computeThunk, ref TResult value, ref bool computed)
@@ -105,6 +120,11 @@ namespace System.Web.Http.Metadata.Providers
         protected virtual bool ComputeIsReadOnly()
         {
             return base.IsReadOnly;
+        }
+
+        protected virtual bool ComputeIsComplexType()
+        {
+            return base.IsComplexType;
         }
     }
 }

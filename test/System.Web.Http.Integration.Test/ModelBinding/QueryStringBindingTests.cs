@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Net.Http;
 using Xunit;
 using Xunit.Extensions;
@@ -22,6 +23,8 @@ namespace System.Web.Http.ModelBinding
         [InlineData("GetIntFromUri", "?value=99", "99")]        // [FromUri]
         [InlineData("GetIntPrefixed", "?somePrefix=99", "99")]  // [FromUri(Prefix=somePrefix)]
         [InlineData("GetIntAsync", "?value=5", "5")]
+        [InlineData("GetOptionalNullableInt", "", "null")]
+        [InlineData("GetOptionalNullableInt", "?value=6", "6")]
         public void Query_String_Binds_Simple_Types_Get(string action, string queryString, string expectedResponse)
         {
             // Arrange
@@ -113,6 +116,30 @@ namespace System.Web.Http.ModelBinding
             // Assert
             ModelBindOrder actualItem = response.Content.ReadAsAsync<ModelBindOrder>().Result;
             Assert.Equal<ModelBindOrder>(expectedItem, actualItem, new ModelBindOrderEqualityComparer());
+        }
+
+        [Theory]
+        [InlineData("PostComplexTypeFromUriWithNestedCollection", "value.Numbers[0]=1&value.Numbers[1]=2", new[] { 1, 2 })]
+        public void Query_String_ComplexType_Type_Post_NestedCollection(string action, string queryString, int[] expectedValues)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(baseAddress + String.Format("ModelBinding/{0}?{1}", action, queryString)),
+                Method = HttpMethod.Post
+            };
+
+            // Act
+            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+            // Assert
+            ComplexTypeWithNestedCollection actualResult = response.Content.ReadAsAsync<ComplexTypeWithNestedCollection>().Result;
+            int[] actualValues = actualResult.Numbers.ToArray();
+            Assert.Equal(expectedValues.Length, actualValues.Length);
+            for (int i = 0; i < expectedValues.Length; i++)
+            {
+                Assert.Equal(expectedValues[i], actualValues[i]);
+            }
         }
     }
 }

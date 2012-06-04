@@ -57,6 +57,32 @@ namespace System.Web.Http.ModelBinding
         }
 
         [Fact]
+        public void GetBinder_ModelTypeIsNullable_ReturnsNull()
+        {
+            // Arrange
+            CollectionModelBinderProvider binderProvider = new CollectionModelBinderProvider();
+
+            // Act
+            IModelBinder binder = binderProvider.GetBinder(null, typeof(int?));
+
+            // Assert
+            Assert.Null(binder);
+        }
+
+        [Fact]
+        public void GetBinder_ModelTypeIsGeneric_ReturnsNull()
+        {
+            // Arrange
+            CollectionModelBinderProvider binderProvider = new CollectionModelBinderProvider();
+
+            // Act
+            IModelBinder binder = binderProvider.GetBinder(null, typeof(Tuple<int>));
+
+            // Assert
+            Assert.Null(binder);
+        }
+
+        [Fact]
         public void GetBinder_ValueProviderDoesNotContainPrefix_ReturnsNull()
         {
             // Arrange

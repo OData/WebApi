@@ -32,6 +32,11 @@ namespace System.Web.Http.ModelBinding
             return value;
         }
 
+        public int? GetOptionalNullableInt(int? value = null)
+        {
+            return value;
+        }
+
         public int GetIntWithDefault(int value = -1)
         {
             return value;
@@ -164,6 +169,11 @@ namespace System.Web.Http.ModelBinding
             return item;
         }
 
+        public ComplexTypeWithNestedCollection PostComplexTypeFromUriWithNestedCollection([FromUri] ComplexTypeWithNestedCollection value)
+        {
+            return value;
+        }
+
         public ModelBindOrder PostComplexTypeFromBody([FromBody] ModelBindOrder item)
         {
             return item;
@@ -198,7 +208,7 @@ namespace System.Web.Http.ModelBinding
         public int Id { get; set; }
 
         [Required]
-        [DataMember(IsRequired=true)]
+        [DataMember(IsRequired = true)]
         public int RequiredValue { get; set; }
     }
 
@@ -212,6 +222,11 @@ namespace System.Web.Http.ModelBinding
         public string ItemName { get; set; }
         public int Quantity { get; set; }
         public ModelBindCustomer Customer { get; set; }
+    }
+
+    public class ComplexTypeWithNestedCollection
+    {
+        public IEnumerable<int> Numbers { get; set; }
     }
 
     public class ModelBindOrderEqualityComparer : IEqualityComparer<ModelBindOrder>

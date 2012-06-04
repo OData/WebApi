@@ -10,7 +10,7 @@ namespace System.Web.Http.ModelBinding.Binders
     {
         public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {            
-            return CollectionModelBinderUtil.GetGenericBinder(typeof(ICollection<>), typeof(CollectionModelBinder<>), modelType); 
+            return CollectionModelBinderUtil.GetGenericBinder(typeof(ICollection<>), typeof(List<>), typeof(CollectionModelBinder<>), modelType); 
         }
     }
 }

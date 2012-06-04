@@ -17,7 +17,7 @@ namespace System.Web.WebPages.Deployment
         private const string SharedLibPublicKey = "31bf3856ad364e35";
 
         internal static readonly AssemblyName ThisAssemblyName = new AssemblyName(typeof(AssemblyUtils).Assembly.FullName);
-        private static readonly Version WebPagesV1Version = new Version(1, 0, 0, 0);
+        internal static readonly Version WebPagesV1Version = new Version(1, 0, 0, 0);
         private static readonly string _binFileName = Path.GetFileName(ThisAssemblyName.Name) + ".dll";
 
         // Special case MWI because it does not share the same assembly version as the rest of WebPages.

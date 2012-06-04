@@ -206,7 +206,7 @@ namespace System.Web.WebPages.Deployment.Test
         }
 
         [Fact]
-        public void PreApplicationStartCodeLoadsMaxVersionIfNoVersionIsSpecifiedAndCurrentAssemblyIsTheMaximumVersionAvailable()
+        public void PreApplicationStartCodeLoadsV1IfNoVersionIsSpecifiedAndCurrentAssemblyIsTheMaximumVersionAvailable()
         {
             // Arrange
             Version loadedVersion = null;
@@ -228,9 +228,36 @@ namespace System.Web.WebPages.Deployment.Test
 
             // Assert
             Assert.True(loaded);
-            Assert.Equal(MaxVersion, loadedVersion);
+            Assert.Equal(v1Version, loadedVersion);
             Assert.False(registeredForChangeNotification);
-            VerifyVersionFile(buildManager, MaxVersion);
+            VerifyVersionFile(buildManager, v1Version);
+        }
+
+        [Fact]
+        public void PreApplicationStartCodeThrowsIfNoVersionIsSpecifiedAndV1IsNotAvailable()
+        {
+            // Arrange
+            Version loadedVersion = null;
+            bool registeredForChangeNotification = false;
+            var webPagesVersion = AssemblyUtils.ThisAssemblyName.Version;
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0");
+
+            // Note: For this test to work with future versions we would need to create corresponding embedded resources with that version in it.
+            var fileSystem = new TestFileSystem();
+            var buildManager = new TestBuildManager();
+            fileSystem.AddFile("Index.cshtml");
+            var nameValueCollection = GetAppSettings(enabled: null, webPagesVersion: null);
+            Action<Version> loadWebPages = (version) => { loadedVersion = version; };
+            Action registerForChange = () => { registeredForChangeNotification = true; };
+
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                PreApplicationStartCode.StartCore(fileSystem, "", "bin", nameValueCollection, loadedAssemblies, buildManager, loadWebPages, registerForChange, null),
+@"Could not determine which version of ASP.NET Web Pages to use.
+
+In order to use this site, specify a version in the site’s web.config file. For more information, see the following article on the Microsoft support site: http://go.microsoft.com/fwlink/?LinkId=254126");
+            Assert.False(registeredForChangeNotification);
+            Assert.Equal(0, buildManager.Stream.Length);
         }
 
         [Fact]

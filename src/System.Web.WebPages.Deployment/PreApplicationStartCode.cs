@@ -84,7 +84,8 @@ namespace System.Web.WebPages.Deployment
 
             var webPagesEnabled = WebPagesDeployment.IsEnabled(fileSystem, appDomainAppPath, appSettings);
             Version binVersion = AssemblyUtils.GetVersionFromBin(binDirectory, fileSystem, getAssemblyNameThunk);
-            Version version = WebPagesDeployment.GetVersionInternal(appSettings, binVersion, defaultVersion: maxWebPagesVersion);
+            Version configVersion = WebPagesDeployment.GetVersionFromConfig(appSettings);
+            Version version = configVersion ?? binVersion ?? AssemblyUtils.WebPagesV1Version;
 
             // Asserts to ensure unit tests are set up correctly. So essentially, we're unit testing the unit tests. 
             Debug.Assert(version != null, "GetVersion always returns a version");
@@ -111,7 +112,15 @@ namespace System.Web.WebPages.Deployment
             }
             else if (!AssemblyUtils.IsVersionAvailable(loadedAssemblies, version))
             {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, ConfigurationResources.WebPagesVersionNotFound, version, AssemblyUtils.ThisAssemblyName.Version));
+                if (version == AssemblyUtils.WebPagesV1Version && configVersion == null && binVersion == null)
+                {
+                    // No version was specified. We're implicitly assuming that the site is a v1 site. However, the user does not have V1 binaries available. 
+                    throw new InvalidOperationException(ConfigurationResources.WebPagesImplicitVersionFailure);
+                }
+                else 
+                {
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, ConfigurationResources.WebPagesVersionNotFound, version, AssemblyUtils.ThisAssemblyName.Version));
+                }
             }
 
             Debug.WriteLine("WebPages Bootstrapper v{0}: loading version {1}, loading WebPages", AssemblyUtils.ThisAssemblyName.Version, version);

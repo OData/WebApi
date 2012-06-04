@@ -120,6 +120,11 @@
   <data name="InstallPathNotFound" xml:space="preserve">
     <value>The "InstallPath" name was not found in the Web Pages registry key "{0}".</value>
   </data>
+  <data name="WebPagesImplicitVersionFailure" xml:space="preserve">
+    <value>Could not determine which version of ASP.NET Web Pages to use.
+
+In order to use this site, specify a version in the site’s web.config file. For more information, see the following article on the Microsoft support site: http://go.microsoft.com/fwlink/?LinkId=254126</value>
+  </data>
   <data name="WebPagesRegistryKeyDoesNotExist" xml:space="preserve">
     <value>The Web Pages registry key "{0}" does not exist.</value>
   </data>

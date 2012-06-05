@@ -214,10 +214,9 @@ namespace System.Web.Http.SelfHost
             return "success from PostCustomerFromUri";
         }
 
-        [Queryable]
         public IQueryable<string> GetWithQueryable()
         {
-            return new List<string>(){"success from GetWithQueryable"}.AsQueryable();
+            return new List<string>() { "success from GetWithQueryable" }.AsQueryable();
         }
 
         public string PostJToken(JToken token)

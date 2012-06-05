@@ -114,7 +114,6 @@
     <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs" />
     <Compile Include="ModelBinding\HttpParameterBindingExtensionsTest.cs" />
     <Compile Include="ModelBinding\ParameterBindingProvidersTest.cs" />
-    <Compile Include="QueryableAttributeTest.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolverTest.cs" />
     <Compile Include="Controllers\ApiControllerActionInvokerTest.cs" />
     <Compile Include="Controllers\ApiControllerActionSelectorTest.cs" />
@@ -131,9 +130,6 @@
     </Compile>
     <Compile Include="ModelBinding\FormDataCollectionExtensionsTest.cs" />
     <Compile Include="ModelBinding\ModelBinderAttributeTest.cs" />
-    <Compile Include="Query\DataModel.cs" />
-    <Compile Include="Query\DefaultStructuredQueryBuilderTests.cs" />
-    <Compile Include="Query\ODataQueryDeserializerTests.cs" />
     <Compile Include="Routing\HttpRouteValueDictionaryTest.cs" />
     <Compile Include="Routing\HttpRouteTest.cs" />
     <Compile Include="Routing\MediaTypeFormatterExtensionsTests.cs" />
@@ -178,7 +174,6 @@
     <Compile Include="Tracing\Tracers\RequestMessageHandlerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\XmlMediaTypeFormatterTracerTest.cs" />
     <Compile Include="Util\ContextUtil.cs" />
-    <Compile Include="Query\QueryValidatorTest.cs" />
     <Compile Include="Filters\HttpActionExecutedContextTest.cs" />
     <Compile Include="Filters\ActionFilterAttributeTest.cs" />
     <Compile Include="Filters\ActionDescriptorFilterProviderTest.cs" />

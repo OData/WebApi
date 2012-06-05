@@ -140,12 +140,6 @@
     <Compile Include="ModelBinding\ModelBinderParameterBinding.cs" />
     <Compile Include="ModelBinding\ParameterBindingRulesCollection.cs" />
     <Compile Include="ParameterBindingAttribute.cs" />
-    <Compile Include="Query\DefaultStructuredQueryBuilder.cs" />
-    <Compile Include="Query\IStructuredQueryBuilder.cs" />
-    <Compile Include="Query\IStructuredQueryPart.cs" />
-    <Compile Include="Query\ParseException.cs" />
-    <Compile Include="Query\StandardStructuredQueryPart.cs" />
-    <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="Dispatcher\DefaultHttpControllerActivator.cs" />
     <Compile Include="Controllers\HttpControllerDescriptor.cs" />
@@ -186,7 +180,6 @@
     <Compile Include="ModelBinding\Binders\CompositeModelBinderProvider.cs" />
     <Compile Include="ModelBinding\Binders\CompositeModelBinder.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />
-    <Compile Include="Query\QueryValidator.cs" />
     <Compile Include="RouteParameter.cs" />
     <Compile Include="Routing\BoundRouteTemplate.cs" />
     <Compile Include="Routing\IHttpVirtualPathData.cs" />
@@ -360,11 +353,6 @@
     <Compile Include="ValueProviders\IValueProvider.cs" />
     <Compile Include="HttpConfiguration.cs" />
     <Compile Include="ApiController.cs" />
-    <Compile Include="Query\DynamicQueryable.cs" />
-    <Compile Include="Query\ODataQueryDeserializer.cs" />
-    <Compile Include="Query\QueryComposer.cs" />
-    <Compile Include="Query\QueryResolver.cs" />
-    <Compile Include="Query\StructuredQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />

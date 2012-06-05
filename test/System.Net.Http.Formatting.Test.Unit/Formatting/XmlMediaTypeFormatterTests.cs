@@ -91,8 +91,8 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [InlineData(typeof(IQueryable<string>))]
         [InlineData(typeof(IEnumerable<string>))]
+        [InlineData(typeof(IQueryable<string>))]
         public void UseXmlFormatterWithNull(Type type)
         {
             XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter { UseXmlSerializer = false };

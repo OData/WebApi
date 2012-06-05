@@ -233,89 +233,11 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="Route_AddRemoveWithNoKeyNotSupported" xml:space="preserve">
     <value>Adding or removing items from a '{0}' is not supported. Please use a key when adding and removing items.</value>
   </data>
-  <data name="AmbiguousMethodInvocation" xml:space="preserve">
-    <value>Ambiguous invocation of method '{0}' in type '{1}'</value>
-  </data>
-  <data name="CloseParenOrCommaExpected" xml:space="preserve">
-    <value>')' or ',' expected</value>
-  </data>
-  <data name="CloseParenOrOperatorExpected" xml:space="preserve">
-    <value>')' or operator expected</value>
-  </data>
-  <data name="DigitExpected" xml:space="preserve">
-    <value>Digit expected</value>
-  </data>
-  <data name="DuplicateIdentifier" xml:space="preserve">
-    <value>The identifier '{0}' was defined more than once</value>
-  </data>
-  <data name="ExpressionExpected" xml:space="preserve">
-    <value>Expression expected</value>
-  </data>
-  <data name="ExpressionTypeMismatch" xml:space="preserve">
-    <value>Expression of type '{0}' expected</value>
-  </data>
-  <data name="IdentifierExpected" xml:space="preserve">
-    <value>Identifier expected</value>
-  </data>
-  <data name="IncompatibleOperand" xml:space="preserve">
-    <value>Operator '{0}' incompatible with operand type '{1}'</value>
-  </data>
-  <data name="IncompatibleOperands" xml:space="preserve">
-    <value>Operator '{0}' incompatible with operand types '{1}' and '{2}'</value>
-  </data>
-  <data name="InvalidCharacter" xml:space="preserve">
-    <value>Syntax error '{0}'</value>
-  </data>
-  <data name="InvalidIntegerLiteral" xml:space="preserve">
-    <value>Invalid integer literal '{0}'</value>
-  </data>
-  <data name="InvalidQueryOperator" xml:space="preserve">
-    <value>Invalid query operator '{0}'.</value>
-  </data>
-  <data name="InvalidRealLiteral" xml:space="preserve">
-    <value>Invalid real literal '{0}'</value>
-  </data>
-  <data name="MethodIsVoid" xml:space="preserve">
-    <value>Method '{0}' in type '{1}' does not return a value</value>
-  </data>
-  <data name="NoApplicableMethod" xml:space="preserve">
-    <value>No applicable method '{0}' exists in type '{1}'</value>
-  </data>
-  <data name="OpenParenExpected" xml:space="preserve">
-    <value>'(' expected</value>
-  </data>
-  <data name="ParseExceptionFormat" xml:space="preserve">
-    <value>{0} (at index {1})</value>
-  </data>
-  <data name="SyntaxError" xml:space="preserve">
-    <value>Syntax error</value>
-  </data>
-  <data name="UnknownIdentifier" xml:space="preserve">
-    <value>Unknown identifier '{0}'</value>
-  </data>
-  <data name="UnknownPropertyOrField" xml:space="preserve">
-    <value>No property or field '{0}' exists in type '{1}'</value>
-  </data>
-  <data name="UnterminatedStringLiteral" xml:space="preserve">
-    <value>Unterminated string literal</value>
-  </data>
-  <data name="UriQueryStringInvalid" xml:space="preserve">
-    <value>The query specified in the URI is not valid.</value>
-  </data>
   <data name="ValueProviderFactory_Cannot_Create" xml:space="preserve">
     <value>Could not create a '{0}' from '{1}'. Please ensure it derives from '{0}' and has a public parameterless constructor.</value>
   </data>
   <data name="Validation_ValueNotFound" xml:space="preserve">
     <value>A value is required but was not present in the request.</value>
-  </data>
-  <data name="InvalidTypeCreationExpression" xml:space="preserve">
-    <value>Invalid '{0}' type creation expression.</value>
-  </data>
-  <data name="InvalidHexLiteral" xml:space="preserve">
-    <value>Invalid hexadecimal literal.</value>
-  </data>
-  <data name="PositiveIntegerExpectedForODataQueryParameter" xml:space="preserve">
-    <value>The OData query parameter '{0}' has an invalid value. The value should be a positive integer. The provided value was '{1}'</value>
   </data>
   <data name="CannotSupportSingletonInstance" xml:space="preserve">
     <value>Cannot reuse an '{0}' instance. '{0}' has to be constructed per incoming message. Check your custom '{1}' and make sure that it will not manufacture the same instance.</value>
@@ -422,12 +344,6 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="HttpRequestMessageExtensions_NoContentNegotiator" xml:space="preserve">
     <value>The provided configuration does not have an instance of the '{0}' service registered.</value>
   </data>
-  <data name="ParseErrorInClause" xml:space="preserve">
-    <value>Parse error in {0}. {1}</value>
-  </data>
-  <data name="InaccessiblePropertyOrField" xml:space="preserve">
-    <value>The property or field '{0}' in type '{1}' is not accessible.</value>
-  </data>
   <data name="ReflectedHttpActionDescriptor_CannotCallOpenGenericMethods" xml:space="preserve">
     <value>Cannot call action method '{0}' on controller '{1}' because the action method is a generic method.</value>
   </data>
@@ -442,9 +358,6 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   </data>
   <data name="HttpActionDescriptor_NoConverterForGenericParamterTypeExists" xml:space="preserve">
     <value>No action result converter could be constructed for a generic parameter type '{0}'.</value>
-  </data>
-  <data name="QueryableAttribute_InvalidResultLimit" xml:space="preserve">
-    <value>The value of the ResultLimit property on the Queryable filter applied to action '{0}' on controller '{1}' must be greater than or equal to 0.</value>
   </data>
   <data name="MissingRequiredMember" xml:space="preserve">
     <value>The {0} property is required.</value>

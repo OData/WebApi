@@ -97,15 +97,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ambiguous invocation of method &apos;{0}&apos; in type &apos;{1}&apos;.
-        /// </summary>
-        internal static string AmbiguousMethodInvocation {
-            get {
-                return ResourceManager.GetString("AmbiguousMethodInvocation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No action was found on the controller &apos;{0}&apos; that matches the name &apos;{1}&apos;..
         /// </summary>
         internal static string ApiControllerActionSelector_ActionNameNotFound {
@@ -165,24 +156,6 @@ namespace System.Web.Http.Properties {
         internal static string CannotSupportSingletonInstance {
             get {
                 return ResourceManager.GetString("CannotSupportSingletonInstance", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;)&apos; or &apos;,&apos; expected.
-        /// </summary>
-        internal static string CloseParenOrCommaExpected {
-            get {
-                return ResourceManager.GetString("CloseParenOrCommaExpected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;)&apos; or operator expected.
-        /// </summary>
-        internal static string CloseParenOrOperatorExpected {
-            get {
-                return ResourceManager.GetString("CloseParenOrOperatorExpected", resourceCulture);
             }
         }
         
@@ -279,47 +252,11 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Digit expected.
-        /// </summary>
-        internal static string DigitExpected {
-            get {
-                return ResourceManager.GetString("DigitExpected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The identifier &apos;{0}&apos; was defined more than once.
-        /// </summary>
-        internal static string DuplicateIdentifier {
-            get {
-                return ResourceManager.GetString("DuplicateIdentifier", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to An error has occurred..
         /// </summary>
         internal static string ErrorOccurred {
             get {
                 return ResourceManager.GetString("ErrorOccurred", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Expression expected.
-        /// </summary>
-        internal static string ExpressionExpected {
-            get {
-                return ResourceManager.GetString("ExpressionExpected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Expression of type &apos;{0}&apos; expected.
-        /// </summary>
-        internal static string ExpressionTypeMismatch {
-            get {
-                return ResourceManager.GetString("ExpressionTypeMismatch", resourceCulture);
             }
         }
         
@@ -378,96 +315,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Identifier expected.
-        /// </summary>
-        internal static string IdentifierExpected {
-            get {
-                return ResourceManager.GetString("IdentifierExpected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The property or field &apos;{0}&apos; in type &apos;{1}&apos; is not accessible..
-        /// </summary>
-        internal static string InaccessiblePropertyOrField {
-            get {
-                return ResourceManager.GetString("InaccessiblePropertyOrField", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operator &apos;{0}&apos; incompatible with operand type &apos;{1}&apos;.
-        /// </summary>
-        internal static string IncompatibleOperand {
-            get {
-                return ResourceManager.GetString("IncompatibleOperand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operator &apos;{0}&apos; incompatible with operand types &apos;{1}&apos; and &apos;{2}&apos;.
-        /// </summary>
-        internal static string IncompatibleOperands {
-            get {
-                return ResourceManager.GetString("IncompatibleOperands", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Syntax error &apos;{0}&apos;.
-        /// </summary>
-        internal static string InvalidCharacter {
-            get {
-                return ResourceManager.GetString("InvalidCharacter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid hexadecimal literal..
-        /// </summary>
-        internal static string InvalidHexLiteral {
-            get {
-                return ResourceManager.GetString("InvalidHexLiteral", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid integer literal &apos;{0}&apos;.
-        /// </summary>
-        internal static string InvalidIntegerLiteral {
-            get {
-                return ResourceManager.GetString("InvalidIntegerLiteral", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid query operator &apos;{0}&apos;..
-        /// </summary>
-        internal static string InvalidQueryOperator {
-            get {
-                return ResourceManager.GetString("InvalidQueryOperator", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid real literal &apos;{0}&apos;.
-        /// </summary>
-        internal static string InvalidRealLiteral {
-            get {
-                return ResourceManager.GetString("InvalidRealLiteral", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid &apos;{0}&apos; type creation expression..
-        /// </summary>
-        internal static string InvalidTypeCreationExpression {
-            get {
-                return ResourceManager.GetString("InvalidTypeCreationExpression", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The key is invalid JQuery syntax because it is missing a closing bracket.
         /// </summary>
         internal static string JQuerySyntaxMissingClosingBracket {
@@ -482,15 +329,6 @@ namespace System.Web.Http.Properties {
         internal static string MaxHttpCollectionKeyLimitReached {
             get {
                 return ResourceManager.GetString("MaxHttpCollectionKeyLimitReached", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Method &apos;{0}&apos; in type &apos;{1}&apos; does not return a value.
-        /// </summary>
-        internal static string MethodIsVoid {
-            get {
-                return ResourceManager.GetString("MethodIsVoid", resourceCulture);
             }
         }
         
@@ -585,15 +423,6 @@ namespace System.Web.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No applicable method &apos;{0}&apos; exists in type &apos;{1}&apos;.
-        /// </summary>
-        internal static string NoApplicableMethod {
-            get {
-                return ResourceManager.GetString("NoApplicableMethod", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No controller was created to handle this request..
         /// </summary>
         internal static string NoControllerCreated {
@@ -617,15 +446,6 @@ namespace System.Web.Http.Properties {
         internal static string NoRouteData {
             get {
                 return ResourceManager.GetString("NoRouteData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;(&apos; expected.
-        /// </summary>
-        internal static string OpenParenExpected {
-            get {
-                return ResourceManager.GetString("OpenParenExpected", resourceCulture);
             }
         }
         
@@ -662,42 +482,6 @@ namespace System.Web.Http.Properties {
         internal static string ParameterBindingIllegalType {
             get {
                 return ResourceManager.GetString("ParameterBindingIllegalType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parse error in {0}. {1}.
-        /// </summary>
-        internal static string ParseErrorInClause {
-            get {
-                return ResourceManager.GetString("ParseErrorInClause", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} (at index {1}).
-        /// </summary>
-        internal static string ParseExceptionFormat {
-            get {
-                return ResourceManager.GetString("ParseExceptionFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The OData query parameter &apos;{0}&apos; has an invalid value. The value should be a positive integer. The provided value was &apos;{1}&apos;.
-        /// </summary>
-        internal static string PositiveIntegerExpectedForODataQueryParameter {
-            get {
-                return ResourceManager.GetString("PositiveIntegerExpectedForODataQueryParameter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The value of the ResultLimit property on the Queryable filter applied to action &apos;{0}&apos; on controller &apos;{1}&apos; must be greater than or equal to 0..
-        /// </summary>
-        internal static string QueryableAttribute_InvalidResultLimit {
-            get {
-                return ResourceManager.GetString("QueryableAttribute_InvalidResultLimit", resourceCulture);
             }
         }
         
@@ -860,15 +644,6 @@ namespace System.Web.Http.Properties {
         internal static string RouteCollection_NameNotFound {
             get {
                 return ResourceManager.GetString("RouteCollection_NameNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Syntax error.
-        /// </summary>
-        internal static string SyntaxError {
-            get {
-                return ResourceManager.GetString("SyntaxError", resourceCulture);
             }
         }
         
@@ -1094,42 +869,6 @@ namespace System.Web.Http.Properties {
         internal static string TraceWriteToStreamMessage {
             get {
                 return ResourceManager.GetString("TraceWriteToStreamMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unknown identifier &apos;{0}&apos;.
-        /// </summary>
-        internal static string UnknownIdentifier {
-            get {
-                return ResourceManager.GetString("UnknownIdentifier", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No property or field &apos;{0}&apos; exists in type &apos;{1}&apos;.
-        /// </summary>
-        internal static string UnknownPropertyOrField {
-            get {
-                return ResourceManager.GetString("UnknownPropertyOrField", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unterminated string literal.
-        /// </summary>
-        internal static string UnterminatedStringLiteral {
-            get {
-                return ResourceManager.GetString("UnterminatedStringLiteral", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The query specified in the URI is not valid..
-        /// </summary>
-        internal static string UriQueryStringInvalid {
-            get {
-                return ResourceManager.GetString("UriQueryStringInvalid", resourceCulture);
             }
         }
         

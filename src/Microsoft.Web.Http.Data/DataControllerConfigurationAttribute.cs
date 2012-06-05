@@ -55,7 +55,6 @@ namespace Microsoft.Web.Http.Data
 
                 Type[] exposedTypes = description.EntityTypes.ToArray();
                 serializers.Add(GetSerializerInfo(typeof(ChangeSetEntry[]), exposedTypes));
-                serializers.Add(GetSerializerInfo(typeof(QueryResult), exposedTypes));
 
                 return serializers;
             });

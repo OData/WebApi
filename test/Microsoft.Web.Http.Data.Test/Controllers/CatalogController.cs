@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.Web.Http.Data.Test.Models;
 
 namespace Microsoft.Web.Http.Data.Test
@@ -25,21 +24,6 @@ namespace Microsoft.Web.Http.Data.Test
                 new Product { ProductID = 1, ProductName = "Beefcicles", UnitPrice = 0.99M, UnitsInStock = 634 },
                 new Product { ProductID = 1, ProductName = "Butterscotchies", UnitPrice = 1.00M, UnitsInStock = 789 }
             };
-        }
-
-        [Queryable(ResultLimit = 9)]
-        public IQueryable<Product> GetProducts()
-        {
-            return this.products.AsQueryable();
-        }
-
-        [Queryable]
-        public IQueryable<Order> GetOrders()
-        {
-            return new Order[] { 
-                new Order { OrderID = 1, CustomerID = "ALFKI" },
-                new Order { OrderID = 2, CustomerID = "CHOPS" }
-            }.AsQueryable();
         }
 
         public IEnumerable<Order_Detail> GetDetails(int orderId)

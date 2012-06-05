@@ -81,10 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeSetTests.cs" />
-    <Compile Include="Controllers\CitiesController.cs" />
     <Compile Include="Controllers\NorthwindEFController.cs" />
     <Compile Include="DataControllerDescriptionTest.cs" />
-    <Compile Include="DataControllerQueryTests.cs" />
     <Compile Include="DataControllerSubmitTests.cs" />
     <Compile Include="MetadataExtensionsTests.cs" />
     <Compile Include="Models\CatalogEntities.cs" />

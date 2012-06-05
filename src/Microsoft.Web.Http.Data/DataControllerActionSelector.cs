@@ -28,9 +28,7 @@ namespace Microsoft.Web.Http.Data
                 return new SubmitProxyActionDescriptor(action);
             }
 
-            // for all other non-CUD operations, we wrap the descriptor in our
-            // customizing descriptor to layer on additional functionality.
-            return new CustomizingActionDescriptor(base.SelectAction(controllerContext));
+            return base.SelectAction(controllerContext);
         }
     }
 }

@@ -46,7 +46,6 @@ namespace Microsoft.Web.Http.Data.Test
     {
         public static string BaseUrl = "http://testhost/";
         public static string CatalogUrl = "http://testhost/Catalog/";
-        public static string CitiesUrl = "http://testhost/Cities/";
     }
 
     internal class HttpContextStub : HttpContextBase

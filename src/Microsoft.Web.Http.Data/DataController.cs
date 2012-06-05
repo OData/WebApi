@@ -5,12 +5,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
@@ -93,43 +90,6 @@ namespace Microsoft.Web.Http.Data
             }
 
             return true;
-        }
-
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for the lifetime of the object")]
-        public override Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
-        {
-            return base.ExecuteAsync(controllerContext, cancellationToken)
-                 .Then<HttpResponseMessage, HttpResponseMessage>(response =>
-                 {
-                     int totalCount;
-                     if (response != null &&
-                         controllerContext.Request.Properties.TryGetValue<int>(QueryFilterAttribute.TotalCountKey, out totalCount))
-                     {
-                         ObjectContent objectContent = response.Content as ObjectContent;
-                         IEnumerable results;
-                         if (objectContent != null && (results = objectContent.Value as IEnumerable) != null)
-                         {
-                             HttpResponseMessage oldResponse = response;
-                             // Client has requested the total count, so the actual response content will contain
-                             // the query results as well as the count. Create a new ObjectContent for the query results.
-                             // Because this code does not specify any formatters explicitly, it will use the
-                             // formatters in the configuration.
-                             QueryResult queryResult = new QueryResult(results, totalCount);
-                             response = response.RequestMessage.CreateResponse(oldResponse.StatusCode, queryResult);
-
-                             foreach (var header in oldResponse.Headers)
-                             {
-                                 response.Headers.Add(header.Key, header.Value);
-                             }
-                             // TODO what about content headers?
-
-                             oldResponse.RequestMessage = null;
-                             oldResponse.Dispose();
-                         }
-                     }
-
-                     return response;
-                 }, cancellationToken: cancellationToken);
         }
 
         /// <summary>

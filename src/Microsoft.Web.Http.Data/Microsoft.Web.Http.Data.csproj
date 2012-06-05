@@ -83,7 +83,6 @@
     <Compile Include="ChangeSet.cs" />
     <Compile Include="ChangeSetEntry.cs" />
     <Compile Include="DataControllerActionInvoker.cs" />
-    <Compile Include="CustomizingActionDescriptor.cs" />
     <Compile Include="DataController.cs" />
     <Compile Include="DataControllerActionSelector.cs" />
     <Compile Include="DataControllerConfigurationAttribute.cs" />
@@ -97,8 +96,6 @@
     <Compile Include="Metadata\MetadataProvider.cs" />
     <Compile Include="Metadata\MetadataProviderAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryFilterAttribute.cs" />
-    <Compile Include="QueryResult.cs" />
     <Compile Include="Resource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

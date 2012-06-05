@@ -602,6 +602,11 @@ namespace System.Web.Http.SelfHost
                 if (requestContext != null)
                 {
                     Interlocked.Increment(ref _requestsOutstanding);
+                    if (TryIncreaseWindowSize())
+                    {
+                        // Spin off an additional BeginReceiveRequest to increase the window size by 1
+                        BeginReceiveRequestContext(channelContext);
+                    }
                     ProcessRequestContext(channelContext, requestContext);
                 }
             }
@@ -742,11 +747,19 @@ namespace System.Web.Http.SelfHost
 
         private void BeginNextRequest(ChannelContext context)
         {
+            if (TryDecreaseWindowSize())
+            {
+                // Decrease the window size by 1 by avoiding calling BeginReceiveRequest
+                return;
+            }
+
+            BeginReceiveRequestContext(context);
+        }
+
+        private bool TryIncreaseWindowSize()
+        {
             if (ShouldIncreaseWindowSize())
             {
-                // This boolean avoids us calling BeginReceiveRequestContext under a lock
-                bool windowSizeIncreased = false;
-
                 // If we can't get the lock, just keep the window size the same
                 // It's better to keep the window size the same than risk affecting performance by waiting on a lock
                 // And if the lock is taken, some other thread is already updating the window size to a better value
@@ -759,7 +772,7 @@ namespace System.Web.Http.SelfHost
                         {
                             // Increase Window Size
                             _windowSize++;
-                            windowSizeIncreased = true;
+                            return true;
                         }
                     }
                     finally
@@ -767,14 +780,13 @@ namespace System.Web.Http.SelfHost
                         Monitor.Exit(_windowSizeLock);
                     }
                 }
-
-                if (windowSizeIncreased)
-                {
-                    // Spin off an additional BeginReceiveRequest to increase the window size by 1
-                    BeginReceiveRequestContext(context);
-                }
             }
-            else if (ShouldDecreaseWindowSize())
+            return false;
+        }
+
+        private bool TryDecreaseWindowSize()
+        {
+            if (ShouldDecreaseWindowSize())
             {
                 // If we can't get the lock, just keep the window size the same
                 // It's better to keep the window size the same than risk affecting performance by waiting on a lock
@@ -786,9 +798,8 @@ namespace System.Web.Http.SelfHost
                         // Recheck that we should decrease the window size to guard for changes between the time we take the lock and the time we increase the window size
                         if (ShouldDecreaseWindowSize())
                         {
-                            // Decrease the window size by 1 by avoiding calling BeginReceiveRequest
                             _windowSize--;
-                            return;
+                            return true;
                         }
                     }
                     finally
@@ -797,8 +808,7 @@ namespace System.Web.Http.SelfHost
                     }
                 }
             }
-
-            BeginReceiveRequestContext(context);
+            return false;
         }
 
         private bool ShouldIncreaseWindowSize()

@@ -14,6 +14,8 @@ namespace System.Net.Http.Formatting.Parsers
     {
         internal const int MinMessageSize = 10;
 
+        private const int MaxBoundarySize = 256;
+
         private const byte HTAB = 0x09;
         private const byte SP = 0x20;
         private const byte CR = 0x0D;
@@ -44,6 +46,11 @@ namespace System.Net.Http.Formatting.Parsers
             if (String.IsNullOrWhiteSpace(boundary))
             {
                 throw Error.ArgumentNull("boundary");
+            }
+
+            if (boundary.Length > MaxBoundarySize - 4)
+            {
+                throw Error.ArgumentMustBeLessThanOrEqualTo("boundary", boundary.Length, MaxBoundarySize - 4);
             }
 
             if (boundary.EndsWith(" ", StringComparison.Ordinal))
@@ -305,14 +312,23 @@ namespace System.Net.Http.Formatting.Parsers
                     {
                         if (++bytesConsumed == effectiveMax)
                         {
-                            currentBodyPart.AppendBoundary(buffer, segmentStart, bytesConsumed - segmentStart);
+                            if (!currentBodyPart.AppendBoundary(buffer, segmentStart, bytesConsumed - segmentStart))
+                            {
+                                currentBodyPart.ResetBoundary();
+                                bodyPartState = BodyPartState.BodyPart;
+                            }
                             goto quit;
                         }
                     }
 
                     if (bytesConsumed > segmentStart)
                     {
-                        currentBodyPart.AppendBoundary(buffer, segmentStart, bytesConsumed - segmentStart);
+                        if (!currentBodyPart.AppendBoundary(buffer, segmentStart, bytesConsumed - segmentStart))
+                        {
+                            currentBodyPart.ResetBoundary();
+                            bodyPartState = BodyPartState.BodyPart;
+                            goto case BodyPartState.BodyPart;
+                        }
                     }
 
                     // Remember potential boundary
@@ -383,16 +399,15 @@ namespace System.Net.Http.Formatting.Parsers
         /// </summary>
         private class CurrentBodyPartStore
         {
-            private const int MaxBoundarySize = 256;
             private const int InitialOffset = 2;
 
-            private byte[] _boundaryStore = new byte[CurrentBodyPartStore.MaxBoundarySize];
+            private byte[] _boundaryStore = new byte[MaxBoundarySize];
             private int _boundaryStoreLength;
 
-            private byte[] _referenceBoundary = new byte[CurrentBodyPartStore.MaxBoundarySize];
+            private byte[] _referenceBoundary = new byte[MaxBoundarySize];
             private int _referenceBoundaryLength;
 
-            private byte[] _boundary = new byte[CurrentBodyPartStore.MaxBoundarySize];
+            private byte[] _boundary = new byte[MaxBoundarySize];
             private int _boundaryLength = 0;
 
             private ArraySegment<byte> _bodyPart = MimeMultipartParser._emptyBodyPart;
@@ -407,6 +422,8 @@ namespace System.Net.Http.Formatting.Parsers
             /// <param name="referenceBoundary">The reference boundary.</param>
             public CurrentBodyPartStore(string referenceBoundary)
             {
+                Contract.Assert(referenceBoundary != null);
+
                 _referenceBoundary[0] = MimeMultipartParser.CR;
                 _referenceBoundary[1] = MimeMultipartParser.LF;
                 _referenceBoundary[2] = MimeMultipartParser.Dash;
@@ -499,10 +516,15 @@ namespace System.Net.Http.Formatting.Parsers
             /// <param name="data">The data to append to the boundary.</param>
             /// <param name="offset">The offset into the data.</param>
             /// <param name="count">The number of bytes to append.</param>
-            public void AppendBoundary(byte[] data, int offset, int count)
+            public bool AppendBoundary(byte[] data, int offset, int count)
             {
+                if (_boundaryLength + count > MaxBoundarySize)
+                {
+                    return false;
+                }
                 Buffer.BlockCopy(data, offset, _boundary, _boundaryLength, count);
                 _boundaryLength += count;
+                return true;
             }
 
             /// <summary>

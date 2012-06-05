@@ -148,6 +148,16 @@ namespace System.Net.Http.Formatting.Parsers
             Assert.ThrowsArgumentNull(() => { new MimeMultipartParser(null, ParserData.MinMessageSize); }, "boundary");
         }
 
+        [Fact]
+        public void MimeMultipartParser_ThrowsOnTooBigBoundary()
+        {
+            string maxLegalBoundary = new string('a', 252);
+            MimeMultipartParser parser = new MimeMultipartParser(maxLegalBoundary, ParserData.MinMessageSize);
+
+            string minIllegalBoundary = new string('a', 253);
+            Assert.ThrowsArgumentLessThanOrEqualTo(() => new MimeMultipartParser(minIllegalBoundary, ParserData.MinMessageSize),
+                "boundary", "252", "253");
+        }
 
         [Fact]
         public void MultipartParserNullBuffer()

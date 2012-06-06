@@ -17,6 +17,7 @@ using Microsoft.Win32;
 
 namespace System.Web.WebPages.Deployment
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class WebPagesDeployment
     {
         private const string AppSettingsVersionKey = "webpages:Version";
@@ -40,15 +41,13 @@ namespace System.Web.WebPages.Deployment
         /// </remarks>
         public static Version GetVersionWithoutEnabledCheck(string path)
         {
-            if (String.IsNullOrEmpty(path))
-            {
-                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
-            }
-
-            var binDirectory = GetBinDirectory(path);
-            var binVersion = AssemblyUtils.GetVersionFromBin(binDirectory, _fileSystem);
             var maxVersion = AssemblyUtils.GetMaxWebPagesVersion();
-            return GetVersionInternal(GetAppSettings(path), binVersion, maxVersion);
+            return GetVersionWithoutEnabledCheckInternal(path, maxVersion);
+        }
+
+        public static Version GetExplicitWebPagesVersion(string path)
+        {
+            return GetVersionWithoutEnabledCheckInternal(path, defaultVersion: null);
         }
 
         [Obsolete("This method is obsolete and is meant for legacy code. Use GetVersionWithoutEnabled instead.")]
@@ -182,6 +181,19 @@ namespace System.Web.WebPages.Deployment
             // 2) Version in bin
             // 3) defaultVersion.
             return GetVersionFromConfig(appSettings) ?? binVersion ?? defaultVersion;
+        }
+
+        private static Version GetVersionWithoutEnabledCheckInternal(string path, Version defaultVersion)
+        {
+            if (String.IsNullOrEmpty(path))
+            {
+                throw ExceptionHelper.CreateArgumentNullOrEmptyException("path");
+            }
+
+            var binDirectory = GetBinDirectory(path);
+            var binVersion = AssemblyUtils.GetVersionFromBin(binDirectory, _fileSystem);
+
+            return GetVersionInternal(GetAppSettings(path), binVersion, defaultVersion);
         }
 
         /// <summary>

@@ -149,11 +149,15 @@ namespace System.Web.WebPages.Deployment.Test
 
                 using (WebUtils.CreateHttpRuntime(@"~\foo", "."))
                 {
+                    string path = Path.Combine(_tempPath, @"ConfigTestSites\CshtmlFileConfigV1");
+
                     // Act
-                    Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(Path.Combine(_tempPath, @"ConfigTestSites\CshtmlFileConfigV1"));
+                    Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(path);
+                    Version explicitVersion = WebPagesDeployment.GetExplicitWebPagesVersion(path);
 
                     // Assert
                     Assert.Equal(new Version(1, 0, 0, 0), ver);
+                    Assert.Equal(new Version(1, 0, 0, 0), explicitVersion);
                 }
             });
         }
@@ -170,11 +174,15 @@ namespace System.Web.WebPages.Deployment.Test
 
                 using (WebUtils.CreateHttpRuntime(@"~\foo", "."))
                 {
+                    string path = Path.Combine(_tempPath, @"ConfigTestSites\NoCshtmlConfigV1");
+
                     // Act
-                    Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(Path.Combine(_tempPath, @"ConfigTestSites\NoCshtmlConfigV1"));
+                    Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(path);
+                    Version explicitVersion = WebPagesDeployment.GetExplicitWebPagesVersion(path);
 
                     // Assert
                     Assert.Equal(new Version(1, 0, 0, 0), ver);
+                    Assert.Equal(new Version(1, 0, 0, 0), explicitVersion);
                 }
             });
         }
@@ -201,7 +209,7 @@ namespace System.Web.WebPages.Deployment.Test
         }
 
         [Fact]
-        public void GetVersionReturnsVMaxAssemblyVersionIfCshtmlFilePresent()
+        public void GetVersionReturnsVMaxAssemblyVersionIfCshtmlFilePresentButNoVersionIsSpecifiedInConfigOrBin()
         {
             AppDomainUtils.RunInSeparateAppDomain(() =>
             {
@@ -212,11 +220,15 @@ namespace System.Web.WebPages.Deployment.Test
 
                 using (WebUtils.CreateHttpRuntime(@"~\foo", "."))
                 {
+                    string path = Path.Combine(_tempPath, @"ConfigTestSites\CshtmlFileNoVersion");
+
                     // Act
-                    Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(Path.Combine(_tempPath, @"ConfigTestSites\CshtmlFileNoVersion"));
+                    Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(path);
+                    Version explicitVersion = WebPagesDeployment.GetExplicitWebPagesVersion(path);
 
                     // Assert
                     Assert.Equal(MaxVersion, ver);
+                    Assert.Null(explicitVersion);
                 }
             });
         }

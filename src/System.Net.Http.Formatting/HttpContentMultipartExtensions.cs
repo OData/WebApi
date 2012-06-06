@@ -119,10 +119,11 @@ namespace System.Net.Http
                 throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
+            MimeMultipartBodyPartParser parser = null;
             return content.ReadAsStreamAsync().Then(stream =>
             {
                 TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
-                MimeMultipartBodyPartParser parser = new MimeMultipartBodyPartParser(content, streamProvider);
+                parser = new MimeMultipartBodyPartParser(content, streamProvider);
                 byte[] data = new byte[bufferSize];
                 MultipartAsyncContext context = new MultipartAsyncContext(content, stream, taskCompletionSource, parser, data, streamProvider.Contents);
 
@@ -131,7 +132,13 @@ namespace System.Net.Http
 
                 // Return task and complete when we have run the post processing step.
                 return taskCompletionSource.Task.Then(() => streamProvider.ExecutePostProcessingAsync().ToTask<T>(result: streamProvider));
-            });
+            }).Finally(() =>
+            {
+                if (parser != null)
+                {
+                    parser.Dispose();
+                }
+            }, runSynchronously: true);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]

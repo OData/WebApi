@@ -1,4 +1,8 @@
-﻿@Code
+﻿@Helper Link(ByVal url As String, text As String) 
+    @<a href="@url">@text</a> 
+End Helper 
+
+@Code
     Dim ch = True
     Dim cls = "bar"
     @<a href="Foo" />

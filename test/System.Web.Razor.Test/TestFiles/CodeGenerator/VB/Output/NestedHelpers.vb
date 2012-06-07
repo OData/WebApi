@@ -26,18 +26,24 @@ Return New Template(Sub (__razor_helper_writer)
                              
         s = s.ToUpper()
 
+
 #End ExternalSource
 WriteLiteralTo(__razor_helper_writer, "        ")
+
 WriteLiteralTo(__razor_helper_writer, "<strong>")
+
 
 #ExternalSource("NestedHelpers.vbhtml", 5)
 WriteTo(__razor_helper_writer, s)
 
+
 #End ExternalSource
 WriteLiteralTo(__razor_helper_writer, "</strong>"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
 
+
 #ExternalSource("NestedHelpers.vbhtml", 6)
     
+
 #End ExternalSource
 End Sub)
 End Function
@@ -52,22 +58,29 @@ Return New Template(Sub (__razor_helper_writer)
                            
     s = s.ToUpper()
     
+
 #End ExternalSource
 
 #ExternalSource("NestedHelpers.vbhtml", 6)
               
 
+
 #End ExternalSource
 WriteLiteralTo(__razor_helper_writer, "    ")
+
 WriteLiteralTo(__razor_helper_writer, "<em>")
+
 
 #ExternalSource("NestedHelpers.vbhtml", 7)
 WriteTo(__razor_helper_writer, Bold(s))
 
+
 #End ExternalSource
 WriteLiteralTo(__razor_helper_writer, "</em>"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
 
+
 #ExternalSource("NestedHelpers.vbhtml", 8)
+
 
 #End ExternalSource
 End Sub)

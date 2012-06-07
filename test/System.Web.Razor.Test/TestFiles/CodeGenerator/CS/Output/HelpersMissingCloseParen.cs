@@ -23,18 +23,23 @@ return new Template(__razor_helper_writer => {
                         
     s = s.ToUpper();
 
+
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "    <strong>");
 
+
 #line 3 "HelpersMissingCloseParen.cshtml"
 WriteTo(__razor_helper_writer, s);
+
 
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "</strong>\r\n");
 
+
 #line 4 "HelpersMissingCloseParen.cshtml"
+
 
 #line default
 #line hidden

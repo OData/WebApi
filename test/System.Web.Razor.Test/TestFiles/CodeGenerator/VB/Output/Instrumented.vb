@@ -25,25 +25,39 @@ Return New Template(Sub (__razor_helper_writer)
 #ExternalSource("Instrumented.vbhtml", 1)
                            
 
+
 #End ExternalSource
 BeginContext(__razor_helper_writer, "~/Instrumented.vbhtml", 29, 4, true)
+
 WriteLiteralTo(__razor_helper_writer, "    ")
+
 EndContext(__razor_helper_writer, "~/Instrumented.vbhtml", 29, 4, true)
+
 BeginContext(__razor_helper_writer, "~/Instrumented.vbhtml", 34, 8, true)
+
 WriteLiteralTo(__razor_helper_writer, "<strong>")
+
 EndContext(__razor_helper_writer, "~/Instrumented.vbhtml", 34, 8, true)
+
 BeginContext(__razor_helper_writer, "~/Instrumented.vbhtml", 43, 1, false)
+
 
 #ExternalSource("Instrumented.vbhtml", 2)
 WriteTo(__razor_helper_writer, s)
 
+
 #End ExternalSource
 EndContext(__razor_helper_writer, "~/Instrumented.vbhtml", 43, 1, false)
+
 BeginContext(__razor_helper_writer, "~/Instrumented.vbhtml", 44, 11, true)
+
 WriteLiteralTo(__razor_helper_writer, "</strong>"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
+
 EndContext(__razor_helper_writer, "~/Instrumented.vbhtml", 44, 11, true)
 
+
 #ExternalSource("Instrumented.vbhtml", 3)
+
 
 #End ExternalSource
 End Sub)

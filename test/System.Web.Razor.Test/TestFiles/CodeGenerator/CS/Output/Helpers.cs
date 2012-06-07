@@ -23,18 +23,23 @@ return new Template(__razor_helper_writer => {
                         
     s = s.ToUpper();
 
+
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "    <strong>");
 
+
 #line 3 "Helpers.cshtml"
 WriteTo(__razor_helper_writer, s);
+
 
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "</strong>\r\n");
 
+
 #line 4 "Helpers.cshtml"
+
 
 #line default
 #line hidden
@@ -55,18 +60,23 @@ return new Template(__razor_helper_writer => {
                           
     s = s.ToUpper();
 
+
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "    <em>");
 
+
 #line 8 "Helpers.cshtml"
 WriteTo(__razor_helper_writer, s);
+
 
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "</em>\r\n");
 
+
 #line 9 "Helpers.cshtml"
+
 
 #line default
 #line hidden

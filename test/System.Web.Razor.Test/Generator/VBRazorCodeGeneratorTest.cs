@@ -85,16 +85,6 @@ namespace System.Web.Razor.Test.Generator
             RunTest(testName);
         }
 
-        //// To regenerate individual baselines, uncomment this and set the appropriate test name in the Inline Data.
-        //// Please comment out again after regenerating.
-        //// TODO: Remove this when we go to a Source Control system that doesn't lock files, thus requiring we unlock them to regenerate them :(
-        //[Theory]
-        //[InlineData("RazorComments")]
-        //public void VBCodeGeneratorCorrectlyGeneratesRunTimeCode2(string testType)
-        //{
-        //    RunTest(testType);
-        //}
-
         [Fact]
         public void VBCodeGeneratorCorrectlyGeneratesMappingsForRazorCommentsAtDesignTime()
         {

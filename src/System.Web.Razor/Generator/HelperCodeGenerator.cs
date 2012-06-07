@@ -105,6 +105,7 @@ namespace System.Web.Razor.Generator
                 _writer.WriteLinePragma(pragma);
             }
             _writer.WriteSnippet(statement);
+            _writer.InnerWriter.WriteLine(); // CodeDOM normally inserts an extra line so we need to do so here.
             if (pragma != null)
             {
                 _writer.WriteLinePragma();

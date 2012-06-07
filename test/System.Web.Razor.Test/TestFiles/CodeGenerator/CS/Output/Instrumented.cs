@@ -22,24 +22,35 @@ return new Template(__razor_helper_writer => {
 #line 1 "Instrumented.cshtml"
                           
 
+
 #line default
 #line hidden
 BeginContext(__razor_helper_writer, "~/Instrumented.cshtml", 28, 12, true);
+
 WriteLiteralTo(__razor_helper_writer, "    <strong>");
+
 EndContext(__razor_helper_writer, "~/Instrumented.cshtml", 28, 12, true);
+
 BeginContext(__razor_helper_writer, "~/Instrumented.cshtml", 41, 1, false);
+
 
 #line 2 "Instrumented.cshtml"
 WriteTo(__razor_helper_writer, s);
 
+
 #line default
 #line hidden
 EndContext(__razor_helper_writer, "~/Instrumented.cshtml", 41, 1, false);
+
 BeginContext(__razor_helper_writer, "~/Instrumented.cshtml", 42, 11, true);
+
 WriteLiteralTo(__razor_helper_writer, "</strong>\r\n");
+
 EndContext(__razor_helper_writer, "~/Instrumented.cshtml", 42, 11, true);
 
+
 #line 3 "Instrumented.cshtml"
+
 
 #line default
 #line hidden

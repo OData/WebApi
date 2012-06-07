@@ -15,12 +15,53 @@ Imports System
 
 Namespace TestOutput
 Public Class ConditionalAttributes
+
+#ExternalSource("ConditionalAttributes.vbhtml", 1)
+Public Shared Function Link(ByVal url As String, text As String) As Template
+
+#End ExternalSource
+Return New Template(Sub (__razor_helper_writer)
+
+#ExternalSource("ConditionalAttributes.vbhtml", 1)
+                                                  
+
+
+#End ExternalSource
+WriteLiteralTo(__razor_helper_writer, "    ")
+
+WriteLiteralTo(__razor_helper_writer, "<a")
+
+WriteAttributeTo(__razor_helper_writer, "href", Tuple.Create(" href=""", 59), Tuple.Create("""", 70) _
+, Tuple.Create(Tuple.Create("", 66), Tuple.Create(Of System.Object, System.Int32)(url _
+, 66), False) _
+)
+
+WriteLiteralTo(__razor_helper_writer, ">")
+
+
+#ExternalSource("ConditionalAttributes.vbhtml", 2)
+WriteTo(__razor_helper_writer, text)
+
+
+#End ExternalSource
+WriteLiteralTo(__razor_helper_writer, "</a> "&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
+
+
+#ExternalSource("ConditionalAttributes.vbhtml", 3)
+
+
+#End ExternalSource
+End Sub)
+End Function
+
 Public Sub New()
 MyBase.New
 End Sub
 Public Overrides Sub Execute()
+WriteLiteral(" "&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
 
-#ExternalSource("ConditionalAttributes.vbhtml",1)
+
+#ExternalSource("ConditionalAttributes.vbhtml",5)
      
     Dim ch = True
     Dim cls = "bar"
@@ -39,9 +80,9 @@ WriteLiteral("    ")
 
 WriteLiteral("<p")
 
-WriteAttribute("class", Tuple.Create(" class=""", 77), Tuple.Create("""", 89) _
-, Tuple.Create(Tuple.Create("", 85), Tuple.Create(Of System.Object, System.Int32)(cls _
-, 85), False) _
+WriteAttribute("class", Tuple.Create(" class=""", 176), Tuple.Create("""", 188) _
+, Tuple.Create(Tuple.Create("", 184), Tuple.Create(Of System.Object, System.Int32)(cls _
+, 184), False) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
@@ -50,10 +91,10 @@ WriteLiteral("    ")
 
 WriteLiteral("<p")
 
-WriteAttribute("class", Tuple.Create(" class=""", 102), Tuple.Create("""", 118) _
-, Tuple.Create(Tuple.Create("", 110), Tuple.Create("foo", 110), True) _
-, Tuple.Create(Tuple.Create(" ", 113), Tuple.Create(Of System.Object, System.Int32)(cls _
-, 114), False) _
+WriteAttribute("class", Tuple.Create(" class=""", 201), Tuple.Create("""", 217) _
+, Tuple.Create(Tuple.Create("", 209), Tuple.Create("foo", 209), True) _
+, Tuple.Create(Tuple.Create(" ", 212), Tuple.Create(Of System.Object, System.Int32)(cls _
+, 213), False) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
@@ -62,10 +103,10 @@ WriteLiteral("    ")
 
 WriteLiteral("<p")
 
-WriteAttribute("class", Tuple.Create(" class=""", 131), Tuple.Create("""", 147) _
-, Tuple.Create(Tuple.Create("", 139), Tuple.Create(Of System.Object, System.Int32)(cls _
-, 139), False) _
-, Tuple.Create(Tuple.Create(" ", 143), Tuple.Create("foo", 144), True) _
+WriteAttribute("class", Tuple.Create(" class=""", 230), Tuple.Create("""", 246) _
+, Tuple.Create(Tuple.Create("", 238), Tuple.Create(Of System.Object, System.Int32)(cls _
+, 238), False) _
+, Tuple.Create(Tuple.Create(" ", 242), Tuple.Create("foo", 243), True) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
@@ -76,9 +117,9 @@ WriteLiteral("<input")
 
 WriteLiteral(" type=""checkbox""")
 
-WriteAttribute("checked", Tuple.Create(" checked=""", 180), Tuple.Create("""", 193) _
-, Tuple.Create(Tuple.Create("", 190), Tuple.Create(Of System.Object, System.Int32)(ch _
-, 190), False) _
+WriteAttribute("checked", Tuple.Create(" checked=""", 279), Tuple.Create("""", 292) _
+, Tuple.Create(Tuple.Create("", 289), Tuple.Create(Of System.Object, System.Int32)(ch _
+, 289), False) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
@@ -89,10 +130,10 @@ WriteLiteral("<input")
 
 WriteLiteral(" type=""checkbox""")
 
-WriteAttribute("checked", Tuple.Create(" checked=""", 226), Tuple.Create("""", 243) _
-, Tuple.Create(Tuple.Create("", 236), Tuple.Create("foo", 236), True) _
-, Tuple.Create(Tuple.Create(" ", 239), Tuple.Create(Of System.Object, System.Int32)(ch _
-, 240), False) _
+WriteAttribute("checked", Tuple.Create(" checked=""", 325), Tuple.Create("""", 342) _
+, Tuple.Create(Tuple.Create("", 335), Tuple.Create("foo", 335), True) _
+, Tuple.Create(Tuple.Create(" ", 338), Tuple.Create(Of System.Object, System.Int32)(ch _
+, 339), False) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
@@ -101,26 +142,26 @@ WriteLiteral("    ")
 
 WriteLiteral("<p")
 
-WriteAttribute("class", Tuple.Create(" class=""", 256), Tuple.Create("""", 302) _
-, Tuple.Create(Tuple.Create("", 264), Tuple.Create(Of System.Object, System.Int32)(New Template(Sub (__razor_attribute_value_writer)
+WriteAttribute("class", Tuple.Create(" class=""", 355), Tuple.Create("""", 401) _
+, Tuple.Create(Tuple.Create("", 363), Tuple.Create(Of System.Object, System.Int32)(New Template(Sub (__razor_attribute_value_writer)
 
 
-#ExternalSource("ConditionalAttributes.vbhtml",10)
+#ExternalSource("ConditionalAttributes.vbhtml",14)
                 If cls IsNot Nothing Then 
 
 #End ExternalSource
 
-#ExternalSource("ConditionalAttributes.vbhtml",10)
+#ExternalSource("ConditionalAttributes.vbhtml",14)
    WriteTo(__razor_attribute_value_writer, cls)
 
 
 #End ExternalSource
 
-#ExternalSource("ConditionalAttributes.vbhtml",10)
+#ExternalSource("ConditionalAttributes.vbhtml",14)
                                                End If
 
 #End ExternalSource
-End Sub), 264), False) _
+End Sub), 363), False) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
@@ -129,15 +170,15 @@ WriteLiteral("    ")
 
 WriteLiteral("<a")
 
-WriteAttribute("href", Tuple.Create(" href=""", 315), Tuple.Create("""", 327) _
-, Tuple.Create(Tuple.Create("", 322), Tuple.Create(Of System.Object, System.Int32)(Href("~/Foo") _
-, 322), False) _
+WriteAttribute("href", Tuple.Create(" href=""", 414), Tuple.Create("""", 426) _
+, Tuple.Create(Tuple.Create("", 421), Tuple.Create(Of System.Object, System.Int32)(Href("~/Foo") _
+, 421), False) _
 )
 
 WriteLiteral(" />"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10))
 
 
-#ExternalSource("ConditionalAttributes.vbhtml",12)
+#ExternalSource("ConditionalAttributes.vbhtml",16)
 
 
 #End ExternalSource

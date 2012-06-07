@@ -23,19 +23,24 @@ return new Template(__razor_helper_writer => {
                             
         s = s.ToUpper();
 
+
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "        <strong>");
 
+
 #line 5 "NestedHelpers.cshtml"
 WriteTo(__razor_helper_writer, s);
+
 
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "</strong>\r\n");
 
+
 #line 6 "NestedHelpers.cshtml"
     
+
 #line default
 #line hidden
 });
@@ -55,24 +60,30 @@ return new Template(__razor_helper_writer => {
                           
     s = s.ToUpper();
     
+
 #line default
 #line hidden
 
 #line 6 "NestedHelpers.cshtml"
      
 
+
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "    <em>");
 
+
 #line 7 "NestedHelpers.cshtml"
 WriteTo(__razor_helper_writer, Bold(s));
+
 
 #line default
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "</em>\r\n");
 
+
 #line 8 "NestedHelpers.cshtml"
+
 
 #line default
 #line hidden

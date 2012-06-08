@@ -3,8 +3,8 @@
 using System.Collections.Specialized;
 using Microsoft.TestCommon;
 using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 using Xunit.Extensions;
+using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Headers
 {

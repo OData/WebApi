@@ -11,7 +11,7 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Internal
 {
-    class HttpValueCollectionTest
+    public class HttpValueCollectionTest
     {
         public static TheoryDataSet<IEnumerable<KeyValuePair<string, string>>> KeyValuePairs
         {

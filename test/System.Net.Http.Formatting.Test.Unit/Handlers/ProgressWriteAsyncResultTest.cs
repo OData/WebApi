@@ -9,7 +9,7 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Handlers
 {
-    class ProgressWriteAsyncResultTest
+    public class ProgressWriteAsyncResultTest
     {
         static readonly byte[] sampleData = Encoding.UTF8.GetBytes("Hello World! Hello World! Hello World! Hello World! Hello World!");
 

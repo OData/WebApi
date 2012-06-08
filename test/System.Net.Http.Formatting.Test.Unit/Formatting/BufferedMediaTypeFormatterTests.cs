@@ -6,10 +6,10 @@ using System.Linq;
 using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
 using System.Text;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
-using Xunit.Extensions;
 using System.Threading.Tasks;
+using Xunit;
+using Xunit.Extensions;
+using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

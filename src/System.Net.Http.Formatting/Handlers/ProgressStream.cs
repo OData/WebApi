@@ -18,10 +18,10 @@ namespace System.Net.Http.Handlers
         private readonly ProgressMessageHandler _handler;
         private readonly HttpRequestMessage _request;
 
-        private int _bytesReceived;
+        private long _bytesReceived;
         private long? _totalBytesToReceive;
 
-        private int _bytesSent;
+        private long _bytesSent;
         private long? _totalBytesToSend;
 
         public ProgressStream(Stream innerStream, ProgressMessageHandler handler, HttpRequestMessage request, HttpResponseMessage response)

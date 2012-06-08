@@ -13,8 +13,8 @@ namespace System.Net.Http.Handlers
             // Arrange
             int progressPercentage = 10;
             object userState = new object();
-            int bytesTransferred = 1024;
-            long? totalBytes = 1024 * 1024;
+            long bytesTransferred = 10L * 1024 * 1024 * 1024;
+            long? totalBytes = 10L * 1024 * 1024 * 1024;
 
             // Act
             HttpProgressEventArgs args = new HttpProgressEventArgs(progressPercentage, userState, bytesTransferred, totalBytes);

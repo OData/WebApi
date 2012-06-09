@@ -73,13 +73,9 @@ namespace System.Web.Http.Routing
             }
         }
 
-        #region IRouteConstraint Members
-
         bool IHttpRouteConstraint.Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
             return Match(request, route, parameterName, values, routeDirection);
         }
-
-        #endregion
     }
 }

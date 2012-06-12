@@ -178,6 +178,32 @@ namespace System.Web.WebPages.Deployment.Test
         }
 
         [Fact]
+        public void GetMatchingAssembliesReturnsEmptyDictionaryIfAssemblyReferencesCollectionIsNull()
+        {
+            // Arrange
+            Dictionary<string, IEnumerable<string>> assemblyReferences = null;
+
+            // Act
+            var referencedAssemblies = AssemblyUtils.GetAssembliesMatchingOtherVersions(assemblyReferences);
+
+            // Assert
+            Assert.Empty(referencedAssemblies);
+        }
+
+        [Fact]
+        public void GetMatchingAssembliesReturnsEmptyDictionaryIfAssemblyReferencesCollectionIsEmpty()
+        {
+            // Arrange
+            var assemblyReferences = new Dictionary<string, IEnumerable<string>>();
+
+            // Act
+            var referencedAssemblies = AssemblyUtils.GetAssembliesMatchingOtherVersions(assemblyReferences);
+
+            // Assert
+            Assert.Empty(referencedAssemblies);
+        }
+
+        [Fact]
         public void GetMatchingAssembliesReturnsEmptyDictionaryIfNoReferencesMatchWebPagesAssemblies()
         {
             // Arrange
@@ -186,12 +212,6 @@ namespace System.Web.WebPages.Deployment.Test
                 { @"x:\site\bin\A.dll", new List<string> { "mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null" }},
                 { @"x:\site\bin\B.dll", new List<string> { "System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" }},
             };
-
-            var a = "1";
-            var b = "2";
-
-            var c = new { a, b };
-            Console.WriteLine(c.a);
 
             // Act
             var referencedAssemblies = AssemblyUtils.GetAssembliesMatchingOtherVersions(assemblyReferences);

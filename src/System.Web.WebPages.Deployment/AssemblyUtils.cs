@@ -158,7 +158,7 @@ namespace System.Web.WebPages.Deployment
         public static IDictionary<string, Version> GetAssembliesMatchingOtherVersions(IDictionary<string, IEnumerable<string>> references)
         {
             var webPagesAssemblies = AssemblyUtils.GetAssembliesForVersion(AssemblyUtils.ThisAssemblyName.Version);
-            if (webPagesAssemblies == null || !webPagesAssemblies.Any())
+            if (references == null || webPagesAssemblies == null || !webPagesAssemblies.Any())
             {
                 return new Dictionary<string, Version>(0);
             }

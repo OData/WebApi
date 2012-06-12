@@ -151,7 +151,7 @@ namespace System.Net.Http.Handlers
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
 
-        [Fact]
+        [Fact(Timeout = 5000)]
         public void BeginEndWrite_ReportsBytesWritten()
         {
             // Arrange

@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -83,6 +84,7 @@ namespace System.Web.Mvc.Async
             return base.UniqueId + DescriptorUtil.CreateUniqueId(TaskMethodInfo);
         }
 
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This is commented in great detail.")]
         public override IAsyncResult BeginExecute(ControllerContext controllerContext, IDictionary<string, object> parameters, AsyncCallback callback, object state)
         {
             if (controllerContext == null)
@@ -168,10 +170,32 @@ namespace System.Web.Mvc.Async
             // if user supplied a callback, invoke that when their task has finished running. 
             if (callback != null)
             {
-                taskUser.Finally(() =>
+                if (taskUser.IsCompleted)
                 {
+                    // If the underlying task is already finished, from our caller's perspective this is just
+                    // a synchronous completion.
+                    result.CompletedSynchronously = true;
                     callback(result);
-                });
+                }
+                else
+                {
+                    // If the underlying task isn't yet finished, from our caller's perspective this will be
+                    // an asynchronous completion. We'll use ContinueWith instead of Finally for two reasons:
+                    //
+                    // - Finally propagates the antecedent Task's exception, which we don't need to do here.
+                    //   Out caller will eventually call EndExecute, which correctly observes the
+                    //   antecedent Task's exception anyway if it faulted.
+                    //
+                    // - Finally invokes the callback on the captured SynchronizationContext, which is
+                    //   unnecessary when using APM (Begin / End). APM assumes that the callback is invoked
+                    //   on an arbitrary ThreadPool thread with no SynchronizationContext set up, so
+                    //   ContinueWith gets us closer to the desired semantic.
+                    result.CompletedSynchronously = false;
+                    taskUser.ContinueWith(_ =>
+                    {
+                        callback(result);
+                    });
+                }
             }
 
             return result;

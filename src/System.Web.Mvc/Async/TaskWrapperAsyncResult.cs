@@ -11,6 +11,8 @@ namespace System.Web.Mvc.Async
     /// </summary>
     internal sealed class TaskWrapperAsyncResult : IAsyncResult
     {
+        private bool? _completedSynchronously;
+
         internal TaskWrapperAsyncResult(Task task, object asyncState, Action cleanupThunk = null)
         {
             Task = task;
@@ -30,9 +32,14 @@ namespace System.Web.Mvc.Async
         /// </summary>
         public Action CleanupThunk { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the asynchronous operation completed synchronously.
+        /// </summary>
+        /// <returns>true if the asynchronous operation completed synchronously; otherwise, false.</returns>
         public bool CompletedSynchronously
         {
-            get { return ((IAsyncResult)Task).CompletedSynchronously; }
+            get { return _completedSynchronously ?? ((IAsyncResult)Task).CompletedSynchronously; }
+            internal set { _completedSynchronously = value; }
         }
 
         public bool IsCompleted

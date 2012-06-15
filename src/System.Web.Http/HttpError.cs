@@ -69,7 +69,7 @@ namespace System.Web.Http
                 Add(StackTraceKey, exception.StackTrace);
                 if (exception.InnerException != null)
                 {
-                    Add(InnerExceptionKey, exception.InnerException);
+                    Add(InnerExceptionKey, new HttpError(exception.InnerException, includeErrorDetail));
                 }
             }
         }

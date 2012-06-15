@@ -316,11 +316,12 @@ namespace System.Web.Http.WebHost
             Assert.Equal("The 'ObjectContent`1' type failed to serialize the response body for content type 'application/json; charset=utf-8'.", httpError["ExceptionMessage"]);
             Assert.Equal(typeof(InvalidOperationException).FullName, httpError["ExceptionType"]);
             Assert.True(httpError.ContainsKey("StackTrace"));
-            JObject jObject = httpError["InnerException"] as JObject;
-            Assert.NotNull(jObject);
-            Assert.Equal(typeof(NotSupportedException).FullName, jObject["ClassName"].ToString());
-            Assert.Equal("Expected error", jObject["Message"].ToString());
-            Assert.Contains(MethodInfo.GetCurrentMethod().Name, jObject["StackTraceString"].ToString());
+
+            HttpError innerError = (httpError["InnerException"] as JObject).ToObject<HttpError>();
+            Assert.NotNull(innerError);
+            Assert.Equal(typeof(NotSupportedException).FullName, innerError["ExceptionType"].ToString());
+            Assert.Equal("Expected error", innerError["ExceptionMessage"]);
+            Assert.Contains(MethodInfo.GetCurrentMethod().Name, innerError["StackTrace"].ToString());
         }
 
         [Fact]
@@ -362,11 +363,12 @@ namespace System.Web.Http.WebHost
             Assert.Equal("The 'ObjectContent`1' type failed to serialize the response body for content type 'application/json; charset=utf-8'.", httpError["ExceptionMessage"]);
             Assert.Equal(typeof(InvalidOperationException).FullName, httpError["ExceptionType"]);
             Assert.True(httpError.ContainsKey("StackTrace"));
-            JObject jObject = httpError["InnerException"] as JObject;
-            Assert.NotNull(jObject);
-            Assert.Equal(typeof(NotSupportedException).FullName, jObject["ClassName"].ToString());
-            Assert.Equal("Expected error", jObject["Message"].ToString());
-            Assert.Contains("System.Net.Http.HttpContent.CopyToAsync", jObject["StackTraceString"].ToString());
+
+            HttpError innerError = (httpError["InnerException"] as JObject).ToObject<HttpError>();
+            Assert.NotNull(innerError);
+            Assert.Equal(typeof(NotSupportedException).FullName, innerError["ExceptionType"].ToString());
+            Assert.Equal("Expected error", innerError["ExceptionMessage"]);
+            Assert.Contains("System.Net.Http.HttpContent.CopyToAsync", innerError["StackTrace"].ToString());
         }
 
         [Fact]

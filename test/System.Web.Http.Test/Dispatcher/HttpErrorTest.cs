@@ -44,6 +44,7 @@ namespace System.Web.Http.Dispatcher
             Assert.Contains(new KeyValuePair<string, object>("ExceptionType", "System.ArgumentException"), error);
             Assert.True(error.ContainsKey("StackTrace"));
             Assert.True(error.ContainsKey("InnerException"));
+            Assert.IsType<HttpError>(error["InnerException"]);
         }
 
         [Fact]
@@ -167,6 +168,23 @@ namespace System.Web.Http.Dispatcher
             Assert.Equal("error", roundtrippedError.Message);
             Assert.Equal("42", roundtrippedError["ErrorCode"]);
             Assert.Equal("a b c", roundtrippedError["Data"]);
+        }
+
+        [Fact]
+        public void HttpErrorForInnerException_Serializes_WithXmlSerializer()
+        {
+            HttpError error = new HttpError(new ArgumentException("error", new Exception("innerError")), includeErrorDetail: true);
+            MediaTypeFormatter formatter = new XmlMediaTypeFormatter() { UseXmlSerializer = true };
+            MemoryStream stream = new MemoryStream();
+
+            formatter.WriteToStreamAsync(typeof(HttpError), error, stream, content: null, transportContext: null).Wait();
+            stream.Position = 0;
+            string serializedError = new StreamReader(stream).ReadToEnd();
+
+            Assert.NotNull(serializedError);
+            Assert.Equal(
+                "<Error><Message>An error has occurred.</Message><ExceptionMessage>error</ExceptionMessage><ExceptionType>System.ArgumentException</ExceptionType><StackTrace /><InnerException><Message>An error has occurred.</Message><ExceptionMessage>innerError</ExceptionMessage><ExceptionType>System.Exception</ExceptionType><StackTrace /></InnerException></Error>",
+                serializedError);
         }
     }
 }

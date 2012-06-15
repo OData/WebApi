@@ -16,7 +16,6 @@ namespace System.Web.WebPages.Deployment.Test
     public class WebPagesDeploymentTest : IDisposable
     {
         private const string TestNamespacePrefix = "System.Web.WebPages.Deployment.Test.TestFiles.";
-        private static readonly Version MaxVersion = new Version(2, 0, 0, 0);
 
         private static readonly IDictionary<string, string> _deploymentPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -203,13 +202,13 @@ namespace System.Web.WebPages.Deployment.Test
                     Version ver = WebPagesDeployment.GetVersionWithoutEnabledCheck(Path.Combine(_tempPath, @"ConfigTestSites\CshtmlFileNoVersion"));
 
                     // Assert
-                    Assert.Equal(MaxVersion, ver);
+                    Assert.Equal(new Version("1.0.0.0"), ver);
                 }
             });
         }
 
         [Fact]
-        public void GetVersionReturnsVMaxAssemblyVersionIfCshtmlFilePresentButNoVersionIsSpecifiedInConfigOrBin()
+        public void GetVersionReturnsV1IfCshtmlFilePresentButNoVersionIsSpecifiedInConfigOrBin()
         {
             AppDomainUtils.RunInSeparateAppDomain(() =>
             {
@@ -227,7 +226,7 @@ namespace System.Web.WebPages.Deployment.Test
                     Version explicitVersion = WebPagesDeployment.GetExplicitWebPagesVersion(path);
 
                     // Assert
-                    Assert.Equal(MaxVersion, ver);
+                    Assert.Equal(new Version("1.0.0.0"), ver);
                     Assert.Null(explicitVersion);
                 }
             });
@@ -257,7 +256,7 @@ namespace System.Web.WebPages.Deployment.Test
             var configuration = new NameValueCollection();
 
             // Act and Assert
-            Assert.ThrowsArgumentNullOrEmptyString(() => WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem, () => new Version("2.0.0.0")), "path");
+            Assert.ThrowsArgumentNullOrEmptyString(() => WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem), "path");
         }
 
         [Fact]
@@ -269,14 +268,14 @@ namespace System.Web.WebPages.Deployment.Test
             var configuration = new NameValueCollection();
 
             // Act
-            var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem, () => new Version("2.0.0.0"));
+            var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem);
 
             // Assert
             Assert.Null(version);
         }
 
         [Fact]
-        public void ObsoleteGetVersionReturnsMaxVersionIfNoValueInConfigNoFilesInBinSiteContainsCshtmlFiles()
+        public void ObsoleteGetVersionReturnsV1VersionIfNoValueInConfigNoFilesInBinSiteContainsCshtmlFiles()
         {
             // Arrange
             var path = "blah";
@@ -285,10 +284,10 @@ namespace System.Web.WebPages.Deployment.Test
             var configuration = new NameValueCollection();
 
             // Act
-            var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem, () => new Version("2.0.0.0"));
+            var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem);
 
             // Assert
-            Assert.Equal(new Version("2.0.0.0"), version);
+            Assert.Equal(new Version("1.0.0.0"), version);
         }
 
         [Fact]
@@ -303,7 +302,7 @@ namespace System.Web.WebPages.Deployment.Test
             var path = "blah";
 
             // Act
-            var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem, () => maxVersion);
+            var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem);
 
             // Assert
             Assert.Equal(new Version("2.0.0.0"), version);

@@ -38,11 +38,11 @@ namespace System.Web.WebPages.Deployment
         /// <remarks>
         /// In a non-hosted scenario, this method would only look at a web.config that is present at the current path. Any config settings at an
         /// ancestor directory would not be considered.
+        /// If we are unable to determine a version, we would assume that this is a v1 app.
         /// </remarks>
         public static Version GetVersionWithoutEnabledCheck(string path)
         {
-            var maxVersion = AssemblyUtils.GetMaxWebPagesVersion();
-            return GetVersionWithoutEnabledCheckInternal(path, maxVersion);
+            return GetVersionWithoutEnabledCheckInternal(path, AssemblyUtils.WebPagesV1Version);
         }
 
         public static Version GetExplicitWebPagesVersion(string path)
@@ -53,13 +53,13 @@ namespace System.Web.WebPages.Deployment
         [Obsolete("This method is obsolete and is meant for legacy code. Use GetVersionWithoutEnabled instead.")]
         public static Version GetVersion(string path)
         {
-            return GetObsoleteVersionInternal(path, GetAppSettings(path), new PhysicalFileSystem(), AssemblyUtils.GetMaxWebPagesVersion);
+            return GetObsoleteVersionInternal(path, GetAppSettings(path), new PhysicalFileSystem());
         }
 
         /// <remarks>
         /// This is meant to test an obsolete method. Don't use this!
         /// </remarks>
-        internal static Version GetObsoleteVersionInternal(string path, NameValueCollection configuration, IFileSystem fileSystem, Func<Version> getMaxWebPagesVersion)
+        internal static Version GetObsoleteVersionInternal(string path, NameValueCollection configuration, IFileSystem fileSystem)
         {
             if (String.IsNullOrEmpty(path))
             {
@@ -77,8 +77,8 @@ namespace System.Web.WebPages.Deployment
             }
             else if (AppRootContainsWebPagesFile(fileSystem, path))
             {
-                // If the path points to a WebPages site, return the highest version.
-                return getMaxWebPagesVersion();
+                // If the path points to a WebPages site, return v1 as a fixed version.
+                return AssemblyUtils.WebPagesV1Version;
             }
             return null;
         }

@@ -1176,7 +1176,7 @@ namespace System.Web.Http.Tracing
             bool invoked = false;
 
             // Act
-            traceWriter.TraceBeginEndAsync<int>(request,
+            int result = traceWriter.TraceBeginEndAsync<int>(request,
                                  "",
                                  TraceLevel.Fatal,
                                  "",
@@ -1188,10 +1188,11 @@ namespace System.Web.Http.Tracing
                                      return TaskHelpers.FromResult<int>(1);
                                  },
                                  endTrace: (tr, value) => { },
-                                 errorTrace: (tr) => { }).Wait();
+                                 errorTrace: (tr) => { }).Result;
 
             // Assert
             Assert.True(invoked);
+            Assert.Equal(1, result);
         }
 
         [Fact]

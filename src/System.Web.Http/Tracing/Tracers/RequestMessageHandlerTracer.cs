@@ -25,7 +25,6 @@ namespace System.Web.Http.Tracing.Tracers
             _traceWriter = traceWriter;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "Tracing layer needs to observer all Task completion paths")]
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return _traceWriter.TraceBeginEndAsync<HttpResponseMessage>(

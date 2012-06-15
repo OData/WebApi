@@ -397,7 +397,6 @@ namespace System.Web.Http.Tracing
         /// allowing the given <see cref="TraceRecord"/> to be filled in.  It may be null.</param>
         /// <returns>The <see cref="Task"/> returned by the operation.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic required for this method.")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "ContinueWith is necessary to observe all completion paths")]
         public static Task<TResult> TraceBeginEndAsync<TResult>(this ITraceWriter traceWriter,
                                 HttpRequestMessage request,
                                 string category,
@@ -445,74 +444,67 @@ namespace System.Web.Http.Tracing
                     return task;
                 }
 
-                // Task<Task> so that we return the original task, preserving its completion state
-                Task<Task<TResult>> returnTask = task.ContinueWith<Task<TResult>>((t) =>
-                {
-                    if (t.IsCanceled)
+                return task
+                    .Then<TResult, TResult>((result) =>
                     {
                         traceWriter.Trace(
                             request,
                             category,
-                            TraceLevel.Warn,
+                            level,
                             (TraceRecord traceRecord) =>
                             {
                                 traceRecord.Kind = TraceKind.End;
                                 traceRecord.Operator = operatorName;
                                 traceRecord.Operation = operationName;
-                                traceRecord.Message = SRResources.TraceCancelledMessage;
-                                if (errorTrace != null)
+                                if (endTrace != null)
                                 {
-                                    errorTrace(traceRecord);
+                                    endTrace(traceRecord, result);
                                 }
                             });
 
-                        return TaskHelpers.Canceled<TResult>();
-                    }
-
-                    if (t.IsFaulted)
-                    {
-                        traceWriter.Trace(
-                            request,
-                            category,
-                            TraceLevel.Error,
-                            (TraceRecord traceRecord) =>
-                            {
-                                traceRecord.Kind = TraceKind.End;
-                                traceRecord.Exception = t.Exception.GetBaseException();
-                                traceRecord.Operator = operatorName;
-                                traceRecord.Operation = operationName;
-                                if (errorTrace != null)
-                                {
-                                    errorTrace(traceRecord);
-                                }
-                            });
-
-                        return TaskHelpers.FromErrors<TResult>(t.Exception.InnerExceptions);
-                    }
-
-                    TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
-                    TResult result = t.Result;
-
-                    traceWriter.Trace(
-                        request,
-                        category,
-                        level,
-                        (TraceRecord traceRecord) =>
+                        return result;
+                    })
+                    .Catch<TResult>((info) =>
                         {
-                            traceRecord.Kind = TraceKind.End;
-                            traceRecord.Operator = operatorName;
-                            traceRecord.Operation = operationName;
-                            if (endTrace != null)
+                            traceWriter.Trace(
+                                request,
+                                category,
+                                TraceLevel.Error,
+                                (TraceRecord traceRecord) =>
+                                {
+                                    traceRecord.Kind = TraceKind.End;
+                                    traceRecord.Exception = info.Exception.GetBaseException();
+                                    traceRecord.Operator = operatorName;
+                                    traceRecord.Operation = operationName;
+                                    if (errorTrace != null)
+                                    {
+                                        errorTrace(traceRecord);
+                                    }
+                                });
+
+                            return info.Throw();
+                        })
+                    .Finally(() =>
+                        {
+                            if (task.IsCanceled)
                             {
-                                endTrace(traceRecord, result);
+                                traceWriter.Trace(
+                                    request,
+                                    category,
+                                    TraceLevel.Warn,
+                                    (TraceRecord traceRecord) =>
+                                    {
+                                        traceRecord.Kind = TraceKind.End;
+                                        traceRecord.Operator = operatorName;
+                                        traceRecord.Operation = operationName;
+                                        traceRecord.Message = SRResources.TraceCancelledMessage;
+                                        if (errorTrace != null)
+                                        {
+                                            errorTrace(traceRecord);
+                                        }
+                                    });
                             }
                         });
-
-                    tcs.TrySetResult(result);
-                    return tcs.Task;
-                });
-
-                return returnTask.FastUnwrap();
             }
             catch (Exception ex)
             {
@@ -553,7 +545,6 @@ namespace System.Web.Http.Tracing
         /// <param name="errorTrace">The <see cref="Action"/> to invoke if an error was encountered performing the operation, 
         /// allowing the given <see cref="TraceRecord"/> to be filled in.  It may be null.</param>
         /// <returns>The <see cref="Task"/> returned by the operation.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "ContinueWith is necessary to observe all completion paths")]
         public static Task TraceBeginEndAsync(this ITraceWriter traceWriter,
                                 HttpRequestMessage request,
                                 string category,
@@ -601,30 +592,25 @@ namespace System.Web.Http.Tracing
                     return task;
                 }
 
-                Task<Task> returnTask = task.ContinueWith<Task>((t) =>
-                {
-                    if (t.IsCanceled)
+                return task
+                    .Then(() =>
                     {
                         traceWriter.Trace(
                             request,
                             category,
-                            TraceLevel.Warn,
+                            level,
                             (TraceRecord traceRecord) =>
                             {
                                 traceRecord.Kind = TraceKind.End;
                                 traceRecord.Operator = operatorName;
                                 traceRecord.Operation = operationName;
-                                traceRecord.Message = SRResources.TraceCancelledMessage;
-                                if (errorTrace != null)
+                                if (endTrace != null)
                                 {
-                                    errorTrace(traceRecord);
+                                    endTrace(traceRecord);
                                 }
                             });
-
-                        return TaskHelpers.Canceled();
-                    }
-
-                    if (t.IsFaulted)
+                    })
+                    .Catch((info) =>
                     {
                         traceWriter.Trace(
                             request,
@@ -633,7 +619,7 @@ namespace System.Web.Http.Tracing
                             (TraceRecord traceRecord) =>
                             {
                                 traceRecord.Kind = TraceKind.End;
-                                traceRecord.Exception = t.Exception.GetBaseException();
+                                traceRecord.Exception = info.Exception.GetBaseException();
                                 traceRecord.Operator = operatorName;
                                 traceRecord.Operation = operationName;
                                 if (errorTrace != null)
@@ -642,28 +628,29 @@ namespace System.Web.Http.Tracing
                                 }
                             });
 
-                        return TaskHelpers.FromErrors(t.Exception.InnerExceptions);
-                    }
-
-                    traceWriter.Trace(
-                        request,
-                        category,
-                        level,
-                        (TraceRecord traceRecord) =>
+                        return info.Throw(info.Exception);
+                    })
+                    .Finally(() =>
+                    {
+                        if (task.IsCanceled)
                         {
-                            traceRecord.Kind = TraceKind.End;
-                            traceRecord.Operator = operatorName;
-                            traceRecord.Operation = operationName;
-                            if (endTrace != null)
-                            {
-                                endTrace(traceRecord);
-                            }
-                        });
-
-                    return TaskHelpers.Completed();
-                });
-
-                return returnTask.FastUnwrap();
+                            traceWriter.Trace(
+                                request,
+                                category,
+                                TraceLevel.Warn,
+                                (TraceRecord traceRecord) =>
+                                {
+                                    traceRecord.Kind = TraceKind.End;
+                                    traceRecord.Operator = operatorName;
+                                    traceRecord.Operation = operationName;
+                                    traceRecord.Message = SRResources.TraceCancelledMessage;
+                                    if (errorTrace != null)
+                                    {
+                                        errorTrace(traceRecord);
+                                    }
+                                });
+                        }
+                    });
             }
             catch (Exception ex)
             {

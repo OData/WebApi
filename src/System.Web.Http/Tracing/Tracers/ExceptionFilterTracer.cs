@@ -23,7 +23,6 @@ namespace System.Web.Http.Tracing.Tracers
             get { return InnerFilter as IExceptionFilter; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This layer needs to observe all completion paths")]
         public Task ExecuteExceptionFilterAsync(HttpActionExecutedContext actionExecutedContext,
                                                 CancellationToken cancellationToken)
         {

@@ -173,7 +173,6 @@ namespace System.Web.Http.Tracing.Tracers
             return InnerFormatter.ToString();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "Tracing layer needs to observer all Task completion paths")]
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
@@ -205,7 +204,6 @@ namespace System.Web.Http.Tracing.Tracers
                 errorTrace: null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "Tracing layer needs to observer all Task completion paths")]
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;

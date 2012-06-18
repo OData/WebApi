@@ -258,34 +258,52 @@ namespace System.Net.Http
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
         private static void MoveNextPart(MultipartAsyncContext context)
         {
             Contract.Assert(context != null, "context cannot be null");
-            while (context.PartsEnumerator.MoveNext())
+            try
             {
-                context.SegmentsEnumerator = context.PartsEnumerator.Current.Segments.GetEnumerator();
-                if (MoveNextSegment(context))
+                while (context.PartsEnumerator.MoveNext())
                 {
-                    return;
+                    context.SegmentsEnumerator = context.PartsEnumerator.Current.Segments.GetEnumerator();
+                    if (MoveNextSegment(context))
+                    {
+                        return;
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                context.TaskCompletionSource.TrySetException(e);
+                return;
             }
 
             // Read some more
             MultipartReadAsync(context);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
         private static bool MoveNextSegment(MultipartAsyncContext context)
         {
             Contract.Assert(context != null, "context cannot be null");
-            if (context.SegmentsEnumerator.MoveNext())
+            try
             {
-                MultipartWriteSegmentAsync(context);
-                return true;
+                if (context.SegmentsEnumerator.MoveNext())
+                {
+                    MultipartWriteSegmentAsync(context);
+                    return true;
+                }
+                else if (CheckPartCompletion(context.PartsEnumerator.Current, context.Result))
+                {
+                    // We are done parsing
+                    context.TaskCompletionSource.TrySetResult(true);
+                    return true;
+                }
             }
-            else if (CheckPartCompletion(context.PartsEnumerator.Current, context.Result))
+            catch (Exception e)
             {
-                // We are done parsing
-                context.TaskCompletionSource.TrySetResult(true);
+                context.TaskCompletionSource.TrySetException(e);
                 return true;
             }
 

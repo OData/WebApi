@@ -518,7 +518,10 @@ namespace System.Net.Http.Formatting.Parsers
             /// <param name="count">The number of bytes to append.</param>
             public bool AppendBoundary(byte[] data, int offset, int count)
             {
-                if (_boundaryLength + count > MaxBoundarySize)
+                // Check that potential boundary is not bigger than our reference boundary.
+                // Allow for 2 extra characters to include the final boundary which ends with
+                // an additional "--" sequence + plus up to 4 LWS characters (which are allowed).
+                if (_boundaryLength + count > _referenceBoundaryLength + 6)
                 {
                     return false;
                 }

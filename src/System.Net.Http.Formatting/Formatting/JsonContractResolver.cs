@@ -34,8 +34,6 @@ namespace System.Net.Http.Formatting
             else
             {
                 property.Required = Required.Default;
-                property.DefaultValueHandling = DefaultValueHandling.Ignore;
-                property.NullValueHandling = NullValueHandling.Ignore;
             }
         }
 

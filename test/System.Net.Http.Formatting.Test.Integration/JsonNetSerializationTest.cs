@@ -68,6 +68,7 @@ namespace System.Net.Http.Formatting
                     { new DataContractType() { s = "foo", i = 49, NotAMember = "Error" }, "{\"s\":\"foo\",\"i\":49}" },
                     { new POCOType() { s = "foo", t = "Error"}, "{\"s\":\"foo\"}" },
                     { new SerializableType("protected") { publicField = "public", protectedInternalField = "protected internal", internalField = "internal", PublicProperty = "private", nonSerializedField = "Error" }, "{\"publicField\":\"public\",\"internalField\":\"internal\",\"protectedInternalField\":\"protected internal\",\"protectedField\":\"protected\",\"privateField\":\"private\"}" },
+                    { new { field1 = "x", field2 = (string)null, field3 = "y" }, "{\"field1\":\"x\",\"field2\":null,\"field3\":\"y\"}" },
                     
                     // Generics
                     { new KeyValuePair<string, bool>("foo", false), "{\"Key\":\"foo\",\"Value\":false}" },
@@ -184,6 +185,16 @@ namespace System.Net.Http.Formatting
             Ref deserializedObject = Deserialize(json, typeof(Ref)) as Ref;
 
             Assert.ReferenceEquals(deserializedObject, deserializedObject.Reference.Reference);
+        }
+
+        [Fact]
+        public void MissingMemberGetsDeserializedToNull()
+        {
+            string json = "{}";
+
+            POCOType deserializedObject = Deserialize(json, typeof(POCOType)) as POCOType;
+
+            Assert.Null(deserializedObject.s);
         }
 
         [Fact]

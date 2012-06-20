@@ -171,25 +171,26 @@ namespace System.Web.Http.SelfHost
             Contract.Assert(channelContext != null);
             Contract.Assert(requestContext != null);
 
-            // Get the HTTP request from the WCF Message
-            HttpRequestMessage request = requestContext.RequestMessage.ToHttpRequestMessage();
-            if (request == null)
-            {
-                throw Error.InvalidOperation(SRResources.HttpMessageHandlerInvalidMessage, requestContext.RequestMessage.GetType());
-            }
-
-            // create principal information and add it the request for the windows auth case
-            SetCurrentPrincipal(request);
-
-            // Add the retrieve client certificate delegate to the property bag to enable lookup later on
-            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
-
-            // Add information about whether the request is local or not
-            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => IsLocal(requestContext.RequestMessage)));
-
-            // Submit request up the stack
+            HttpRequestMessage request = null;
             try
             {
+                // Get the HTTP request from the WCF Message
+                request = requestContext.RequestMessage.ToHttpRequestMessage();
+                if (request == null)
+                {
+                    throw Error.InvalidOperation(SRResources.HttpMessageHandlerInvalidMessage, requestContext.RequestMessage.GetType());
+                }
+
+                // create principal information and add it the request for the windows auth case
+                SetCurrentPrincipal(request);
+
+                // Add the retrieve client certificate delegate to the property bag to enable lookup later on
+                request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
+
+                // Add information about whether the request is local or not
+                request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => IsLocal(requestContext.RequestMessage)));
+
+                // Submit request up the stack
                 HttpResponseMessage responseMessage = null;
 
                 channelContext.Server.SendAsync(request, channelContext.Server._cancellationTokenSource.Token)
@@ -215,7 +216,9 @@ namespace System.Web.Http.SelfHost
             }
             catch (Exception e)
             {
-                HttpResponseMessage response = request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
+                HttpResponseMessage response = request != null ?
+                    request.CreateErrorResponse(HttpStatusCode.InternalServerError, e) :
+                    new HttpResponseMessage(HttpStatusCode.BadRequest);
                 Message reply = response.ToMessage();
                 BeginReply(new ReplyContext(channelContext, requestContext, reply));
             }

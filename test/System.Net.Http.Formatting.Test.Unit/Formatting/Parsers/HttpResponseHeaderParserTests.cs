@@ -19,6 +19,167 @@ namespace System.Net.Http.Formatting.Parsers
             Assert.Type.HasProperties<HttpResponseHeaderParser>(TypeAssert.TypeProperties.IsClass);
         }
 
+        [Fact]
+        public void HttpResponseHeaderParserConstructorTest()
+        {
+            HttpUnsortedResponse result = new HttpUnsortedResponse();
+            Assert.NotNull(result);
+
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize - 1, ParserData.MinHeaderSize),
+                "maxStatusLineSize", ParserData.MinStatusLineSize.ToString(), ParserData.MinStatusLineSize - 1);
+
+            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize - 1),
+                "maxHeaderSize", ParserData.MinHeaderSize.ToString(), ParserData.MinHeaderSize - 1);
+
+            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize);
+            Assert.NotNull(parser);
+
+            Assert.ThrowsArgumentNull(() => { new HttpResponseHeaderParser(null); }, "httpResponse");
+        }
+
+
+        [Fact]
+        public void ResponseHeaderParserNullBuffer()
+        {
+            HttpUnsortedResponse result = new HttpUnsortedResponse();
+            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize);
+            Assert.NotNull(parser);
+            int bytesConsumed = 0;
+            Assert.ThrowsArgumentNull(() => { parser.ParseBuffer(null, 0, ref bytesConsumed); }, "buffer");
+        }
+
+        [Fact]
+        public void ResponseHeaderParserMinimumBuffer()
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", "200", "", null);
+            HttpUnsortedResponse result = new HttpUnsortedResponse();
+            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize);
+            Assert.NotNull(parser);
+
+            int bytesConsumed = 0;
+            ParserState state = parser.ParseBuffer(data, data.Length, ref bytesConsumed);
+            Assert.Equal(ParserState.Done, state);
+            Assert.Equal(data.Length, bytesConsumed);
+
+            ValidateResult(result, new Version("1.1"), HttpStatusCode.OK, "", null);
+        }
+
+        [Theory]
+        [TestDataSet(typeof(HttpUnitTestDataSets), "AllHttpStatusCodes")]
+        public void ResponseHeaderParserAcceptsStandardStatusCodes(HttpStatusCode status)
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason", ParserData.ValidHeaders);
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse result = new HttpUnsortedResponse();
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Done, state);
+                Assert.Equal(data.Length, totalBytesConsumed);
+
+                ValidateResult(result, new Version("1.1"), status, "Reason", ParserData.ValidHeaders);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(HttpUnitTestDataSets), "CustomHttpStatusCodes")]
+        public void ResponseHeaderParserAcceptsCustomStatusCodes(HttpStatusCode status)
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason", ParserData.ValidHeaders);
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse result = new HttpUnsortedResponse();
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Done, state);
+                Assert.Equal(data.Length, totalBytesConsumed);
+
+                ValidateResult(result, new Version("1.1"), status, "Reason", ParserData.ValidHeaders);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(ParserData), "InvalidStatusCodes")]
+        public void ResponseHeaderParserRejectsInvalidStatusCodes(string invalidStatus)
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", invalidStatus, "Reason", ParserData.ValidHeaders);
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse result = new HttpUnsortedResponse();
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Invalid, state);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(ParserData), "InvalidReasonPhrases")]
+        public void ResponseHeaderParserRejectsInvalidReasonPhrase(string invalidReason)
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", "200", invalidReason, ParserData.ValidHeaders);
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse result = new HttpUnsortedResponse();
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Invalid, state);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(ParserData), "Versions")]
+        public void ResponseHeaderParserAcceptsValidVersion(Version version)
+        {
+            byte[] data = CreateBuffer(String.Format("HTTP/{0}", version.ToString(2)), "200", "Reason", ParserData.ValidHeaders);
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse result = new HttpUnsortedResponse();
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(data.Length, totalBytesConsumed);
+
+                ValidateResult(result, version, HttpStatusCode.OK, "Reason", ParserData.ValidHeaders);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(ParserData), "InvalidVersions")]
+        public void ResponseHeaderParserRejectsInvalidVersion(string invalid)
+        {
+            byte[] data = CreateBuffer(invalid, "200", "Reason", ParserData.ValidHeaders);
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse result = new HttpUnsortedResponse();
+                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Invalid, state);
+            }
+        }
+
         private static byte[] CreateBuffer(string version, string statusCode, string reasonPhrase, Dictionary<string, string> headers)
         {
             const string SP = " ";
@@ -81,185 +242,6 @@ namespace System.Net.Http.Formatting.Parsers
                     Assert.True(statusLine.HttpHeaders.Contains(header.Key), "Parsed header did not contain expected key " + header.Key);
                     Assert.Equal(header.Value, statusLine.HttpHeaders.GetValues(header.Key).ElementAt(0));
                 }
-            }
-        }
-
-        [Fact]
-        public void HttpResponseHeaderParserConstructorTest()
-        {
-            HttpUnsortedResponse result = new HttpUnsortedResponse();
-            Assert.NotNull(result);
-
-            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize - 1, ParserData.MinHeaderSize),
-                "maxStatusLineSize", ParserData.MinStatusLineSize.ToString(), ParserData.MinStatusLineSize - 1);
-
-            Assert.ThrowsArgumentGreaterThanOrEqualTo(() => new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize - 1),
-                "maxHeaderSize", ParserData.MinHeaderSize.ToString(), ParserData.MinHeaderSize - 1);
-
-            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize);
-            Assert.NotNull(parser);
-
-            Assert.ThrowsArgumentNull(() => { new HttpResponseHeaderParser(null); }, "httpResponse");
-        }
-
-
-        [Fact]
-        public void ResponseHeaderParserNullBuffer()
-        {
-            HttpUnsortedResponse result = new HttpUnsortedResponse();
-            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize);
-            Assert.NotNull(parser);
-            int bytesConsumed = 0;
-            Assert.ThrowsArgumentNull(() => { parser.ParseBuffer(null, 0, ref bytesConsumed); }, "buffer");
-        }
-
-        [Fact]
-        public void ResponseHeaderParserMinimumBuffer()
-        {
-            byte[] data = CreateBuffer("HTTP/1.1", "200", "", null);
-            HttpUnsortedResponse result = new HttpUnsortedResponse();
-            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result, ParserData.MinStatusLineSize, ParserData.MinHeaderSize);
-            Assert.NotNull(parser);
-
-            int bytesConsumed = 0;
-            ParserState state = parser.ParseBuffer(data, data.Length, ref bytesConsumed);
-            Assert.Equal(ParserState.Done, state);
-            Assert.Equal(data.Length, bytesConsumed);
-
-            ValidateResult(result, new Version("1.1"), HttpStatusCode.OK, "", null);
-        }
-
-        [Fact]
-        public void ResponseHeaderParserAcceptsStandardStatusCodes()
-        {
-            foreach (HttpStatusCode status in HttpUnitTestDataSets.AllHttpStatusCodes)
-            {
-                byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason", ParserData.ValidHeaders);
-
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse result = new HttpUnsortedResponse();
-                    HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
-                    Assert.NotNull(parser);
-
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Done, state);
-                    Assert.Equal(data.Length, totalBytesConsumed);
-
-                    ValidateResult(result, new Version("1.1"), status, "Reason", ParserData.ValidHeaders);
-                }
-            }
-        }
-
-        [Fact]
-        public void ResponseHeaderParserAcceptsCustomStatusCodes()
-        {
-            foreach (HttpStatusCode status in HttpUnitTestDataSets.CustomHttpStatusCodes)
-            {
-                byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason", ParserData.ValidHeaders);
-
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse result = new HttpUnsortedResponse();
-                    HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
-                    Assert.NotNull(parser);
-
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Done, state);
-                    Assert.Equal(data.Length, totalBytesConsumed);
-
-                    ValidateResult(result, new Version("1.1"), status, "Reason", ParserData.ValidHeaders);
-                }
-            }
-        }
-
-        [Fact]
-        public void ResponseHeaderParserRejectsInvalidStatusCodes()
-        {
-            foreach (string invalidStatus in ParserData.InvalidStatusCodes)
-            {
-                byte[] data = CreateBuffer("HTTP/1.1", invalidStatus, "Reason", ParserData.ValidHeaders);
-
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse result = new HttpUnsortedResponse();
-                    HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
-                    Assert.NotNull(parser);
-
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Invalid, state);
-                }
-            }
-        }
-
-        [Fact]
-        public void ResponseHeaderParserRejectsInvalidReasonPhrase()
-        {
-            foreach (string invalidReason in ParserData.InvalidReasonPhrases)
-            {
-                byte[] data = CreateBuffer("HTTP/1.1", "200", invalidReason, ParserData.ValidHeaders);
-
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse result = new HttpUnsortedResponse();
-                    HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
-                    Assert.NotNull(parser);
-
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Invalid, state);
-                }
-            }
-        }
-
-        public static IEnumerable<object[]> Versions
-        {
-            get { return ParserData.Versions; }
-        }
-
-        [Theory]
-        [PropertyData("Versions")]
-        public void ResponseHeaderParserAcceptsValidVersion(Version version)
-        {
-            byte[] data = CreateBuffer(String.Format("HTTP/{0}", version.ToString(2)), "200", "Reason", ParserData.ValidHeaders);
-
-            for (var cnt = 1; cnt <= data.Length; cnt++)
-            {
-                HttpUnsortedResponse result = new HttpUnsortedResponse();
-                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
-                Assert.NotNull(parser);
-
-                int totalBytesConsumed = 0;
-                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                Assert.Equal(data.Length, totalBytesConsumed);
-
-                ValidateResult(result, version, HttpStatusCode.OK, "Reason", ParserData.ValidHeaders);
-            }
-        }
-
-        public static IEnumerable<object[]> InvalidVersions
-        {
-            get { return ParserData.InvalidVersions; }
-        }
-
-        [Theory]
-        [PropertyData("InvalidVersions")]
-        public void ResponseHeaderParserRejectsInvalidVersion(string invalid)
-        {
-            byte[] data = CreateBuffer(invalid, "200", "Reason", ParserData.ValidHeaders);
-
-            for (var cnt = 1; cnt <= data.Length; cnt++)
-            {
-                HttpUnsortedResponse result = new HttpUnsortedResponse();
-                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(result);
-                Assert.NotNull(parser);
-
-                int totalBytesConsumed = 0;
-                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                Assert.Equal(ParserState.Invalid, state);
             }
         }
     }

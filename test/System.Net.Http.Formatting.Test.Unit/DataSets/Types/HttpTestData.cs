@@ -174,16 +174,19 @@ namespace System.Net.Http.Formatting.DataSets.Types
             new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true),
         });
 
-        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
+        public static TheoryDataSet<string, string, bool> ReadAndWriteCorrectCharacterEncoding
         {
             get
             {
-                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-8", "utf-8", true };
-                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-16", "utf-16", true };
-                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using utf-32", "utf-32", false };
-                yield return new object[] { "This is a test 激光這兩個字是甚麼意思 string written using shift_jis", "shift_jis", false };
-                yield return new object[] { "This is a test æøå string written using iso-8859-1", "iso-8859-1", false };
-                yield return new object[] { "This is a test 레이저 단어 뜻 string written using iso-2022-kr", "iso-2022-kr", false };
+                return new TheoryDataSet<string, string, bool>
+                {
+                    { "This is a test 激光這兩個字是甚麼意思 string written using utf-8", "utf-8", true },
+                    { "This is a test 激光這兩個字是甚麼意思 string written using utf-16", "utf-16", true },
+                    { "This is a test 激光這兩個字是甚麼意思 string written using utf-32", "utf-32", false },
+                    { "This is a test 激光這兩個字是甚麼意思 string written using shift_jis", "shift_jis", false },
+                    { "This is a test æøå string written using iso-8859-1", "iso-8859-1", false },
+                    { "This is a test 레이저 단어 뜻 string written using iso-2022-kr", "iso-2022-kr", false },
+                };
             }
         }
 

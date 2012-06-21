@@ -83,9 +83,6 @@
     <Compile Include="..\Microsoft.Web.Http.Data.Test\Controllers\CatalogController.cs">
       <Link>Controllers\CatalogController.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.Web.Http.Data.Test\Controllers\CitiesController.cs">
-      <Link>Controllers\CitiesController.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.Web.Http.Data.Test\Controllers\NorthwindEFController.cs">
       <Link>Controllers\NorthwindEFController.cs</Link>
     </Compile>

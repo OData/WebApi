@@ -26,11 +26,6 @@ namespace System.Net.Http.Formatting
 
     public class XmlSerializerMediaTypeFormatterTests : MediaTypeFormatterTestBase<XmlSerializerMediaTypeFormatter>
     {
-        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
-        {
-            get { return HttpTestData.ReadAndWriteCorrectCharacterEncoding; }
-        }
-
         public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes
         {
             get { return HttpTestData.StandardXmlMediaTypes; }
@@ -43,11 +38,7 @@ namespace System.Net.Http.Formatting
 
         public override byte[] ExpectedSampleTypeByteRepresentation
         {
-#if DEBUG
-            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleTypeOfXmlSerializerMediaTypeFormatter xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><Number>42</Number></SampleTypeOfXmlSerializerMediaTypeFormatter>"); }
-#else
             get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleTypeOfXmlSerializerMediaTypeFormatter xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><Number>42</Number></SampleTypeOfXmlSerializerMediaTypeFormatter>"); }
-#endif
         }
 
         [Fact]
@@ -229,7 +220,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             if (!isDefaultEncoding)
@@ -248,7 +239,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             if (!isDefaultEncoding)

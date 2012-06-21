@@ -118,18 +118,10 @@ namespace System.Net.Http.Formatting.Parsers
             Assert.Equal(0, collection.Count());
         }
 
-        public static TheoryDataSet<string, string, string> UriQueryData
-        {
-            get
-            {
-                return UriQueryTestData.UriQueryData;
-            }
-        }
-
         [Theory]
         [InlineData("N", "N", "")]
         [InlineData("%26", "&", "")]
-        [PropertyData("UriQueryData")]
+        [TestDataSet(typeof(UriQueryTestData), "UriQueryData")]
         public void ParseBufferCorrectly(string segment, string name, string value)
         {
             for (int index = 1; index < Iterations; index++)

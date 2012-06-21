@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http
 {
@@ -17,97 +18,131 @@ namespace System.Net.Http
 
         public const int MinBufferSize = 256;
 
-        public static IEnumerable<object[]> Boundaries
+        public static TheoryDataSet<Version> Versions
         {
             get
             {
-                yield return new object[] { "1" };
-                yield return new object[] { "a" };
-                yield return new object[] { "'" };
-                yield return new object[] { "(" };
-                yield return new object[] { ")" };
-                yield return new object[] { "+" };
-                yield return new object[] { "_" };
-                yield return new object[] { "-" };
-                yield return new object[] { "." };
-                yield return new object[] { "/" };
-                yield return new object[] { ":" };
-                yield return new object[] { "=" };
-                yield return new object[] { "?" };
-                yield return new object[] { "--" };
-                yield return new object[] { "--------------------01234567890123456789" };
-                yield return new object[] { "--------------------01234567890123456789--------------------" };
-                yield return new object[] { "--A--B--C--D--E--F--" };
+                return new TheoryDataSet<Version>
+                {
+                    Version.Parse("1.0"),
+                    Version.Parse("1.1"),
+                    Version.Parse("1.2"),
+                    Version.Parse("2.0"),
+                    Version.Parse("10.0"),
+                    Version.Parse("1.15"),
+                };
             }
         }
 
-        public static IEnumerable<object[]> Versions
+        public static TheoryDataSet<string> InvalidVersions
         {
             get
             {
-                yield return new object[] { Version.Parse("1.0") };
-                yield return new object[] { Version.Parse("1.1") };
-                yield return new object[] { Version.Parse("1.2") };
-                yield return new object[] { Version.Parse("2.0") };
-                yield return new object[] { Version.Parse("10.0") };
-                yield return new object[] { Version.Parse("1.15") };
+                return new TheoryDataSet<string>
+                {
+                    "",
+                    "http/1.1",
+                    "HTTP/a.1",
+                    "HTTP/1.a",
+                    "HTTP 1.1",
+                    "HTTP\t1.1",
+                    "HTTP 1 1",
+                    "\0",
+                    "HTTP\01.1",
+                    "HTTP/4294967295.4294967295",
+                    "æææøøøååå",
+                    "HTTP/æææøøøååå",
+                    "いくつかのテキスト",
+                    "HTTP/いくつかのテキスト",
+                };
             }
         }
 
-        public static IEnumerable<object[]> InvalidVersions
+        public static TheoryDataSet<string> InvalidMethods
         {
             get
             {
-                yield return new object[] { "" };
-                yield return new object[] { "http/1.1" };
-                yield return new object[] { "HTTP/a.1" };
-                yield return new object[] { "HTTP/1.a" };
-                yield return new object[] { "HTTP 1.1" };
-                yield return new object[] { "HTTP\t1.1" };
-                yield return new object[] { "HTTP 1 1" };
-                yield return new object[] { "\0" };
-                yield return new object[] { "HTTP\01.1" };
-                yield return new object[] { "HTTP/4294967295.4294967295" };
+                return new TheoryDataSet<string>
+                {
+                    "",
+                    "G\tT",
+                    "G E T",
+                    "\0",
+                    "G\0T",
+                    "GET\n",
+                    "æææøøøååå",
+                    "いくつかのテキスト",
+                };
             }
         }
 
-        public static readonly string[] InvalidMethods = new string[]
+        public static TheoryDataSet<string> ValidReasonPhrases
         {
-            "",
-            "G\tT",
-            "G E T",
-            "\0",
-            "G\0T",
-            "GET\n",
-        };
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "",
+                    "Ok",
+                    "public Server Error",
+                    "r e a s o n",
+                    "reason ",
+                    " reason ",
+                };
+            }
+        }
 
-        public static readonly string[] InvalidReasonPhrases = new string[]
+        public static TheoryDataSet<string> InvalidReasonPhrases
         {
-            "\0",
-            "\t",
-            "reason\n",
-        };
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "\0",
+                    "\t",
+                    "reason\n",
+                    "æææøøøååå",
+                    "いくつかのテキスト",
+                };
+            }
+        }
 
-        // This deliberately only checks for syntac boundaries of the URI, not its content
-        public static readonly string[] InvalidRequestUris = new string[]
+        // This deliberately only checks for syntactic boundaries of the URI, not its content
+        public static TheoryDataSet<string> InvalidRequestUris
         {
-            "",
-            "p a t h",
-            "path ",
-            " path ",
-        };
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "",
+                    "p a t h",
+                    "path ",
+                    " path ",
+                    "æææø ø øååå",
+                    "いくつか の テキスト"
+                };
+            }
+        }
 
-        public static readonly string[] InvalidStatusCodes = new string[]
+        public static TheoryDataSet<string> InvalidStatusCodes
         {
-            "0",
-            "99",
-            "1a1",
-            "abc",
-            "1001",
-            "2000",
-            Int32.MinValue.ToString(),
-            Int32.MaxValue.ToString(),
-        };
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "0",
+                    "99",
+                    "1a1",
+                    "abc",
+                    "1001",
+                    "2000",
+                    Int32.MinValue.ToString(),
+                    Int32.MaxValue.ToString(),
+                    "æææøøøååå",
+                    "いくつかのテキスト"
+                };
+            }
+        }
 
         public static readonly Dictionary<string, string> ValidHeaders = new Dictionary<string, string>
         {
@@ -134,6 +169,11 @@ namespace System.Net.Http
         public static readonly Uri HttpRequestUriWithPortAndQuery = new Uri("http://" + HttpHostName + ":" + HttpHostPort + "/some/path?%C3%A6%C3%B8%C3%A5");
         public static readonly Uri HttpsRequestUri = new Uri("https://" + HttpHostName + "/some/path");
 
+        public static readonly string TextContentType = "text/plain; charset=utf-8";
+
+        public static readonly MediaTypeHeaderValue HttpRequestMediaType = MediaTypeHeaderValue.Parse("application/http; msgtype=request");
+        public static readonly MediaTypeHeaderValue HttpResponseMediaType = MediaTypeHeaderValue.Parse("application/http; msgtype=response");
+
         public static readonly string HttpRequest =
             HttpMethod +
             " /some/path HTTP/1.2\r\nHost: " +
@@ -159,8 +199,6 @@ namespace System.Net.Http
             HttpReasonPhrase +
             "\r\nN1: V1a, V1b, V1c, V1d, V1e\r\nN2: V2\r\n\r\n";
 
-        public static readonly string TextContentType = "text/plain; charset=utf-8";
-
         public static readonly string HttpRequestWithEntity =
             HttpMethod +
             " /some/path HTTP/1.2\r\nHost: " +
@@ -179,16 +217,5 @@ namespace System.Net.Http
             TextContentType +
             "\r\n\r\n" +
             HttpMessageEntity;
-
-        public static readonly MediaTypeHeaderValue HttpRequestMediaType;
-
-        public static readonly MediaTypeHeaderValue HttpResponseMediaType;
-
-        static ParserData()
-        {
-            MediaTypeHeaderValue.TryParse("application/http; msgtype=request", out HttpRequestMediaType);
-            MediaTypeHeaderValue.TryParse("application/http; msgtype=response", out HttpResponseMediaType);
-        }
-
     }
 }

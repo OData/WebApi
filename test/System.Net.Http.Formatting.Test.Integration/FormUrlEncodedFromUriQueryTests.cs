@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Json;
 using System.Text;
 using System.Web.Http;
+using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Extensions;
@@ -231,93 +232,21 @@ namespace System.Net.Http.Formatting
             ParseInvalidFormUrlEncoded(encoded);
         }
 
-
-        public static IEnumerable<object[]> TestObjectPropertyData
-        {
-            get
-            {
-                string encoded = "a[]=4&a[]=5&b[x][]=7&b[y]=8&b[z][]=9&b[z][]=true&b[z][]=undefined&b[z][]=&c=1&f=";
-                string resultStr = @"{""a"":[""4"",""5""],""b"":{""x"":[""7""],""y"":""8"",""z"":[""9"",""true"",""undefined"",""""]},""c"":""1"",""f"":""""}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "customer[Name]=Pete&customer[Address]=Redmond&customer[Age][0][]=23&customer[Age][0][]=24&customer[Age][1][]=25&" +
-                    "customer[Age][1][]=26&customer[Phones][]=425+888+1111&customer[Phones][]=425+345+7777&customer[Phones][]=425+888+4564&" +
-                    "customer[EnrolmentDate]=%22%5C%2FDate(1276562539537)%5C%2F%22&role=NewRole&changeDate=3&count=15";
-                resultStr = @"{""customer"":{""Name"":""Pete"",""Address"":""Redmond"",""Age"":[[""23"",""24""],[""25"",""26""]]," +
-                    @"""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\/Date(1276562539537)\\/\""""},""role"":""NewRole"",""changeDate"":""3"",""count"":""15""}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "customers[0][Name]=Pete2&customers[0][Address]=Redmond2&customers[0][Age][0][]=23&customers[0][Age][0][]=24&" +
-                    "customers[0][Age][1][]=25&customers[0][Age][1][]=26&customers[0][Phones][]=425+888+1111&customers[0][Phones][]=425+345+7777&" +
-                    "customers[0][Phones][]=425+888+4564&customers[0][EnrolmentDate]=%22%5C%2FDate(1276634840700)%5C%2F%22&customers[1][Name]=Pete3&" +
-                    "customers[1][Address]=Redmond3&customers[1][Age][0][]=23&customers[1][Age][0][]=24&customers[1][Age][1][]=25&customers[1][Age][1][]=26&" +
-                    "customers[1][Phones][]=425+888+1111&customers[1][Phones][]=425+345+7777&customers[1][Phones][]=425+888+4564&customers[1][EnrolmentDate]=%22%5C%2FDate(1276634840700)%5C%2F%22";
-                resultStr = @"{""customers"":[{""Name"":""Pete2"",""Address"":""Redmond2"",""Age"":[[""23"",""24""],[""25"",""26""]]," +
-                    @"""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\/Date(1276634840700)\\/\""""}," +
-                    @"{""Name"":""Pete3"",""Address"":""Redmond3"",""Age"":[[""23"",""24""],[""25"",""26""]],""Phones"":[""425 888 1111"",""425 345 7777"",""425 888 4564""],""EnrolmentDate"":""\""\\/Date(1276634840700)\\/\""""}]}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "ab%5B%5D=hello";
-                resultStr = @"{""ab"":[""hello""]}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "123=hello";
-                resultStr = @"{""123"":""hello""}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "a%5B%5D=1&a";
-                resultStr = @"{""a"":[""1"",""""]}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "a=1&a";
-                resultStr = @"{""a"":[""1"",""""]}";
-                yield return new[] { encoded, resultStr };
-            }
-        }
-
         /// <summary>
         /// Tests for parsing complex object graphs form-urlencoded.
         /// </summary>
         [Theory]
-        [PropertyData("TestObjectPropertyData")]
+        [TestDataSet(typeof(FormUrlEncodedJsonFromContentTests), "TestObjectTestData")]
         public void TestObject(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);
-        }
-
-        public static IEnumerable<object[]> TestEncodedNameTestData
-        {
-            get
-            {
-                string encoded = "some+thing=10";
-                string resultStr = @"{""some thing"":""10""}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "%E5%B8%A6%E4%B8%89%E4%B8%AA%E8%A1%A8=bar";
-                resultStr = @"{""带三个表"":""bar""}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "some+thing=10&%E5%B8%A6%E4%B8%89%E4%B8%AA%E8%A1%A8=bar";
-                resultStr = @"{""some thing"":""10"",""带三个表"":""bar""}";
-                yield return new[] { encoded, resultStr };
-
-                encoded = "a[0\r\n][b]=1";
-                resultStr = "{\"a\":{\"0\\r\\n\":{\"b\":\"1\"}}}";
-                yield return new[] { encoded, resultStr };
-                yield return new[] { encoded.Replace("\r", "%0D").Replace("\n", "%0A"), resultStr };
-
-                yield return new[] { "a[0\0]=1", "{\"a\":{\"0\\u0000\":\"1\"}}" };
-                yield return new[] { "a[0%00]=1", "{\"a\":{\"0\\u0000\":\"1\"}}" };
-                yield return new[] { "a[\00]=1", "{\"a\":{\"\\u00000\":\"1\"}}" };
-                yield return new[] { "a[%000]=1", "{\"a\":{\"\\u00000\":\"1\"}}" };
-            }
         }
 
         /// <summary>
         /// Tests for parsing form-urlencoded data with encoded names.
         /// </summary>
         [Theory]
-        [PropertyData("TestEncodedNameTestData")]
+        [TestDataSet(typeof(FormUrlEncodedJsonFromContentTests), "TestEncodedNameTestData")]
         public void TestEncodedName(string encoded, string expectedResult)
         {
             ValidateFormUrlEncoded(encoded, expectedResult);

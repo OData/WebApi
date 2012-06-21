@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using Microsoft.TestCommon;
@@ -12,7 +11,7 @@ namespace System.Net.Http.Formatting
 {
     public class JsonNetValidationTest
     {
-        public static IEnumerable<object[]> Theories
+        public static TheoryDataSet<string, Type, int> Theories
         {
             get
             {

@@ -18,57 +18,6 @@ namespace System.Net.Http.Formatting.Parsers
             Assert.Type.HasProperties<HttpStatusLineParser>(TypeAssert.TypeProperties.IsClass);
         }
 
-        internal static byte[] CreateBuffer(string version, string statusCode, string reasonPhrase)
-        {
-            return CreateBuffer(version, statusCode, reasonPhrase, false);
-        }
-
-        private static byte[] CreateBuffer(string version, string statusCode, string reasonPhrase, bool withLws)
-        {
-            const string SP = " ";
-            const string HTAB = "\t";
-            const string CRLF = "\r\n";
-
-            string lws = SP;
-            if (withLws)
-            {
-                lws = SP + SP + HTAB + SP;
-            }
-
-            string statusLine = String.Format("{0}{1}{2}{3}{4}{5}", version, lws, statusCode, lws, reasonPhrase, CRLF);
-            return Encoding.UTF8.GetBytes(statusLine);
-        }
-
-        private static ParserState ParseBufferInSteps(HttpStatusLineParser parser, byte[] buffer, int readsize, out int totalBytesConsumed)
-        {
-            ParserState state = ParserState.Invalid;
-            totalBytesConsumed = 0;
-            while (totalBytesConsumed <= buffer.Length)
-            {
-                int size = Math.Min(buffer.Length - totalBytesConsumed, readsize);
-                byte[] parseBuffer = new byte[size];
-                Buffer.BlockCopy(buffer, totalBytesConsumed, parseBuffer, 0, size);
-
-                int bytesConsumed = 0;
-                state = parser.ParseBuffer(parseBuffer, parseBuffer.Length, ref bytesConsumed);
-                totalBytesConsumed += bytesConsumed;
-
-                if (state != ParserState.NeedMoreData)
-                {
-                    return state;
-                }
-            }
-
-            return state;
-        }
-
-        private static void ValidateResult(HttpUnsortedResponse statusLine, Version version, HttpStatusCode statusCode, string reasonPhrase)
-        {
-            Assert.Equal(version, statusLine.Version);
-            Assert.Equal(statusCode, statusLine.StatusCode);
-            Assert.Equal(reasonPhrase, statusLine.ReasonPhrase);
-        }
-
         [Fact]
         public void HttpStatusLineParserConstructorTest()
         {
@@ -127,87 +76,68 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
-        [Fact]
-        public void StatusLineParserAcceptsStandardStatusCodes()
+        [Theory]
+        [TestDataSet(typeof(HttpUnitTestDataSets), "AllHttpStatusCodes")]
+        public void StatusLineParserAcceptsStandardStatusCodes(HttpStatusCode status)
         {
-            foreach (HttpStatusCode status in HttpUnitTestDataSets.AllHttpStatusCodes)
+            byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason");
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
             {
-                byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason");
+                HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
+                HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, data.Length);
+                Assert.NotNull(parser);
 
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
-                    HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, data.Length);
-                    Assert.NotNull(parser);
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Done, state);
+                Assert.Equal(data.Length, totalBytesConsumed);
 
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Done, state);
-                    Assert.Equal(data.Length, totalBytesConsumed);
-
-                    ValidateResult(statusLine, new Version("1.1"), status, "Reason");
-                }
-            }
-        }
-
-        [Fact]
-        public void StatusLineParserAcceptsCustomStatusCodes()
-        {
-            foreach (HttpStatusCode status in HttpUnitTestDataSets.CustomHttpStatusCodes)
-            {
-                byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason");
-
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
-                    HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, data.Length);
-                    Assert.NotNull(parser);
-
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Done, state);
-                    Assert.Equal(data.Length, totalBytesConsumed);
-
-                    ValidateResult(statusLine, new Version("1.1"), status, "Reason");
-                }
-            }
-        }
-
-        [Fact]
-        public void StatusLineParserRejectsInvalidStatusCodes()
-        {
-            foreach (string invalidStatus in ParserData.InvalidStatusCodes)
-            {
-                byte[] data = CreateBuffer("HTTP/1.1", invalidStatus, "Reason");
-
-                for (var cnt = 1; cnt <= data.Length; cnt++)
-                {
-                    HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
-                    HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, 256);
-                    Assert.NotNull(parser);
-
-                    int totalBytesConsumed = 0;
-                    ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                    Assert.Equal(ParserState.Invalid, state);
-                }
-            }
-        }
-
-        public static IEnumerable<object[]> ValidReasonPhrases
-        {
-            get
-            {
-                yield return new object[] { "" };
-                yield return new object[] { "Ok" };
-                yield return new object[] { "public Server Error" };
-                yield return new object[] { "r e a s o n" };
-                yield return new object[] { "reason " };
-                yield return new object[] { " reason " };
+                ValidateResult(statusLine, new Version("1.1"), status, "Reason");
             }
         }
 
         [Theory]
-        [PropertyData("ValidReasonPhrases")]
+        [TestDataSet(typeof(HttpUnitTestDataSets), "CustomHttpStatusCodes")]
+        public void StatusLineParserAcceptsCustomStatusCodes(HttpStatusCode status)
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason");
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
+                HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, data.Length);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Done, state);
+                Assert.Equal(data.Length, totalBytesConsumed);
+
+                ValidateResult(statusLine, new Version("1.1"), status, "Reason");
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(ParserData), "InvalidStatusCodes")]
+        public void StatusLineParserRejectsInvalidStatusCodes(string invalidStatus)
+        {
+            byte[] data = CreateBuffer("HTTP/1.1", invalidStatus, "Reason");
+
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpUnsortedResponse statusLine = new HttpUnsortedResponse();
+                HttpStatusLineParser parser = new HttpStatusLineParser(statusLine, 256);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Invalid, state);
+            }
+        }
+
+        [Theory]
+        [TestDataSet(typeof(ParserData), "ValidReasonPhrases")]
         public void StatusLineParserAcceptsValidReasonPhrase(string validReasonPhrase)
         {
             byte[] data = CreateBuffer("HTTP/1.1", "200", validReasonPhrase);
@@ -225,13 +155,8 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
-        public static IEnumerable<object[]> Versions
-        {
-            get { return ParserData.Versions; }
-        }
-
         [Theory]
-        [PropertyData("Versions")]
+        [TestDataSet(typeof(ParserData), "Versions")]
         public void StatusLineParserAcceptsValidVersion(Version version)
         {
             byte[] data = CreateBuffer(String.Format("HTTP/{0}", version.ToString(2)), "200", "Reason");
@@ -250,13 +175,8 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
-        public static IEnumerable<object[]> InvalidVersions
-        {
-            get { return ParserData.InvalidVersions; }
-        }
-
         [Theory]
-        [PropertyData("InvalidVersions")]
+        [TestDataSet(typeof(ParserData), "InvalidVersions")]
         public void StatusLineParserRejectsInvalidVersion(string invalidVersion)
         {
             byte[] data = CreateBuffer(invalidVersion, "200", "Reason");
@@ -271,6 +191,57 @@ namespace System.Net.Http.Formatting.Parsers
                 ParserState state = ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
                 Assert.Equal(ParserState.Invalid, state);
             }
+        }
+
+        internal static byte[] CreateBuffer(string version, string statusCode, string reasonPhrase)
+        {
+            return CreateBuffer(version, statusCode, reasonPhrase, false);
+        }
+
+        private static byte[] CreateBuffer(string version, string statusCode, string reasonPhrase, bool withLws)
+        {
+            const string SP = " ";
+            const string HTAB = "\t";
+            const string CRLF = "\r\n";
+
+            string lws = SP;
+            if (withLws)
+            {
+                lws = SP + SP + HTAB + SP;
+            }
+
+            string statusLine = String.Format("{0}{1}{2}{3}{4}{5}", version, lws, statusCode, lws, reasonPhrase, CRLF);
+            return Encoding.UTF8.GetBytes(statusLine);
+        }
+
+        private static ParserState ParseBufferInSteps(HttpStatusLineParser parser, byte[] buffer, int readsize, out int totalBytesConsumed)
+        {
+            ParserState state = ParserState.Invalid;
+            totalBytesConsumed = 0;
+            while (totalBytesConsumed <= buffer.Length)
+            {
+                int size = Math.Min(buffer.Length - totalBytesConsumed, readsize);
+                byte[] parseBuffer = new byte[size];
+                Buffer.BlockCopy(buffer, totalBytesConsumed, parseBuffer, 0, size);
+
+                int bytesConsumed = 0;
+                state = parser.ParseBuffer(parseBuffer, parseBuffer.Length, ref bytesConsumed);
+                totalBytesConsumed += bytesConsumed;
+
+                if (state != ParserState.NeedMoreData)
+                {
+                    return state;
+                }
+            }
+
+            return state;
+        }
+
+        private static void ValidateResult(HttpUnsortedResponse statusLine, Version version, HttpStatusCode statusCode, string reasonPhrase)
+        {
+            Assert.Equal(version, statusLine.Version);
+            Assert.Equal(statusCode, statusLine.StatusCode);
+            Assert.Equal(reasonPhrase, statusLine.ReasonPhrase);
         }
     }
 }

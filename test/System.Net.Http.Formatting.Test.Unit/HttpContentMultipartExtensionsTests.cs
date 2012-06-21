@@ -22,7 +22,6 @@ namespace System.Net.Http
         private const string ExceptionStreamProviderMessage = "Bad Stream Provider!";
         private const string ExceptionSyncStreamMessage = "Bad Sync Stream!";
         private const string ExceptionAsyncStreamMessage = "Bad Async Stream!";
-        private const string LongText = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
 
         public static TheoryDataSet<string, bool, string, bool> IsMimeMultipartContentTestData
         {
@@ -39,33 +38,6 @@ namespace System.Net.Http
                     { "multipart/form-data; boundary=1234; charset=utf-8", true, "form-data", true },
                     { "Multipart/Related; boundary=example-1; start=\"<950120.aaCC@XIson.com>\"; type=\"Application/X-FixedRecord\"; start-info=\"-o ps\"", true, "related", true },
                 };
-            }
-        }
-
-        public static TheoryDataSet<string> Boundaries
-        {
-            get
-            {
-                return new TheoryDataSet<string>
-                 {
-                    "1",
-                    "a",
-                    "'",
-                    "(",
-                    ")",
-                    "+",
-                    "_",
-                    "-",
-                    ".",
-                    "/",
-                    ":",
-                    "=",
-                    "?",
-                    "--",
-                    "--------------------01234567890123456789",
-                    "--------------------01234567890123456789--------------------",
-                    "--A--B--C--D--E--F--",
-                 };
             }
         }
 
@@ -166,7 +138,7 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries")]
         public void ReadAsMultipartAsync_ParsesContent(string boundary)
         {
             HttpContent successContent;
@@ -186,7 +158,7 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries")]
         public void ReadAsMultipartAsync_ParsesEmptyContent(string boundary)
         {
             HttpContent content = CreateContent(boundary);
@@ -247,91 +219,61 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_SingleShortBodyPart(string boundary)
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "SingleShortBodies")]
+        public void ReadAsMultipartAsync_SingleShortBodyPart(string boundary, string singleShortBody)
         {
-            HttpContent content = CreateContent(boundary, "A");
+            HttpContent content = CreateContent(boundary, singleShortBody);
 
             MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
             Assert.Equal(1, result.Contents.Count);
-            Assert.Equal("A", result.Contents[0].ReadAsStringAsync().Result);
+            Assert.Equal(singleShortBody, result.Contents[0].ReadAsStringAsync().Result);
             ValidateContents(result.Contents);
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_MultipleShortBodyParts(string boundary)
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "MultipleShortBodies")]
+        public void ReadAsMultipartAsync_MultipleShortBodyParts(string boundary, string[] multipleShortBodies)
         {
-            string[] text = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-
-            HttpContent content = CreateContent(boundary, text);
+            HttpContent content = CreateContent(boundary, multipleShortBodies);
             MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
-            Assert.Equal(text.Length, result.Contents.Count);
-            for (var check = 0; check < text.Length; check++)
+            Assert.Equal(multipleShortBodies.Length, result.Contents.Count);
+            for (var check = 0; check < multipleShortBodies.Length; check++)
             {
-                Assert.Equal(text[check], result.Contents[check].ReadAsStringAsync().Result);
+                Assert.Equal(multipleShortBodies[check], result.Contents[check].ReadAsStringAsync().Result);
             }
 
             ValidateContents(result.Contents);
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_SingleLongBodyPart(string boundary)
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "SingleLongBodies")]
+        public void ReadAsMultipartAsync_SingleLongBodyPart(string boundary, string singleLongBody)
         {
-            HttpContent content = CreateContent(boundary, LongText);
+            HttpContent content = CreateContent(boundary, singleLongBody);
 
             MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync().Result;
             Assert.Equal(1, result.Contents.Count);
-            Assert.Equal(LongText, result.Contents[0].ReadAsStringAsync().Result);
+            Assert.Equal(singleLongBody, result.Contents[0].ReadAsStringAsync().Result);
             ValidateContents(result.Contents);
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
-        public void ReadAsMultipartAsync_MultipleLongBodyParts(string boundary)
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries", typeof(MimeMultipartParserTests), "MultipleLongBodies")]
+        public void ReadAsMultipartAsync_MultipleLongBodyParts(string boundary, string[] multipleLongBodies)
         {
-            string[] text = new string[] { 
-                "A" + LongText + "A", 
-                "B" + LongText + "B", 
-                "C" + LongText + "C", 
-                "D" + LongText + "D", 
-                "E" + LongText + "E", 
-                "F" + LongText + "F", 
-                "G" + LongText + "G", 
-                "H" + LongText + "H", 
-                "I" + LongText + "I", 
-                "J" + LongText + "J", 
-                "K" + LongText + "K", 
-                "L" + LongText + "L", 
-                "M" + LongText + "M", 
-                "N" + LongText + "N", 
-                "O" + LongText + "O", 
-                "P" + LongText + "P", 
-                "Q" + LongText + "Q", 
-                "R" + LongText + "R", 
-                "S" + LongText + "S", 
-                "T" + LongText + "T", 
-                "U" + LongText + "U", 
-                "V" + LongText + "V", 
-                "W" + LongText + "W", 
-                "X" + LongText + "X", 
-                "Y" + LongText + "Y", 
-                "Z" + LongText + "Z"};
-
-            HttpContent content = CreateContent(boundary, text);
+            HttpContent content = CreateContent(boundary, multipleLongBodies);
             MultipartMemoryStreamProvider result = content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), ParserData.MinBufferSize).Result;
-            Assert.Equal(text.Length, result.Contents.Count);
-            for (var check = 0; check < text.Length; check++)
+            Assert.Equal(multipleLongBodies.Length, result.Contents.Count);
+            for (var check = 0; check < multipleLongBodies.Length; check++)
             {
-                Assert.Equal(text[check], result.Contents[check].ReadAsStringAsync().Result);
+                Assert.Equal(multipleLongBodies[check], result.Contents[check].ReadAsStringAsync().Result);
             }
 
             ValidateContents(result.Contents);
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries")]
         public void ReadAsMultipartAsync_UsingMultipartContent(string boundary)
         {
             MultipartContent content = new MultipartContent("mixed", boundary);
@@ -354,7 +296,7 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [PropertyData("Boundaries")]
+        [TestDataSet(typeof(MimeMultipartParserTests), "Boundaries")]
         public void ReadAsMultipartAsync_NestedMultipartContent(string boundary)
         {
             const int nesting = 10;

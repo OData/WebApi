@@ -18,77 +18,6 @@ namespace System.Net.Http.Formatting.Parsers
             Assert.Type.HasProperties<InternetMessageFormatHeaderParser>(TypeAssert.TypeProperties.IsClass);
         }
 
-        private static IEnumerable<HttpHeaders> CreateHttpHeaders()
-        {
-            return new HttpHeaders[]
-            {
-                new HttpRequestMessage().Headers,
-                new HttpResponseMessage().Headers,
-                new StringContent(String.Empty).Headers,
-            };
-        }
-
-        private static InternetMessageFormatHeaderParser CreateHeaderParser(int maximumHeaderLength, out HttpHeaders headers)
-        {
-            headers = new HttpRequestMessage().Headers;
-            return new InternetMessageFormatHeaderParser(headers, maximumHeaderLength);
-        }
-
-        internal static byte[] CreateBuffer(params string[] headers)
-        {
-            const string CRLF = "\r\n";
-            StringBuilder header = new StringBuilder();
-            foreach (var h in headers)
-            {
-                header.Append(h + CRLF);
-            }
-
-            header.Append(CRLF);
-            return Encoding.UTF8.GetBytes(header.ToString());
-        }
-
-        private static void RunRfc5322SampleTest(string[] testHeaders, Action<HttpHeaders> validation)
-        {
-            byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer(testHeaders);
-            for (var cnt = 1; cnt <= data.Length; cnt++)
-            {
-                HttpHeaders headers;
-                InternetMessageFormatHeaderParser parser = InternetMessageFormatHeaderParserTests.CreateHeaderParser(data.Length, out headers);
-                Assert.NotNull(parser);
-
-                int totalBytesConsumed = 0;
-                ParserState state = InternetMessageFormatHeaderParserTests.ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
-                Assert.Equal(ParserState.Done, state);
-                Assert.Equal(data.Length, totalBytesConsumed);
-
-                validation(headers);
-            }
-        }
-
-        private static ParserState ParseBufferInSteps(InternetMessageFormatHeaderParser parser, byte[] buffer, int readsize, out int totalBytesConsumed)
-        {
-            ParserState state = ParserState.Invalid;
-            totalBytesConsumed = 0;
-            while (totalBytesConsumed <= buffer.Length)
-            {
-                int size = Math.Min(buffer.Length - totalBytesConsumed, readsize);
-                byte[] parseBuffer = new byte[size];
-                Buffer.BlockCopy(buffer, totalBytesConsumed, parseBuffer, 0, size);
-
-                int bytesConsumed = 0;
-                state = parser.ParseBuffer(parseBuffer, parseBuffer.Length, ref bytesConsumed);
-                totalBytesConsumed += bytesConsumed;
-
-                if (state != ParserState.NeedMoreData)
-                {
-                    return state;
-                }
-            }
-
-            return state;
-        }
-
-
         [Fact]
         public void HeaderParserConstructorTest()
         {
@@ -344,122 +273,6 @@ namespace System.Net.Http.Formatting.Parsers
             }
         }
 
-
-        // Set of samples from RFC 5322 with times adjusted to GMT following HTTP style for date time format. 
-
-        static readonly string[] Rfc5322Sample1 = new string[] {
-            @"From: John Doe <jdoe@machine.example>",
-            @"To: Mary Smith <mary@example.net>",
-            @"Subject: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
-            @"Message-ID: <1234@local.machine.example>",
-        };
-
-        static readonly string[] Rfc5322Sample2 = new string[] {
-            @"From: John Doe <jdoe@machine.example>",
-            @"Sender: Michael Jones <mjones@machine.example>",
-            @"To: Mary Smith <mary@example.net>",
-            @"Subject: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
-            @"Message-ID: <1234@local.machine.example>",
-        };
-
-        static readonly string[] Rfc5322Sample3 = new string[] {
-            @"From: ""Joe Q. Public"" <john.q.public@example.com>",
-            @"To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>",
-            @"Cc: <boss@nil.test>, ""Giant; \""Big\"" Box"" <sysservices@example.net>",
-            @"Date: Tue, 01 Jul 2003 10:52:37 GMT",
-            @"Message-ID: <5678.21-Nov-1997@example.com>",
-        };
-
-        static readonly string[] Rfc5322Sample4 = new string[] {
-            @"From: Pete <pete@silly.example>",
-            @"To: A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;",
-            @"Cc: Undisclosed recipients:;",
-            @"Date: Thu, 13 Feb 1969 23:32:54 GMT",
-            @"Message-ID: <testabcd.1234@silly.example>",
-        };
-
-        static readonly string[] Rfc5322Sample5 = new string[] {
-            @"From: John Doe <jdoe@machine.example>",
-            @"To: Mary Smith <mary@example.net>",
-            @"Subject: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
-            @"Message-ID: <1234@local.machine.example>",
-        };
-
-        static readonly string[] Rfc5322Sample6 = new string[] {
-            @"From: Mary Smith <mary@example.net>",
-            @"To: John Doe <jdoe@machine.example>",
-            @"Reply-To: ""Mary Smith: Personal Account"" <smith@home.example>",
-            @"Subject: Re: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 10:01:10 GMT",
-            @"Message-ID: <3456@example.net>",
-            @"In-Reply-To: <1234@local.machine.example>",
-            @"References: <1234@local.machine.example>",
-        };
-
-        static readonly string[] Rfc5322Sample7 = new string[] {
-            @"To: ""Mary Smith: Personal Account"" <smith@home.example>",
-            @"From: John Doe <jdoe@machine.example>",
-            @"Subject: Re: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 11:00:00 GMT",
-            @"Message-ID: <abcd.1234@local.machine.test>",
-            @"In-Reply-To: <3456@example.net>",
-            @"References: <1234@local.machine.example> <3456@example.net>",
-        };
-
-        static readonly string[] Rfc5322Sample8 = new string[] {
-            @"From: John Doe <jdoe@machine.example>",
-            @"To: Mary Smith <mary@example.net>",
-            @"Subject: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
-            @"Message-ID: <1234@local.machine.example>",
-        };
-
-        static readonly string[] Rfc5322Sample9 = new string[] {
-            @"Resent-From: Mary Smith <mary@example.net>",
-            @"Resent-To: Jane Brown <j-brown@other.example>",
-            @"Resent-Date: Mon, 24 Nov 1997 14:22:01 GMT",
-            @"Resent-Message-ID: <78910@example.net>",
-            @"From: John Doe <jdoe@machine.example>",
-            @"To: Mary Smith <mary@example.net>",
-            @"Subject: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
-            @"Message-ID: <1234@local.machine.example>",
-        };
-
-        static readonly string[] Rfc5322Sample10 = new string[] {
-            @"Received: from x.y.test",
-            @"   by example.net",
-            @"   via TCP",
-            @"   with ESMTP",
-            @"   id ABC12345",
-            @"   for <mary@example.net>;  21 Nov 1997 10:05:43 GMT",
-            @"Received: from node.example by x.y.test; 21 Nov 1997 10:01:22 GMT",
-            @"From: John Doe <jdoe@node.example>",
-            @"To: Mary Smith <mary@example.net>",
-            @"Subject: Saying Hello",
-            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
-            @"Message-ID: <1234@local.node.example>",
-        };
-
-        static readonly string[] Rfc5322Sample11 = new string[] {
-            @"From: Pete(A nice \) chap) <pete(his account)@silly.test(his host)>",
-            @"To:A Group(Some people)",
-            @"     :Chris Jones <c@(Chris's host.)public.example>,",
-            @"         joe@example.org,",
-            @"  John <jdoe@one.test> (my dear friend); (the end of the group)",
-            @"Cc:(Empty list)(start)Hidden recipients  :(nobody(that I know))  ;",
-            @"Date: Thu,",
-            @"      13",
-            @"        Feb",
-            @"          1969",
-            @"      23:32:00",
-            @"               GMT",
-            @"Message-ID:              <testabcd.1234@silly.test>",
-        };
-
         [Fact]
         public void Rfc5322Sample1Test()
         {
@@ -637,5 +450,188 @@ namespace System.Net.Http.Formatting.Parsers
                 });
         }
 
+        // Set of samples from RFC 5322 with times adjusted to GMT following HTTP style for date time format. 
+        static readonly string[] Rfc5322Sample1 = new string[] {
+            @"From: John Doe <jdoe@machine.example>",
+            @"To: Mary Smith <mary@example.net>",
+            @"Subject: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
+            @"Message-ID: <1234@local.machine.example>",
+        };
+
+        static readonly string[] Rfc5322Sample2 = new string[] {
+            @"From: John Doe <jdoe@machine.example>",
+            @"Sender: Michael Jones <mjones@machine.example>",
+            @"To: Mary Smith <mary@example.net>",
+            @"Subject: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
+            @"Message-ID: <1234@local.machine.example>",
+        };
+
+        static readonly string[] Rfc5322Sample3 = new string[] {
+            @"From: ""Joe Q. Public"" <john.q.public@example.com>",
+            @"To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>",
+            @"Cc: <boss@nil.test>, ""Giant; \""Big\"" Box"" <sysservices@example.net>",
+            @"Date: Tue, 01 Jul 2003 10:52:37 GMT",
+            @"Message-ID: <5678.21-Nov-1997@example.com>",
+        };
+
+        static readonly string[] Rfc5322Sample4 = new string[] {
+            @"From: Pete <pete@silly.example>",
+            @"To: A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;",
+            @"Cc: Undisclosed recipients:;",
+            @"Date: Thu, 13 Feb 1969 23:32:54 GMT",
+            @"Message-ID: <testabcd.1234@silly.example>",
+        };
+
+        static readonly string[] Rfc5322Sample5 = new string[] {
+            @"From: John Doe <jdoe@machine.example>",
+            @"To: Mary Smith <mary@example.net>",
+            @"Subject: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
+            @"Message-ID: <1234@local.machine.example>",
+        };
+
+        static readonly string[] Rfc5322Sample6 = new string[] {
+            @"From: Mary Smith <mary@example.net>",
+            @"To: John Doe <jdoe@machine.example>",
+            @"Reply-To: ""Mary Smith: Personal Account"" <smith@home.example>",
+            @"Subject: Re: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 10:01:10 GMT",
+            @"Message-ID: <3456@example.net>",
+            @"In-Reply-To: <1234@local.machine.example>",
+            @"References: <1234@local.machine.example>",
+        };
+
+        static readonly string[] Rfc5322Sample7 = new string[] {
+            @"To: ""Mary Smith: Personal Account"" <smith@home.example>",
+            @"From: John Doe <jdoe@machine.example>",
+            @"Subject: Re: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 11:00:00 GMT",
+            @"Message-ID: <abcd.1234@local.machine.test>",
+            @"In-Reply-To: <3456@example.net>",
+            @"References: <1234@local.machine.example> <3456@example.net>",
+        };
+
+        static readonly string[] Rfc5322Sample8 = new string[] {
+            @"From: John Doe <jdoe@machine.example>",
+            @"To: Mary Smith <mary@example.net>",
+            @"Subject: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
+            @"Message-ID: <1234@local.machine.example>",
+        };
+
+        static readonly string[] Rfc5322Sample9 = new string[] {
+            @"Resent-From: Mary Smith <mary@example.net>",
+            @"Resent-To: Jane Brown <j-brown@other.example>",
+            @"Resent-Date: Mon, 24 Nov 1997 14:22:01 GMT",
+            @"Resent-Message-ID: <78910@example.net>",
+            @"From: John Doe <jdoe@machine.example>",
+            @"To: Mary Smith <mary@example.net>",
+            @"Subject: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
+            @"Message-ID: <1234@local.machine.example>",
+        };
+
+        static readonly string[] Rfc5322Sample10 = new string[] {
+            @"Received: from x.y.test",
+            @"   by example.net",
+            @"   via TCP",
+            @"   with ESMTP",
+            @"   id ABC12345",
+            @"   for <mary@example.net>;  21 Nov 1997 10:05:43 GMT",
+            @"Received: from node.example by x.y.test; 21 Nov 1997 10:01:22 GMT",
+            @"From: John Doe <jdoe@node.example>",
+            @"To: Mary Smith <mary@example.net>",
+            @"Subject: Saying Hello",
+            @"Date: Fri, 21 Nov 1997 09:55:06 GMT",
+            @"Message-ID: <1234@local.node.example>",
+        };
+
+        static readonly string[] Rfc5322Sample11 = new string[] {
+            @"From: Pete(A nice \) chap) <pete(his account)@silly.test(his host)>",
+            @"To:A Group(Some people)",
+            @"     :Chris Jones <c@(Chris's host.)public.example>,",
+            @"         joe@example.org,",
+            @"  John <jdoe@one.test> (my dear friend); (the end of the group)",
+            @"Cc:(Empty list)(start)Hidden recipients  :(nobody(that I know))  ;",
+            @"Date: Thu,",
+            @"      13",
+            @"        Feb",
+            @"          1969",
+            @"      23:32:00",
+            @"               GMT",
+            @"Message-ID:              <testabcd.1234@silly.test>",
+        };
+
+        private static IEnumerable<HttpHeaders> CreateHttpHeaders()
+        {
+            return new HttpHeaders[]
+            {
+                new HttpRequestMessage().Headers,
+                new HttpResponseMessage().Headers,
+                new StringContent(String.Empty).Headers,
+            };
+        }
+
+        private static InternetMessageFormatHeaderParser CreateHeaderParser(int maximumHeaderLength, out HttpHeaders headers)
+        {
+            headers = new HttpRequestMessage().Headers;
+            return new InternetMessageFormatHeaderParser(headers, maximumHeaderLength);
+        }
+
+        internal static byte[] CreateBuffer(params string[] headers)
+        {
+            const string CRLF = "\r\n";
+            StringBuilder header = new StringBuilder();
+            foreach (var h in headers)
+            {
+                header.Append(h + CRLF);
+            }
+
+            header.Append(CRLF);
+            return Encoding.UTF8.GetBytes(header.ToString());
+        }
+
+        private static void RunRfc5322SampleTest(string[] testHeaders, Action<HttpHeaders> validation)
+        {
+            byte[] data = InternetMessageFormatHeaderParserTests.CreateBuffer(testHeaders);
+            for (var cnt = 1; cnt <= data.Length; cnt++)
+            {
+                HttpHeaders headers;
+                InternetMessageFormatHeaderParser parser = InternetMessageFormatHeaderParserTests.CreateHeaderParser(data.Length, out headers);
+                Assert.NotNull(parser);
+
+                int totalBytesConsumed = 0;
+                ParserState state = InternetMessageFormatHeaderParserTests.ParseBufferInSteps(parser, data, cnt, out totalBytesConsumed);
+                Assert.Equal(ParserState.Done, state);
+                Assert.Equal(data.Length, totalBytesConsumed);
+
+                validation(headers);
+            }
+        }
+
+        private static ParserState ParseBufferInSteps(InternetMessageFormatHeaderParser parser, byte[] buffer, int readsize, out int totalBytesConsumed)
+        {
+            ParserState state = ParserState.Invalid;
+            totalBytesConsumed = 0;
+            while (totalBytesConsumed <= buffer.Length)
+            {
+                int size = Math.Min(buffer.Length - totalBytesConsumed, readsize);
+                byte[] parseBuffer = new byte[size];
+                Buffer.BlockCopy(buffer, totalBytesConsumed, parseBuffer, 0, size);
+
+                int bytesConsumed = 0;
+                state = parser.ParseBuffer(parseBuffer, parseBuffer.Length, ref bytesConsumed);
+                totalBytesConsumed += bytesConsumed;
+
+                if (state != ParserState.NeedMoreData)
+                {
+                    return state;
+                }
+            }
+
+            return state;
+        }
     }
 }

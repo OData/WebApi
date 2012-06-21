@@ -16,7 +16,7 @@ namespace System.Net.Http.Formatting
 {
     public class JsonNetSerializationTest
     {
-        public static IEnumerable<object[]> SerializedJson
+        public static TheoryDataSet<object, string> SerializedJson
         {
             get
             {
@@ -87,7 +87,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        public static IEnumerable<object[]> TypedSerializedJson
+        public static TheoryDataSet<object, string, Type> TypedSerializedJson
         {
             get
             {

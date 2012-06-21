@@ -7,6 +7,7 @@ using System.Net.Http.Formatting.DataSets.Types;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -17,11 +18,6 @@ namespace System.Net.Http.Formatting
     {
         private const string ExpectedSupportedMediaType = "text/test";
         private const string TestData = "Hello World Hello World Hello World Hello World Hello World Hello World";
-
-        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
-        {
-            get { return HttpTestData.ReadAndWriteCorrectCharacterEncoding; }
-        }
 
         public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes
         {
@@ -114,7 +110,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // Arrange
@@ -126,7 +122,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // Arrange
@@ -140,7 +136,7 @@ namespace System.Net.Http.Formatting
 
     public class MockBufferedMediaTypeFormatter : BufferedMediaTypeFormatter
     {
-        private const string SupportedMediaType = "text/test";        
+        private const string SupportedMediaType = "text/test";
 
         public MockBufferedMediaTypeFormatter()
         {
@@ -160,7 +156,7 @@ namespace System.Net.Http.Formatting
         {
             return true;
         }
-        
+
         public override object ReadFromStream(Type type, Stream stream, HttpContent content, IFormatterLogger formatterLogger)
         {
             object result = null;

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
@@ -69,11 +68,13 @@ namespace System.Net.Http
                     "<acb>",
                     "[ABC]",
                     "{a&b}",
+                    "æææøøøååå",
+                    "いくつかのテキスト",
                 };
             }
         }
 
-        public static IEnumerable<object[]> ValidDateStringValues
+        public static TheoryDataSet<DateTimeOffset, string> ValidDateStringValues
         {
             get
             {
@@ -84,7 +85,7 @@ namespace System.Net.Http
             }
         }
 
-        public static IEnumerable<object[]> ValidDateValues
+        public static TheoryDataSet<string, DateTimeOffset> ValidDateValues
         {
             get
             {
@@ -123,6 +124,12 @@ namespace System.Net.Http
                     "Sun, 06 Nov 1994 08:49:37 GMT invalid",
                     "Sun, 06 Nov 1994 08:49:37 GMT,",
                     ",Sun, 06 Nov 1994 08:49:37 GMT",
+                    "Sun, 06 Nov 1994 08:49:37 æøå",
+                    "Sun, 06 æøå 1994 08:49:37 GMT",
+                    "Sun, 06 Nov 1994 08:49:37 いくつ",
+                    "Sun, 06 いくつ 1994 08:49:37 Nov",
+                    "æææøøøååå",
+                    "いくつかのテキスト",
                 };
             }
         }

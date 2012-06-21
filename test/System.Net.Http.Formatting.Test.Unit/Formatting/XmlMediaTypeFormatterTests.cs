@@ -18,11 +18,6 @@ namespace System.Net.Http.Formatting
 {
     public class XmlMediaTypeFormatterTests : MediaTypeFormatterTestBase<XmlMediaTypeFormatter>
     {
-        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
-        {
-            get { return HttpTestData.ReadAndWriteCorrectCharacterEncoding; }
-        }
-
         public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes
         {
             get { return HttpTestData.StandardXmlMediaTypes; }
@@ -238,7 +233,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             if (!isDefaultEncoding)
@@ -257,7 +252,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             if (!isDefaultEncoding)

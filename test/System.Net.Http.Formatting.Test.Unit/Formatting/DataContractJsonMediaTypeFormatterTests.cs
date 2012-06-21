@@ -25,11 +25,6 @@ namespace System.Net.Http.Formatting
 
     public class DataContractJsonMediaTypeFormatterTests : MediaTypeFormatterTestBase<DataContractJsonMediaTypeFormatter>
     {
-        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
-        {
-            get { return HttpTestData.ReadAndWriteCorrectCharacterEncoding; }
-        }
-
         public static IEnumerable<TestData> ValueAndRefTypeTestDataCollectionExceptULong
         {
             get
@@ -188,7 +183,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             if (!isDefaultEncoding)
@@ -208,7 +203,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // DataContractJsonSerializer does not honor the value of byteOrderMark in the UnicodeEncoding ctor.

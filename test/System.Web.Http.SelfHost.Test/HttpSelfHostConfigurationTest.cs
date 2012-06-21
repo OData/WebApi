@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.IdentityModel.Selectors;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -16,7 +15,7 @@ namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostConfigurationTest
     {
-        public static IEnumerable<object[]> BasicClientCredentialTestData
+        public static TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType> BasicClientCredentialTestData
         {
             get
             {
@@ -28,7 +27,7 @@ namespace System.Web.Http.SelfHost
             }
         }
 
-        public static IEnumerable<object[]> CertificateClientCredentialTestData
+        public static TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType> CertificateClientCredentialTestData
         {
             get
             {
@@ -40,7 +39,7 @@ namespace System.Web.Http.SelfHost
             }
         }
 
-        public static IEnumerable<object[]> NonCertificateClientCredentialTestData
+        public static TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType> NonCertificateClientCredentialTestData
         {
             get
             {
@@ -60,7 +59,7 @@ namespace System.Web.Http.SelfHost
             }
         }
 
-        public static IEnumerable<object[]> NonBasicClientCredentialTestData
+        public static TheoryDataSet<string, HttpBindingSecurityMode, HttpClientCredentialType> NonBasicClientCredentialTestData
         {
             get
             {
@@ -256,11 +255,11 @@ namespace System.Web.Http.SelfHost
                    roundTripTestValue: HttpClientCredentialType.Windows);
 
             // now let us check the illegal value differently
-            config.ClientCredentialType = (HttpClientCredentialType)999; 
+            config.ClientCredentialType = (HttpClientCredentialType)999;
             Assert.ThrowsArgumentOutOfRange(
                 () =>
-                {  
-                    new HttpSelfHostServer(config).OpenAsync().Wait(); 
+                {
+                    new HttpSelfHostServer(config).OpenAsync().Wait();
                 }, "value", null, false, 999);
         }
 
@@ -329,7 +328,7 @@ namespace System.Web.Http.SelfHost
         {
             // Arrange
             HttpBinding binding = new HttpBinding();
-            binding.ConfigureTransportBindingElement = ConfigureTransportBindingElement; 
+            binding.ConfigureTransportBindingElement = ConfigureTransportBindingElement;
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration("http://localhost")
             {
                 MaxBufferSize = 10,

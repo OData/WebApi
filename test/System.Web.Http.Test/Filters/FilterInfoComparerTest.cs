@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using Microsoft.TestCommon;
 using Moq;
 using Xunit;
@@ -10,16 +9,7 @@ namespace System.Web.Http.Filters
 {
     public class FilterInfoComparerTest
     {
-        [Theory]
-        [PropertyData("CompareTestData")]
-        public void Compare(FilterInfo x, FilterInfo y, int expectedSign)
-        {
-            int result = FilterInfoComparer.Instance.Compare(x, y);
-
-            Assert.Equal(expectedSign, Math.Sign(result));
-        }
-
-        public static IEnumerable<object[]> CompareTestData
+        public static TheoryDataSet<FilterInfo, FilterInfo, int> CompareTestData
         {
             get
             {
@@ -34,6 +24,15 @@ namespace System.Web.Http.Filters
                     { new FilterInfo(f, FilterScope.Action), new FilterInfo(f, FilterScope.Controller), 1 },
                 };
             }
+        }
+
+        [Theory]
+        [PropertyData("CompareTestData")]
+        public void Compare(FilterInfo x, FilterInfo y, int expectedSign)
+        {
+            int result = FilterInfoComparer.Instance.Compare(x, y);
+
+            Assert.Equal(expectedSign, Math.Sign(result));
         }
     }
 }

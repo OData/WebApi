@@ -19,11 +19,6 @@ namespace System.Net.Http.Formatting
 {
     public class JsonMediaTypeFormatterTests : MediaTypeFormatterTestBase<JsonMediaTypeFormatter>
     {
-        public static IEnumerable<object[]> ReadAndWriteCorrectCharacterEncoding
-        {
-            get { return HttpTestData.ReadAndWriteCorrectCharacterEncoding; }
-        }
-
         public static List<Type> JTokenTypes
         {
             get
@@ -175,10 +170,10 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void UseDataContractJsonSerializer_False()
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
+            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             //Assert.True(serializedString.Contains("DataContractSampleType"),
@@ -189,13 +184,12 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void UseDataContractJsonSerializer_False_Indent()
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
+            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
-            Console.WriteLine(serializedString);
             Assert.True(serializedString.Contains("\r\n"), "Using JsonSerializer with Indent set to true should emit data with indentation.");
         }
 
@@ -204,10 +198,10 @@ namespace System.Net.Http.Formatting
         [InlineData(typeof(IEnumerable<string>))]
         public void UseJsonFormatterWithNull(Type type)
         {
-            JsonMediaTypeFormatter xmlFormatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false};
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            Assert.Task.Succeeds(xmlFormatter.WriteToStreamAsync(type, null, memoryStream, content, transportContext: null));
+            Assert.Task.Succeeds(formatter.WriteToStreamAsync(type, null, memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("null"), "Using Json formatter to serialize null should emit 'null'.");
@@ -230,7 +224,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // Arrange
@@ -244,7 +238,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [PropertyData("ReadAndWriteCorrectCharacterEncoding")]
+        [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             // Arrange

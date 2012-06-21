@@ -12,6 +12,35 @@ namespace System.Web.Http.Routing
 {
     public class UrlHelperTest
     {
+        public static TheoryDataSet<string, int?, string> UrlGeneratorTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, int?, string>()
+                {
+                    { null, 456, "/somerootpath/people/456"}, // Just override ID, so ID is replaced
+                    { "people", 456, "/somerootpath/people/456"}, // Just override ID, so ID is replaced
+                    { null, null, "/somerootpath/people/123"}, // Override nothing, so everything the same
+                    { "people", null, "/somerootpath/people/123"}, // Override nothing, so everything the same
+                    { "customers", 456, "/somerootpath/customers/456"}, // Override everything, so everything changed
+                    { "customers", null, null}, // Override controller, which clears out the ID, so it doesn't match (i.e. null)
+                };
+            }
+        }
+
+        public static TheoryDataSet<string> RequestUrlTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "http://localhost",
+                    "http://localhost/123",
+                    "http://localhost/123?q=odata&$filter=123#123"
+                };
+            }
+        }
+
         [Fact]
         public void UrlHelper_CtorThrows_WithNullContext()
         {
@@ -167,30 +196,6 @@ namespace System.Web.Http.Routing
             }
 
             return routeValues;
-        }
-
-        public static IEnumerable<object[]> UrlGeneratorTestData
-        {
-            get
-            {
-                return new TheoryDataSet<string, int?, string>()
-                {
-                    { null, 456, "/somerootpath/people/456"}, // Just override ID, so ID is replaced
-                    { "people", 456, "/somerootpath/people/456"}, // Just override ID, so ID is replaced
-                    { null, null, "/somerootpath/people/123"}, // Override nothing, so everything the same
-                    { "people", null, "/somerootpath/people/123"}, // Override nothing, so everything the same
-                    { "customers", 456, "/somerootpath/customers/456"}, // Override everything, so everything changed
-                    { "customers", null, null}, // Override controller, which clears out the ID, so it doesn't match (i.e. null)
-                };
-            }
-        }
-
-        public static IEnumerable<object> RequestUrlTestData
-        {
-            get
-            {
-                return new[] { "http://localhost", "http://localhost/123", "http://localhost/123?q=odata&$filter=123#123" };
-            }
         }
     }
 }

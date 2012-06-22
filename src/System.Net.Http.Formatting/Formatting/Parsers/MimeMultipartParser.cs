@@ -48,9 +48,9 @@ namespace System.Net.Http.Formatting.Parsers
                 throw Error.ArgumentNull("boundary");
             }
 
-            if (boundary.Length > MaxBoundarySize - 4)
+            if (boundary.Length > MaxBoundarySize - 10)
             {
-                throw Error.ArgumentMustBeLessThanOrEqualTo("boundary", boundary.Length, MaxBoundarySize - 4);
+                throw Error.ArgumentMustBeLessThanOrEqualTo("boundary", boundary.Length, MaxBoundarySize - 10);
             }
 
             if (boundary.EndsWith(" ", StringComparison.Ordinal))
@@ -518,15 +518,28 @@ namespace System.Net.Http.Formatting.Parsers
             /// <param name="count">The number of bytes to append.</param>
             public bool AppendBoundary(byte[] data, int offset, int count)
             {
-                // Check that potential boundary is not bigger than our reference boundary.
-                // Allow for 2 extra characters to include the final boundary which ends with
-                // an additional "--" sequence + plus up to 4 LWS characters (which are allowed).
+                // Check that potential boundary is not bigger than our reference boundary. 
+                // Allow for 2 extra characters to include the final boundary which ends with 
+                // an additional "--" sequence + plus up to 4 LWS characters (which are allowed). 
                 if (_boundaryLength + count > _referenceBoundaryLength + 6)
                 {
                     return false;
                 }
+
+                int cnt = _boundaryLength;
                 Buffer.BlockCopy(data, offset, _boundary, _boundaryLength, count);
                 _boundaryLength += count;
+
+                // Verify that boundary matches so far
+                int maxCount = Math.Min(_boundaryLength, _referenceBoundaryLength);
+                for (; cnt < maxCount; cnt++)
+                {
+                    if (_boundary[cnt] != _referenceBoundary[cnt])
+                    {
+                        return false;
+                    }
+                }
+
                 return true;
             }
 

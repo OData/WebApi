@@ -122,7 +122,7 @@ namespace System.Net.Http.Formatting.Parsers
                     CRLF + "--" + "AAA" + CRLF + CRLF, 
                     CRLF + "--" + "AAA" + "--" + CRLF, 
                     CRLF + "--" + "AAA" + "--" + CRLF + CRLF,
-                    "--úN$(Os#»Í(Bt$(Dqf(BS'.Â‚æ0j",
+                    "--úN$(Os#»Í(Bt$(Dqf(CS'.Â‚æ0j",
                     "--123456",
                     "123--456",
                     "123456--"

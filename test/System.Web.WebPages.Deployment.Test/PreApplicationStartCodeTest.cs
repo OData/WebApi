@@ -15,7 +15,7 @@ namespace System.Web.WebPages.Deployment.Test
     public class PreApplicationStartCodeTest
     {
         private const string DeploymentVersionFile = "System.Web.WebPages.Deployment";
-        private static readonly Version MaxVersion = new Version(2, 0, 0, 0);
+        private static readonly Version MaxVersion = new Version(3, 0, 0, 0);
 
         [Fact]
         public void PreApplicationStartCodeDoesNothingIfWebPagesIsExplicitlyDisabled()
@@ -47,7 +47,7 @@ namespace System.Web.WebPages.Deployment.Test
             // Arrange
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.12.123.1234", "2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.12.123.1234", "3.0.0.0");
             Version webPagesVersion = new Version("1.12.123.1234");
 
             var fileSystem = new TestFileSystem();
@@ -74,7 +74,7 @@ namespace System.Web.WebPages.Deployment.Test
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
             Version webPagesVersion = AssemblyUtils.ThisAssemblyName.Version;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("3.0.0.0");
 
             var fileSystem = new TestFileSystem();
             var buildManager = new TestBuildManager();
@@ -98,7 +98,7 @@ namespace System.Web.WebPages.Deployment.Test
             // Arrange
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("3.0.0.0");
 
             var fileSystem = new TestFileSystem();
             var buildManager = new TestBuildManager();
@@ -123,7 +123,7 @@ namespace System.Web.WebPages.Deployment.Test
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
             var v1Version = new Version("1.0.0.0");
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "3.0.0.0");
 
             var binDirectory = DeploymentUtil.GetBinDirectory();
 
@@ -152,7 +152,7 @@ namespace System.Web.WebPages.Deployment.Test
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
             var v1Version = new Version("1.0.0.0");
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "3.0.0.0");
 
             var binDirectory = DeploymentUtil.GetBinDirectory();
 
@@ -213,7 +213,7 @@ namespace System.Web.WebPages.Deployment.Test
             bool registeredForChangeNotification = false;
             var webPagesVersion = AssemblyUtils.ThisAssemblyName.Version;
             var v1Version = new Version("1.0.0.0");
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "3.0.0.0");
 
             // Note: For this test to work with future versions we would need to create corresponding embedded resources with that version in it.
             var fileSystem = new TestFileSystem();
@@ -240,7 +240,7 @@ namespace System.Web.WebPages.Deployment.Test
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
             var webPagesVersion = AssemblyUtils.ThisAssemblyName.Version;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("3.0.0.0");
 
             // Note: For this test to work with future versions we would need to create corresponding embedded resources with that version in it.
             var fileSystem = new TestFileSystem();
@@ -266,7 +266,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             // Arrange
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0", "8.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("3.0.0.0", "8.0.0.0");
 
             var binDirectory = DeploymentUtil.GetBinDirectory();
 
@@ -297,7 +297,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             bool registeredForChangeNotification = false;
             // Hopefully we'd have figured out a better way to load Plan9 by v8.
             var webPagesVersion = new Version("8.0.0.0");
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "2.0.0.0", "8.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "3.0.0.0", "8.0.0.0");
 
             var fileSystem = new TestFileSystem();
             fileSystem.AddFile("Index.cshtml");
@@ -322,7 +322,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             // Arrange
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("3.0.0.0");
 
             var fileSystem = new TestFileSystem();
             fileSystem.AddFile("Index.cshtml");
@@ -330,7 +330,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             var content = "1.0.0.0" + Environment.NewLine;
             buildManager.Stream = new MemoryStream(Encoding.Default.GetBytes(content));
 
-            var nameValueCollection = GetAppSettings(enabled: null, webPagesVersion: new Version("2.0.0.0"));
+            var nameValueCollection = GetAppSettings(enabled: null, webPagesVersion: new Version("3.0.0.0"));
             Action<Version> loadWebPages = (version) => { loadedVersion = version; };
             Action registerForChange = () => { registeredForChangeNotification = true; };
 
@@ -343,7 +343,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             Assert.Equal("Changes were detected in the Web Pages runtime version that require your application to be recompiled. Refresh your browser window to continue.", ex.Message);
             Assert.Equal(ex.Data["WebPages.VersionChange"], true);
             Assert.False(registeredForChangeNotification);
-            VerifyVersionFile(buildManager, new Version("2.0.0.0"));
+            VerifyVersionFile(buildManager, new Version("3.0.0.0"));
             Assert.True(fileSystem.FileExists(@"site\bin\WebPagesRecompilation.deleteme"));
         }
 
@@ -353,7 +353,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             // Arrange
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("2.0.0.0", "5.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("3.0.0.0", "5.0.0.0");
 
             var fileSystem = new TestFileSystem();
             fileSystem.AddFile("Index.cshtml");
@@ -381,7 +381,7 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             // Arrange
             Version loadedVersion = null;
             bool registeredForChangeNotification = false;
-            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "2.0.0.0");
+            IEnumerable<AssemblyName> loadedAssemblies = GetAssemblies("1.0.0.0", "3.0.0.0");
 
             var binDirectory = DeploymentUtil.GetBinDirectory();
 
@@ -392,16 +392,16 @@ In order to use this site, specify a version in the site’s web.config file. Fo
             var content = AssemblyUtils.ThisAssemblyName.Version + Environment.NewLine;
             buildManager.Stream = new MemoryStream(Encoding.Default.GetBytes(content));
 
-            var nameValueCollection = GetAppSettings(enabled: null, webPagesVersion: new Version("2.0.0"));
+            var nameValueCollection = GetAppSettings(enabled: null, webPagesVersion: new Version("3.0.0"));
             Action<Version> loadWebPages = (version) => { loadedVersion = version; };
             Action registerForChange = () => { registeredForChangeNotification = true; };
             Func<string, AssemblyName> getAssembyName = _ => new AssemblyName("System.Web.WebPages.Deployment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 
             // Act and Assert
             Assert.Throws<InvalidOperationException>(() =>
-                                                              PreApplicationStartCode.StartCore(fileSystem, "", binDirectory, nameValueCollection, loadedAssemblies, buildManager, loadWebPages, registerForChange, getAssembyName),
-                                                              @"Conflicting versions of ASP.NET Web Pages detected: specified version is ""2.0.0.0"", but the version in bin is ""1.0.0.0"". To continue, remove files from the application's bin directory or remove the version specification in web.config."
-                );
+                PreApplicationStartCode.StartCore(fileSystem, "", binDirectory, nameValueCollection, loadedAssemblies, buildManager, loadWebPages, registerForChange, getAssembyName),
+                @"Conflicting versions of ASP.NET Web Pages detected: specified version is ""3.0.0.0"", but the version in bin is ""1.0.0.0"". To continue, remove files from the application's bin directory or remove the version specification in web.config."
+            );
 
             Assert.False(registeredForChangeNotification);
             Assert.Null(loadedVersion);

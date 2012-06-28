@@ -70,15 +70,6 @@ namespace System.Net.Http.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The IAsyncResult implementation &apos;{0}&apos; tried to get a handle after End was called..
-        /// </summary>
-        internal static string AsyncResult_CannotGetHandleAfterEnd {
-            get {
-                return ResourceManager.GetString("AsyncResult_CannotGetHandleAfterEnd", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The IAsyncResult implementation &apos;{0}&apos; tried to complete a single operation multiple times. This could be caused by an incorrect application IAsyncResult implementation or other extensibility code, such as an IAsyncResult that returns incorrect CompletedSynchronously values or invokes the AsyncCallback multiple times..
         /// </summary>
         internal static string AsyncResult_MultipleCompletes {

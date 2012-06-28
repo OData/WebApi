@@ -30,48 +30,6 @@ namespace System.Web.Http
             Assert.Same(state, mockAsyncResult.AsyncState);
         }
 
-        [Fact]
-        public void AsyncWaitHandle_ReturnsSameHandle()
-        {
-            // Arrange
-            MockAsyncResult mockAsyncResult = new MockAsyncResult(null, null);
-
-            // Act
-            WaitHandle handle1 = mockAsyncResult.AsyncWaitHandle;
-            WaitHandle handle2 = mockAsyncResult.AsyncWaitHandle;
-
-            // Assert
-            Assert.Same(handle1, handle2);
-        }
-
-        [Fact]
-        public void AsyncWaitHandle_ReturnsIncompleteHandle()
-        {
-            // Arrange
-            MockAsyncResult mockAsyncResult = new MockAsyncResult(null, null);
-
-            // Act
-            WaitHandle handle = mockAsyncResult.AsyncWaitHandle;
-            bool signal = handle.WaitOne(_timeout);
-
-            // Assert
-            Assert.False(signal);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void AsyncWaitHandle_ThrowsIfAcessedAfterEndIsCalled(bool completedSynchronously)
-        {
-            // Arrange
-            MockAsyncResult mockAsyncResult = new MockAsyncResult(null, null);
-            mockAsyncResult.Complete(completedSynchronously);
-            MockAsyncResult.End<MockAsyncResult>(mockAsyncResult);
-
-            // Act/Assert
-            Assert.Throws<InvalidOperationException>(() => mockAsyncResult.AsyncWaitHandle);
-        }
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -100,21 +58,6 @@ namespace System.Web.Http
 
             // Assert
             Assert.True(mockAsyncResult.IsCompleted);
-        }
-
-        [Fact]
-        public void Complete_SetsHandleWhenNotCompletingSynchronously()
-        {
-            // Arrange
-            MockAsyncResult mockAsyncResult = new MockAsyncResult(null, null);
-
-            // Act
-            mockAsyncResult.Complete(false);
-            WaitHandle handle = mockAsyncResult.AsyncWaitHandle;
-            bool signal = handle.WaitOne(_timeout);
-
-            // Assert
-            Assert.True(signal);
         }
 
         [Theory]
@@ -203,25 +146,6 @@ namespace System.Web.Http
 
             // Act/Assert
             Assert.Throws<ApplicationException>(() => MockAsyncResult.End<MockAsyncResult>(mockAsyncResult));
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void End_ClosesHandle(bool completedSynchronously)
-        {
-            // Arrange
-            MockAsyncCallback mockCallback = new MockAsyncCallback(false);
-            MockAsyncResult mockAsyncResult = new MockAsyncResult(mockCallback.Callback, null);
-            ApplicationException applicationException = new ApplicationException("Complete failed!");
-            mockAsyncResult.Complete(completedSynchronously);
-            WaitHandle handle = mockAsyncResult.AsyncWaitHandle;
-
-            // Act
-            MockAsyncResult.End<MockAsyncResult>(mockAsyncResult);
-
-            // Assert
-            Assert.ThrowsObjectDisposed(() => handle.WaitOne(), "");
         }
 
         internal class MockAsyncResult : AsyncResult

@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Moq;
 using Xunit;
+using System.Threading;
 
 namespace System.Net.Http.Handlers
 {
@@ -151,10 +152,11 @@ namespace System.Net.Http.Handlers
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public void BeginEndWrite_ReportsBytesWritten()
         {
             // Arrange
+            ManualResetEvent writeComplete = new ManualResetEvent(false);
             HttpRequestMessage request = CreateRequest();
             Stream innerStream = new MemoryStream();
             byte[] buffer = CreateBufferContent();
@@ -170,8 +172,16 @@ namespace System.Net.Http.Handlers
             while (totalBytesWritten < expectedLength)
             {
                 bytesWritten = Math.Min(8, (int)expectedLength - totalBytesWritten);
-                IAsyncResult result = progressStream.BeginWrite(buffer, totalBytesWritten, bytesWritten, null, userState);
-                progressStream.EndWrite(result);
+                IAsyncResult result = progressStream.BeginWrite(buffer, totalBytesWritten, bytesWritten,
+                    ia =>
+                    {
+                        progressStream.EndWrite(ia);
+                        writeComplete.Set();
+                    },
+                    userState);
+
+                writeComplete.WaitOne();
+                writeComplete.Reset();
                 totalBytesWritten += bytesWritten;
 
                 Assert.Same(userState, mockProgressEventHandler.EventArgs.UserState);

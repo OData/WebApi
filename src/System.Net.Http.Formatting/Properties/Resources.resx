@@ -273,9 +273,6 @@
   <data name="AsyncResult_CallbackThrewException" xml:space="preserve">
     <value>Async Callback threw an exception.</value>
   </data>
-  <data name="AsyncResult_CannotGetHandleAfterEnd" xml:space="preserve">
-    <value>The IAsyncResult implementation '{0}' tried to get a handle after End was called.</value>
-  </data>
   <data name="AsyncResult_MultipleCompletes" xml:space="preserve">
     <value>The IAsyncResult implementation '{0}' tried to complete a single operation multiple times. This could be caused by an incorrect application IAsyncResult implementation or other extensibility code, such as an IAsyncResult that returns incorrect CompletedSynchronously values or invokes the AsyncCallback multiple times.</value>
   </data>

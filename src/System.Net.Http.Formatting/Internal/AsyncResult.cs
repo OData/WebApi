@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Web.Http;
 
@@ -17,13 +18,11 @@ namespace System.Net.Http.Internal
         private bool _endCalled;
 
         private Exception _exception;
-        private Lazy<ManualResetEvent> _manualResetEvent;
 
         protected AsyncResult(AsyncCallback callback, object state)
         {
             _callback = callback;
             _state = state;
-            _manualResetEvent = new Lazy<ManualResetEvent>(() => new ManualResetEvent(_isCompleted));
         }
 
         public object AsyncState
@@ -35,12 +34,8 @@ namespace System.Net.Http.Internal
         {
             get
             {
-                if (_endCalled)
-                {
-                    throw Error.InvalidOperation(Properties.Resources.AsyncResult_CannotGetHandleAfterEnd, GetType().Name);
-                }
-
-                return _manualResetEvent.Value;
+                Contract.Assert(false, "AsyncWaitHandle is not supported -- use callbacks instead.");
+                return null;
             }
         }
 
@@ -68,10 +63,6 @@ namespace System.Net.Http.Internal
 
             _completedSynchronously = completedSynchronously;
             _isCompleted = true;
-            if (_manualResetEvent.IsValueCreated)
-            {
-                _manualResetEvent.Value.Set();
-            }
 
             if (_callback != null)
             {
@@ -117,11 +108,6 @@ namespace System.Net.Http.Internal
             }
 
             thisPtr._endCalled = true;
-
-            if (thisPtr._manualResetEvent.IsValueCreated)
-            {
-                thisPtr._manualResetEvent.Value.Close();
-            }
 
             if (thisPtr._exception != null)
             {

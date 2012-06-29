@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Mime;
-using System.Text;
 using System.Web.TestUtil;
+using Microsoft.TestCommon;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
@@ -10,6 +10,7 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {
+    [CLSCompliant(false)]
     public class FileResultTest
     {
         [Fact]
@@ -141,29 +142,38 @@ namespace System.Web.Mvc.Test
             MemberHelper.TestStringProperty(result, "FileDownloadName", String.Empty);
         }
 
-        [Theory]
-        [InlineData("09aAzZ", "attachment; filename=09aAzZ")]
-        [InlineData(" ", "attachment; filename=\" \"")]
-        [InlineData("a b", "attachment; filename=\"a b\"")]
-        [InlineData("a\tb", "attachment; filename=\"a\tb\"")]
-        [InlineData("a\nb", "attachment; filename=\"a\\\nb\"")]
-        [InlineData("a.b", "attachment; filename=a.b")]
-        [InlineData("-", "attachment; filename=-")]
-        [InlineData("_", "attachment; filename=_")]
-        [InlineData(":", "attachment; filename=\":\"")]
-        [InlineData(": :", "attachment; filename=\": :\"")]
-        [InlineData("~", "attachment; filename=~")]
-        [InlineData("$", "attachment; filename=$")]
-        [InlineData("&", "attachment; filename=&")]
-        [InlineData("+", "attachment; filename=+")]
-        [InlineData("@", "attachment; filename=\"@\"")]
-        [InlineData("\"", "attachment; filename=\"\\\"\"")]
-        [InlineData("#", "attachment; filename=#")]
-        [InlineData("résumé.txt", "attachment; filename*=UTF-8''r%C3%A9sum%C3%A9.txt")]
-        [InlineData("Δ", "attachment; filename*=UTF-8''%CE%94")]
-        [InlineData("Δ\t", "attachment; filename*=UTF-8''%CE%94%09")]
-        [InlineData("ABCXYZabcxyz012789!@#$%^&*()-=_+.:~Δ", @"attachment; filename*=UTF-8''ABCXYZabcxyz012789!%40%23$%25%5E&%2A%28%29-%3D_+.:~%CE%94")]
-        [CLSCompliant(false)]
+        public static TheoryDataSet<string, string> ContentDispositionData
+        {
+            get
+            {
+                return new TheoryDataSet<string, string>
+                {
+                    { "09aAzZ", "attachment; filename=09aAzZ" },
+                    { " ", "attachment; filename=\" \"" },
+                    { "a b", "attachment; filename=\"a b\"" },
+                    { "a\tb", "attachment; filename=\"a\tb\"" },
+                    { "a\nb", PlatformInfo.Platform == Platform.Net40 ? "attachment; filename=\"a\\\nb\"" : "attachment; filename=\"=?utf-8?B?YQpi?=\"" },
+                    { "a.b", "attachment; filename=a.b" },
+                    { "-", "attachment; filename=-" },
+                    { "_", "attachment; filename=_" },
+                    { ":", "attachment; filename=\":\"" },
+                    { ": :", "attachment; filename=\": :\"" },
+                    { "~", "attachment; filename=~" },
+                    { "$", "attachment; filename=$" },
+                    { "&", "attachment; filename=&" },
+                    { "+", "attachment; filename=+" },
+                    { "@", "attachment; filename=\"@\"" },
+                    { "\"", "attachment; filename=\"\\\"\"" },
+                    { "#", "attachment; filename=#" },
+                    { "résumé.txt", "attachment; filename*=UTF-8''r%C3%A9sum%C3%A9.txt" },
+                    { "Δ", "attachment; filename*=UTF-8''%CE%94" },
+                    { "Δ\t", "attachment; filename*=UTF-8''%CE%94%09" },
+                    { "ABCXYZabcxyz012789!@#$%^&*()-=_+.:~Δ", @"attachment; filename*=UTF-8''ABCXYZabcxyz012789!%40%23$%25%5E&%2A%28%29-%3D_+.:~%CE%94" },
+                };
+            }
+        }
+
+        [Theory, PropertyData("ContentDispositionData")]
         public void GetHeaderValue_Produces_Correct_ContentDisposition(string input, string expectedOutput)
         {
             // Arrange & Act

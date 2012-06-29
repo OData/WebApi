@@ -9,8 +9,8 @@ using System.Text;
 using Microsoft.TestCommon;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using FactAttribute = Microsoft.TestCommon.DefaultTimeoutFactAttribute;
-using TheoryAttribute = Microsoft.TestCommon.DefaultTimeoutTheoryAttribute;
+using FactAttribute = Microsoft.TestCommon.WsrFactAttribute;
+using TheoryAttribute = Microsoft.TestCommon.WsrTheoryAttribute;
 
 namespace System.Net.Http
 {

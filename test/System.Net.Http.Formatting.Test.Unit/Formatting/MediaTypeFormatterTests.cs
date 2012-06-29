@@ -9,9 +9,9 @@ using System.Text;
 using System.Web.Http;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
+using FactAttribute = Microsoft.TestCommon.WsrFactAttribute;
 
 namespace System.Net.Http.Formatting
 {
@@ -60,7 +60,7 @@ namespace System.Net.Http.Formatting
             Assert.Reflection.IntegerProperty<MediaTypeFormatter, int>(
                 null,
                 c => MediaTypeFormatter.MaxHttpCollectionKeys,
-                expectedDefaultValue: 1000,
+                expectedDefaultValue: PlatformInfo.Platform == Platform.Net40 ? 1000 : Int32.MaxValue,
                 minLegalValue: 1,
                 illegalLowerValue: 0,
                 maxLegalValue: null,

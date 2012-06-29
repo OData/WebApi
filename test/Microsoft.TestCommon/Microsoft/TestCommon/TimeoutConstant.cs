@@ -15,7 +15,7 @@ namespace Microsoft.TestCommon
         public const int DefaultTimeout = 30 * seconds;
 
         /// <summary>
-        /// An extendedn timeout for longer running test methods.
+        /// An extended timeout for longer running test methods.
         /// </summary>
         public const int ExtendedTimeout = 240 * seconds;
     }

@@ -73,12 +73,15 @@
     <Compile Include="..\Common\HttpMethodHelperTest.cs">
       <Link>Common\HttpMethodHelperTest.cs</Link>
     </Compile>
+    <Compile Include="Channels\HttpBindingSecurityModeHelperTest.cs" />
     <Compile Include="DeeplyNestedTypeTests.cs" />
     <Compile Include="HttpSelfHostConfigurationTest.cs" />
     <Compile Include="HttpSelfHostServerTest.cs" />
     <Compile Include="MaxHttpCollectionKeyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpSelfHostResponseTest.cs" />
+    <Compile Include="ServiceModel\TransferModeHelperTest.cs" />
+    <Compile Include="ServiceModel\HostNameComparisonModeHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

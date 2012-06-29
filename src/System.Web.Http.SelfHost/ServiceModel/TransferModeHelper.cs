@@ -24,11 +24,11 @@ namespace System.Web.Http.SelfHost.ServiceModel
             return transferMode == TransferMode.StreamedResponse || transferMode == TransferMode.Streamed;
         }
 
-        public static void Validate(TransferMode value)
+        public static void Validate(TransferMode value, string parameterValue)
         {
             if (!IsDefined(value))
             {
-                throw Error.InvalidEnumArgument("value", (int)value, typeof(TransferMode));
+                throw Error.InvalidEnumArgument(parameterValue, (int)value, typeof(TransferMode));
             }
         }
     }

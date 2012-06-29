@@ -9,8 +9,6 @@ namespace System.Web.Http.SelfHost.Channels
     /// </summary>
     internal static class HttpBindingSecurityModeHelper
     {
-        private static readonly Type _httpBindingSecurityMode = typeof(HttpBindingSecurityMode);
-
         /// <summary>
         /// Determines whether the specified <paramref name="value"/> is defined by the <see cref="HttpBindingSecurityMode"/>
         /// enumeration.
@@ -34,7 +32,7 @@ namespace System.Web.Http.SelfHost.Channels
         {
             if (!IsDefined(value))
             {
-                throw Error.InvalidEnumArgument(parameterName, (int)value, _httpBindingSecurityMode);
+                throw Error.InvalidEnumArgument(parameterName, (int)value, typeof(HttpBindingSecurityMode));
             }
         }
     }

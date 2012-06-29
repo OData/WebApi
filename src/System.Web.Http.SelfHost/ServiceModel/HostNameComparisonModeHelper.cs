@@ -14,11 +14,11 @@ namespace System.Web.Http.SelfHost.ServiceModel
                 || value == HostNameComparisonMode.WeakWildcard;
         }
 
-        public static void Validate(HostNameComparisonMode value)
+        public static void Validate(HostNameComparisonMode value, string parameterName)
         {
             if (!IsDefined(value))
             {
-                throw Error.InvalidEnumArgument("value", (int)value, typeof(HostNameComparisonMode));
+                throw Error.InvalidEnumArgument(parameterName, (int)value, typeof(HostNameComparisonMode));
             }
         }
     }

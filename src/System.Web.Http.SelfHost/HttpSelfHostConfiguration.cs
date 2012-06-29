@@ -109,7 +109,7 @@ namespace System.Web.Http.SelfHost
 
             set
             {
-                TransferModeHelper.Validate(value);
+                TransferModeHelper.Validate(value, "value");
                 _transferMode = value;
             }
         }
@@ -123,7 +123,7 @@ namespace System.Web.Http.SelfHost
 
             set
             {
-                HostNameComparisonModeHelper.Validate(value);
+                HostNameComparisonModeHelper.Validate(value, "value");
                 _hostNameComparisonMode = value;
             }
         }

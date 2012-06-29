@@ -10,8 +10,6 @@ namespace System.Net.Http.Formatting
     /// </summary>
     internal static class StringComparisonHelper
     {
-        private static readonly Type _stringComparisonType = typeof(StringComparison);
-
         /// <summary>
         /// Determines whether the specified <paramref name="value"/> is defined by the <see cref="StringComparison"/>
         /// enumeration.
@@ -40,7 +38,7 @@ namespace System.Net.Http.Formatting
         {
             if (!IsDefined(value))
             {
-                throw Error.InvalidEnumArgument(parameterName, (int)value, _stringComparisonType);
+                throw Error.InvalidEnumArgument(parameterName, (int)value, typeof(StringComparison));
             }
         }
     }

@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace System.Web.Http.Controllers
 {
-    internal interface IActionHttpMethodProvider
+    public interface IActionHttpMethodProvider
     {
         Collection<HttpMethod> HttpMethods { get; }
     }

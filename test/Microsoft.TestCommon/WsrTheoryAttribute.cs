@@ -13,6 +13,7 @@ namespace Microsoft.TestCommon
         public WsrTheoryAttribute()
         {
             Timeout = TimeoutConstant.DefaultTimeout;
+            Platforms = Platform.All;
         }
 
         /// <summary>

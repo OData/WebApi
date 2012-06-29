@@ -71,8 +71,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CultureReplacer.cs" />
-    <Compile Include="DefaultTimeoutFactAttribute.cs" />
-    <Compile Include="DefaultTimeoutTheoryAttribute.cs" />
+    <Compile Include="WsrFactAttribute.cs" />
+    <Compile Include="WsrTheoryAttribute.cs" />
     <Compile Include="DictionaryEqualityComparer.cs" />
     <Compile Include="ExceptionAssertions.cs">
       <SubType>Code</SubType>

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Net;
 using System.ServiceModel;
 
@@ -29,7 +29,7 @@ namespace System.Web.Http.SelfHost.ServiceModel
                     return AuthenticationSchemes.Negotiate;
             }
 
-            Debug.Assert(false, "Invalid clientCredentialType " + clientCredentialType);
+            Contract.Assert(false, "Invalid clientCredentialType " + clientCredentialType);
             return AuthenticationSchemes.Anonymous;
         }
     }

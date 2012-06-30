@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Threading;
@@ -107,7 +106,7 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             {
                 // If we completedSynchronously, then there's no chance that the manualResetEvent was created so
                 // we don't need to worry about a race
-                Debug.Assert(_manualResetEvent == null, "No ManualResetEvent should be created for a synchronous AsyncResult.");
+                Contract.Assert(_manualResetEvent == null, "No ManualResetEvent should be created for a synchronous AsyncResult.");
                 _isCompleted = true;
             }
             else

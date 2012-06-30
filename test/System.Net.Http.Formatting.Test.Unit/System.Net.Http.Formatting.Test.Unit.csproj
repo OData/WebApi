@@ -71,6 +71,10 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MimeBodyPartTest.cs" />
+    <Compile Include="HttpHeaderExtensionsTest.cs" />
+    <Compile Include="HttpUnsortedResponseTest.cs" />
+    <Compile Include="HttpUnsortedRequestTest.cs" />
     <Compile Include="Formatting\StringComparisonHelperTest.cs" />
     <Compile Include="Formatting\XmlHttpRequestHeaderMappingTest.cs" />
     <Compile Include="Formatting\MediaTypeFormatterMatchTest.cs" />

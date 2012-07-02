@@ -65,7 +65,7 @@
   <ItemGroup>
     <Compile Include="JsonNetSerializationTest.cs" />
     <Compile Include="JsonNetValidationTest.cs" />
-    <Compile Include="JsonValueCreatorSurrogate.cs" />
+    <Compile Include="JTokenCreatorSurrogate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FormUrlEncodedFromContentTests.cs" />
     <Compile Include="FormUrlEncodedFromUriQueryTests.cs" />

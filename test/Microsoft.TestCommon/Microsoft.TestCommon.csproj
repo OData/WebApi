@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumHelperTestBase.cs" />
+    <Compile Include="InstanceCreator.cs" />
     <Compile Include="PartialTrustRunner.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="PlatformInfo.cs" />

@@ -104,10 +104,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\System.Json\System.Json.csproj">
-      <Project>{F0441BE9-BDC0-4629-BE5A-8765FFAA2481}</Project>
-      <Name>System.Json</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
       <Project>{668E9021-CE84-49D9-98FB-DF125A9FCDB0}</Project>
       <Name>System.Net.Http.Formatting</Name>

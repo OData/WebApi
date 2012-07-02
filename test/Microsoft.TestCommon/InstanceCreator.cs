@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace System.Json
+namespace Microsoft.TestCommon
 {
     /// <summary>
     /// Settings used by the <see cref="InstanceCreator"/> class.
@@ -166,7 +167,7 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="DateTime"/> type.</returns>
-        public static System.DateTime CreateInstanceOfDateTime(Random rndGen)
+        public static DateTime CreateInstanceOfDateTime(Random rndGen)
         {
             long temp = CreateInstanceOfInt64(rndGen);
             temp = Math.Abs(temp);
@@ -215,7 +216,7 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="DateTimeOffset"/> type.</returns>
-        public static System.DateTimeOffset CreateInstanceOfDateTimeOffset(Random rndGen)
+        public static DateTimeOffset CreateInstanceOfDateTimeOffset(Random rndGen)
         {
             DateTime temp = CreateInstanceOfDateTime(rndGen);
             temp = DateTime.SpecifyKind(temp, DateTimeKind.Unspecified);
@@ -274,7 +275,7 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="Guid"/> type.</returns>
-        public static System.Guid CreateInstanceOfGuid(Random rndGen)
+        public static Guid CreateInstanceOfGuid(Random rndGen)
         {
             byte[] temp = new byte[16];
             rndGen.NextBytes(temp);
@@ -353,7 +354,6 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="SByte"/> type.</returns>
-        [CLSCompliant(false)]
         public static sbyte CreateInstanceOfSByte(Random rndGen)
         {
             byte[] rndValue = new byte[1];
@@ -505,7 +505,6 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="UInt16"/> type.</returns>
-        [CLSCompliant(false)]
         public static ushort CreateInstanceOfUInt16(Random rndGen)
         {
             byte[] rndValue = new byte[2];
@@ -525,7 +524,6 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="UInt32"/> type.</returns>
-        [CLSCompliant(false)]
         public static uint CreateInstanceOfUInt32(Random rndGen)
         {
             byte[] rndValue = new byte[4];
@@ -545,7 +543,6 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="UInt64"/> type.</returns>
-        [CLSCompliant(false)]
         public static ulong CreateInstanceOfUInt64(Random rndGen)
         {
             byte[] rndValue = new byte[8];
@@ -565,7 +562,7 @@ namespace System.Json
         /// </summary>
         /// <param name="rndGen">A <see cref="Random"/> used to create the instance.</param>
         /// <returns>An instance of the <see cref="Uri"/> type.</returns>
-        public static System.Uri CreateInstanceOfUri(Random rndGen)
+        public static Uri CreateInstanceOfUri(Random rndGen)
         {
             Uri result;
             UriKind kind;

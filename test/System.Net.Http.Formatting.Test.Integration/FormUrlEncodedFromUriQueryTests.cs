@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Json;
 using System.Text;
 using System.Web.Http;
 using Microsoft.TestCommon;
@@ -13,8 +12,6 @@ namespace System.Net.Http.Formatting
 {
     public class FormUrlEncodedJsonFromUriQueryTests
     {
-        #region Tests
-
         [Theory,
             InlineData("abc", "{\"abc\":\"\"}"),
             InlineData("%2eabc%2e", "{\".abc.\":\"\"}"),
@@ -315,9 +312,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        #endregion
-
-        #region Helpers
         private static string FormUrlEncoding(JToken jsonValue)
         {
             List<string> results = new List<string>();
@@ -428,7 +422,5 @@ namespace System.Net.Http.Formatting
             Assert.NotNull(result);
             Assert.Equal(expectedResult, result.ToString(Newtonsoft.Json.Formatting.None));
         }
-
-        #endregion
     }
 }

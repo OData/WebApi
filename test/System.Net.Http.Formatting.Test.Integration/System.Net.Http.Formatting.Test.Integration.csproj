@@ -84,10 +84,6 @@
       <Project>{7AF77741-9158-4D5F-8782-8F21FADF025F}</Project>
       <Name>System.Net.Http.Formatting.Test.Unit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Json.Test.Integration\System.Json.Test.Integration.csproj">
-      <Project>{A7B1264E-BCE5-42A8-8B5E-001A5360B128}</Project>
-      <Name>System.Json.Test.Integration</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

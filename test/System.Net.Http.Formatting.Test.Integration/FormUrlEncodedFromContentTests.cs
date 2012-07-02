@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Json;
 using System.Net.Http.Formatting.Parsers;
 using System.Text;
 using System.Web.Http;
@@ -71,8 +70,6 @@ namespace System.Net.Http.Formatting
                 };
             }
         }
-
-        #region Tests
 
         [Theory,
             InlineData("abc", "{\"abc\":\"\"}"),
@@ -390,10 +387,6 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        #endregion
-
-        #region Helpers
-
         private static string FormUrlEncoding(JToken jsonValue)
         {
             List<string> results = new List<string>();
@@ -510,7 +503,5 @@ namespace System.Net.Http.Formatting
                 Assert.Equal(expectedResult, result.ToString(Newtonsoft.Json.Formatting.None));
             }
         }
-
-        #endregion
     }
 }

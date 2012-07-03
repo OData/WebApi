@@ -73,7 +73,7 @@ namespace System.Web.Http.ContentNegotiation
             Assert.Equal<string>("Hello World!", response.Content.ReadAsStringAsync().Result);
         }
 
-        [Fact(Skip = "Test update needed, uses IKeyValueModel")]
+        [Fact]
         public void CustomFormatter_Post_Returns_Request_Integer_Content()
         {
             HttpRequestMessage request = new HttpRequestMessage
@@ -93,8 +93,7 @@ namespace System.Web.Http.ContentNegotiation
             Assert.Equal<int>(100, Convert.ToInt32(response.Content.ReadAsStringAsync().Result));
         }
 
-
-        [Fact(Skip = "Test update needed, uses IKeyValueModel")]
+        [Fact]
         public void CustomFormatter_Post_Returns_Request_ComplexType_Content()
         {
             Order reqOrdr = new Order() { OrderId = "100", OrderValue = 100.00 };
@@ -206,15 +205,24 @@ namespace System.Web.Http.ContentNegotiation
 
         public override Task<object> ReadFromStreamAsync(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
         {
-            string stringContent = null;
+            object result = null;
 
             using (var reader = new StreamReader(readStream))
             {
-                stringContent = reader.ReadToEnd();
+                result = reader.ReadToEnd();
+            }
+
+            if (type == typeof(Int32))
+            {
+                result = Int32.Parse((string)result);
+            }
+            else if (type == typeof(Order))
+            {
+                result = new Order((string)result);
             }
 
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(stringContent);
+            tcs.SetResult(result);
             return tcs.Task;
         }
 
@@ -257,6 +265,16 @@ namespace System.Web.Http.ContentNegotiation
         public string OrderId { get; set; }
         public double OrderValue { get; set; }
 
+        public Order() { }
+
+        public Order(string value)
+        {
+            string[] pieces = value.Split(new[] { '\n' }, 2);
+
+            OrderId = pieces[0];
+            OrderValue = Double.Parse(pieces[1]);
+        }
+
         public bool Equals(Order other)
         {
             return (this.OrderId.Equals(other.OrderId) && this.OrderValue.Equals(other.OrderValue));
@@ -269,7 +287,7 @@ namespace System.Web.Http.ContentNegotiation
 
         public override string ToString()
         {
-            return String.Format("OrderId:{0}, OrderValue:{1}", OrderId, OrderValue);
+            return String.Format("{0}\n{1}", OrderId, OrderValue);
         }
     }
 }

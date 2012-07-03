@@ -183,28 +183,6 @@ namespace System.Web.Http.ModelBinding
             Assert.Null(boundCollection);
         }
 
-        [Fact(Skip = "is this test checking a valid invariant?")]
-        public void BindSimpleCollection_SubBinderDoesNotExist()
-        {
-            // Arrange
-            CultureInfo culture = CultureInfo.GetCultureInfo("fr-FR");
-            ModelBindingContext bindingContext = new ModelBindingContext
-            {
-                ModelMetadata = new EmptyModelMetadataProvider().GetMetadataForType(null, typeof(int)),
-                ModelName = "someName",
-                ValueProvider = new SimpleHttpValueProvider()
-            };
-            HttpActionContext context = ContextUtil.CreateActionContext();
-            context.ControllerContext.Configuration.Services.Replace(typeof(ModelBinderProvider), null); // completely remove from resolution?
-
-            // Act
-            List<int> boundCollection = CollectionModelBinder<int>.BindSimpleCollection(context, bindingContext, new int[1], culture);
-
-            // Assert
-            Assert.Equal(new[] { 0 }, boundCollection.ToArray());
-            Assert.Empty(bindingContext.ValidationNode.ChildNodes);
-        }
-
         [Fact]
         public void BindSimpleCollection_SubBindingSucceeds()
         {

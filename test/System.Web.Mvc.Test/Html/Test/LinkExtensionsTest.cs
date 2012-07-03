@@ -50,7 +50,7 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<a href=""" + AppPathModifier + @"/app/home/explicitAction"">linktext</a>", html.ToHtmlString());
         }
 
-        [Fact(Skip = "External bug DevDiv 356125 -- does not work correctly on 4.5")]
+        [Fact]
         public void ActionLinkParametersNeedEscaping()
         {
             // Arrange

@@ -110,47 +110,6 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             client.Verify();
         }
 
-        [Fact(Skip="The code in DNOA library is verifying the request for XSRF attack using MachineKeyUtil class, which always fails.")]
-        public void VerifyAuthenticationSucceed()
-        {
-            // Arrange
-            var queryStrings = new NameValueCollection();
-            queryStrings.Add("__provider__", "facebook");
-            queryStrings.Add("__sid__", "2C5FA1BBDF9343F8994E20ABB416CCA7");
-
-            var cookies = new HttpCookieCollection();
-            cookies.Add(new HttpCookie("__csid__", "2C5FA1BBDF9343F8994E20ABB416CCA7"));
-
-            var context = new Mock<HttpContextBase>();
-            context.Setup(c => c.Request.QueryString).Returns(queryStrings);
-            context.Setup(c => c.Request.Cookies).Returns(cookies);
-            context.Setup(c => c.Response.Cookies).Returns(cookies);
-            context.Setup(c => c.User.Identity.IsAuthenticated).Returns(false);
-            context.Setup(c => c.User.Identity.Name).Returns("luan");
-
-            var client = new Mock<IAuthenticationClient>(MockBehavior.Strict);
-            client.Setup(c => c.ProviderName).Returns("facebook");
-            client.Setup(c => c.VerifyAuthentication(context.Object)).Returns(new AuthenticationResult(true, "facebook", "123", "super", null));
-
-            var anotherClient = new Mock<IAuthenticationClient>(MockBehavior.Strict);
-            anotherClient.Setup(c => c.ProviderName).Returns("twitter");
-            anotherClient.Setup(c => c.VerifyAuthentication(context.Object)).Returns(AuthenticationResult.Failed);
-
-            OAuthWebSecurity.RegisterClient(client.Object);
-            OAuthWebSecurity.RegisterClient(anotherClient.Object);
-
-            // Act
-            AuthenticationResult result = OAuthWebSecurity.VerifyAuthenticationCore(context.Object, "one.aspx");
-
-            // Assert
-            Assert.True(result.IsSuccessful);
-            Assert.Equal("facebook", result.Provider);
-            Assert.Equal("123", result.ProviderUserId);
-            Assert.Equal("super", result.UserName);
-            Assert.Null(result.Error);
-            Assert.Null(result.ExtraData);
-        }
-
         [Fact]
         public void VerifyAuthenticationFail()
         {
@@ -225,7 +184,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
 
             // Assert
             Assert.True(successful);
-            
+
             Assert.Equal(1, cookies.Count);
             HttpCookie addedCookie = cookies[0];
 
@@ -253,7 +212,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             var dataProvider = new Mock<IOpenAuthDataProvider>();
             dataProvider.Setup(p => p.GetUserNameFromOpenAuth("twitter", "12345")).Returns((string)null);
             OAuthWebSecurity.OAuthDataProvider = dataProvider.Object;
-            
+
             // Act
             bool successful = OAuthWebSecurity.LoginCore(context.Object, "twitter", "12345", createPersistentCookie: false);
 
@@ -440,7 +399,8 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             Assert.Null(data.First().ExtraData);
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             OAuthWebSecurity.ClearProviders();
         }
     }

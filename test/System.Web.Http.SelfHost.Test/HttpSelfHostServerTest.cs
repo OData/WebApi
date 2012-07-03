@@ -207,7 +207,7 @@ namespace System.Web.Http.SelfHost
             Assert.Throws<HttpRequestException>(() => task.Wait());
         }
 
-        [Theory(Skip = "This currently fails on CI machine only")]
+        [Theory]
         [InlineData("/SelfHostServerTest/ThrowBeforeWriteStream", TransferMode.Buffered)]
         [InlineData("/SelfHostServerTest/ThrowBeforeWriteStream", TransferMode.Streamed)]
         [InlineData("/SelfHostServerTest/ThrowAfterWriteStream", TransferMode.Buffered)]

@@ -26,7 +26,7 @@ namespace Microsoft.Web.Http.Data.Test
     public class DataControllerSubmitTests
     {
         // Verify that POSTs directly to CUD actions still go through the submit pipeline
-        [Fact(Platforms = Platform.Net40)]  // Seems to be flaky on 4.5
+        [Fact(Platforms = Platform.All & ~Platform.Net45, PlatformJustification = "Test is flaky on .NET 4.5")]
         public void Submit_Proxy_Insert()
         {
             Order order = new Order { OrderID = 1, OrderDate = DateTime.Now };

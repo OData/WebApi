@@ -28,27 +28,6 @@ namespace System.Net.Formatting.Tests
             SerializerConsistencyHepers.Test(c1);
         }
 
-        [Fact(Skip = "failing")]
-        public void ClassWithIenumerable()
-        {
-            var widget = new ClassWithIenumerable { Property = "something" };
-            SerializerConsistencyHepers.Test(widget); // XML fails to serialize
-        }
-
-        [Fact(Skip = "failing")]
-        public void ClassWithIenumerableAndDataContract()
-        {
-            var widget = new ClassWithIenumerable2 { Property = "something" };
-            SerializerConsistencyHepers.Test(widget); // XML fails to serialize
-        }
-
-        [Fact(Skip = "failing")]
-        public void TestAnonymousType()
-        {
-            var anonymous = new { X = 10, Y = 15 };
-            SerializerConsistencyHepers.Test(anonymous); // XML fails to write anonymous types
-        }
-
         [Fact]
         public void PrivateProperty()
         {
@@ -64,15 +43,6 @@ namespace System.Net.Formatting.Tests
             SerializerConsistencyHepers.Test(source);
         }
 
-        [Fact(Skip = "failing")]
-        public void DerivedProperties()
-        {
-            // If the static type is the base object, will we see the runtime type and pick derived properties
-            BaseClass source = new DerivedClass { Property = "base", DerivedProperty = "derived" };
-            source.SetField("private");
-            SerializerConsistencyHepers.Test(source, typeof(BaseClass));
-        }
-
         [Fact]
         public void InheritedProperties()
         {
@@ -82,16 +52,6 @@ namespace System.Net.Formatting.Tests
             SerializerConsistencyHepers.Test(source, typeof(DerivedClass));
         }
 
-        [Fact(Skip = "failing")]
-        public void NewPropertiesHideBaseClass()
-        {
-            DerivedClassWithNew source = new DerivedClassWithNew { Property = "derived" };
-            BaseClass baseClass = (BaseClass)source;
-            baseClass.Property = "base";
-
-            SerializerConsistencyHepers.Test(source, typeof(DerivedClassWithNew));
-        }
-
         [Fact]
         public void NullEmptyWhitespaceString()
         {
@@ -99,8 +59,6 @@ namespace System.Net.Formatting.Tests
 
             SerializerConsistencyHepers.Test(source);
         }
-
-
 
         [Fact]
         public void Dictionary()
@@ -130,15 +88,6 @@ namespace System.Net.Formatting.Tests
             SerializerConsistencyHepers.Test(array, typeof(IEnumerable<string>));
         }
 
-        [Fact(Skip = "failing")]
-        public void LinqDirect()
-        {
-            var l = from i in Enumerable.Range(1, 10) where i > 5 select i * i;
-
-            // Write as the derived runtime type, but then read back as just an IEnumerable.
-            SerializerConsistencyHepers.Test(l, tSourceWrite: l.GetType(), tSourceRead: typeof(IEnumerable<int>));
-        }
-
         [Fact]
         public void Linq()
         {
@@ -155,17 +104,6 @@ namespace System.Net.Formatting.Tests
             ClassWithStaticProperties source = new ClassWithStaticProperties();
 
             SerializerConsistencyHepers.Test(source);
-        }
-
-        [Fact(Skip = "failing")]
-        public void ExplicitInterfaceProps()
-        {
-            ClassWithExplicitInterface source = new ClassWithExplicitInterface { PublicProp = "public" };
-            Interface1 i1 = source;
-            i1.Foo = "interface!";
-
-            SerializerConsistencyHepers.Test(source);
-            SerializerConsistencyHepers.Test(source, typeof(Interface1));
         }
     }
 
@@ -191,29 +129,6 @@ namespace System.Net.Formatting.Tests
             {
                 Assert.True(false, "serializers should never call static properties");
                 throw new InvalidOperationException(); // assert already threw
-            }
-        }
-    }
-
-    public interface Interface1
-    {
-        string Foo { get; set; }
-    }
-    public class ClassWithExplicitInterface : Interface1
-    {
-        private string _value;
-
-        public string PublicProp { get; set; }
-
-        string Interface1.Foo
-        {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                _value = value; ;
             }
         }
     }
@@ -265,60 +180,6 @@ namespace System.Net.Formatting.Tests
     public class DerivedClass : BaseClass
     {
         public string DerivedProperty { get; set; }
-    }
-
-    public class DerivedClassWithNew : BaseClass
-    {
-        // shadows base class property
-        public new string Property { get; set; }
-    }
-
-    // Does a serializer see this implements IEnumerable? And does it treat it specially?
-    public class ClassWithIenumerable2 : IEnumerable<string>
-    {
-        public string Property { get; set; }
-
-        public IEnumerator<string> GetEnumerator()
-        {
-            return GetEnumeratorWorker();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumeratorWorker();
-        }
-
-        private IEnumerator<string> GetEnumeratorWorker()
-        {
-            string[] vals = new string[] { "First", "Second", "Third" };
-            IEnumerable<string> e = vals;
-            return e.GetEnumerator();
-        }
-    }
-
-    // Enumerable, decorated with [DataContract] attributes.
-    [DataContract]
-    public class ClassWithIenumerable : IEnumerable<string>
-    {
-        [DataMember]
-        public string Property { get; set; }
-
-        public IEnumerator<string> GetEnumerator()
-        {
-            return GetEnumeratorWorker();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumeratorWorker();
-        }
-
-        private IEnumerator<string> GetEnumeratorWorker()
-        {
-            string[] vals = new string[] { "First", "Second", "Third" };
-            IEnumerable<string> e = vals;
-            return e.GetEnumerator();
-        }
     }
 
     // Helpers for performing consistency checks with the serializers.

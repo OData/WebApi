@@ -20,46 +20,6 @@ namespace System.Web.Http.ModelBinding
             Assert.Null(customResourceString);
         }
 
-        [Fact(Skip = "This functionality isn't enabled yet")]
-        public void GetUserResourceString_NullHttpContext_ReturnsNull()
-        {
-            Mock<HttpActionContext> context = new Mock<HttpActionContext>();
-            //context.Setup(o => o.HttpContext).Returns((HttpContextBase)null);
-
-            // Act
-            string customResourceString = ModelBinderConfig.GetUserResourceString(context.Object, "someResourceName", "someResourceClassKey");
-
-            // Assert
-            Assert.Null(customResourceString);
-        }
-
-        [Fact(Skip = "This functionality isn't enabled yet")]
-        public void GetUserResourceString_NullResourceKey_ReturnsNull()
-        {
-            Mock<HttpActionContext> context = new Mock<HttpActionContext>();
-
-            // Act
-            string customResourceString = ModelBinderConfig.GetUserResourceString(context.Object, "someResourceName", null /* resourceClassKey */);
-
-            // Assert
-            //context.Verify(o => o.HttpContext, Times.Never());
-            Assert.Null(customResourceString);
-        }
-
-        [Fact(Skip = "This functionality isn't enabled yet")]
-        public void GetUserResourceString_ValidResourceObject_ReturnsResourceString()
-        {
-            Mock<HttpActionContext> context = new Mock<HttpActionContext>();
-            //context.Setup(o => o.HttpContext.GetGlobalResourceObject("someResourceClassKey", "someResourceName", CultureInfo.CurrentUICulture))
-            //       .Returns("My custom resource string");
-
-            // Act
-            string customResourceString = ModelBinderConfig.GetUserResourceString(context.Object, "someResourceName", "someResourceClassKey");
-
-            // Assert
-            Assert.Equal("My custom resource string", customResourceString);
-        }
-
         [Fact]
         public void TypeConversionErrorMessageProvider_DefaultValue()
         {

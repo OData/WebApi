@@ -14,6 +14,7 @@ namespace Microsoft.TestCommon
         {
             Timeout = TimeoutConstant.DefaultTimeout;
             Platforms = Platform.All;
+            PlatformJustification = "Unsupported platform (test runs on {0}, current platform is {1})";
         }
 
         /// <summary>
@@ -30,6 +31,12 @@ namespace Microsoft.TestCommon
         /// </summary>
         public Platform Platforms { get; set; }
 
+        /// <summary>
+        /// Gets or sets the platform skipping justification. This message can receive
+        /// the supported platforms as {0}, and the current platform as {1}.
+        /// </summary>
+        public string PlatformJustification { get; set; }
+
         /// <inheritdoc/>
         protected override IEnumerable<ITestCommand> EnumerateTestCommands(IMethodInfo method)
         {
@@ -39,7 +46,7 @@ namespace Microsoft.TestCommon
                     new SkipCommand(
                         method,
                         DisplayName,
-                        String.Format("Unsupported platform (test only runs on {0}, current platform is {1})", Platforms, Platform)
+                        String.Format(PlatformJustification, Platforms.ToString().Replace(", ", " | "), Platform)
                     )
                 };
             }

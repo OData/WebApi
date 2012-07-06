@@ -6,25 +6,21 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http.SelfHost;
+using System.Web.Http.Util;
 using Xunit;
 using Xunit.Extensions;
 
 namespace System.Web.Http.ContentNegotiation
 {
-    public class HttpResponseReturnTests : IDisposable
+    public class HttpResponseReturnTests
     {
-        private HttpSelfHostServer server = null;
+        private HttpServer server = null;
         private string baseAddress = null;
         private HttpClient httpClient = null;
 
         public HttpResponseReturnTests()
         {
             this.SetupHost();
-        }
-
-        public void Dispose()
-        {
-            this.CleanupHost();
         }
 
         [Theory]
@@ -77,28 +73,19 @@ namespace System.Web.Http.ContentNegotiation
             response.EnsureSuccessStatusCode();
             IEnumerable<string> list;
             Assert.True(response.Headers.TryGetValues("Set-Cookie", out list));
-            Assert.Equal("cookie1,cookie2", ((string[])list)[0]);
+            Assert.Equal(new[] { "cookie1", "cookie2" }, list);
         }
 
         public void SetupHost()
         {
-            httpClient = new HttpClient();
-
             baseAddress = "http://localhost/";
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "HttpResponseReturn" });
+            config.MessageHandlers.Add(new ConvertToStreamMessageHandler());
 
-            server = new HttpSelfHostServer(config);
-            server.OpenAsync().Wait();
-        }
-
-        public void CleanupHost()
-        {
-            if (server != null)
-            {
-                server.CloseAsync().Wait();
-            }
+            server = new HttpServer(config);
+            httpClient = new HttpClient(server);
         }
     }
 

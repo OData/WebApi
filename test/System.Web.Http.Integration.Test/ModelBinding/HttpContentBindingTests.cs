@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http.SelfHost;
+using System.Web.Http.Util;
 using Xunit;
 using Xunit.Extensions;
 
@@ -13,16 +14,11 @@ namespace System.Web.Http.ModelBinding
     /// <summary>
     /// Tests actions that directly use HttpRequestMessage parameters
     /// </summary>
-    public class HttpContentBindingTests : IDisposable
+    public class HttpContentBindingTests
     {
         public HttpContentBindingTests()
         {
-            this.SetupHost();
-        }
-
-        public void Dispose()
-        {
-            this.CleanupHost();
+            SetupHost();
         }
 
         [Theory]
@@ -48,29 +44,20 @@ namespace System.Web.Http.ModelBinding
             Assert.Equal(order.OrderValue, receivedOrder.OrderValue);
         }
 
-        private HttpSelfHostServer server = null;
+        private HttpServer server = null;
         private string baseAddress = null;
         private HttpClient httpClient = null;
 
         private void SetupHost()
         {
-            httpClient = new HttpClient();
-
             baseAddress = "http://localhost/";
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "HttpContentBinding", action = "HandleMessage" });
+            config.MessageHandlers.Add(new ConvertToStreamMessageHandler());
 
-            server = new HttpSelfHostServer(config);
-            server.OpenAsync().Wait();
-        }
-
-        private void CleanupHost()
-        {
-            if (server != null)
-            {
-                server.CloseAsync().Wait();
-            }
+            server = new HttpServer(config);
+            httpClient = new HttpClient(server);
         }
     }
 

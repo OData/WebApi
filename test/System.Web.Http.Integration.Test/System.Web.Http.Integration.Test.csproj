@@ -133,6 +133,7 @@
     <Compile Include="PartialTrust\BasicScenarioTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\ContextUtil.cs" />
+    <Compile Include="Util\ConvertToStreamMessageHandler.cs" />
     <Compile Include="Util\ScenarioHelper.cs" />
   </ItemGroup>
   <ItemGroup>

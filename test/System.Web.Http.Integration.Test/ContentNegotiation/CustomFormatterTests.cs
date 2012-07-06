@@ -9,25 +9,21 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http.SelfHost;
+using System.Web.Http.Util;
 using Xunit;
 
 namespace System.Web.Http.ContentNegotiation
 {
-    public class CustomFormatterTests : IDisposable
+    public class CustomFormatterTests
     {
-        private HttpSelfHostServer server = null;
+        private HttpServer server = null;
         private string baseAddress = null;
         private HttpClient httpClient = null;
-        private HttpSelfHostConfiguration config = null;
+        private HttpConfiguration config = null;
 
         public CustomFormatterTests()
         {
             SetupHost();
-        }
-
-        public void Dispose()
-        {
-            this.CleanupHost();
         }
 
         [Fact]
@@ -47,7 +43,7 @@ namespace System.Web.Http.ContentNegotiation
             response.EnsureSuccessStatusCode();
 
             IEnumerable<string> versionHdr = null;
-            Assert.True(response.Headers.TryGetValues("Version", out versionHdr));
+            Assert.True(response.Content.Headers.TryGetValues("Version", out versionHdr));
             Assert.Equal<string>("1.3.5.0", versionHdr.First());
             Assert.NotNull(response.Content);
             Assert.NotNull(response.Content.Headers.ContentType);
@@ -114,23 +110,15 @@ namespace System.Web.Http.ContentNegotiation
 
         private void SetupHost()
         {
-            httpClient = new HttpClient();
             baseAddress = "http://localhost/";
             config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "CustomFormatterTests", action = "EchoOrder" });
+            config.MessageHandlers.Add(new ConvertToStreamMessageHandler());
             config.Formatters.Add(new PlainTextFormatterWithVersionInfo());
             config.Formatters.Add(new PlainTextFormatter());
 
-            server = new HttpSelfHostServer(config);
-            server.OpenAsync().Wait();
-        }
-
-        private void CleanupHost()
-        {
-            if (server != null)
-            {
-                server.CloseAsync().Wait();
-            }
+            server = new HttpServer(config);
+            httpClient = new HttpClient(server);
         }
     }
 

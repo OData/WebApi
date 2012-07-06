@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Net.Http.Formatting.DataSets;
 using System.Text;
 using Microsoft.TestCommon;
@@ -77,7 +76,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "AllHttpStatusCodes")]
+        [TestDataSet(typeof(HttpTestData), "AllHttpStatusCodes")]
         public void StatusLineParserAcceptsStandardStatusCodes(HttpStatusCode status)
         {
             byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason");
@@ -98,7 +97,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "CustomHttpStatusCodes")]
+        [TestDataSet(typeof(HttpTestData), "CustomHttpStatusCodes")]
         public void StatusLineParserAcceptsCustomStatusCodes(HttpStatusCode status)
         {
             byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason");

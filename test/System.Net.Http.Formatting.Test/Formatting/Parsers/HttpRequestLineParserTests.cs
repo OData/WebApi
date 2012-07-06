@@ -77,7 +77,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "AllHttpMethods")]
+        [TestDataSet(typeof(HttpTestData), "AllHttpMethods")]
         public void RequestLineParserAcceptsStandardMethods(HttpMethod method)
         {
             byte[] data = CreateBuffer(method.ToString(), "/", "HTTP/1.1");
@@ -98,7 +98,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "CustomHttpMethods")]
+        [TestDataSet(typeof(HttpTestData), "CustomHttpMethods")]
         public void RequestLineParserAcceptsCustomMethods(HttpMethod method)
         {
             byte[] data = CreateBuffer(method.ToString(), "/", "HTTP/1.1");

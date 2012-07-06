@@ -18,7 +18,7 @@ namespace System.Net.Http.Formatting
         {
             get
             {
-                return HttpUnitTestDataSets.UriStrings.Where((s) => !s.Contains('?'));
+                return HttpTestData.UriTestDataStrings.Where((s) => !s.Contains('?'));
             }
         }
 
@@ -33,9 +33,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues")]
         public void Constructor(string queryStringParameterName, string queryStringParameterValue, MediaTypeHeaderValue mediaType)
         {
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
@@ -46,7 +46,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void ConstructorThrowsWithEmptyQueryParameterName(MediaTypeHeaderValue mediaType, string queryStringParameterName)
         {
@@ -55,7 +55,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void ConstructorThrowsWithEmptyQueryParameterValue(MediaTypeHeaderValue mediaType, string queryStringParameterValue)
         {
@@ -64,8 +64,8 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues")]
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues")]
         public void ConstructorThrowsWithNullMediaTypeHeaderValue(string queryStringParameterName, string queryStringParameterValue)
         {
             Assert.ThrowsArgumentNull(() => new QueryStringMapping(queryStringParameterName, queryStringParameterValue, (MediaTypeHeaderValue)null), "mediaType");
@@ -73,9 +73,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void Constructor1(string queryStringParameterName, string queryStringParameterValue, string mediaType)
         {
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
@@ -86,7 +86,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void Constructor1ThrowsWithEmptyQueryParameterName(string mediaType, string queryStringParameterName)
         {
@@ -95,7 +95,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void Constructor1ThrowsWithEmptyQueryParameterValue(string mediaType, string queryStringParameterValue)
         {
@@ -104,8 +104,8 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void Constructor1ThrowsWithEmptyMediaType(string queryStringParameterName, string queryStringParameterValue, string mediaType)
         {
@@ -114,9 +114,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(QueryStringMappingTests), "UriStringsWithoutQuery")]
         public void TryMatchMediaTypeReturnsMatchWithQueryStringParameterNameAndValueInUri(string queryStringParameterName, string queryStringParameterValue, string mediaType, string uriBase)
         {
@@ -129,9 +129,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(QueryStringMappingTests), "UriStringsWithoutQuery")]
         public void TryMatchMediaTypeReturnsZeroWithQueryStringParameterNameNotInUri(string queryStringParameterName, string queryStringParameterValue, string mediaType, string uriBase)
         {
@@ -143,9 +143,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(QueryStringMappingTests), "UriStringsWithoutQuery")]
         public void TryMatchMediaTypeReturnsZeroWithQueryStringParameterValueNotInUri(string queryStringParameterName, string queryStringParameterValue, string mediaType, string uriBase)
         {
@@ -157,9 +157,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void TryMatchMediaTypeThrowsWithNullHttpRequestMessage(string queryStringParameterName, string queryStringParameterValue, string mediaType)
         {
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
@@ -168,9 +168,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterNames",
-            typeof(HttpUnitTestDataSets), "LegalQueryStringParameterValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalQueryStringParameterNames",
+            typeof(HttpTestData), "LegalQueryStringParameterValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void TryMatchMediaTypeThrowsWithNullUriInHttpRequestMessage(string queryStringParameterName, string queryStringParameterValue, string mediaType)
         {
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);

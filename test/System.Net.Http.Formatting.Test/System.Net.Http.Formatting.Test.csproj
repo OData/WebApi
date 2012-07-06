@@ -111,10 +111,9 @@
     <Compile Include="DataSets\Types\DerivedWcfPocoType.cs" />
     <Compile Include="DataSets\Types\DerivedXmlMediaTypeFormatter.cs" />
     <Compile Include="DataSets\Types\DerivedXmlSerializableType.cs" />
-    <Compile Include="DataSets\Types\HttpTestData.cs" />
+    <Compile Include="DataSets\HttpTestData.cs" />
     <Compile Include="DataSets\Types\INotJsonSerializable.cs" />
     <Compile Include="DataSets\Types\WcfPocoType.cs" />
-    <Compile Include="DataSets\HttpUnitTestDataSets.cs" />
     <Compile Include="DataSets\Types\XmlSerializableType.cs" />
     <Compile Include="Formatting\DataContractJsonMediaTypeFormatterTests.cs" />
     <Compile Include="Formatting\SerializerConsistencyTests.cs" />

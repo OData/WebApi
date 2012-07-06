@@ -52,7 +52,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "StandardFormUrlEncodedMediaTypes")]
+        [TestDataSet(typeof(HttpTestData), "StandardFormUrlEncodedMediaTypes")]
         public void Constructor(MediaTypeHeaderValue mediaType)
         {
             FormUrlEncodedMediaTypeFormatter formatter = new FormUrlEncodedMediaTypeFormatter();

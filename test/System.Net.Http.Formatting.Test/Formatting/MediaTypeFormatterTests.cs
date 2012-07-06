@@ -73,7 +73,7 @@ namespace System.Net.Http.Formatting
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
-            MediaTypeHeaderValue[] mediaTypes = HttpUnitTestDataSets.LegalMediaTypeHeaderValues.ToArray();
+            MediaTypeHeaderValue[] mediaTypes = HttpTestData.LegalMediaTypeHeaderValues.ToArray();
             foreach (MediaTypeHeaderValue mediaType in mediaTypes)
             {
                 supportedMediaTypes.Add(mediaType);
@@ -92,7 +92,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaRangeValues")]
+        [TestDataSet(typeof(HttpTestData), "LegalMediaRangeValues")]
         public void SupportedMediaTypes_AddThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -110,7 +110,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "LegalMediaRangeValues")]
+        [TestDataSet(typeof(HttpTestData), "LegalMediaRangeValues")]
         public void SupportedMediaTypes_InsertThrowsWithMediaRange(MediaTypeHeaderValue mediaType)
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
@@ -124,7 +124,7 @@ namespace System.Net.Http.Formatting
         {
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             Collection<MediaTypeMapping> mappings = formatter.MediaTypeMappings;
-            MediaTypeMapping[] standardMappings = HttpUnitTestDataSets.StandardMediaTypeMappings.ToArray();
+            MediaTypeMapping[] standardMappings = HttpTestData.StandardMediaTypeMappings.ToArray();
             foreach (MediaTypeMapping mapping in standardMappings)
             {
                 mappings.Add(mapping);

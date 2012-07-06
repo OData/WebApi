@@ -28,7 +28,7 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "Uris")]
+        [TestDataSet(typeof(HttpTestData), "UriTestData")]
         public void ParseQueryStringSucceeds(Uri address)
         {
             NameValueCollection result = address.ParseQueryString();
@@ -53,7 +53,7 @@ namespace System.Net.Http
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "Uris")]
+        [TestDataSet(typeof(HttpTestData), "UriTestData")]
         public void TryReadQueryAsJsonSucceeds(Uri address)
         {
             JObject value;

@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Formatting.DataSets.Types;
+using System.Net.Http.Formatting.DataSets;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;

@@ -23,9 +23,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues")]
         public void Constructor(string headerName, string headerValue, MediaTypeHeaderValue mediaType)
         {
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, StringComparison.CurrentCulture, true, mediaType);
@@ -38,7 +38,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void ConstructorThrowsWithEmptyHeaderName(MediaTypeHeaderValue mediaType, string headerName)
         {
@@ -47,7 +47,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void ConstructorThrowsWithEmptyHeaderValue(MediaTypeHeaderValue mediaType, string headerValue)
         {
@@ -56,8 +56,8 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues")]
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues")]
         public void ConstructorThrowsWithNullMediaTypeHeaderValue(string headerName, string headerValue)
         {
             Assert.ThrowsArgumentNull(() => new RequestHeaderMapping(headerName, headerValue, StringComparison.CurrentCulture, false, (MediaTypeHeaderValue)null), "mediaType");
@@ -65,9 +65,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeHeaderValues")]
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeHeaderValues")]
         public void ConstructorThrowsWithInvalidStringComparison(string headerName, string headerValue, MediaTypeHeaderValue mediaType)
         {
             int invalidValue = 999;
@@ -77,9 +77,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void Constructor1(string headerName, string headerValue, string mediaType)
         {
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, StringComparison.CurrentCulture, true, mediaType);
@@ -92,7 +92,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void Constructor1ThrowsWithEmptyHeaderName(string mediaType, string headerName)
         {
@@ -101,7 +101,7 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void Constructor1ThrowsWithEmptyHeaderValue(string mediaType, string headerValue)
         {
@@ -110,8 +110,8 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
             typeof(CommonUnitTestDataSets), "EmptyStrings")]
         public void Constructor1ThrowsWithEmptyMediaType(string headerName, string headerValue, string mediaType)
         {
@@ -120,9 +120,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void Constructor1ThrowsWithInvalidStringComparison(string headerName, string headerValue, string mediaType)
         {
             int invalidValue = 999;
@@ -133,9 +133,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings",
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings",
             typeof(CommonUnitTestDataSets), "Bools")]
         public void TryMatchMediaTypeReturnsTrueWithNameAndValueInRequest(string headerName, string headerValue, string mediaType, bool subset)
         {
@@ -147,9 +147,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-            typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalHttpHeaderNames",
+            typeof(HttpTestData), "LegalHttpHeaderValues",
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void TryMatchMediaTypeReturnsTrueWithNameAndValueSubsetInRequest(string headerName, string headerValue, string mediaType)
         {
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, StringComparison.Ordinal, true, mediaType);
@@ -168,9 +168,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-           typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-           typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-           typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+           typeof(HttpTestData), "LegalHttpHeaderNames",
+           typeof(HttpTestData), "LegalHttpHeaderValues",
+           typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void TryMatchMediaTypeReturnsFalseWithNameNotInRequest(string headerName, string headerValue, string mediaType)
         {
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, StringComparison.Ordinal, false, mediaType);
@@ -189,9 +189,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-           typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-           typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-           typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+           typeof(HttpTestData), "LegalHttpHeaderNames",
+           typeof(HttpTestData), "LegalHttpHeaderValues",
+           typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void TryMatchMediaTypeReturnsFalseWithValueNotInRequest(string headerName, string headerValue, string mediaType)
         {
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, StringComparison.Ordinal, false, mediaType);
@@ -210,9 +210,9 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [TestDataSet(
-           typeof(HttpUnitTestDataSets), "LegalHttpHeaderNames",
-           typeof(HttpUnitTestDataSets), "LegalHttpHeaderValues",
-           typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+           typeof(HttpTestData), "LegalHttpHeaderNames",
+           typeof(HttpTestData), "LegalHttpHeaderValues",
+           typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void TryMatchMediaTypeThrowsWithNullHttpRequestMessage(string headerName, string headerValue, string mediaType)
         {
             RequestHeaderMapping mapping = new RequestHeaderMapping(headerName, headerValue, StringComparison.CurrentCulture, true, mediaType);

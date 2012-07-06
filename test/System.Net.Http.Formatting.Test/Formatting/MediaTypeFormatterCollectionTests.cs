@@ -43,7 +43,7 @@ namespace System.Net.Http.Formatting
         public void Constructor1_SetsProperties()
         {
             // All combination of formatters presented to ctor should still set XmlFormatter
-            foreach (IEnumerable<MediaTypeFormatter> formatterCollection in HttpUnitTestDataSets.AllFormatterCollections)
+            foreach (IEnumerable<MediaTypeFormatter> formatterCollection in HttpTestData.AllFormatterCollections)
             {
                 MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatterCollection);
                 if (collection.OfType<XmlMediaTypeFormatter>().Any())
@@ -70,7 +70,7 @@ namespace System.Net.Http.Formatting
         public void Constructor1_SetsDerivedFormatters()
         {
             // force to array to get stable instances
-            MediaTypeFormatter[] derivedFormatters = HttpUnitTestDataSets.DerivedFormatters.ToArray();
+            MediaTypeFormatter[] derivedFormatters = HttpTestData.DerivedFormatters.ToArray();
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(derivedFormatters);
             Assert.True(derivedFormatters.SequenceEqual(collection));
         }
@@ -231,12 +231,12 @@ namespace System.Net.Http.Formatting
         [Theory]
         [TestDataSet(
             typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void FindReader_ReturnsFormatterOnMatch(Type variationType, object testData, string mediaType)
         {
             // Arrange
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            foreach (string legalMediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
+            foreach (string legalMediaType in HttpTestData.LegalMediaTypeStrings)
             {
                 formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(legalMediaType));
             }
@@ -291,12 +291,12 @@ namespace System.Net.Http.Formatting
         [Theory]
         [TestDataSet(
             typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection",
-            typeof(HttpUnitTestDataSets), "LegalMediaTypeStrings")]
+            typeof(HttpTestData), "LegalMediaTypeStrings")]
         public void FindWriter_ReturnsFormatterOnMatch(Type variationType, object testData, string mediaType)
         {
             // Arrange
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter() { CallBase = true };
-            foreach (string legalMediaType in HttpUnitTestDataSets.LegalMediaTypeStrings)
+            foreach (string legalMediaType in HttpTestData.LegalMediaTypeStrings)
             {
                 formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaType));
             }

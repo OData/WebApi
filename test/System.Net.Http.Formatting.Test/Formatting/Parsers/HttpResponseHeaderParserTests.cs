@@ -65,7 +65,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "AllHttpStatusCodes")]
+        [TestDataSet(typeof(HttpTestData), "AllHttpStatusCodes")]
         public void ResponseHeaderParserAcceptsStandardStatusCodes(HttpStatusCode status)
         {
             byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason", ParserData.ValidHeaders);
@@ -86,7 +86,7 @@ namespace System.Net.Http.Formatting.Parsers
         }
 
         [Theory]
-        [TestDataSet(typeof(HttpUnitTestDataSets), "CustomHttpStatusCodes")]
+        [TestDataSet(typeof(HttpTestData), "CustomHttpStatusCodes")]
         public void ResponseHeaderParserAcceptsCustomStatusCodes(HttpStatusCode status)
         {
             byte[] data = CreateBuffer("HTTP/1.1", ((int)status).ToString(), "Reason", ParserData.ValidHeaders);

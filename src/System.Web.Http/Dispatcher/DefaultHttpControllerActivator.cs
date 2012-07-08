@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dependencies;
 using System.Web.Http.Internal;
 using System.Web.Http.Properties;
 
@@ -111,12 +112,16 @@ namespace System.Web.Http.Dispatcher
             Contract.Assert(request != null);
             Contract.Assert(controllerType != null);
 
-            // If dependency resolver returns controller object then use it.
-            IHttpController instance = (IHttpController)request.GetDependencyScope().GetService(controllerType);
-            if (instance != null)
+            IDependencyScope scope = request.GetDependencyScope();
+            if (scope != null)
             {
-                activator = null;
-                return instance;
+                // If dependency resolver returns controller object then use it.
+                IHttpController instance = (IHttpController)scope.GetService(controllerType);
+                if (instance != null)
+                {
+                    activator = null;
+                    return instance;
+                }
             }
 
             // Otherwise create a delegate for creating a new instance of the type

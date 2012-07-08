@@ -131,6 +131,28 @@ namespace System.Web.Http.Dispatcher
             mockScope.Verify();
         }
 
+        [Fact]
+        public void Create_MakesInstanceOfControllerForNullDependencyScope()
+        {
+            // Arrange
+            var config = new HttpConfiguration();
+            var mockResolver = new Mock<IDependencyResolver>();
+            mockResolver.Setup(resolver => resolver.BeginScope()).Returns((IDependencyScope)null).Verifiable();
+            config.DependencyResolver = mockResolver.Object;
+            var request = new HttpRequestMessage();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            var descriptorSimpleController = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
+            var activator = new DefaultHttpControllerActivator();
+
+            // Act
+            IHttpController simpleController = activator.Create(request, descriptorSimpleController, typeof(SimpleController));
+
+            // Assert
+            Assert.NotNull(simpleController);
+            Assert.IsType<SimpleController>(simpleController);
+            mockResolver.Verify();
+        }
+
         // Helper classes
 
         abstract class AbstractController : ApiController { }

@@ -26,11 +26,6 @@
         <!-- Target 4.0 for both VS2010 and VS 11 by default -->
         <TargetFrameworkVersion Condition = "'$(TargetFrameworkVersion)' == ''">v4.0</TargetFrameworkVersion>
 
-        <!-- Enable NuGet package restore for all projects -->
-        <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(WebStackRootPath)</SolutionDir>
-        <RestorePackages Condition=" '$(RestorePackages)' == '' ">$(EnableNuGetPackageRestore)</RestorePackages>
-        <RestorePackages Condition=" '$(RestorePackages)' == '' ">false</RestorePackages>
-
         <!-- Use CustomAfterMicrosoftCommonTargets property (defined in Microsoft.Common.targets) to
              inject post-Common targets files without requiring the inclusion -->
         <CustomAfterMicrosoftCommonTargets>$(WebStackToolsPath)WebStack.targets</CustomAfterMicrosoftCommonTargets>

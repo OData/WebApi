@@ -3,10 +3,12 @@
     <StyleCopMsBuildRunner Include="$(WebStackRootPath)packages\**\StyleCop.dll"/>
   </ItemGroup>
   <PropertyGroup>
-    <StyleCopEnabled Condition=" '$(StyleCopMsBuildRunner)' == '' ">false</StyleCopEnabled>
+    <IsStyleCopEnabled Condition=" '$(StyleCopMsBuildRunner)' != '' ">$(StyleCopEnabled)</IsStyleCopEnabled>
+    <IsStyleCopEnabled Condition=" '$(StyleCopMsBuildRunner)' == '' ">false</IsStyleCopEnabled>
   </PropertyGroup>
-  <UsingTask AssemblyFile="@(StyleCopMsBuildRunner)" TaskName="StyleCopTask" Condition=" '$(StyleCopEnabled)' != 'false' " />
 
+  <UsingTask AssemblyFile="@(StyleCopMsBuildRunner)" TaskName="StyleCopTask" Condition=" '$(IsStyleCopEnabled)' != 'false' " />
+  
   <PropertyGroup>
     <BuildDependsOn>$(BuildDependsOn);StyleCop</BuildDependsOn>
     <RebuildDependsOn>StyleCopForceFullAnalysis;$(RebuildDependsOn)</RebuildDependsOn>
@@ -36,12 +38,12 @@
     <StyleCopTreatErrorsAsWarnings>true</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
 
-  <!-- Define StyleCopEnabled property. -->
-  <PropertyGroup Condition="('$(SourceAnalysisEnabled)' != '') and ('$(StyleCopEnabled)' == '')">
-    <StyleCopEnabled>$(SourceAnalysisEnabled)</StyleCopEnabled>
+  <!-- Define IsStyleCopEnabled property. -->
+  <PropertyGroup Condition="('$(SourceAnalysisEnabled)' != '') and ('$(IsStyleCopEnabled)' == '')">
+    <IsStyleCopEnabled>$(SourceAnalysisEnabled)</IsStyleCopEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(StyleCopEnabled)' == ''">
-    <StyleCopEnabled>true</StyleCopEnabled>
+  <PropertyGroup Condition="'$(IsStyleCopEnabled)' == ''">
+    <IsStyleCopEnabled>true</IsStyleCopEnabled>
   </PropertyGroup>
 
   <!-- Define StyleCopOverrideSettingsFile property. -->
@@ -76,7 +78,7 @@
   </Target>
 
   <!-- Define target: StyleCop -->
-  <Target Name="StyleCop" Condition="'$(StyleCopEnabled)' != 'false'">
+  <Target Name="StyleCop" Condition="'$(IsStyleCopEnabled)' != 'false'">
     <Message Text="Forcing full StyleCop reanalysis." Condition="'$(StyleCopForceFullAnalysis)' == 'true'" Importance="Low" />
 
     <!-- Determine what files should be checked. Take all Compile items, but exclude those that have

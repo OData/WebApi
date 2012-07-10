@@ -22,24 +22,6 @@
     </Target>
 
     <Target Name="Prereq">
-        <MSBuild
-            Projects="tools\WebStack.NuGet.targets"
-            Targets="VerifyPackages"
-            Properties="CompactMessage=false"
-            Condition=" '$(EnableNuGetPackageRestore)' != 'true' " />
-        <CallTarget Targets="RestorePackages" Condition=" '$(EnableNuGetPackageRestore)' == 'true' " />
-    </Target>
-
-    <Target Name="RestorePackages">
-        <!--
-        This can't build in parallel because of NuGet package restore race conditions.
-        When this is fixed in NuGet, we can remove the CSPROJ part of this target
-        (we will continue to need the NuGet install for StyleCop and FxCop tasks).
-
-        NOTE: These projects are hand selected to be the minimum # of CSPROJ files that
-              ensure we've restored every remote package. If another collision is found,
-              please review the project list as appropriate.
-        -->
         <ItemGroup>
             <RestoreCsProjFiles
                 Include="test\Microsoft.Web.Http.Data.Test\*.csproj;
@@ -47,20 +29,15 @@
                          src\System.Web.WebPages.Deployment\*.csproj;
                          src\Microsoft.Web.WebPages.OAuth\*.csproj" />
         </ItemGroup>
+
         <Message Text="Restoring NuGet packages..." Importance="High" />
-        <!-- Download NuGet.exe -->
-        <MSBuild
-            Projects="tools\WebStack.NuGet.targets"
-            Targets="CheckPrerequisites" />
-        <!-- Restore the things the CSPROJ files need -->
-        <MSBuild
-            Projects="@(RestoreCsProjFiles)"
-            BuildInParallel="false"
-            Targets="RestorePackages" />
-        <!-- Hand restore packages with binaries that this MSBuild process needs -->
-        <MSBuild
-            Projects="tools\WebStack.NuGet.targets"
-            Targets="RestoreBinaryDependencies" />
+        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="RestorePackages" StopOnFirstFailure="true" />
+        <MSBuild Projects=".nuget\nuget.targets" Targets="RestoreBinaryDependencies" />
+    </Target>
+
+    <Target Name="RestorePackages">
+        <SetEnvironmentVariable EnvKey="EnableNuGetPackageRestore" EnvValue="true" />
+        <CallTarget Targets="Prereq" />
     </Target>
 
     <Target Name="Build" DependsOnTargets="Prereq">
@@ -82,4 +59,20 @@
         <MakeDir Directories="$(TestResultsDirectory)" />
         <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
     </Target>
+
+    <UsingTask TaskName="SetEnvironmentVariable" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <EnvKey ParameterType="System.String" Required="true" />
+            <EnvValue ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+                try { Environment.SetEnvironmentVariable(EnvKey, EnvValue, System.EnvironmentVariableTarget.Process); }
+                catch { }
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
 </Project>

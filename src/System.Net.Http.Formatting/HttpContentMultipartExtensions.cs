@@ -101,7 +101,6 @@ namespace System.Net.Http
         /// <param name="streamProvider">A stream provider providing output streams for where to write body parts as they are parsed.</param>
         /// <param name="bufferSize">Size of the buffer used to read the contents.</param>
         /// <returns>A <see cref="Task{T}"/> representing the tasks of getting the result of reading the MIME content.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "caller becomes owner.")]
         public static Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, int bufferSize) where T : MultipartStreamProvider
         {
             if (content == null)

@@ -25,7 +25,6 @@ namespace System.Web.Helpers
 
         private IDictionary<string, string> Attributes { get; set; }
 
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "It is there for completeness")]
         public string this[string name]
         {
             get { return Attributes[name]; }

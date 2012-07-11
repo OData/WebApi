@@ -26,7 +26,6 @@ namespace System.Web.Http.Validation.Providers
     /// </summary>
     // [SecuritySafeCritical] because class constructor accesses DataAnnotations types
     [SecuritySafeCritical]
-    [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "This class is cached for the lifetime of the application.")]
     public class DataAnnotationsModelValidatorProvider : AssociatedValidatorProvider
     {
         // Factories for validation attributes

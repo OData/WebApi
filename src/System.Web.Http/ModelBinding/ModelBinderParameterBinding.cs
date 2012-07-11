@@ -50,8 +50,6 @@ namespace System.Web.Http.ModelBinding
 
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
         {
-            string name = Descriptor.ParameterName;
-
             ModelBindingContext ctx = GetModelBindingContext(metadataProvider, actionContext);
 
             bool haveResult = _binder.BindModel(actionContext, ctx);

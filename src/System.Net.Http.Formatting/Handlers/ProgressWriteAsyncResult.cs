@@ -41,7 +41,7 @@ namespace System.Net.Http.Handlers
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is handled as part of IAsyncResult completion.")]
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is handled as part of IAsyncResult completion.")]
         private static void WriteCompletedCallback(IAsyncResult result)
         {
             if (result.CompletedSynchronously)

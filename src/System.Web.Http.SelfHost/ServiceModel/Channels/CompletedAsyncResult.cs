@@ -14,7 +14,6 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             Complete(true);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Result is validated.")]
         public static void End(IAsyncResult result)
         {
             Contract.Assert(result != null, "CompletedAsyncResult was null.");
@@ -34,8 +33,6 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             Complete(true);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes", Justification = "Existing API")]
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Result is validated.")]
         public static T End(IAsyncResult result)
         {
             Contract.Assert(result != null, "CompletedAsyncResult<T> was null.");

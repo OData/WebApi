@@ -19,3 +19,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "identityprovider", Scope = "resource", Target = "System.Web.WebPages.Resources.WebPageResources.resources", Justification = "This is part of a URL.")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "nameidentifier", Scope = "resource", Target = "System.Web.WebPages.Resources.WebPageResources.resources", Justification = "This is part of a URL.")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "xmlsoap", Scope = "resource", Target = "System.Web.WebPages.Resources.WebPageResources.resources", Justification = "This is part of a URL.")]
+[assembly: SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces", Scope = "type", Target = "System.Web.Helpers.Validation")]

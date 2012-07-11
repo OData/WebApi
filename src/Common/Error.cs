@@ -11,7 +11,6 @@ namespace System.Web.Http
     /// <summary>
     /// Utility class for creating and unwrapping <see cref="Exception"/> instances.
     /// </summary>
-    [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "This usage is okay.")]
     internal static class Error
     {
         /// <summary>
@@ -20,7 +19,6 @@ namespace System.Web.Http
         /// <param name="format">A composite format string.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <returns>The formatted string.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "0#", Justification = "Standard String.Format pattern and names.")]
         internal static string Format(string format, params object[] args)
         {
             return String.Format(CultureInfo.CurrentCulture, format, args);

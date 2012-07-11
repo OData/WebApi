@@ -74,7 +74,6 @@ namespace System.Web.Http.Controllers
             }
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing of response instance.")]
         public virtual Task ExecuteBindingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             if (_parameterBindings.Length == 0)

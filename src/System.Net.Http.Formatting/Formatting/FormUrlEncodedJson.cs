@@ -35,7 +35,6 @@ namespace System.Net.Http.Formatting
         /// <param name="nameValuePairs">The collection of query string name-value pairs parsed in lexical order. Both names
         /// and values must be un-escaped so that they don't contain any <see cref="Uri"/> encoding.</param>
         /// <returns>The <see cref="JObject"/> corresponding to the given query string values.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
         public static JObject Parse(IEnumerable<KeyValuePair<string, string>> nameValuePairs)
         {
             return ParseInternal(nameValuePairs, Int32.MaxValue, true);
@@ -50,7 +49,6 @@ namespace System.Net.Http.Formatting
         /// and values must be un-escaped so that they don't contain any <see cref="Uri"/> encoding.</param>
         /// <param name="maxDepth">The maximum depth of object graph encoded as <c>x-www-form-urlencoded</c>.</param>
         /// <returns>The <see cref="JObject"/> corresponding to the given query string values.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
         public static JObject Parse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth)
         {
             return ParseInternal(nameValuePairs, maxDepth, true);
@@ -65,7 +63,6 @@ namespace System.Net.Http.Formatting
         /// and values must be un-escaped so that they don't contain any <see cref="Uri"/> encoding.</param>
         /// <param name="value">The parsed result or null if parsing failed.</param>
         /// <returns><c>true</c> if <paramref name="nameValuePairs"/> was parsed successfully; otherwise false.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
         public static bool TryParse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, out JObject value)
         {
             return (value = ParseInternal(nameValuePairs, Int32.MaxValue, false)) != null;
@@ -81,7 +78,6 @@ namespace System.Net.Http.Formatting
         /// <param name="maxDepth">The maximum depth of object graph encoded as <c>x-www-form-urlencoded</c>.</param>
         /// <param name="value">The parsed result or null if parsing failed.</param>
         /// <returns><c>true</c> if <paramref name="nameValuePairs"/> was parsed successfully; otherwise false.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
         public static bool TryParse(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth, out JObject value)
         {
             return (value = ParseInternal(nameValuePairs, maxDepth, false)) != null;
@@ -97,7 +93,6 @@ namespace System.Net.Http.Formatting
         /// <param name="maxDepth">The maximum depth of object graph encoded as <c>x-www-form-urlencoded</c>.</param>
         /// <param name="throwOnError">Indicates whether to throw an exception on error or return false</param>
         /// <returns>The <see cref="JObject"/> corresponding to the given query string values.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is a low-level API used by other APIs to provide end-user functionality.")]
         private static JObject ParseInternal(IEnumerable<KeyValuePair<string, string>> nameValuePairs, int maxDepth, bool throwOnError)
         {
             if (nameValuePairs == null)

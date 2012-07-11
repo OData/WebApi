@@ -42,7 +42,6 @@ namespace System.Web.Http.SelfHost.Channels
         /// <typeparam name="TChannel">The type of channel the listener accepts.</typeparam>
         /// <param name="context">The <see cref="BindingContext"/> that provides context for the binding element</param>
         /// <returns>true if the <see cref="IChannelListener{TChannel}"/> of type <see cref="IChannel"/> can be built by the binding element; otherwise, false.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Existing public API")]
         public override bool CanBuildChannelFactory<TChannel>(BindingContext context)
         {
             return false;
@@ -54,7 +53,6 @@ namespace System.Web.Http.SelfHost.Channels
         /// <typeparam name="TChannel">The type of channel the channel factory produces.</typeparam>
         /// <param name="context">The <see cref="BindingContext"/> that provides context for the binding element</param>
         /// <returns>ALways false.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Existing public API")]
         public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingContext context)
         {
             throw Error.NotSupported(SRResources.ChannelFactoryNotSupported, typeof(HttpMessageEncodingBindingElement).Name, typeof(IChannelFactory).Name);
@@ -66,7 +64,6 @@ namespace System.Web.Http.SelfHost.Channels
         /// <typeparam name="TChannel">The type of channel the channel factory produces.</typeparam>
         /// <param name="context">The <see cref="BindingContext"/> that provides context for the binding element</param>
         /// <returns>ALways false.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Existing public API")]
         public override bool CanBuildChannelListener<TChannel>(BindingContext context)
         {
             if (context == null)
@@ -85,7 +82,6 @@ namespace System.Web.Http.SelfHost.Channels
         /// <typeparam name="TChannel">The type of channel the listener is built to accept.</typeparam>
         /// <param name="context">The <see cref="BindingContext"/> that provides context for the binding element</param>
         /// <returns>The <see cref="IChannelListener{TChannel}"/> of type <see cref="IChannel"/> initialized from the context.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Existing public API")]
         public override IChannelListener<TChannel> BuildChannelListener<TChannel>(BindingContext context)
         {
             if (context == null)

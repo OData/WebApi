@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES;$(DefineConstants)</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
@@ -31,7 +31,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ASPNETWEBPAGES</DefineConstants>
+    <DefineConstants>TRACE;ASPNETWEBPAGES;$(DefineConstants)</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
@@ -40,7 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\..\bin\CodeCoverage\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_COVERAGE;ASPNETWEBPAGES</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_COVERAGE;ASPNETWEBPAGES;$(DefineConstants)</DefineConstants>
     <DebugType>full</DebugType>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>

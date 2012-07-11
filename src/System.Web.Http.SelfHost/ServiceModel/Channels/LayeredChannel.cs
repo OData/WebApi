@@ -27,7 +27,6 @@ namespace System.Web.Http.SelfHost.ServiceModel.Channels
             get { return _innerChannel; }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Existing public API")]
         public override T GetProperty<T>()
         {
             T baseProperty = base.GetProperty<T>();

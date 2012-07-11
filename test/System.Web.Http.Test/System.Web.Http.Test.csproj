@@ -289,9 +289,9 @@
       <Project>{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}</Project>
       <Name>Microsoft.TestCommon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Net.Http.Formatting.Test.Unit\System.Net.Http.Formatting.Test.Unit.csproj">
+    <ProjectReference Include="..\System.Net.Http.Formatting.Test\System.Net.Http.Formatting.Test.csproj">
       <Project>{7AF77741-9158-4D5F-8782-8F21FADF025F}</Project>
-      <Name>System.Net.Http.Formatting.Test.Unit</Name>
+      <Name>System.Net.Http.Formatting.Test</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

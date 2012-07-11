@@ -35,7 +35,6 @@ namespace System.Web.Http.SelfHost.Channels
             set
             {
                 HttpBindingSecurityModeHelper.Validate(value, "value");
-                IsModeSet = true;
                 _mode = value;
             }
         }
@@ -50,7 +49,5 @@ namespace System.Web.Http.SelfHost.Channels
 
             set { _transportSecurity = value ?? new HttpTransportSecurity(); }
         }
-
-        internal bool IsModeSet { get; private set; }
     }
 }

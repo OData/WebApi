@@ -37,12 +37,6 @@ namespace System.Web.Http.Internal
             return null;
         }
 
-        internal static Type ExtractGenericInterface(Type queryType, Type interfaceType)
-        {
-            Func<Type, bool> matchesInterface = t => t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType;
-            return matchesInterface(queryType) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
-        }
-
         internal static Type[] GetTypeArgumentsIfMatch(Type closedType, Type matchingOpenType)
         {
             if (!closedType.IsGenericType)

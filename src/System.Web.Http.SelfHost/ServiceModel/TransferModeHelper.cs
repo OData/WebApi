@@ -14,16 +14,6 @@ namespace System.Web.Http.SelfHost.ServiceModel
                    transferMode == TransferMode.StreamedResponse;
         }
 
-        public static bool IsRequestStreamed(TransferMode transferMode)
-        {
-            return transferMode == TransferMode.StreamedRequest || transferMode == TransferMode.Streamed;
-        }
-
-        public static bool IsResponseStreamed(TransferMode transferMode)
-        {
-            return transferMode == TransferMode.StreamedResponse || transferMode == TransferMode.Streamed;
-        }
-
         public static void Validate(TransferMode value, string parameterValue)
         {
             if (!IsDefined(value))

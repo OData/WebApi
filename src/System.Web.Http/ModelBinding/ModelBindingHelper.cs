@@ -101,16 +101,6 @@ namespace System.Web.Http.ModelBinding
             }
         }
 
-        // Returns true if the ModelBinderAttribute specifies a binder provider of <TProvider> or binder instance of <TBinder>
-        internal static bool IsModelBinderFor<TProvider, TBinder>(ModelBinderAttribute modelBinderAttribute)
-        {
-            Contract.Assert(modelBinderAttribute != null, "modelBinderAttribute cannot be null");
-            Type binderType = modelBinderAttribute.BinderType;
-            return binderType != null &&
-                   (typeof(TProvider).IsAssignableFrom(binderType) ||
-                    typeof(TBinder).IsAssignableFrom(binderType));
-        }
-
         internal static bool TryGetProviderFromAttribute(Type modelType, ModelBinderAttribute modelBinderAttribute, out ModelBinderProvider provider)
         {
             Contract.Assert(modelType != null, "modelType cannot be null.");
@@ -149,27 +139,6 @@ namespace System.Web.Http.ModelBinding
         internal static bool TryGetProviderFromAttributes(Type modelType, out ModelBinderProvider provider)
         {
             ModelBinderAttribute attr = GetModelBinderAttribute(modelType);
-            if (attr == null)
-            {
-                provider = null;
-                return false;
-            }
-
-            return TryGetProviderFromAttribute(modelType, attr, out provider);
-        }
-
-        internal static bool TryGetProviderFromAttributes(HttpParameterDescriptor parameterDescriptor, out ModelBinderProvider provider)
-        {
-            Contract.Assert(parameterDescriptor != null, "parameterDescriptor cannot be null.");
-
-            Type modelType = parameterDescriptor.ParameterType;
-
-            ModelBinderAttribute attr = parameterDescriptor.GetCustomAttributes<ModelBinderAttribute>().FirstOrDefault();
-            if (attr == null)
-            {
-                attr = GetModelBinderAttribute(modelType);
-            }
-
             if (attr == null)
             {
                 provider = null;

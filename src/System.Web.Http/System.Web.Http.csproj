@@ -229,7 +229,6 @@
     <Compile Include="Services\DefaultServices.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Controllers\IHttpController.cs" />
-    <Compile Include="Internal\DataTypeUtil.cs" />
     <Compile Include="Internal\TypeDescriptorHelper.cs" />
     <Compile Include="Internal\CollectionModelBinderUtil.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProvider.cs" />

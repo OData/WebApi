@@ -6,7 +6,7 @@ using System.ServiceModel;
 
 namespace System.Web.Http.SelfHost.ServiceModel
 {
-    internal class HttpProxyCredentialTypeHelper
+    internal static class HttpProxyCredentialTypeHelper
     {
         internal static AuthenticationSchemes MapToAuthenticationScheme(HttpProxyCredentialType proxyCredentialType)
         {

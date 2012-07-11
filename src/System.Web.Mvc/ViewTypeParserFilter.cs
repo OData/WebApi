@@ -7,6 +7,9 @@ using System.Web.UI;
 
 namespace System.Web.Mvc
 {
+    // This class is referenced dynamically by the web.config built by project templates.
+    // Do not delete this class based on it not being statically referenced by product code.
+
     internal class ViewTypeParserFilter : PageParserFilter
     {
         private static Dictionary<string, Type> _directiveBaseTypeMappings = new Dictionary<string, Type>

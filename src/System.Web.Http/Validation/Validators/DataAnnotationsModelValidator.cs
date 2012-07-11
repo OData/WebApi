@@ -31,11 +31,6 @@ namespace System.Web.Http.Validation.Validators
             get { return Attribute is RequiredAttribute; }
         }
 
-        internal static ModelValidator Create(IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
-        {
-            return new DataAnnotationsModelValidator(validatorProviders, attribute);
-        }
-
         // [SecuritySafeCritical] because is uses DataAnnotations type ValidationContext
         [SecuritySafeCritical]
         public override IEnumerable<ModelValidationResult> Validate(ModelMetadata metadata, object container)

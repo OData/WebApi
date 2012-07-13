@@ -17,6 +17,8 @@ namespace System.Web.Http.SelfHost
 {
     public class HttpSelfHostServerTest : IDisposable
     {
+        internal const int TestPort = 50231;
+
         private string machineName = "localhost";
         private HttpSelfHostServer _bufferServer;
         private HttpSelfHostServer _streamServer;
@@ -100,8 +102,8 @@ namespace System.Web.Http.SelfHost
         private string BaseUri(TransferMode transferMode)
         {
             return transferMode == TransferMode.Streamed
-                ? String.Format("http://{0}:8081/stream", machineName)
-                : String.Format("http://{0}:8081", machineName);
+                ? String.Format("http://{0}:{1}/stream", machineName, HttpSelfHostServerTest.TestPort)
+                : String.Format("http://{0}:{1}", machineName, HttpSelfHostServerTest.TestPort);
         }
 
         private HttpSelfHostServer GetServer(TransferMode transferMode)

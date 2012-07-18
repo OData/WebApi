@@ -59,7 +59,11 @@
             BuildPackage;
         </BuildDependsOn>
     </PropertyGroup>
-    
+
+    <Target Name="EnableRestore">
+        <SetEnvironmentVariable EnvKey="EnableNuGetPackageRestore" EnvValue="true" />
+    </Target>
+
     <Target Name="RestoreBinaryDependencies">
         <Exec
             Command='$(NuGetCommand) install StyleCop -source $(PackageSources) -o "$(PackagesDir)" -Version 4.7.10.0 > NUL'
@@ -133,15 +137,9 @@
         </ParameterGroup>
         <Task>
             <Using Namespace="System" />
-            <Code Type="Fragment" Language="cs">
-                <![CDATA[
-                try {
-                    Environment.SetEnvironmentVariable(EnvKey, EnvValue, System.EnvironmentVariableTarget.Process);
-                }
-                catch  {
-                }
-            ]]>
-            </Code>
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                Environment.SetEnvironmentVariable(EnvKey, EnvValue, System.EnvironmentVariableTarget.Process);
+            ]]></Code>
         </Task>
     </UsingTask>
 </Project>

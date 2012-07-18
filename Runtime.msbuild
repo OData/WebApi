@@ -21,7 +21,12 @@
         <RemoveDir Directories="bin\$(Configuration)" />
     </Target>
 
-    <Target Name="Prereq">
+    <Target Name="Prereq" DependsOnTargets="PreRestorePackages">
+        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="RestorePackages" StopOnFirstFailure="true" />
+        <MSBuild Projects=".nuget\nuget.targets" Targets="RestoreBinaryDependencies" />
+    </Target>
+
+    <Target Name="PreRestorePackages">
         <ItemGroup>
             <RestoreCsProjFiles
                 Include="test\Microsoft.Web.Http.Data.Test\*.csproj;
@@ -29,15 +34,12 @@
                          src\System.Web.WebPages.Deployment\*.csproj;
                          src\Microsoft.Web.WebPages.OAuth\*.csproj" />
         </ItemGroup>
-
         <Message Text="Restoring NuGet packages..." Importance="High" />
-        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="RestorePackages" StopOnFirstFailure="true" />
-        <MSBuild Projects=".nuget\nuget.targets" Targets="RestoreBinaryDependencies" />
     </Target>
 
-    <Target Name="RestorePackages">
-        <SetEnvironmentVariable EnvKey="EnableNuGetPackageRestore" EnvValue="true" />
-        <CallTarget Targets="Prereq" />
+    <Target Name="RestorePackages" DependsOnTargets="PreRestorePackages">
+        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="EnableRestore;RestorePackages" StopOnFirstFailure="true" />
+        <MSBuild Projects=".nuget\nuget.targets" Targets="EnableRestore;RestoreBinaryDependencies" />
     </Target>
 
     <Target Name="Build" DependsOnTargets="Prereq">
@@ -59,20 +61,4 @@
         <MakeDir Directories="$(TestResultsDirectory)" />
         <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
     </Target>
-
-    <UsingTask TaskName="SetEnvironmentVariable" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
-        <ParameterGroup>
-            <EnvKey ParameterType="System.String" Required="true" />
-            <EnvValue ParameterType="System.String" Required="true" />
-        </ParameterGroup>
-        <Task>
-            <Using Namespace="System" />
-            <Code Type="Fragment" Language="cs">
-            <![CDATA[
-                try { Environment.SetEnvironmentVariable(EnvKey, EnvValue, System.EnvironmentVariableTarget.Process); }
-                catch { }
-            ]]>
-            </Code>
-        </Task>
-    </UsingTask>
 </Project>

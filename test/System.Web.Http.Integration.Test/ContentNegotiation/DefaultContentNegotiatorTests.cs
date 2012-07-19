@@ -15,7 +15,7 @@ namespace System.Web.Http.ContentNegotiation
         public void Custom_ContentNegotiator_Used_In_Response()
         {
             // Arrange
-            configuration.Formatters.Clear();
+            Configuration.Formatters.Clear();
             MediaTypeWithQualityHeaderValue requestContentType = new MediaTypeWithQualityHeaderValue("application/xml");
             MediaTypeHeaderValue responseContentType = null;
 
@@ -23,12 +23,12 @@ namespace System.Web.Http.ContentNegotiation
             selector.Setup(s => s.Negotiate(It.IsAny<Type>(), It.IsAny<HttpRequestMessage>(), It.IsAny<IEnumerable<MediaTypeFormatter>>()))
                 .Returns(new ContentNegotiationResult(new XmlMediaTypeFormatter(), null));
 
-            configuration.Services.Replace(typeof(IContentNegotiator), selector.Object);
+            Configuration.Services.Replace(typeof(IContentNegotiator), selector.Object);
 
             // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress);
             request.Headers.Accept.Add(requestContentType);
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
             responseContentType = response.Content.Headers.ContentType;
 

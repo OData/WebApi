@@ -1,31 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Net.Http;
-using System.Web.Http.Util;
-
 namespace System.Web.Http.ContentNegotiation
 {
-    public class ContentNegotiationTestBase
+    public abstract class ContentNegotiationTestBase : HttpServerTestBase
     {
-        protected readonly string baseUri = "http://localhost/Conneg";
-        protected HttpServer server = null;
-        protected HttpConfiguration configuration = null;
-        protected HttpClient httpClient = null;
-
-        public ContentNegotiationTestBase()
+        protected ContentNegotiationTestBase()
+            : base("http://localhost/Conneg")
         {
-            this.SetupHost();
         }
 
-        public void SetupHost()
+        protected override void ApplyConfiguration(HttpConfiguration configuration)
         {
-            configuration = new HttpConfiguration();
             configuration.Routes.MapHttpRoute("Default", "{controller}", new { controller = "Conneg" });
-            configuration.MessageHandlers.Add(new ConvertToStreamMessageHandler());
-
-            server = new HttpServer(configuration);
-
-            httpClient = new HttpClient(server);
         }
     }
 }

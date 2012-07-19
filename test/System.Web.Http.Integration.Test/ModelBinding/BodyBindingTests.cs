@@ -25,13 +25,13 @@ namespace System.Web.Http.ModelBinding
 
             HttpRequestMessage request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(baseAddress + "ModelBinding/PostComplexWithValidation"),
+                RequestUri = new Uri(BaseAddress + "ModelBinding/PostComplexWithValidation"),
                 Method = HttpMethod.Post,
                 Content = stringContent,
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -47,13 +47,13 @@ namespace System.Web.Http.ModelBinding
 
             HttpRequestMessage request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(baseAddress + "ModelBinding/PostComplexWithValidation"),
+                RequestUri = new Uri(BaseAddress + "ModelBinding/PostComplexWithValidation"),
                 Method = HttpMethod.Post,
                 Content = stringContent,
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -69,13 +69,13 @@ namespace System.Web.Http.ModelBinding
             StringContent stringContent = new StringContent(@"""string value""", Encoding.UTF8, "application/json");
             HttpRequestMessage request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(baseAddress + "ModelBinding/" + actionName),
+                RequestUri = new Uri(BaseAddress + "ModelBinding/" + actionName),
                 Method = HttpMethod.Post,
                 Content = stringContent,
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
             HttpError error = response.Content.ReadAsAsync<HttpError>().Result;
 
             // Assert
@@ -94,13 +94,13 @@ namespace System.Web.Http.ModelBinding
 
             HttpRequestMessage request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(baseAddress + "ModelBinding/PostComplexTypeFromBody"),
+                RequestUri = new Uri(BaseAddress + "ModelBinding/PostComplexTypeFromBody"),
                 Method = HttpMethod.Post,
                 Content = stringContent,
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -126,12 +126,12 @@ namespace System.Web.Http.ModelBinding
             HttpRequestMessage request = new HttpRequestMessage
             {
                 Content = new ObjectContent<ModelBindOrder>(expectedItem, formatter),
-                RequestUri = new Uri(baseAddress + String.Format("ModelBinding/{0}", action)),
+                RequestUri = new Uri(BaseAddress + String.Format("ModelBinding/{0}", action)),
                 Method = HttpMethod.Post,
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
 
             // Assert
             ModelBindOrder actualItem = response.Content.ReadAsAsync<ModelBindOrder>().Result;
@@ -156,12 +156,12 @@ namespace System.Web.Http.ModelBinding
             HttpRequestMessage request = new HttpRequestMessage
             {
                 Content = new ObjectContent<ModelBindOrder>(expectedItem, formatter),
-                RequestUri = new Uri(baseAddress + String.Format("ModelBinding/{0}", action)),
+                RequestUri = new Uri(BaseAddress + String.Format("ModelBinding/{0}", action)),
                 Method = HttpMethod.Post,
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
 
             // Assert
             ModelBindOrder actualItem = response.Content.ReadAsAsync<ModelBindOrder>().Result;

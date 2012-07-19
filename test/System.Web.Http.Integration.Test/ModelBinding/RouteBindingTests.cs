@@ -16,12 +16,12 @@ namespace System.Web.Http.ModelBinding
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(baseAddress + "ModelBinding/GetStringFromRoute"),
+                RequestUri = new Uri(BaseAddress + "ModelBinding/GetStringFromRoute"),
                 Method = HttpMethod.Get
             };
 
             // Act
-            HttpResponseMessage response = httpClient.SendAsync(request).Result;
+            HttpResponseMessage response = Client.SendAsync(request).Result;
 
             // Assert
             string responseString = response.Content.ReadAsStringAsync().Result;

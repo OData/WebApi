@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Internal
 {
@@ -18,7 +15,6 @@ namespace System.Web.Http.Internal
     {
         private static readonly Type TaskGenericType = typeof(Task<>);
 
-        internal static readonly Type HttpControllerType = typeof(IHttpController);
         internal static readonly Type ApiControllerType = typeof(ApiController);
 
         internal static Type GetTaskInnerTypeOrNull(Type type)

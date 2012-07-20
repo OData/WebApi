@@ -91,6 +91,7 @@
     <Compile Include="Controllers\ActionReachabilityTest.cs" />
     <Compile Include="Controllers\Apis\ValuesController.cs" />
     <Compile Include="Controllers\ControllerConfigurationTest.cs" />
+    <Compile Include="Dispatcher\CustomHttpControllerTypeResolverTest.cs" />
     <Compile Include="Tracing\ITestTraceWriter.cs" />
     <Compile Include="Tracing\MemoryTraceWriter.cs" />
     <Compile Include="Tracing\NeverTracesTraceWriter.cs" />

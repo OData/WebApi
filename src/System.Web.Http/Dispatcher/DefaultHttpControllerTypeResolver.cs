@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.Internal;
+using System.Web.Http.Controllers;
 
 namespace System.Web.Http.Dispatcher
 {
@@ -50,10 +50,10 @@ namespace System.Web.Http.Dispatcher
             return
                 t != null &&
                 t.IsClass &&
-                t.IsPublic &&
-                t.Name.EndsWith(DefaultHttpControllerSelector.ControllerSuffix, StringComparison.OrdinalIgnoreCase) &&
+                t.IsVisible &&
                 !t.IsAbstract &&
-                TypeHelper.HttpControllerType.IsAssignableFrom(t);
+                typeof(IHttpController).IsAssignableFrom(t) &&
+                HasValidControllerName(t);
         }
 
         /// <summary>
@@ -105,6 +105,18 @@ namespace System.Web.Http.Dispatcher
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// We match if type name ends with "Controller" and that is not the only part of the 
+        /// name (i.e it can't be just "Controller"). The reason is that the route name has to 
+        /// be a non-empty prefix of the controller type name.
+        /// </summary>
+        internal static bool HasValidControllerName(Type controllerType)
+        {
+            Contract.Assert(controllerType != null);
+            string controllerSuffix = DefaultHttpControllerSelector.ControllerSuffix;
+            return controllerType.Name.Length > controllerSuffix.Length && controllerType.Name.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

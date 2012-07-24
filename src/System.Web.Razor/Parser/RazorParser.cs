@@ -12,6 +12,8 @@ namespace System.Web.Razor.Parser
 {
     public class RazorParser
     {
+        private bool _designTimeMode;
+        
         public RazorParser(ParserBase codeParser, ParserBase markupParser)
         {
             if (codeParser == null)
@@ -25,23 +27,47 @@ namespace System.Web.Razor.Parser
 
             MarkupParser = markupParser;
             CodeParser = codeParser;
-            Optimizers = new List<ISyntaxTreeRewriter>()
-            {
-                // Move whitespace from start of expression block to markup
-                new WhiteSpaceRewriter(MarkupParser.BuildSpan),
-                // Collapse conditional attributes where the entire value is literal
-                new ConditionalAttributeCollapser(MarkupParser.BuildSpan),
-                // Collapse sibling Markup Spans
-                // TODO: Fix and restore Markup Collapser post-beta.
-                //new MarkupCollapser(MarkupParser.BuildSpan)
-            };
+            ResetOptimizers();
         }
 
         internal ParserBase CodeParser { get; private set; }
         internal ParserBase MarkupParser { get; private set; }
         internal IList<ISyntaxTreeRewriter> Optimizers { get; private set; }
 
-        public bool DesignTimeMode { get; set; }
+        public bool DesignTimeMode
+        {
+            get { return _designTimeMode; }
+            set
+            {
+                if (_designTimeMode != value)
+                {
+                    _designTimeMode = value;
+                    ResetOptimizers();
+                }
+            }
+        }
+
+        private void ResetOptimizers()
+        {
+            if (_designTimeMode)
+            {
+                Optimizers = new List<ISyntaxTreeRewriter>()
+                {
+                    // Move whitespace from start of expression block to markup
+                    new WhiteSpaceRewriter(MarkupParser.BuildSpan),
+                };
+            }
+            else
+            {
+                Optimizers = new List<ISyntaxTreeRewriter>()
+                {
+                    // Move whitespace from start of expression block to markup
+                    new WhiteSpaceRewriter(MarkupParser.BuildSpan),
+                    // Collapse conditional attributes where the entire value is literal
+                    new ConditionalAttributeCollapser(MarkupParser.BuildSpan),
+                };
+            }
+        }
 
         public virtual void Parse(TextReader input, ParserVisitor visitor)
         {

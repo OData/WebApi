@@ -97,11 +97,17 @@ namespace System.Web.Razor.Editor
         {
             if (disposing)
             {
-                if (InnerTask != null)
+                // "If you start having to do strange gyrations in order to Dispose (or in the case of Tasks, 
+                // use additional synchronization to ensure it's safe to dispose, since Dispose may only be 
+                // used once a task has completed), it's likely better to rely on finalization to take care of things.
+                //  - Stephen Toub [http://social.msdn.microsoft.com/Forums/en/parallelextensions/thread/7b3a42e5-4ebf-405a-8ee6-bcd2f0214f85]
+                // So, dispose the task if we can
+                if (InnerTask.IsCanceled || InnerTask.IsCompleted || InnerTask.IsFaulted)
                 {
                     InnerTask.Dispose();
-                    InnerTask = null;
                 }
+                // But if we can't, the finalizer will do it
+                InnerTask = null;
                 if (_cancelSource != null)
                 {
                     _cancelSource.Dispose();

@@ -115,6 +115,7 @@ namespace Microsoft.Web.UnitTestUtil
             if (!String.IsNullOrEmpty(appPath))
             {
                 mockHttpContext.Setup(o => o.Request.ApplicationPath).Returns(appPath);
+                mockHttpContext.Setup(o => o.Request.RawUrl).Returns(appPath);
             }
             if (!String.IsNullOrEmpty(requestPath))
             {

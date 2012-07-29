@@ -164,6 +164,19 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ActionEmpty()
+        {
+            // Arrange
+            UrlHelper urlHelper = GetUrlHelper();
+
+            // Act
+            string url = urlHelper.Action();
+
+            // Assert
+            Assert.Equal("/app/", url);
+        }
+
+        [Fact]
         public void Action()
         {
             // Arrange

@@ -39,6 +39,11 @@ namespace System.Web.Mvc
 
         public RouteCollection RouteCollection { get; private set; }
 
+        public string Action()
+        {
+            return RequestContext.HttpContext.Request.RawUrl;
+        }
+
         public string Action(string actionName)
         {
             return GenerateUrl(null /* routeName */, actionName, null, (RouteValueDictionary)null /* routeValues */);

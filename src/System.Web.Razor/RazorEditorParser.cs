@@ -148,19 +148,6 @@ namespace System.Web.Razor
                 {
                     QueueFullReparse(change);
                 }
-#if DEBUG
-                else
-                {
-                    if (CurrentParseTree != null)
-                    {
-                        RazorDebugHelpers.WriteDebugTree(FileName, CurrentParseTree, result, change, this, false);
-                    }
-                    if (_currentCompileUnit != null)
-                    {
-                        RazorDebugHelpers.WriteGeneratedCode(FileName, _currentCompileUnit);
-                    }
-                }
-#endif
 
                 // Otherwise, remember if this was provisionally accepted for next partial parse
                 LastResultProvisional = result.HasFlag(PartialParseResult.Provisional);
@@ -280,6 +267,7 @@ namespace System.Web.Razor
                     // Take the current tree and check for differences
                     treeStructureChanged = CurrentParseTree == null || TreesAreDifferent(CurrentParseTree, results.Document, changes);
                     CurrentParseTree = results.Document;
+                    RazorEditorTrace.TreeStructureHasChanged(treeStructureChanged, changes);
 #if DEBUG
                     _currentCompileUnit = results.GeneratedCode;
 #endif
@@ -320,12 +308,6 @@ namespace System.Web.Razor
 
             // Now compare the trees
             bool treesDifferent = !leftTree.EquivalentTo(rightTree);
-#if DEBUG
-            if (RazorDebugHelpers.OutputDebuggingEnabled)
-            {
-                Debug.WriteLine(String.Format(CultureInfo.CurrentCulture, "Processed {0} changes, trees were{1} different", changes.Length, treesDifferent ? String.Empty : " not"));
-            }
-#endif
             return treesDifferent;
         }
 
@@ -337,10 +319,6 @@ namespace System.Web.Razor
             {
                 handler(this, args);
             }
-#if DEBUG
-            RazorDebugHelpers.WriteDebugTree(FileName, args.GeneratorResults.Document, PartialParseResult.Rejected, args.SourceChange, this, args.TreeStructureChanged);
-            RazorDebugHelpers.WriteGeneratedCode(FileName, args.GeneratorResults.GeneratedCode);
-#endif
         }
 
         [Conditional("DEBUG")]

@@ -11,7 +11,7 @@ namespace System.Web.Razor.Editor
     {
         private CancellationTokenSource _cancelSource = new CancellationTokenSource();
         private GeneratorResults _results;
-
+        
         [SuppressMessage("Microsoft.WebAPI", "CR4002:DoNotConstructTaskInstances", Justification = "This rule is not applicable to this assembly.")]
         private BackgroundParseTask(RazorTemplateEngine engine, string sourceFileName, TextChange change)
         {

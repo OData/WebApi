@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Web.Razor.Editor;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Resources;
@@ -59,12 +60,10 @@ namespace System.Web.Razor
     {
         // Lock for this document
         private object _lock = new object();
-        private Stack<BackgroundParseTask> _outstandingParserTasks = new Stack<BackgroundParseTask>();
         private Span _lastChangeOwner;
         private Span _lastAutoCompleteSpan;
-#if DEBUG
-        private CodeCompileUnit _currentCompileUnit;
-#endif
+        private BackgroundParser _parser;
+        private Block _currentParseTree;
 
         /// <summary>
         /// Constructs the editor parser.  One instance should be used per active editor.  This
@@ -85,6 +84,8 @@ namespace System.Web.Razor
 
             Host = host;
             FileName = sourceFileName;
+            _parser = new BackgroundParser(host, sourceFileName);
+            _parser.ResultsReady += (sender, args) => OnDocumentParseComplete(args);
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace System.Web.Razor
         public RazorEngineHost Host { get; private set; }
         public string FileName { get; private set; }
         public bool LastResultProvisional { get; private set; }
-        public Block CurrentParseTree { get; private set; }
+        public Block CurrentParseTree { get { return _currentParseTree; } }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Since this method is heavily affected by side-effects, particularly calls to CheckForStructureChanges, it should not be made into a property")]
         public virtual string GetAutoCompleteString()
@@ -138,7 +139,7 @@ namespace System.Web.Razor
             lock (_lock)
             {
                 // If there isn't already a parse underway, try partial-parsing
-                if (CurrentParseTree != null && _outstandingParserTasks.Count == 0)
+                if (CurrentParseTree != null && _parser.IsIdle)
                 {
                     result = TryPartialParse(change);
                 }
@@ -146,7 +147,7 @@ namespace System.Web.Razor
                 // If partial parsing failed or there were outstanding parser tasks, start a full reparse
                 if (result.HasFlag(PartialParseResult.Rejected))
                 {
-                    QueueFullReparse(change);
+                    _parser.QueueChange(change);
                 }
 
                 // Otherwise, remember if this was provisionally accepted for next partial parse
@@ -171,26 +172,8 @@ namespace System.Web.Razor
         {
             if (disposing)
             {
-                lock (_lock)
-                {
-                    if (_outstandingParserTasks.Count > 0)
-                    {
-                        foreach (var task in _outstandingParserTasks)
-                        {
-                            task.Dispose();
-                        }
-                    }
-                }
+                _parser.Dispose();
             }
-        }
-
-        private void QueueFullReparse(TextChange change)
-        {
-            if (_outstandingParserTasks.Count > 0)
-            {
-                _outstandingParserTasks.Peek().Cancel();
-            }
-            _outstandingParserTasks.Push(CreateBackgroundTask(Host, FileName, change).ContinueWith(OnParseCompleted));
         }
 
         private PartialParseResult TryPartialParse(TextChange change)
@@ -243,76 +226,10 @@ namespace System.Web.Razor
             return result;
         }
 
-        private void OnParseCompleted(GeneratorResults results, BackgroundParseTask parseTask)
-        {
-            try
-            {
-                // Lock the state objects
-                bool treeStructureChanged = true;
-                TextChange lastChange;
-                lock (_lock)
-                {
-                    // Are we still active?
-                    if (_outstandingParserTasks.Count == 0 || !ReferenceEquals(parseTask, _outstandingParserTasks.Peek()))
-                    {
-                        // We aren't, just abort
-                        return;
-                    }
-
-                    // Ok, we're active. Flush out the changes from all the parser tasks and clear the stack of outstanding parse tasks
-                    TextChange[] changes = _outstandingParserTasks.Select(t => t.Change).Reverse().ToArray();
-                    lastChange = changes.Last();
-                    _outstandingParserTasks.Clear();
-
-                    // Take the current tree and check for differences
-                    treeStructureChanged = CurrentParseTree == null || TreesAreDifferent(CurrentParseTree, results.Document, changes);
-                    CurrentParseTree = results.Document;
-                    RazorEditorTrace.TreeStructureHasChanged(treeStructureChanged, changes);
-#if DEBUG
-                    _currentCompileUnit = results.GeneratedCode;
-#endif
-                    _lastChangeOwner = null;
-                }
-
-                // Done, now exit the lock and fire the event
-                OnDocumentParseComplete(new DocumentParseCompleteEventArgs()
-                {
-                    GeneratorResults = results,
-                    SourceChange = lastChange,
-                    TreeStructureChanged = treeStructureChanged
-                });
-            }
-            finally
-            {
-                parseTask.Dispose();
-            }
-        }
-
-        internal static bool TreesAreDifferent(Block leftTree, Block rightTree, TextChange[] changes)
-        {
-            // Apply all the pending changes to the original tree
-            // PERF: If this becomes a bottleneck, we can probably do it the other way around,
-            //  i.e. visit the tree and find applicable changes for each node.
-            foreach (TextChange change in changes)
-            {
-                Span changeOwner = leftTree.LocateOwner(change);
-
-                // Apply the change to the tree
-                if (changeOwner == null)
-                {
-                    return true;
-                }
-                EditResult result = changeOwner.EditHandler.ApplyChange(changeOwner, change, force: true);
-                changeOwner.ReplaceWith(result.EditedSpan);
-            }
-
-            // Now compare the trees
-            bool treesDifferent = !leftTree.EquivalentTo(rightTree);
-            return treesDifferent;
-        }
-
         private void OnDocumentParseComplete(DocumentParseCompleteEventArgs args)
         {
+            Interlocked.Exchange(ref _currentParseTree, args.GeneratorResults.Document);
+            
             Debug.Assert(args != null, "Event arguments cannot be null");
             EventHandler<DocumentParseCompleteEventArgs> handler = DocumentParseComplete;
             if (handler != null)
@@ -336,11 +253,6 @@ namespace System.Web.Razor
             Debug.Assert(result.HasFlag(PartialParseResult.Accepted) ||
                          !result.HasFlag(PartialParseResult.Provisional),
                          "Partial Parse result was Rejected AND had Provisional flag set");
-        }
-
-        internal virtual BackgroundParseTask CreateBackgroundTask(RazorEngineHost host, string fileName, TextChange change)
-        {
-            return BackgroundParseTask.StartNew(new RazorTemplateEngine(Host), FileName, change);
         }
     }
 }

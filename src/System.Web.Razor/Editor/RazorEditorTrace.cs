@@ -17,18 +17,19 @@ namespace System.Web.Razor.Editor
             return Boolean.TryParse(Environment.GetEnvironmentVariable("RAZOR_EDITOR_TRACE"), out enabled) && enabled;
         }
 
-        private static void TraceLine(string format, params object[] args)
+        [Conditional("DEBUG")]
+        public static void TraceLine(string format, params object[] args)
         {
             if (IsEnabled())
             {
-                Trace.WriteLine(String.Format(
+                Debug.WriteLine(String.Format(
                     "[RzEd] {0}",
                     String.Format(format, args)));
             }
         }
 
         [Conditional("DEBUG")]
-        public static void TreeStructureHasChanged(bool treeStructureChanged, TextChange[] changes)
+        public static void TreeStructureHasChanged(bool treeStructureChanged, IEnumerable<TextChange> changes)
         {
             if (treeStructureChanged)
             {
@@ -36,7 +37,7 @@ namespace System.Web.Razor.Editor
             }
         }
 
-        private static string FormatList(TextChange[] changes)
+        private static string FormatList(IEnumerable<TextChange> changes)
         {
             return String.Join(",", changes.Select(c => c.ToString()));
         }

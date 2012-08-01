@@ -70,7 +70,7 @@
     </Compile>
     <Compile Include="DocumentParseCompleteEventArgs.cs" />
     <Compile Include="Editor\AutoCompleteEditHandler.cs" />
-    <Compile Include="Editor\BackgroundParseTask.cs" />
+    <Compile Include="Editor\BackgroundParser.cs" />
     <Compile Include="Editor\RazorEditorTrace.cs" />
     <Compile Include="Generator\AttributeBlockCodeGenerator.cs" />
     <Compile Include="Generator\CodeWriterExtensions.cs" />

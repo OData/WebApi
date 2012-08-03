@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,7 +13,7 @@ namespace System.Web.Razor.Editor
 {
     internal class BackgroundParser : IDisposable
     {
-        private MainThread _main;
+        private MainThreadState _main;
         private BackgroundThread _bg;
 
         public bool IsIdle
@@ -27,7 +28,7 @@ namespace System.Web.Razor.Editor
 
         public BackgroundParser(RazorEngineHost host, string fileName)
         {
-            _main = new MainThread();
+            _main = new MainThreadState(fileName);
             _bg = new BackgroundThread(_main, host, fileName);
 
             _main.ResultsReady += (sender, args) => OnResultsReady(args);
@@ -100,12 +101,12 @@ namespace System.Web.Razor.Editor
             return treesDifferent;
         }
 
-        private abstract class ThreadBase
+        private abstract class ThreadStateBase
         {
 #if DEBUG
             private int _id = -1;
 #endif
-            protected ThreadBase()
+            protected ThreadStateBase()
             {
             }
 
@@ -136,11 +137,12 @@ namespace System.Web.Razor.Editor
             }
         }
 
-        private class MainThread : ThreadBase, IDisposable
+        private class MainThreadState : ThreadStateBase, IDisposable
         {
             private CancellationTokenSource _cancelSource = new CancellationTokenSource();
             private ManualResetEventSlim _hasParcel = new ManualResetEventSlim(false);
             private CancellationTokenSource _currentParcelCancelSource;
+            private string _fileName;
             
             private object _stateLock = new object();
             private IList<TextChange> _changes = new List<TextChange>();
@@ -159,8 +161,10 @@ namespace System.Web.Razor.Editor
                 }
             }
 
-            public MainThread()
+            public MainThreadState(string fileName)
             {
+                _fileName = fileName;
+
                 SetThreadId(Thread.CurrentThread.ManagedThreadId);
             }
 
@@ -172,6 +176,7 @@ namespace System.Web.Razor.Editor
 
             public void QueueChange(TextChange change)
             {
+                RazorEditorTrace.TraceLine("[M][{0}] Queuing Parse for: {1}", Path.GetFileName(_fileName), change);
                 EnsureOnThread();
                 lock (_stateLock)
                 {
@@ -242,16 +247,16 @@ namespace System.Web.Razor.Editor
             }
         }
 
-        private class BackgroundThread : ThreadBase
+        private class BackgroundThread : ThreadStateBase
         {
-            private MainThread _main;
+            private MainThreadState _main;
             private Thread _bgThread;
             private CancellationToken _shutdownToken;
             private RazorEngineHost _host;
             private string _fileName;
             private Block _currentParseTree;
 
-            public BackgroundThread(MainThread main, RazorEngineHost host, string fileName)
+            public BackgroundThread(MainThreadState main, RazorEngineHost host, string fileName)
             {
                 // Run on MAIN thread!
                 _main = main;
@@ -272,45 +277,85 @@ namespace System.Web.Razor.Editor
             // **** BACKGROUND THREAD ****
             private void WorkerLoop()
             {
+                long? elapsedMs = null;
+#if DEBUG
+                Stopwatch sw = new Stopwatch();
+#endif
+
                 try
                 {
+                    RazorEditorTrace.TraceLine("[BG][{0}] Startup", Path.GetFileName(_fileName));
                     EnsureOnThread();
                     while (!_shutdownToken.IsCancellationRequested)
                     {
                         // Grab the parcel of work to do
                         WorkParcel parcel = _main.GetParcel();
-
-                        try
+                        if (parcel.Changes.Any())
                         {
-                            using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(_shutdownToken, parcel.CancelToken))
+                            RazorEditorTrace.TraceLine("[BG][{0}] {1} changes arrived", Path.GetFileName(_fileName), parcel.Changes.Count);
+                            try
                             {
-                                if (parcel != null && !linkedCancel.IsCancellationRequested)
+                                DocumentParseCompleteEventArgs args = null;
+                                using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(_shutdownToken, parcel.CancelToken))
                                 {
-                                    GeneratorResults results = ParseChange(parcel.Buffer, linkedCancel.Token);
-                                    if (results != null && !linkedCancel.IsCancellationRequested)
+                                    if (parcel != null && !linkedCancel.IsCancellationRequested)
                                     {
-                                        // Take the current tree and check for differences
-                                        bool treeStructureChanged = _currentParseTree == null || TreesAreDifferent(_currentParseTree, results.Document, parcel.Changes, parcel.CancelToken);
-                                        _currentParseTree = results.Document;
-                                        RazorEditorTrace.TreeStructureHasChanged(treeStructureChanged, parcel.Changes);
+#if DEBUG
+                                        sw.Start();
+#endif
+                                        GeneratorResults results = ParseChange(parcel.Buffer, linkedCancel.Token);
+#if DEBUG
+                                        sw.Stop();
+                                        elapsedMs = sw.ElapsedMilliseconds;
+                                        sw.Reset();
+#endif
+                                        RazorEditorTrace.TraceLine(
+                                            "[BG][{0}] Parse Complete in {1}ms",
+                                            Path.GetFileName(_fileName),
+                                            elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?");
 
-                                        // Build Arguments
-                                        DocumentParseCompleteEventArgs args = new DocumentParseCompleteEventArgs()
+                                        if (results != null && !linkedCancel.IsCancellationRequested)
                                         {
-                                            GeneratorResults = results,
-                                            SourceChange = parcel.LastChange,
-                                            TreeStructureChanged = treeStructureChanged
-                                        };
+                                            // Take the current tree and check for differences
+#if DEBUG
+                                            sw.Start();
+#endif
+                                            bool treeStructureChanged = _currentParseTree == null || TreesAreDifferent(_currentParseTree, results.Document, parcel.Changes, parcel.CancelToken);
+#if DEBUG
+                                            sw.Stop();
+                                            elapsedMs = sw.ElapsedMilliseconds;
+                                            sw.Reset();
+#endif
+                                            _currentParseTree = results.Document;
+                                            RazorEditorTrace.TraceLine("[BG][{0}] Trees Compared in {1}ms. Different = {2}",
+                                                Path.GetFileName(_fileName),
+                                                elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?",
+                                                treeStructureChanged);
 
-                                        _main.ReturnParcel(args);
+                                            // Build Arguments
+                                            args = new DocumentParseCompleteEventArgs()
+                                            {
+                                                GeneratorResults = results,
+                                                SourceChange = parcel.LastChange,
+                                                TreeStructureChanged = treeStructureChanged
+                                            };
+                                        }
                                     }
                                 }
+                                if (args != null)
+                                {
+                                    _main.ReturnParcel(args);
+                                }
+                            }
+                            catch (OperationCanceledException)
+                            {
                             }
                         }
-                        catch (OperationCanceledException)
+                        else
                         {
+                            RazorEditorTrace.TraceLine("[BG][{0}] no changes arrived?", Path.GetFileName(_fileName), parcel.Changes.Count);
+                            Thread.Yield();
                         }
-
                     }
                 }
                 catch (OperationCanceledException)
@@ -319,7 +364,7 @@ namespace System.Web.Razor.Editor
                 }
                 finally
                 {
-                    RazorEditorTrace.TraceLine("Background Parser Shutdown");
+                    RazorEditorTrace.TraceLine("[BG][{0}] Shutdown", Path.GetFileName(_fileName));
 
                     // Clean up main thread resources
                     _main.Dispose();

@@ -11,10 +11,26 @@ namespace System.Web.Razor.Editor
 {
     internal static class RazorEditorTrace
     {
+        private static bool? _enabled;
+
         private static bool IsEnabled()
         {
-            bool enabled;
-            return Boolean.TryParse(Environment.GetEnvironmentVariable("RAZOR_EDITOR_TRACE"), out enabled) && enabled;
+            if (_enabled == null)
+            {
+                bool enabled;
+                if (Boolean.TryParse(Environment.GetEnvironmentVariable("RAZOR_EDITOR_TRACE"), out enabled))
+                {
+                    Debug.WriteLine(String.Format(
+                        "[RzEd] Editor Tracing {0}",
+                        enabled ? "Enabled" : "Disabled"));
+                    _enabled = enabled;
+                }
+                else
+                {
+                    _enabled = false;
+                }
+            }
+            return _enabled.Value;
         }
 
         [Conditional("DEBUG")]
@@ -25,15 +41,6 @@ namespace System.Web.Razor.Editor
                 Debug.WriteLine(String.Format(
                     "[RzEd] {0}",
                     String.Format(format, args)));
-            }
-        }
-
-        [Conditional("DEBUG")]
-        public static void TreeStructureHasChanged(bool treeStructureChanged, IEnumerable<TextChange> changes)
-        {
-            if (treeStructureChanged)
-            {
-                TraceLine("Tree changed after: {0}", FormatList(changes));
             }
         }
 

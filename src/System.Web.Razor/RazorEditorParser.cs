@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Web.Razor.Editor;
@@ -86,6 +87,7 @@ namespace System.Web.Razor
             FileName = sourceFileName;
             _parser = new BackgroundParser(host, sourceFileName);
             _parser.ResultsReady += (sender, args) => OnDocumentParseComplete(args);
+            _parser.Start();
         }
 
         /// <summary>
@@ -125,6 +127,12 @@ namespace System.Web.Razor
         public virtual PartialParseResult CheckForStructureChanges(TextChange change)
         {
             // Validate the change
+            long? elapsedMs = null;
+#if DEBUG
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+#endif
+            RazorEditorTrace.TraceLine("[P][{0}] Recieved Change: {1}", Path.GetFileName(FileName), change);
             if (change.NewBuffer == null)
             {
                 throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture,
@@ -154,6 +162,13 @@ namespace System.Web.Razor
                 LastResultProvisional = result.HasFlag(PartialParseResult.Provisional);
             }
             VerifyFlagsAreValid(result);
+
+#if DEBUG
+            sw.Stop();
+            elapsedMs = sw.ElapsedMilliseconds;
+            sw.Reset();
+#endif
+            RazorEditorTrace.TraceLine("[P][{0}] {3} Change in {2}ms: {1}", Path.GetFileName(FileName), change, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
             return result;
         }
 

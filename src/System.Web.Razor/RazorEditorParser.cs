@@ -128,7 +128,7 @@ namespace System.Web.Razor
         {
             // Validate the change
             long? elapsedMs = null;
-#if DEBUG
+#if EDITOR_TRACING
             Stopwatch sw = new Stopwatch();
             sw.Start();
 #endif
@@ -163,7 +163,7 @@ namespace System.Web.Razor
             }
             VerifyFlagsAreValid(result);
 
-#if DEBUG
+#if EDITOR_TRACING
             sw.Stop();
             elapsedMs = sw.ElapsedMilliseconds;
             sw.Reset();

@@ -26,6 +26,10 @@ namespace System.Web.Razor.Text
             get { return _absoluteIndex; }
         }
 
+        // THIS IS 1-based!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        /// <summary>
+        /// Gets the 1-based index of the line referred to by this Source Location.
+        /// </summary>
         public int LineIndex
         {
             get { return _lineIndex; }

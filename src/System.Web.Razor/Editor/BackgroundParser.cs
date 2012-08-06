@@ -122,8 +122,8 @@ namespace System.Web.Razor.Editor
             protected void EnsureOnThread()
             {
 #if DEBUG
-                Debug.Assert(_id != -1);
-                Debug.Assert(Thread.CurrentThread.ManagedThreadId == _id);
+                Debug.Assert(_id != -1, "SetThreadId was never called!");
+                Debug.Assert(Thread.CurrentThread.ManagedThreadId == _id, "Called from an unexpected thread!");
 #endif
             }
 
@@ -131,8 +131,8 @@ namespace System.Web.Razor.Editor
             protected void EnsureNotOnThread()
             {
 #if DEBUG
-                Debug.Assert(_id != -1);
-                Debug.Assert(Thread.CurrentThread.ManagedThreadId != _id);
+                Debug.Assert(_id != -1, "SetThreadId was never called!");
+                Debug.Assert(Thread.CurrentThread.ManagedThreadId != _id, "Called from an unexpected thread!");
 #endif
             }
         }
@@ -278,7 +278,7 @@ namespace System.Web.Razor.Editor
             private void WorkerLoop()
             {
                 long? elapsedMs = null;
-#if DEBUG
+#if EDITOR_TRACING
                 Stopwatch sw = new Stopwatch();
 #endif
 
@@ -300,11 +300,11 @@ namespace System.Web.Razor.Editor
                                 {
                                     if (parcel != null && !linkedCancel.IsCancellationRequested)
                                     {
-#if DEBUG
+#if EDITOR_TRACING
                                         sw.Start();
 #endif
                                         GeneratorResults results = ParseChange(parcel.Buffer, linkedCancel.Token);
-#if DEBUG
+#if EDITOR_TRACING
                                         sw.Stop();
                                         elapsedMs = sw.ElapsedMilliseconds;
                                         sw.Reset();
@@ -317,11 +317,11 @@ namespace System.Web.Razor.Editor
                                         if (results != null && !linkedCancel.IsCancellationRequested)
                                         {
                                             // Take the current tree and check for differences
-#if DEBUG
+#if EDITOR_TRACING
                                             sw.Start();
 #endif
                                             bool treeStructureChanged = _currentParseTree == null || TreesAreDifferent(_currentParseTree, results.Document, parcel.Changes, parcel.CancelToken);
-#if DEBUG
+#if EDITOR_TRACING
                                             sw.Stop();
                                             elapsedMs = sw.ElapsedMilliseconds;
                                             sw.Reset();
@@ -341,6 +341,24 @@ namespace System.Web.Razor.Editor
                                             };
                                         }
                                     }
+
+#if EDITOR_TRACING
+                                    if (args != null)
+                                    {
+                                        // Rewind the buffer and sanity check the line mappings
+                                        parcel.Buffer.Position = 0;
+                                        int lineCount = parcel.Buffer.ReadToEnd().Split(new string[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.None).Count();
+                                        Debug.Assert(
+                                            !args.GeneratorResults.DesignTimeLineMappings.Any(pair => pair.Value.StartLine > lineCount),
+                                            "Found a design-time line mapping referring to a line outside the source file!");
+                                        Debug.Assert(
+                                            !args.GeneratorResults.Document.Flatten().Any(span => span.Start.LineIndex > lineCount),
+                                            "Found a span with a line number outside the source file");
+                                        Debug.Assert(
+                                            !args.GeneratorResults.Document.Flatten().Any(span => span.Start.AbsoluteIndex > parcel.Buffer.Length),
+                                            "Found a span with an absolute offset outside the source file");
+                                    }
+#endif
                                 }
                                 if (args != null)
                                 {

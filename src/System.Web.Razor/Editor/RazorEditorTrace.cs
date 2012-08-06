@@ -20,7 +20,7 @@ namespace System.Web.Razor.Editor
                 bool enabled;
                 if (Boolean.TryParse(Environment.GetEnvironmentVariable("RAZOR_EDITOR_TRACE"), out enabled))
                 {
-                    Debug.WriteLine(String.Format(
+                    Trace.WriteLine(String.Format(
                         "[RzEd] Editor Tracing {0}",
                         enabled ? "Enabled" : "Disabled"));
                     _enabled = enabled;
@@ -33,12 +33,12 @@ namespace System.Web.Razor.Editor
             return _enabled.Value;
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("EDITOR_TRACING")]
         public static void TraceLine(string format, params object[] args)
         {
             if (IsEnabled())
             {
-                Debug.WriteLine(String.Format(
+                Trace.WriteLine(String.Format(
                     "[RzEd] {0}",
                     String.Format(format, args)));
             }

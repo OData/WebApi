@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ASPNETWEBPAGES;EDITOR_TRACING</DefineConstants>
+    <DefineConstants>TRACE;ASPNETWEBPAGES</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>

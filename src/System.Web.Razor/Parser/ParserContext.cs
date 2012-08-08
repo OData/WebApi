@@ -121,13 +121,6 @@ namespace System.Web.Razor.Parser
                 throw new InvalidOperationException(RazorResources.ParserContext_NoCurrentBlock);
             }
             _blockStack.Peek().Children.Add(span);
-
-            span.Previous = LastSpan;
-            if (LastSpan != null)
-            {
-                LastSpan.Next = span;
-            }
-
             LastSpan = span;
         }
 

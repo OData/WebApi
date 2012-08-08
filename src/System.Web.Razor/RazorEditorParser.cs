@@ -143,24 +143,28 @@ namespace System.Web.Razor
 
             PartialParseResult result = PartialParseResult.Rejected;
 
-            // Lock the state objects
-            lock (_lock)
+            // If there isn't already a parse underway, try partial-parsing
+            string changeString = String.Empty;
+            using (_parser.SynchronizeWithBackgroundThread())
             {
-                // If there isn't already a parse underway, try partial-parsing
+                // Capture the string value of the change while we're synchronized
+                changeString = change.ToString();
+
+                // Check if we can partial-parse
                 if (CurrentParseTree != null && _parser.IsIdle)
                 {
                     result = TryPartialParse(change);
                 }
-
-                // If partial parsing failed or there were outstanding parser tasks, start a full reparse
-                if (result.HasFlag(PartialParseResult.Rejected))
-                {
-                    _parser.QueueChange(change);
-                }
-
-                // Otherwise, remember if this was provisionally accepted for next partial parse
-                LastResultProvisional = result.HasFlag(PartialParseResult.Provisional);
             }
+
+            // If partial parsing failed or there were outstanding parser tasks, start a full reparse
+            if (result.HasFlag(PartialParseResult.Rejected))
+            {
+                _parser.QueueChange(change);
+            }
+
+            // Otherwise, remember if this was provisionally accepted for next partial parse
+            LastResultProvisional = result.HasFlag(PartialParseResult.Provisional);
             VerifyFlagsAreValid(result);
 
 #if EDITOR_TRACING
@@ -168,7 +172,7 @@ namespace System.Web.Razor
             elapsedMs = sw.ElapsedMilliseconds;
             sw.Reset();
 #endif
-            RazorEditorTrace.TraceLine("[P][{0}] {3} Change in {2}ms: {1}", Path.GetFileName(FileName), change, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
+            RazorEditorTrace.TraceLine("[P][{0}] {3} Change in {2}ms: {1}", Path.GetFileName(FileName), changeString, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
             return result;
         }
 

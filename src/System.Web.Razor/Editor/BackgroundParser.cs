@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Text;
+using System.Web.Razor.Utils;
 
 namespace System.Web.Razor.Editor
 {
@@ -51,16 +52,12 @@ namespace System.Web.Razor.Editor
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _main.Cancel();
         }
 
-        protected virtual void Dispose(bool disposing)
+        public IDisposable SynchronizeWithBackgroundThread()
         {
-            if (disposing)
-            {
-                _main.Cancel();
-            }
+            return _main.Lock();
         }
 
         protected virtual void OnResultsReady(DocumentParseCompleteEventArgs args)
@@ -172,6 +169,12 @@ namespace System.Web.Razor.Editor
             {
                 EnsureOnThread();
                 _cancelSource.Cancel();
+            }
+
+            public IDisposable Lock()
+            {
+                Monitor.Enter(_stateLock);
+                return new DisposableAction(() => Monitor.Exit(_stateLock));
             }
 
             public void QueueChange(TextChange change)

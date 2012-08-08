@@ -12,8 +12,6 @@ namespace System.Web.Razor.Parser
 {
     public class RazorParser
     {
-        private bool _designTimeMode;
-        
         public RazorParser(ParserBase codeParser, ParserBase markupParser)
         {
             if (codeParser == null)
@@ -27,47 +25,21 @@ namespace System.Web.Razor.Parser
 
             MarkupParser = markupParser;
             CodeParser = codeParser;
-            ResetOptimizers();
+
+            Optimizers = new List<ISyntaxTreeRewriter>()
+            {
+                // Move whitespace from start of expression block to markup
+                new WhiteSpaceRewriter(MarkupParser.BuildSpan),
+                // Collapse conditional attributes where the entire value is literal
+                new ConditionalAttributeCollapser(MarkupParser.BuildSpan),
+            };
         }
 
         internal ParserBase CodeParser { get; private set; }
         internal ParserBase MarkupParser { get; private set; }
         internal IList<ISyntaxTreeRewriter> Optimizers { get; private set; }
 
-        public bool DesignTimeMode
-        {
-            get { return _designTimeMode; }
-            set
-            {
-                if (_designTimeMode != value)
-                {
-                    _designTimeMode = value;
-                    ResetOptimizers();
-                }
-            }
-        }
-
-        private void ResetOptimizers()
-        {
-            if (_designTimeMode)
-            {
-                Optimizers = new List<ISyntaxTreeRewriter>()
-                {
-                    // Move whitespace from start of expression block to markup
-                    new WhiteSpaceRewriter(MarkupParser.BuildSpan),
-                };
-            }
-            else
-            {
-                Optimizers = new List<ISyntaxTreeRewriter>()
-                {
-                    // Move whitespace from start of expression block to markup
-                    new WhiteSpaceRewriter(MarkupParser.BuildSpan),
-                    // Collapse conditional attributes where the entire value is literal
-                    new ConditionalAttributeCollapser(MarkupParser.BuildSpan),
-                };
-            }
-        }
+        public bool DesignTimeMode { get; set; }
 
         public virtual void Parse(TextReader input, ParserVisitor visitor)
         {
@@ -164,6 +136,18 @@ namespace System.Web.Razor.Parser
             foreach (ISyntaxTreeRewriter rewriter in Optimizers)
             {
                 current = rewriter.Rewrite(current);
+            }
+
+            // Link the leaf nodes into a chain
+            Span prev = null;
+            foreach (Span node in current.Flatten())
+            {
+                node.Previous = prev;
+                if (prev != null)
+                {
+                    prev.Next = node;
+                }
+                prev = node;
             }
 
             // Return the new result

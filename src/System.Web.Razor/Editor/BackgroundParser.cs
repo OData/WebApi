@@ -282,9 +282,9 @@ namespace System.Web.Razor.Editor
             private void WorkerLoop()
             {
                 long? elapsedMs = null;
+                string fileNameOnly = Path.GetFileName(_fileName);
 #if EDITOR_TRACING
                 Stopwatch sw = new Stopwatch();
-                string fileNameOnly = Path.GetFileName(_fileName);
 #endif
 
                 try
@@ -307,7 +307,7 @@ namespace System.Web.Razor.Editor
                                     {
                                         // Collect ALL changes
 #if EDITOR_TRACING
-                                        if (_previouslyDiscarded != null && _previouslyDiscarded.Any())
+                                        if (_previouslyDiscarded.Any())
                                         {
                                             RazorEditorTrace.TraceLine("[BG][{0}] Collecting {1} discarded changes", fileNameOnly, _previouslyDiscarded.Count);
                                         }

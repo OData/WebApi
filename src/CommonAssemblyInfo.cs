@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]
+[assembly: AssemblyCompany("Microsoft Open Technologies, Inc")]
+[assembly: AssemblyCopyright("© Microsoft Open Technologies, Inc. All rights reserved.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
@@ -14,15 +14,13 @@ using System.Runtime.InteropServices;
 
 #if ASPNETMVC && ASPNETWEBPAGES
 #error Runtime projects cannot define both ASPNETMVC and ASPNETWEBPAGES
-#endif
-
-#if ASPNETMVC
-[assembly: AssemblyVersion("5.0.0.0")]
-[assembly: AssemblyFileVersion("5.0.0.0")]
+#elif ASPNETMVC
+[assembly: AssemblyVersion("5.0.0.0")] // ASPNETMVC
+[assembly: AssemblyFileVersion("5.0.0.0")] // ASPNETMVC
 [assembly: AssemblyProduct("Microsoft ASP.NET MVC")]
 #elif ASPNETWEBPAGES
-[assembly: AssemblyVersion("3.0.0.0")]
-[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: AssemblyVersion("3.0.0.0")] // ASPNETWEBPAGES
+[assembly: AssemblyFileVersion("3.0.0.0")] // ASPNETWEBPAGES
 [assembly: AssemblyProduct("Microsoft ASP.NET Web Pages")]
 #else
 #error Runtime projects must define either ASPNETMVC or ASPNETWEBPAGES

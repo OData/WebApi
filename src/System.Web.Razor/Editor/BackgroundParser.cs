@@ -258,6 +258,7 @@ namespace System.Web.Razor.Editor
             private RazorEngineHost _host;
             private string _fileName;
             private Block _currentParseTree;
+            private IList<TextChange> _previouslyDiscarded = new List<TextChange>();
 
             public BackgroundThread(MainThreadState main, RazorEngineHost host, string fileName)
             {
@@ -283,11 +284,12 @@ namespace System.Web.Razor.Editor
                 long? elapsedMs = null;
 #if EDITOR_TRACING
                 Stopwatch sw = new Stopwatch();
+                string fileNameOnly = Path.GetFileName(_fileName);
 #endif
 
                 try
                 {
-                    RazorEditorTrace.TraceLine("[BG][{0}] Startup", Path.GetFileName(_fileName));
+                    RazorEditorTrace.TraceLine("[BG][{0}] Startup", fileNameOnly);
                     EnsureOnThread();
                     while (!_shutdownToken.IsCancellationRequested)
                     {
@@ -295,7 +297,7 @@ namespace System.Web.Razor.Editor
                         WorkParcel parcel = _main.GetParcel();
                         if (parcel.Changes.Any())
                         {
-                            RazorEditorTrace.TraceLine("[BG][{0}] {1} changes arrived", Path.GetFileName(_fileName), parcel.Changes.Count);
+                            RazorEditorTrace.TraceLine("[BG][{0}] {1} changes arrived", fileNameOnly, parcel.Changes.Count);
                             try
                             {
                                 DocumentParseCompleteEventArgs args = null;
@@ -303,65 +305,87 @@ namespace System.Web.Razor.Editor
                                 {
                                     if (parcel != null && !linkedCancel.IsCancellationRequested)
                                     {
+                                        // Collect ALL changes
 #if EDITOR_TRACING
-                                        sw.Start();
-#endif
-                                        GeneratorResults results = ParseChange(parcel.Buffer, linkedCancel.Token);
-#if EDITOR_TRACING
-                                        sw.Stop();
-                                        elapsedMs = sw.ElapsedMilliseconds;
-                                        sw.Reset();
-#endif
-                                        RazorEditorTrace.TraceLine(
-                                            "[BG][{0}] Parse Complete in {1}ms",
-                                            Path.GetFileName(_fileName),
-                                            elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?");
-
-                                        if (results != null && !linkedCancel.IsCancellationRequested)
+                                        if (_previouslyDiscarded != null && _previouslyDiscarded.Any())
                                         {
-                                            // Take the current tree and check for differences
+                                            RazorEditorTrace.TraceLine("[BG][{0}] Collecting {1} discarded changes", fileNameOnly, _previouslyDiscarded.Count);
+                                        }
+#endif
+                                        var allChanges = Enumerable.Concat(
+                                            _previouslyDiscarded ?? Enumerable.Empty<TextChange>(), parcel.Changes).ToList();
+                                        var finalChange = allChanges.LastOrDefault();
+                                        if (finalChange != null)
+                                        {
 #if EDITOR_TRACING
                                             sw.Start();
 #endif
-                                            bool treeStructureChanged = _currentParseTree == null || TreesAreDifferent(_currentParseTree, results.Document, parcel.Changes, parcel.CancelToken);
+                                            GeneratorResults results = ParseChange(finalChange.NewBuffer, linkedCancel.Token);
 #if EDITOR_TRACING
                                             sw.Stop();
                                             elapsedMs = sw.ElapsedMilliseconds;
                                             sw.Reset();
 #endif
-                                            _currentParseTree = results.Document;
-                                            RazorEditorTrace.TraceLine("[BG][{0}] Trees Compared in {1}ms. Different = {2}",
-                                                Path.GetFileName(_fileName),
-                                                elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?",
-                                                treeStructureChanged);
+                                            RazorEditorTrace.TraceLine(
+                                                "[BG][{0}] Parse Complete in {1}ms",
+                                                fileNameOnly,
+                                                elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?");
 
-                                            // Build Arguments
-                                            args = new DocumentParseCompleteEventArgs()
+                                            if (results != null && !linkedCancel.IsCancellationRequested)
                                             {
-                                                GeneratorResults = results,
-                                                SourceChange = parcel.LastChange,
-                                                TreeStructureChanged = treeStructureChanged
-                                            };
+                                                // Clear discarded changes list
+                                                _previouslyDiscarded = null;
+
+                                                // Take the current tree and check for differences
+#if EDITOR_TRACING
+                                                sw.Start();
+#endif
+                                                bool treeStructureChanged = _currentParseTree == null || TreesAreDifferent(_currentParseTree, results.Document, allChanges, parcel.CancelToken);
+#if EDITOR_TRACING
+                                                sw.Stop();
+                                                elapsedMs = sw.ElapsedMilliseconds;
+                                                sw.Reset();
+#endif
+                                                _currentParseTree = results.Document;
+                                                RazorEditorTrace.TraceLine("[BG][{0}] Trees Compared in {1}ms. Different = {2}",
+                                                    fileNameOnly,
+                                                    elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?",
+                                                    treeStructureChanged);
+
+                                                // Build Arguments
+                                                args = new DocumentParseCompleteEventArgs()
+                                                {
+                                                    GeneratorResults = results,
+                                                    SourceChange = finalChange,
+                                                    TreeStructureChanged = treeStructureChanged
+                                                };
+                                            }
+                                            else
+                                            {
+                                                // Parse completed but we were cancelled in the mean time. Add these to the discarded changes set
+                                                RazorEditorTrace.TraceLine("[BG][{0}] Discarded {1} changes", fileNameOnly, allChanges.Count);
+                                                _previouslyDiscarded = allChanges;
+                                            }
+
+#if CHECK_TREE
+                                            if (args != null)
+                                            {
+                                                // Rewind the buffer and sanity check the line mappings
+                                                finalChange.NewBuffer.Position = 0;
+                                                int lineCount = finalChange.NewBuffer.ReadToEnd().Split(new string[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.None).Count();
+                                                Debug.Assert(
+                                                    !args.GeneratorResults.DesignTimeLineMappings.Any(pair => pair.Value.StartLine > lineCount),
+                                                    "Found a design-time line mapping referring to a line outside the source file!");
+                                                Debug.Assert(
+                                                    !args.GeneratorResults.Document.Flatten().Any(span => span.Start.LineIndex > lineCount),
+                                                    "Found a span with a line number outside the source file");
+                                                Debug.Assert(
+                                                    !args.GeneratorResults.Document.Flatten().Any(span => span.Start.AbsoluteIndex > parcel.NewBuffer.Length),
+                                                    "Found a span with an absolute offset outside the source file");
+                                            }
+#endif
                                         }
                                     }
-
-#if EDITOR_TRACING
-                                    if (args != null)
-                                    {
-                                        // Rewind the buffer and sanity check the line mappings
-                                        parcel.Buffer.Position = 0;
-                                        int lineCount = parcel.Buffer.ReadToEnd().Split(new string[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.None).Count();
-                                        Debug.Assert(
-                                            !args.GeneratorResults.DesignTimeLineMappings.Any(pair => pair.Value.StartLine > lineCount),
-                                            "Found a design-time line mapping referring to a line outside the source file!");
-                                        Debug.Assert(
-                                            !args.GeneratorResults.Document.Flatten().Any(span => span.Start.LineIndex > lineCount),
-                                            "Found a span with a line number outside the source file");
-                                        Debug.Assert(
-                                            !args.GeneratorResults.Document.Flatten().Any(span => span.Start.AbsoluteIndex > parcel.Buffer.Length),
-                                            "Found a span with an absolute offset outside the source file");
-                                    }
-#endif
                                 }
                                 if (args != null)
                                 {
@@ -374,7 +398,7 @@ namespace System.Web.Razor.Editor
                         }
                         else
                         {
-                            RazorEditorTrace.TraceLine("[BG][{0}] no changes arrived?", Path.GetFileName(_fileName), parcel.Changes.Count);
+                            RazorEditorTrace.TraceLine("[BG][{0}] no changes arrived?", fileNameOnly, parcel.Changes.Count);
                             Thread.Yield();
                         }
                     }
@@ -385,7 +409,7 @@ namespace System.Web.Razor.Editor
                 }
                 finally
                 {
-                    RazorEditorTrace.TraceLine("[BG][{0}] Shutdown", Path.GetFileName(_fileName));
+                    RazorEditorTrace.TraceLine("[BG][{0}] Shutdown", fileNameOnly);
 
                     // Clean up main thread resources
                     _main.Dispose();
@@ -421,23 +445,6 @@ namespace System.Web.Razor.Editor
         private class WorkParcel
         {
             public CancellationToken CancelToken { get; private set; }
-
-            public ITextBuffer Buffer
-            {
-                get
-                {
-                    var change = LastChange;
-                    if (change != null)
-                    {
-                        return change.NewBuffer;
-                    }
-                    return null;
-                }
-            }
-            public TextChange LastChange
-            {
-                get { return Changes.LastOrDefault(); }
-            }
             public IList<TextChange> Changes { get; private set; }
 
             public WorkParcel(IList<TextChange> changes, CancellationToken cancelToken)

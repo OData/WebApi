@@ -12,6 +12,13 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 
+[assembly: NeutralResourcesLanguage("en-US")]
+
+// ===========================================================================
+//  DO NOT EDIT OR REMOVE ANYTHING BELOW THIS COMMENT.
+//  Version numbers are automatically generated based on regular expressions.
+// ===========================================================================
+
 #if ASPNETMVC && ASPNETWEBPAGES
 #error Runtime projects cannot define both ASPNETMVC and ASPNETWEBPAGES
 #elif ASPNETMVC
@@ -25,5 +32,3 @@ using System.Runtime.InteropServices;
 #else
 #error Runtime projects must define either ASPNETMVC or ASPNETWEBPAGES
 #endif
-
-[assembly: NeutralResourcesLanguage("en-US")]

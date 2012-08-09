@@ -22,14 +22,16 @@ namespace System.Net.Http.Formatting
         {
             return value == StringComparison.CurrentCulture ||
                    value == StringComparison.CurrentCultureIgnoreCase ||
+#if !NETFX_CORE
                    value == StringComparison.InvariantCulture ||
                    value == StringComparison.InvariantCultureIgnoreCase ||
+#endif
                    value == StringComparison.Ordinal ||
                    value == StringComparison.OrdinalIgnoreCase;
         }
 
         /// <summary>
-        /// Validates the specified <paramref name="value"/> and throws an <see cref="InvalidEnumArgumentException"/>
+        /// Validates the specified <paramref name="value"/> and throws an <see cref="ArgumentException"/>
         /// exception if not valid.
         /// </summary>
         /// <param name="value">The value to validate.</param>

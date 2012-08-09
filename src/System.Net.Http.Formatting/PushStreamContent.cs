@@ -106,12 +106,20 @@ namespace System.Net.Http
                 _serializeToStreamTask = serializeToStreamTask;
             }
 
+#if NETFX_CORE
+            protected override void Dispose(bool disposing)
+            {
+                _serializeToStreamTask.TrySetResult(true);
+                base.Dispose(disposing);
+            }
+#else
             public override void Close()
             {
                 // Note we don't call close on the inner stream as the stream will get closed when this
                 // HttpContent instance is disposed.
                 _serializeToStreamTask.TrySetResult(true);
             }
+#endif
         }
     }
 }

@@ -13,6 +13,9 @@ namespace System.Web.Http
     /// </summary>
     internal static class Error
     {
+        private const string HttpScheme = "http";
+        private const string HttpsScheme = "https";
+
         /// <summary>
         /// Formats the specified resource string using <see cref="M:CultureInfo.CurrentCulture"/>.
         /// </summary>
@@ -55,7 +58,7 @@ namespace System.Web.Http
         /// <returns>The logged <see cref="Exception"/>.</returns>
         internal static ArgumentException ArgumentUriNotHttpOrHttpsScheme(string parameterName, Uri actualValue)
         {
-            return new ArgumentException(Error.Format(CommonWebApiResources.ArgumentInvalidHttpUriScheme, actualValue, Uri.UriSchemeHttp, Uri.UriSchemeHttps), parameterName);
+            return new ArgumentException(Error.Format(CommonWebApiResources.ArgumentInvalidHttpUriScheme, actualValue, HttpScheme, HttpsScheme), parameterName);
         }
 
         /// <summary>
@@ -213,15 +216,19 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Creates an <see cref="InvalidEnumArgumentException"/>.
+        /// Creates an <see cref="ArgumentException"/> for an invalid enum argument.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
         /// <param name="invalidValue">The value of the argument that failed.</param>
         /// <param name="enumClass">A <see cref="Type"/> that represents the enumeration class with the valid values.</param>
         /// <returns>The logged <see cref="Exception"/>.</returns>
-        internal static InvalidEnumArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
+        internal static ArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
         {
+#if NETFX_CORE
+            return new ArgumentException(Error.Format(CommonWebApiResources.InvalidEnumArgument, parameterName, invalidValue, enumClass.Name), parameterName);
+#else
             return new InvalidEnumArgumentException(parameterName, invalidValue, enumClass);
+#endif
         }
 
         /// <summary>

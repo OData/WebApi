@@ -80,7 +80,7 @@ namespace System.Net.Http
         /// <returns>The parsed <see cref="HttpRequestMessage"/> instance.</returns>
         public static Task<HttpRequestMessage> ReadAsHttpRequestMessageAsync(this HttpContent content)
         {
-            return ReadAsHttpRequestMessageAsync(content, Uri.UriSchemeHttp, DefaultBufferSize);
+            return ReadAsHttpRequestMessageAsync(content, "http", DefaultBufferSize);
         }
 
         /// <summary>

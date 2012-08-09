@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
@@ -131,10 +132,7 @@ namespace System.Net.Http.Formatting
 
             // This uses a naive buffering. BufferedStream() will block the thread while it drains the buffer. 
             // We can explore a smarter implementation that async drains the buffer. 
-            Stream bufferedStream = new BufferedStream(nonClosingStream, bufferSize);
-
-            // We now have buffered, non-closing stream which we can pass to the user.
-            return bufferedStream;
+            return new BufferedStream(nonClosingStream, bufferSize);
         }
     }
 }

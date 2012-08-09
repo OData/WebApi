@@ -4,7 +4,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+#if !NETFX_CORE
 using System.Configuration;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -37,7 +39,9 @@ namespace System.Net.Http.Formatting
         {
             SupportedMediaTypes = new MediaTypeHeaderValueCollection();
             SupportedEncodings = new Collection<Encoding>();
+#if !NETFX_CORE
             MediaTypeMappings = new Collection<MediaTypeMapping>();
+#endif
         }
 
         /// <summary>
@@ -78,6 +82,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public Collection<Encoding> SupportedEncodings { get; private set; }
 
+#if !NETFX_CORE
         /// <summary>
         /// Gets the mutable collection of <see cref="MediaTypeMapping"/> elements used
         /// by this <see cref="MediaTypeFormatter"/> instance to determine the
@@ -89,6 +94,7 @@ namespace System.Net.Http.Formatting
         /// Gets or sets the <see cref="IRequiredMemberSelector"/> used to determine required members.
         /// </summary>
         public IRequiredMemberSelector RequiredMemberSelector { get; set; }
+#endif
 
         /// <summary>
         /// Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/>
@@ -138,13 +144,15 @@ namespace System.Net.Http.Formatting
 
         private static bool TryGetDelegatingType(Type interfaceType, ref Type type)
         {
-            if (type != null
-                && type.IsInterface
-                && type.IsGenericType
-                && (type.GetInterface(interfaceType.FullName) != null || type.GetGenericTypeDefinition().Equals(interfaceType)))
+            if (type != null && type.IsInterface() && type.IsGenericType())
             {
-                type = GetOrAddDelegatingType(type);
-                return true;
+                Type genericType = type.ExtractGenericInterface(interfaceType);
+
+                if (genericType != null)
+                {
+                    type = GetOrAddDelegatingType(type, genericType);
+                    return true;
+                }
             }
 
             return false;
@@ -152,6 +160,9 @@ namespace System.Net.Http.Formatting
 
         private static int InitializeDefaultCollectionKeySize()
         {
+#if NETFX_CORE
+            return Int32.MaxValue;
+#else
             // we first detect if we are running on 4.5, return Max value if we are.
             Type comparerType = Type.GetType(IWellKnownComparerTypeName, throwOnError: false);
 
@@ -171,6 +182,7 @@ namespace System.Net.Http.Formatting
             }
 
             return result;
+#endif
         }
 
         /// <summary>
@@ -292,8 +304,7 @@ namespace System.Net.Http.Formatting
 
         /// <summary>
         /// Returns a specialized instance of the <see cref="MediaTypeFormatter"/> that can handle formatting a response for the given
-        /// parameters. This method is called by <see cref="DefaultContentNegotiator"/> after a formatter has been selected through content
-        /// negotiation.
+        /// parameters. This method is called after a formatter has been selected through content negotiation.
         /// </summary>
         /// <remarks>
         /// The default implementation returns <c>this</c> instance. Derived classes can choose to return a new instance if
@@ -339,7 +350,7 @@ namespace System.Net.Http.Formatting
         /// <returns><c>true</c> if this <see cref="MediaTypeFormatter"/> can serialize an object of that type; otherwise <c>false</c>.</returns>
         public abstract bool CanWriteType(Type type);
 
-        private static Type GetOrAddDelegatingType(Type type)
+        private static Type GetOrAddDelegatingType(Type type, Type genericType)
         {
             return _delegatingEnumerableCache.GetOrAdd(
                 type,
@@ -347,16 +358,7 @@ namespace System.Net.Http.Formatting
                 {
                     // The current method is called by methods that already checked the type for is not null, is generic and is or implements IEnumerable<T>
                     // This retrieves the T type of the IEnumerable<T> interface.
-                    Type elementType;
-                    if (typeToRemap.GetGenericTypeDefinition().Equals(FormattingUtilities.EnumerableInterfaceGenericType))
-                    {
-                        elementType = typeToRemap.GetGenericArguments()[0];
-                    }
-                    else
-                    {
-                        elementType = typeToRemap.GetInterface(FormattingUtilities.EnumerableInterfaceGenericType.FullName).GetGenericArguments()[0];
-                    }
-
+                    Type elementType = genericType.GetGenericArguments()[0];
                     Type delegatingType = FormattingUtilities.DelegatingEnumerableGenericType.MakeGenericType(elementType);
                     ConstructorInfo delegatingConstructor = delegatingType.GetConstructor(new Type[] { FormattingUtilities.EnumerableInterfaceGenericType.MakeGenericType(elementType) });
                     _delegatingEnumerableConstructorCache.TryAdd(delegatingType, delegatingConstructor);
@@ -375,7 +377,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("type");
             }
 
-            if (type.IsValueType)
+            if (type.IsValueType())
             {
                 return Activator.CreateInstance(type);
             }

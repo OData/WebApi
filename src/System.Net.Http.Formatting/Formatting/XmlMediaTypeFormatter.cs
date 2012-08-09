@@ -69,6 +69,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public bool Indent { get; set; }
 
+#if !NETFX_CORE
         /// <summary>
         /// Gets or sets the maximum depth allowed by this formatter.
         /// </summary>
@@ -88,6 +89,7 @@ namespace System.Net.Http.Formatting
                 _readerQuotas.MaxDepth = value;
             }
         }
+#endif
 
         /// <summary>
         /// Registers the <see cref="XmlObjectSerializer"/> to use to read or write
@@ -241,12 +243,16 @@ namespace System.Net.Http.Formatting
 
                 // Get the character encoding for the content
                 Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
-
                 object serializer = GetSerializerForType(type);
 
                 try
                 {
+#if NETFX_CORE
+                    // Force a preamble into the stream, since CreateTextReader in WinRT only supports auto-detecting encoding.
+                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new ReadOnlyStreamWithEncodingPreamble(readStream, effectiveEncoding), _readerQuotas))
+#else
                     using (XmlReader reader = XmlDictionaryReader.CreateTextReader(new NonClosingDelegatingStream(readStream), effectiveEncoding, _readerQuotas, null))
+#endif
                     {
                         XmlSerializer xmlSerializer = serializer as XmlSerializer;
                         if (xmlSerializer != null)
@@ -352,8 +358,11 @@ namespace System.Net.Http.Formatting
                 }
                 else
                 {
+#if !NETFX_CORE
+                    // REVIEW: Is there something comparable in WinRT?
                     // Verify that type is a valid data contract by forcing the serializer to try to create a data contract
                     FormattingUtilities.XsdDataContractExporter.GetRootElementName(type);
+#endif
                     serializer = new DataContractSerializer(type);
                 }
             }

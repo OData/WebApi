@@ -112,10 +112,12 @@ namespace System.Net.Http
         /// </summary>
         public static readonly Type QueryableInterfaceGenericType = typeof(IQueryable<>);
 
+#if !NETFX_CORE
         /// <summary>
         /// An instance of <see cref="XsdDataContractExporter"/>.
         /// </summary>
         public static readonly XsdDataContractExporter XsdDataContractExporter = new XsdDataContractExporter();
+#endif
 
         /// <summary>
         /// Determines whether <paramref name="type"/> is a <see cref="JToken"/> type.
@@ -162,6 +164,9 @@ namespace System.Net.Http
         /// <returns></returns>
         public static XmlDictionaryReaderQuotas CreateDefaultReaderQuotas()
         {
+#if NETFX_CORE
+            return XmlDictionaryReaderQuotas.Max;
+#else
             return new XmlDictionaryReaderQuotas()
             {
                 MaxArrayLength = Int32.MaxValue,
@@ -170,6 +175,7 @@ namespace System.Net.Http
                 MaxNameTableCharCount = Int32.MaxValue,
                 MaxStringContentLength = Int32.MaxValue
             };
+#endif
         }
 
         /// <summary>
@@ -194,7 +200,20 @@ namespace System.Net.Http
 
         public static bool ValidateHeaderToken(string token)
         {
-            return token != null && !token.Any(c => c < 0x21 || c > 0x7E || NonTokenChars.IndexOf(c) != -1);
+            if (token == null)
+            {
+                return false;
+            }
+
+            foreach (char c in token)
+            {
+                if (c < 0x21 || c > 0x7E || NonTokenChars.IndexOf(c) != -1)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public static string DateToString(DateTimeOffset dateTime)

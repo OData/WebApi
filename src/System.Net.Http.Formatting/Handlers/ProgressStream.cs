@@ -3,6 +3,8 @@
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Internal;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net.Http.Handlers
 {
@@ -47,17 +49,25 @@ namespace System.Net.Http.Handlers
         public override int Read(byte[] buffer, int offset, int count)
         {
             int bytesRead = InnerStream.Read(buffer, offset, count);
-            ReportBytesReceived(bytesRead, null);
+            ReportBytesReceived(bytesRead, userState: null);
             return bytesRead;
         }
 
         public override int ReadByte()
         {
             int byteRead = InnerStream.ReadByte();
-            ReportBytesReceived(byteRead == -1 ? 0 : 1, null);
+            ReportBytesReceived(byteRead == -1 ? 0 : 1, userState: null);
             return byteRead;
         }
 
+#if NETFX_CORE
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            int readCount = await InnerStream.ReadAsync(buffer, offset, count, cancellationToken);
+            ReportBytesReceived(readCount, userState: null);
+            return readCount;
+        }
+#else
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return InnerStream.BeginRead(buffer, offset, count, callback, state);
@@ -69,19 +79,27 @@ namespace System.Net.Http.Handlers
             ReportBytesReceived(bytesRead, asyncResult.AsyncState);
             return bytesRead;
         }
+#endif
 
         public override void Write(byte[] buffer, int offset, int count)
         {
             InnerStream.Write(buffer, offset, count);
-            ReportBytesSent(count, null);
+            ReportBytesSent(count, userState: null);
         }
 
         public override void WriteByte(byte value)
         {
             InnerStream.WriteByte(value);
-            ReportBytesSent(1, null);
+            ReportBytesSent(1, userState: null);
         }
 
+#if NETFX_CORE
+        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await InnerStream.WriteAsync(buffer, offset, count, cancellationToken);
+            ReportBytesSent(count, userState: null);
+        }
+#else
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return new ProgressWriteAsyncResult(InnerStream, this, buffer, offset, count, callback, state);
@@ -91,6 +109,7 @@ namespace System.Net.Http.Handlers
         {
             ProgressWriteAsyncResult.End(asyncResult);
         }
+#endif
 
         internal void ReportBytesSent(int bytesSent, object userState)
         {

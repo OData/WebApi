@@ -33,7 +33,9 @@ namespace System.Net.Http
         private const string DefaultRequestMediaType = DefaultMediaType + "; " + MsgTypeParameter + "=" + DefaultRequestMsgType;
         private const string DefaultResponseMediaType = DefaultMediaType + "; " + MsgTypeParameter + "=" + DefaultResponseMsgType;
 
+#if !NETFX_CORE
         private static readonly AsyncCallback _onWriteComplete = new AsyncCallback(OnWriteComplete);
+#endif
 
         // Set of header fields that only support single values such as Set-Cookie.
         private static readonly HashSet<string> _singleValueHeaderFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -178,6 +180,25 @@ namespace System.Net.Http
         /// <param name="stream">The <see cref="Stream"/> to which to write.</param>
         /// <param name="context">The associated <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> instance that is asynchronously serializing the object's content.</returns>
+#if NETFX_CORE
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        {
+            if (stream == null)
+            {
+                throw Error.ArgumentNull("stream");
+            }
+
+            byte[] header = SerializeHeader();
+            await stream.WriteAsync(header, 0, header.Length);
+
+            if (Content != null)
+            {
+                Stream readStream = await _streamTask.Value;
+                ValidateStreamForReading(readStream);
+                await Content.CopyToAsync(stream);
+            }
+        }
+#else
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
@@ -205,6 +226,7 @@ namespace System.Net.Http
 
             return writeTask.Task;
         }
+#endif
 
         /// <summary>
         /// Computes the length of the stream if possible.
@@ -282,6 +304,7 @@ namespace System.Net.Http
             base.Dispose(disposing);
         }
 
+#if !NETFX_CORE
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
         private static void OnWriteComplete(IAsyncResult result)
         {
@@ -333,6 +356,7 @@ namespace System.Net.Http
                 }
             });
         }
+#endif
 
         /// <summary>
         /// Serializes the HTTP request line.
@@ -397,6 +421,7 @@ namespace System.Net.Http
             }
         }
 
+#if !NETFX_CORE
         private Task<HttpContent> PrepareContentAsync()
         {
             if (Content == null)
@@ -406,30 +431,11 @@ namespace System.Net.Http
 
             return _streamTask.Value.Then(readStream =>
             {
-                // If the content needs to be written to a target stream a 2nd time, then the stream must support
-                // seeking (e.g. a FileStream), otherwise the stream can't be copied a second time to a target 
-                // stream (e.g. a NetworkStream).
-                if (_contentConsumed)
-                {
-                    if (readStream != null && readStream.CanRead)
-                    {
-                        readStream.Position = 0;
-                    }
-                    else
-                    {
-                        throw Error.InvalidOperation(Properties.Resources.HttpMessageContentAlreadyRead,
-                                      FormattingUtilities.HttpContentType.Name,
-                                      HttpRequestMessage != null
-                                          ? FormattingUtilities.HttpRequestMessageType.Name
-                                          : FormattingUtilities.HttpResponseMessageType.Name);
-                    }
-
-                    _contentConsumed = true;
-                }
-
+                ValidateStreamForReading(readStream);
                 return Content;
             }, runSynchronously: true);
         }
+#endif
 
         private byte[] SerializeHeader()
         {
@@ -457,6 +463,30 @@ namespace System.Net.Http
 
             message.Append(CRLF);
             return Encoding.UTF8.GetBytes(message.ToString());
+        }
+
+        private void ValidateStreamForReading(Stream stream)
+        {
+            // If the content needs to be written to a target stream a 2nd time, then the stream must support
+            // seeking (e.g. a FileStream), otherwise the stream can't be copied a second time to a target 
+            // stream (e.g. a NetworkStream).
+            if (_contentConsumed)
+            {
+                if (stream != null && stream.CanRead)
+                {
+                    stream.Position = 0;
+                }
+                else
+                {
+                    throw Error.InvalidOperation(Properties.Resources.HttpMessageContentAlreadyRead,
+                                  FormattingUtilities.HttpContentType.Name,
+                                  HttpRequestMessage != null
+                                      ? FormattingUtilities.HttpRequestMessageType.Name
+                                      : FormattingUtilities.HttpResponseMessageType.Name);
+                }
+            }
+
+            _contentConsumed = true;
         }
     }
 }

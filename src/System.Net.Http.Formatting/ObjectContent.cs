@@ -125,8 +125,8 @@ namespace System.Net.Http
 
         private static bool IsTypeNullable(Type type)
         {
-            return !type.IsValueType ||
-                    (type.IsGenericType &&
+            return !type.IsValueType() ||
+                   (type.IsGenericType() &&
                     type.GetGenericTypeDefinition() == typeof(Nullable<>));
         }
 

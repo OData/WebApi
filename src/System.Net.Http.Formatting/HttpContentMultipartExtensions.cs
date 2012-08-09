@@ -21,8 +21,10 @@ namespace System.Net.Http
         private const int MinBufferSize = 256;
         private const int DefaultBufferSize = 32 * 1024;
 
+#if !NETFX_CORE
         private static readonly AsyncCallback _onMultipartReadAsyncComplete = new AsyncCallback(OnMultipartReadAsyncComplete);
         private static readonly AsyncCallback _onMultipartWriteSegmentAsyncComplete = new AsyncCallback(OnMultipartWriteSegmentAsyncComplete);
+#endif
 
         /// <summary>
         /// Determines whether the specified content is MIME multipart content.
@@ -101,6 +103,87 @@ namespace System.Net.Http
         /// <param name="streamProvider">A stream provider providing output streams for where to write body parts as they are parsed.</param>
         /// <param name="bufferSize">Size of the buffer used to read the contents.</param>
         /// <returns>A <see cref="Task{T}"/> representing the tasks of getting the result of reading the MIME content.</returns>
+#if NETFX_CORE
+        public static async Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, int bufferSize) where T : MultipartStreamProvider
+        {
+            if (content == null)
+            {
+                throw Error.ArgumentNull("content");
+            }
+
+            if (streamProvider == null)
+            {
+                throw Error.ArgumentNull("streamProvider");
+            }
+
+            if (bufferSize < MinBufferSize)
+            {
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
+            }
+
+            try
+            {
+                Stream stream = await content.ReadAsStreamAsync();
+                List<HttpContent> childContents = new List<HttpContent>();
+
+                using (var parser = new MimeMultipartBodyPartParser(content, streamProvider))
+                {
+                    byte[] buffer = new byte[bufferSize];
+                    bool finalPart = false;
+
+                    while (!finalPart)
+                    {
+                        int readCount = await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                        // The parser returns one or more parsed parts, depending on how much data was returned
+                        // from the network read. The last part may be incomplete (partial), so we only dispose
+                        // of the parts once we know they're finished. Regardless of whether the part is complete
+                        // or not, we send the bytes to the desired output stream. We loop back for more data
+                        // until we've completely read the complete, final part.
+                        foreach (MimeBodyPart part in parser.ParseBuffer(buffer, readCount))
+                        {
+                            try
+                            {
+                                Stream output = part.GetOutputStream(content);
+
+                                foreach (ArraySegment<byte> segment in part.Segments)
+                                {
+                                    await output.WriteAsync(segment.Array, segment.Offset, segment.Count);
+                                }
+
+                                if (part.IsComplete)
+                                {
+                                    if (part.HttpContent != null)
+                                    {
+                                        childContents.Add(part.HttpContent);
+                                    }
+
+                                    finalPart = part.IsFinal;
+                                    part.Dispose();
+                                    break;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                // Clean up the part if we got an error in the middle of parsing, because we normally
+                                // won't dispose a part until it's complete.
+                                part.Dispose();
+                                throw;
+                            }
+                        }
+                    }
+
+                    // Let the stream provider post-process when everything is complete
+                    await streamProvider.ExecutePostProcessingAsync();
+                    return streamProvider;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorReading, e);
+            }
+        }
+#else
         public static Task<T> ReadAsMultipartAsync<T>(this HttpContent content, T streamProvider, int bufferSize) where T : MultipartStreamProvider
         {
             if (content == null)
@@ -389,5 +472,6 @@ namespace System.Net.Http
             /// </summary>
             public IEnumerator SegmentsEnumerator { get; set; }
         }
+#endif
     }
 }

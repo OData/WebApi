@@ -495,6 +495,9 @@ namespace System.Threading.Tasks
         [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
         private static Action<Task> GetRethrowWithNoStackLossDelegate()
         {
+#if NETFX_CORE
+            return task => task.GetAwaiter().GetResult();
+#else
             MethodInfo getAwaiterMethod = typeof(Task).GetMethod("GetAwaiter", Type.EmptyTypes);
             if (getAwaiterMethod != null)
             {
@@ -546,6 +549,7 @@ namespace System.Threading.Tasks
                     }
                 };
             }
+#endif
         }
 
         /// <summary>
@@ -795,7 +799,7 @@ namespace System.Threading.Tasks
                 }
             }, TaskContinuationOptions.ExecuteSynchronously);
 
-            return tcs.Task;          
+            return tcs.Task;
         }
 
         /// <summary>

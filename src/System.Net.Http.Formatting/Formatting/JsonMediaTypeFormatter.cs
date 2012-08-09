@@ -23,12 +23,14 @@ namespace System.Net.Http.Formatting
     public class JsonMediaTypeFormatter : MediaTypeFormatter
     {
         private JsonSerializerSettings _jsonSerializerSettings;
-        private readonly IContractResolver _defaultContractResolver;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
-        private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
 
+#if !NETFX_CORE
         private ConcurrentDictionary<Type, DataContractJsonSerializer> _dataContractSerializerCache = new ConcurrentDictionary<Type, DataContractJsonSerializer>();
+        private readonly IContractResolver _defaultContractResolver;
+        private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
         private RequestHeaderMapping _requestHeaderMapping;
+#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonMediaTypeFormatter"/> class.
@@ -40,15 +42,19 @@ namespace System.Net.Http.Formatting
             SupportedMediaTypes.Add(MediaTypeConstants.TextJsonMediaType);
 
             // Initialize serializer
+#if !NETFX_CORE
             _defaultContractResolver = new JsonContractResolver(this);
+#endif
             _jsonSerializerSettings = CreateDefaultSerializerSettings();
 
             // Set default supported character encodings
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
             SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
 
+#if !NETFX_CORE
             _requestHeaderMapping = new XmlHttpRequestHeaderMapping();
             MediaTypeMappings.Add(_requestHeaderMapping);
+#endif
         }
 
         /// <summary>
@@ -85,6 +91,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
+#if !NETFX_CORE
         /// <summary>
         /// Gets or sets a value indicating whether to use <see cref="DataContractJsonSerializer"/> by default.
         /// </summary>
@@ -92,12 +99,14 @@ namespace System.Net.Http.Formatting
         ///     <c>true</c> if use <see cref="DataContractJsonSerializer"/> by default; otherwise, <c>false</c>. The default is <c>false</c>.
         /// </value>
         public bool UseDataContractJsonSerializer { get; set; }
+#endif
 
         /// <summary>
         /// Gets or sets a value indicating whether to indent elements when writing data. 
         /// </summary>
         public bool Indent { get; set; }
 
+#if !NETFX_CORE
         /// <summary>
         /// Gets or sets the maximum depth allowed by this formatter.
         /// </summary>
@@ -118,15 +127,19 @@ namespace System.Net.Http.Formatting
                 _readerQuotas.MaxDepth = value;
             }
         }
+#endif
 
         /// <summary>
         /// Creates a <see cref="JsonSerializerSettings"/> instance with the default settings used by the <see cref="JsonMediaTypeFormatter"/>.
         /// </summary>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This could only be static half the time.")]
         public JsonSerializerSettings CreateDefaultSerializerSettings()
         {
             return new JsonSerializerSettings()
             {
+#if !NETFX_CORE
                 ContractResolver = _defaultContractResolver,
+#endif
                 MissingMemberHandling = MissingMemberHandling.Ignore,
 
                 // Do not change this setting
@@ -148,6 +161,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("type");
             }
 
+#if !NETFX_CORE
             if (UseDataContractJsonSerializer)
             {
                 // If there is a registered non-null serializer, we can support this type.
@@ -158,6 +172,7 @@ namespace System.Net.Http.Formatting
                 return serializer != null;
             }
             else
+#endif
             {
                 return true;
             }
@@ -176,6 +191,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("type");
             }
 
+#if !NETFX_CORE
             if (UseDataContractJsonSerializer)
             {
                 MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
@@ -188,6 +204,7 @@ namespace System.Net.Http.Formatting
                 return serializer != null;
             }
             else
+#endif
             {
                 return true;
             }
@@ -229,6 +246,7 @@ namespace System.Net.Http.Formatting
 
                 try
                 {
+#if !NETFX_CORE
                     if (UseDataContractJsonSerializer)
                     {
                         DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
@@ -238,6 +256,7 @@ namespace System.Net.Http.Formatting
                         }
                     }
                     else
+#endif
                     {
                         using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(readStream, effectiveEncoding)) { CloseInput = false, MaxDepth = _maxDepth })
                         {
@@ -291,29 +310,19 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("writeStream");
             }
 
+#if !NETFX_CORE
             if (UseDataContractJsonSerializer && Indent)
             {
                 throw Error.NotSupported(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer));
             }
+#endif
 
             return TaskHelpers.RunSynchronously(() =>
             {
                 Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
 
-                if (!UseDataContractJsonSerializer)
-                {
-                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) { CloseOutput = false })
-                    {
-                        if (Indent)
-                        {
-                            jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
-                        }
-                        JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
-                        jsonSerializer.Serialize(jsonTextWriter, value);
-                        jsonTextWriter.Flush();
-                    }
-                }
-                else
+#if !NETFX_CORE
+                if (UseDataContractJsonSerializer)
                 {
                     if (MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type))
                     {
@@ -329,9 +338,24 @@ namespace System.Net.Http.Formatting
                         dataContractSerializer.WriteObject(writer, value);
                     }
                 }
+                else
+#endif
+                {
+                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) { CloseOutput = false })
+                    {
+                        if (Indent)
+                        {
+                            jsonTextWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+                        }
+                        JsonSerializer jsonSerializer = JsonSerializer.Create(_jsonSerializerSettings);
+                        jsonSerializer.Serialize(jsonTextWriter, value);
+                        jsonTextWriter.Flush();
+                    }
+                }
             });
         }
 
+#if !NETFX_CORE
         private static DataContractJsonSerializer CreateDataContractSerializer(Type type, bool throwOnError)
         {
             if (type == null)
@@ -381,5 +405,6 @@ namespace System.Net.Http.Formatting
 
             return serializer;
         }
+#endif
     }
 }

@@ -10,7 +10,7 @@
 
 namespace System.Net.Http.Properties {
     using System;
-    
+    using System.Reflection;    
     
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
@@ -39,7 +39,12 @@ namespace System.Net.Http.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Net.Http.Properties.Resources", typeof(Resources).Assembly);
+#if NETFX_CORE
+                    var assembly = typeof(Resources).GetTypeInfo().Assembly;
+#else
+                    var assembly = typeof(Resources).Assembly;
+#endif
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Net.Http.Properties.Resources", assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

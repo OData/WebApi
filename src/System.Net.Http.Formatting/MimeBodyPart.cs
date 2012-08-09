@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Formatting.Parsers;
@@ -28,7 +28,7 @@ namespace System.Net.Http
         {
             Contract.Assert(streamProvider != null);
             _streamProvider = streamProvider;
-            Segments = new ArrayList(2);
+            Segments = new List<ArraySegment<byte>>(2);
             _headers = FormattingUtilities.CreateEmptyContentHeaders();
             HeaderParser = new InternetMessageFormatHeaderParser(_headers, maxBodyPartHeaderSize);
         }
@@ -53,12 +53,7 @@ namespace System.Net.Http
         /// Gets the set of <see cref="ArraySegment{T}"/> pointing to the read buffer with
         /// contents of this body part.
         /// </summary>
-        /// <remarks>We deliberately use <see cref="ArrayList"/> as List{ArraySegment{byte}} and Collection{ArraySegment{byte}} trip FxCop rule CA908
-        /// which states the following: "Assemblies that are precompiled (using ngen.exe) should only instantiate generic types that will not cause JIT 
-        /// compilation at runtime. Generic types with value type type parameters (outside of a special set of supported runtime generic types) will 
-        /// always cause JIT compilation, even if the encapsulating assembly has been precompiled". As we don't want to force JIT'ing we use the old
-        /// non-generic form which doesn't have this problem (ArraySegment{byte} of course is a value type).</remarks>
-        public ArrayList Segments { get; private set; }
+        public List<ArraySegment<byte>> Segments { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the body part has been completed.
@@ -150,7 +145,11 @@ namespace System.Net.Http
                 }
                 else
                 {
+#if NETFX_CORE
+                    _outputStream.Dispose();
+#else
                     _outputStream.Close();
+#endif
                 }
 
                 _outputStream = null;

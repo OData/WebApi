@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Net;
 using System.Text;
 
 namespace System.Web.Http
@@ -11,8 +12,36 @@ namespace System.Web.Http
     /// </summary>
     internal static class UriQueryUtility
     {
-        #region UrlEncode implementation
+        public static string UrlEncode(string str)
+        {
+            if (str == null)
+            {
+                return null;
+            }
 
+#if NETFX_CORE
+            return WebUtility.UrlEncode(str);
+#else
+            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            return Encoding.ASCII.GetString(UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false));
+#endif
+        }
+
+        public static string UrlDecode(string str)
+        {
+            if (str == null)
+            {
+                return null;
+            }
+
+#if NETFX_CORE
+            return WebUtility.UrlDecode(str);
+#else
+            return UrlDecodeInternal(str, Encoding.UTF8);
+#endif
+        }
+
+#if !NETFX_CORE
         private static byte[] UrlEncode(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
         {
             byte[] encoded = UrlEncode(bytes, offset, count);
@@ -75,23 +104,6 @@ namespace System.Web.Http
             return expandedBytes;
         }
 
-        #endregion
-
-        #region UrlEncode public methods
-
-        public static string UrlEncode(string str)
-        {
-            if (str == null)
-                return null;
-
-            byte[] bytes = Encoding.UTF8.GetBytes(str);
-            return Encoding.ASCII.GetString(UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */));
-        }
-
-        #endregion
-
-        #region UrlDecode implementation
-
         private static string UrlDecodeInternal(string value, Encoding encoding)
         {
             if (value == null)
@@ -139,22 +151,6 @@ namespace System.Web.Http
 
             return helper.GetString();
         }
-
-        #endregion
-
-        #region UrlDecode public methods
-
-        public static string UrlDecode(string str)
-        {
-            if (str == null)
-                return null;
-
-            return UrlDecodeInternal(str, Encoding.UTF8);
-        }
-
-        #endregion
-
-        #region Helper methods
 
         private static int HexToInt(char h)
         {
@@ -214,10 +210,6 @@ namespace System.Web.Http
 
             return true;
         }
-
-        #endregion
-
-        #region UrlDecoder nested class
 
         // Internal class to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
         private class UrlDecoder
@@ -280,7 +272,6 @@ namespace System.Web.Http
                     return String.Empty;
             }
         }
-
-        #endregion
+#endif
     }
 }

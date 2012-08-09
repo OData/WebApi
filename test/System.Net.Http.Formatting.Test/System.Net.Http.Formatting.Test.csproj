@@ -80,6 +80,7 @@
     <Compile Include="Formatting\JTokenCreatorSurrogate.cs" />
     <Compile Include="Formatting\JTokenRoundTripComparer.cs" />
     <Compile Include="Formatting\MediaTypeMappingTests.cs" />
+    <Compile Include="Internal\ReadOnlyStreamWithEncodingPreambleTest.cs" />
     <Compile Include="MimeBodyPartTest.cs" />
     <Compile Include="HttpHeaderExtensionsTest.cs" />
     <Compile Include="HttpUnsortedResponseTest.cs" />

@@ -39,6 +39,8 @@
             <Word>OpenID</Word>
             <Word>Yadis</Word>
             <Word>fwlink</Word>
+            <Word>Edm</Word>
+            <Word>Deserializer</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>

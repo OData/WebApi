@@ -1,0 +1,1140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AbsoluteUri" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;http://www.tempuri.org:8000/AbsoluteUri&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Bool" xml:space="preserve">
+    <value>&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;true&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Byte" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Byte"&gt;64&lt;/d:ID&gt;</value>
+  </data>
+  <data name="ByteArray" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Binary"&gt;AAIgQID/&lt;/d:ID&gt;</value>
+  </data>
+  <data name="DateTime" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.DateTime"&gt;2010-01-01T00:00:00&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Decimal" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Decimal"&gt;12345.99999&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Double" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Double"&gt;99999.12345&lt;/d:ID&gt;</value>
+  </data>
+  <data name="EntryTypePersonAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;entry xml:base="http://localhost:8081/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+  &lt;id&gt;http://localhost:8081/People(10)&lt;/id&gt;
+  &lt;category term="System.Web.Http.OData.Formatter.FormatterPerson" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;link rel="edit" href="http://localhost:8081/People(10)" /&gt;
+  &lt;link rel="self" href="http://localhost:8081/People(10)" /&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:PerId m:type="Edm.Int32"&gt;10&lt;/d:PerId&gt;
+      &lt;d:Age m:type="Edm.Int32"&gt;10&lt;/d:Age&gt;
+      &lt;d:MyGuid m:type="Edm.Guid"&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:MyGuid&gt;
+      &lt;d:Name&gt;Asha&lt;/d:Name&gt;
+      &lt;d:Order m:type="System.Web.Http.OData.Formatter.FormatterOrder"&gt;
+        &lt;d:OrderAmount m:type="Edm.Int32"&gt;235342&lt;/d:OrderAmount&gt;
+        &lt;d:OrderName&gt;FirstOrder&lt;/d:OrderName&gt;
+      &lt;/d:Order&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="EntryTypePersonODataJson" xml:space="preserve">
+    <value>%
+  "d":%
+    "__metadata":%
+      "id":"http://localhost:8081/People(10)","uri":"http://localhost:8081/People(10)","type":"System.Web.Http.OData.Formatter.FormatterPerson"
+    },"PerId":10,"Age":10,"MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":%
+      "__metadata":%
+        "type":"System.Web.Http.OData.Formatter.FormatterOrder"
+      },"OrderAmount":235342,"OrderName":"FirstOrder"
+    }
+  }
+}</value>
+  </data>
+  <data name="EntryTypePersonRegularJson" xml:space="preserve">
+    <value>%"Age":10,"MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":%"OrderAmount":235342,"OrderName":"FirstOrder"},"PerId":10}</value>
+  </data>
+  <data name="Guid" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Guid"&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int16" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int16"&gt;-32768&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int32" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Int32"&gt;-2147483648&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int64" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Int64"&gt;-9223372036854775808&lt;/d:ID&gt;</value>
+  </data>
+  <data name="NullableBool" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Boolean"&gt;false&lt;/d:ID&gt;</value>
+  </data>
+  <data name="NullableInt" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:null="true" /&gt;</value>
+  </data>
+  <data name="ProductInsertData" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title type="text"&gt;Bread&lt;/title&gt;
+  &lt;summary type="text"&gt;Whole grain bread&lt;/summary&gt;
+  &lt;updated&gt;2012-04-19T00:54:33Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:ID m:type="Edm.Int32"&gt;0&lt;/d:ID&gt;
+      &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;1992-01-01T00:00:00&lt;/d:ReleaseDate&gt;
+      &lt;d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" /&gt;
+      &lt;d:Rating m:type="Edm.Int32"&gt;4&lt;/d:Rating&gt;
+      &lt;d:Price m:type="Edm.Decimal"&gt;2.5&lt;/d:Price&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="ProductsCSDL" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"&gt;
+  &lt;edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0"&gt;
+    &lt;Schema Namespace="ODataDemo" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2007/05/edm"&gt;
+      &lt;EntityType Name="Product"&gt;
+        &lt;Key&gt;
+          &lt;PropertyRef Name="ID" /&gt;
+        &lt;/Key&gt;
+        &lt;Property Name="ID" Type="Edm.Int32" Nullable="false" /&gt;
+        &lt;Property Name="Name" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="false" /&gt;
+        &lt;Property Name="Description" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationSummary" m:FC_ContentKind="text" m:FC_KeepInContent="false" /&gt;
+        &lt;Property Name="ReleaseDate" Type="Edm.DateTime" Nullable="false" /&gt;
+        &lt;Property Name="DiscontinuedDate" Type="Edm.DateTime" Nullable="true" /&gt;
+        &lt;Property Name="Rating" Type="Edm.Int32" Nullable="false" /&gt;
+        &lt;Property Name="Price" Type="Edm.Decimal" Nullable="false" /&gt;
+        &lt;NavigationProperty Name="Category" Relationship="ODataDemo.Product_Category_Category_Products" FromRole="Product_Category" ToRole="Category_Products" /&gt;
+        &lt;NavigationProperty Name="Supplier" Relationship="ODataDemo.Product_Supplier_Supplier_Products" FromRole="Product_Supplier" ToRole="Supplier_Products" /&gt;
+      &lt;/EntityType&gt;
+      &lt;EntityType Name="Category"&gt;
+        &lt;Key&gt;
+          &lt;PropertyRef Name="ID" /&gt;
+        &lt;/Key&gt;
+        &lt;Property Name="ID" Type="Edm.Int32" Nullable="false" /&gt;
+        &lt;Property Name="Name" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="true" /&gt;
+        &lt;NavigationProperty Name="Products" Relationship="ODataDemo.Product_Category_Category_Products" FromRole="Category_Products" ToRole="Product_Category" /&gt;
+      &lt;/EntityType&gt;
+      &lt;EntityType Name="Supplier"&gt;
+        &lt;Key&gt;
+          &lt;PropertyRef Name="ID" /&gt;
+        &lt;/Key&gt;
+        &lt;Property Name="ID" Type="Edm.Int32" Nullable="false" /&gt;
+        &lt;Property Name="Name" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="true" /&gt;
+        &lt;Property Name="Address" Type="ODataDemo.Address" Nullable="false" /&gt;
+        &lt;Property Name="Concurrency" Type="Edm.Int32" Nullable="false" ConcurrencyMode="Fixed" /&gt;
+        &lt;NavigationProperty Name="Products" Relationship="ODataDemo.Product_Supplier_Supplier_Products" FromRole="Supplier_Products" ToRole="Product_Supplier" /&gt;
+      &lt;/EntityType&gt;
+      &lt;ComplexType Name="Address"&gt;
+        &lt;Property Name="Street" Type="Edm.String" Nullable="true" /&gt;
+        &lt;Property Name="City" Type="Edm.String" Nullable="true" /&gt;
+        &lt;Property Name="State" Type="Edm.String" Nullable="true" /&gt;
+        &lt;Property Name="ZipCode" Type="Edm.String" Nullable="true" /&gt;
+        &lt;Property Name="Country" Type="Edm.String" Nullable="true" /&gt;
+      &lt;/ComplexType&gt;
+      &lt;Association Name="Product_Category_Category_Products"&gt;
+        &lt;End Role="Product_Category" Type="ODataDemo.Product" Multiplicity="*" /&gt;
+        &lt;End Role="Category_Products" Type="ODataDemo.Category" Multiplicity="0..1" /&gt;
+      &lt;/Association&gt;
+      &lt;Association Name="Product_Supplier_Supplier_Products"&gt;
+        &lt;End Role="Product_Supplier" Type="ODataDemo.Product" Multiplicity="*" /&gt;
+        &lt;End Role="Supplier_Products" Type="ODataDemo.Supplier" Multiplicity="0..1" /&gt;
+      &lt;/Association&gt;
+      &lt;EntityContainer Name="DemoService" m:IsDefaultEntityContainer="true"&gt;
+        &lt;EntitySet Name="Products" EntityType="ODataDemo.Product" /&gt;
+        &lt;EntitySet Name="Categories" EntityType="ODataDemo.Category" /&gt;
+        &lt;EntitySet Name="Suppliers" EntityType="ODataDemo.Supplier" /&gt;
+        &lt;AssociationSet Name="Products_Category_Categories" Association="ODataDemo.Product_Category_Category_Products"&gt;
+          &lt;End Role="Product_Category" EntitySet="Products" /&gt;
+          &lt;End Role="Category_Products" EntitySet="Categories" /&gt;
+        &lt;/AssociationSet&gt;
+        &lt;AssociationSet Name="Products_Supplier_Suppliers" Association="ODataDemo.Product_Supplier_Supplier_Products"&gt;
+          &lt;End Role="Product_Supplier" EntitySet="Products" /&gt;
+          &lt;End Role="Supplier_Products" EntitySet="Suppliers" /&gt;
+        &lt;/AssociationSet&gt;
+        &lt;FunctionImport Name="GetProductsByRating" EntitySet="Products" ReturnType="Collection(ODataDemo.Product)" m:HttpMethod="GET"&gt;
+          &lt;Parameter Name="rating" Type="Edm.Int32" Mode="In" /&gt;
+        &lt;/FunctionImport&gt;
+      &lt;/EntityContainer&gt;
+    &lt;/Schema&gt;
+  &lt;/edmx:DataServices&gt;
+&lt;/edmx:Edmx&gt;</value>
+  </data>
+  <data name="RelativeUri" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:anyURI xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;RelativeUri&lt;/d:anyURI&gt;</value>
+  </data>
+  <data name="SByte" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.SByte"&gt;-128&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Single" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Single"&gt;INF&lt;/d:ID&gt;</value>
+  </data>
+  <data name="String" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;This is a Test String&lt;/d:ID&gt;</value>
+  </data>
+  <data name="SuppliersInsertData" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:etag="W/&amp;quot;0&amp;quot;" xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
+  &lt;title type="text"&gt;Exotic Liquids&lt;/title&gt;
+  &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;link rel="edit" title="Supplier" href="Suppliers(0)" /&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Products" type="application/atom+xml;type=feed" title="Products" href="Suppliers(0)/Products"&gt;
+    &lt;m:inline&gt;
+      &lt;feed&gt;
+        &lt;title type="text"&gt;Products&lt;/title&gt;
+        &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)/Products&lt;/id&gt;
+        &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+        &lt;link rel="self" title="Products" href="Suppliers(0)/Products" /&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://services.odata.org/OData/OData.svc/Products(1)&lt;/id&gt;
+          &lt;title type="text"&gt;Milk&lt;/title&gt;
+          &lt;summary type="text"&gt;Low fat milk&lt;/summary&gt;
+          &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;link rel="edit" title="Product" href="Products(1)" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(1)/Category" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(1)/Supplier" /&gt;
+          &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:ID m:type="Edm.Int32"&gt;1&lt;/d:ID&gt;
+              &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;1995-10-01T00:00:00&lt;/d:ReleaseDate&gt;
+              &lt;d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" /&gt;
+              &lt;d:Rating m:type="Edm.Int32"&gt;3&lt;/d:Rating&gt;
+              &lt;d:Price m:type="Edm.Decimal"&gt;3.5&lt;/d:Price&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://services.odata.org/OData/OData.svc/Products(2)&lt;/id&gt;
+          &lt;title type="text"&gt;Vint soda&lt;/title&gt;
+          &lt;summary type="text"&gt;Americana Variety - Mix of 6 flavors&lt;/summary&gt;
+          &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;link rel="edit" title="Product" href="Products(2)" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(2)/Category" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(2)/Supplier" /&gt;
+          &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:ID m:type="Edm.Int32"&gt;2&lt;/d:ID&gt;
+              &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;2000-10-01T00:00:00&lt;/d:ReleaseDate&gt;
+              &lt;d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" /&gt;
+              &lt;d:Rating m:type="Edm.Int32"&gt;3&lt;/d:Rating&gt;
+              &lt;d:Price m:type="Edm.Decimal"&gt;20.9&lt;/d:Price&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://services.odata.org/OData/OData.svc/Products(3)&lt;/id&gt;
+          &lt;title type="text"&gt;Havina Cola&lt;/title&gt;
+          &lt;summary type="text"&gt;The Original Key Lime Cola&lt;/summary&gt;
+          &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;link rel="edit" title="Product" href="Products(3)" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(3)/Category" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(3)/Supplier" /&gt;
+          &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:ID m:type="Edm.Int32"&gt;3&lt;/d:ID&gt;
+              &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;2005-10-01T00:00:00&lt;/d:ReleaseDate&gt;
+              &lt;d:DiscontinuedDate m:type="Edm.DateTime"&gt;2006-10-01T00:00:00&lt;/d:DiscontinuedDate&gt;
+              &lt;d:Rating m:type="Edm.Int32"&gt;3&lt;/d:Rating&gt;
+              &lt;d:Price m:type="Edm.Decimal"&gt;19.9&lt;/d:Price&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://services.odata.org/OData/OData.svc/Products(4)&lt;/id&gt;
+          &lt;title type="text"&gt;Fruit Punch&lt;/title&gt;
+          &lt;summary type="text"&gt;Mango flavor, 8.3 Ounce Cans (Pack of 24)&lt;/summary&gt;
+          &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;link rel="edit" title="Product" href="Products(4)" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(4)/Category" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(4)/Supplier" /&gt;
+          &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:ID m:type="Edm.Int32"&gt;4&lt;/d:ID&gt;
+              &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;2003-01-05T00:00:00&lt;/d:ReleaseDate&gt;
+              &lt;d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" /&gt;
+              &lt;d:Rating m:type="Edm.Int32"&gt;3&lt;/d:Rating&gt;
+              &lt;d:Price m:type="Edm.Decimal"&gt;22.99&lt;/d:Price&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://services.odata.org/OData/OData.svc/Products(5)&lt;/id&gt;
+          &lt;title type="text"&gt;Cranberry Juice&lt;/title&gt;
+          &lt;summary type="text"&gt;16-Ounce Plastic Bottles (Pack of 12)&lt;/summary&gt;
+          &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;link rel="edit" title="Product" href="Products(5)" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(5)/Category" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(5)/Supplier" /&gt;
+          &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:ID m:type="Edm.Int32"&gt;5&lt;/d:ID&gt;
+              &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;2006-08-04T00:00:00&lt;/d:ReleaseDate&gt;
+              &lt;d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" /&gt;
+              &lt;d:Rating m:type="Edm.Int32"&gt;3&lt;/d:Rating&gt;
+              &lt;d:Price m:type="Edm.Decimal"&gt;22.8&lt;/d:Price&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://services.odata.org/OData/OData.svc/Products(6)&lt;/id&gt;
+          &lt;title type="text"&gt;Pink Lemonade&lt;/title&gt;
+          &lt;summary type="text"&gt;36 Ounce Cans (Pack of 3)&lt;/summary&gt;
+          &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;link rel="edit" title="Product" href="Products(6)" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(6)/Category" /&gt;
+          &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(6)/Supplier" /&gt;
+          &lt;category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:ID m:type="Edm.Int32"&gt;6&lt;/d:ID&gt;
+              &lt;d:ReleaseDate m:type="Edm.DateTime"&gt;2006-11-05T00:00:00&lt;/d:ReleaseDate&gt;
+              &lt;d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" /&gt;
+              &lt;d:Rating m:type="Edm.Int32"&gt;3&lt;/d:Rating&gt;
+              &lt;d:Price m:type="Edm.Decimal"&gt;18.8&lt;/d:Price&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+      &lt;/feed&gt;
+    &lt;/m:inline&gt;
+  &lt;/link&gt;
+  &lt;category term="ODataDemo.Supplier" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:ID m:type="Edm.Int32"&gt;0&lt;/d:ID&gt;
+      &lt;d:Name&gt;Exotic Liquids&lt;/d:Name&gt;
+      &lt;d:Concurrency m:type="Edm.Int32"&gt;0&lt;/d:Concurrency&gt;
+      &lt;d:Address m:type="ODataDemo.Address"&gt;
+        &lt;d:Street&gt;NE 228th&lt;/d:Street&gt;
+        &lt;d:City&gt;Sammamish&lt;/d:City&gt;
+        &lt;d:State&gt;WA&lt;/d:State&gt;
+        &lt;d:ZipCode&gt;98074&lt;/d:ZipCode&gt;
+        &lt;d:Country&gt;USA&lt;/d:Country&gt;
+      &lt;/d:Address&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="SuppliersPatchData" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:etag="W/&amp;quot;0&amp;quot;" xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
+  &lt;title type="text"&gt;Exotic Liquids&lt;/title&gt;
+  &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;  
+  &lt;category term="ODataDemo.Supplier" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;      
+      &lt;d:Name&gt;Exotic Liquids&lt;/d:Name&gt;
+      &lt;d:Address m:type="ODataDemo.Address"&gt;
+        &lt;d:Street&gt;NE 228th&lt;/d:Street&gt;
+        &lt;d:City&gt;Sammamish&lt;/d:City&gt;
+        &lt;d:State&gt;WA&lt;/d:State&gt;
+        &lt;d:ZipCode&gt;98074&lt;/d:ZipCode&gt;
+        &lt;d:Country&gt;USA&lt;/d:Country&gt;
+      &lt;/d:Address&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="TestArrayOfBools" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ArrayOfboolean xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
+&lt;/ArrayOfboolean&gt;</value>
+  </data>
+  <data name="TestArrayOfInts" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ArrayOfint xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;10&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;20&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;30&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;40&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;50&lt;/element&gt;
+&lt;/ArrayOfint&gt;</value>
+  </data>
+  <data name="TestCollectionOfPerson" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ArrayOfPerson xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Person" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Age m:type="Edm.Int32"&gt;20&lt;/Age&gt;
+    &lt;FavoriteHobby m:type="HobbyActivity"&gt;
+      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
+    &lt;/FavoriteHobby&gt;
+    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
+    &lt;Gender&gt;Male&lt;/Gender&gt;
+    &lt;HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+      &lt;City&gt;Redmond&lt;/City&gt;
+      &lt;State&gt;WA&lt;/State&gt;
+      &lt;StreetAddress&gt;4850 156th Ave NE&lt;/StreetAddress&gt;
+      &lt;ZipCode m:type="Edm.Int32"&gt;98052&lt;/ZipCode&gt;
+    &lt;/HomeAddress&gt;
+    &lt;HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
+      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
+      &lt;Number m:type="Edm.Int32"&gt;9879089&lt;/Number&gt;
+      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
+    &lt;/HomeNumber&gt;
+    &lt;OtherNames &gt;
+      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias0&lt;/d:element&gt;
+    &lt;/OtherNames&gt;
+  &lt;/element&gt;
+  &lt;element m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Person" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Age m:type="Edm.Int32"&gt;21&lt;/Age&gt;
+    &lt;FavoriteHobby m:type="HobbyActivity"&gt;
+      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
+    &lt;/FavoriteHobby&gt;
+    &lt;FirstName&gt;Steve&lt;/FirstName&gt;
+    &lt;Gender&gt;Male&lt;/Gender&gt;
+    &lt;HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+      &lt;City&gt;Redmond&lt;/City&gt;
+      &lt;State&gt;WA&lt;/State&gt;
+      &lt;StreetAddress&gt;4851 157th Ave NE&lt;/StreetAddress&gt;
+      &lt;ZipCode m:type="Edm.Int32"&gt;98053&lt;/ZipCode&gt;
+    &lt;/HomeAddress&gt;
+    &lt;HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
+      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
+      &lt;Number m:type="Edm.Int32"&gt;9879090&lt;/Number&gt;
+      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
+    &lt;/HomeNumber&gt;
+    &lt;OtherNames &gt;
+      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias1&lt;/d:element&gt;
+    &lt;/OtherNames&gt;
+  &lt;/element&gt;
+  &lt;element m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Person" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Age m:type="Edm.Int32"&gt;22&lt;/Age&gt;
+    &lt;FavoriteHobby m:type="HobbyActivity"&gt;
+      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
+    &lt;/FavoriteHobby&gt;
+    &lt;FirstName&gt;Tom&lt;/FirstName&gt;
+    &lt;Gender&gt;Male&lt;/Gender&gt;
+    &lt;HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+      &lt;City&gt;Redmond&lt;/City&gt;
+      &lt;State&gt;WA&lt;/State&gt;
+      &lt;StreetAddress&gt;4852 158th Ave NE&lt;/StreetAddress&gt;
+      &lt;ZipCode m:type="Edm.Int32"&gt;98054&lt;/ZipCode&gt;
+    &lt;/HomeAddress&gt;
+    &lt;HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
+      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
+      &lt;Number m:type="Edm.Int32"&gt;9879091&lt;/Number&gt;
+      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
+    &lt;/HomeNumber&gt;
+    &lt;OtherNames &gt;
+      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias2&lt;/d:element&gt;
+    &lt;/OtherNames&gt;
+  &lt;/element&gt;
+&lt;/ArrayOfPerson&gt;</value>
+  </data>
+  <data name="TestComplexTypePerson" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:Person xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Person"&gt;
+  &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+  &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+    &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+  &lt;/d:FavoriteHobby&gt;
+  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+  &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+    &lt;d:City&gt;Redmond&lt;/d:City&gt;
+    &lt;d:State&gt;WA&lt;/d:State&gt;
+    &lt;d:StreetAddress&gt;4850 156th Ave NE&lt;/d:StreetAddress&gt;
+    &lt;d:ZipCode m:type="Edm.Int32"&gt;98052&lt;/d:ZipCode&gt;
+  &lt;/d:HomeAddress&gt;
+  &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+    &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+    &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+    &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+    &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+  &lt;/d:HomeNumber&gt;
+  &lt;d:OtherNames &gt;
+    &lt;d:element&gt;Alias0&lt;/d:element&gt;
+  &lt;/d:OtherNames&gt;
+&lt;/d:Person&gt;</value>
+  </data>
+  <data name="TestDictionary" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ArrayOfKeyValueOfintstring xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Key m:type="Edm.Int32"&gt;1&lt;/Key&gt;
+    &lt;Value&gt;Frank&lt;/Value&gt;
+  &lt;/element&gt;
+  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Key m:type="Edm.Int32"&gt;2&lt;/Key&gt;
+    &lt;Value&gt;Steve&lt;/Value&gt;
+  &lt;/element&gt;
+  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Key m:type="Edm.Int32"&gt;3&lt;/Key&gt;
+    &lt;Value&gt;Tom&lt;/Value&gt;
+  &lt;/element&gt;
+  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
+    &lt;Key m:type="Edm.Int32"&gt;4&lt;/Key&gt;
+    &lt;Value&gt;Chandler&lt;/Value&gt;
+  &lt;/element&gt;
+&lt;/ArrayOfKeyValueOfintstring&gt;</value>
+  </data>
+  <data name="TestEntityTypeBasic" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;entry xml:base="http://www.tempuri.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" type="application/atom+xml;type=entry" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)/CurrentWorkItem"&gt;
+    &lt;m:inline&gt;
+      &lt;entry&gt;
+        &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)&lt;/id&gt;
+        &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+        &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)" /&gt;
+        &lt;title /&gt;
+        &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+        &lt;author&gt;
+          &lt;name /&gt;
+        &lt;/author&gt;
+        &lt;content type="application/xml"&gt;
+          &lt;m:properties&gt;
+            &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
+            &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+            &lt;d:NumberOfHours m:type="Edm.Single"&gt;16&lt;/d:NumberOfHours&gt;
+            &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
+          &lt;/m:properties&gt;
+        &lt;/content&gt;
+      &lt;/entry&gt;
+    &lt;/m:inline&gt;
+  &lt;/link&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)/DirectReports"&gt;
+    &lt;m:inline&gt;
+      &lt;feed&gt;
+        &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee&lt;/id&gt;
+        &lt;title /&gt;
+        &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+        &lt;author&gt;
+          &lt;name /&gt;
+        &lt;/author&gt;
+      &lt;/feed&gt;
+    &lt;/m:inline&gt;
+  &lt;/link&gt;
+  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)&lt;/id&gt;
+  &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)" /&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+      &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+        &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+      &lt;/d:FavoriteHobby&gt;
+      &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+      &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+      &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+        &lt;d:City&gt;Redmond&lt;/d:City&gt;
+        &lt;d:State&gt;WA&lt;/d:State&gt;
+        &lt;d:StreetAddress&gt;4850 156th Ave NE&lt;/d:StreetAddress&gt;
+        &lt;d:ZipCode m:type="Edm.Int32"&gt;98052&lt;/d:ZipCode&gt;
+      &lt;/d:HomeAddress&gt;
+      &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+        &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+        &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+        &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+        &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+      &lt;/d:HomeNumber&gt;
+      &lt;d:OtherNames &gt;
+        &lt;d:element&gt;Alias0&lt;/d:element&gt;
+      &lt;/d:OtherNames&gt;
+      &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
+      &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+        &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
+        &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+        &lt;/d:FavoriteHobby&gt;
+        &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
+        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+          &lt;d:City&gt;Redmond&lt;/d:City&gt;
+          &lt;d:State&gt;WA&lt;/d:State&gt;
+          &lt;d:StreetAddress&gt;4851 157th Ave NE&lt;/d:StreetAddress&gt;
+          &lt;d:ZipCode m:type="Edm.Int32"&gt;98053&lt;/d:ZipCode&gt;
+        &lt;/d:HomeAddress&gt;
+        &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+          &lt;d:Number m:type="Edm.Int32"&gt;9879090&lt;/d:Number&gt;
+          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+        &lt;/d:HomeNumber&gt;
+        &lt;d:OtherNames &gt;
+          &lt;d:element&gt;Alias1&lt;/d:element&gt;
+        &lt;/d:OtherNames&gt;
+        &lt;d:CurrentWorkItem m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem"&gt;
+          &lt;d:EmployeeID m:type="Edm.Int32"&gt;1&lt;/d:EmployeeID&gt;
+          &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+          &lt;d:NumberOfHours m:type="Edm.Single"&gt;17&lt;/d:NumberOfHours&gt;
+          &lt;d:WorkItemID m:type="Edm.Int32"&gt;26&lt;/d:WorkItemID&gt;
+        &lt;/d:CurrentWorkItem&gt;
+        
+        &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
+        &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+          &lt;d:Age m:type="Edm.Int32"&gt;22&lt;/d:Age&gt;
+          &lt;d:FirstName&gt;Tom&lt;/d:FirstName&gt;
+          &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+          &lt;d:OtherNames &gt;
+            &lt;d:element&gt;Alias2&lt;/d:element&gt;
+          &lt;/d:OtherNames&gt;
+          
+          &lt;d:EmployeeId m:type="Edm.Int64"&gt;2&lt;/d:EmployeeId&gt;
+        &lt;/d:Manager&gt;
+      &lt;/d:Manager&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="TestEntityTypeWithMultipleKeys" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;entry xml:base="http://www.tempuri.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" type="application/atom+xml;type=entry" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')/CurrentWorkItem"&gt;
+    &lt;m:inline&gt;
+      &lt;entry&gt;
+        &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)&lt;/id&gt;
+        &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+        &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)" /&gt;
+        &lt;title /&gt;
+        &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+        &lt;author&gt;
+          &lt;name /&gt;
+        &lt;/author&gt;
+        &lt;content type="application/xml"&gt;
+          &lt;m:properties&gt;
+            &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
+            &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+            &lt;d:NumberOfHours m:type="Edm.Single"&gt;16&lt;/d:NumberOfHours&gt;
+            &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
+          &lt;/m:properties&gt;
+        &lt;/content&gt;
+      &lt;/entry&gt;
+    &lt;/m:inline&gt;
+  &lt;/link&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')/DirectReports"&gt;
+    &lt;m:inline&gt;
+      &lt;feed&gt;
+        &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee&lt;/id&gt;
+        &lt;title /&gt;
+        &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+        &lt;author&gt;
+          &lt;name /&gt;
+        &lt;/author&gt;
+      &lt;/feed&gt;
+    &lt;/m:inline&gt;
+  &lt;/link&gt;
+  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')&lt;/id&gt;
+  &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')" /&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+      &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+        &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+      &lt;/d:FavoriteHobby&gt;
+      &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+      &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+      &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+        &lt;d:City&gt;Redmond&lt;/d:City&gt;
+        &lt;d:State&gt;WA&lt;/d:State&gt;
+        &lt;d:StreetAddress&gt;4850 156th Ave NE&lt;/d:StreetAddress&gt;
+        &lt;d:ZipCode m:type="Edm.Int32"&gt;98052&lt;/d:ZipCode&gt;
+      &lt;/d:HomeAddress&gt;
+      &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+        &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+        &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+        &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+        &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+      &lt;/d:HomeNumber&gt;
+      &lt;d:OtherNames &gt;
+        &lt;d:element&gt;Alias0&lt;/d:element&gt;
+      &lt;/d:OtherNames&gt;
+      &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
+      &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+        &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
+        &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
+        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        &lt;d:OtherNames &gt;
+          &lt;d:element&gt;Alias1&lt;/d:element&gt;
+        &lt;/d:OtherNames&gt;
+        
+        &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
+      &lt;/d:Manager&gt;
+      &lt;d:EmployeeGuid m:type="Edm.Guid"&gt;844080c0-2f9e-472e-8c72-1a8ecd9f9037&lt;/d:EmployeeGuid&gt;
+      &lt;d:UniqueStringId&gt;Frank0&lt;/d:UniqueStringId&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="TestEntityWorkItem" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;id&gt;http://localhost/WorkItems(25)&lt;/id&gt;
+  &lt;category term="System.Web.Http.OData.TestCommon.Models.WorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;link rel="edit" href="http://localhost/WorkItems(25)" /&gt;
+  &lt;link rel="self" href="http://localhost/WorkItems(25)" /&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
+      &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
+      &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+      &lt;d:NumberOfHours m:type="Edm.Single"&gt;100&lt;/d:NumberOfHours&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="TestEntityWorkItemWithExplictKeys" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;entry xml:base="http://www.tempuri.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem(EmployeeID=0,WorkItemID=25)&lt;/id&gt;
+  &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem(EmployeeID=0,WorkItemID=25)" /&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
+      &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+      &lt;d:NumberOfHours m:type="Edm.Single"&gt;100&lt;/d:NumberOfHours&gt;
+      &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="TestFeedOfEmployee" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;feed xml:base="http://www.tempuri.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;entry&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" type="application/atom+xml;type=entry" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)/CurrentWorkItem"&gt;
+      &lt;m:inline&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)&lt;/id&gt;
+          &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)" /&gt;
+          &lt;title /&gt;
+          &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
+              &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+              &lt;d:NumberOfHours m:type="Edm.Single"&gt;16&lt;/d:NumberOfHours&gt;
+              &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+      &lt;/m:inline&gt;
+    &lt;/link&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)/DirectReports"&gt;
+      &lt;m:inline&gt;
+        &lt;feed&gt;
+          &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee&lt;/id&gt;
+          &lt;title /&gt;
+          &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+        &lt;/feed&gt;
+      &lt;/m:inline&gt;
+    &lt;/link&gt;
+    &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)&lt;/id&gt;
+    &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+    &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(0)" /&gt;
+    &lt;title /&gt;
+    &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+    &lt;author&gt;
+      &lt;name /&gt;
+    &lt;/author&gt;
+    &lt;content type="application/xml"&gt;
+      &lt;m:properties&gt;
+        &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+        &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+        &lt;/d:FavoriteHobby&gt;
+        &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+          &lt;d:City&gt;Redmond&lt;/d:City&gt;
+          &lt;d:State&gt;WA&lt;/d:State&gt;
+          &lt;d:StreetAddress&gt;4850 156th Ave NE&lt;/d:StreetAddress&gt;
+          &lt;d:ZipCode m:type="Edm.Int32"&gt;98052&lt;/d:ZipCode&gt;
+        &lt;/d:HomeAddress&gt;
+        &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+          &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+        &lt;/d:HomeNumber&gt;
+        &lt;d:OtherNames &gt;
+          &lt;d:element&gt;Alias0&lt;/d:element&gt;
+        &lt;/d:OtherNames&gt;
+        &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
+        &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+          &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
+          &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+            &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+          &lt;/d:FavoriteHobby&gt;
+          &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
+          &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+          &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+            &lt;d:City&gt;Redmond&lt;/d:City&gt;
+            &lt;d:State&gt;WA&lt;/d:State&gt;
+            &lt;d:StreetAddress&gt;4851 157th Ave NE&lt;/d:StreetAddress&gt;
+            &lt;d:ZipCode m:type="Edm.Int32"&gt;98053&lt;/d:ZipCode&gt;
+          &lt;/d:HomeAddress&gt;
+          &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+            &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+            &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+            &lt;d:Number m:type="Edm.Int32"&gt;9879090&lt;/d:Number&gt;
+            &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+          &lt;/d:HomeNumber&gt;
+          &lt;d:OtherNames &gt;
+            &lt;d:element&gt;Alias1&lt;/d:element&gt;
+          &lt;/d:OtherNames&gt;
+          &lt;d:CurrentWorkItem m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem"&gt;
+            &lt;d:EmployeeID m:type="Edm.Int32"&gt;1&lt;/d:EmployeeID&gt;
+            &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+            &lt;d:NumberOfHours m:type="Edm.Single"&gt;17&lt;/d:NumberOfHours&gt;
+            &lt;d:WorkItemID m:type="Edm.Int32"&gt;26&lt;/d:WorkItemID&gt;
+          &lt;/d:CurrentWorkItem&gt;
+          
+          &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
+          &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+            &lt;d:Age m:type="Edm.Int32"&gt;22&lt;/d:Age&gt;
+            &lt;d:FirstName&gt;Tom&lt;/d:FirstName&gt;
+            &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+            &lt;d:OtherNames &gt;
+              &lt;d:element&gt;Alias2&lt;/d:element&gt;
+            &lt;/d:OtherNames&gt;
+            
+            &lt;d:EmployeeId m:type="Edm.Int64"&gt;2&lt;/d:EmployeeId&gt;
+          &lt;/d:Manager&gt;
+        &lt;/d:Manager&gt;
+      &lt;/m:properties&gt;
+    &lt;/content&gt;
+  &lt;/entry&gt;
+  &lt;entry&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" type="application/atom+xml;type=entry" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(1)/CurrentWorkItem"&gt;
+      &lt;m:inline&gt;
+        &lt;entry&gt;
+          &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(26)&lt;/id&gt;
+          &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+          &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(26)" /&gt;
+          &lt;title /&gt;
+          &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+          &lt;content type="application/xml"&gt;
+            &lt;m:properties&gt;
+              &lt;d:EmployeeID m:type="Edm.Int32"&gt;1&lt;/d:EmployeeID&gt;
+              &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+              &lt;d:NumberOfHours m:type="Edm.Single"&gt;17&lt;/d:NumberOfHours&gt;
+              &lt;d:WorkItemID m:type="Edm.Int32"&gt;26&lt;/d:WorkItemID&gt;
+            &lt;/m:properties&gt;
+          &lt;/content&gt;
+        &lt;/entry&gt;
+      &lt;/m:inline&gt;
+    &lt;/link&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(1)/DirectReports"&gt;
+      &lt;m:inline&gt;
+        &lt;feed&gt;
+          &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee&lt;/id&gt;
+          &lt;title /&gt;
+          &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+          &lt;author&gt;
+            &lt;name /&gt;
+          &lt;/author&gt;
+        &lt;/feed&gt;
+      &lt;/m:inline&gt;
+    &lt;/link&gt;
+    &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(1)&lt;/id&gt;
+    &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+    &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee(1)" /&gt;
+    &lt;title /&gt;
+    &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+    &lt;author&gt;
+      &lt;name /&gt;
+    &lt;/author&gt;
+    &lt;content type="application/xml"&gt;
+      &lt;m:properties&gt;
+        &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
+        &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+        &lt;/d:FavoriteHobby&gt;
+        &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
+        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+          &lt;d:City&gt;Redmond&lt;/d:City&gt;
+          &lt;d:State&gt;WA&lt;/d:State&gt;
+          &lt;d:StreetAddress&gt;4851 157th Ave NE&lt;/d:StreetAddress&gt;
+          &lt;d:ZipCode m:type="Edm.Int32"&gt;98053&lt;/d:ZipCode&gt;
+        &lt;/d:HomeAddress&gt;
+        &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+          &lt;d:Number m:type="Edm.Int32"&gt;9879090&lt;/d:Number&gt;
+          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+        &lt;/d:HomeNumber&gt;
+        &lt;d:OtherNames &gt;
+          &lt;d:element&gt;Alias1&lt;/d:element&gt;
+        &lt;/d:OtherNames&gt;
+        &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
+        &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+          &lt;d:Age m:type="Edm.Int32"&gt;22&lt;/d:Age&gt;
+          &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
+            &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+          &lt;/d:FavoriteHobby&gt;
+          &lt;d:FirstName&gt;Tom&lt;/d:FirstName&gt;
+          &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+          &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
+            &lt;d:City&gt;Redmond&lt;/d:City&gt;
+            &lt;d:State&gt;WA&lt;/d:State&gt;
+            &lt;d:StreetAddress&gt;4852 158th Ave NE&lt;/d:StreetAddress&gt;
+            &lt;d:ZipCode m:type="Edm.Int32"&gt;98054&lt;/d:ZipCode&gt;
+          &lt;/d:HomeAddress&gt;
+          &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
+            &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+            &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+            &lt;d:Number m:type="Edm.Int32"&gt;9879091&lt;/d:Number&gt;
+            &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+          &lt;/d:HomeNumber&gt;
+          &lt;d:OtherNames &gt;
+            &lt;d:element&gt;Alias2&lt;/d:element&gt;
+          &lt;/d:OtherNames&gt;
+          &lt;d:CurrentWorkItem m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem"&gt;
+            &lt;d:EmployeeID m:type="Edm.Int32"&gt;2&lt;/d:EmployeeID&gt;
+            &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
+            &lt;d:NumberOfHours m:type="Edm.Single"&gt;18&lt;/d:NumberOfHours&gt;
+            &lt;d:WorkItemID m:type="Edm.Int32"&gt;27&lt;/d:WorkItemID&gt;
+          &lt;/d:CurrentWorkItem&gt;
+          
+          &lt;d:EmployeeId m:type="Edm.Int64"&gt;2&lt;/d:EmployeeId&gt;
+          &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
+            &lt;d:Age m:type="Edm.Int32"&gt;23&lt;/d:Age&gt;
+            &lt;d:FirstName&gt;Chandler&lt;/d:FirstName&gt;
+            &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+            &lt;d:OtherNames &gt;
+              &lt;d:element&gt;Alias3&lt;/d:element&gt;
+            &lt;/d:OtherNames&gt;
+            
+            &lt;d:EmployeeId m:type="Edm.Int64"&gt;3&lt;/d:EmployeeId&gt;
+          &lt;/d:Manager&gt;
+        &lt;/d:Manager&gt;
+      &lt;/m:properties&gt;
+    &lt;/content&gt;
+  &lt;/entry&gt;
+  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee&lt;/id&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+&lt;/feed&gt;</value>
+  </data>
+  <data name="TestListOfStrings" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ArrayOfstring xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element&gt;Frank&lt;/element&gt;
+  &lt;element&gt;Steve&lt;/element&gt;
+  &lt;element&gt;Tom&lt;/element&gt;
+  &lt;element&gt;Chandler&lt;/element&gt;
+&lt;/ArrayOfstring&gt;</value>
+  </data>
+  <data name="TimeSpan" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Time"&gt;PT1H&lt;/d:ID&gt;</value>
+  </data>
+</root>

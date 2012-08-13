@@ -1,0 +1,84 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiHelpPage", "src\WebApiHelpPage\WebApiHelpPage.csproj", "{FEDFE6CA-8282-4C5B-A756-E97189690982}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiHelpPage.Test", "test\WebApiHelpPage.Test\WebApiHelpPage.Test.csproj", "{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{317DD921-6091-44F1-8094-C4D3030309F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F9F7C095-0A04-4D66-B953-6E90C8F1D640}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.Tracing", "src\System.Web.Http.Tracing\System.Web.Http.Tracing.csproj", "{6E81EF98-8F5C-4EED-8B37-456991CA56FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.Tracing.Test", "test\System.Web.Http.Tracing.Test\System.Web.Http.Tracing.Test.csproj", "{F87FD911-4A97-4057-8EAE-1CB96B9A1937}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData.Test", "test\System.Web.Http.OData.Test\System.Web.Http.OData.Test.csproj", "{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TestCommon", "test\Microsoft.TestCommon\Microsoft.TestCommon.csproj", "{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		CodeCoverage|Any CPU = CodeCoverage|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEDFE6CA-8282-4C5B-A756-E97189690982}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{FEDFE6CA-8282-4C5B-A756-E97189690982}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{FEDFE6CA-8282-4C5B-A756-E97189690982}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEDFE6CA-8282-4C5B-A756-E97189690982}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEDFE6CA-8282-4C5B-A756-E97189690982}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEDFE6CA-8282-4C5B-A756-E97189690982}.Release|Any CPU.Build.0 = Release|Any CPU
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}.CodeCoverage|Any CPU.ActiveCfg = Release|Any CPU
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}.CodeCoverage|Any CPU.Build.0 = Release|Any CPU
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}.CodeCoverage|Any CPU.ActiveCfg = CodeCoverage|Any CPU
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}.CodeCoverage|Any CPU.Build.0 = CodeCoverage|Any CPU
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FEDFE6CA-8282-4C5B-A756-E97189690982} = {317DD921-6091-44F1-8094-C4D3030309F1}
+		{6E81EF98-8F5C-4EED-8B37-456991CA56FD} = {317DD921-6091-44F1-8094-C4D3030309F1}
+		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE} = {317DD921-6091-44F1-8094-C4D3030309F1}
+		{291EF478-BF24-4935-BC78-E0DCCD0C9A1B} = {F9F7C095-0A04-4D66-B953-6E90C8F1D640}
+		{F87FD911-4A97-4057-8EAE-1CB96B9A1937} = {F9F7C095-0A04-4D66-B953-6E90C8F1D640}
+		{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9} = {F9F7C095-0A04-4D66-B953-6E90C8F1D640}
+		{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0} = {F9F7C095-0A04-4D66-B953-6E90C8F1D640}
+	EndGlobalSection
+EndGlobal

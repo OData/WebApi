@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Web.Http.OData</RootNamespace>
+    <AssemblyName>System.Web.Http.OData.Test</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackages>true</RestorePackages>
+    <CopyPackages>true</CopyPackages>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\extensions\Debug\Test\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\extensions\Release\Test\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Data.Edm">
+      <HintPath>..\..\packages\Microsoft.Data.Edm.5.0.1\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData">
+      <HintPath>..\..\packages\Microsoft.Data.OData.5.0.1\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData.Contrib">
+      <HintPath>..\..\packages\Microsoft.Data.OData.Contrib.5.0.1.50813\lib\net40\Microsoft.Data.OData.Contrib.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Spatial">
+      <HintPath>..\..\packages\System.Spatial.5.0.1\lib\net40\System.Spatial.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.4.0.20710.0\lib\net40\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.SelfHost">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.SelfHost.4.0.20710.0\lib\net40\System.Web.Http.SelfHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.extensions, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.extensions.1.9.1\lib\net20\xunit.extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BaselineResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BaselineResource.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TestCommon\ODataMediaTypeMapping.cs" />
+    <Compile Include="OData\Formatter\PeopleController.cs" />
+    <Compile Include="OData\Formatter\ODataTestUtil.cs" />
+    <Compile Include="OData\Builder\ComplexTypeTest.cs" />
+    <Compile Include="OData\Builder\Conventions\ConventionsHelpersTests.cs" />
+    <Compile Include="OData\Builder\Conventions\EntityKeyConventionTests.cs" />
+    <Compile Include="OData\Builder\Conventions\ODataConventionModelBuilderTests.cs" />
+    <Compile Include="OData\Builder\EntitySetLinkConfigurationTest.cs" />
+    <Compile Include="OData\Builder\EntitySetTest.cs" />
+    <Compile Include="OData\Builder\EntityTypeTest.cs" />
+    <Compile Include="OData\Builder\MetadataTest.cs" />
+    <Compile Include="OData\Builder\ODataModelBuilderTest.cs" />
+    <Compile Include="OData\Builder\PrimitiveTypeTest.cs" />
+    <Compile Include="OData\Builder\ProgrammableBuilderApiTest.cs" />
+    <Compile Include="OData\Builder\RoutingTest.cs" />
+    <Compile Include="OData\Builder\TestModels\Address.cs" />
+    <Compile Include="OData\Builder\TestModels\Customer.cs" />
+    <Compile Include="OData\Builder\TestModels\Order.cs" />
+    <Compile Include="OData\Builder\TestModels\ZipCode.cs" />
+    <Compile Include="TestCommon\UsefulBuilders.cs" />
+    <Compile Include="OData\DeltaTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProviderTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\MockODataRequestMessage.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializerTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntityDeserializerTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializerTests.cs" />
+    <Compile Include="TestCommon\Models\TestDataModels.cs" />
+    <Compile Include="OData\Formatter\ODataFormatterTests.cs" />
+    <Compile Include="OData\ODataMetaDataControllerTests.cs" />
+    <Compile Include="OData\Query\Controllers\CustomerControllers.cs" />
+    <Compile Include="OData\Query\FilterQueryOptionTest.cs" />
+    <Compile Include="OData\Query\ODataQueryContextTests.cs" />
+    <Compile Include="OData\Query\ODataQueryOptionTest.cs" />
+    <Compile Include="OData\Query\OrderByQueryOptionTest.cs" />
+    <Compile Include="OData\Query\QueryCompositionControllers.cs" />
+    <Compile Include="OData\Query\QueryCompositionTests.cs" />
+    <Compile Include="OData\Query\SkipQueryOptionTests.cs" />
+    <Compile Include="OData\Query\TopQueryOptionTests.cs" />
+    <Compile Include="OData\Query\UriParserTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\EnumHelperTestBase.cs" />
+    <Compile Include="OData\Formatter\Serialization\DefaultODataSerializerProviderTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\Models\Address.cs" />
+    <Compile Include="OData\Formatter\Serialization\Models\Customer.cs" />
+    <Compile Include="OData\Formatter\Serialization\Models\Order.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataCollectionSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataComplexTypeSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEntityTypeSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataFeedSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelperTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializerTests.cs" />
+    <Compile Include="TestCommon\EdmTestHelpers.cs" />
+    <Compile Include="OData\Query\HttpActionDescriptorExtensionTests.cs" />
+    <Compile Include="HttpConfigurationExtensionTests.cs" />
+    <Compile Include="QueryableAttributeTests.cs" />
+    <Compile Include="OData\Query\ODataQueryParameterBindingAttributeTests.cs" />
+    <Compile Include="OData\Query\Expressions\DataModel.cs" />
+    <Compile Include="OData\Query\Expressions\FilterBinderTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataUriHelperTest.cs" />
+    <Compile Include="OData\Builder\PropertySelectorVisitorTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\HttpRequestODataMessage.cs" />
+    <Compile Include="OData\Formatter\ODataMediaTypeFormatterTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\CollectionTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ComplexTypeTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\EntityTypeTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\FeedTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\PrimitiveTypesTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\SerializationTestsHelpers.cs" />
+    <Compile Include="TestCommon\Models\ComplexTypes\Attributed\Person.cs" />
+    <Compile Include="TestCommon\Models\ComplexTypes\POCO\Address.cs" />
+    <Compile Include="TestCommon\Models\ComplexTypes\POCO\Gender.cs" />
+    <Compile Include="TestCommon\Models\ComplexTypes\POCO\IActivity.cs" />
+    <Compile Include="TestCommon\Models\ComplexTypes\POCO\PhoneNumber.cs" />
+    <Compile Include="TestCommon\Models\ComplexTypes\POCO\PhoneType.cs" />
+    <Compile Include="TestCommon\DataSource.cs" />
+    <Compile Include="TestCommon\Models\EntityTypes\Attributed\Employee.cs" />
+    <Compile Include="TestCommon\Models\EntityTypes\Attributed\MultipleKeyEmployee.cs" />
+    <Compile Include="TestCommon\Models\EntityTypes\POCO\AddressEntity.cs" />
+    <Compile Include="TestCommon\Models\EntityTypes\POCO\WorkItem.cs" />
+    <Compile Include="TestCommon\ReferenceDepthContext.cs" />
+    <Compile Include="TestCommon\SupportedTypes.cs" />
+    <Compile Include="TestCommon\TypeInitializer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BaselineResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>BaselineResource.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>System.Web.Http.OData</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Web.Http.OData\System.Web.Http.OData.csproj">
+      <Project>{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}</Project>
+      <Name>System.Web.Http.OData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
+      <Project>{fccc4cb7-baf7-4a57-9f89-e5766fe536c0}</Project>
+      <Name>Microsoft.TestCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+</Project>

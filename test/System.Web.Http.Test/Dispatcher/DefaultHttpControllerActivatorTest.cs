@@ -132,7 +132,7 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void Create_MakesInstanceOfControllerForNullDependencyScope()
+        public void Create_ThrowsForNullDependencyScope()
         {
             // Arrange
             var config = new HttpConfiguration();
@@ -144,12 +144,18 @@ namespace System.Web.Http.Dispatcher
             var descriptorSimpleController = new HttpControllerDescriptor(config, "Simple", typeof(SimpleController));
             var activator = new DefaultHttpControllerActivator();
 
-            // Act
-            IHttpController simpleController = activator.Create(request, descriptorSimpleController, typeof(SimpleController));
+            // Act & Assert
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => activator.Create(request, descriptorSimpleController, typeof(SimpleController)));
 
-            // Assert
-            Assert.NotNull(simpleController);
-            Assert.IsType<SimpleController>(simpleController);
+            Assert.Equal(
+                "An error occurred when trying to create a controller of type 'SimpleController'. Make sure that the controller has a parameterless public constructor.",
+                exception.Message);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal(
+                "A dependency resolver of type 'IDependencyResolverProxy' returned an invalid value of null from its BeginScope method. If the container does not have a concept of scope, consider returning a scope that resolves in the root of the container instead.",
+                exception.InnerException.Message);
+
             mockResolver.Verify();
         }
 

@@ -55,7 +55,12 @@ namespace System.Net.Http
             IDependencyScope result;
             if (!request.Properties.TryGetValue<IDependencyScope>(HttpPropertyKeys.DependencyScope, out result))
             {
-                result = request.GetConfiguration().DependencyResolver.BeginScope();
+                IDependencyResolver dependencyResolver = request.GetConfiguration().DependencyResolver;
+                result = dependencyResolver.BeginScope();
+                if (result == null)
+                {
+                    throw Error.InvalidOperation(SRResources.DependencyResolver_BeginScopeReturnsNull, dependencyResolver.GetType().Name);
+                }
                 request.Properties[HttpPropertyKeys.DependencyScope] = result;
                 request.RegisterForDispose(result);
             }

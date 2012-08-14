@@ -413,4 +413,7 @@ The request for '{0}' has found the following matching controllers:{2}</value>
   <data name="ValidationAttributeOnNonPublicProperty" xml:space="preserve">
     <value>Non-public property '{0}' on type '{1}' is attributed with one or more validation attributes. Validation attributes on non-public properties are not supported. Consider using a public property for validation instead.</value>
   </data>
+  <data name="DependencyResolver_BeginScopeReturnsNull" xml:space="preserve">
+    <value>A dependency resolver of type '{0}' returned an invalid value of null from its BeginScope method. If the container does not have a concept of scope, consider returning a scope that resolves in the root of the container instead.</value>
+  </data>
 </root>

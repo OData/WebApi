@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Mvc.Test;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -92,36 +93,32 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        [ReplaceCulture]
         public void ValueHelpersWithEmptyNameConvertModelValueUsingCurrentCulture()
         {
             // Arrange
             HtmlHelper<FooBarModel> helper = MvcHelper.GetHtmlHelper(GetValueViewData());
-            string expectedModelValue = "{ foo = ViewItemFoo, bar = 1900/01/01 12:00:00 AM }";
+            string expectedModelValue = "{ foo = ViewItemFoo, bar = 01/01/1900 00:00:00 }";
 
             // Act & Assert
-            using (HtmlHelperTest.ReplaceCulture("en-ZA", "en-US"))
-            {
-                Assert.Equal(expectedModelValue, helper.Value(name: String.Empty).ToHtmlString());
-                Assert.Equal(expectedModelValue, helper.ValueFor(m => m).ToHtmlString());
-                Assert.Equal(expectedModelValue, helper.ValueForModel().ToHtmlString());
-            }
+            Assert.Equal(expectedModelValue, helper.Value(name: String.Empty).ToHtmlString());
+            Assert.Equal(expectedModelValue, helper.ValueFor(m => m).ToHtmlString());
+            Assert.Equal(expectedModelValue, helper.ValueForModel().ToHtmlString());
         }
 
         [Fact]
+        [ReplaceCulture]
         public void ValueHelpersFormatValue()
         {
             // Arrange
             HtmlHelper<FooBarModel> helper = MvcHelper.GetHtmlHelper(GetValueViewData());
-            string expectedModelValue = "-{ foo = ViewItemFoo, bar = 1900/01/01 12:00:00 AM }-";
-            string expectedBarValue = "-1900/01/01 12:00:00 AM-";
+            string expectedModelValue = "-{ foo = ViewItemFoo, bar = 01/01/1900 00:00:00 }-";
+            string expectedBarValue = "-01/01/1900 00:00:00-";
 
             // Act & Assert
-            using (HtmlHelperTest.ReplaceCulture("en-ZA", "en-US"))
-            {
-                Assert.Equal(expectedModelValue, helper.ValueForModel("-{0}-").ToHtmlString());
-                Assert.Equal(expectedBarValue, helper.Value("bar", "-{0}-").ToHtmlString());
-                Assert.Equal(expectedBarValue, helper.ValueFor(m => m.bar, "-{0}-").ToHtmlString());
-            }
+            Assert.Equal(expectedModelValue, helper.ValueForModel("-{0}-").ToHtmlString());
+            Assert.Equal(expectedBarValue, helper.Value("bar", "-{0}-").ToHtmlString());
+            Assert.Equal(expectedBarValue, helper.ValueFor(m => m.bar, "-{0}-").ToHtmlString());
         }
 
         [Fact]

@@ -69,6 +69,7 @@
     <Compile Include="PartialTrustRunner.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="PlatformInfo.cs" />
+    <Compile Include="ReplaceCultureAttribute.cs" />
     <Compile Include="RestoreThreadPrincipalAttribute.cs" />
     <Compile Include="AppDomainUtils.cs" />
     <Compile Include="AssertEx.cs">

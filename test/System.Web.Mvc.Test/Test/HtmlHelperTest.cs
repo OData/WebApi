@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Web.Routing;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
 using Xunit;
@@ -1060,36 +1061,32 @@ Parameter name: httpMethod"
         }
 
         [Fact]
+        [ReplaceCulture]
         public void EvalStringAndFormatValueUseCurrentCulture()
         {
             // Arrange
             DateTime dt = new DateTime(1900, 1, 1, 0, 0, 0);
             HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(new ViewDataDictionary() { { "date", dt } });
-            string expectedFormattedDate = "-1900/01/01 12:00:00 AM-";
+            string expectedFormattedDate = "-01/01/1900 00:00:00-";
 
             // Act && Assert
-            using (ReplaceCulture("en-ZA", "en-US"))
-            {
-                Assert.Equal(expectedFormattedDate, htmlHelper.FormatValue(dt, "-{0}-"));
-                Assert.Equal(expectedFormattedDate, htmlHelper.EvalString("date", "-{0}-"));
-            }
+            Assert.Equal(expectedFormattedDate, htmlHelper.FormatValue(dt, "-{0}-"));
+            Assert.Equal(expectedFormattedDate, htmlHelper.EvalString("date", "-{0}-"));
         }
 
         [Fact]
+        [ReplaceCulture]
         public void EvalStringAndFormatValueWithEmptyFormatConvertsValueToString()
         {
             // Arrange
             DateTime dt = new DateTime(1900, 1, 1, 0, 0, 0);
             HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(new ViewDataDictionary() { { "date", dt } });
-            string expectedUnformattedDate = "1900/01/01 12:00:00 AM";
+            string expectedUnformattedDate = "01/01/1900 00:00:00";
 
             // Act && Assert
-            using (ReplaceCulture("en-ZA", "en-US"))
-            {
-                Assert.Equal(expectedUnformattedDate, htmlHelper.FormatValue(dt, String.Empty));
-                Assert.Equal(expectedUnformattedDate, htmlHelper.EvalString("date", String.Empty));
-                Assert.Equal(expectedUnformattedDate, htmlHelper.EvalString("date"));
-            }
+            Assert.Equal(expectedUnformattedDate, htmlHelper.FormatValue(dt, String.Empty));
+            Assert.Equal(expectedUnformattedDate, htmlHelper.EvalString("date", String.Empty));
+            Assert.Equal(expectedUnformattedDate, htmlHelper.EvalString("date"));
         }
 
         private class ObjectWithWrapperMarkup

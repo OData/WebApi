@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc.Test;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -1751,6 +1752,7 @@ namespace System.Web.Mvc.Html.Test
         // Culture tests
 
         [Fact]
+        [ReplaceCulture]
         public void SelectHelpersUseCurrentCultureToConvertValues()
         {
             // Arrange
@@ -1767,48 +1769,45 @@ namespace System.Web.Mvc.Html.Test
                 // DropDownList(name, selectList, optionLabel)
                 new
                 {
-                    Html = @"<select id=""foo"" name=""foo""><option selected=""selected"" value=""1900/01/01 12:00:00 AM"">Alpha</option>
-<option value=""1900/01/01 12:00:01 AM"">Bravo</option>
-<option value=""1900/01/01 12:00:02 AM"">Charlie</option>
+                    Html = @"<select id=""foo"" name=""foo""><option selected=""selected"" value=""01/01/1900 00:00:00"">Alpha</option>
+<option value=""01/01/1900 00:00:01"">Bravo</option>
+<option value=""01/01/1900 00:00:02"">Charlie</option>
 </select>",
                     Action = new Func<MvcHtmlString>(() => helper.DropDownList("foo", selectList, (string)null))
                 },
                 // DropDownList(name, selectList, optionLabel) (With default value selected from ViewData)
                 new
                 {
-                    Html = @"<select id=""bar"" name=""bar""><option value=""1900/01/01 12:00:00 AM"">Alpha</option>
-<option selected=""selected"" value=""1900/01/01 12:00:01 AM"">Bravo</option>
-<option value=""1900/01/01 12:00:02 AM"">Charlie</option>
+                    Html = @"<select id=""bar"" name=""bar""><option value=""01/01/1900 00:00:00"">Alpha</option>
+<option selected=""selected"" value=""01/01/1900 00:00:01"">Bravo</option>
+<option value=""01/01/1900 00:00:02"">Charlie</option>
 </select>",
                     Action = new Func<MvcHtmlString>(() => defaultValueHelper.DropDownList("bar", selectList, (string)null))
                 },
                 // ListBox(name, selectList)
                 new
                 {
-                    Html = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option selected=""selected"" value=""1900/01/01 12:00:00 AM"">Alpha</option>
-<option value=""1900/01/01 12:00:01 AM"">Bravo</option>
-<option value=""1900/01/01 12:00:02 AM"">Charlie</option>
+                    Html = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option selected=""selected"" value=""01/01/1900 00:00:00"">Alpha</option>
+<option value=""01/01/1900 00:00:01"">Bravo</option>
+<option value=""01/01/1900 00:00:02"">Charlie</option>
 </select>",
                     Action = new Func<MvcHtmlString>(() => helper.ListBox("foo", selectList))
                 },
                 // ListBox(name, selectList) (With default value selected from ViewData)
                 new
                 {
-                    Html = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option value=""1900/01/01 12:00:00 AM"">Alpha</option>
-<option selected=""selected"" value=""1900/01/01 12:00:01 AM"">Bravo</option>
-<option value=""1900/01/01 12:00:02 AM"">Charlie</option>
+                    Html = @"<select id=""foo"" multiple=""multiple"" name=""foo""><option value=""01/01/1900 00:00:00"">Alpha</option>
+<option selected=""selected"" value=""01/01/1900 00:00:01"">Bravo</option>
+<option value=""01/01/1900 00:00:02"">Charlie</option>
 </select>",
                     Action = new Func<MvcHtmlString>(() => defaultValueHelper.ListBox("foo", selectList))
                 }
             };
 
             // Act && Assert
-            using (HtmlHelperTest.ReplaceCulture("en-ZA", "en-US"))
+            foreach (var test in tests)
             {
-                foreach (var test in tests)
-                {
-                    Assert.Equal(test.Html, test.Action().ToHtmlString());
-                }
+                Assert.Equal(test.Html, test.Action().ToHtmlString());
             }
         }
 

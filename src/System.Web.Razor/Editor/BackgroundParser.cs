@@ -55,7 +55,7 @@ namespace System.Web.Razor.Editor
             _main.Cancel();
         }
 
-        public IDisposable SynchronizeWithBackgroundThread()
+        public IDisposable SynchronizeMainThreadState()
         {
             return _main.Lock();
         }

@@ -145,7 +145,7 @@ namespace System.Web.Razor
 
             // If there isn't already a parse underway, try partial-parsing
             string changeString = String.Empty;
-            using (_parser.SynchronizeWithBackgroundThread())
+            using (_parser.SynchronizeMainThreadState())
             {
                 // Capture the string value of the change while we're synchronized
                 changeString = change.ToString();
@@ -209,12 +209,7 @@ namespace System.Web.Razor
                     _lastChangeOwner.ReplaceWith(editResult.EditedSpan);
                 }
 
-                // If the last change was provisional, then the result of this span's attempt to parse partially goes
-                // Otherwise, accept the change if this span accepted it, but if it didn't, just do the standard search.
-                if (LastResultProvisional || result.HasFlag(PartialParseResult.Accepted))
-                {
-                    return result;
-                }
+                return result;
             }
 
             // Locate the span responsible for this change
@@ -247,13 +242,24 @@ namespace System.Web.Razor
 
         private void OnDocumentParseComplete(DocumentParseCompleteEventArgs args)
         {
-            Interlocked.Exchange(ref _currentParseTree, args.GeneratorResults.Document);
+            using (_parser.SynchronizeMainThreadState())
+            {
+                _currentParseTree = args.GeneratorResults.Document;
+                _lastChangeOwner = null;
+            }
             
             Debug.Assert(args != null, "Event arguments cannot be null");
             EventHandler<DocumentParseCompleteEventArgs> handler = DocumentParseComplete;
             if (handler != null)
             {
-                handler(this, args);
+                try
+                {
+                    handler(this, args);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("[RzEd] Document Parse Complete Handler Threw: " + ex.ToString());
+                }
             }
         }
 

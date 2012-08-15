@@ -307,7 +307,7 @@ namespace System.Web.Razor.Editor
                                     {
                                         // Collect ALL changes
 #if EDITOR_TRACING
-                                        if (_previouslyDiscarded.Any())
+                                        if (_previouslyDiscarded != null && _previouslyDiscarded.Any())
                                         {
                                             RazorEditorTrace.TraceLine("[BG][{0}] Collecting {1} discarded changes", fileNameOnly, _previouslyDiscarded.Count);
                                         }

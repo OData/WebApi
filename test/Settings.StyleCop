@@ -3,6 +3,16 @@
     <StringProperty Name="MergeSettingsFiles">Parent</StringProperty>
   </GlobalSettings>
   <Analyzers>
+    <Analyzer AnalyzerId="Microsoft.Web.StyleCop.Rules">
+      <Rules>
+        <Rule Name="DoNotUseBuiltInTypeAliasInExpression">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyzerSettings />
+    </Analyzer>
     <Analyzer AnalyzerId="StyleCop.CSharp.DocumentationRules">
       <AnalyzerSettings>
         <BooleanProperty Name="IncludeFields">False</BooleanProperty>

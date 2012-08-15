@@ -72,6 +72,10 @@
             Command='$(NuGetCommand) install Microsoft.Web.FxCop -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
             LogStandardErrorAsError="true"
             Condition=" !Exists('$(PackagesDir)\Microsoft.Web.FxCop') " />
+        <Exec
+            Command='$(NuGetCommand) install Microsoft.Web.StyleCop -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
+            LogStandardErrorAsError="true"
+            Condition=" !Exists('$(PackagesDir)\Microsoft.Web.StyleCop') " />
     </Target>
 
     <Target Name="CheckPrerequisites">

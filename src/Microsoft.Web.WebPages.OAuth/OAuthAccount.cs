@@ -25,7 +25,7 @@ namespace Microsoft.Web.WebPages.OAuth
                     "provider");
             }
 
-            if (string.IsNullOrEmpty(providerUserId))
+            if (String.IsNullOrEmpty(providerUserId))
             {
                 throw new ArgumentException(
                     String.Format(CultureInfo.CurrentCulture, WebResources.Argument_Cannot_Be_Null_Or_Empty, "providerUserId"),

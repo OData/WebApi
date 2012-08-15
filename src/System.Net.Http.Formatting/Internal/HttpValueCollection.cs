@@ -39,12 +39,12 @@ namespace System.Net.Http.Formatting.Internal
                 string key = kv.Key;
                 if (key == null)
                 {
-                    key = string.Empty;
+                    key = String.Empty;
                 }
                 string value = kv.Value;
                 if (value == null)
                 {
-                    value = string.Empty;
+                    value = String.Empty;
                 }
                 nvc.Add(key, value);
             }

@@ -27,7 +27,7 @@ namespace System.Web.Http.ModelBinding
         {
             if (key == null)
             {
-                return string.Empty;
+                return String.Empty;
             }
 
             StringBuilder sb = null;
@@ -64,7 +64,7 @@ namespace System.Web.Http.ModelBinding
                 }
                 else
                 {
-                    if (char.IsDigit(key[indexOpen + 1]))
+                    if (Char.IsDigit(key[indexOpen + 1]))
                     {
                         // array index. Leave unchanged. 
                         sb.Append(key, indexOpen, indexClose - indexOpen + 1);
@@ -134,7 +134,7 @@ namespace System.Web.Http.ModelBinding
 
         public static object ReadAs(this FormDataCollection formData, Type type)
         {
-            return ReadAs(formData, type, string.Empty, requiredMemberSelector: null, formatterLogger: null);
+            return ReadAs(formData, type, String.Empty, requiredMemberSelector: null, formatterLogger: null);
         }
 
         public static T ReadAs<T>(this FormDataCollection formData, string modelName, IRequiredMemberSelector requiredMemberSelector, IFormatterLogger formatterLogger)
@@ -165,7 +165,7 @@ namespace System.Web.Http.ModelBinding
 
             if (modelName == null)
             {
-                modelName = string.Empty;
+                modelName = String.Empty;
             }
 
             using (HttpConfiguration config = new HttpConfiguration())

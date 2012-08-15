@@ -65,7 +65,7 @@ namespace Microsoft.Web.Http.Data.Helpers
             IDataSourceConfig dataSourceConfig = new DataSourceConfig<TDataController>(htmlHelper, bufferChanges, queryOperation, serviceUrl, clientName);
             if (dataSources.ContainsKey(dataSourceConfig.ClientName))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Cannot have multiple data sources with the same clientName. Found multiple data sources with the name '{0}'", dataSourceConfig.ClientName));
+                throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Cannot have multiple data sources with the same clientName. Found multiple data sources with the name '{0}'", dataSourceConfig.ClientName));
             }
             dataSources.Add(dataSourceConfig.ClientName, dataSourceConfig);
             return this;
@@ -74,13 +74,13 @@ namespace Microsoft.Web.Http.Data.Helpers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Following established design pattern for HTML helpers.")]
         public UpshotConfigBuilder ClientMapping<TEntity>(string clientConstructor)
         {
-            if (string.IsNullOrEmpty(clientConstructor))
+            if (String.IsNullOrEmpty(clientConstructor))
             {
                 throw new ArgumentException("clientConstructor cannot be null or empty", "clientConstructor");
             }
             if (clientMappings.ContainsKey(typeof(TEntity)))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Cannot have multiple client mappings for the same entity type. Found multiple client mappings for '{0}'", typeof(TEntity).FullName));
+                throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Cannot have multiple client mappings for the same entity type. Found multiple client mappings for '{0}'", typeof(TEntity).FullName));
             }
             clientMappings.Add(typeof(TEntity), clientConstructor);
             return this;
@@ -124,7 +124,7 @@ namespace Microsoft.Web.Http.Data.Helpers
                 js.AppendFormat("upshot.registerType(\"{0}\", function() {{ return {1} }});\n", EncodeServerTypeName(mapping.Key), mapping.Value);
             }
 
-            return string.Format(CultureInfo.InvariantCulture, "<script type='text/javascript'>\n{0}</script>", js);
+            return String.Format(CultureInfo.InvariantCulture, "<script type='text/javascript'>\n{0}</script>", js);
         }
 
         private string GetMetadata(Type dataControllerType)
@@ -138,8 +138,8 @@ namespace Microsoft.Web.Http.Data.Helpers
         {
             IEnumerable<string> clientMappingStrings =
                 clientMappings.Select(
-                    clientMapping => string.Format(CultureInfo.InvariantCulture, "\"{0}\": function(data) {{ return new {1}(data) }}", EncodeServerTypeName(clientMapping.Key), clientMapping.Value));
-            return string.Format(CultureInfo.InvariantCulture, "{{{0}}}", string.Join(",", clientMappingStrings));
+                    clientMapping => String.Format(CultureInfo.InvariantCulture, "\"{0}\": function(data) {{ return new {1}(data) }}", EncodeServerTypeName(clientMapping.Key), clientMapping.Value));
+            return String.Format(CultureInfo.InvariantCulture, "{{{0}}}", String.Join(",", clientMappingStrings));
         }
 
         private static string EncodeServerTypeName(Type type)
@@ -161,7 +161,7 @@ namespace Microsoft.Web.Http.Data.Helpers
                 this.bufferChanges = bufferChanges;
                 this.queryOperation = queryOperation;
                 this.serviceUrlOverride = serviceUrlOverride;
-                this.clientName = string.IsNullOrEmpty(clientName) ? DefaultClientName : clientName;
+                this.clientName = String.IsNullOrEmpty(clientName) ? DefaultClientName : clientName;
             }
 
             public string ClientName
@@ -219,7 +219,7 @@ namespace Microsoft.Web.Http.Data.Helpers
 
                     if (!Description.EntityTypes.Any(type => type == entityType))
                     {
-                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "queryOperation '{0}' must return an entity type or an IEnumerable/IQueryable of an entity type", OperationMethod.Name));
+                        throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "queryOperation '{0}' must return an entity type or an IEnumerable/IQueryable of an entity type", OperationMethod.Name));
                     }
 
                     return entityType;
@@ -230,7 +230,7 @@ namespace Microsoft.Web.Http.Data.Helpers
             {
                 get
                 {
-                    if (!string.IsNullOrEmpty(serviceUrlOverride))
+                    if (!String.IsNullOrEmpty(serviceUrlOverride))
                     {
                         return serviceUrlOverride;
                     }
@@ -252,7 +252,7 @@ namespace Microsoft.Web.Http.Data.Helpers
                 {
                     string operationName = OperationMethod.Name;
                     // By convention, strip away any "Get" verb on the method.  Clients can override by explictly specifying client name.
-                    return operationName.StartsWith("Get", StringComparison.OrdinalIgnoreCase) && operationName.Length > 3 && char.IsLetter(operationName[3]) ? operationName.Substring(3) : operationName;
+                    return operationName.StartsWith("Get", StringComparison.OrdinalIgnoreCase) && operationName.Length > 3 && Char.IsLetter(operationName[3]) ? operationName.Substring(3) : operationName;
                 }
             }
 
@@ -280,7 +280,7 @@ namespace Microsoft.Web.Http.Data.Helpers
 
                     if (!methodCall.Method.DeclaringType.IsAssignableFrom(typeof(TDataController)))
                     {
-                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "queryOperation must be a method on '{0}' or a base type", typeof(TDataController).Name));
+                        throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "queryOperation must be a method on '{0}' or a base type", typeof(TDataController).Name));
                     }
 
                     return methodCall.Method;
@@ -304,7 +304,7 @@ namespace Microsoft.Web.Http.Data.Helpers
 
             public string GetInitializationScript()
             {
-                return string.Format(CultureInfo.InvariantCulture, @"{0} = upshot.RemoteDataSource({{
+                return String.Format(CultureInfo.InvariantCulture, @"{0} = upshot.RemoteDataSource({{
     providerParameters: {{ url: ""{1}"", operationName: ""{2}"" }},
     entityType: ""{3}"",
     bufferChanges: {4},

@@ -371,7 +371,7 @@ namespace System.Web.Http.Description
             IDocumentationProvider documentationProvider = DocumentationProvider ?? actionDescriptor.Configuration.Services.GetDocumentationProvider();
             if (documentationProvider == null)
             {
-                return string.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, actionDescriptor.ActionName);
+                return String.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, actionDescriptor.ActionName);
             }
 
             return documentationProvider.GetDocumentation(actionDescriptor);
@@ -382,7 +382,7 @@ namespace System.Web.Http.Description
             IDocumentationProvider documentationProvider = DocumentationProvider ?? parameterDescriptor.Configuration.Services.GetDocumentationProvider();
             if (documentationProvider == null)
             {
-                return string.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.Prefix ?? parameterDescriptor.ParameterName);
+                return String.Format(CultureInfo.CurrentCulture, SRResources.ApiExplorer_DefaultDocumentation, parameterDescriptor.Prefix ?? parameterDescriptor.ParameterName);
             }
 
             return documentationProvider.GetDocumentation(parameterDescriptor);

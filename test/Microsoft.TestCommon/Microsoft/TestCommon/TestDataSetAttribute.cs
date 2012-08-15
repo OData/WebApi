@@ -125,7 +125,7 @@ namespace Microsoft.TestCommon
 
             if (property == null)
             {
-                throw new ArgumentException(string.Format("Could not find public static property {0} on {1}", propertyName, declaringType.FullName));
+                throw new ArgumentException(String.Format("Could not find public static property {0} on {1}", propertyName, declaringType.FullName));
             }
             else
             {
@@ -141,7 +141,7 @@ namespace Microsoft.TestCommon
             IEnumerable<object> value = (propertyValue as IEnumerable<object>) ?? (propertyValue as IEnumerable).Cast<object>();
             if (value == null)
             {
-                throw new InvalidOperationException(string.Format("{0}.{1} is either null or does not implement IEnumerable", declaringType.FullName, propertyName));
+                throw new InvalidOperationException(String.Format("{0}.{1} is either null or does not implement IEnumerable", declaringType.FullName, propertyName));
             }
 
             IEnumerable<object[]> dataset = value as IEnumerable<object[]>;

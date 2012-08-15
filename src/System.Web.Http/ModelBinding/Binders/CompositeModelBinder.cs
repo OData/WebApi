@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
-using System.Web.Http.Internal;
-using System.Web.Http.Properties;
 
 namespace System.Web.Http.ModelBinding.Binders
 {
@@ -79,7 +76,7 @@ namespace System.Web.Http.ModelBinding.Binders
             };
 
             // validation is expensive to create, so copy it over if we can
-            if (object.ReferenceEquals(modelName, oldBindingContext.ModelName))
+            if (Object.ReferenceEquals(modelName, oldBindingContext.ModelName))
             {
                 newBindingContext.ValidationNode = oldBindingContext.ValidationNode;
             }

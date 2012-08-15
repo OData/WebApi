@@ -31,8 +31,8 @@ namespace System.Web.Http.Tracing.Tracers
                 request,
                 TraceCategories.RequestCategory,
                 TraceLevel.Info,
-                string.Empty,
-                string.Empty,
+                String.Empty,
+                String.Empty,
                 beginTrace: (tr) =>
                 {
                     tr.Message = request.RequestUri == null ? SRResources.TraceNoneObjectMessage : request.RequestUri.ToString();

@@ -271,7 +271,7 @@ namespace System.Web.Mvc.Html
             {
                 if (html.ViewContext.ViewData.Model is Color)
                 {
-                    Color color = ((Color) html.ViewContext.ViewData.Model);
+                    Color color = (Color)html.ViewContext.ViewData.Model;
                     value = String.Format(CultureInfo.InvariantCulture, "#{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
                 }
                 else

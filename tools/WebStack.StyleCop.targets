@@ -3,11 +3,10 @@
     <StyleCopMsBuildRunner Include="$(WebStackRootPath)packages\**\StyleCop.dll"/>
   </ItemGroup>
   <PropertyGroup>
-    <IsStyleCopEnabled Condition=" '$(StyleCopMsBuildRunner)' != '' ">$(StyleCopEnabled)</IsStyleCopEnabled>
-    <IsStyleCopEnabled Condition=" '$(StyleCopMsBuildRunner)' == '' ">false</IsStyleCopEnabled>
+    <IsStyleCopEnabled>$(StyleCopEnabled)</IsStyleCopEnabled>
   </PropertyGroup>
 
-  <UsingTask AssemblyFile="@(StyleCopMsBuildRunner)" TaskName="StyleCopTask" Condition=" '$(IsStyleCopEnabled)' != 'false' " />
+  <UsingTask AssemblyFile="@(StyleCopMsBuildRunner)" TaskName="StyleCopTask" Condition=" '@(StyleCopMsBuildRunner)' != '' " />
   
   <PropertyGroup>
     <BuildDependsOn>$(BuildDependsOn);StyleCop</BuildDependsOn>
@@ -79,6 +78,13 @@
 
   <!-- Define target: StyleCop -->
   <Target Name="StyleCop" Condition="'$(IsStyleCopEnabled)' != 'false'">
+    <PropertyGroup>
+      <StyleCopMsBuildRunner>@(StyleCopMsBuildRunner)</StyleCopMsBuildRunner>
+    </PropertyGroup>
+    <Error Text="Multiple StyleCop copies detected. Please clean out your packages folder and try again."
+           Condition=" $(StyleCopMsBuildRunner.Contains(';')) " />
+
+    <Message Text="Running Style Analysis..." Importance="high" />
     <Message Text="Forcing full StyleCop reanalysis." Condition="'$(StyleCopForceFullAnalysis)' == 'true'" Importance="Low" />
 
     <!-- Determine what files should be checked. Take all Compile items, but exclude those that have

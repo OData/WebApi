@@ -3,7 +3,6 @@
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
@@ -36,9 +35,8 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
-            mockFormatter.Setup(
-                f => f.ReadFromStream(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).
-                Returns("sampleValue");
+            mockFormatter.Setup(f => f.ReadFromStream(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>()))
+                .Returns("sampleValue");
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
@@ -115,11 +113,9 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             InvalidOperationException exception = new InvalidOperationException("test");
             Mock<BufferedMediaTypeFormatter> mockFormatter = new Mock<BufferedMediaTypeFormatter>() { CallBase = true };
-            mockFormatter.Setup(
-                f =>
-                f.WriteToStream(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
-                                     It.IsAny<HttpContent>())).
-                Throws(exception);
+            mockFormatter.Setup(f => f.WriteToStream(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
+                                                     It.IsAny<HttpContent>()))
+                         .Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();

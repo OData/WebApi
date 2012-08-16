@@ -12,8 +12,8 @@ namespace Microsoft.Web.Helpers.Test
     public class TwitterTest
     {
         /// <summary>
-        ///A test for Profile
-        ///</summary>
+        /// A test for Profile
+        /// </summary>
         [Fact]
         public void Profile_ReturnsValidData()
         {

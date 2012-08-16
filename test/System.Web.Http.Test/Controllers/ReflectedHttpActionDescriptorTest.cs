@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using Moq;
 using Xunit;

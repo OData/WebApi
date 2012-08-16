@@ -47,7 +47,7 @@ namespace Microsoft.TestCommon
             if (!String.IsNullOrEmpty(expected) || actual != null)
             {
                 Assert.NotNull(expected);
-                MediaTypeHeaderValue expectedMediaType = new MediaTypeHeaderValue(expected); ;
+                MediaTypeHeaderValue expectedMediaType = new MediaTypeHeaderValue(expected);
                 Assert.Equal(0, new MediaTypeHeaderValueComparer().Compare(expectedMediaType, actual));
             }
         }

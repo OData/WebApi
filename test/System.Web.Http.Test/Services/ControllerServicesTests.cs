@@ -2,21 +2,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
-using System.Web.Http.Description;
-using System.Web.Http.Dispatcher;
-using System.Web.Http.Filters;
-using System.Web.Http.Metadata;
-using System.Web.Http.Metadata.Providers;
-using System.Web.Http.ModelBinding;
-using System.Web.Http.ModelBinding.Binders;
-using System.Web.Http.Tracing;
-using System.Web.Http.Validation;
-using System.Web.Http.Validation.Providers;
 using System.Web.Http.ValueProviders;
-using System.Web.Http.ValueProviders.Providers;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;

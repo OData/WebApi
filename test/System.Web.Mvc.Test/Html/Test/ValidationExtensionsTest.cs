@@ -723,8 +723,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -743,8 +743,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
             Assert.Equal("validationSummary", htmlHelper.ViewContext.FormContext.ValidationSummaryId);
         }
 
@@ -784,8 +784,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -805,8 +805,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -835,8 +835,8 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<div class=""validation-summary-valid"" id=""validationSummary""><ul><li style=""display:none""></li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -853,8 +853,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -871,8 +871,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -890,8 +890,8 @@ namespace System.Web.Mvc.Html.Test
 <li>foo error 2</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error 2</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -906,8 +906,8 @@ namespace System.Web.Mvc.Html.Test
             // Assert
             Assert.Equal(@"<div class=""validation-summary-errors""><span>This is my message.</span>
 <ul><li style=""display:none""></li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -923,8 +923,8 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(@"<div class=""validation-summary-errors""><span>This is my message.</span>
 <ul><li>Something is wrong.</li>
 <li>Something else is also wrong.</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -939,8 +939,8 @@ namespace System.Web.Mvc.Html.Test
             // Assert
             Assert.Equal(@"<div class=""validation-summary-errors""><span>This is my message.</span>
 <ul><li style=""display:none""></li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]

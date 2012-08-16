@@ -9,9 +9,9 @@ using Assert = Microsoft.TestCommon.AssertEx;
 namespace System.Web.Helpers.Test
 {
     /// <summary>
-    ///This is a test class for CryptoTest and is intended
-    ///to contain all CryptoTest Unit Tests
-    ///</summary>
+    /// This is a test class for CryptoTest and is intended
+    /// to contain all CryptoTest Unit Tests
+    /// </summary>
     public class CryptoTest
     {
         [Fact]

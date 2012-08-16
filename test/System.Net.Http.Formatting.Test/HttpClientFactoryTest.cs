@@ -106,7 +106,7 @@ namespace System.Net.Http
             for (int handlerCount = 0; handlerCount < maxHandlerCount; handlerCount++)
             {
                 handlers.Add(new MockDelegatingHandler());
-            };
+            }
 
             HttpClientHandler innerHandler = new HttpClientHandler();
 

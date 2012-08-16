@@ -33,7 +33,6 @@ namespace Microsoft.Web.Http.Data.Test
 
         public void InsertOrder(Order order)
         {
-
         }
 
         public void UpdateProduct(Product product)

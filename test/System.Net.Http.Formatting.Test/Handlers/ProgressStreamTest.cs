@@ -2,9 +2,9 @@
 
 using System.IO;
 using System.Text;
+using System.Threading;
 using Moq;
 using Xunit;
-using System.Threading;
 
 namespace System.Net.Http.Handlers
 {

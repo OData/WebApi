@@ -36,9 +36,7 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void SaveToCache_ReadFromCache_ReturnsNullIfTypesAreInvalid()
         {
-            //
             // SAVING
-            //
 
             // Arrange
             Type[] expectedTypes = new Type[]
@@ -61,9 +59,7 @@ namespace System.Web.Mvc.Test
             byte[] streamContents = writeStream.ToArray();
             Assert.NotEqual(0, streamContents.Length);
 
-            //
             // READING
-            //
 
             // Arrange
             MemoryStream readStream = new MemoryStream(streamContents);
@@ -79,9 +75,7 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void SaveToCache_ReadFromCache_Success()
         {
-            //
             // SAVING
-            //
 
             // Arrange
             Type[] expectedTypes = new Type[]
@@ -104,9 +98,7 @@ namespace System.Web.Mvc.Test
             byte[] streamContents = writeStream.ToArray();
             Assert.NotEqual(0, streamContents.Length);
 
-            //
             // READING
-            //
 
             // Arrange
             MemoryStream readStream = new MemoryStream(streamContents);

@@ -23,7 +23,8 @@ namespace System.Web.Http
             var exception = new HttpResponseException(response);
 
             Assert.Same(response, exception.Response);
-            if(Assert.CurrentCultureIsEnglish) {
+            if (Assert.CurrentCultureIsEnglish)
+            {
                 Assert.Equal("Processing of the HTTP request resulted in an exception. Please see the HTTP response returned by the 'Response' property of this exception for details.", exception.Message);
             }
         }

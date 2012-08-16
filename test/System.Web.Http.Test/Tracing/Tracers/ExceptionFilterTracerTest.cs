@@ -19,9 +19,8 @@ namespace System.Web.Http.Tracing.Tracers
             HttpRequestMessage request = new HttpRequestMessage();
             HttpResponseMessage response = new HttpResponseMessage();
             Mock<IExceptionFilter> mockFilter = new Mock<IExceptionFilter>() { CallBase = true };
-            mockFilter.Setup(
-                f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(), It.IsAny<CancellationToken>())).
-                Returns(TaskHelpers.Completed());
+            mockFilter.Setup(f => f.ExecuteExceptionFilterAsync(It.IsAny<HttpActionExecutedContext>(), It.IsAny<CancellationToken>()))
+                .Returns(TaskHelpers.Completed());
             HttpActionExecutedContext actionExecutedContext = ContextUtil.GetActionExecutedContext(request, response);
             TestTraceWriter traceWriter = new TestTraceWriter();
             ExceptionFilterTracer tracer = new ExceptionFilterTracer(mockFilter.Object, traceWriter);

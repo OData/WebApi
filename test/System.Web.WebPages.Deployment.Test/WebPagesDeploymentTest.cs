@@ -54,7 +54,6 @@ namespace System.Web.WebPages.Deployment.Test
             }
             catch
             {
-
             }
         }
 

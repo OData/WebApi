@@ -8,10 +8,10 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.Validation;
+using System.Web.Http.ValueProviders;
 using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Web.Http.ValueProviders;
 
 namespace System.Web.Http.ModelBinding.Binders
 {
@@ -748,7 +748,7 @@ Parameter name: value", bindingContext.ModelState["foo.NameNoAttribute"].Errors[
 
             protected override void SetProperty(HttpActionContext actionContext, ModelBindingContext bindingContext, ModelMetadata propertyMetadata, ComplexModelDtoResult dtoResult, ModelValidator requiredValidator)
             {
- 	            SetPropertyPublic(actionContext, bindingContext, propertyMetadata, dtoResult, requiredValidator);
+                SetPropertyPublic(actionContext, bindingContext, propertyMetadata, dtoResult, requiredValidator);
             }
         }
     }

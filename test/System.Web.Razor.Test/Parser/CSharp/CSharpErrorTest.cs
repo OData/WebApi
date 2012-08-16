@@ -609,7 +609,7 @@ blah",
                         Factory.Markup("<html></html>").Accepts(AcceptedCharacters.None)),
                     Factory.EmptyCSharp().AsStatement(),
                     Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
-                expectedErrors: new [] {
+                expectedErrors: new[] {
                     new RazorError(
                         String.Format(RazorResources.ParseError_Expected_CloseBracket_Before_EOF, "(", ")"),
                         14, 0, 14)

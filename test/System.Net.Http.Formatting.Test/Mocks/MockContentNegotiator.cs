@@ -18,52 +18,52 @@ namespace System.Net.Http.Formatting.Mocks
         {
         }
 
-        new public Collection<MediaTypeFormatterMatch> ComputeFormatterMatches(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
+        public new Collection<MediaTypeFormatterMatch> ComputeFormatterMatches(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
             return base.ComputeFormatterMatches(type, request, formatters);
         }
 
-        new public MediaTypeFormatterMatch SelectResponseMediaTypeFormatter(ICollection<MediaTypeFormatterMatch> matches)
+        public new MediaTypeFormatterMatch SelectResponseMediaTypeFormatter(ICollection<MediaTypeFormatterMatch> matches)
         {
             return base.SelectResponseMediaTypeFormatter(matches);
         }
 
-        new public Encoding SelectResponseCharacterEncoding(HttpRequestMessage request, MediaTypeFormatter formatter)
+        public new Encoding SelectResponseCharacterEncoding(HttpRequestMessage request, MediaTypeFormatter formatter)
         {
             return base.SelectResponseCharacterEncoding(request, formatter);
         }
 
-        new public MediaTypeFormatterMatch MatchMediaTypeMapping(HttpRequestMessage request, MediaTypeFormatter formatter)
+        public new MediaTypeFormatterMatch MatchMediaTypeMapping(HttpRequestMessage request, MediaTypeFormatter formatter)
         {
             return base.MatchMediaTypeMapping(request, formatter);
         }
 
-        new public MediaTypeFormatterMatch MatchAcceptHeader(IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptValues, MediaTypeFormatter formatter)
+        public new MediaTypeFormatterMatch MatchAcceptHeader(IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptValues, MediaTypeFormatter formatter)
         {
             return base.MatchAcceptHeader(sortedAcceptValues, formatter);
         }
 
-        new public MediaTypeFormatterMatch MatchRequestMediaType(HttpRequestMessage request, MediaTypeFormatter formatter)
+        public new MediaTypeFormatterMatch MatchRequestMediaType(HttpRequestMessage request, MediaTypeFormatter formatter)
         {
             return base.MatchRequestMediaType(request, formatter);
         }
 
-        new public MediaTypeFormatterMatch MatchType(Type type, MediaTypeFormatter formatter)
+        public new MediaTypeFormatterMatch MatchType(Type type, MediaTypeFormatter formatter)
         {
             return base.MatchType(type, formatter);
         }
 
-        new public IEnumerable<MediaTypeWithQualityHeaderValue> SortMediaTypeWithQualityHeaderValuesByQFactor(ICollection<MediaTypeWithQualityHeaderValue> headerValues)
+        public new IEnumerable<MediaTypeWithQualityHeaderValue> SortMediaTypeWithQualityHeaderValuesByQFactor(ICollection<MediaTypeWithQualityHeaderValue> headerValues)
         {
             return base.SortMediaTypeWithQualityHeaderValuesByQFactor(headerValues);
         }
 
-        new public IEnumerable<StringWithQualityHeaderValue> SortStringWithQualityHeaderValuesByQFactor(ICollection<StringWithQualityHeaderValue> headerValues)
+        public new IEnumerable<StringWithQualityHeaderValue> SortStringWithQualityHeaderValuesByQFactor(ICollection<StringWithQualityHeaderValue> headerValues)
         {
             return base.SortStringWithQualityHeaderValuesByQFactor(headerValues);
         }
 
-        new public MediaTypeFormatterMatch UpdateBestMatch(MediaTypeFormatterMatch current, MediaTypeFormatterMatch potentialReplacement)
+        public new MediaTypeFormatterMatch UpdateBestMatch(MediaTypeFormatterMatch current, MediaTypeFormatterMatch potentialReplacement)
         {
             return base.UpdateBestMatch(current, potentialReplacement);
         }

@@ -197,7 +197,6 @@ namespace System.Web.Razor.Test.Parser.Html
         {
             // Arrange
             const string code =
-            #region Big Block o' code
  @"<div class=""sidebar"">
     <h1>Title</h1>
     <p>
@@ -255,7 +254,6 @@ namespace System.Web.Razor.Test.Parser.Html
         </fieldset>
     </form>
 </div>";
-            #endregion
 
             // Act
             ParserResults results = ParseDocument(code);

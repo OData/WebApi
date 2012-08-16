@@ -117,8 +117,8 @@ namespace System.Web.WebPages.Test
 <li>foo error &lt;2&gt;</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -137,8 +137,8 @@ namespace System.Web.WebPages.Test
 <li>foo error &lt;2&gt;</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -158,8 +158,8 @@ namespace System.Web.WebPages.Test
 <li>bar error &lt;2&gt;</li>
 <li>some form error &lt;1&gt;</li>
 <li>some form error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -175,8 +175,8 @@ namespace System.Web.WebPages.Test
             Assert.Equal(@"<div class=""validation-summary-errors""><ul>
 <li>some form error &lt;1&gt;</li>
 <li>some form error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -194,8 +194,8 @@ namespace System.Web.WebPages.Test
 <li>foo error &lt;2&gt;</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -213,8 +213,8 @@ namespace System.Web.WebPages.Test
 <li>foo error &lt;2&gt;</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -232,8 +232,8 @@ namespace System.Web.WebPages.Test
 <li>foo error &lt;2&gt;</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         //[Fact]
@@ -254,8 +254,8 @@ namespace System.Web.WebPages.Test
 <li>foo error &lt;2&gt;</li>
 <li>bar error &lt;1&gt;</li>
 <li>bar error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         [Fact]
@@ -319,8 +319,8 @@ namespace System.Web.WebPages.Test
             Assert.Equal(@"<div class=""validation-summary-errors""><ul>
 <li>error &lt;1&gt;</li>
 <li>error &lt;2&gt;</li>
-</ul></div>"
-                         , html.ToHtmlString());
+</ul></div>",
+                         html.ToHtmlString());
         }
 
         private static ModelStateDictionary GetModelStateWithErrors()

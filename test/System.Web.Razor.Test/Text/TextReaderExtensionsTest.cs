@@ -116,14 +116,14 @@ namespace System.Web.Razor.Test.Text
         public void ReadUntilWithMultipleTerminatorsHonorsInclusiveFlagWhenFalse()
         {
             // NOTE: Using named parameters would be difficult here, hence the inline comment
-            RunReaderTest("<bar/>", "<bar", '/', r => r.ReadUntil( /* inclusive */ false, '/', '>'));
+            RunReaderTest("<bar/>", "<bar", '/', r => r.ReadUntil(/* inclusive */ false, '/', '>'));
         }
 
         [Fact]
         public void ReadUntilWithMultipleTerminatorsHonorsInclusiveFlagWhenTrue()
         {
             // NOTE: Using named parameters would be difficult here, hence the inline comment
-            RunReaderTest("<bar/>", "<bar/", '>', r => r.ReadUntil( /* inclusive */ true, '/', '>'));
+            RunReaderTest("<bar/>", "<bar/", '>', r => r.ReadUntil(/* inclusive */ true, '/', '>'));
         }
 
         [Fact]

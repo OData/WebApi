@@ -2,8 +2,8 @@
 
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using Xunit;
 using System.Net.Http;
+using Xunit;
 
 namespace System.Web.Http.ValueProviders.Providers
 {

@@ -230,7 +230,7 @@ namespace System.Web.Http.Tracing.Tracers
 
             // Assert
             Assert.Equal(1, wrappedFilters.Length);
-            Assert.IsType<AuthorizationFilterAttributeTracer>(wrappedFilters[0].Instance); ;
+            Assert.IsType<AuthorizationFilterAttributeTracer>(wrappedFilters[0].Instance);
         }
 
         [Fact]

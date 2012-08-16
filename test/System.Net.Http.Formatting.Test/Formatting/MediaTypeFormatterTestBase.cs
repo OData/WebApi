@@ -101,8 +101,8 @@ namespace System.Net.Http.Formatting
             contentHeaders.ContentLength = 0;
 
             // Act 
-            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger).
-                ContinueWith(
+            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger)
+                .ContinueWith(
                     readTask =>
                     {
                         // Assert
@@ -125,8 +125,8 @@ namespace System.Net.Http.Formatting
             contentHeaders.ContentLength = 0;
 
             // Act 
-            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger).
-                ContinueWith(
+            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger)
+                .ContinueWith(
                     readTask =>
                     {
                         // Assert

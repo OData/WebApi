@@ -104,7 +104,7 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             Mock<HttpParameterDescriptor> mockParamDescriptor = new Mock<HttpParameterDescriptor>() { CallBase = true };
             mockParamDescriptor.Setup(d => d.ParameterName).Returns("paramName");
-            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof (string));
+            mockParamDescriptor.Setup(d => d.ParameterType).Returns(typeof(string));
             FormatterParameterBinding binding = new FormatterParameterBinding(mockParamDescriptor.Object, new MediaTypeFormatterCollection(), null);
             TestTraceWriter traceWriter = new TestTraceWriter();
             FormatterParameterBindingTracer tracer = new FormatterParameterBindingTracer(binding, traceWriter);

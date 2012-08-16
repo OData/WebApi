@@ -3,13 +3,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Web.Http.Metadata;
+using System.Runtime.Serialization;
 using System.Web.Http.Metadata.Providers;
-using Moq;
-using Moq.Protected;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Runtime.Serialization;
 
 namespace System.Web.Http.Validation.Providers
 {

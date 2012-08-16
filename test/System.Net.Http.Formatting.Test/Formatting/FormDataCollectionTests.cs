@@ -93,7 +93,7 @@ namespace System.Net.Http.Formatting
         {
             FormDataCollection form = new FormDataCollection(new Uri("http://foo.com/?x=1&x=2&x=3"));
                         
-            Assert.Equal(new string [] { "1", "2", "3"}, form.GetValues("x"));
+            Assert.Equal(new string[] { "1", "2", "3"}, form.GetValues("x"));
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace System.Net.Http.Formatting
         [InlineData("x=", "")] // rhs only
         [InlineData("x=%20", SPACE)] // escaped space
         [InlineData("x=" + SPACE, SPACE)] // literal space
-        [InlineData("x=+", SPACE)] // 
+        [InlineData("x=+", SPACE)]
         [InlineData("x=null", "null")] // null literal, not escaped
         [InlineData("x=undefined", "undefined")] // undefined literal, not escaped
         [InlineData("x=\"null\"", "\"null\"")] // quoted null, preserved as is

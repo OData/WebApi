@@ -29,7 +29,7 @@ namespace System.Web.Http
             HttpActionContext ctx = new HttpActionContext();
 
             // Act
-            object result =  "abc";
+            object result = "abc";
             binding.SetValue(ctx, result);
             var result2 = binding.GetValue(ctx);
 

@@ -1,19 +1,14 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading;
-using System.Web.Http.Controllers;
+using System.Net.Http.Formatting;
+using System.Web.Http.ModelBinding;
+using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
+using Moq;
 using Xunit;
 using Assert = Microsoft.TestCommon.AssertEx;
-using Moq;
-using System.Web.Http.ModelBinding;
-using System.Collections.Generic;
-using System.Net.Http.Formatting;
-using System.Web.Http.Validation;
 
 namespace System.Web.Http.Controllers
 {

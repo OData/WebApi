@@ -8,9 +8,9 @@ using Assert = Microsoft.TestCommon.AssertEx;
 namespace System.Web.Helpers.Test
 {
     /// <summary>
-    ///This is a test class for Util is intended
-    ///to contain all HelperResult Unit Tests
-    ///</summary>
+    /// This is a test class for Util is intended
+    /// to contain all HelperResult Unit Tests
+    /// </summary>
     public class HelperResultTest
     {
         [Fact]

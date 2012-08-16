@@ -382,8 +382,9 @@ namespace System.Net.Http.Formatting
                     }
                 }
             }
-            else //jsonValue is JObject
+            else
             {
+                //jsonValue is JObject
                 foreach (KeyValuePair<string, JToken> item in (JObject)jsonValue)
                 {
                     BuildParams(prefix + "[" + item.Key + "]", item.Value, results);

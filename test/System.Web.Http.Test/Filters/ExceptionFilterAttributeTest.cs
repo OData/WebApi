@@ -78,7 +78,6 @@ namespace System.Web.Http.Filters
 
         public sealed class TestableExceptionFilter : ExceptionFilterAttribute
         {
-
         }
     }
 }

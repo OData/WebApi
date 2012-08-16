@@ -3,7 +3,6 @@
 using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
 using Moq;
 using Xunit;
 

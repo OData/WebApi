@@ -23,8 +23,8 @@ namespace System.Web.Http
         [InlineData("GET", "Test/5?random=9", "GetUser")]
         [InlineData("Post", "Test", "PostUser")]
         [InlineData("Post", "Test?name=mario&age=10", "PostUserByNameAndAge")]
-        /// Note: Normally the following would not match DeleteUserByIdAndOptName because it has 'id' and 'age' as parameters while the DeleteUserByIdAndOptName action has 'id' and 'name'. 
-        /// However, because the default value is provided on action parameter 'name', having the 'id' in the request was enough to match the action.
+        // Note: Normally the following would not match DeleteUserByIdAndOptName because it has 'id' and 'age' as parameters while the DeleteUserByIdAndOptName action has 'id' and 'name'. 
+        // However, because the default value is provided on action parameter 'name', having the 'id' in the request was enough to match the action.
         [InlineData("Delete", "Test/6?age=10", "DeleteUserByIdAndOptName")]
         [InlineData("Delete", "Test", "DeleteUserByOptName")]
         [InlineData("Delete", "Test?name=user", "DeleteUserByOptName")]

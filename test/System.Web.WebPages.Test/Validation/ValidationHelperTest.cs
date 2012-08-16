@@ -821,7 +821,6 @@ namespace System.Web.WebPages.Validation.Test
 
         private class AutoFailValidator : IValidator
         {
-
             public ValidationResult Validate(ValidationContext validationContext)
             {
                 return new ValidationResult("Failed!");

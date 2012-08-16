@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Specialized;
 using System.Net.Http;
 using Microsoft.TestCommon;
 using Xunit;
 using Xunit.Extensions;
 using Assert = Microsoft.TestCommon.AssertEx;
-using System.Collections.Specialized;
 
 namespace System.Web.Http.WebHost.Routing
 {

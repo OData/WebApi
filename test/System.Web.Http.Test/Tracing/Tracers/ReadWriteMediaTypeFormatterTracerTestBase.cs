@@ -4,7 +4,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
@@ -26,9 +25,8 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
-            mockFormatter.Setup(
-                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).
-                Returns(TaskHelpers.FromResult<object>("sampleValue"));
+            mockFormatter.Setup(f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>()))
+                .Returns(TaskHelpers.FromResult<object>("sampleValue"));
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
@@ -90,9 +88,8 @@ namespace System.Web.Http.Tracing.Tracers
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
             tcs.TrySetException(exception);
 
-            mockFormatter.Setup(
-                f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>())).
-                Returns(tcs.Task);
+            mockFormatter.Setup(f => f.ReadFromStreamAsync(It.IsAny<Type>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<IFormatterLogger>()))
+                .Returns(tcs.Task);
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
@@ -120,9 +117,8 @@ namespace System.Web.Http.Tracing.Tracers
         {
             // Arrange
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
-            mockFormatter.Setup(
-                f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).
-                Returns(TaskHelpers.Completed());
+            mockFormatter.Setup(f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>()))
+                .Returns(TaskHelpers.Completed());
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Content = new StringContent("");
@@ -149,11 +145,9 @@ namespace System.Web.Http.Tracing.Tracers
             // Arrange
             InvalidOperationException exception = new InvalidOperationException("test");
             Mock<TFormatter> mockFormatter = new Mock<TFormatter>() { CallBase = true };
-            mockFormatter.Setup(
-                f =>
-                f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
-                                     It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).
-                Throws(exception);
+            mockFormatter.Setup(f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(),
+                                                         It.IsAny<HttpContent>(), It.IsAny<TransportContext>()))
+                .Throws(exception);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();
@@ -185,9 +179,8 @@ namespace System.Web.Http.Tracing.Tracers
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
             tcs.TrySetException(exception);
 
-            mockFormatter.Setup(
-                f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>())).
-                Returns(tcs.Task);
+            mockFormatter.Setup(f => f.WriteToStreamAsync(It.IsAny<Type>(), It.IsAny<Object>(), It.IsAny<Stream>(), It.IsAny<HttpContent>(), It.IsAny<TransportContext>()))
+                .Returns(tcs.Task);
 
             TestTraceWriter traceWriter = new TestTraceWriter();
             HttpRequestMessage request = new HttpRequestMessage();

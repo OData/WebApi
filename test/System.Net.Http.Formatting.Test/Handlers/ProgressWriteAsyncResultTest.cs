@@ -36,8 +36,8 @@ namespace System.Net.Http.Handlers
             Mock<Stream> mockInnerStream = new Mock<Stream>();
             object userState = new object();
             IAsyncResult mockIAsyncResult = CreateMockCompletedAsyncResult(true, userState);
-            mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>())).
-                Returns(mockIAsyncResult);
+            mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()))
+                .Returns(mockIAsyncResult);
             ProgressStream progressStream = ProgressStreamTest.CreateProgressStream();
 
             // Act
@@ -55,8 +55,8 @@ namespace System.Net.Http.Handlers
         {
             // Arrange
             Mock<Stream> mockInnerStream = new Mock<Stream>();
-            mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>())).
-                Throws<ApplicationException>();
+            mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()))
+                .Throws<ApplicationException>();
             ProgressStream progressStream = ProgressStreamTest.CreateProgressStream();
 
             // Act
@@ -77,8 +77,8 @@ namespace System.Net.Http.Handlers
             Mock<Stream> mockInnerStream = new Mock<Stream>();
             object userState = new object();
             IAsyncResult mockIAsyncResult = CreateMockCompletedAsyncResult(true, userState);
-            mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>())).
-                Returns(mockIAsyncResult);
+            mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()))
+                .Returns(mockIAsyncResult);
 
             MockProgressEventHandler mockProgressHandler;
             ProgressMessageHandler progressMessageHandler = MockProgressEventHandler.CreateProgressMessageHandler(out mockProgressHandler, sendProgress: true);

@@ -484,12 +484,10 @@ namespace System.Net.Http.Formatting
 
     public class Base
     {
-
     }
 
     public class Derived : Base
     {
-
     }
 
     [DataContract]
@@ -524,6 +522,5 @@ namespace System.Net.Http.Formatting
 
     public class DangerousType
     {
-
     }
 }

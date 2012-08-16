@@ -40,4 +40,3 @@ namespace System.Web.Http.Tracing
         public IList<TraceRecord> Records { get { return _records; } }
     }
 }
-

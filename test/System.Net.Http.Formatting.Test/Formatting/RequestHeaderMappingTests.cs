@@ -11,7 +11,6 @@ namespace System.Net.Http.Formatting
 {
     public class RequestHeaderMappingTests
     {
-
         [Fact]
         public void TypeIsCorrect()
         {

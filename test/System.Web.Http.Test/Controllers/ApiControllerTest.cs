@@ -326,8 +326,8 @@ namespace System.Web.Http
 
             Mock<HttpActionDescriptor> actionDescriptorMock = new Mock<HttpActionDescriptor>();
             actionDescriptorMock.Setup(ad => ad.ActionBinding).Returns(actionBindingMock.Object);
-            actionDescriptorMock.Setup(ad => ad.GetFilterPipeline()).
-                Returns(new Collection<FilterInfo>(new List<FilterInfo>() { new FilterInfo(actionFilterMock.Object, FilterScope.Action), new FilterInfo(authFilterMock.Object, FilterScope.Action) }));
+            actionDescriptorMock.Setup(ad => ad.GetFilterPipeline())
+                .Returns(new Collection<FilterInfo>(new List<FilterInfo>() { new FilterInfo(actionFilterMock.Object, FilterScope.Action), new FilterInfo(authFilterMock.Object, FilterScope.Action) }));
 
             selectorMock.Setup(s => s.SelectAction(controllerContext)).Returns(actionDescriptorMock.Object);
 

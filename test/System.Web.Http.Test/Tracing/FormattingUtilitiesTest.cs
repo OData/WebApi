@@ -55,8 +55,8 @@ namespace System.Web.Http.Tracing
                                                            {"p2", true}
                                                        };
 
-            string expected = String.Format("p1={0}, p2={1}", 
-                                    FormattingUtilities.ValueToString(arguments["p1"], CultureInfo.CurrentCulture), 
+            string expected = String.Format("p1={0}, p2={1}",
+                                    FormattingUtilities.ValueToString(arguments["p1"], CultureInfo.CurrentCulture),
                                     FormattingUtilities.ValueToString(arguments["p2"], CultureInfo.CurrentCulture));
 
             // Act
@@ -164,8 +164,8 @@ namespace System.Web.Http.Tracing
         public void ModelBinderToString_Formats()
         {
             // Arrange
-            ModelBinderProvider provider = new SimpleModelBinderProvider(typeof (int), () => null);
-            string expected = typeof (SimpleModelBinderProvider).Name;
+            ModelBinderProvider provider = new SimpleModelBinderProvider(typeof(int), () => null);
+            string expected = typeof(SimpleModelBinderProvider).Name;
 
             // Act
             string actual = FormattingUtilities.ModelBinderToString(provider);
@@ -182,8 +182,8 @@ namespace System.Web.Http.Tracing
             ModelBinderProvider innerProvider2 = new ArrayModelBinderProvider();
             CompositeModelBinderProvider compositeProvider = new CompositeModelBinderProvider(new ModelBinderProvider[] { innerProvider1, innerProvider2 });
             string expected = String.Format(
-                                "{0}({1}, {2})", 
-                                typeof(CompositeModelBinderProvider).Name, 
+                                "{0}({1}, {2})",
+                                typeof(CompositeModelBinderProvider).Name,
                                 typeof(SimpleModelBinderProvider).Name,
                                 typeof(ArrayModelBinderProvider).Name);
 
@@ -220,8 +220,8 @@ namespace System.Web.Http.Tracing
 
             CompositeValueProvider compositeProvider = new CompositeValueProvider(providers);
             string expected = String.Format(
-                                "{0}({1}, {2})", 
-                                typeof(CompositeValueProvider).Name, 
+                                "{0}({1}, {2})",
+                                typeof(CompositeValueProvider).Name,
                                 typeof(ElementalValueProvider).Name,
                                 typeof(NameValuePairsValueProvider).Name);
 
@@ -241,7 +241,7 @@ namespace System.Web.Http.Tracing
                                                                  {"r1", "c1"},
                                                                  {"r2", "c2"}
                                                              };
-            Mock<IHttpRouteData> mockRouteData = new Mock<IHttpRouteData>() { CallBase = true};
+            Mock<IHttpRouteData> mockRouteData = new Mock<IHttpRouteData>() { CallBase = true };
             mockRouteData.Setup(r => r.Values).Returns(routeDictionary);
             string expected = "r1:c1,r2:c2";
 

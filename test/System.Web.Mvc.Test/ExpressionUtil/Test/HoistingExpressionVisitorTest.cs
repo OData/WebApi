@@ -12,7 +12,7 @@ namespace System.Web.Mvc.ExpressionUtil.Test
         public void Hoist()
         {
             // Arrange
-            Expression<Func<string, int>> expr = s => 2 * s.Length + 1;
+            Expression<Func<string, int>> expr = s => (2 * s.Length) + 1;
 
             // Act
             Expression<Hoisted<string, int>> hoisted = HoistingExpressionVisitor<string, int>.Hoist(expr);

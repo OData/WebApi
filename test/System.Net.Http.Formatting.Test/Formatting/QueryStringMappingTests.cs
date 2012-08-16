@@ -120,7 +120,6 @@ namespace System.Net.Http.Formatting
             typeof(QueryStringMappingTests), "UriStringsWithoutQuery")]
         public void TryMatchMediaTypeReturnsMatchWithQueryStringParameterNameAndValueInUri(string queryStringParameterName, string queryStringParameterValue, string mediaType, string uriBase)
         {
-
             QueryStringMapping mapping = new QueryStringMapping(queryStringParameterName, queryStringParameterValue, mediaType);
             string uri = uriBase + "?" + queryStringParameterName + "=" + queryStringParameterValue;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);

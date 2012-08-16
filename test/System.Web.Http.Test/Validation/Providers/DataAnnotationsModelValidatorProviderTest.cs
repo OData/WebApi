@@ -32,7 +32,6 @@ namespace System.Web.Http.Validation.Providers
             public MyValidationAttributeAdapter(IEnumerable<ModelValidatorProvider> validatorProviders, ValidationAttribute attribute)
                 : base(validatorProviders, attribute)
             {
-
             }
         }
 

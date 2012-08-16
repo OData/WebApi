@@ -21,7 +21,7 @@ namespace System.Web.Http.Tracing
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            ITraceManager traceManager = config.Services.GetService(typeof (ITraceManager)) as ITraceManager;
+            ITraceManager traceManager = config.Services.GetService(typeof(ITraceManager)) as ITraceManager;
 
             // Assert
             Assert.IsType<TraceManager>(traceManager);

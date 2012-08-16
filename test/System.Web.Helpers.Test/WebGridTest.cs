@@ -2214,7 +2214,6 @@ namespace System.Web.Helpers.Test
         {
             // Arrange
             IEnumerable<Person> elements = new NonGenericEnumerable(new[] { new Person { FirstName = "Foo", LastName = "Bar" } });
-            ;
 
             // Act
             Type type = WebGrid.GetElementType(elements);
@@ -2228,7 +2227,6 @@ namespace System.Web.Helpers.Test
         {
             // Arrange
             IEnumerable<Person> elements = new GenericEnumerable<Person>(new[] { new Person { FirstName = "Foo", LastName = "Bar" } });
-            ;
 
             // Act
             Type type = WebGrid.GetElementType(elements);

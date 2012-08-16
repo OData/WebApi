@@ -5,10 +5,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using System.Xml.Linq;
-using System.Xml;
 
 namespace System.Web.Http.SelfHost
 {

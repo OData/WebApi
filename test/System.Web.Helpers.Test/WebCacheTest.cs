@@ -101,7 +101,7 @@ namespace System.Web.Helpers.Test
         {
             string key = DateTime.UtcNow.Ticks.ToString() + "_SetWithSlidingExpirationForMoreThanYear_SetTest";
             object expected = new object();
-            Assert.ThrowsArgumentLessThanOrEqualTo(() => WebCache.Set(key, expected, 365 * 24 * 60 + 1, true), "minutesToCache", (365 * 24 * 60).ToString());
+            Assert.ThrowsArgumentLessThanOrEqualTo(() => WebCache.Set(key, expected, (365 * 24 * 60) + 1, true), "minutesToCache", (365 * 24 * 60).ToString());
         }
 
         [Fact]

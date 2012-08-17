@@ -324,4 +324,10 @@
   <data name="CannotCastFilter" xml:space="preserve">
     <value>Cannot cast $filter of type '{0}' to type '{1}'.</value>
   </data>
+  <data name="OnlySkipAndTopSupported" xml:space="preserve">
+    <value>Only $skip and $top OData query options are supported for this type.</value>
+  </data>
+  <data name="PrimitiveTypeRequired" xml:space="preserve">
+    <value>The type '{0}' is not a primitive type.</value>
+  </data>
 </root>

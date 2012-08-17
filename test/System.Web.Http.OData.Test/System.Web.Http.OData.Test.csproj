@@ -98,6 +98,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BaselineResource.resx</DependentUpon>
     </Compile>
+    <Compile Include="OData\Query\Controllers\PrimitiveController.cs" />
     <Compile Include="TestCommon\ODataMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\PeopleController.cs" />
     <Compile Include="OData\Formatter\ODataTestUtil.cs" />

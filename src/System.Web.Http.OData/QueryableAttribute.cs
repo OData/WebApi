@@ -100,41 +100,64 @@ namespace System.Web.Http
 
                     try
                     {
-                        // Get model for the entire app
-                        IEdmModel model = configuration.GetEdmModel();
+                        ODataQueryContext queryContext;
+
                         Type originalQueryType = query.GetType();
                         Type entityClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
 
-                        if (entityClrType == null)
+                        // Primitive types do not construct an EDM model and deal only with the CLR Type
+                        if (TypeHelper.IsQueryPrimitiveType(entityClrType))
                         {
-                            // The actual type is not IEnumerable or IQueryable
+                            queryContext = new ODataQueryContext(entityClrType);
+                        }
+                        else
+                        {
+                            // Get model for the entire app
+                            IEdmModel model = configuration.GetEdmModel();
+
+                            if (entityClrType == null)
+                            {
+                                // The actual type is not IEnumerable or IQueryable
+                                actionExecutedContext.Response = request.CreateErrorResponse(
+                                   HttpStatusCode.InternalServerError,
+                                   Error.Format(SRResources.FailedToRetrieveTypeToBuildEdmModel, originalQueryType.FullName,
+                                       actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName));
+                                return;
+                            }
+
+                            if (model == null)
+                            {
+                                // user has not configured anything, now let's create one just for this type
+                                // and cache it in the action descriptor
+                                model = actionDescriptor.GetEdmModel(entityClrType);
+                            }
+
+                            if (model == null)
+                            {
+                                // we need to send 500 if we can't create a model
+                                actionExecutedContext.Response = request.CreateErrorResponse(
+                                    HttpStatusCode.InternalServerError,
+                                    Error.Format(SRResources.FailedToBuildEdmModel, entityClrType.FullName,
+                                        actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName));
+                                return;
+                            }
+
+                            // parses the query from request uri
+                            queryContext = new ODataQueryContext(model, entityClrType);
+                        }
+
+                        ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+
+                        // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
+                        if (queryContext.IsPrimitiveClrType && (queryOptions.Filter != null || queryOptions.OrderBy != null))
+                        {
+                            // An attempt to use a query option not allowed for primitive types
+                            // generates a BadRequest with a general message that avoids information disclosure.
                             actionExecutedContext.Response = request.CreateErrorResponse(
-                               HttpStatusCode.InternalServerError,
-                               Error.Format(SRResources.FailedToRetrieveTypeToBuildEdmModel, originalQueryType.FullName,
-                                   actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName));
+                                                                HttpStatusCode.BadRequest,
+                                                                SRResources.OnlySkipAndTopSupported);
                             return;
                         }
-
-                        if (model == null)
-                        {
-                            // user has not configured anything, now let's create one just for this type
-                            // and cache it in the action descriptor
-                            model = actionDescriptor.GetEdmModel(entityClrType);
-                        }
-
-                        if (model == null)
-                        {
-                            // we need to send 500 if we can't create a model
-                            actionExecutedContext.Response = request.CreateErrorResponse(
-                                HttpStatusCode.InternalServerError,
-                                Error.Format(SRResources.FailedToBuildEdmModel, entityClrType.FullName,
-                                    actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName));
-                            return;
-                        }
-
-                        // parses the query from request uri
-                        var queryContext = new ODataQueryContext(model, entityClrType);
-                        var queryOptions = new ODataQueryOptions(queryContext, request);
 
                         // apply the query
                         queryable = query as IQueryable;

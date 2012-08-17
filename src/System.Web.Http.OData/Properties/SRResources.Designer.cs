@@ -493,6 +493,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only $skip and $top OData query options are supported for this type..
+        /// </summary>
+        internal static string OnlySkipAndTopSupported {
+            get {
+                return ResourceManager.GetString("OnlySkipAndTopSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicate property named &apos;{0}&apos; is not supported in the OrderByQueryNode..
         /// </summary>
         internal static string OrderByDuplicateProperty {
@@ -516,6 +525,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string OrderByPropertyNotFound {
             get {
                 return ResourceManager.GetString("OrderByPropertyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a primitive type..
+        /// </summary>
+        internal static string PrimitiveTypeRequired {
+            get {
+                return ResourceManager.GetString("PrimitiveTypeRequired", resourceCulture);
             }
         }
         

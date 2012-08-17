@@ -110,5 +110,61 @@ namespace System.Web.Http.OData
 
             Assert.Equal(HttpStatusCode.BadRequest, errorResponse.Response.StatusCode);
         }
+
+        [Theory]
+        [InlineData("$top=1")]
+        [InlineData("$skip=1")]
+        public void Primitives_Can_Be_Used_For_Top_And_Skip(string filter)
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
+            HttpConfiguration config = new HttpConfiguration();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Primitive", typeof(PrimitiveController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(PrimitiveController).GetMethod("GetIEnumerableOfInt"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            HttpContent expectedResponse = new ObjectContent(typeof(object), new List<int>(), new JsonMediaTypeFormatter());
+            context.Response.Content = expectedResponse;
+
+            // Act and Assert
+            attribute.OnActionExecuted(context);
+            HttpResponseMessage response = context.Response;
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(expectedResponse, response.Content);
+        }
+
+        [Theory]
+        [InlineData("$filter=2 eq 1")]
+        [InlineData("$orderby=1")]
+        public void Primitives_Cannot_Be_Used_By_Filter_And_OrderBy(string filter)
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
+            HttpConfiguration config = new HttpConfiguration();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Primitive", typeof(PrimitiveController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(PrimitiveController).GetMethod("GetIEnumerableOfInt"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            context.Response.Content = new ObjectContent(typeof(object), new List<int>(), new JsonMediaTypeFormatter());
+
+            // Act and Assert
+            attribute.OnActionExecuted(context);
+            HttpResponseMessage response = context.Response;
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.IsAssignableFrom(typeof(ObjectContent), response.Content);
+            Assert.IsType(typeof(HttpError), ((ObjectContent)response.Content).Value);
+            Assert.Equal("Only $skip and $top OData query options are supported for this type.",
+                         ((HttpError)((ObjectContent)response.Content).Value).Message);
+        }
     }
 }

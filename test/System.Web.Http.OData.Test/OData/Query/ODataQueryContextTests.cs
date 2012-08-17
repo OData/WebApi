@@ -4,12 +4,92 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.Edm;
+using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Xunit;
+using Xunit.Extensions;
+using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData.Query
 {
     public class ODataQueryContextTests
     {
+        // All types considered primitive for queries containing $skip and $top
+        public static TheoryDataSet<Type> QueryPrimitiveTypes
+        {
+            get
+            {
+                return new TheoryDataSet<Type>
+                {
+                    // Edm primitive kinds
+                    typeof(byte[]),
+                    typeof(bool),
+                    typeof(byte),
+                    typeof(DateTime),
+                    typeof(DateTimeOffset),
+                    typeof(decimal),
+                    typeof(double),
+                    typeof(Guid),
+                    typeof(short),
+                    typeof(int),
+                    typeof(long),
+                    typeof(sbyte),
+                    typeof(float),
+                    typeof(string),
+                    typeof(TimeSpan),
+
+                    // additional types not considered Edm primitives
+                    // but which we permit in $skip and $top
+                    typeof(int?),
+                    typeof(char),
+                    typeof(sbyte),
+                    typeof(ushort),
+                    typeof(uint),
+                    typeof(ulong),
+                    typeof(Uri),
+                    typeof(FlagsEnum),
+                    typeof(SimpleEnum),
+                    typeof(LongEnum),
+                    typeof(FlagsEnum?),
+                    typeof(int[]),
+                    typeof(int[][]),
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("QueryPrimitiveTypes")]
+        public void ContructorWithOnlyType(Type type)
+        {
+            // Arrange & Act
+            ODataQueryContext context = new ODataQueryContext(type);
+
+            // Assert
+            Assert.Null(context.Model);
+            Assert.True(context.EntityClrType == type);
+            Assert.Null(context.EntitySet);
+            Assert.True(context.IsPrimitiveClrType);
+        }
+
+        [Fact]
+        public void ContructorWithOnlyType_Throws_With_Null_Type()
+        {
+            // Arrange & Act & Assert
+            Assert.ThrowsArgumentNull(
+                    () => new ODataQueryContext(null), 
+                    "clrType");
+        }
+
+        [Fact]
+        public void ContructorWithOnlyType_Throws_With_NonPrimitive_Type()
+        {
+            // Arrange & Act & Assert
+            Assert.ThrowsArgument(
+                    () => new ODataQueryContext(this.GetType()),
+                    "clrType",
+                    "The type 'ODataQueryContextTests' is not a primitive type.");
+        }
+
         [Fact]
         public void ContructorWithModelAndType()
         {
@@ -65,8 +145,9 @@ namespace System.Web.Http.OData.Query
         public void ContructorWithNullModelAndTypeThrows()
         {
             // Act && Assert
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(null, typeof(Customer)));
+            Assert.ThrowsArgumentNull(
+                    () => new ODataQueryContext(null, typeof(Customer)), 
+                    "model");
         }
 
         [Fact]
@@ -75,31 +156,35 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainers().Single().FindEntitySet("Customers");
 
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(null, typeof(Customer), entitySet));
+            Assert.ThrowsArgumentNull(
+                    () => new ODataQueryContext(null, typeof(Customer), entitySet), 
+                    "model");
         }
 
         [Fact]
         public void ContructorWithNullModelAndTypeAndEntitySetNameThrows()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(null, typeof(Customer), "Customers"));
+            Assert.ThrowsArgumentNull(() =>
+                    new ODataQueryContext(null, typeof(Customer), "Customers"), 
+                    "model");
         }
 
         [Fact]
         public void ConstructorWithNullTypeThrows()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(model, null));
+            Assert.ThrowsArgumentNull(() =>
+                    new ODataQueryContext(model, null),
+                    "entityClrType");
         }
 
         [Fact]
         public void ConstructorWithNullTypeAndEntitySetNameThrows()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(model, null, "Customers"));
+            Assert.ThrowsArgumentNull(() =>
+                    new ODataQueryContext(model, null, "Customers"),
+                    "entityClrType");
         }
 
         [Fact]
@@ -108,32 +193,37 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainers().Single().FindEntitySet("Customers");
 
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(model, null, entitySet));
+            Assert.ThrowsArgumentNull(() =>
+                    new ODataQueryContext(model, null, entitySet), 
+                    "entityClrType");
         }
 
         [Fact]
         public void ConstructorWithNullEntitySetNameThrows()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            Assert.Throws<ArgumentException>(() =>
-                new ODataQueryContext(model, typeof(Customer), (string)null));
+            Assert.ThrowsArgument(
+                    () => new ODataQueryContext(model, typeof(Customer), (string)null),
+                    "entitySetName");
         }
 
         [Fact]
         public void ConstructorWithEmptyEntitySetNameThrows()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            Assert.Throws<ArgumentException>(() =>
-                new ODataQueryContext(model, typeof(Customer), string.Empty));
+            Assert.ThrowsArgument(
+                    () => new ODataQueryContext(model, typeof(Customer), string.Empty),
+                    "entitySetName",
+                    "The argument 'entitySetName' is null or empty." + Environment.NewLine + "Parameter name: entitySetName");
         }
 
         [Fact]
         public void ConstructorWithNullEntitySetThrows()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            Assert.Throws<ArgumentNullException>(() =>
-                new ODataQueryContext(model, typeof(Customer), (IEdmEntitySet)null));
+            Assert.ThrowsArgumentNull(() =>
+                    new ODataQueryContext(model, typeof(Customer), (IEdmEntitySet)null),
+                    "entitySet");
         }
     }
 }

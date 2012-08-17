@@ -14,6 +14,27 @@ namespace System.Web.Http.OData
     public class ODataQueryContext
     {
         /// <summary>
+        /// Constructs an instance of <see cref="ODataQueryContext"/> based only on a CLR type. 
+        /// </summary>
+        /// <remarks>This is intended to be used only for primitive types.</remarks>
+        /// <param name="clrType">The CLR type information.</param>
+        public ODataQueryContext(Type clrType)
+        {
+            if (clrType == null)
+            {
+                throw Error.ArgumentNull("clrType");
+            }
+
+            if (!TypeHelper.IsQueryPrimitiveType(clrType))
+            {
+                throw Error.Argument("clrType", SRResources.PrimitiveTypeRequired, clrType.Name);
+            }
+
+            EntityClrType = clrType;
+            IsPrimitiveClrType = true;
+        }
+
+        /// <summary>
         /// Constructs an instance of <see cref="ODataQueryContext"/> with EdmModel and Entity's CLR type. 
         /// By default we assume the full name of the CLR type is used for the name for the EntitySet stored in the model.
         /// </summary>
@@ -185,5 +206,12 @@ namespace System.Web.Http.OData
         /// Gets the CLR type of the entity.
         /// </summary>
         public Type EntityClrType { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the current
+        /// <see cref="ODataQueryContext"/> instance is associated
+        /// with a primitive CLR type.
+        /// </summary>
+        public bool IsPrimitiveClrType { get; private set; }
     }
 }

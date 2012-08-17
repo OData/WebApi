@@ -190,7 +190,7 @@ namespace System.Web.Http.OData.Query
             }
 
             OrderByQueryOption orderBy = OrderBy;
-            if (orderBy == null && (Skip != null || Top != null) && canUseDefaultOrderBy)
+            if (orderBy == null && (Skip != null || Top != null) && canUseDefaultOrderBy && !Context.IsPrimitiveClrType)
             {
                 // Instead of failing early here if we cannot generate a default OrderBy,
                 // let the IQueryable backend fail (if it has to).

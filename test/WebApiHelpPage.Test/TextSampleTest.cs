@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using Xunit;
 

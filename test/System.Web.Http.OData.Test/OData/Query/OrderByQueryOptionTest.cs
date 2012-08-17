@@ -94,7 +94,7 @@ namespace System.Web.Http.OData.Query
             var orderByOption = new OrderByQueryOption("Name", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "Andy"  },
+                new Customer { CustomerId = 1, Name = "Andy" },
                 new Customer { CustomerId = 2, Name = "Aaron" },
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();
@@ -113,7 +113,7 @@ namespace System.Web.Http.OData.Query
             var orderByOption = new OrderByQueryOption("Name asc", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "Andy"  },
+                new Customer { CustomerId = 1, Name = "Andy" },
                 new Customer { CustomerId = 2, Name = "Aaron" },
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();
@@ -132,7 +132,7 @@ namespace System.Web.Http.OData.Query
             var orderByOption = new OrderByQueryOption("Name desc", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "Andy"  },
+                new Customer { CustomerId = 1, Name = "Andy" },
                 new Customer { CustomerId = 2, Name = "Aaron" },
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();

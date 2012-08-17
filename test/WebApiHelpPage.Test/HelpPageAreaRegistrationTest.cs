@@ -1,4 +1,6 @@
-﻿using System.Web.Mvc;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Mvc;
 using System.Web.Routing;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using Xunit;

@@ -73,7 +73,7 @@ namespace System.Web.Http.OData.Query
             var skipOption = new SkipQueryOption("1", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "Andy"  },
+                new Customer { CustomerId = 1, Name = "Andy" },
                 new Customer { CustomerId = 2, Name = "Aaron" },
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();
@@ -93,7 +93,7 @@ namespace System.Web.Http.OData.Query
             var skipOption = new SkipQueryOption("1", context);
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "Andy"  },
+                new Customer { CustomerId = 1, Name = "Andy" },
                 new Customer { CustomerId = 2, Name = "Aaron" },
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();

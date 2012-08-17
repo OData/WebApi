@@ -1,8 +1,10 @@
-﻿using System.Web.Http.Description;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http.Headers;
+using System.Web.Http.Description;
+using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models;
 using Xunit;
-using System.Net.Http.Headers;
-using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 
 namespace WebApiHelpPageWebHost.UnitTest
 {

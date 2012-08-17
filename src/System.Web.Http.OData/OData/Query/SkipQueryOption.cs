@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("context");
             }
 
-            if (string.IsNullOrEmpty(rawValue))
+            if (String.IsNullOrEmpty(rawValue))
             {
                 throw Error.ArgumentNullOrEmpty("rawValue");
             }

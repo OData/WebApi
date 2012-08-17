@@ -18,13 +18,13 @@ namespace System.Web.Http.OData.Builder.Conventions
             {
                 return new TheoryDataSet<object, string>
                 {
-                    { 1, "1"},
-                    {"1", "'1'"},
-                    {new DateTime(2012,12,31),"datetime'2012-12-31T00:00:00'"},
-                    {new byte[]{ 1,2 }, "binary'0102'"},
-                    {false, "false"},
-                    {true, "true"},
-                    {new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "guid'dddddddd-dddd-dddd-dddd-dddddddddddd'"}
+                    { 1, "1" },
+                    { "1", "'1'" },
+                    { new DateTime(2012,12,31),"datetime'2012-12-31T00:00:00'" },
+                    { new byte[] { 1,2 }, "binary'0102'" },
+                    { false, "false" },
+                    { true, "true" },
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "guid'dddddddd-dddd-dddd-dddd-dddddddddddd'" }
                 };
             }
         }

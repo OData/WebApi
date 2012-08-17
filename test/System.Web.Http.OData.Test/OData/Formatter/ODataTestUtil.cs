@@ -121,4 +121,3 @@ namespace System.Web.Http.OData.Formatter
         DbSet<FormatterPerson> Persons { get; set; }
     }
 }
-

@@ -2,11 +2,11 @@
 
 using System.Linq;
 using System.Web.Http.Controllers;
+using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Xunit;
 using Xunit.Extensions;
-using System.Web.Http.OData.Query.Controllers;
 
 namespace System.Web.Http.OData.Query
 {

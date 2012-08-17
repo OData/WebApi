@@ -15,7 +15,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
     {
         private const int DefaultCollectionSize = 3;
         private readonly SimpleTypeObjectGenerator SimpleObjectGenerator = new SimpleTypeObjectGenerator();
-        
+
         /// <summary>
         /// Generates an object for a given type. The type needs to be public, have a public default constructor and settable public properties/fields. Currently it supports the following types:
         /// Simple types: <see cref="int"/>, <see cref="string"/>, <see cref="Enum"/>, <see cref="DateTime"/>, <see cref="Uri"/>, etc.
@@ -101,7 +101,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             return null;
         }
 
-        private static object GenerateGenericType(Type type, int DefaultCollectionSize, Dictionary<Type, object> createdObjectReferences)
+        private static object GenerateGenericType(Type type, int collectionSize, Dictionary<Type, object> createdObjectReferences)
         {
             Type genericTypeDefinition = type.GetGenericTypeDefinition();
             if (genericTypeDefinition == typeof(Nullable<>))
@@ -127,18 +127,18 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                     genericTypeDefinition == typeof(ICollection<>))
                 {
                     Type collectionType = typeof(List<>).MakeGenericType(genericArguments);
-                    return GenerateCollection(collectionType, DefaultCollectionSize, createdObjectReferences);
+                    return GenerateCollection(collectionType, collectionSize, createdObjectReferences);
                 }
 
                 if (genericTypeDefinition == typeof(IQueryable<>))
                 {
-                    return GenerateQueryable(type, DefaultCollectionSize, createdObjectReferences);
+                    return GenerateQueryable(type, collectionSize, createdObjectReferences);
                 }
 
                 Type closedCollectionType = typeof(ICollection<>).MakeGenericType(genericArguments[0]);
                 if (closedCollectionType.IsAssignableFrom(type))
                 {
-                    return GenerateCollection(type, DefaultCollectionSize, createdObjectReferences);
+                    return GenerateCollection(type, collectionSize, createdObjectReferences);
                 }
             }
 
@@ -147,13 +147,13 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 if (genericTypeDefinition == typeof(IDictionary<,>))
                 {
                     Type dictionaryType = typeof(Dictionary<,>).MakeGenericType(genericArguments);
-                    return GenerateDictionary(dictionaryType, DefaultCollectionSize, createdObjectReferences);
+                    return GenerateDictionary(dictionaryType, collectionSize, createdObjectReferences);
                 }
 
                 Type closedDictionaryType = typeof(IDictionary<,>).MakeGenericType(genericArguments[0], genericArguments[1]);
                 if (closedDictionaryType.IsAssignableFrom(type))
                 {
-                    return GenerateDictionary(type, DefaultCollectionSize, createdObjectReferences);
+                    return GenerateDictionary(type, collectionSize, createdObjectReferences);
                 }
             }
 
@@ -395,6 +395,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
 
         private class SimpleTypeObjectGenerator
         {
+            private long _index = 0;
             private static readonly Dictionary<Type, Func<long, object>> DefaultGenerators = InitializeGenerators();
 
             [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple type factories and cannot be split up.")]
@@ -402,40 +403,44 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             {
                 return new Dictionary<Type, Func<long, object>>
                 {
-                    {typeof(Boolean), index => true},
-                    {typeof(Byte), index => (Byte)64},
-                    {typeof(Char), index => (Char)65},
-                    {typeof(DateTime), index => DateTime.Now},
-                    {typeof(DateTimeOffset), index => new DateTimeOffset(DateTime.Now)},
-                    {typeof(DBNull), index => DBNull.Value},
-                    {typeof(Decimal), index => (Decimal)index},
-                    {typeof(Double), index => (Double)(index + 0.1)},
-                    {typeof(Guid), index => Guid.NewGuid()},
-                    {typeof(Int16), index => (Int16)(index % Int16.MaxValue)},
-                    {typeof(Int32), index => (Int32)(index % Int32.MaxValue)},
-                    {typeof(Int64), index => (Int64)index},
-                    {typeof(Object), index => new object()},
-                    {typeof(SByte), index => (SByte)64},
-                    {typeof(Single), index => (Single)(index + 0.1)},
-                    {typeof(String), index =>
-                    {
-                        return String.Format(CultureInfo.CurrentCulture, "sample string {0}", index);
-                    }},
-                    {typeof(TimeSpan), index =>
-                    {
-                        return TimeSpan.FromTicks(1234567);
-                    }},
-                    {typeof(UInt16), index => (UInt16)(index % UInt16.MaxValue)},
-                    {typeof(UInt32), index => (UInt32)(index % UInt32.MaxValue)},
-                    {typeof(UInt64), index => (UInt64)index},
-                    {typeof(Uri), index =>
-                    {
-                        return new Uri(String.Format(CultureInfo.CurrentCulture, "http://webapihelppage{0}.com", index));
-                    }},
+                    { typeof(Boolean), index => true },
+                    { typeof(Byte), index => (Byte)64 },
+                    { typeof(Char), index => (Char)65 },
+                    { typeof(DateTime), index => DateTime.Now },
+                    { typeof(DateTimeOffset), index => new DateTimeOffset(DateTime.Now) },
+                    { typeof(DBNull), index => DBNull.Value },
+                    { typeof(Decimal), index => (Decimal)index },
+                    { typeof(Double), index => (Double)(index + 0.1) },
+                    { typeof(Guid), index => Guid.NewGuid() },
+                    { typeof(Int16), index => (Int16)(index % Int16.MaxValue) },
+                    { typeof(Int32), index => (Int32)(index % Int32.MaxValue) },
+                    { typeof(Int64), index => (Int64)index },
+                    { typeof(Object), index => new object() },
+                    { typeof(SByte), index => (SByte)64 },
+                    { typeof(Single), index => (Single)(index + 0.1) },
+                    { 
+                        typeof(String), index =>
+                        {
+                            return String.Format(CultureInfo.CurrentCulture, "sample string {0}", index);
+                        }
+                    },
+                    { 
+                        typeof(TimeSpan), index =>
+                        {
+                            return TimeSpan.FromTicks(1234567);
+                        }
+                    },
+                    { typeof(UInt16), index => (UInt16)(index % UInt16.MaxValue) },
+                    { typeof(UInt32), index => (UInt32)(index % UInt32.MaxValue) },
+                    { typeof(UInt64), index => (UInt64)index },
+                    { 
+                        typeof(Uri), index =>
+                        {
+                            return new Uri(String.Format(CultureInfo.CurrentCulture, "http://webapihelppage{0}.com", index));
+                        }
+                    },
                 };
             }
-
-            private long _index = 0;
 
             public static bool CanGenerateObject(Type type)
             {

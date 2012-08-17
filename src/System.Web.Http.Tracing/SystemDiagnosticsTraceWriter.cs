@@ -424,7 +424,7 @@ namespace System.Web.Http.Tracing
                     break;
                 }
 
-                Contract.Assert(!object.ReferenceEquals(httpError, innerExceptionObject));
+                Contract.Assert(!Object.ReferenceEquals(httpError, innerExceptionObject));
 
                 httpError = innerExceptionObject as HttpError;
             }
@@ -444,7 +444,7 @@ namespace System.Web.Http.Tracing
                 }
             }
 
-            return Error.Format(SRResources.HttpErrorModelStateErrorFormat, string.Join(", ", messages));
+            return Error.Format(SRResources.HttpErrorModelStateErrorFormat, String.Join(", ", messages));
         }
 
         private void TraceMessage(TraceLevel level, string message)

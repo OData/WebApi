@@ -219,7 +219,6 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 {
                     apiModel.SampleRequests.Add(item.Key, item.Value);
                     LogInvalidSampleAsError(apiModel, item.Value);
-
                 }
 
                 foreach (var item in sampleGenerator.GetSampleResponses(apiDescription))

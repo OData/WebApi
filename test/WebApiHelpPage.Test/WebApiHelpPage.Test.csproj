@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>$(WebStackRootPath)\bin\Release\Test\</OutputPath>
+    <OutputPath>$(WebStackRootPath)\bin\Extensions\Release\Test\</OutputPath>
     <DocumentationFile>$(WebStackRootPath)\bin\Extensions\Release\Test\WebApiHelpPage.Test.XML</DocumentationFile>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -42,7 +42,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>$(WebStackRootPath)\bin\CodeCoverage\Test\</OutputPath>
+    <OutputPath>$(WebStackRootPath)\bin\Extensions\CodeCoverage\Test\</OutputPath>
     <DocumentationFile>$(WebStackRootPath)\bin\Extensions\CodeCoverage\Test\WebApiHelpPage.Test.XML</DocumentationFile>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>

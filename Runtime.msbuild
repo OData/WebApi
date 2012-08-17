@@ -9,16 +9,26 @@
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
         <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
+        <ExtensionsTestResultsDirectory>$(MSBuildThisFileDirectory)bin\Extensions\$(Configuration)\test\TestResults\</ExtensionsTestResultsDirectory>
     </PropertyGroup>
+    
+    <ItemGroup>            
+        <SolutionsToBuild Include="Runtime.sln">
+            <ReleaseRoot>.</ReleaseRoot>
+        </SolutionsToBuild>    
+        <SolutionsToBuild Include="Extensions.sln">
+            <ReleaseRoot>Extensions</ReleaseRoot>
+        </SolutionsToBuild>
+    </ItemGroup>    
 
     <Target Name="Integration" DependsOnTargets="Clean;Build;UnitTest" />
 
     <Target Name="Clean">
         <MSBuild
-            Projects="Runtime.sln"
+            Projects="@(SolutionsToBuild)"
             Targets="Clean"
             Properties="Configuration=$(Configuration)" />
-        <RemoveDir Directories="bin\$(Configuration)" />
+        <RemoveDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
     </Target>
 
     <Target Name="Prereq" DependsOnTargets="PreRestorePackages">
@@ -43,9 +53,9 @@
     </Target>
 
     <Target Name="Build" DependsOnTargets="Prereq">
-        <MakeDir Directories="bin\$(Configuration)" />
+        <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
         <MSBuild
-            Projects="Runtime.sln"
+            Projects="@(SolutionsToBuild)"
             BuildInParallel="$(BuildInParallel)"
             Targets="Build"
             Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled)" />
@@ -53,12 +63,17 @@
 
     <Target Name="UnitTest" DependsOnTargets="Build">
         <ItemGroup>            
-            <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll" />
+            <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll">
+                <ResultsDirectory>$(TestResultsDirectory)</ResultsDirectory>
+            </TestDLLsXunit>
+            <TestDLLsXunit Include="bin\Extensions\$(Configuration)\test\*.Test.dll">
+                <ResultsDirectory>$(ExtensionsTestResultsDirectory)</ResultsDirectory>
+            </TestDLLsXunit>
             <XunitProject Include="tools\WebStack.xunit.targets">
-                <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=$(TestResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
+                <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=%(TestDLLsXunit.ResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
             </XunitProject>
         </ItemGroup>
-        <MakeDir Directories="$(TestResultsDirectory)" />
+        <MakeDir Directories="%(TestDLLsXunit.ResultsDirectory)" />
         <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
     </Target>
 </Project>

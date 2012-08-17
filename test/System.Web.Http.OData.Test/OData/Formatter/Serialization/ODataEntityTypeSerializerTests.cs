@@ -377,4 +377,3 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
     }
 }
-

@@ -73,7 +73,7 @@ namespace System.Web.Http.OData
                 throw Error.ArgumentNull("entityClrType");
             }
 
-            if (string.IsNullOrEmpty(entitySetName))
+            if (String.IsNullOrEmpty(entitySetName))
             {
                 throw Error.ArgumentNullOrEmpty("entitySetName");
             }

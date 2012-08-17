@@ -32,7 +32,7 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("context");
             }
 
-            if (string.IsNullOrEmpty(rawValue))
+            if (String.IsNullOrEmpty(rawValue))
             {
                 throw Error.ArgumentNullOrEmpty("rawValue");
             }
@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Query
                     // TODO: Bug 462293: Review this code with Alex!
                     // 1. Do I need to create this fake uri?
                     Uri fakeServiceRootUri = new Uri("http://server/");
-                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, string.Format(CultureInfo.InvariantCulture, "{0}/?$orderby={1}", Context.EntitySet.Name, RawValue));
+                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, String.Format(CultureInfo.InvariantCulture, "{0}/?$orderby={1}", Context.EntitySet.Name, RawValue));
                     SemanticTree semanticTree = SemanticTree.ParseUri(fakeQueryOptionsUri, fakeServiceRootUri, Context.Model);
                     _queryNode = semanticTree.Query as OrderByQueryNode;
                 }

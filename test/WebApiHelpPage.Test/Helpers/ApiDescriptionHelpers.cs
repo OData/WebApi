@@ -1,10 +1,12 @@
-﻿using System.Web.Http.Description;
-using System.Web.Http;
-using System.Net.Http.Formatting;
-using System.Collections.Generic;
-using System.Web.Http.Controllers;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Formatting;
+using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Http.Description;
 
 namespace WebApiHelpPageWebHost.UnitTest.Helpers
 {

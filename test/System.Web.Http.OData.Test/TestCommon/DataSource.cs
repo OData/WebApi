@@ -32,11 +32,11 @@ namespace System.Web.Http.OData
 
         public static Address[] Address = new Address[]
         {
-            new Address() { StreetAddress = "StreetAddress1", City = "City1", State = "State1", ZipCode =  1 },
-            new Address() { StreetAddress = "StreetAddress2", City = "City2", State = "State2", ZipCode =  2 },
-            new Address() { StreetAddress = "StreetAddress3", City = "City3", State = "State3", ZipCode =  3 },
-            new Address() { StreetAddress = "StreetAddress4", City = "City4", State = "State4", ZipCode =  4 },
-            new Address() { StreetAddress = "StreetAddress5", City = "City5", State = "State5", ZipCode =  5 },
+            new Address() { StreetAddress = "StreetAddress1", City = "City1", State = "State1", ZipCode = 1 },
+            new Address() { StreetAddress = "StreetAddress2", City = "City2", State = "State2", ZipCode = 2 },
+            new Address() { StreetAddress = "StreetAddress3", City = "City3", State = "State3", ZipCode = 3 },
+            new Address() { StreetAddress = "StreetAddress4", City = "City4", State = "State4", ZipCode = 4 },
+            new Address() { StreetAddress = "StreetAddress5", City = "City5", State = "State5", ZipCode = 5 },
         };
     }
 }

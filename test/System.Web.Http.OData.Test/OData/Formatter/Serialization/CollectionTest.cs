@@ -31,7 +31,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter writes out array of bool in valid ODataMessageFormat")]
         public void ArrayOfBoolsSerializesAsOData()
         {
-
             ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false }, _formatter);
 
             Assert.Xml.Equal(BaselineResource.TestArrayOfBools, content.ReadAsStringAsync().Result);
@@ -41,7 +40,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter writes out List of strings in valid ODataMessageFormat")]
         public void ListOfStringsSerializesAsOData()
         {
-
             List<string> listOfStrings = new List<string>();
             listOfStrings.Add("Frank");
             listOfStrings.Add("Steve");
@@ -57,7 +55,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter throws while writing out non-homogenous collection of objects")]
         public void CollectionOfObjectsSerializesAsOData()
         {
-
             Collection<object> collectionOfObjects = new Collection<object>();
             collectionOfObjects.Add(1);
             collectionOfObjects.Add("Frank");
@@ -73,7 +70,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter writes out Collection of complex types in valid ODataMessageFormat")]
         public void CollectionOfComplexTypeSerializesAsOData()
         {
-
             IEnumerable<Person> collectionOfPerson = new Collection<Person>() 
             {
                 (Person)TypeInitializer.GetInstance(SupportedTypes.Person, 0),
@@ -90,7 +86,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter writes out Dictionary type in valid ODataMessageFormat")]
         public void DictionarySerializesAsOData()
         {
-
             Dictionary<int, string> dictionary = new Dictionary<int, string>();
             dictionary.Add(1, "Frank");
             dictionary.Add(2, "Steve");
@@ -106,7 +101,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter sets required headers for a complex type when serialized as XML.")]
         public void ContentHeadersAreAddedForXmlMediaType()
         {
-
             ObjectContent<IEnumerable<Person>> content = new ObjectContent<IEnumerable<Person>>(new Person[] { new Person(0, new ReferenceDepthContext(7)) }, _formatter);
             content.LoadIntoBufferAsync().Wait();
 
@@ -118,7 +112,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Trait("Description", "ODataMediaTypeFormatter sets required headers for a complex type when serialized as JSON.")]
         public void ContentHeadersAreAddedForJsonMediaType()
         {
-
             HttpContent content = new ObjectContent<Person[]>(new Person[] { new Person(0, new ReferenceDepthContext(7)) }, _formatter, "application/json");
             content.LoadIntoBufferAsync().Wait();
 

@@ -19,6 +19,5 @@ namespace System.Web.Http.OData.TestCommon.Models
     // Used as a type on which keys can be explicitly set
     public class DerivedWorkItem : WorkItem
     {
-
     }
 }

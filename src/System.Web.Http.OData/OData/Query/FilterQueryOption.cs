@@ -32,7 +32,7 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("context");
             }
 
-            if (string.IsNullOrEmpty(rawValue))
+            if (String.IsNullOrEmpty(rawValue))
             {
                 throw Error.ArgumentNullOrEmpty("rawValue");
             }
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Query
                     //      but the UriParser need to change from a linked list style tree (semantic ordering of operations pre-applied) to 
                     //      a flower style tree first. So for now we are rebuilding the just part of the Uri that is important for parsing $filter.
                     Uri fakeServiceRootUri = new Uri("http://server/");
-                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, string.Format(CultureInfo.InvariantCulture, "{0}/?$filter={1}", Context.EntitySet.Name, RawValue));
+                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, String.Format(CultureInfo.InvariantCulture, "{0}/?$filter={1}", Context.EntitySet.Name, RawValue));
                     SemanticTree semanticTree = SemanticTree.ParseUri(fakeQueryOptionsUri, fakeServiceRootUri, Context.Model);
                     _queryNode = semanticTree.Query as FilterQueryNode;
                 }

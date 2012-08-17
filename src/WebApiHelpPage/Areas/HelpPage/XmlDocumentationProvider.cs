@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Xml.XPath;
-using System.Globalization;
 
 namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
 {
@@ -14,8 +14,8 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
     public class XmlDocumentationProvider : IDocumentationProvider
     {
         private XPathNavigator _documentNavigator;
-        private const string _methodExpression = "/doc/members/member[@name='M:{0}']";
-        private const string _parameterExpression = "param[@name='{0}']";
+        private const string MethodExpression = "/doc/members/member[@name='M:{0}']";
+        private const string ParameterExpression = "param[@name='{0}']";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlDocumentationProvider"/> class.
@@ -55,7 +55,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
                 if (methodNode != null)
                 {
                     string parameterName = reflectedParameterDescriptor.ParameterInfo.Name;
-                    XPathNavigator parameterNode = methodNode.SelectSingleNode(String.Format(CultureInfo.InvariantCulture, _parameterExpression, parameterName));
+                    XPathNavigator parameterNode = methodNode.SelectSingleNode(String.Format(CultureInfo.InvariantCulture, ParameterExpression, parameterName));
                     if (parameterNode != null)
                     {
                         return parameterNode.Value.Trim();
@@ -71,7 +71,7 @@ namespace ROOT_PROJECT_NAMESPACE.Areas.HelpPage
             ReflectedHttpActionDescriptor reflectedActionDescriptor = actionDescriptor as ReflectedHttpActionDescriptor;
             if (reflectedActionDescriptor != null)
             {
-                string selectExpression = String.Format(CultureInfo.InvariantCulture, _methodExpression, GetMemberName(reflectedActionDescriptor.MethodInfo));
+                string selectExpression = String.Format(CultureInfo.InvariantCulture, MethodExpression, GetMemberName(reflectedActionDescriptor.MethodInfo));
                 return _documentNavigator.SelectSingleNode(selectExpression);
             }
 

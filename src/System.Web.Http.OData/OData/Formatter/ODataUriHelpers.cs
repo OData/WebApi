@@ -160,7 +160,7 @@ namespace System.Web.Http.OData.Formatter
                 Uri requestUriWithoutQuerypart = new Uri(requestUri.GetLeftPart(UriPartial.Path));
                 SyntacticTree syntacticTree = SyntacticTree.ParseUri(requestUriWithoutQuerypart, baseAddress);
                 SegmentQueryToken lastSegment = syntacticTree.Path as SegmentQueryToken;
-                if (lastSegment != null && !string.IsNullOrEmpty(lastSegment.Name))
+                if (lastSegment != null && !String.IsNullOrEmpty(lastSegment.Name))
                 {
                     return lastSegment.Name;
                 }

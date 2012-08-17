@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Http;
 using System.Web.Mvc;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Controllers;

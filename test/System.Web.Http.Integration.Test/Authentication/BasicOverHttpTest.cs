@@ -9,7 +9,7 @@ namespace System.Web.Http
 {
     public class BasicOverHttpTest
     {
-        private static readonly string BaseAddress = "http://localhost:8080";
+        private static readonly string BaseAddress = "http://localhost:50231";
 
         [Fact]
         public void AuthenticateWithUsernameTokenSucceed()

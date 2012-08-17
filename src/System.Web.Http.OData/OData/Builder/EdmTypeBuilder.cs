@@ -9,6 +9,9 @@ using Microsoft.Data.Edm.Library;
 
 namespace System.Web.Http.OData.Builder
 {
+    /// <summary>
+    /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref=" IStructuralTypeConfiguration"/>'s.
+    /// </summary>
     public class EdmTypeBuilder
     {
         private readonly List<IStructuralTypeConfiguration> _configurations;
@@ -110,6 +113,11 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Builds <see cref="IEdmType"/>'s from <paramref name="configurations"/>
+        /// </summary>
+        /// <param name="configurations">A collection of <see cref="IStructuralTypeConfiguration"/>'s</param>
+        /// <returns>The built collection of <see cref="IEdmType"/></returns>
         public static IEnumerable<IEdmType> GetTypes(IEnumerable<IStructuralTypeConfiguration> configurations)
         {
             if (configurations == null)
@@ -121,6 +129,11 @@ namespace System.Web.Http.OData.Builder
             return builder.GetEdmTypes();
         }
 
+        /// <summary>
+        /// Gets the <see cref="EdmPrimitiveTypeKind"/> that maps to the <see cref="Type"/>
+        /// </summary>
+        /// <param name="clrType">The clr type</param>
+        /// <returns>The corresponding Edm primitive kind.</returns>
         public static EdmPrimitiveTypeKind GetTypeKind(Type clrType)
         {
             IEdmPrimitiveType primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(clrType);

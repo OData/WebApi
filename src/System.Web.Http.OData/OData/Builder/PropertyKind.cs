@@ -4,7 +4,7 @@ namespace System.Web.Http.OData.Builder
 {
     public enum PropertyKind
     {
-        Primitive,
+        Primitive = 0,
         Complex,
         Collection,
         Navigation

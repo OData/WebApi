@@ -4,7 +4,7 @@ namespace System.Web.Http.OData.Builder
 {
     public enum StructuralTypeKind
     {
-        EntityType,
+        EntityType = 0,
         ComplexType
     }
 }

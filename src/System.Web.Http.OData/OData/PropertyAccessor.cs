@@ -11,7 +11,7 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntityType">The type that contains the PropertyInfo</typeparam>
     internal abstract class PropertyAccessor<TEntityType> where TEntityType : class
     {
-        public PropertyAccessor(PropertyInfo property)
+        protected PropertyAccessor(PropertyInfo property)
         {
             if (property == null)
             {

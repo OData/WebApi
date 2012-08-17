@@ -5,6 +5,11 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData
 {
+    /// <summary>
+    /// An instance of <see cref="EntityInstanceContext{TEntityType}"/> gets passed to the self link (<see cref="M:IEntitySetConfiguration.HasIdLink"/>, <see cref="M:IEntitySetConfiguration.HasEditLink"/>, <see cref="M:IEntitySetConfiguration.HasReadLink"/>)
+    /// and navigation link (<see cref="M:IEntitySetConfiguration.HasNavigationPropertyLink"/>, <see cref="M:IEntitySetConfiguration.HasNavigationPropertiesLink"/>) builders and can be used by the link builders to generate links.
+    /// </summary>
+    /// <typeparam name="TEntityType">The entity type</typeparam>
     public class EntityInstanceContext<TEntityType> : EntityInstanceContext
     {
         /// <summary>

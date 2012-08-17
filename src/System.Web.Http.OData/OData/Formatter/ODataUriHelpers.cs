@@ -148,7 +148,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         // TODO: Bug 467617: figure out the story for the operation name on the client side and server side.
-        // This is clearly a hack. We are assuming that the operation name is the last segment in the request uri 
+        // This is clearly a workaround. We are assuming that the operation name is the last segment in the request uri 
         // which works for most cases and fall back to the type name of the object being written.
         // We should rather use uri parser semantic tree to figure out the operation name from the request url.
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "we really dont want to fail here and the underlying code can throw any exception")]

@@ -151,9 +151,9 @@ namespace System.Web.Http.OData.Query
             var orderByOption = new OrderByQueryOption("Name,Website", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.co.uk" },
+                new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.net" },
                 new Customer { CustomerId = 2, Name = "AAAA", Website = "http://www.aaaa.com" },
-                new Customer { CustomerId = 3, Name = "ACME", Website = "http://www.acme.co.nz" }
+                new Customer { CustomerId = 3, Name = "ACME", Website = "http://www.acme.com" }
             }).AsQueryable();
 
             var results = orderByOption.ApplyTo(customers).ToArray();
@@ -169,9 +169,9 @@ namespace System.Web.Http.OData.Query
             var orderByOption = new OrderByQueryOption("Name desc,Website", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.co.uk" },
+                new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.net" },
                 new Customer { CustomerId = 2, Name = "AAAA", Website = "http://www.aaaa.com" },
-                new Customer { CustomerId = 3, Name = "ACME", Website = "http://www.acme.co.nz" }
+                new Customer { CustomerId = 3, Name = "ACME", Website = "http://www.acme.com" }
             }).AsQueryable();
 
             var results = orderByOption.ApplyTo(customers).ToArray();
@@ -188,9 +188,9 @@ namespace System.Web.Http.OData.Query
             var orderByOption = new OrderByQueryOption("Name desc,Website desc", new ODataQueryContext(model, typeof(Customer), "Customers"));
 
             var customers = (new List<Customer>{
-                new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.co.uk" },
+                new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.net" },
                 new Customer { CustomerId = 2, Name = "AAAA", Website = "http://www.aaaa.com" },
-                new Customer { CustomerId = 3, Name = "ACME", Website = "http://www.acme.co.nz" }
+                new Customer { CustomerId = 3, Name = "ACME", Website = "http://www.acme.com" }
             }).AsQueryable();
 
             var results = orderByOption.ApplyTo(customers).ToArray();

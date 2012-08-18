@@ -76,10 +76,9 @@ namespace System.Web.Http.OData.Builder
 
             var zipCode = builder.ComplexType<ZipCode>();
 
-            Assert.ThrowsArgument(
+            Assert.Throws<InvalidOperationException>(
                 () => zipCode.ComplexProperty(z => z.Recursive),
-                "propertyInfo",
-                "A recursive loop of complex types is not allowed.");
+                "The complex type 'System.Web.Http.OData.Builder.TestModels.ZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
         }
 
         [Fact]

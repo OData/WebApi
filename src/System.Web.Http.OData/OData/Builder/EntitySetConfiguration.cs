@@ -161,7 +161,7 @@ namespace System.Web.Http.OData.Builder
             }
 
             Type entityType = navigationConfiguration.RelatedClrType;
-            IEntitySetConfiguration[] matchingSets = _modelBuilder.EntitySets.Where(es => es.EntityType.FullName == entityType.FullName).ToArray();
+            IEntitySetConfiguration[] matchingSets = _modelBuilder.EntitySets.Where(es => es.EntityType.ClrType == entityType).ToArray();
             if (matchingSets.Count() == 1)
             {
                 return AddBinding(navigationConfiguration, matchingSets[0]);

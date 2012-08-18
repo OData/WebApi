@@ -3,8 +3,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData.Builder
@@ -16,7 +18,7 @@ namespace System.Web.Http.OData.Builder
             ClrType = clrType;
             ModelBuilder = modelBuilder;
             ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
-            IgnoredProperties = new List<PropertyInfo>();
+            RemovedProperties = new List<PropertyInfo>();
         }
 
         public abstract StructuralTypeKind Kind { get; }
@@ -25,7 +27,7 @@ namespace System.Web.Http.OData.Builder
 
         public string FullName
         {
-            get { return Namespace + "." + Name; }
+            get { return ClrType.EdmFullName(); }
         }
 
         public string Namespace
@@ -35,7 +37,7 @@ namespace System.Web.Http.OData.Builder
 
         public string Name
         {
-            get { return ClrType.Name; }
+            get { return ClrType.EdmName(); }
         }
 
         public IEnumerable<PropertyConfiguration> Properties
@@ -43,9 +45,14 @@ namespace System.Web.Http.OData.Builder
             get { return ExplicitProperties.Values; }
         }
 
+        public IEnumerable<PropertyInfo> IgnoredProperties
+        {
+            get { return RemovedProperties; }
+        }
+
         protected ODataModelBuilder ModelBuilder { get; private set; }
 
-        protected ICollection<PropertyInfo> IgnoredProperties { get; private set; }
+        protected ICollection<PropertyInfo> RemovedProperties { get; private set; }
 
         protected Dictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
 
@@ -56,15 +63,15 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
             // Remove from the ignored properties
-            if (IgnoredProperties.Contains(propertyInfo))
+            if (RemovedProperties.Contains(propertyInfo))
             {
-                IgnoredProperties.Remove(propertyInfo);
+                RemovedProperties.Remove(propertyInfo);
             }
 
             PrimitivePropertyConfiguration propertyConfiguration = null;
@@ -73,7 +80,7 @@ namespace System.Web.Http.OData.Builder
                 propertyConfiguration = ExplicitProperties[propertyInfo] as PrimitivePropertyConfiguration;
                 if (propertyConfiguration == null)
                 {
-                    throw Error.Argument("propertyInfo", SRResources.MustBePrimitiveProperty, propertyInfo.Name);
+                    throw Error.Argument("propertyInfo", SRResources.MustBePrimitiveProperty, propertyInfo.Name, ClrType.FullName);
                 }
             }
             else
@@ -81,6 +88,7 @@ namespace System.Web.Http.OData.Builder
                 propertyConfiguration = new PrimitivePropertyConfiguration(propertyInfo);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
             }
+
             return propertyConfiguration;
         }
 
@@ -92,20 +100,20 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
             if (propertyInfo.PropertyType == ClrType)
             {
-                throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed);
+                throw Error.InvalidOperation(SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
             }
 
             // Remove from the ignored properties
-            if (IgnoredProperties.Contains(propertyInfo))
+            if (RemovedProperties.Contains(propertyInfo))
             {
-                IgnoredProperties.Remove(propertyInfo);
+                RemovedProperties.Remove(propertyInfo);
             }
 
             ComplexPropertyConfiguration propertyConfiguration = null;
@@ -114,7 +122,7 @@ namespace System.Web.Http.OData.Builder
                 propertyConfiguration = ExplicitProperties[propertyInfo] as ComplexPropertyConfiguration;
                 if (propertyConfiguration == null)
                 {
-                    throw Error.Argument("propertyInfo", SRResources.MustBeComplexProperty, propertyInfo.Name);
+                    throw Error.Argument("propertyInfo", SRResources.MustBeComplexProperty, propertyInfo.Name, ClrType.FullName);
                 }
             }
             else
@@ -136,9 +144,9 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
             if (ExplicitProperties.ContainsKey(propertyInfo))
@@ -146,9 +154,9 @@ namespace System.Web.Http.OData.Builder
                 ExplicitProperties.Remove(propertyInfo);
             }
 
-            if (!IgnoredProperties.Contains(propertyInfo))
+            if (!RemovedProperties.Contains(propertyInfo))
             {
-                IgnoredProperties.Add(propertyInfo);
+                RemovedProperties.Add(propertyInfo);
             }
         }
     }

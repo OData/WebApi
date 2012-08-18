@@ -96,6 +96,16 @@ namespace System.Web.Http.OData.Query
         }
     }
 
+    public class QueryCompositionCategoryController : ApiController
+    {
+        [Queryable]
+        public IQueryable<QueryCompositionCategory> Get()
+        {
+            return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
+        }
+    }
+
+
     public class QueryCompositionCustomer
     {
         public int Id { get; set; }
@@ -110,5 +120,13 @@ namespace System.Web.Http.OData.Query
         public string City { get; set; }
         public string State { get; set; }
         public string Zipcode { get; set; }
+    }
+
+    public class QueryCompositionCategory
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public QueryCompositionAddress[] Locations { get; set; }
+        public int[] AlternateIds { get; set; }
     }
 }

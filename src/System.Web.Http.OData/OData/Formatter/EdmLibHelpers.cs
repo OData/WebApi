@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -112,7 +114,7 @@ namespace System.Web.Http.OData.Formatter
                     .SingleOrDefault();
 
                 // default to the EdmType with the same name as the ClrType name 
-                returnType = returnType ?? edmModel.FindType(clrType.FullName);
+                returnType = returnType ?? edmModel.FindType(clrType.EdmFullName());
                 return returnType;
             }
         }
@@ -202,6 +204,19 @@ namespace System.Web.Http.OData.Formatter
             return primitiveType != null ? new EdmPrimitiveTypeReference(primitiveType, IsNullable(clrType)) : null;
         }
 
+        // Mangle the invalid EDM literal Type.FullName (System.Collections.Generic.IEnumerable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]) 
+        // to a valid EDM literal (the C# type name IEnumerable<int>).
+        public static string EdmName(this Type clrType)
+        {
+            // We cannot use just Type.Name here as it doesn't work for generic types.
+            return MangleClrTypeName(clrType);
+        }
+
+        public static string EdmFullName(this Type clrType)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "{0}.{1}", clrType.Namespace, clrType.EdmName());
+        }
+
         private static IEdmPrimitiveType GetPrimitiveType(EdmPrimitiveTypeKind primitiveKind)
         {
             return _coreModel.GetPrimitiveType(primitiveKind);
@@ -250,11 +265,30 @@ namespace System.Web.Http.OData.Formatter
 
                 if (exportedTypes != null)
                 {
-                    result.AddRange(exportedTypes.Where(t => t != null && t.IsPublic && t.FullName == edmFullName));
+                    result.AddRange(exportedTypes.Where(t => t != null && t.IsPublic && t.EdmFullName() == edmFullName));
                 }
             }
 
             return result;
+        }
+
+        // TODO (workitem 336): Support nested types and anonymous types.
+        private static string MangleClrTypeName(Type type)
+        {
+            Contract.Assert(type != null);
+
+            if (!type.IsGenericType)
+            {
+                return type.Name;
+            }
+            else
+            {
+                return String.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0}Of{1}",
+                    type.Name.Replace('`', '_'),
+                    String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
+            }
         }
     }
 }

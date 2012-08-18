@@ -34,6 +34,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [InlineData(typeof(IsCollection_with_Collections_TestClass), typeof(bool))]
         [InlineData(typeof(IEnumerable<int>), typeof(int))]
         [InlineData(typeof(int[]), typeof(int))]
+        [InlineData(typeof(MyCustomCollection), typeof(int))]
         public void IsCollection_with_Collections(Type collectionType, Type elementType)
         {
             Type type;
@@ -45,6 +46,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [InlineData(typeof(object))]
         [InlineData(typeof(ICollection))]
         [InlineData(typeof(IEnumerable))]
+        [InlineData(typeof(string))]
         public void IsCollection_with_NonCollections(Type type)
         {
             Assert.False(type.IsCollection());
@@ -72,8 +74,24 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void GetProperties_ReturnsProperties_FromBaseAndDerived()
         {
-            var properties = ConventionsHelpers.GetProperties(typeof(GetProperties_Derived));
-            var expectedProperties = new string[] { "Base_I", "Base_Complex", "Base_Str", "Derived_I", "Derived_Complex" };
+            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
+
+            var properties = ConventionsHelpers.GetProperties(edmType.Object);
+            var expectedProperties = new string[] { "Base_I", "Base_Complex", "Base_Str", "Derived_I", "Derived_Complex", "Collection" };
+
+            Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
+        }
+
+        [Fact]
+        public void GetProperties_Ignores_IgnoredProperties()
+        {
+            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
+            edmType.Setup(t => t.IgnoredProperties).Returns(typeof(GetProperties_Derived).GetProperties().Where(p => new string[] { "Base_I", "Derived_I" }.Contains(p.Name)));
+
+            var properties = ConventionsHelpers.GetProperties(edmType.Object);
+            var expectedProperties = new string[] { "Base_Complex", "Base_Str", "Derived_Complex", "Collection" };
 
             Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
         }
@@ -181,13 +199,25 @@ namespace System.Web.Http.OData.Builder.Conventions
 
     class GetProperties_Derived : GetProperties_Base
     {
+        public static int SomeStaticProperty1 { get; set; }
+
+        internal static int SomeStaticProperty2 { get; set; }
+
+        private static int SomeStaticProperty3 { get; set; }
+
         public string Derived_I { get; set; }
 
         public GetProperties_Complex Derived_Complex { get; set; }
+
+        public int[] Collection { get; private set; }
     }
 
     class GetProperties_Complex
     {
         public int A { get; set; }
+    }
+
+    class MyCustomCollection : List<int>
+    {
     }
 }

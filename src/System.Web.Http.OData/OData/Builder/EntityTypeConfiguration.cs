@@ -48,6 +48,10 @@ namespace System.Web.Http.OData.Builder
         public IEntityTypeConfiguration HasKey(PropertyInfo keyProperty)
         {
             PrimitivePropertyConfiguration propertyConfig = AddProperty(keyProperty);
+
+            // keys are always required
+            propertyConfig.IsRequired();
+
             if (!_keys.Contains(propertyConfig))
             {
                 _keys.Add(propertyConfig);
@@ -63,9 +67,9 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            if (navigationProperty.DeclaringType != ClrType)
+            if (!navigationProperty.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType);
+                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }
 
             PropertyConfiguration propertyConfig;
@@ -76,7 +80,7 @@ namespace System.Web.Http.OData.Builder
                 propertyConfig = ExplicitProperties[navigationProperty];
                 if (propertyConfig.Kind != PropertyKind.Navigation)
                 {
-                    throw Error.Argument("navigationProperty", SRResources.MustBeNavigationProperty, navigationProperty.Name);
+                    throw Error.Argument("navigationProperty", SRResources.MustBeNavigationProperty, navigationProperty.Name, ClrType.FullName);
                 }
 
                 navigationPropertyConfig = propertyConfig as NavigationPropertyConfiguration;

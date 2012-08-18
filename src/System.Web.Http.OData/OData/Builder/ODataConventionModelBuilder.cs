@@ -1,18 +1,21 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Builder.Conventions;
+using System.Web.Http.OData.Builder.Conventions.Attributes;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
     public class ODataConventionModelBuilder : ODataModelBuilder
     {
-        private static readonly IConvention[] _conventions = 
+        private static readonly List<IConvention> _conventions = new List<IConvention>
         {
             // IEdmTypeConvention's
             new EntityKeyConvention(),
@@ -22,6 +25,7 @@ namespace System.Web.Http.OData.Builder
             new NavigationLinksGenerationConvention(),
 
             // IEdmPropertyConvention's
+            new NotMappedAttributeConvention(),
             new KeyAttributeConvention(),
         };
 
@@ -31,10 +35,20 @@ namespace System.Web.Http.OData.Builder
         private HashSet<IStructuralTypeConfiguration> _configuredTypes;
         private HashSet<IEntitySetConfiguration> _configuredEntitySets;
 
+        private IEnumerable<IStructuralTypeConfiguration> _explicitlyAddedTypes;
+
         private bool _isModelBeingBuilt;
+        private bool _isQueryCompositionMode;
+        private bool _conventionsBeingApplied;
 
         public ODataConventionModelBuilder()
+            : this(isQueryCompositionMode: false)
         {
+        }
+
+        internal ODataConventionModelBuilder(bool isQueryCompositionMode)
+        {
+            _isQueryCompositionMode = isQueryCompositionMode;
             _configuredEntitySets = new HashSet<IEntitySetConfiguration>();
             _configuredTypes = new HashSet<IStructuralTypeConfiguration>();
         }
@@ -47,7 +61,12 @@ namespace System.Web.Http.OData.Builder
             if (_isModelBeingBuilt && !alreadyExists)
             {
                 MapEntityType(entityTypeConfiguration);
-                ApplyTypeConventions(entityTypeConfiguration);
+
+                if (_conventionsBeingApplied)
+                {
+                    ApplyTypeConventions(entityTypeConfiguration);
+                    ApplyPropertyConventions(entityTypeConfiguration);
+                }
             }
 
             return entityTypeConfiguration;
@@ -61,7 +80,12 @@ namespace System.Web.Http.OData.Builder
             if (_isModelBeingBuilt && !alreadyExists)
             {
                 MapComplexType(complexTypeConfiguration);
-                ApplyTypeConventions(complexTypeConfiguration);
+
+                if (_conventionsBeingApplied)
+                {
+                    ApplyTypeConventions(complexTypeConfiguration);
+                    ApplyPropertyConventions(complexTypeConfiguration);
+                }
             }
 
             return complexTypeConfiguration;
@@ -80,32 +104,45 @@ namespace System.Web.Http.OData.Builder
 
         public override IEdmModel GetEdmModel()
         {
-            _isModelBeingBuilt = true;
-            IEnumerable<IStructuralTypeConfiguration> explicitlyAddedTypes = new List<IStructuralTypeConfiguration>(StructuralTypes);
+            if (_isModelBeingBuilt)
+            {
+                throw Error.NotSupported(SRResources.GetEdmModelCalledMoreThanOnce);
+            }
 
-            // Map Types
+            // before we begin, get the set of types the user had added explicitly.
+            _explicitlyAddedTypes = new List<IStructuralTypeConfiguration>(StructuralTypes);
+
+            _isModelBeingBuilt = true;
+
             MapTypes();
 
-            // configure edm types
-            IEnumerable<IStructuralTypeConfiguration> edmTypes = new List<IStructuralTypeConfiguration>(StructuralTypes);
-            foreach (IStructuralTypeConfiguration edmTypeConfiguration in edmTypes)
+            _conventionsBeingApplied = true;
+
+            // Apply type conventions. Note the call to ToArray() is required as the StructuralTypes collection
+            // could get modified during ApplyTypeConventions().
+            foreach (IStructuralTypeConfiguration edmTypeConfiguration in StructuralTypes.ToArray())
             {
                 ApplyTypeConventions(edmTypeConfiguration);
             }
 
-            // configure properties of edm types
-            foreach (IStructuralTypeConfiguration edmTypeConfiguration in StructuralTypes)
+            // Apply property conventions. Note the call to ToArray() is required as the StructuralTypes collection
+            // could get modified during ApplyPropertyConventions(). Also, type conventions might have
+            // modified this. So, call ToArray() again.
+            foreach (IStructuralTypeConfiguration edmTypeConfiguration in StructuralTypes.ToArray())
             {
-                foreach (PropertyConfiguration property in edmTypeConfiguration.Properties)
-                {
-                    ApplyPropertyConventions(property, edmTypeConfiguration);
-                }
+                ApplyPropertyConventions(edmTypeConfiguration);
             }
 
-            // re-discover complex types
-            RediscoverComplexTypes(explicitlyAddedTypes);
+            // Don't RediscoverComplexTypes() and treat everything as an entity type if buidling a model for QueryableAttribute.
+            if (!_isQueryCompositionMode)
+            {
+                RediscoverComplexTypes();
+            }
 
-            // configure entity sets
+            // prune unreachable types
+            PruneUnreachableTypes();
+
+            // Apply entity set conventions.
             IEnumerable<IEntitySetConfiguration> explictlyConfiguredEntitySets = new List<IEntitySetConfiguration>(EntitySets);
             foreach (IEntitySetConfiguration entitySet in explictlyConfiguredEntitySets)
             {
@@ -115,14 +152,21 @@ namespace System.Web.Http.OData.Builder
             return base.GetEdmModel();
         }
 
-        private void RediscoverComplexTypes(IEnumerable<IStructuralTypeConfiguration> explicitlyAddedTypes)
+        private void RediscoverComplexTypes()
         {
+            Contract.Assert(_explicitlyAddedTypes != null);
+
             IEnumerable<IEntityTypeConfiguration> misconfiguredEntityTypes = StructuralTypes
-                                                                            .Except(explicitlyAddedTypes)
+                                                                            .Except(_explicitlyAddedTypes)
                                                                             .OfType<IEntityTypeConfiguration>()
                                                                             .Where(entity => !entity.Keys.Any())
                                                                             .ToArray();
 
+            ReconfigureEntityTypesAsComplexType(misconfiguredEntityTypes);
+        }
+
+        private void ReconfigureEntityTypesAsComplexType(IEnumerable<IEntityTypeConfiguration> misconfiguredEntityTypes)
+        {
             IEnumerable<IEntityTypeConfiguration> actualEntityTypes = StructuralTypes
                                                                             .Except(misconfiguredEntityTypes)
                                                                             .OfType<IEntityTypeConfiguration>()
@@ -132,6 +176,12 @@ namespace System.Web.Http.OData.Builder
             {
                 RemoveStructuralType(misconfiguredEntityType.ClrType);
 
+                IComplexTypeConfiguration newComplexType = AddComplexType(misconfiguredEntityType.ClrType);
+                foreach (var ignoredProperty in misconfiguredEntityType.IgnoredProperties)
+                {
+                    newComplexType.RemoveProperty(ignoredProperty);
+                }
+
                 foreach (IEntityTypeConfiguration entityToBePatched in actualEntityTypes)
                 {
                     NavigationPropertyConfiguration[] propertiesToBeRemoved = entityToBePatched
@@ -140,6 +190,11 @@ namespace System.Web.Http.OData.Builder
                                                                             .ToArray();
                     foreach (NavigationPropertyConfiguration propertyToBeRemoved in propertiesToBeRemoved)
                     {
+                        if (propertyToBeRemoved.Multiplicity == EdmMultiplicity.Many)
+                        {
+                            // complex collections are not supported.
+                            throw Error.NotSupported(SRResources.CollectionPropertiesNotSupported, propertyToBeRemoved.PropertyInfo.Name, propertyToBeRemoved.PropertyInfo.ReflectedType.FullName);
+                        }
                         entityToBePatched.RemoveProperty(propertyToBeRemoved.PropertyInfo);
                         entityToBePatched.AddComplexProperty(propertyToBeRemoved.PropertyInfo);
                     }
@@ -151,8 +206,7 @@ namespace System.Web.Http.OData.Builder
 
         private void MapTypes()
         {
-            IEnumerable<IStructuralTypeConfiguration> explictlyConfiguredTypes = new List<IStructuralTypeConfiguration>(StructuralTypes);
-            foreach (IStructuralTypeConfiguration edmType in explictlyConfiguredTypes)
+            foreach (IStructuralTypeConfiguration edmType in _explicitlyAddedTypes)
             {
                 IEntityTypeConfiguration entity = edmType as IEntityTypeConfiguration;
                 if (entity != null)
@@ -168,52 +222,198 @@ namespace System.Web.Http.OData.Builder
 
         private void MapEntityType(IEntityTypeConfiguration entity)
         {
-            PropertyInfo[] properties = ConventionsHelpers.GetProperties(entity.ClrType);
+            PropertyInfo[] properties = ConventionsHelpers.GetProperties(entity);
             foreach (PropertyInfo property in properties)
             {
-                if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(property.PropertyType) != null)
+                bool isCollection;
+                IStructuralTypeConfiguration mappedType;
+
+                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
+
+                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex)
                 {
-                    PrimitivePropertyConfiguration primitiveProperty = entity.AddProperty(property);
-                    primitiveProperty.OptionalProperty = IsNullable(property.PropertyType);
+                    MapStructuralProperty(entity, property, propertyKind, isCollection);
                 }
                 else
                 {
-                    IStructuralTypeConfiguration mappedType = GetStructuralTypeOrNull(property.PropertyType);
-                    if (mappedType != null)
+                    if (!isCollection)
                     {
-                        if (mappedType is IComplexTypeConfiguration)
-                        {
-                            entity.AddComplexProperty(property);
-                        }
-                        else
-                        {
-                            entity.AddNavigationProperty(property, property.PropertyType.IsCollection() ? EdmMultiplicity.Many : EdmMultiplicity.ZeroOrOne);
-                        }
+                        entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
                     }
                     else
                     {
-                        // we are not really sure if this should be a complex property or an navigation property.
-                        // Assume that it is a navigation property and patch later in RediscoverComplexTypes().
-                        entity.AddNavigationProperty(property, property.PropertyType.IsCollection() ? EdmMultiplicity.Many : EdmMultiplicity.ZeroOrOne);
+                        entity.AddNavigationProperty(property, EdmMultiplicity.Many);
                     }
                 }
             }
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1822: MarkMembersAsStatic", Justification = "To be consistent with MapEntityType")]
         private void MapComplexType(IComplexTypeConfiguration complexType)
         {
-            PropertyInfo[] properties = ConventionsHelpers.GetProperties(complexType.ClrType);
+            PropertyInfo[] properties = ConventionsHelpers.GetProperties(complexType);
             foreach (PropertyInfo property in properties)
             {
-                if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(property.PropertyType) != null)
+                bool isCollection;
+                IStructuralTypeConfiguration mappedType;
+
+                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
+
+                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex)
                 {
-                    PrimitivePropertyConfiguration primitiveProperty = complexType.AddProperty(property);
-                    primitiveProperty.OptionalProperty = IsNullable(property.PropertyType);
+                    MapStructuralProperty(complexType, property, propertyKind, isCollection);
                 }
                 else
                 {
-                    complexType.AddComplexProperty(property);
+                    // navigation property in a complex type ?
+                    if (!isCollection)
+                    {
+                        if (_explicitlyAddedTypes.Contains(mappedType))
+                        {
+                            // user told us that this an entity type.
+                            throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
+                        }
+                        else
+                        {
+                            // we tried to be over-smart earlier and made the bad choice. so patch up now.
+                            ReconfigureEntityTypesAsComplexType(new IEntityTypeConfiguration[] { mappedType as IEntityTypeConfiguration });
+                            complexType.AddComplexProperty(property);
+                        }
+                    }
+                    else
+                    {
+                        throw Error.NotSupported(SRResources.CollectionPropertiesNotSupported, property.Name, property.ReflectedType.FullName);
+                    }
+                }
+            }
+        }
+
+        private void MapStructuralProperty(IStructuralTypeConfiguration type, PropertyInfo property, PropertyKind propertyKind, bool isCollection)
+        {
+            Contract.Assert(type != null);
+            Contract.Assert(property != null);
+            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive);
+
+            if (!isCollection)
+            {
+                if (propertyKind == PropertyKind.Primitive)
+                {
+                    type.AddProperty(property);
+                }
+                else
+                {
+                    type.AddComplexProperty(property);
+                }
+            }
+            else
+            {
+                if (!_isQueryCompositionMode)
+                {
+                    throw Error.NotSupported(SRResources.CollectionPropertiesNotSupported, property.Name, property.ReflectedType.FullName);
+                }
+                else
+                {
+                    Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
+                    // Ignore these primitive collection properties. They cannot be queried anyways.
+                }
+            }
+        }
+
+        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IStructuralTypeConfiguration mappedType)
+        {
+            Contract.Assert(property != null);
+
+            if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(property.PropertyType) != null)
+            {
+                isCollection = false;
+                mappedType = null;
+                return PropertyKind.Primitive;
+            }
+            else
+            {
+                mappedType = GetStructuralTypeOrNull(property.PropertyType);
+                if (mappedType != null)
+                {
+                    isCollection = false;
+
+                    if (mappedType is IComplexTypeConfiguration)
+                    {
+                        return PropertyKind.Complex;
+                    }
+                    else
+                    {
+                        return PropertyKind.Navigation;
+                    }
+                }
+                else
+                {
+                    Type elementType;
+                    if (property.PropertyType.IsCollection(out elementType))
+                    {
+                        isCollection = true;
+
+                        // Collection properties - can be a collection of primitives, complex or entities.
+                        if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(elementType) != null)
+                        {
+                            return PropertyKind.Primitive;
+                        }
+                        else
+                        {
+                            mappedType = GetStructuralTypeOrNull(elementType);
+                            if (mappedType != null && mappedType is IComplexTypeConfiguration)
+                            {
+                                return PropertyKind.Complex;
+                            }
+                            else
+                            {
+                                return PropertyKind.Navigation;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        isCollection = false;
+                        return PropertyKind.Navigation;
+                    }
+                }
+            }
+        }
+
+        // the convention model builder MapTypes() method might have went through deep object graphs and added a bunch of types
+        // only to realise after applying the conventions that the user has ignored some of the properties. So, prune the unreachable stuff.
+        private void PruneUnreachableTypes()
+        {
+            Contract.Assert(_explicitlyAddedTypes != null);
+
+            // Do a BFS starting with the types the user has explicitly added to find out the unreachable nodes.
+            Queue<IStructuralTypeConfiguration> reachableTypes = new Queue<IStructuralTypeConfiguration>(_explicitlyAddedTypes);
+            HashSet<IStructuralTypeConfiguration> visitedTypes = new HashSet<IStructuralTypeConfiguration>();
+
+            while (reachableTypes.Count != 0)
+            {
+                IStructuralTypeConfiguration currentType = reachableTypes.Dequeue();
+
+                // go visit other end of each of this node's edges.
+                foreach (PropertyConfiguration property in currentType.Properties.Where(property => property.Kind != PropertyKind.Primitive))
+                {
+                    IStructuralTypeConfiguration propertyType = GetStructuralTypeOrNull(property.RelatedClrType);
+                    Contract.Assert(propertyType != null, "we should already have seen this type");
+
+                    if (!visitedTypes.Contains(propertyType))
+                    {
+                        reachableTypes.Enqueue(propertyType);
+                    }
+                }
+
+                visitedTypes.Add(currentType);
+            }
+
+            IStructuralTypeConfiguration[] allConfiguredTypes = StructuralTypes.ToArray();
+            foreach (IStructuralTypeConfiguration type in allConfiguredTypes)
+            {
+                if (!visitedTypes.Contains(type))
+                {
+                    // we don't have to fix up any properties because this type is unreachable and cannot be a property of any reachable type.
+                    RemoveStructuralType(type.ClrType);
                 }
             }
         }
@@ -255,53 +455,15 @@ namespace System.Web.Http.OData.Builder
             return StructuralTypes.Where(edmType => edmType.ClrType == clrType).SingleOrDefault();
         }
 
-        private static bool IsNullable(Type type)
+        private static void ApplyPropertyConventions(IStructuralTypeConfiguration edmTypeConfiguration)
         {
-            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
-        }
-
-        private static void ApplyPropertyConventions(PropertyConfiguration property, IStructuralTypeConfiguration edmTypeConfiguration)
-        {
-            foreach (IConvention convention in _conventions)
+            foreach (PropertyConfiguration property in edmTypeConfiguration.Properties.ToArray())
             {
-                PrimitivePropertyConfiguration primitivePropertyConfiguration;
-                ComplexPropertyConfiguration complexPropertyConfiguration;
-                NavigationPropertyConfiguration navigationPropertyConfiguration;
-
-                if ((primitivePropertyConfiguration = property as PrimitivePropertyConfiguration) != null)
+                foreach (IEdmPropertyConvention propertyConvention in _conventions.OfType<IEdmPropertyConvention>())
                 {
-                    IEdmPropertyConvention<PrimitivePropertyConfiguration> propertyConfigurationConvention = convention as IEdmPropertyConvention<PrimitivePropertyConfiguration>;
-                    if (propertyConfigurationConvention != null)
-                    {
-                        ApplyPropertyConvention(primitivePropertyConfiguration, edmTypeConfiguration, propertyConfigurationConvention);
-                    }
-                }
-                else if ((complexPropertyConfiguration = property as ComplexPropertyConfiguration) != null)
-                {
-                    IEdmPropertyConvention<ComplexPropertyConfiguration> propertyConfigurationConvention = convention as IEdmPropertyConvention<ComplexPropertyConfiguration>;
-                    if (propertyConfigurationConvention != null)
-                    {
-                        ApplyPropertyConvention(complexPropertyConfiguration, edmTypeConfiguration, propertyConfigurationConvention);
-                    }
-                }
-                else if ((navigationPropertyConfiguration = property as NavigationPropertyConfiguration) != null)
-                {
-                    IEdmPropertyConvention<NavigationPropertyConfiguration> propertyConfigurationConvention = convention as IEdmPropertyConvention<NavigationPropertyConfiguration>;
-                    if (propertyConfigurationConvention != null)
-                    {
-                        ApplyPropertyConvention(navigationPropertyConfiguration, edmTypeConfiguration, propertyConfigurationConvention);
-                    }
+                    propertyConvention.Apply(property, edmTypeConfiguration);
                 }
             }
-        }
-
-        private static void ApplyPropertyConvention<TPropertyConfiguration>(
-            TPropertyConfiguration property,
-            IStructuralTypeConfiguration structuralTypeConfiguration,
-            IEdmPropertyConvention<TPropertyConfiguration> convention)
-            where TPropertyConfiguration : PropertyConfiguration
-        {
-            convention.Apply(property, structuralTypeConfiguration);
         }
     }
 }

@@ -8,6 +8,11 @@ namespace System.Web.Http.OData.Builder
     {
         protected PropertyConfiguration(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw Error.ArgumentNull("property");
+            }
+
             PropertyInfo = property;
         }
 

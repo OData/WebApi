@@ -13,6 +13,8 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
+        private static HashSet<Type> _ignoredCollectionTypes = new HashSet<Type>(new Type[] { typeof(string) });
+
         public static bool IsEntityType(Type type)
         {
             return GetKeyProperty(type) != null;
@@ -64,7 +66,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
         }
 
-        public static PropertyInfo[] GetProperties(Type type)
+        public static PropertyInfo[] GetProperties(IStructuralTypeConfiguration type)
         {
             if (type == null)
             {
@@ -72,8 +74,9 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
 
             return type
-                .GetProperties()
-                .Where(p => p.IsValidStructuralProperty())
+                .ClrType
+                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties.Contains(p))
                 .ToArray();
         }
 
@@ -123,6 +126,12 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             elementType = type;
 
+            // see if this type is in the black list
+            if (_ignoredCollectionTypes.Contains(type))
+            {
+                return false;
+            }
+
             Type collectionInterface
                 = type.GetInterfaces()
                     .Union(new[] { type })
@@ -133,7 +142,6 @@ namespace System.Web.Http.OData.Builder.Conventions
             if (collectionInterface != null)
             {
                 elementType = collectionInterface.GetGenericArguments().Single();
-
                 return true;
             }
 

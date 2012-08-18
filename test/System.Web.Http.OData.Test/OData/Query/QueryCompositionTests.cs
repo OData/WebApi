@@ -290,6 +290,21 @@ namespace System.Web.Http.OData.Query
             Assert.True(called);
         }
 
+        [Theory]
+        [InlineData("Id eq 10")]
+        [InlineData("Locations/any(l : l/City eq 'Redmond')")]
+        [InlineData("Locations/any(l : l/Zipcode eq '98052')")]
+        public void QueryableWorksWithModelsWithPrimitiveCollectionAndComplexCollection(string filter)
+        {
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCategoryController", useCustomEdmModel: false));
+            HttpClient client = new HttpClient(server);
+
+            // unsupported operator starting with $ - throws
+            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionCategory/?$filter=" + filter).Result;
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(0, response.Content.ReadAsAsync<List<QueryCompositionCategory>>().Result.Count());
+        }
+
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
             HttpConfiguration config = new HttpConfiguration();

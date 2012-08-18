@@ -25,7 +25,7 @@ namespace System.Web.Http
             // save the EdmModel to the action descriptor
             return actionDescriptor.Properties.GetOrAdd(EdmModelKey + entityClrType.FullName, _ =>
                     {
-                        ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+                        ODataConventionModelBuilder builder = new ODataConventionModelBuilder(isQueryCompositionMode: true);
                         IEntityTypeConfiguration entityTypeConfiguration = builder.AddEntity(entityClrType);
                         builder.AddEntitySet(entityClrType.Name, entityTypeConfiguration);
                         return builder.GetEdmModel();

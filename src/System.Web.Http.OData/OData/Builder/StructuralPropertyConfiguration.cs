@@ -1,20 +1,22 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace System.Web.Http.OData.Builder
 {
     public abstract class StructuralPropertyConfiguration : PropertyConfiguration
     {
-        protected StructuralPropertyConfiguration(PropertyInfo property) : base(property)
+        protected StructuralPropertyConfiguration(PropertyInfo property)
+            : base(property)
         {
+            OptionalProperty = IsNullable(property.PropertyType);
         }
 
-        public virtual bool OptionalProperty 
-        { 
-            get; 
-            set; 
+        public bool OptionalProperty { get; set; }
+
+        private static bool IsNullable(Type type)
+        {
+            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
         }
     }
 }

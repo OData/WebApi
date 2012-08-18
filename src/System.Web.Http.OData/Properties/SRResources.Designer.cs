@@ -133,6 +133,24 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; is a collection property. Collection properties are not supported..
+        /// </summary>
+        internal static string CollectionPropertiesNotSupported {
+            get {
+                return ResourceManager.GetString("CollectionPropertiesNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; refers to the entity type &apos;{1}&apos; through the property &apos;{1}&apos;..
+        /// </summary>
+        internal static string ComplexTypeRefersToEntityType {
+            get {
+                return ResourceManager.GetString("ComplexTypeRefersToEntityType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} does not support CreateProperty..
         /// </summary>
         internal static string CreatePropertyNotSupported {
@@ -304,6 +322,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GetEdmModel cannot be called more than once. Consider using a different instance of the model builder or reusing the model you have built earlier..
+        /// </summary>
+        internal static string GetEdmModelCalledMoreThanOnce {
+            get {
+                return ResourceManager.GetString("GetEdmModelCalledMoreThanOnce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid entity set name..
         /// </summary>
         internal static string InvalidEntitySetName {
@@ -331,7 +358,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Many to Many navigationProperties must return either List&lt;T&gt; or Collection&lt;T&gt;..
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on the type &apos;{1}&apos; is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections..
         /// </summary>
         internal static string ManyToManyNavigationPropertyMustReturnCollection {
             get {
@@ -367,6 +394,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The member &apos;{0}&apos; on type &apos;{1}&apos; contains multiple instances of the attribute &apos;{2}&apos;..
+        /// </summary>
+        internal static string MultipleAttributesFound {
+            get {
+                return ResourceManager.GetString("MultipleAttributesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There are multiple EntitySets found that match EntityClrType &apos;{0}&apos;..
         /// </summary>
         internal static string MultipleEntitySetMatchedClrType {
@@ -394,7 +430,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; property must be a Complex property..
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a Complex property..
         /// </summary>
         internal static string MustBeComplexProperty {
             get {
@@ -403,7 +439,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; property must be a Navigation property..
+        ///   Looks up a localized string similar to The property  &apos;{0}&apos; on type &apos;{1}&apos; must be a Navigation property..
         /// </summary>
         internal static string MustBeNavigationProperty {
             get {
@@ -412,7 +448,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; property must be a Primitive property..
+        ///   Looks up a localized string similar to The property &apos;{0}&apos;  on type &apos;{1}&apos; must be a Primitive property..
         /// </summary>
         internal static string MustBePrimitiveProperty {
             get {
@@ -421,7 +457,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type must be a primitive type..
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; must be a primitive type..
         /// </summary>
         internal static string MustBePrimitiveType {
             get {
@@ -538,7 +574,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property does not belong to the specified type..
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; does not belong to the type &apos;{1}&apos;..
         /// </summary>
         internal static string PropertyDoesNotBelongToType {
             get {
@@ -601,7 +637,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A recursive loop of complex types is not allowed..
+        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; has a reference to itself through the property &apos;{1}&apos;. A recursive loop of complex types is not allowed..
         /// </summary>
         internal static string RecursiveComplexTypesNotAllowed {
             get {

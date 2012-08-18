@@ -46,12 +46,14 @@ namespace System.Web.Http.OData.Builder
 
             if (pinfo == null)
             {
-                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.DeclaringType.FullName, node.Member.Name);
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.ReflectedType.FullName, node.Member.Name);
             }
+
             if (node.Expression.NodeType != ExpressionType.Parameter)
             {
                 throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeBoundToLambdaParameter);
             }
+
             _properties.Add(pinfo);
             return node;
         }

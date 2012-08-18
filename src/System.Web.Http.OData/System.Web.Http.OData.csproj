@@ -106,11 +106,13 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
-    <Compile Include="OData\Builder\Conventions\AttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEntitySetConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\KeyAttributeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConvention.cs" />
     <Compile Include="OData\Builder\Conventions\ODataRouteNames.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConvention.cs" />

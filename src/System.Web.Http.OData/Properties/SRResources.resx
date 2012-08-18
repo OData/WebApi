@@ -238,7 +238,7 @@
     <value>The entity set '{0}' is missing link generation configuration. Check that the self and edit links are configured during model building.</value>
   </data>
   <data name="PropertyDoesNotBelongToType" xml:space="preserve">
-    <value>The property does not belong to the specified type.</value>
+    <value>The property '{0}' does not belong to the type '{1}'.</value>
   </data>
   <data name="EntitySetAlreadyConfiguredDifferentEntityType" xml:space="preserve">
     <value>The entity set '{0}' was already configured with a different EntityType ('{1}').</value>
@@ -250,7 +250,7 @@
     <value>The type '{0}' cannot be configured as a EntityType. It was previously configured as an ComplexType.</value>
   </data>
   <data name="RecursiveComplexTypesNotAllowed" xml:space="preserve">
-    <value>A recursive loop of complex types is not allowed.</value>
+    <value>The complex type '{0}' has a reference to itself through the property '{1}'. A recursive loop of complex types is not allowed.</value>
   </data>
   <data name="DeserializerDoesNotSupportRead" xml:space="preserve">
     <value>'{0}' does not support Read.</value>
@@ -262,7 +262,7 @@
     <value>No EditLink factory was found. Try calling HasEditLink on the EntitySetConfiguration for '{0}'.</value>
   </data>
   <data name="ManyToManyNavigationPropertyMustReturnCollection" xml:space="preserve">
-    <value>Many to Many navigationProperties must return either List&lt;T&gt; or Collection&lt;T&gt;.</value>
+    <value>The property '{0}' on the type '{1}' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.</value>
   </data>
   <data name="ODataFormatterMissing" xml:space="preserve">
     <value>The formatter collection is missing '{0}'. Did you forget to add it to your configuration?</value>
@@ -283,13 +283,13 @@
     <value>Entity type '{0}' has multiple keys.</value>
   </data>
   <data name="MustBeComplexProperty" xml:space="preserve">
-    <value>The '{0}' property must be a Complex property.</value>
+    <value>The property '{0}' on type '{1}' must be a Complex property.</value>
   </data>
   <data name="MustBeNavigationProperty" xml:space="preserve">
-    <value>The '{0}' property must be a Navigation property.</value>
+    <value>The property  '{0}' on type '{1}' must be a Navigation property.</value>
   </data>
   <data name="MustBePrimitiveProperty" xml:space="preserve">
-    <value>The '{0}' property must be a Primitive property.</value>
+    <value>The property '{0}'  on type '{1}' must be a Primitive property.</value>
   </data>
   <data name="MustHaveMatchingMultiplicity" xml:space="preserve">
     <value>The multiplicity of the '{0}' property must be '{1}'.</value>
@@ -298,7 +298,7 @@
     <value>Entity type '{0}' has no keys.</value>
   </data>
   <data name="MustBePrimitiveType" xml:space="preserve">
-    <value>The type must be a primitive type.</value>
+    <value>The type '{0}' must be a primitive type.</value>
   </data>
   <data name="RebindingNotSupported" xml:space="preserve">
     <value>Rebinding is not supported.</value>
@@ -329,5 +329,17 @@
   </data>
   <data name="PrimitiveTypeRequired" xml:space="preserve">
     <value>The type '{0}' is not a primitive type.</value>
+  </data>
+  <data name="CollectionPropertiesNotSupported" xml:space="preserve">
+    <value>The property '{0}' on type '{1}' is a collection property. Collection properties are not supported.</value>
+  </data>
+  <data name="ComplexTypeRefersToEntityType" xml:space="preserve">
+    <value>The complex type '{0}' refers to the entity type '{1}' through the property '{1}'.</value>
+  </data>
+  <data name="MultipleAttributesFound" xml:space="preserve">
+    <value>The member '{0}' on type '{1}' contains multiple instances of the attribute '{2}'.</value>
+  </data>
+  <data name="GetEdmModelCalledMoreThanOnce" xml:space="preserve">
+    <value>GetEdmModel cannot be called more than once. Consider using a different instance of the model builder or reusing the model you have built earlier.</value>
   </data>
 </root>

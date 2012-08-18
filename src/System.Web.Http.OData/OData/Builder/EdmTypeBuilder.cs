@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Builder
     public class EdmTypeBuilder
     {
         private readonly List<IStructuralTypeConfiguration> _configurations;
-        private readonly Dictionary<string, IEdmType> _types = new Dictionary<string, IEdmType>();
+        private readonly Dictionary<Type, IEdmType> _types = new Dictionary<Type, IEdmType>();
 
         internal EdmTypeBuilder(IEnumerable<IStructuralTypeConfiguration> configurations)
         {
@@ -29,7 +29,7 @@ namespace System.Web.Http.OData.Builder
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
-                _types.Add(config.FullName, CreateEdmTypeHeader(config));
+                _types.Add(config.ClrType, CreateEdmTypeHeader(config));
             }
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Builder
 
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
-                yield return _types[config.FullName];
+                yield return _types[config.ClrType];
             }
         }
 
@@ -56,7 +56,7 @@ namespace System.Web.Http.OData.Builder
 
         private void CreateEdmTypeBody(IStructuralTypeConfiguration config)
         {
-            IEdmType edmType = _types[config.FullName];
+            IEdmType edmType = _types[config.ClrType];
 
             if (edmType.TypeKind == EdmTypeKind.Complex)
             {
@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Builder
             }
             foreach (ComplexPropertyConfiguration prop in config.Properties.OfType<ComplexPropertyConfiguration>())
             {
-                IEdmComplexType complexType = _types[prop.RelatedClrType.FullName] as IEdmComplexType;
+                IEdmComplexType complexType = _types[prop.RelatedClrType] as IEdmComplexType;
 
                 type.AddStructuralProperty(
                     prop.PropertyInfo.Name,
@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Builder
                 EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo();
                 info.Name = navProp.Name;
                 info.TargetMultiplicity = navProp.Multiplicity;
-                info.Target = _types[navProp.RelatedClrType.FullName] as IEdmEntityType;
+                info.Target = _types[navProp.RelatedClrType] as IEdmEntityType;
                 //TODO: If target end has a multiplity of 1 this assumes the source end is 0..1.
                 //      I think a better default multiplicity is *
                 type.AddUnidirectionalNavigation(info);
@@ -139,7 +139,7 @@ namespace System.Web.Http.OData.Builder
             IEdmPrimitiveType primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(clrType);
             if (primitiveType == null)
             {
-                throw Error.Argument("clrType", SRResources.MustBePrimitiveType);
+                throw Error.Argument("clrType", SRResources.MustBePrimitiveType, clrType.FullName);
             }
 
             return primitiveType.PrimitiveKind;

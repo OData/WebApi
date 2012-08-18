@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
+using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
@@ -23,13 +24,13 @@ namespace System.Web.Http.OData.Builder
             _relatedType = property.PropertyType;
             if (multiplicity == EdmMultiplicity.Many)
             {
-                //TODO: support use of a non-generic type i.e. public class OrdersCollection: List<Order>
-                if (!_relatedType.IsGenericType || _relatedType.GetGenericArguments().Length > 1)
+                Type elementType;
+                if (!_relatedType.IsCollection(out elementType))
                 {
-                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection);
+                    throw Error.InvalidOperation(SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.ReflectedType.Name);
                 }
 
-                _relatedType = _relatedType.GetGenericArguments()[0];
+                _relatedType = elementType;
             }
         }
 

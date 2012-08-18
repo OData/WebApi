@@ -42,7 +42,7 @@ namespace System.Web.Http.OData.Builder
             var nameProperty = customerType.DeclaredProperties.SingleOrDefault(dp => dp.Name == "Name");
             Assert.NotNull(nameProperty);
             Assert.True(nameProperty.Type.IsString());
-            Assert.False(nameProperty.Type.IsNullable);
+            Assert.True(nameProperty.Type.IsNullable);
 
             Assert.Equal(1, customerType.NavigationProperties().Count());
             var ordersProperty = customerType.NavigationProperties().Single();

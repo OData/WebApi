@@ -100,11 +100,6 @@
     <Compile Include="ApiExplorer\Controllers\ItemController.cs" />
     <Compile Include="ApiExplorer\Controllers\HiddenActionController.cs" />
     <Compile Include="ApiExplorer\Controllers\OverloadsController.cs" />
-    <Compile Include="Authentication\BasicOverHttpTest.cs" />
-    <Compile Include="Authentication\CustomMessageHandler.cs" />
-    <Compile Include="Authentication\CustomUsernamePasswordValidator.cs" />
-    <Compile Include="Authentication\RequireAdminAttribute.cs" />
-    <Compile Include="Authentication\SampleController.cs" />
     <Compile Include="ContentNegotiation\ContentNegotiationTestBase.cs" />
     <Compile Include="ContentNegotiation\CustomFormatterTests.cs" />
     <Compile Include="ContentNegotiation\DefaultContentNegotiatorTests.cs" />

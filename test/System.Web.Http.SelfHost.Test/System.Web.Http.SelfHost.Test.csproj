@@ -75,6 +75,11 @@
     <Compile Include="..\Common\HttpMethodHelperTest.cs">
       <Link>Common\HttpMethodHelperTest.cs</Link>
     </Compile>
+    <Compile Include="Authentication\BasicOverHttpTest.cs" />
+    <Compile Include="Authentication\CustomMessageHandler.cs" />
+    <Compile Include="Authentication\CustomUsernamePasswordValidator.cs" />
+    <Compile Include="Authentication\RequireAdminAttribute.cs" />
+    <Compile Include="Authentication\SampleController.cs" />
     <Compile Include="Channels\HttpBindingSecurityModeHelperTest.cs" />
     <Compile Include="DeeplyNestedTypeTests.cs" />
     <Compile Include="HttpSelfHostConfigurationTest.cs" />

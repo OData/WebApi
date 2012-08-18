@@ -155,7 +155,8 @@
     <ItemGroup>
       <SourceFiles Include="Areas/**/*.*" />
     </ItemGroup>
+    <MakeDir Directories="$(OutputPath)\NuGet"/>
     <ConvertToNuGetTransformationFiles SourceFiles="@(SourceFiles)" OutputPath="$(OutputPath)" OriginalNamespaceToken="ROOT_PROJECT_NAMESPACE" ReplacementNamespaceToken="$rootnamespace$" />
-    <Exec Command="$(SolutionDir)\.nuget\nuget.exe pack $(ProjectDir)WebApiHelpPage.nuspec -BasePath $(OutputPath) -OutputDirectory $(OutputPath)" />
+    <Exec Command="$(SolutionDir)\.nuget\nuget.exe pack $(ProjectDir)WebApiHelpPage.nuspec -BasePath $(OutputPath) -OutputDirectory $(OutputPath)\NuGet" />
   </Target>
 </Project>

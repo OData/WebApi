@@ -31,10 +31,9 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void UriConstructorThrowsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new FormDataCollection((Uri)null));
+            Assert.ThrowsArgumentNull(() => new FormDataCollection((Uri)null), "uri");
         }
-
-
+        
         [Fact]
         public void CreateFromEmptyString()
         {
@@ -55,7 +54,7 @@ namespace System.Net.Http.Formatting
         public void PairConstructorThrowsNull()
         {
             var arg = (IEnumerable<KeyValuePair<string, string>>)null;
-            Assert.Throws<ArgumentNullException>(() => new FormDataCollection(arg));
+            Assert.ThrowsArgumentNull(() => new FormDataCollection(arg), "pairs");
         }
 
         [Fact]

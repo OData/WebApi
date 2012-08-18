@@ -234,7 +234,7 @@ namespace System.Net.Http
         [Fact]
         public void CreateResponse_MatchingMediaType_WhenMediaTypeStringIsNull_Throws()
         {
-            Assert.Throws<ArgumentException>(() => _request.CreateResponse(HttpStatusCode.OK, _value, (string)null), "The value cannot be null or empty.\r\nParameter name: mediaType");
+            Assert.ThrowsArgument(() => _request.CreateResponse(HttpStatusCode.OK, _value, (string)null), "mediaType");
         }
 
         [Fact]

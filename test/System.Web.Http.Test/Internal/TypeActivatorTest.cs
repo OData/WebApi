@@ -63,7 +63,7 @@ namespace System.Web.Http.Internal
         public void CreateTypeInvalidThrowsInvalidArgument(Type type)
         {
             // Value types, interfaces, and open generics cause ArgumentException
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create(type));
+            Assert.ThrowsArgument(() => TypeActivator.Create(type), paramName: null);
         }
 
         [Theory]
@@ -96,10 +96,10 @@ namespace System.Web.Http.Internal
         public void CreateOfTInvalid()
         {
             // string doesn't have a default ctor
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<string>());
+            Assert.ThrowsArgument(() => TypeActivator.Create<string>(), paramName: null);
 
             // Uri doesn't have a default ctor
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<Uri>());
+            Assert.ThrowsArgument(() => TypeActivator.Create<Uri>(), paramName: null);
 
             // HttpContent is abstract
             Assert.Throws<InvalidOperationException>(() => TypeActivator.Create<HttpContent>());
@@ -139,22 +139,22 @@ namespace System.Web.Http.Internal
         public void CreateOfTBaseInvalid()
         {
             // int not being a ref type
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<object>(typeof(int)));
+            Assert.ThrowsArgument(() => TypeActivator.Create<object>(typeof(int)), paramName: null);
 
             // GUID is not a ref type
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<object>(typeof(Guid)));
+            Assert.ThrowsArgument(() => TypeActivator.Create<object>(typeof(Guid)), paramName: null);
 
             // HttpStatusCode is not a ref type
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<object>(typeof(HttpStatusCode)));
+            Assert.ThrowsArgument(() => TypeActivator.Create<object>(typeof(HttpStatusCode)), paramName: null);
 
             // string does not have a default ctor
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<string>(typeof(string)));
+            Assert.ThrowsArgument(() => TypeActivator.Create<string>(typeof(string)), paramName: null);
 
             // ObjectContent does not have a default ctor
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<HttpContent>(typeof(ObjectContent)));
+            Assert.ThrowsArgument(() => TypeActivator.Create<HttpContent>(typeof(ObjectContent)), paramName: null);
 
             // Base type and instance type flipped
-            Assert.Throws<ArgumentException>(() => TypeActivator.Create<ReflectedHttpActionDescriptor>(typeof(HttpActionDescriptor)));
+            Assert.ThrowsArgument(() => TypeActivator.Create<ReflectedHttpActionDescriptor>(typeof(HttpActionDescriptor)), paramName: null);
         }
     }
 }

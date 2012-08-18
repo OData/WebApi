@@ -13,12 +13,16 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
+    /// <summary>
+    /// <see cref="ODataConventionModelBuilder"/> is used to automatically map CLR classes to an EDM model based on a set of <see cref="IConvention"/>.
+    /// </summary>
     public class ODataConventionModelBuilder : ODataModelBuilder
     {
         private static readonly List<IConvention> _conventions = new List<IConvention>
         {
             // IEdmTypeConvention's
             new EntityKeyConvention(),
+            new DataContractAttributeEdmTypeConvention(),
             
             // IEntitySetConvention's
             new SelfLinksGenerationConvention(),
@@ -26,7 +30,9 @@ namespace System.Web.Http.OData.Builder
 
             // IEdmPropertyConvention's
             new NotMappedAttributeConvention(),
-            new KeyAttributeConvention(),
+            new RequiredAttributeEdmPropertyConvention(),
+            new KeyAttributeEdmPropertyConvention(),
+            new IgnoreDataMemberAttributeEdmPropertyConvention(),
         };
 
         // These hashset's keep track of edmtypes/entitysets for which conventions
@@ -316,7 +322,7 @@ namespace System.Web.Http.OData.Builder
                     // CollectionProperties are supported by the modelBuilders now, but not in queries, at least not until the 
                     // bug in the UriParser that results in incorrect parameters types on Any/All nodes is fixed.
                     // see disabled tests in FilterQueryOptionTest for more information.
-                    Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");  
+                    Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
             }
         }
@@ -399,7 +405,7 @@ namespace System.Web.Http.OData.Builder
                 foreach (PropertyConfiguration property in currentType.Properties.Where(property => property.Kind != PropertyKind.Primitive))
                 {
                     if (property.Kind == PropertyKind.Collection)
-                    { 
+                    {
                         // if the elementType is primitive we don't need to do anything.
                         CollectionPropertyConfiguration colProperty = property as CollectionPropertyConfiguration;
                         if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(colProperty.ElementType) != null)

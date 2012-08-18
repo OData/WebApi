@@ -8,13 +8,19 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures properties that have the <see cref="KeyAttribute"/> as keys in the <see cref="IEdmEntityType"/>.
     /// </summary>
-    public class KeyAttributeConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration, KeyAttribute>
+    public class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration, KeyAttribute>
     {
-        public KeyAttributeConvention()
+        public KeyAttributeEdmPropertyConvention()
             : base(allowMultiple: false)
         {
         }
 
+        /// <summary>
+        /// Configures the property as a key on the edm type.
+        /// </summary>
+        /// <param name="edmProperty">The key property.</param>
+        /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
+        /// <param name="attribute">The <see cref="KeyAttribute"/> found on the property.</param>
         public override void Apply(PrimitivePropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, KeyAttribute attribute)
         {
             if (edmProperty == null)

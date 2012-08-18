@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Builder
     {
         private List<PrimitivePropertyConfiguration> _keys = new List<PrimitivePropertyConfiguration>();
 
-        internal EntityTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
+        public EntityTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
             : base(modelBuilder, clrType)
         {
         }

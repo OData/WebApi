@@ -8,12 +8,12 @@ using Moq;
 
 namespace System.Web.Http.OData.Builder.Conventions.Attributes
 {
-    public class KeyAttributeConventionTests
+    public class KeyAttributeEdmPropertyConventionTests
     {
         [Fact]
         public void Empty_Ctor_DoesnotThrow()
         {
-            Assert.DoesNotThrow(() => new KeyAttributeConvention());
+            Assert.DoesNotThrow(() => new KeyAttributeEdmPropertyConvention());
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             entityType.Setup(e => e.HasKey(property.Object)).Returns(entityType.Object).Verifiable();
 
             // Act
-            new KeyAttributeConvention().Apply(primitiveProperty.Object, entityType.Object);
+            new KeyAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, entityType.Object);
 
             // Assert
             entityType.Verify();
@@ -49,7 +49,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<IComplexTypeConfiguration> complexType = new Mock<IComplexTypeConfiguration>(MockBehavior.Strict);
 
             // Act
-            new KeyAttributeConvention().Apply(primitiveProperty.Object, complexType.Object);
+            new KeyAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, complexType.Object);
 
             // Assert
             complexType.Verify();
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
 
             // Act
-            new KeyAttributeConvention().Apply(complexProperty.Object, entityType.Object);
+            new KeyAttributeEdmPropertyConvention().Apply(complexProperty.Object, entityType.Object);
 
             // Assert
             entityType.Verify();
@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
 
             // Act
-            new KeyAttributeConvention().Apply(navigationProperty.Object, entityType.Object);
+            new KeyAttributeEdmPropertyConvention().Apply(navigationProperty.Object, entityType.Object);
 
             // Assert
             entityType.Verify();

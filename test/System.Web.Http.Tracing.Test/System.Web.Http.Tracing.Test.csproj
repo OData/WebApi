@@ -22,7 +22,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>$(WebStackRootPath)\bin\Extensions\Debug\</OutputPath>
+    <OutputPath>$(WebStackRootPath)\bin\Extensions\Debug\Test\</OutputPath>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>$(WebStackRootPath)\bin\Extensions\Release\</OutputPath>
+    <OutputPath>$(WebStackRootPath)\bin\Extensions\Release\Test\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <ErrorReport>prompt</ErrorReport>

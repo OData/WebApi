@@ -55,7 +55,7 @@ namespace System.Net.Http.Headers
 
         public static TheoryDataSet<string> InvalidCookieHeaderDataSet
         {
-            get 
+            get
             {
                 return new TheoryDataSet<string>
                 {
@@ -67,7 +67,7 @@ namespace System.Net.Http.Headers
         }
 
         [Fact]
-        public void CookieHeaderValueCtor1_InitializesCorrectly()
+        public void CookieHeaderValue_Ctor1_InitializesCorrectly()
         {
             CookieHeaderValue header = new CookieHeaderValue("cookie", "value");
             Assert.Equal(1, header.Cookies.Count);
@@ -76,7 +76,7 @@ namespace System.Net.Http.Headers
         }
 
         [Fact]
-        public void CookieHeaderValueCtor2_InitializesCorrectly()
+        public void CookieHeaderValue_Ctor2_InitializesCorrectly()
         {
             NameValueCollection nvc = new NameValueCollection();
             nvc.Add("name", "value");
@@ -88,7 +88,7 @@ namespace System.Net.Http.Headers
         }
 
         [Fact]
-        public void CookieHeaderValueClone()
+        public void CookieHeaderValue_Clone()
         {
             // Arrange
             NameValueCollection nvc = new NameValueCollection();
@@ -110,14 +110,43 @@ namespace System.Net.Http.Headers
 
         [Theory]
         [PropertyData("CookieHeaderDataSet")]
-        public void CookieHeaderToString(CookieHeaderValue input, string expectedValue)
+        public void CookieHeaderValue_ToString(CookieHeaderValue input, string expectedValue)
         {
             Assert.Equal(expectedValue, input.ToString());
         }
 
         [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void CookieHeaderValue_GetItem_ReturnsNullIfNameIsNullOrEmpty(string name)
+        {
+            CookieHeaderValue header = new CookieHeaderValue("cookie", "value");
+            Assert.Null(header[name]);
+        }
+
+        [Fact]
+        public void CookieHeaderValue_GetItem_ReturnsCookie()
+        {
+            CookieHeaderValue header = new CookieHeaderValue("cookie", "value");
+
+            CookieState state = header["cookie"];
+            Assert.Equal(1, header.Cookies.Count);
+            Assert.Equal("value", state.Value);
+        }
+
+        [Fact]
+        public void CookieHeaderValue_GetItem_CreatesEmptyCookieIfNotAlreadyPresent()
+        {
+            CookieHeaderValue header = new CookieHeaderValue("cookie", "value");
+
+            CookieState state = header["newstate"];
+            Assert.Equal(2, header.Cookies.Count);
+            Assert.Equal(String.Empty, state.Value);
+        }
+
+        [Theory]
         [PropertyData("CookieHeaderDataSet")]
-        public void CookieHeaderTryParse_AcceptsValidValues(CookieHeaderValue cookie, string expectedValue)
+        public void CookieHeaderValue_TryParse_AcceptsValidValues(CookieHeaderValue cookie, string expectedValue)
         {
             CookieHeaderValue header;
             bool result = CookieHeaderValue.TryParse(expectedValue, out header);
@@ -128,7 +157,7 @@ namespace System.Net.Http.Headers
 
         [Theory]
         [PropertyData("InvalidCookieHeaderDataSet")]
-        public void CookieHeaderTryParse_RejectsInvalidValues(string value)
+        public void CookieHeaderValue_TryParse_RejectsInvalidValues(string value)
         {
             CookieHeaderValue header;
             bool result = CookieHeaderValue.TryParse(value, out header);

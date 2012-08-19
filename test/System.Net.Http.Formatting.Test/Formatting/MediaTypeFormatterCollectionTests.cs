@@ -39,30 +39,27 @@ namespace System.Net.Http.Formatting
             Assert.Equal(0, collection.Count);
         }
 
-        [Fact]
-        public void Constructor1_SetsProperties()
+        [Theory]
+        [TestDataSet(typeof(HttpTestData), "AllFormatterCollections")]
+        public void Constructor1_SetsProperties(IEnumerable<MediaTypeFormatter> formatterCollection)
         {
-            // All combination of formatters presented to ctor should still set XmlFormatter
-            foreach (IEnumerable<MediaTypeFormatter> formatterCollection in HttpTestData.AllFormatterCollections)
+            MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatterCollection);
+            if (collection.OfType<XmlMediaTypeFormatter>().Any())
             {
-                MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatterCollection);
-                if (collection.OfType<XmlMediaTypeFormatter>().Any())
-                {
-                    Assert.NotNull(collection.XmlFormatter);
-                }
-                else
-                {
-                    Assert.Null(collection.XmlFormatter);
-                }
+                Assert.NotNull(collection.XmlFormatter);
+            }
+            else
+            {
+                Assert.Null(collection.XmlFormatter);
+            }
 
-                if (collection.OfType<JsonMediaTypeFormatter>().Any())
-                {
-                    Assert.NotNull(collection.JsonFormatter);
-                }
-                else
-                {
-                    Assert.Null(collection.JsonFormatter);
-                }
+            if (collection.OfType<JsonMediaTypeFormatter>().Any())
+            {
+                Assert.NotNull(collection.JsonFormatter);
+            }
+            else
+            {
+                Assert.Null(collection.JsonFormatter);
             }
         }
 

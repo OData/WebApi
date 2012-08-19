@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Query.Expressions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
@@ -17,6 +18,7 @@ namespace System.Web.Http.OData.Query
     /// </summary>
     public class FilterQueryOption
     {
+        private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private FilterQueryNode _queryNode;
 
         /// <summary>
@@ -83,10 +85,22 @@ namespace System.Web.Http.OData.Query
         /// <returns>The query that the filter query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, bool handleNullPropagation)
         {
+            return ApplyTo(query, handleNullPropagation, _defaultAssembliesResolver);
+        }
+
+        /// <summary>
+        /// Apply the filter query to the given IQueryable.
+        /// </summary>
+        /// <param name="query">The IQueryable that we are applying filter query against.</param>
+        /// <param name="handleNullPropagation">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
+        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
+        /// <returns>The query that the filter query has been applied to.</returns>
+        public IQueryable ApplyTo(IQueryable query, bool handleNullPropagation, IAssembliesResolver assembliesResolver)
+        {
             FilterQueryNode node = QueryNode;
             Contract.Assert(node != null);
 
-            Expression filter = FilterBinder.Bind(node, Context.EntityClrType, Context.Model, handleNullPropagation);
+            Expression filter = FilterBinder.Bind(node, Context.EntityClrType, Context.Model, assembliesResolver, handleNullPropagation);
             query = ExpressionHelpers.Where(query, filter, Context.EntityClrType);
             return query;
         }

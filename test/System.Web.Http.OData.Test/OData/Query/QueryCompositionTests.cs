@@ -4,14 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Deserialization;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
     public class QueryCompositionTests
     {
+        private static IEdmModel _queryCompositionCustomerModel;
+
         public static TheoryDataSet<string, bool> ControllerNames
         {
             get
@@ -26,6 +31,21 @@ namespace System.Web.Http.OData.Query
                     { "QueryCompositionCustomerLowLevel", false },
                     { "QueryCompositionCustomerQueryable", false },
                     { "QueryCompositionCustomerGlobal", false }
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, bool, int[]> Filters
+        {
+            get
+            {
+                return new TheoryDataSet<string, bool, int[]>
+                {
+                    { "Name eq 'Highest'", true, new int[] { 33 } },
+                    { "Address/City eq 'redmond'", true, new int[] { 11 } },
+                    { "Address/City eq null", true, new int[] { 22 , 3 } },
+                    { "RelationshipManager/Name eq null", true, new int[] { 11, 22, 3 } },
+                    { "RelationshipManager/Name ne null", true, new int[] { 33 } }
                 };
             }
         }
@@ -225,21 +245,6 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        public static TheoryDataSet<string, bool, int[]> Filters
-        {
-            get
-            {
-                return new TheoryDataSet<string, bool, int[]>
-                {
-                    { "Name eq 'Highest'", true, new int[] { 33 } },
-                    //{ "Address/City eq 'redmond'", true, new int[] { 11}},
-                    //{ "Address/City eq null", true, new int[] { 22 , 3}},
-                    //{ "RelationshipManager/Name eq null", true, new int[]{ 11, 22, 3} },
-                    //{ "RelationshipManager/Name ne null", true, new int[]{ 33} }
-                };
-            }
-        }
-
         [Theory]
         [TestDataSet(typeof(QueryCompositionTests), "ControllerNames", typeof(QueryCompositionTests), "Filters")]
         public void QueryableFilter(string controllerName, bool useCustomEdmModel, string filter, bool nullPropagation, int[] customerIds)
@@ -258,6 +263,33 @@ namespace System.Web.Http.OData.Query
                 customers.Select(customer => customer.Id));
         }
 
+        [Fact]
+        public void QueryableUsesConfiguredAssembliesResolver()
+        {
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
+            IEdmModel model = modelBuilder.GetEdmModel();
+            model.SetAnnotationValue<ClrTypeAnnotation>(model.FindType("System.Web.Http.OData.Query.QueryCompositionCustomer"), null);
+
+            HttpConfiguration configuration = InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: false);
+            configuration.SetEdmModel(model);
+
+            bool called = false;
+            Mock<IAssembliesResolver> assembliesResolver = new Mock<IAssembliesResolver>();
+            assembliesResolver
+                .Setup(r => r.GetAssemblies())
+                .Returns(new DefaultAssembliesResolver().GetAssemblies())
+                .Callback(() => { called = true; })
+                .Verifiable();
+            configuration.Services.Replace(typeof(IAssembliesResolver), assembliesResolver.Object);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            HttpResponseMessage response = client.GetAsync("http://localhost:8080/{0}/?$filter=Id eq 2").Result;
+            Assert.True(called);
+        }
+
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
             HttpConfiguration config = new HttpConfiguration();
@@ -270,10 +302,13 @@ namespace System.Web.Http.OData.Query
 
             if (useCustomEdmModel)
             {
-                ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-                modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
-                IEdmModel model = modelBuilder.GetEdmModel();
-                config.SetEdmModel(model);
+                if (_queryCompositionCustomerModel == null)
+                {
+                    ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+                    modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
+                    _queryCompositionCustomerModel = modelBuilder.GetEdmModel();
+                }
+                config.SetEdmModel(_queryCompositionCustomerModel);
             }
 
             return config;

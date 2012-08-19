@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -16,6 +18,8 @@ namespace System.Web.Http.OData.Query.Expressions
         private const string NotTesting = "";
 
         private static readonly Uri _serviceBaseUri = new Uri("http://server/service/");
+
+        private static Dictionary<Type, IEdmModel> _modelCache = new Dictionary<Type, IEdmModel>();
 
         #region Inequalities
         [Theory]
@@ -1018,7 +1022,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             var semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
 
-            var filterExpr = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode, model, handleNullPropagation: false);
+            var filterExpr = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode, model, new DefaultAssembliesResolver(), handleNullPropagation: false);
 
             if (!String.IsNullOrEmpty(expectedResult))
             {
@@ -1027,7 +1031,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             expectedResultWithNullPropagation = expectedResultWithNullPropagation ?? expectedResult;
 
-            var filterExprWithNullPropagation = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode, model, handleNullPropagation: true);
+            var filterExprWithNullPropagation = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode, model, new DefaultAssembliesResolver(), handleNullPropagation: true);
 
             if (!String.IsNullOrEmpty(expectedResultWithNullPropagation))
             {
@@ -1050,11 +1054,19 @@ namespace System.Web.Http.OData.Query.Expressions
                 String.Format("Expected expression '{0}' but the deserializer produced '{1}'", expectedExpression, resultExpression));
         }
 
+
         private IEdmModel GetModel<T>() where T : class
         {
-            var model = new ODataConventionModelBuilder();
-            model.EntitySet<T>("Products");
-            return model.GetEdmModel();
+            Type key = typeof(T);
+            IEdmModel value;
+
+            if (!_modelCache.TryGetValue(key, out value))
+            {
+                ODataModelBuilder model = new ODataConventionModelBuilder();
+                model.EntitySet<T>("Products");
+                value = _modelCache[key] = model.GetEdmModel();
+            }
+            return value;
         }
 
         private T? ToNullable<T>(object value) where T : struct

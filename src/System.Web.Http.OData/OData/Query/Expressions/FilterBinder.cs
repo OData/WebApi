@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
@@ -48,22 +49,25 @@ namespace System.Web.Http.OData.Query.Expressions
         private Dictionary<string, ParameterExpression> _lambdaParameters;
 
         private bool _nullPropagation;
+        private IAssembliesResolver _assembliesResolver;
 
-        private FilterBinder(IEdmModel model, bool handleNullPropagation)
+        private FilterBinder(IEdmModel model, IAssembliesResolver assembliesResolver, bool handleNullPropagation)
         {
             Contract.Assert(model != null);
+            Contract.Assert(assembliesResolver != null);
 
             _nullPropagation = handleNullPropagation;
             _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
             _model = model;
+            _assembliesResolver = assembliesResolver;
         }
 
-        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, bool handleNullPropagation)
+        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, bool handleNullPropagation)
         {
-            return Bind(filterNode, typeof(TEntityType), model, handleNullPropagation) as Expression<Func<TEntityType, bool>>;
+            return Bind(filterNode, typeof(TEntityType), model, assembliesResolver, handleNullPropagation) as Expression<Func<TEntityType, bool>>;
         }
 
-        public static Expression Bind(FilterQueryNode filterNode, Type filterType, IEdmModel model, bool handleNullPropagation)
+        public static Expression Bind(FilterQueryNode filterNode, Type filterType, IEdmModel model, IAssembliesResolver assembliesResolver, bool handleNullPropagation)
         {
             if (filterNode == null)
             {
@@ -80,7 +84,12 @@ namespace System.Web.Http.OData.Query.Expressions
                 throw Error.ArgumentNull("model");
             }
 
-            FilterBinder binder = new FilterBinder(model, handleNullPropagation);
+            if (assembliesResolver == null)
+            {
+                throw Error.ArgumentNull("assembliesResolver");
+            }
+
+            FilterBinder binder = new FilterBinder(model, assembliesResolver, handleNullPropagation);
             Expression filter = binder.BindFilterQueryNode(filterNode);
 
             Type expectedFilterType = typeof(Func<,>).MakeGenericType(filterType, typeof(bool));
@@ -227,7 +236,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 return _nullConstant;
             }
 
-            return Expression.Constant(constantNode.Value, EdmLibHelpers.GetClrType(constantNode.TypeReference, _model));
+            return Expression.Constant(constantNode.Value, EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver));
         }
 
         private Expression BindConvertQueryNode(ConvertQueryNode convertQueryNode)
@@ -237,7 +246,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Expression source = Bind(convertQueryNode.Source);
 
-            Type conversionType = EdmLibHelpers.GetClrType(convertQueryNode.TypeReference, _model);
+            Type conversionType = EdmLibHelpers.GetClrType(convertQueryNode.TypeReference, _model, _assembliesResolver);
 
             if (conversionType == typeof(bool?) && source.Type == typeof(bool))
             {
@@ -256,7 +265,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression BindFilterQueryNode(FilterQueryNode filterNode)
         {
-            Type filterType = EdmLibHelpers.GetClrType(filterNode.ItemType, _model);
+            Type filterType = EdmLibHelpers.GetClrType(filterNode.ItemType, _model, _assembliesResolver);
             ParameterExpression filterParameter = Expression.Parameter(filterType, filterNode.Parameter.Name);
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
             _lambdaParameters.Add(filterNode.Parameter.Name, filterParameter);
@@ -702,7 +711,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 ParameterExpression parameter;
                 if (!_lambdaParameters.TryGetValue(parameterNode.Name, out parameter))
                 {
-                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(parameterNode.ParameterType, _model), parameterNode.Name);
+                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(parameterNode.ParameterType, _model, _assembliesResolver), parameterNode.Name);
                     Contract.Assert(lambdaIt == null, "There can be only one parameter in an Any/All lambda");
                     lambdaIt = parameter;
                 }

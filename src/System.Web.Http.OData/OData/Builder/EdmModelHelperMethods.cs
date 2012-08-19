@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -65,6 +66,8 @@ namespace System.Web.Http.OData.Builder
 
             EdmModel model = new EdmModel();
 
+            Dictionary<string, IStructuralTypeConfiguration> typeConfigurations = entityTypeConfigurations.ToDictionary(t => t.FullName);
+
             Dictionary<string, IEdmStructuredType> types = EdmTypeBuilder.GetTypes(entityTypeConfigurations)
                 .OfType<IEdmStructuredType>()
                 .ToDictionary(t => t.ToString());
@@ -83,6 +86,11 @@ namespace System.Web.Http.OData.Builder
                 {
                     throw Error.InvalidOperation(SRResources.UnsupportedEntityTypeInModel);
                 }
+
+                // pre-populate the model with clr-type annotations so that we dont have to scan 
+                // all loaded assemblies to find the clr type for an edm type that we build.
+                Type mappedClrType = typeConfigurations[(type as IEdmSchemaType).FullName()].ClrType;
+                model.SetAnnotationValue<ClrTypeAnnotation>(type, new ClrTypeAnnotation(mappedClrType));
             }
 
             if (entitySetConfigurations.Any())

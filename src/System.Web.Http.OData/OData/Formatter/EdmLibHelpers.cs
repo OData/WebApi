@@ -2,10 +2,12 @@
 
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Spatial;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Properties;
 using System.Xml.Linq;
@@ -17,6 +19,8 @@ namespace System.Web.Http.OData.Formatter
     public static class EdmLibHelpers
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
+
+        private static readonly IAssembliesResolver _defaultAssemblyResolver = new DefaultAssembliesResolver();
 
         private static readonly Dictionary<Type, IEdmPrimitiveType> _builtInTypesMapping =
             new[]
@@ -145,6 +149,11 @@ namespace System.Web.Http.OData.Formatter
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
         {
+            return GetClrType(edmTypeReference, edmModel, _defaultAssemblyResolver);
+        }
+
+        public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
+        {
             if (edmTypeReference == null)
             {
                 throw Error.ArgumentNull("edmTypeReference");
@@ -167,25 +176,7 @@ namespace System.Web.Http.OData.Formatter
                     return annotation.ClrType;
                 }
 
-                // search all the loaded assemblies for a type with the same name
-                IEnumerable<Type> matchingTypes =
-                    AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .SelectMany(assembly =>
-                        {
-                            Type[] types;
-                            try
-                            {
-                                types = assembly.GetTypes();
-                            }
-                            catch (ReflectionTypeLoadException e)
-                            {
-                                types = e.Types;
-                            }
-
-                            return types ?? Enumerable.Empty<Type>();
-                        })
-                    .Where(type => type != null && type.FullName == edmTypeReference.FullName());
+                IEnumerable<Type> matchingTypes = GetMatchingTypes(edmTypeReference.FullName(), assembliesResolver);
 
                 if (matchingTypes.Count() > 1)
                 {
@@ -225,6 +216,45 @@ namespace System.Web.Http.OData.Formatter
         {
             Func<Type, bool> matchesInterface = t => t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType;
             return matchesInterface(queryType) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching all exceptions in this case is the right to do.")]
+        // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
+        private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssembliesResolver assembliesResolver)
+        {
+            List<Type> result = new List<Type>();
+
+            // Go through all assemblies referenced by the application and search for types matching a predicate
+            ICollection<Assembly> assemblies = assembliesResolver.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Type[] exportedTypes = null;
+                if (assembly == null || assembly.IsDynamic)
+                {
+                    // can't call GetExportedTypes on a dynamic assembly
+                    continue;
+                }
+
+                try
+                {
+                    exportedTypes = assembly.GetExportedTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    exportedTypes = ex.Types;
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (exportedTypes != null)
+                {
+                    result.AddRange(exportedTypes.Where(t => t != null && t.IsPublic && t.FullName == edmFullName));
+                }
+            }
+
+            return result;
         }
     }
 }

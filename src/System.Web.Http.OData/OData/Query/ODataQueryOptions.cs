@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -20,6 +21,8 @@ namespace System.Web.Http.OData.Query
         private const string EntityFrameworkQueryProviderAssemblyName = "EntityFramework";
         private const string Linq2SqlQueryProviderAssemblyName = "System.Data.Linq";
         private const string Linq2ObjectsQueryProviderAssemblyName = "System.Core";
+
+        private IAssembliesResolver _assembliesResolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from 
@@ -38,6 +41,14 @@ namespace System.Web.Http.OData.Query
             {
                 throw Error.ArgumentNull("request");
             }
+
+            if (request.GetConfiguration() != null)
+            {
+                _assembliesResolver = request.GetConfiguration().Services.GetAssembliesResolver();
+            }
+
+            // fallback to the default assemblies resolver if none available.
+            _assembliesResolver = _assembliesResolver ?? new DefaultAssembliesResolver();
 
             // remember the context
             Context = context;
@@ -186,7 +197,7 @@ namespace System.Web.Http.OData.Query
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
             if (Filter != null)
             {
-                result = Filter.ApplyTo(result, handleNullPropagation);
+                result = Filter.ApplyTo(result, handleNullPropagation, _assembliesResolver);
             }
 
             OrderByQueryOption orderBy = OrderBy;

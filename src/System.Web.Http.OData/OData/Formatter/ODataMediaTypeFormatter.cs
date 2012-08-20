@@ -188,15 +188,11 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("readStream");
             }
 
-            if (content == null)
-            {
-                throw Error.ArgumentNull("content");
-            }
-
             object result = null;
 
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             // If content length is 0 then return default value for this type
-            if (content.Headers != null && content.Headers.ContentLength == 0)
+            if (contentHeaders != null && contentHeaders.ContentLength == 0)
             {
                 result = GetDefaultValueForType(type);
             }
@@ -215,12 +211,12 @@ namespace System.Web.Http.OData.Formatter
                 {
                     if (IsClient)
                     {
-                        IODataResponseMessage oDataResponseMessage = new ODataMessageWrapper(readStream, content.Headers);
+                        IODataResponseMessage oDataResponseMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataResponseMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
                     }
                     else
                     {
-                        IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, content.Headers);
+                        IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
                     }
 

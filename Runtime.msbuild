@@ -55,7 +55,7 @@
     <Target Name="Build" DependsOnTargets="Prereq">
         <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
         <MSBuild
-            Projects="@(SolutionsToBuild)"
+            Projects="%(SolutionsToBuild.Identity)"
             BuildInParallel="$(BuildInParallel)"
             Targets="Build"
             Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled)" />

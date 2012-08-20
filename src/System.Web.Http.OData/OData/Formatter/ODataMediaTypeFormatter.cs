@@ -66,7 +66,7 @@ namespace System.Web.Http.OData.Formatter
 
             SupportedMediaTypes.Add(ODataMediaTypeFormatter.ApplicationAtomXmlMediaType);
             SupportedMediaTypes.Add(ODataMediaTypeFormatter.ApplicationJsonMediaType);
-            SupportedMediaTypes.Add(ODataMediaTypeFormatter.DefaultApplicationXmlMediaType);
+            SupportedMediaTypes.Add(ODataMediaTypeFormatter.ApplicationXmlMediaType);
 
             SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
@@ -94,7 +94,7 @@ namespace System.Web.Http.OData.Formatter
         /// </value>
         public static MediaTypeHeaderValue DefaultMediaType
         {
-            get { return ODataMediaTypeFormatter.ApplicationAtomXmlMediaType; }
+            get { return ApplicationAtomXmlMediaType; }
         }
 
         private static MediaTypeHeaderValue ApplicationAtomXmlMediaType
@@ -105,6 +105,11 @@ namespace System.Web.Http.OData.Formatter
         private static MediaTypeHeaderValue ApplicationJsonMediaType
         {
             get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationJsonMediaType).Clone(); }
+        }
+
+        private static MediaTypeHeaderValue ApplicationXmlMediaType
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationXmlMediaType).Clone(); }
         }
 
         /// <inheritdoc/>
@@ -188,37 +193,47 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("content");
             }
 
-            bool isPatchMode = TryGetInnerTypeForDelta(ref type);
-            ODataDeserializer deserializer = ODataDeserializerProvider.GetODataDeserializer(type);
-            if (deserializer == null)
-            {
-                throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
-            }
-
-            ODataMessageReader oDataMessageReader = null;
             object result = null;
-            try
+
+            // If content length is 0 then return default value for this type
+            if (content.Headers != null && content.Headers.ContentLength == 0)
             {
-                if (IsClient)
-                {
-                    IODataResponseMessage oDataResponseMessage = new ODataMessageWrapper(readStream, content.Headers);
-                    oDataMessageReader = new ODataMessageReader(oDataResponseMessage, new ODataMessageReaderSettings(), ODataDeserializerProvider.EdmModel);
-                }
-                else
-                {
-                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, content.Headers);
-                    oDataMessageReader = new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), ODataDeserializerProvider.EdmModel);
-                }
-
-                ODataDeserializerReadContext readContext = new ODataDeserializerReadContext { IsPatchMode = isPatchMode };
-
-                result = deserializer.Read(oDataMessageReader, readContext);
+                result = GetDefaultValueForType(type);
             }
-            finally
+            else
             {
-                if (oDataMessageReader != null)
+                bool isPatchMode = TryGetInnerTypeForDelta(ref type);
+                ODataDeserializer deserializer = ODataDeserializerProvider.GetODataDeserializer(type);
+                if (deserializer == null)
                 {
-                    oDataMessageReader.Dispose();
+                    throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
+                }
+
+                ODataMessageReader oDataMessageReader = null;
+                ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings { DisableMessageStreamDisposal = true };
+                try
+                {
+                    if (IsClient)
+                    {
+                        IODataResponseMessage oDataResponseMessage = new ODataMessageWrapper(readStream, content.Headers);
+                        oDataMessageReader = new ODataMessageReader(oDataResponseMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
+                    }
+                    else
+                    {
+                        IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, content.Headers);
+                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
+                    }
+
+                    ODataDeserializerReadContext readContext = new ODataDeserializerReadContext { IsPatchMode = isPatchMode };
+
+                    result = deserializer.Read(oDataMessageReader, readContext);
+                }
+                finally
+                {
+                    if (oDataMessageReader != null)
+                    {
+                        oDataMessageReader.Dispose();
+                    }
                 }
             }
 

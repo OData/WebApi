@@ -103,7 +103,7 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(headervalues, new string[] { expectedDataServiceVersion + ";" });
         }
 
-        [Fact(Skip="Bug tracked by Issue 335")]
+        [Fact]
         public void SupportedMediaTypes_HeaderValuesAreNotSharedBetweenInstances()
         {
             var formatter1 = CreateFormatter();
@@ -151,7 +151,7 @@ namespace System.Web.Http.OData.Formatter
             Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
         }
 
-        [Fact(Skip = "Bug tracked by Issue 334")]
+        [Fact]
         public Task ReadFromStreamAsync_WhenContentLengthIsZero_DoesNotReadStream()
         {
             // Arrange
@@ -176,7 +176,7 @@ namespace System.Web.Http.OData.Formatter
                     });
         }
 
-        [Fact(Skip = "Bug tracked by Issue 334")]
+        [Fact]
         public Task ReadFromStreamAsync_WhenContentLengthIsZero_DoesNotCloseStream()
         {
             // Arrange
@@ -199,7 +199,7 @@ namespace System.Web.Http.OData.Formatter
                     });
         }
 
-        [Theory(Skip="Bug tracked by Issue 334")]
+        [Theory]
         [InlineData(false)]
         [InlineData(0)]
         [InlineData("")]
@@ -218,7 +218,7 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(default(T), (T)result.Result);
         }
 
-        [Fact(Skip="Bug tracked by Issue 333")]
+        [Fact]
         public Task ReadFromStreamAsync_ReadsDataButDoesNotCloseStream()
         {
             // Arrange
@@ -242,7 +242,7 @@ namespace System.Web.Http.OData.Formatter
                 });
         }
 
-        [Fact(Skip = "Bug tracked by Issue 333")]
+        [Fact]
         public Task ReadFromStreamAsync_WhenContentLengthIsNull_ReadsDataButDoesNotCloseStream()
         {
             // Arrange

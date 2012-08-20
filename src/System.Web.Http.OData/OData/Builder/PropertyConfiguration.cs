@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Builder
     {
         protected PropertyConfiguration(PropertyInfo property)
         {
-            this.PropertyInfo = property;
+            PropertyInfo = property;
         }
 
         public string Name

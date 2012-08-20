@@ -29,7 +29,7 @@ namespace System.Web.Http.OData.Builder
 
         public IEnumerable<NavigationPropertyConfiguration> NavigationProperties
         {
-            get { return this.ExplicitProperties.Values.OfType<NavigationPropertyConfiguration>(); }
+            get { return ExplicitProperties.Values.OfType<NavigationPropertyConfiguration>(); }
         }
 
         public IEnumerable<PrimitivePropertyConfiguration> Keys
@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            if (navigationProperty.DeclaringType != this.ClrType)
+            if (navigationProperty.DeclaringType != ClrType)
             {
                 throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType);
             }
@@ -71,9 +71,9 @@ namespace System.Web.Http.OData.Builder
             PropertyConfiguration propertyConfig;
             NavigationPropertyConfiguration navigationPropertyConfig;
 
-            if (this.ExplicitProperties.ContainsKey(navigationProperty))
+            if (ExplicitProperties.ContainsKey(navigationProperty))
             {
-                propertyConfig = this.ExplicitProperties[navigationProperty];
+                propertyConfig = ExplicitProperties[navigationProperty];
                 if (propertyConfig.Kind != PropertyKind.Navigation)
                 {
                     throw Error.Argument("navigationProperty", SRResources.MustBeNavigationProperty, navigationProperty.Name);
@@ -88,9 +88,9 @@ namespace System.Web.Http.OData.Builder
             else
             {
                 navigationPropertyConfig = new NavigationPropertyConfiguration(navigationProperty, multiplicity);
-                this.ExplicitProperties[navigationProperty] = navigationPropertyConfig;
+                ExplicitProperties[navigationProperty] = navigationPropertyConfig;
                 // make sure the related type is configured
-                this.ModelBuilder.AddEntity(navigationPropertyConfig.RelatedClrType);
+                ModelBuilder.AddEntity(navigationPropertyConfig.RelatedClrType);
             }
             return navigationPropertyConfig;
         }

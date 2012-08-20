@@ -96,7 +96,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.InvalidOperation(SRResources.LambdaExpressionMustHaveExactlyOneParameter);
             }
 
-            Expression body = this.Visit(lambda.Body);
+            Expression body = Visit(lambda.Body);
 
             if (body != lambda.Body)
             {

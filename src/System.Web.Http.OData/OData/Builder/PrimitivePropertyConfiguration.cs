@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Builder
 
         public override Type RelatedClrType
         {
-            get { return this.PropertyInfo.PropertyType; }
+            get { return PropertyInfo.PropertyType; }
         }
 
         public PrimitivePropertyConfiguration IsConcurrencyToken() 
@@ -42,13 +42,13 @@ namespace System.Web.Http.OData.Builder
 
         public PrimitivePropertyConfiguration IsOptional() 
         {
-            this.OptionalProperty = true;
+            OptionalProperty = true;
             return this;
         }
 
         public PrimitivePropertyConfiguration IsRequired() 
         {
-            this.OptionalProperty = false;
+            OptionalProperty = false;
             return this;
         }
     }

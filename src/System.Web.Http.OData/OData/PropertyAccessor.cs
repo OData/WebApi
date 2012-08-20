@@ -17,7 +17,7 @@ namespace System.Web.Http.OData
             {
                 throw Error.ArgumentNull("property");
             }
-            this.Property = property;
+            Property = property;
             if (Property.GetGetMethod() == null || Property.GetSetMethod() == null)
             {
                 throw Error.Argument("property", WebApiResources.PropertyMustHavePublicGetterAndSetter);

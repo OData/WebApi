@@ -48,12 +48,12 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNullOrEmpty("serviceOperationName");
             }
 
-            this._responseMessage = responseMessage;
-            this.ODataFormat = format;
-            this.ODataVersion = version;
-            this._baseAddress = baseAddress;
-            this._serviceOperationName = serviceOperationName;
-            this.IsIndented = true;
+            _responseMessage = responseMessage;
+            ODataFormat = format;
+            ODataVersion = version;
+            _baseAddress = baseAddress;
+            _serviceOperationName = serviceOperationName;
+            IsIndented = true;
         }
 
         public ODataResponseContext(IODataRequestMessage requestMessage, ODataFormat format, ODataVersion version, Uri baseAddress, string serviceOperationName)
@@ -73,12 +73,12 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNullOrEmpty("serviceOperationName");
             }
 
-            this._requestMessage = requestMessage;
-            this.ODataFormat = format;
-            this.ODataVersion = version;
-            this._baseAddress = baseAddress;
-            this._serviceOperationName = serviceOperationName;
-            this.IsIndented = true;
+            _requestMessage = requestMessage;
+            ODataFormat = format;
+            ODataVersion = version;
+            _baseAddress = baseAddress;
+            _serviceOperationName = serviceOperationName;
+            IsIndented = true;
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         public IODataResponseMessage ODataResponseMessage
         {
-            get { return this._responseMessage; }
+            get { return _responseMessage; }
 
             set
             {
@@ -96,7 +96,7 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.ArgumentNull("value");
                 }
 
-                this._responseMessage = value;
+                _responseMessage = value;
             }
         }
 
@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         public IODataRequestMessage ODataRequestMessage
         {
-            get { return this._requestMessage; }
+            get { return _requestMessage; }
 
             set
             {
@@ -115,7 +115,7 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.ArgumentNull("value");
                 }
 
-                this._requestMessage = value;
+                _requestMessage = value;
             }
         }
 
@@ -134,7 +134,7 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         public Uri BaseAddress
         {
-            get { return this._baseAddress; }
+            get { return _baseAddress; }
 
             set
             {
@@ -143,7 +143,7 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.ArgumentNull("value");
                 }
 
-                this._baseAddress = value;
+                _baseAddress = value;
             }
         }
 
@@ -153,7 +153,7 @@ namespace System.Web.Http.OData.Formatter
         /// </summary>
         public string ServiceOperationName
         {
-            get { return this._serviceOperationName; }
+            get { return _serviceOperationName; }
 
             set
             {
@@ -162,7 +162,7 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.ArgumentNullOrEmpty("value");
                 }
 
-                this._serviceOperationName = value;
+                _serviceOperationName = value;
             }
         }
 

@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Builder
 
         public override Type RelatedClrType
         {
-            get { return this.PropertyInfo.PropertyType; }
+            get { return PropertyInfo.PropertyType; }
         }
 
         public ComplexPropertyConfiguration IsOptional()

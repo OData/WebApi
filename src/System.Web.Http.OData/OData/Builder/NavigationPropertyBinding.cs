@@ -6,13 +6,13 @@ namespace System.Web.Http.OData.Builder
 {
     public class NavigationPropertyBinding
     {
-        private Func<EntityInstanceContext, string> linkFactory;
+        private Func<EntityInstanceContext, string> _linkFactory;
 
         public NavigationPropertyBinding(NavigationPropertyConfiguration navigationProperty, IEntitySetConfiguration entitySet) 
         {
-            this.NavigationProperty = navigationProperty;
-            this.EntitySet = entitySet;
-            this.linkFactory = null;
+            NavigationProperty = navigationProperty;
+            EntitySet = entitySet;
+            _linkFactory = null;
         }
 
         public NavigationPropertyConfiguration NavigationProperty { get; private set; } 
@@ -21,17 +21,17 @@ namespace System.Web.Http.OData.Builder
        
         public void HasLinkFactory(Func<EntityInstanceContext, string> linkFactoryParameter)
         {
-            this.linkFactory = linkFactoryParameter;
+            _linkFactory = linkFactoryParameter;
         }
 
         public string GetLink(EntityInstanceContext entityContext)
         {
-            if (this.linkFactory == null)
+            if (_linkFactory == null)
             {
                 throw Error.NotSupported(SRResources.CreatingLinksByConventionNotSupported);
             }
 
-            return linkFactory(entityContext);
+            return _linkFactory(entityContext);
         }
     }
 }

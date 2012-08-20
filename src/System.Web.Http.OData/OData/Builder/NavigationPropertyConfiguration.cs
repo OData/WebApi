@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Builder
 
         public override Type RelatedClrType
         {
-            get { return this._relatedType; }
+            get { return _relatedType; }
         }
 
         public override PropertyKind Kind

@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <returns></returns>
         public virtual object Read(ODataMessageReader messageReader, ODataDeserializerReadContext readContext)
         {
-            throw Error.NotSupported(SRResources.DeserializerDoesNotSupportRead, this.GetType().Name);
+            throw Error.NotSupported(SRResources.DeserializerDoesNotSupportRead, GetType().Name);
         }
     }
 }

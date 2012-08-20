@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         public virtual object ReadInline(object item, ODataDeserializerReadContext readContext)
         {
-            throw Error.NotSupported(SRResources.DoesNotSupportReadInLine, this.GetType().Name);
+            throw Error.NotSupported(SRResources.DoesNotSupportReadInLine, GetType().Name);
         }
 
         internal static void RecurseEnter(ODataDeserializerReadContext readContext)

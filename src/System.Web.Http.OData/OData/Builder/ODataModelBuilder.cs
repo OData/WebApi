@@ -48,13 +48,13 @@ namespace System.Web.Http.OData.Builder
 
             if (!_structuralTypes.ContainsKey(type))
             {
-                var entityTypeConfig = new EntityTypeConfiguration(this, type);
+                EntityTypeConfiguration entityTypeConfig = new EntityTypeConfiguration(this, type);
                 _structuralTypes.Add(type, entityTypeConfig);
                 return entityTypeConfig;
             }
             else
             {
-                var config = _structuralTypes[type] as EntityTypeConfiguration;
+                EntityTypeConfiguration config = _structuralTypes[type] as EntityTypeConfiguration;
                 if (config == null || config.ClrType != type)
                 {
                     throw Error.Argument("type", SRResources.TypeCannotBeEntityWasComplex, type.FullName);
@@ -73,14 +73,13 @@ namespace System.Web.Http.OData.Builder
 
             if (!_structuralTypes.ContainsKey(type))
             {
-                var complexTypeConfig = new ComplexTypeConfiguration(this, type);
+                ComplexTypeConfiguration complexTypeConfig = new ComplexTypeConfiguration(this, type);
                 _structuralTypes.Add(type, complexTypeConfig);
                 return complexTypeConfig;
             }
             else
             {
-                var config = _structuralTypes[type];
-                var complexTypeConfig = config as ComplexTypeConfiguration;
+                ComplexTypeConfiguration complexTypeConfig = _structuralTypes[type] as ComplexTypeConfiguration;
                 if (complexTypeConfig == null || complexTypeConfig.ClrType != type)
                 {
                     throw Error.Argument("type", SRResources.TypeCannotBeComplexWasEntity, type.FullName);

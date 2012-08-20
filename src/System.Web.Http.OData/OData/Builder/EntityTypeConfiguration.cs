@@ -47,7 +47,7 @@ namespace System.Web.Http.OData.Builder
 
         public IEntityTypeConfiguration HasKey(PropertyInfo keyProperty)
         {
-            var propertyConfig = AddProperty(keyProperty);
+            PrimitivePropertyConfiguration propertyConfig = AddProperty(keyProperty);
             if (!_keys.Contains(propertyConfig))
             {
                 _keys.Add(propertyConfig);
@@ -120,8 +120,8 @@ namespace System.Web.Http.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]
         public EntityTypeConfiguration<TEntityType> HasKey<TKey>(Expression<Func<TEntityType, TKey>> keyDefinitionExpression)
         {
-            var properties = PropertySelectorVisitor.GetSelectedProperties(keyDefinitionExpression);
-            foreach (var property in properties)
+            ICollection<PropertyInfo> properties = PropertySelectorVisitor.GetSelectedProperties(keyDefinitionExpression);
+            foreach (PropertyInfo property in properties)
             {
                 _configuration.HasKey(property);
             }

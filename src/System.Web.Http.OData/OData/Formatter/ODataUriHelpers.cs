@@ -21,12 +21,12 @@ namespace System.Web.Http.OData.Formatter
 
             ODataQueryProjectionNode rootProjectionNode = new ODataQueryProjectionNode { Name = String.Empty, NodeType = entitySet.ElementType };
 
-            foreach (var expand in expands)
+            foreach (string expand in expands)
             {
                 ODataQueryProjectionNode currentProjectionNode = rootProjectionNode;
 
                 IEnumerable<string> expandPath = expand.Split('/');
-                foreach (var property in expandPath)
+                foreach (string property in expandPath)
                 {
                     ODataQueryProjectionNode nextNode = currentProjectionNode.Expands.SingleOrDefault(node => node.Name == property);
                     if (nextNode == null)
@@ -39,12 +39,12 @@ namespace System.Web.Http.OData.Formatter
                 }
             }
 
-            foreach (var select in selects)
+            foreach (string select in selects)
             {
                 ODataQueryProjectionNode currentProjectionNode = rootProjectionNode;
 
                 IEnumerable<string> selectPath = select.Split('/');
-                foreach (var property in selectPath)
+                foreach (string property in selectPath)
                 {
                     ODataQueryProjectionNode nextNode = currentProjectionNode.Expands.SingleOrDefault(node => node.Name == property);
                     if (nextNode == null)
@@ -74,9 +74,9 @@ namespace System.Web.Http.OData.Formatter
             IEdmEntitySet currentEntitySet = null;
 
             entitySet = null;
-            foreach (var segment in uri.Segments)
+            foreach (string segment in uri.Segments)
             {
-                var segmentValue = segment.Replace("/", String.Empty);
+                string segmentValue = segment.Replace("/", String.Empty);
 
                 if (segmentValue.Length == 0)
                 {
@@ -90,11 +90,11 @@ namespace System.Web.Http.OData.Formatter
                     segmentValue = segment.Remove(i);
                 }
 
-                var container = model.EntityContainers().First();
+                IEdmEntityContainer container = model.EntityContainers().First();
                 // If there is no entitySet we need to find out which one it is
                 if (currentEntitySet == null)
                 {
-                    var foundEntitySet = container.FindEntitySet(segmentValue);
+                    IEdmEntitySet foundEntitySet = container.FindEntitySet(segmentValue);
                     if (foundEntitySet != null)
                     {
                         currentEntitySet = foundEntitySet;
@@ -102,7 +102,7 @@ namespace System.Web.Http.OData.Formatter
                     else
                     {
                         // check to see if there the current segment is a service operation
-                        var functionImport = container.FunctionImports().SingleOrDefault(fi => fi.Name == segmentValue);
+                        IEdmFunctionImport functionImport = container.FunctionImports().SingleOrDefault(fi => fi.Name == segmentValue);
                         if (functionImport != null)
                         {
                             IEdmEntitySet functionEntitySet = null;
@@ -115,7 +115,7 @@ namespace System.Web.Http.OData.Formatter
                 }
                 else
                 {
-                    var navigationProperty = currentEntitySet.ElementType.NavigationProperties().SingleOrDefault(np => np.Name == segmentValue);
+                    IEdmNavigationProperty navigationProperty = currentEntitySet.ElementType.NavigationProperties().SingleOrDefault(np => np.Name == segmentValue);
                     if (navigationProperty != null)
                     {
                         currentEntitySet = currentEntitySet.FindNavigationTarget(navigationProperty);
@@ -123,7 +123,7 @@ namespace System.Web.Http.OData.Formatter
                     else
                     {
                         // Need to update this a little so it works for Actions/Functions
-                        var functionImport = container.FunctionImports().SingleOrDefault(fi => fi.IsBindable == true && fi.Name == segmentValue);
+                        IEdmFunctionImport functionImport = container.FunctionImports().SingleOrDefault(fi => fi.IsBindable == true && fi.Name == segmentValue);
                         if (functionImport != null)
                         {
                             IEdmEntitySet functionEntitySet = null;

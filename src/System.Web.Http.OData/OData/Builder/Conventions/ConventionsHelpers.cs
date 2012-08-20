@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         public static PropertyInfo GetKeyProperty(Type entityType, bool throwOnError = false)
         {
-            var keys = entityType.GetProperties()
+            IEnumerable<PropertyInfo> keys = entityType.GetProperties()
                 .Where(p => (p.Name.Equals(entityType.Name + "Id", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
                 && EdmLibHelpers.GetEdmPrimitiveTypeOrNull(p.PropertyType) != null);
 
@@ -123,7 +123,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             elementType = type;
 
-            var collectionInterface
+            Type collectionInterface
                 = type.GetInterfaces()
                     .Union(new[] { type })
                     .FirstOrDefault(

@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 writer.WriteStart(feed);
 
-                foreach (var entry in enumerable)
+                foreach (object entry in enumerable)
                 {
                     entrySerializer.WriteObjectInline(entry, writer, writeContext);
                 }

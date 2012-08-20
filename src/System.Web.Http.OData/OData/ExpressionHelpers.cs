@@ -39,10 +39,10 @@ namespace System.Web.Http.OData
 
         public static IQueryable OrderBy(IQueryable query, IEdmProperty property, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
-            var propertyInfo = type.GetProperty(property.Name);
-            var returnType = propertyInfo.PropertyType;
+            PropertyInfo propertyInfo = type.GetProperty(property.Name);
+            Type returnType = propertyInfo.PropertyType;
 
-            var orderByLambda = GetPropertyAccessLambda(type, propertyInfo);
+            Expression orderByLambda = GetPropertyAccessLambda(type, propertyInfo);
             MethodInfo orderByMethod = null;
 
             IOrderedQueryable orderedQuery = null;
@@ -89,8 +89,8 @@ namespace System.Web.Http.OData
 
         public static Expression GetPropertyAccessLambda(Type type, Reflection.PropertyInfo propertyInfo)
         {
-            var p1 = Expression.Parameter(type, "p1");
-            var propertyOnP1 = Expression.Property(p1, propertyInfo.GetGetMethod());
+            ParameterExpression p1 = Expression.Parameter(type, "p1");
+            MemberExpression propertyOnP1 = Expression.Property(p1, propertyInfo.GetGetMethod());
             return Expression.Lambda(propertyOnP1, p1);
         }
     }

@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 throw Error.ArgumentNull("edmProperty");
             }
 
-            var entity = structuralTypeConfiguration as EntityTypeConfiguration;
+            EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
             if (entity != null)
             {
                 entity.HasKey(edmProperty.PropertyInfo);

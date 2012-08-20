@@ -52,7 +52,7 @@ namespace System.Web.Http.OData
                 return false;
             }
 
-            var cacheHit = _propertiesThatExist[name];
+            PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
             Type valueType = value != null ? value.GetType() : null;
             if (cacheHit.Property.PropertyType != valueType) 
             {
@@ -90,7 +90,7 @@ namespace System.Web.Http.OData
                 value = null;
                 return false;
             }
-            var cacheHit = _propertiesThatExist[name];
+            PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
             value = cacheHit.GetValue(_entity);
             return true;
         }
@@ -161,8 +161,8 @@ namespace System.Web.Http.OData
             {
                 throw Error.ArgumentNull("original");
             }
-            var propertiesToCopy = GetChangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
-            foreach (var propertyToCopy in propertiesToCopy) 
+            PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
+            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy) 
             {
                 propertyToCopy.Copy(_entity, original);
             }
@@ -180,8 +180,8 @@ namespace System.Web.Http.OData
                 throw Error.ArgumentNull("original");
             }
 
-            var propertiesToCopy = GetUnchangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
-            foreach (var propertyToCopy in propertiesToCopy) 
+            PropertyAccessor<TEntityType>[] propertiesToCopy = GetUnchangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
+            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy) 
             {
                 propertyToCopy.Copy(_entity, original);
             }

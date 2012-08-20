@@ -24,16 +24,16 @@ namespace System.Web.Http.OData.Builder
             // Reset
             _types.Clear();
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
-            foreach (var config in _configurations)
+            foreach (IStructuralTypeConfiguration config in _configurations)
             {
                 _types.Add(config.FullName, CreateEdmTypeHeader(config));
             }
-            foreach (var config in _configurations)
+            foreach (IStructuralTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeBody(config);
             }
 
-            foreach (var config in _configurations)
+            foreach (IStructuralTypeConfiguration config in _configurations)
             {
                 yield return _types[config.FullName];
             }
@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Builder
             }
             foreach (ComplexPropertyConfiguration prop in config.Properties.OfType<ComplexPropertyConfiguration>())
             {
-                var complexType = _types[prop.RelatedClrType.FullName] as IEdmComplexType;
+                IEdmComplexType complexType = _types[prop.RelatedClrType.FullName] as IEdmComplexType;
 
                 type.AddStructuralProperty(
                     prop.PropertyInfo.Name,
@@ -95,10 +95,10 @@ namespace System.Web.Http.OData.Builder
         private void CreateEntityTypeBody(EdmEntityType type, IEntityTypeConfiguration config)
         {
             CreateStructuralTypeBody(type, config);
-            var keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.PropertyInfo.Name)).ToArray();
+            IEdmStructuralProperty[] keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.PropertyInfo.Name)).ToArray();
             type.AddKeys(keys);
 
-            foreach (var navProp in config.NavigationProperties)
+            foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {
                 EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo();
                 info.Name = navProp.Name;
@@ -117,7 +117,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("configurations");
             }
 
-            var builder = new EdmTypeBuilder(configurations);
+            EdmTypeBuilder builder = new EdmTypeBuilder(configurations);
             return builder.GetEdmTypes();
         }
 

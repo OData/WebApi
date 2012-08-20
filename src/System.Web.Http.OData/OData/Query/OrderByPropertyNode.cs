@@ -23,8 +23,8 @@ namespace System.Web.Http.OData.Query
                 throw new ODataException(SRResources.OrderByNodeNotFound);
             }
 
-            var currentNode = nodes.Pop();
-            var property = currentNode.Expression as PropertyAccessQueryNode;
+            OrderByQueryNode currentNode = nodes.Pop();
+            PropertyAccessQueryNode property = currentNode.Expression as PropertyAccessQueryNode;
 
             if (property == null)
             {
@@ -49,7 +49,7 @@ namespace System.Web.Http.OData.Query
         public static OrderByPropertyNode Create(OrderByQueryNode node)
         {
             Stack<OrderByQueryNode> nodes = new Stack<OrderByQueryNode>();
-            var currentNode = node;
+            OrderByQueryNode currentNode = node;
             while (currentNode != null)
             {
                 nodes.Push(currentNode);

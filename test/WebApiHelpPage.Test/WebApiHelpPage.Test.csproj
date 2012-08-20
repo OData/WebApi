@@ -7,7 +7,6 @@
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{291EF478-BF24-4935-BC78-E0DCCD0C9A1B}</ProjectGuid>
-    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <RootNamespace>WebApiHelpPage</RootNamespace>
     <AssemblyName>WebApiHelpPage.Test</AssemblyName>

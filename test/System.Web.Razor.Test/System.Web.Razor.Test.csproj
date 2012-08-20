@@ -14,7 +14,6 @@
     <RootNamespace>System.Web.Razor.Test</RootNamespace>
     <AssemblyName>System.Web.Razor.Test</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

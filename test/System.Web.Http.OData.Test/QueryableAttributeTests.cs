@@ -8,12 +8,15 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
+using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
+using Moq;
 using Xunit;
 using Xunit.Extensions;
+using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData
 {
@@ -39,6 +42,18 @@ namespace System.Web.Http.OData
                     { "GetObject", new TwoGenericsCollection(), true }
                 };
             }
+        }
+
+        // Move items to this list from UnsupportedQueryNames as they become supported
+        public static TheoryDataSet<string> SupportedQueryNames
+        {
+            get { return ODataQueryOptionTest.SupportedQueryNames; }
+        }
+
+        // Move items from this list to SupportedQueryNames as they become supported
+        public static TheoryDataSet<string> UnsupportedQueryNames
+        {
+            get { return ODataQueryOptionTest.UnsupportedQueryNames; }
         }
 
         [Theory]
@@ -165,6 +180,72 @@ namespace System.Web.Http.OData
             Assert.IsType(typeof(HttpError), ((ObjectContent)response.Content).Value);
             Assert.Equal("Only $skip and $top OData query options are supported for this type.",
                          ((HttpError)((ObjectContent)response.Content).Value).Message);
+        }
+
+        [Fact]
+        public void ValidateQuery_Throws_With_Null_Request()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null), "request"); 
+        }
+
+        [Theory]
+        [PropertyData("SupportedQueryNames")]
+        public void ValidateQuery_Accepts_All_Supported_QueryNames(string queryName)
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName);
+
+            // Act & Assert
+            attribute.ValidateQuery(request);
+        }
+
+        [Theory]
+        [PropertyData("UnsupportedQueryNames")]
+        public void ValidateQuery_Sends_BadRequest_For_Unsupported_QueryNames(string queryName)
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName);
+
+            // Act & Assert
+            HttpResponseException responseException = Assert.Throws<HttpResponseException>(
+                                                                () => attribute.ValidateQuery(request));
+
+            Assert.Equal(HttpStatusCode.BadRequest, responseException.Response.StatusCode);
+        }
+
+        [Fact]
+        public void ValidateQuery_Sends_BadRequest_For_Unrecognized_QueryNames()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
+
+            // Act & Assert
+            HttpResponseException responseException = Assert.Throws<HttpResponseException>(
+                                                                () => attribute.ValidateQuery(request));
+
+            Assert.Equal(HttpStatusCode.BadRequest, responseException.Response.StatusCode);
+        }
+
+        [Fact]
+        public void ValidateQuery_Can_Override_Base()
+        {
+            // Arrange
+            Mock<QueryableAttribute> mockAttribute = new Mock<QueryableAttribute>();
+            mockAttribute.Setup(m => m.ValidateQuery(It.IsAny<HttpRequestMessage>())).Callback(() => { }).Verifiable();
+
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
+
+            // Act & Assert
+            mockAttribute.Object.ValidateQuery(null);
+            mockAttribute.Verify();
         }
     }
 }

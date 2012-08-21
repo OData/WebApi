@@ -49,6 +49,36 @@ namespace System.Web.Http.OData.Query
             }
         }
 
+        // Move items to this list from UnsupportedQueryNames as they become supported
+        public static TheoryDataSet<string> SupportedQueryNames
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "$orderby",
+                    "$filter",
+                    "$top",
+                    "$skip"
+                };
+            }
+        }
+
+        // Move items from this list to SupportedQueryNames as they become supported
+        public static TheoryDataSet<string> UnsupportedQueryNames
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "$select",
+                    "$inlinecount",
+                    "$expand",
+                    "$skiptoken"
+                };
+            }
+        }
+
         internal static IQueryable Customers = new List<Customer>().AsQueryable();
 
         [Fact]
@@ -350,6 +380,29 @@ namespace System.Web.Http.OData.Query
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
 
             Assert.Equal(queryExpression, expectedExpression);
+        }
+
+        [Theory]
+        [PropertyData("SupportedQueryNames")]
+        public void IsSupported_Returns_True_For_All_Supported_Query_Names(string queryName)
+        {
+            // Arrange & Act & Assert
+            Assert.True(ODataQueryOptions.IsSupported(queryName));
+        }
+
+        [Theory]
+        [PropertyData("UnsupportedQueryNames")]
+        public void IsSupported_Returns_False_For_All_Unsupported_Query_Names(string queryName)
+        {
+            // Arrange & Act & Assert
+            Assert.False(ODataQueryOptions.IsSupported(queryName));
+        }
+
+        [Fact]
+        public void IsSupported_Returns_False_For_Unrecognized_Query_Name()
+        {
+            // Arrange & Act & Assert
+            Assert.False(ODataQueryOptions.IsSupported("$invalidqueryname"));
         }
     }
 

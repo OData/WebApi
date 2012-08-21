@@ -193,13 +193,21 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Override this method to expand the out of box support for OData query.
+        /// Validates that the OData query parameters of the incoming request are supported.
         /// </summary>
+        /// <remarks>
+        /// Override this method to add support for new OData query parameters
+        /// Throw <see cref="HttpResponseException"/> for unsupported query parameters.
+        /// </remarks>
         /// <param name="request">The incoming request</param>
+        /// <exception cref="HttpResponseException">The request contains unsupported OData query parameters.</exception>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
-        private static void ValidateQuery(HttpRequestMessage request)
+        public virtual void ValidateQuery(HttpRequestMessage request)
         {
-            Contract.Assert(request != null);
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
 
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
             foreach (KeyValuePair<string, string> kvp in queryParameters)

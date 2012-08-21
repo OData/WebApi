@@ -53,6 +53,7 @@
     </Target>
 
     <Target Name="Build" DependsOnTargets="Prereq">
+        <!-- we need to batch the solution files since they both build Microsoft.TestCommon -->
         <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
         <MSBuild
             Projects="%(SolutionsToBuild.Identity)"

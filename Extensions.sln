@@ -10,10 +10,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F9F7C095-0A04-4D66-B953-6E90C8F1D640}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.Tracing", "src\System.Web.Http.Tracing\System.Web.Http.Tracing.csproj", "{6E81EF98-8F5C-4EED-8B37-456991CA56FD}"
+# Solution dependency is to work around build race condition during CopyLocal
+	ProjectSection(ProjectDependencies) = postProject
+		{FEDFE6CA-8282-4C5B-A756-E97189690982} = {FEDFE6CA-8282-4C5B-A756-E97189690982}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.Tracing.Test", "test\System.Web.Http.Tracing.Test\System.Web.Http.Tracing.Test.csproj", "{F87FD911-4A97-4057-8EAE-1CB96B9A1937}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
+# Solution dependency is to work around build race condition during CopyLocal
+	ProjectSection(ProjectDependencies) = postProject
+		{FEDFE6CA-8282-4C5B-A756-E97189690982} = {FEDFE6CA-8282-4C5B-A756-E97189690982}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData.Test", "test\System.Web.Http.OData.Test\System.Web.Http.OData.Test.csproj", "{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}"
 EndProject

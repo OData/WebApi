@@ -164,9 +164,9 @@ namespace System.Net.Http.Formatting
             Encoding effectiveEncoding = SelectCharacterEncoding(contentHeaders);
             using (StreamReader sReader = new StreamReader(stream, effectiveEncoding))
             {
-                if (type == typeof(BufferedMediaTypeFormatterTests.SampleType))
+                if (type == typeof(SampleType))
                 {
-                    return new BufferedMediaTypeFormatterTests.SampleType { Number = 42 };
+                    return new SampleType { Number = 42 };
                 }
                 else
                 {

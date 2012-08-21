@@ -174,7 +174,7 @@ namespace System.Net.Http.Formatting
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
+            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             //Assert.True(serializedString.Contains("DataContractSampleType"),
@@ -188,7 +188,7 @@ namespace System.Net.Http.Formatting
             JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
+            Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.True(serializedString.Contains("\r\n"), "Using JsonSerializer with Indent set to true should emit data with indentation.");

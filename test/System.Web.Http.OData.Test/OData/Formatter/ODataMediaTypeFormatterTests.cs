@@ -22,14 +22,8 @@ using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData.Formatter
 {
-    public class ODataMediaTypeFormatterTests
+    public class ODataMediaTypeFormatterTests : MediaTypeFormatterTestBase<ODataMediaTypeFormatter>
     {
-        [Fact]
-        public void TypeIsCorrect()
-        {
-            Assert.Type.HasProperties<ODataMediaTypeFormatter, MediaTypeFormatter>(TypeAssert.TypeProperties.IsPublicVisibleClass);
-        }
-
         [Theory]
         [InlineData("application/atom+xml")]
         [InlineData("application/json;odata=verbose")]
@@ -103,205 +97,32 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(headervalues, new string[] { expectedDataServiceVersion + ";" });
         }
 
-        [Fact]
-        public void SupportedMediaTypes_HeaderValuesAreNotSharedBetweenInstances()
+        [Fact(Skip = "OData formatter doesn't support writing nulls")]
+        public override Task WriteToStreamAsync_WhenObjectIsNull_WritesDataButDoesNotCloseStream()
         {
-            var formatter1 = CreateFormatter();
-            var formatter2 = CreateFormatter();
-
-            foreach (MediaTypeHeaderValue mediaType1 in formatter1.SupportedMediaTypes)
-            {
-                MediaTypeHeaderValue mediaType2 = formatter2.SupportedMediaTypes.Single(m => m.Equals(mediaType1));
-                Assert.NotSame(mediaType1, mediaType2);
-            }
+            throw new NotImplementedException();
         }
 
-        [Fact]
-        public void SupportEncodings_ValuesAreNotSharedBetweenInstances()
+        [Fact(Skip = "Tracked by Issue #339, Needs an implementation")]
+        public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
-            var formatter1 = CreateFormatter();
-            var formatter2 = CreateFormatter();
-
-            foreach (Encoding mediaType1 in formatter1.SupportedEncodings)
-            {
-                Encoding mediaType2 = formatter2.SupportedEncodings.Single(m => m.Equals(mediaType1));
-                Assert.NotSame(mediaType1, mediaType2);
-            }
+            throw new NotImplementedException();
         }
 
-        [Fact]
-        public void SupportEncoding_DefaultSupportedMediaTypes()
+        [Fact(Skip = "Tracked by Issue #339, Needs an implementation")]
+        public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Assert.True(ExpectedSupportedMediaTypes.SequenceEqual(formatter.SupportedMediaTypes));
+            throw new NotImplementedException();
         }
 
-        [Fact]
-        public void SupportEncoding_DefaultSupportedEncodings()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Assert.True(ExpectedSupportedEncodings.SequenceEqual(formatter.SupportedEncodings));
-        }
-
-        [Fact]
-        public void ReadFromStreamAsync_ThrowsOnNull()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
-        }
-
-        [Fact]
-        public Task ReadFromStreamAsync_WhenContentLengthIsZero_DoesNotReadStream()
-        {
-            // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Mock<Stream> mockStream = new Mock<Stream>();
-            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-            contentHeaders.ContentLength = 0;
-            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
-
-            // Act 
-            return formatter.ReadFromStreamAsync(typeof(SampleType), mockStream.Object, content, mockFormatterLogger)
-               .ContinueWith(
-                    readTask =>
-                    {
-                        // Assert
-                        Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
-                        mockStream.Verify(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never());
-                        mockStream.Verify(s => s.ReadByte(), Times.Never());
-                        mockStream.Verify(s => s.BeginRead(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
-                    });
-        }
-
-        [Fact]
-        public Task ReadFromStreamAsync_WhenContentLengthIsZero_DoesNotCloseStream()
-        {
-            // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Mock<Stream> mockStream = new Mock<Stream>();
-            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-            contentHeaders.ContentLength = 0;
-            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
-
-            // Act 
-            return formatter.ReadFromStreamAsync(typeof(SampleType), mockStream.Object, content, mockFormatterLogger)
-                .ContinueWith(
-                    readTask =>
-                    {
-                        // Assert
-                        Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
-                        mockStream.Verify(s => s.Close(), Times.Never());
-                    });
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(0)]
-        [InlineData("")]
-        public void ReadFromStreamAsync_WhenContentLengthIsZero_ReturnsDefaultTypeValue<T>(T value)
-        {
-            // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            HttpContent content = new StringContent("");
-
-            // Act
-            var result = formatter.ReadFromStreamAsync(typeof(T), content.ReadAsStreamAsync().Result,
-                content, null);
-            result.WaitUntilCompleted();
-
-            // Assert
-            Assert.Equal(default(T), (T)result.Result);
-        }
-
-        [Fact]
-        public Task ReadFromStreamAsync_ReadsDataButDoesNotCloseStream()
-        {
-            // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-            contentHeaders.ContentLength = memStream.Length;
-            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
-
-            // Act
-            return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
-                readTask =>
-                {
-                    // Assert
-                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
-                    Assert.True(memStream.CanRead);
-
-                    var value = Assert.IsType<SampleType>(readTask.Result);
-                    Assert.Equal(42, value.Number);
-                });
-        }
-
-        [Fact]
-        public Task ReadFromStreamAsync_WhenContentLengthIsNull_ReadsDataButDoesNotCloseStream()
-        {
-            // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-            contentHeaders.ContentLength = null;
-            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
-
-            // Act
-            return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
-                readTask =>
-                {
-                    // Assert
-                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
-                    Assert.True(memStream.CanRead);
-
-                    var value = Assert.IsType<SampleType>(readTask.Result);
-                    Assert.Equal(42, value.Number);
-                });
-        }
-
-        [Fact]
-        public void WriteToStreamAsync_ThrowsOnNull()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(null, new object(), Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null); }, "writeStream");
-        }
-
-        [Fact]
-        public Task WriteToStreamAsync_DoesNotCloseStream()
-        {
-            // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            SampleType sampleType = new SampleType { Number = 42 };
-            Mock<Stream> mockStream = new Mock<Stream>();
-            HttpContent content = new StringContent(String.Empty);
-
-            // Act
-            return formatter.WriteToStreamAsync(typeof(SampleType), sampleType, mockStream.Object, content, null).ContinueWith(
-                writeTask =>
-                {
-                    // Assert
-                    Assert.Equal(TaskStatus.RanToCompletion, writeTask.Status);
-                    mockStream.Verify(s => s.Close(), Times.Never());
-                    mockStream.Verify(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
-                });
-        }
-
-        private ODataMediaTypeFormatter CreateFormatter()
+        public override ODataMediaTypeFormatter CreateFormatter()
         {
             ODataConventionModelBuilder model = new ODataConventionModelBuilder();
             model.Entity<SampleType>();
             return new ODataMediaTypeFormatter(model.GetEdmModel()) { IsClient = true };
         }
 
-        private IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes
+        public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes
         {
             get
             {
@@ -311,7 +132,7 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        private IEnumerable<Encoding> ExpectedSupportedEncodings
+        public override IEnumerable<Encoding> ExpectedSupportedEncodings
         {
             get
             {
@@ -320,13 +141,13 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        private byte[] ExpectedSampleTypeByteRepresentation
+        public override byte[] ExpectedSampleTypeByteRepresentation
         {
             get
             {
                 return ExpectedSupportedEncodings.ElementAt(0).GetBytes(
                   @"<entry xml:base=""http://localhost/"" xmlns=""http://www.w3.org/2005/Atom"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns:georss=""http://www.georss.org/georss"" xmlns:gml=""http://www.opengis.net/gml"">
-                      <category term=""System.Web.Http.OData.Formatter.SampleType"" scheme=""http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"" />
+                      <category term=""System.Net.Http.Formatting.SampleType"" scheme=""http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"" />
                       <id />
                       <title />
                       <updated>2012-08-17T00:16:14Z</updated>
@@ -342,12 +163,5 @@ namespace System.Web.Http.OData.Formatter
                 );
             }
         }
-    }
-
-    [DataContract(Name = "DataContractSampleType")]
-    public class SampleType
-    {
-        [DataMember]
-        public int Number { get; set; }
     }
 }

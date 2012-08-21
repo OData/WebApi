@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -26,17 +27,7 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
-        internal const string DefaultApplicationODataMediaType = "application/atom+xml";
-        internal const string ODataServiceVersion = "DataServiceVersion";
-        internal const string ODataMaxServiceVersion = "MaxDataServiceVersion";
-
-        private static readonly MediaTypeHeaderValue DefaultApplicationAtomXmlMediaType = new MediaTypeHeaderValue(DefaultApplicationODataMediaType);
-        private static readonly MediaTypeHeaderValue DefaultApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
-        private static readonly MediaTypeHeaderValue DefaultApplicationXmlMediaType = MediaTypeHeaderValue.Parse("application/xml");
-
-        private const ODataVersion DefaultODataVersion = ODataVersion.V3;
-        private static readonly ODataFormat defaultODataFormat = ODataFormat.Atom;
-        private readonly ODataVersion _oDataVersionToUse = DefaultODataVersion;
+        private readonly ODataVersion _defaultODataVersion = ODataFormatterConstants.DefaultODataVersion;
 
         /// <summary>
         /// This constructor is used for unit testing purposes only
@@ -55,7 +46,7 @@ namespace System.Web.Http.OData.Formatter
         internal ODataMediaTypeFormatter(ODataVersion oDataVersion, ODataDeserializerProvider oDataDeserializerProvider, ODataSerializerProvider oDataSerializerProvider)
             : this(oDataDeserializerProvider, oDataSerializerProvider)
         {
-            _oDataVersionToUse = oDataVersion;
+            _defaultODataVersion = oDataVersion;
         }
 
         internal ODataMediaTypeFormatter(ODataDeserializerProvider oDataDeserializerProvider, ODataSerializerProvider oDataSerializerProvider)
@@ -64,9 +55,9 @@ namespace System.Web.Http.OData.Formatter
             Model = oDataDeserializerProvider.EdmModel;
             ODataSerializerProvider = oDataSerializerProvider;
 
-            SupportedMediaTypes.Add(ODataMediaTypeFormatter.ApplicationAtomXmlMediaType);
-            SupportedMediaTypes.Add(ODataMediaTypeFormatter.ApplicationJsonMediaType);
-            SupportedMediaTypes.Add(ODataMediaTypeFormatter.ApplicationXmlMediaType);
+            SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationAtomXmlMediaType);
+            SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationJsonMediaType);
+            SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationXmlMediaType);
 
             SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
@@ -94,22 +85,7 @@ namespace System.Web.Http.OData.Formatter
         /// </value>
         public static MediaTypeHeaderValue DefaultMediaType
         {
-            get { return ApplicationAtomXmlMediaType; }
-        }
-
-        private static MediaTypeHeaderValue ApplicationAtomXmlMediaType
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationAtomXmlMediaType).Clone(); }
-        }
-
-        private static MediaTypeHeaderValue ApplicationJsonMediaType
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationJsonMediaType).Clone(); }
-        }
-
-        private static MediaTypeHeaderValue ApplicationXmlMediaType
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationXmlMediaType).Clone(); }
+            get { return ODataFormatterConstants.ApplicationAtomXmlMediaType; }
         }
 
         /// <inheritdoc/>
@@ -134,7 +110,7 @@ namespace System.Web.Http.OData.Formatter
             base.SetDefaultContentHeaders(type, headers, mediaType);
 
             ODataFormat format = GetODataFormat(headers);
-            IEnumerable<KeyValuePair<string, string>> oDataHeaders = GetResponseMessageHeaders(type, format, _oDataVersionToUse);
+            IEnumerable<KeyValuePair<string, string>> oDataHeaders = GetResponseMessageHeaders(type, format, _defaultODataVersion);
 
             foreach (KeyValuePair<string, string> pair in oDataHeaders)
             {
@@ -250,17 +226,23 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("writeStream");
             }
 
-            if (content == null)
-            {
-                throw Error.ArgumentNull("content");
-            }
-
+            HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             return TaskHelpers.RunSynchronously(() =>
             {
                 // Get the format and version to use from the ODataServiceVersion content header or if not available use the
                 // values configured for the specialized formatter instance.
-                ODataVersion version = GetODataVersion(content.Headers, ODataServiceVersion) ?? _oDataVersionToUse;
-                ODataFormat odataFormat = GetODataFormat(content.Headers);
+                ODataVersion version;
+                ODataFormat odataFormat;
+                if (contentHeaders == null)
+                {
+                    version = _defaultODataVersion;
+                    odataFormat = ODataFormatterConstants.DefaultODataFormat;
+                }
+                else
+                {
+                    version = GetODataVersion(contentHeaders, ODataFormatterConstants.ODataServiceVersion) ?? _defaultODataVersion;
+                    odataFormat = GetODataFormat(contentHeaders);
+                }
 
                 ODataSerializer serializer = ODataSerializerProvider.GetODataPayloadSerializer(type);
                 if (serializer == null)
@@ -327,7 +309,10 @@ namespace System.Web.Http.OData.Formatter
                         Indent = responseContext.IsIndented,
                         DisableMessageStreamDisposal = true,
                     };
-                    writerSettings.SetContentType(content.Headers.ContentType.ToString(), Encoding.UTF8.WebName);
+                    if (contentHeaders != null && contentHeaders.ContentType != null)
+                    {
+                        writerSettings.SetContentType(contentHeaders.ContentType.ToString(), Encoding.UTF8.WebName);
+                    }
 
                     using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, ODataDeserializerProvider.EdmModel))
                     {
@@ -347,27 +332,24 @@ namespace System.Web.Http.OData.Formatter
 
         private static ODataFormat GetODataFormat(HttpContentHeaders contentHeaders)
         {
+            Contract.Assert(contentHeaders != null);
+
             if (contentHeaders.ContentType == null)
             {
-                return defaultODataFormat;
+                return ODataFormatterConstants.DefaultODataFormat;
             }
 
-            return GetODataFormat(contentHeaders.ContentType.MediaType);
-        }
-
-        private static ODataFormat GetODataFormat(string mediaType)
-        {
-            if (String.Equals(mediaType, DefaultApplicationODataMediaType, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(contentHeaders.ContentType.MediaType, ODataFormatterConstants.DefaultApplicationODataMediaType, StringComparison.OrdinalIgnoreCase))
             {
                 return ODataFormat.Atom;
             }
-            else if (String.Equals(mediaType, ODataMediaTypeFormatter.ApplicationJsonMediaType.MediaType, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(contentHeaders.ContentType.MediaType, ODataFormatterConstants.ApplicationJsonMediaType.MediaType, StringComparison.OrdinalIgnoreCase))
             {
                 return ODataFormat.VerboseJson;
             }
             else
             {
-                return defaultODataFormat;
+                return ODataFormatterConstants.DefaultODataFormat;
             }
         }
 
@@ -378,7 +360,9 @@ namespace System.Web.Http.OData.Formatter
             // generating the response. So if the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same version; Else use
             // the DataServiceVersionHeader. Our response might require a higher version of the client and it might fail.
             // If the client doesn't send these headers respond with the default version (V3).
-            return GetODataVersion(request.Headers, ODataMaxServiceVersion) ?? GetODataVersion(request.Headers, ODataServiceVersion) ?? DefaultODataVersion;
+            return GetODataVersion(request.Headers, ODataFormatterConstants.ODataMaxServiceVersion) ??
+                GetODataVersion(request.Headers, ODataFormatterConstants.ODataServiceVersion) ??
+                ODataFormatterConstants.DefaultODataVersion;
         }
 
         private static ODataVersion? GetODataVersion(HttpHeaders headers, string headerName)

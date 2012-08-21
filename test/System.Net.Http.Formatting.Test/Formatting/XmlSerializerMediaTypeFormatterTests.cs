@@ -38,7 +38,7 @@ namespace System.Net.Http.Formatting
 
         public override byte[] ExpectedSampleTypeByteRepresentation
         {
-            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleTypeOfXmlSerializerMediaTypeFormatter xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><Number>42</Number></SampleTypeOfXmlSerializerMediaTypeFormatter>"); }
+            get { return ExpectedSupportedEncodings.ElementAt(0).GetBytes("<SampleType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><Number>42</Number></SampleType>"); }
         }
 
         [Fact]

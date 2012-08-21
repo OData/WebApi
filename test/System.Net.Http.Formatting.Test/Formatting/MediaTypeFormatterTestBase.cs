@@ -44,8 +44,8 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void SupportedMediaTypes_HeaderValuesAreNotSharedBetweenInstances()
         {
-            var formatter1 = new TFormatter();
-            var formatter2 = new TFormatter();
+            var formatter1 = CreateFormatter();
+            var formatter2 = CreateFormatter();
 
             foreach (MediaTypeHeaderValue mediaType1 in formatter1.SupportedMediaTypes)
             {
@@ -57,8 +57,8 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void SupportEncodings_ValuesAreNotSharedBetweenInstances()
         {
-            var formatter1 = new TFormatter();
-            var formatter2 = new TFormatter();
+            var formatter1 = CreateFormatter();
+            var formatter2 = CreateFormatter();
 
             foreach (Encoding mediaType1 in formatter1.SupportedEncodings)
             {
@@ -70,21 +70,21 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void SupportEncoding_DefaultSupportedMediaTypes()
         {
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Assert.True(ExpectedSupportedMediaTypes.SequenceEqual(formatter.SupportedMediaTypes));
         }
 
         [Fact]
         public void SupportEncoding_DefaultSupportedEncodings()
         {
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Assert.True(ExpectedSupportedEncodings.SequenceEqual(formatter.SupportedEncodings));
         }
 
         [Fact]
         public void ReadFromStreamAsync_ThrowsOnNull()
         {
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
             Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
         }
@@ -93,7 +93,7 @@ namespace System.Net.Http.Formatting
         public Task ReadFromStreamAsync_WhenContentLengthIsZero_DoesNotReadStream()
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
             HttpContent content = new StringContent(String.Empty);
@@ -101,7 +101,7 @@ namespace System.Net.Http.Formatting
             contentHeaders.ContentLength = 0;
 
             // Act 
-            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger)
+            return formatter.ReadFromStreamAsync(typeof(SampleType), mockStream.Object, content, mockFormatterLogger)
                 .ContinueWith(
                     readTask =>
                     {
@@ -117,7 +117,7 @@ namespace System.Net.Http.Formatting
         public Task ReadFromStreamAsync_WhenContentLengthIsZero_DoesNotCloseStream()
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
             IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
             HttpContent content = new StringContent(String.Empty);
@@ -125,7 +125,7 @@ namespace System.Net.Http.Formatting
             contentHeaders.ContentLength = 0;
 
             // Act 
-            return formatter.ReadFromStreamAsync(typeof(object), mockStream.Object, content, mockFormatterLogger)
+            return formatter.ReadFromStreamAsync(typeof(SampleType), mockStream.Object, content, mockFormatterLogger)
                 .ContinueWith(
                     readTask =>
                     {
@@ -142,7 +142,7 @@ namespace System.Net.Http.Formatting
         public void ReadFromStreamAsync_WhenContentLengthIsZero_ReturnsDefaultTypeValue<T>(T value)
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             HttpContent content = new StringContent("");
 
             // Act
@@ -158,11 +158,12 @@ namespace System.Net.Http.Formatting
         public Task ReadFromStreamAsync_ReadsDataButDoesNotCloseStream()
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
             HttpContent content = new StringContent(String.Empty);
             HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = memStream.Length;
+            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
 
             // Act
             return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
@@ -181,11 +182,12 @@ namespace System.Net.Http.Formatting
         public Task ReadFromStreamAsync_WhenContentLengthIsNull_ReadsDataButDoesNotCloseStream()
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             MemoryStream memStream = new MemoryStream(ExpectedSampleTypeByteRepresentation);
             HttpContent content = new StringContent(String.Empty);
             HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = null;
+            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
 
             // Act
             return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
@@ -203,22 +205,22 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void WriteToStreamAsync_ThrowsOnNull()
         {
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(null, new object(), Stream.Null, null, null); }, "type");
             Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null); }, "writeStream");
         }
 
         [Fact]
-        public Task WriteToStreamAsync_WhenObjectIsNull_WritesDataButDoesNotCloseStream()
+        public virtual Task WriteToStreamAsync_WhenObjectIsNull_WritesDataButDoesNotCloseStream()
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             Mock<Stream> mockStream = new Mock<Stream>();
             mockStream.Setup(s => s.CanWrite).Returns(true);
             HttpContent content = new StringContent(String.Empty);
 
             // Act 
-            return formatter.WriteToStreamAsync(typeof(object), null, mockStream.Object, content, null).ContinueWith(
+            return formatter.WriteToStreamAsync(typeof(SampleType), null, mockStream.Object, content, null).ContinueWith(
                 writeTask =>
                 {
                     // Assert
@@ -232,7 +234,7 @@ namespace System.Net.Http.Formatting
         public Task WriteToStreamAsync_WritesDataButDoesNotCloseStream()
         {
             // Arrange
-            TFormatter formatter = new TFormatter();
+            TFormatter formatter = CreateFormatter();
             SampleType sampleType = new SampleType { Number = 42 };
             MemoryStream memStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
@@ -246,13 +248,18 @@ namespace System.Net.Http.Formatting
                     Assert.True(memStream.CanRead);
 
                     byte[] actualSampleTypeByteRepresentation = memStream.ToArray();
-                    Assert.Equal(ExpectedSampleTypeByteRepresentation, actualSampleTypeByteRepresentation);
+                    Assert.NotEmpty(actualSampleTypeByteRepresentation);
                 });
         }
 
         public abstract Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
 
         public abstract Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
+
+        public virtual TFormatter CreateFormatter()
+        {
+            return new TFormatter();
+        }
 
         public Task ReadFromStreamAsync_UsesCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
         {
@@ -410,12 +417,12 @@ namespace System.Net.Http.Formatting
                     Assert.Equal(expectedData, actualData);
                 });
         }
+    }
 
-        [DataContract(Name = "DataContractSampleType")]
-        public class SampleType
-        {
-            [DataMember]
-            public int Number { get; set; }
-        }
+    [DataContract(Name = "DataContractSampleType")]
+    public class SampleType
+    {
+        [DataMember]
+        public int Number { get; set; }
     }
 }

@@ -165,7 +165,7 @@ namespace System.Net.Http.Formatting
             DataContractJsonMediaTypeFormatter jsonFormatter = new DataContractJsonMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            Assert.Task.Succeeds(jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType), new XmlMediaTypeFormatterTests.SampleType(), memoryStream, content, transportContext: null));
+            Assert.Task.Succeeds(jsonFormatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
             memoryStream.Position = 0;
             string serializedString = new StreamReader(memoryStream).ReadToEnd();
             Assert.False(serializedString.Contains("\r\n"), "Using DCJS should emit data without indentation by default.");
@@ -178,8 +178,8 @@ namespace System.Net.Http.Formatting
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
             Assert.Throws<NotSupportedException>(
-                () => jsonFormatter.WriteToStreamAsync(typeof(XmlMediaTypeFormatterTests.SampleType),
-                    new XmlMediaTypeFormatterTests.SampleType(),
+                () => jsonFormatter.WriteToStreamAsync(typeof(SampleType),
+                    new SampleType(),
                     memoryStream, content, transportContext: null));
         }
 

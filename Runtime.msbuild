@@ -15,9 +15,11 @@
     <ItemGroup>            
         <SolutionsToBuild Include="Runtime.sln">
             <ReleaseRoot>.</ReleaseRoot>
+            <BuildInParallel>$(BuildInParallel)</BuildInParallel>
         </SolutionsToBuild>    
         <SolutionsToBuild Include="Extensions.sln">
             <ReleaseRoot>Extensions</ReleaseRoot>
+            <BuildInParallel>false</BuildInParallel>
         </SolutionsToBuild>
     </ItemGroup>    
 
@@ -57,7 +59,7 @@
         <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
         <MSBuild
             Projects="%(SolutionsToBuild.Identity)"
-            BuildInParallel="$(BuildInParallel)"
+            BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
             Targets="Build"
             Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled)" />
     </Target>

@@ -567,12 +567,35 @@ namespace System.Web.Http.OData.Query.Expressions
             Expression functionCall;
             if (arguments.Length == 2)
             {
-                functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.SubstringStart, arguments[1]);
+                // When null propagation is allowed, we use a safe version of String.Substring(int).
+                // But for providers that would not recognize custom expressions like this, we map 
+                // directly to String.Substring(int)
+                if (_nullPropagation)
+                {
+                    // Safe function is static and takes string "this" as first argument
+                    functionCall = Expression.Call(null, ClrCanonicalFunctions.SubstringStartNoThrow, arguments[0], arguments[1]);
+                }
+                else
+                {
+                    functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.SubstringStart, arguments[1]);
+                }
             }
             else
             {
-                // arguments.Length == 3
-                functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.SubstringStartAndLength, arguments[1], arguments[2]);
+                // arguments.Length == 3 implies String.Substring(int, int)
+
+                // When null propagation is allowed, we use a safe version of String.Substring(int, int).
+                // But for providers that would not recognize custom expressions like this, we map 
+                // directly to String.Substring(int, int)
+                if (_nullPropagation)
+                {
+                    // Safe function is static and takes string "this" as first argument
+                    functionCall = Expression.Call(null, ClrCanonicalFunctions.SubstringStartAndLengthNoThrow, arguments[0], arguments[1], arguments[2]);
+                }
+                else
+                {
+                    functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.SubstringStartAndLength, arguments[1], arguments[2]);
+                }
             }
 
             return CreateFunctionCallWithNullPropagation(functionCall, arguments);

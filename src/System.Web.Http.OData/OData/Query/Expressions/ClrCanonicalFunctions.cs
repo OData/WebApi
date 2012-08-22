@@ -17,6 +17,8 @@ namespace System.Web.Http.OData.Query.Expressions
         public static readonly MethodInfo Contains;
         public static readonly MethodInfo SubstringStart;
         public static readonly MethodInfo SubstringStartAndLength;
+        public static readonly MethodInfo SubstringStartNoThrow;
+        public static readonly MethodInfo SubstringStartAndLengthNoThrow;
         public static readonly MethodInfo IndexOf;
         public static readonly MethodInfo ToLower;
         public static readonly MethodInfo ToUpper;
@@ -36,6 +38,8 @@ namespace System.Web.Http.OData.Query.Expressions
             IndexOf = MethodOf(_ => _defaultString.IndexOf(default(string)));
             SubstringStart = MethodOf(_ => _defaultString.Substring(default(int)));
             SubstringStartAndLength = MethodOf(_ => _defaultString.Substring(default(int), default(int)));
+            SubstringStartNoThrow = MethodOf(_ => ClrSafeFunctions.SubstringStart(default(string), default(int)));
+            SubstringStartAndLengthNoThrow = MethodOf(_ => ClrSafeFunctions.SubstringStartAndLength(default(string), default(int), default(int)));
             Contains = MethodOf(_ => _defaultString.Contains(default(string)));
             ToLower = MethodOf(_ => _defaultString.ToLower());
             ToUpper = MethodOf(_ => _defaultString.ToUpper());

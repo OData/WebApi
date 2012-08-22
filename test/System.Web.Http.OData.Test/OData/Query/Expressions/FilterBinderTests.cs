@@ -589,6 +589,48 @@ namespace System.Web.Http.OData.Query.Expressions
         #endregion
 
         #region String Functions
+
+        [Theory]
+        [InlineData("Abcd", -1, "Abcd", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd",  0, "Abcd", true, true)]
+        [InlineData("Abcd",  1, "bcd",  true, true)]
+        [InlineData("Abcd",  3, "d",    true, true)]
+        [InlineData("Abcd",  4, "",     true, true)]
+        [InlineData("Abcd",  5, "",     true, typeof(ArgumentOutOfRangeException))]
+        public void StringSubstringStart(string productName, int startIndex, string compareString, bool withNullPropagation, object withoutNullPropagation)
+        {
+            string filter = string.Format("$filter=substring(ProductName, {0}) eq '{1}'", startIndex, compareString);
+            var filters = VerifyQueryDeserialization(filter);
+
+            RunFilters(filters,
+              new Product { ProductName = productName },
+              new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData("Abcd", -1,  4, "Abcd", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", -1,  3, "Abc",  true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd",  0,  1, "A",    true, true)]
+        [InlineData("Abcd",  0,  4, "Abcd", true, true)]
+        [InlineData("Abcd",  0,  3, "Abc",  true, true)]
+        [InlineData("Abcd",  0,  5, "Abcd", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd",  1,  3, "bcd",  true, true)]
+        [InlineData("Abcd",  1,  5, "bcd",  true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd",  2,  1, "c",    true, true)]
+        [InlineData("Abcd",  3,  1, "d",    true, true)]
+        [InlineData("Abcd",  4,  1, "",     true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd",  0, -1, "",     true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd",  5, -1, "",     true, typeof(ArgumentOutOfRangeException))]
+        public void StringSubstringStartAndLength(string productName, int startIndex, int length, string compareString, bool withNullPropagation, object withoutNullPropagation)
+        {
+            string filter = string.Format("$filter=substring(ProductName, {0}, {1}) eq '{2}'", startIndex, length, compareString);
+            var filters = VerifyQueryDeserialization(filter);
+
+            RunFilters(filters,
+              new Product { ProductName = productName },
+              new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
         [Theory]
         [InlineData(null, false, typeof(NullReferenceException))]
         [InlineData("Abcd", true, true)]

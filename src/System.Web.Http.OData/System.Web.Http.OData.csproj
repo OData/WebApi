@@ -114,7 +114,7 @@
     <Compile Include="OData\Builder\Conventions\IEntitySetConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\ODataRouteNames.cs" />
+    <Compile Include="ODataRouteNames.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConvention.cs" />
     <Compile Include="OData\Builder\EdmTypeBuilder.cs" />
     <Compile Include="OData\Builder\EntitySetConfiguration.cs" />

@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Web.WebPages.Scope;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Test
 {

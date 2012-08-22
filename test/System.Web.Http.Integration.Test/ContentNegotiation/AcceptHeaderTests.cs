@@ -2,8 +2,7 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ContentNegotiation
 {

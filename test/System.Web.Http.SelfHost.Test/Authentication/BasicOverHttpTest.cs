@@ -3,7 +3,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.SelfHost;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http
 {

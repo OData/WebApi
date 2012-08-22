@@ -3,9 +3,8 @@
 using System.IO;
 using System.Text;
 using System.Web.WebPages.ApplicationParts;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Test
 {

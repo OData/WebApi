@@ -2,8 +2,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Mvc.Async.Test
 {

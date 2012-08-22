@@ -9,8 +9,6 @@ using System.Web.Http.Dispatcher;
 using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http
 {

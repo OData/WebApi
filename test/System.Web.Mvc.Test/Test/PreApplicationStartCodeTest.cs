@@ -3,7 +3,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Web.WebPages.TestUtils;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
 {

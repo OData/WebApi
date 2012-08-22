@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
-using Xunit;
 
 namespace System.Web.Mvc.Html.Test
 {

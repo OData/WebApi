@@ -7,9 +7,6 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

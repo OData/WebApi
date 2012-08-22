@@ -3,9 +3,6 @@
 using System.Collections.Generic;
 using System.Net.Http.Mocks;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {

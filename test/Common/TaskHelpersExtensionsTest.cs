@@ -2,8 +2,6 @@
 
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 // There are several tests which need unreachable code (return after throw) to guarantee the correct lambda signature
 #pragma warning disable 0162

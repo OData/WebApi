@@ -3,9 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http.Formatting
 {

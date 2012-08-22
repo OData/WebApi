@@ -2,11 +2,9 @@
 
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
+using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http
 {

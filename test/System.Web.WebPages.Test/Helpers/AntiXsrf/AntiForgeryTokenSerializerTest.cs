@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Web.Mvc;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Helpers.AntiXsrf.Test
 {

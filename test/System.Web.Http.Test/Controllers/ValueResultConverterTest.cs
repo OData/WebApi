@@ -3,8 +3,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Controllers
 {

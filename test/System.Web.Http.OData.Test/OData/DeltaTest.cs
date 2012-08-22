@@ -2,8 +2,7 @@
 
 using System.Linq;
 using System.Web.Http.OData.TestCommon.Models;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData
 {

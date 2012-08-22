@@ -6,11 +6,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
 using Moq.Protected;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

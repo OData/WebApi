@@ -3,8 +3,7 @@
 using System.CodeDom;
 using System.Web.Razor.Generator;
 using System.Web.Razor.Parser;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test
 {

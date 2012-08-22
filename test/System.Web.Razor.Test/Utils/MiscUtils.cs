@@ -3,7 +3,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Utils
 {

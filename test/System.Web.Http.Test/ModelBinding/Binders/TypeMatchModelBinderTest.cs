@@ -3,7 +3,7 @@
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.Util;
 using System.Web.Http.ValueProviders;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ModelBinding.Binders
 {

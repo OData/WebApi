@@ -4,9 +4,8 @@ using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Web;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace Microsoft.Web.Helpers.Test
 {

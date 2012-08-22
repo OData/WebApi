@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {

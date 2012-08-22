@@ -2,7 +2,7 @@
 
 using System.Globalization;
 using System.Threading;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.TestUtil
 {

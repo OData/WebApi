@@ -9,11 +9,10 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using Microsoft.TestCommon;
 using Microsoft.Web.Http.Data.EntityFramework;
 using Microsoft.Web.Http.Data.EntityFramework.Metadata;
 using Microsoft.Web.Http.Data.Test.Models;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace Microsoft.Web.Http.Data.Test
 {

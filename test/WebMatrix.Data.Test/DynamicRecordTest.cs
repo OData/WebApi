@@ -4,9 +4,8 @@ using System;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace WebMatrix.Data.Test
 {

@@ -3,8 +3,7 @@
 using System;
 using System.Web.Helpers.Test;
 using System.Web.TestUtil;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace Microsoft.Web.Helpers.Test
 {

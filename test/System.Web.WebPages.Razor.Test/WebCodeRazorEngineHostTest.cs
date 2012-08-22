@@ -3,7 +3,7 @@
 using System.CodeDom;
 using System.Linq;
 using System.Web.Razor.Generator;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Razor.Test
 {

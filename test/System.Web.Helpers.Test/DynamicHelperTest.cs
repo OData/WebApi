@@ -2,7 +2,7 @@
 
 using System.Dynamic;
 using Microsoft.Internal.Web.Utils;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Helpers.Test
 {

@@ -5,9 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Validation.Providers
 {

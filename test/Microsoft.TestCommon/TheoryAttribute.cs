@@ -2,15 +2,14 @@
 
 using System;
 using System.Collections.Generic;
-using Xunit.Extensions;
 using Xunit.Sdk;
 
 namespace Microsoft.TestCommon
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class WsrTheoryAttribute : TheoryAttribute
+    public class TheoryAttribute : Xunit.Extensions.TheoryAttribute
     {
-        public WsrTheoryAttribute()
+        public TheoryAttribute()
         {
             Timeout = TimeoutConstant.DefaultTimeout;
             Platforms = Platform.All;

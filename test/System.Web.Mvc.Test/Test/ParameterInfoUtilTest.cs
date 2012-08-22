@@ -3,8 +3,8 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Mvc.Test
 {

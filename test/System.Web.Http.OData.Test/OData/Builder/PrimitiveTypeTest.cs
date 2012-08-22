@@ -3,7 +3,7 @@
 using System.IO;
 using System.Linq;
 using Microsoft.Data.Edm;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
 {

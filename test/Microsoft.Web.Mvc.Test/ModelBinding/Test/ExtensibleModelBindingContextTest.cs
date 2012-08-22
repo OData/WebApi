@@ -3,9 +3,8 @@
 using System;
 using System.Web.Mvc;
 using System.Web.TestUtil;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace Microsoft.Web.Mvc.ModelBinding.Test
 {

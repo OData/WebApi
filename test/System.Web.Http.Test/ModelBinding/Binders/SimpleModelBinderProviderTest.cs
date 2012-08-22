@@ -2,9 +2,8 @@
 
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.Util;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.ModelBinding.Binders
 {

@@ -11,9 +11,6 @@ using System.Web.Http.Filters;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Tracing.Tracers;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing
 {

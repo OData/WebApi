@@ -4,11 +4,10 @@ using System;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
-using Xunit;
 
 namespace Microsoft.TestCommon
 {
-    public class RestoreThreadPrincipalAttribute : BeforeAfterTestAttribute
+    public class RestoreThreadPrincipalAttribute : Xunit.BeforeAfterTestAttribute
     {
         private IPrincipal _originalPrincipal;
 

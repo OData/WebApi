@@ -3,8 +3,7 @@
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http
 {

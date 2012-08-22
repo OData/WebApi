@@ -6,9 +6,6 @@ using System.Net.Http;
 using System.Reflection;
 using System.Web.Http.Controllers;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Internal
 {

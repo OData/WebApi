@@ -63,21 +63,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAttribute.cs" />
     <Compile Include="EnumHelperTestBase.cs" />
+    <Compile Include="InlineDataAttribute.cs" />
     <Compile Include="InstanceCreator.cs" />
     <Compile Include="MatrixTheoryDataSet.cs" />
     <Compile Include="PartialTrustRunner.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="PlatformInfo.cs" />
+    <Compile Include="PropertyDataAttribute.cs" />
     <Compile Include="ReplaceCultureAttribute.cs" />
     <Compile Include="RestoreThreadPrincipalAttribute.cs" />
     <Compile Include="AppDomainUtils.cs" />
-    <Compile Include="AssertEx.cs">
+    <Compile Include="Assert.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CultureReplacer.cs" />
-    <Compile Include="WsrFactAttribute.cs" />
-    <Compile Include="WsrTheoryAttribute.cs" />
+    <Compile Include="FactAttribute.cs" />
+    <Compile Include="TheoryAttribute.cs" />
     <Compile Include="DictionaryEqualityComparer.cs" />
     <Compile Include="ExceptionAssertions.cs">
       <SubType>Code</SubType>
@@ -116,6 +119,7 @@
     <Compile Include="TestHelper.cs" />
     <Compile Include="TheoryDataSet.cs" />
     <Compile Include="ThreadPoolSyncContext.cs" />
+    <Compile Include="TraitAttribute.cs" />
     <Compile Include="WebUtils.cs" />
   </ItemGroup>
   <ItemGroup>

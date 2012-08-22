@@ -3,8 +3,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Web.Http.Metadata.Providers;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Validation.Providers
 {

@@ -2,8 +2,7 @@
 
 using System.Reflection;
 using System.Web.Http.Services;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Dispatcher
 {

@@ -4,7 +4,6 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using Xunit;
 
 namespace Microsoft.TestCommon
 {
@@ -12,7 +11,7 @@ namespace Microsoft.TestCommon
     /// Replaces the current culture and UI culture for the test.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class ReplaceCultureAttribute : BeforeAfterTestAttribute
+    public class ReplaceCultureAttribute : Xunit.BeforeAfterTestAttribute
     {
         private CultureInfo _originalCulture;
         private CultureInfo _originalUICulture;

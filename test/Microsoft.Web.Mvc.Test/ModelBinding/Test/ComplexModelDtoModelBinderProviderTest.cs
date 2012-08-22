@@ -2,7 +2,7 @@
 
 using System;
 using System.Web.Mvc;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace Microsoft.Web.Mvc.ModelBinding.Test
 {

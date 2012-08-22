@@ -10,8 +10,6 @@ using System.Web.Routing;
 using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

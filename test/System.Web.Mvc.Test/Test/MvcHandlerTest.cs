@@ -4,10 +4,9 @@ using System.Web.Mvc.Async;
 using System.Web.Mvc.Async.Test;
 using System.Web.Routing;
 using System.Web.SessionState;
+using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

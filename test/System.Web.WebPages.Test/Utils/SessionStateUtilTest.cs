@@ -3,9 +3,8 @@
 using System.Collections.Concurrent;
 using System.Web.Razor;
 using System.Web.SessionState;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Test
 {

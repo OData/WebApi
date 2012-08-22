@@ -4,7 +4,7 @@ using System;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace Microsoft.Web.Mvc.Test
 {

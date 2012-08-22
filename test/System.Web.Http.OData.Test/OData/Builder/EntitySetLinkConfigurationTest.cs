@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
 {

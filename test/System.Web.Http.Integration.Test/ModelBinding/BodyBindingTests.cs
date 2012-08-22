@@ -6,8 +6,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.Properties;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ModelBinding
 {

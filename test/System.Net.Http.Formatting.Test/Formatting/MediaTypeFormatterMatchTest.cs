@@ -2,8 +2,7 @@
 
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http.Formatting
 {

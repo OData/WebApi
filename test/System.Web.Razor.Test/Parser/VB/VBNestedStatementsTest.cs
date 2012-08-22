@@ -3,7 +3,7 @@
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Test.Framework;
 using System.Web.Razor.Tokenizer.Symbols;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Parser.VB
 {

@@ -5,9 +5,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http.Formatting.Internal;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Internal
 {

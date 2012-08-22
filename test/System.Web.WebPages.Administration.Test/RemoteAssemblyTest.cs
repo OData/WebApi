@@ -2,9 +2,9 @@
 
 using System.Linq;
 using System.Web.WebPages.Administration.PackageManager;
+using Microsoft.TestCommon;
 using Moq;
 using NuGet.Runtime;
-using Xunit;
 
 namespace System.Web.WebPages.Administration.Test
 {

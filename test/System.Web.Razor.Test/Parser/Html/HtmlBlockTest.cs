@@ -8,8 +8,7 @@ using System.Web.Razor.Resources;
 using System.Web.Razor.Test.Framework;
 using System.Web.Razor.Text;
 using System.Web.Razor.Tokenizer.Symbols;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Parser.Html
 {

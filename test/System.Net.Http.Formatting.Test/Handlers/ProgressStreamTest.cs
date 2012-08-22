@@ -3,8 +3,8 @@
 using System.IO;
 using System.Text;
 using System.Threading;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Net.Http.Handlers
 {

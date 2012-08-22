@@ -2,8 +2,7 @@
 
 using System.Collections.Specialized;
 using System.Globalization;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
 {

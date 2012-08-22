@@ -5,8 +5,6 @@ using System.Linq;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

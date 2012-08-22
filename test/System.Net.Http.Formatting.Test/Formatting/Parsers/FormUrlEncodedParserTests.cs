@@ -5,9 +5,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting.Parsers
 {

@@ -5,11 +5,8 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Web.Helpers.Claims;
 using System.Web.Helpers.Claims.Test;
-using System.Web.Helpers.Test;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Helpers.AntiXsrf.Test
 {

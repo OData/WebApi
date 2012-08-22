@@ -3,11 +3,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
-using System.Web.Http.OData.TestCommon;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.OData;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

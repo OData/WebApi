@@ -4,8 +4,7 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
 {

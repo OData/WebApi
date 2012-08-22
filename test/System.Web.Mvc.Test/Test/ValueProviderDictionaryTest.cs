@@ -5,8 +5,8 @@ using System.Globalization;
 using System.Threading;
 using System.Web.Routing;
 using System.Web.TestUtil;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 #pragma warning disable 0618    // ValueProviderDictionary is now obsolete
 

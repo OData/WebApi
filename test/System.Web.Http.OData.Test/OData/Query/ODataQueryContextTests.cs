@@ -6,9 +6,6 @@ using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData.Query
 {
@@ -76,7 +73,7 @@ namespace System.Web.Http.OData.Query
         {
             // Arrange & Act & Assert
             Assert.ThrowsArgumentNull(
-                    () => new ODataQueryContext(null), 
+                    () => new ODataQueryContext(null),
                     "clrType");
         }
 
@@ -146,7 +143,7 @@ namespace System.Web.Http.OData.Query
         {
             // Act && Assert
             Assert.ThrowsArgumentNull(
-                    () => new ODataQueryContext(null, typeof(Customer)), 
+                    () => new ODataQueryContext(null, typeof(Customer)),
                     "model");
         }
 
@@ -157,7 +154,7 @@ namespace System.Web.Http.OData.Query
             IEdmEntitySet entitySet = model.EntityContainers().Single().FindEntitySet("Customers");
 
             Assert.ThrowsArgumentNull(
-                    () => new ODataQueryContext(null, typeof(Customer), entitySet), 
+                    () => new ODataQueryContext(null, typeof(Customer), entitySet),
                     "model");
         }
 
@@ -165,7 +162,7 @@ namespace System.Web.Http.OData.Query
         public void ContructorWithNullModelAndTypeAndEntitySetNameThrows()
         {
             Assert.ThrowsArgumentNull(() =>
-                    new ODataQueryContext(null, typeof(Customer), "Customers"), 
+                    new ODataQueryContext(null, typeof(Customer), "Customers"),
                     "model");
         }
 
@@ -194,7 +191,7 @@ namespace System.Web.Http.OData.Query
             IEdmEntitySet entitySet = model.EntityContainers().Single().FindEntitySet("Customers");
 
             Assert.ThrowsArgumentNull(() =>
-                    new ODataQueryContext(model, null, entitySet), 
+                    new ODataQueryContext(model, null, entitySet),
                     "entityClrType");
         }
 

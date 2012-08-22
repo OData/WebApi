@@ -3,8 +3,8 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Web.Configuration;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.WebPages.Test
 {

@@ -6,9 +6,8 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Web.WebPages.Html;
 using System.Web.WebPages.Scope;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Validation.Test
 {

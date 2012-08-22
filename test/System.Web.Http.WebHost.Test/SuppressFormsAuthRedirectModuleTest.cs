@@ -5,8 +5,6 @@ using System.Collections.Specialized;
 using System.Web.WebPages.TestUtils;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http.WebHost
 {
@@ -16,7 +14,7 @@ namespace System.Web.Http.WebHost
         public void DisableAuthenticationRedirect_SetTheFlagToTrue()
         {
             // Arrange
-            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() {DefaultValue = DefaultValue.Mock};
+            Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             IDictionary contextItems = new Hashtable();
             contextMock.SetupGet(hcb => hcb.Items).Returns(contextItems);
 
@@ -24,8 +22,8 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.DisableAuthenticationRedirect(contextMock.Object);
 
             // Assert
-            AssertEx.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
-            AssertEx.True((bool) contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
+            Assert.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
+            Assert.True((bool)contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
         }
 
         [Fact]
@@ -40,8 +38,8 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.AllowAuthenticationRedirect(contextMock.Object);
 
             // Assert
-            AssertEx.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
-            AssertEx.False((bool) contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
+            Assert.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
+            Assert.False((bool)contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
         }
 
         [Fact]
@@ -61,7 +59,7 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.EnsureRestoreUnauthorized(disableRedirectStub);
 
             // Assert
-            AssertEx.Equal(401, response.StatusCode);
+            Assert.Equal(401, response.StatusCode);
         }
 
         [Fact]
@@ -81,7 +79,7 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.EnsureRestoreUnauthorized(disableRedirectStub);
 
             // Assert
-            AssertEx.Equal(200, response.StatusCode);
+            Assert.Equal(200, response.StatusCode);
         }
 
         [Fact]
@@ -101,12 +99,13 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.EnsureRestoreUnauthorized(disableRedirectStub);
 
             // Assert
-            AssertEx.Equal(302, response.StatusCode);
+            Assert.Equal(302, response.StatusCode);
         }
 
 
         [Fact]
-        public void OnEndRequest_IfWebApiControllerReturnsARedirect_DoNothing() {
+        public void OnEndRequest_IfWebApiControllerReturnsARedirect_DoNothing()
+        {
             // Arrange
             HttpResponse response = new HttpResponse(null);
             IDictionary contextItems = new Hashtable();
@@ -123,7 +122,7 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.EnsureRestoreUnauthorized(disableRedirectStub);
 
             // Assert
-            AssertEx.Equal(302, response.StatusCode);
+            Assert.Equal(302, response.StatusCode);
         }
 
         [Fact]
@@ -143,7 +142,7 @@ namespace System.Web.Http.WebHost
             SuppressFormsAuthRedirectModule.EnsureRestoreUnauthorized(disableRedirectStub);
 
             // Assert
-            AssertEx.Equal(200, response.StatusCode);
+            Assert.Equal(200, response.StatusCode);
         }
 
         [Theory]
@@ -153,31 +152,35 @@ namespace System.Web.Http.WebHost
         [InlineData("foo", true)]
         public void GetDisabled_ParsesAppSettings(string setting, bool expected)
         {
-            AssertEx.Equal(expected, SuppressFormsAuthRedirectModule.GetEnabled(new NameValueCollection() { { SuppressFormsAuthRedirectModule.AppSettingsSuppressFormsAuthenticationRedirectKey, setting } }));
+            Assert.Equal(expected, SuppressFormsAuthRedirectModule.GetEnabled(new NameValueCollection() { { SuppressFormsAuthRedirectModule.AppSettingsSuppressFormsAuthenticationRedirectKey, setting } }));
         }
-        
+
 
         [Fact]
-        public void PreApplicationStartCode_IsValid() 
+        public void PreApplicationStartCode_IsValid()
         {
             PreAppStartTestHelper.TestPreAppStartClass(typeof(PreApplicationStartCode));
         }
     }
 
-    internal class DisableRedirectStub : SuppressFormsAuthRedirectModule.IDisableRedirect {
+    internal class DisableRedirectStub : SuppressFormsAuthRedirectModule.IDisableRedirect
+    {
         private readonly IDictionary _contextItems;
         private readonly HttpResponse _response;
 
-        public DisableRedirectStub(IDictionary contextItems, HttpResponse response) {
+        public DisableRedirectStub(IDictionary contextItems, HttpResponse response)
+        {
             _contextItems = contextItems;
             _response = response;
         }
 
-        public IDictionary ContextItems {
+        public IDictionary ContextItems
+        {
             get { return _contextItems; }
         }
 
-        public HttpResponse Response {
+        public HttpResponse Response
+        {
             get { return _response; }
         }
     }

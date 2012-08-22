@@ -6,8 +6,8 @@ using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

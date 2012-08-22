@@ -3,7 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.TestUtil
 {

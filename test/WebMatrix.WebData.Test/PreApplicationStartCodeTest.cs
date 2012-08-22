@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Web.Security;
 using System.Web.WebPages.Razor;
 using System.Web.WebPages.TestUtils;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace WebMatrix.WebData.Test
 {

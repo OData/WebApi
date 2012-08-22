@@ -3,9 +3,8 @@
 using System.IO;
 using System.Web.Routing;
 using System.Web.UI;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

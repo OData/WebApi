@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.Conventions;
 using Microsoft.Data.Edm;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
 {

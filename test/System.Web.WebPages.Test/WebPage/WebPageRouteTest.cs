@@ -2,10 +2,8 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Test
 {

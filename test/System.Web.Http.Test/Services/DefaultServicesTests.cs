@@ -17,9 +17,8 @@ using System.Web.Http.Validation;
 using System.Web.Http.Validation.Providers;
 using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Services
 {

@@ -2,8 +2,7 @@
 
 using System.Globalization;
 using System.Web.Routing;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
 {

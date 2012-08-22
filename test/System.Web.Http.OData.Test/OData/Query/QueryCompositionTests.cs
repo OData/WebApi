@@ -7,8 +7,6 @@ using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http.OData.Query
 {

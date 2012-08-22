@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Threading;
-using Xunit;
 
 namespace Microsoft.TestCommon
 {
@@ -9,7 +8,7 @@ namespace Microsoft.TestCommon
     /// Preserves the current <see cref="SynchronizationContext"/>. Use this attribute on
     /// tests which modify the current <see cref="SynchronizationContext"/>.
     /// </summary>
-    public class PreserveSyncContextAttribute : BeforeAfterTestAttribute
+    public class PreserveSyncContextAttribute : Xunit.BeforeAfterTestAttribute
     {
         private SynchronizationContext _syncContext;
 

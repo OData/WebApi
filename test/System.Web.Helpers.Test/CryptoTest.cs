@@ -3,8 +3,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Helpers.Test
 {

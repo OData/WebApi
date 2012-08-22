@@ -3,8 +3,8 @@
 using System.Linq;
 using System.Threading;
 using System.Web.Hosting;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.WebPages.Test
 {

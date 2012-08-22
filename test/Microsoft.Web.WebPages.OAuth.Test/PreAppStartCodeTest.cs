@@ -2,7 +2,7 @@
 
 
 using System.Web.WebPages.TestUtils;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace Microsoft.Web.WebPages.OAuth.Test
 {

@@ -3,8 +3,8 @@
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.Util;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Http.ModelBinding.Binders
 {

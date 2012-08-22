@@ -4,8 +4,6 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing.Tracers
 {

@@ -9,8 +9,7 @@ using System.Net.Http.Formatting;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.SelfHost
 {

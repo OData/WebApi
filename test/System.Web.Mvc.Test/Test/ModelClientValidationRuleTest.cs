@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Web.TestUtil;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
 {

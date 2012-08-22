@@ -15,8 +15,6 @@ using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http.OData.Query
 {

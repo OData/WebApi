@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
-using Xunit;
 
 namespace Microsoft.Web.Mvc.ModelBinding.Test
 {

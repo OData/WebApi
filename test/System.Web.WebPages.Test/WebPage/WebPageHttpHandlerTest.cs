@@ -5,9 +5,8 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Security;
 using System.Text;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Test
 {

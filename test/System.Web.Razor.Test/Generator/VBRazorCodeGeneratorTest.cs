@@ -2,9 +2,7 @@
 
 using System.Collections.Generic;
 using System.Web.Razor.Generator;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Generator
 {

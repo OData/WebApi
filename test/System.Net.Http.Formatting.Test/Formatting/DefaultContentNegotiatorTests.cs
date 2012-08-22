@@ -7,9 +7,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

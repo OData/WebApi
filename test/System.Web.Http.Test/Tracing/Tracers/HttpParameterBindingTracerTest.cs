@@ -9,9 +9,8 @@ using System.Web.Http.Metadata;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing.Tracers
 {

@@ -3,8 +3,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Web.Security;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace Microsoft.Web.Mvc.Test
 {

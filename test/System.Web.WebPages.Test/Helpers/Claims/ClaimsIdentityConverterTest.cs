@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Principal;
 using System.Web.Security;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Helpers.Claims.Test
 {

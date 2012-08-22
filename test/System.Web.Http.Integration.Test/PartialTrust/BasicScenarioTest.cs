@@ -3,8 +3,6 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http.PartialTrust
 {
@@ -46,7 +44,7 @@ namespace System.Web.Http.PartialTrust
         }
     }
 
-    [RunWith(typeof(PartialTrustRunner))]
+    [PartialTrustRunner]
     public class PartialTrustBasicScenarioTest : BasicScenarioTest { }
 
     public class EchoController : ApiController

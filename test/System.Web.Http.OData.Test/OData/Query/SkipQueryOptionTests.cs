@@ -5,8 +5,7 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.OData;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
 {

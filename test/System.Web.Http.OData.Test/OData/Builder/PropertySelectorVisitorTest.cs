@@ -3,7 +3,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http.OData.TestCommon.Models;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
 {

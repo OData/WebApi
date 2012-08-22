@@ -3,8 +3,6 @@
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {

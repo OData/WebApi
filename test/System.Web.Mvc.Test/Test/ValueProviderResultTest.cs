@@ -3,9 +3,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

@@ -3,7 +3,7 @@
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData
 {

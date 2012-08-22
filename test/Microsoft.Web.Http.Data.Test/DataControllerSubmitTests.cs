@@ -15,10 +15,9 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Routing;
+using Microsoft.TestCommon;
 using Microsoft.Web.Http.Data.Test.Models;
 using Newtonsoft.Json;
-using Assert = Microsoft.TestCommon.AssertEx;
-using FactAttribute = Microsoft.TestCommon.WsrFactAttribute;
 
 namespace Microsoft.Web.Http.Data.Test
 {

@@ -4,8 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Validation
 {

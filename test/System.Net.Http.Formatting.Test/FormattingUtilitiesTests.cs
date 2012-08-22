@@ -4,9 +4,6 @@ using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {

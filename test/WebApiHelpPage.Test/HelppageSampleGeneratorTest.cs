@@ -11,11 +11,10 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http.Description;
+using Microsoft.TestCommon;
 using Moq;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
 using WebApiHelpPageWebHost.UnitTest.Helpers;
-using Xunit;
-using Xunit.Extensions;
 
 namespace WebApiHelpPageWebHost.UnitTest
 {

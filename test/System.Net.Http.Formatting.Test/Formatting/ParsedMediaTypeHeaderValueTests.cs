@@ -2,8 +2,6 @@
 
 using System.Net.Http.Headers;
 using Microsoft.TestCommon;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

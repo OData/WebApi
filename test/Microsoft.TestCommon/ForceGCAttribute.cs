@@ -2,11 +2,10 @@
 
 using System;
 using System.Reflection;
-using Xunit;
 
 namespace Microsoft.TestCommon
 {
-    public class ForceGCAttribute : BeforeAfterTestAttribute
+    public class ForceGCAttribute : Xunit.BeforeAfterTestAttribute
     {
         public override void After(MethodInfo methodUnderTest)
         {

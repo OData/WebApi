@@ -3,10 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
-using FactAttribute = Microsoft.TestCommon.WsrFactAttribute;
-using TheoryAttribute = Microsoft.TestCommon.WsrTheoryAttribute;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http
 {

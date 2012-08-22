@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Web.WebPages.Resources;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Test
 {

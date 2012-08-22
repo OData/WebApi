@@ -2,10 +2,10 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.TestCommon;
 using Microsoft.Web.Http.Data.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit;
 
 namespace Microsoft.Web.Http.Data.Test
 {

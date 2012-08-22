@@ -2,7 +2,6 @@
 
 using System;
 using System.Net.Http.Headers;
-using Xunit;
 
 namespace Microsoft.TestCommon
 {

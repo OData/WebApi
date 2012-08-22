@@ -8,8 +8,7 @@ using System.Text;
 using System.Web.Razor;
 using System.Web.Razor.Generator;
 using Microsoft.CSharp;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Razor.Test
 {

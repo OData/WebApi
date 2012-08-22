@@ -3,9 +3,8 @@
 using System.Collections.Generic;
 using System.Web.Razor.Parser;
 using System.Web.Razor.Parser.SyntaxTree;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Razor.Test.Parser
 {

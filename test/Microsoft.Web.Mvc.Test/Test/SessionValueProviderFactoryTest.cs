@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace Microsoft.Web.Mvc.Test
 {

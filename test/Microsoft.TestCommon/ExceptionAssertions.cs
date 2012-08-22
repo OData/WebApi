@@ -8,7 +8,7 @@ using System.Web;
 
 namespace Microsoft.TestCommon
 {
-    public partial class AssertEx
+    public partial class Assert
     {
         /// <summary>
         /// Determines if your thread's current culture and current UI culture is English.
@@ -510,7 +510,7 @@ namespace Microsoft.TestCommon
 
             protected override bool ExcludeStackFrame(string stackFrame)
             {
-                if (stackFrame.StartsWith("at Microsoft.TestCommon.AssertEx.", StringComparison.OrdinalIgnoreCase))
+                if (stackFrame.StartsWith("at Microsoft.TestCommon.Assert.", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }

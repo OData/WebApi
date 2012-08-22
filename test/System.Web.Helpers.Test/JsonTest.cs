@@ -2,8 +2,7 @@
 
 using System.Collections.Generic;
 using System.Dynamic;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Helpers.Test
 {

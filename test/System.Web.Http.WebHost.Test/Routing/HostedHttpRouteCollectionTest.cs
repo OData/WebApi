@@ -5,9 +5,8 @@ using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Routing;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.WebHost.Routing
 {

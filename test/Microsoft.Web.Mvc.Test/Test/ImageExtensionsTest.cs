@@ -2,9 +2,8 @@
 
 using System.Web.Mvc;
 using System.Web.Routing;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace Microsoft.Web.Mvc.Test
 {

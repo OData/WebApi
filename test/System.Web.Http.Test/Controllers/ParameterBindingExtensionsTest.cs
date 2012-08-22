@@ -6,9 +6,8 @@ using System.Net.Http.Formatting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Validation;
 using System.Web.Http.ValueProviders;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Controllers
 {

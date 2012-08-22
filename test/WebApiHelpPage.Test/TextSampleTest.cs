@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.TestCommon;
 using ROOT_PROJECT_NAMESPACE.Areas.HelpPage;
-using Xunit;
 
 namespace WebApiHelpPageWebHost.UnitTest
 {

@@ -3,8 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Web.WebPages.Resources;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Test
 {

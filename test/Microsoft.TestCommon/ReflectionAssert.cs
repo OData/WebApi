@@ -3,7 +3,6 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace Microsoft.TestCommon
 {

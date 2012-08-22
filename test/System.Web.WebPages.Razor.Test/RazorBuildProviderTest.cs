@@ -9,8 +9,8 @@ using System.Reflection;
 using System.Web.Compilation;
 using ASP;
 using Microsoft.CSharp;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace ASP
 {

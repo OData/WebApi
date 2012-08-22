@@ -3,8 +3,6 @@
 using System.Collections.Generic;
 using System.Web.Routing;
 using Microsoft.TestCommon;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http
 {

@@ -10,9 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

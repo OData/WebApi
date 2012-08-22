@@ -2,8 +2,7 @@
 
 using System.Globalization;
 using System.Web.TestUtil;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Test
 {

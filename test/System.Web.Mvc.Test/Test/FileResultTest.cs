@@ -4,9 +4,6 @@ using System.Net.Mime;
 using System.Web.TestUtil;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

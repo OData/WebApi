@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Web.WebPages.Administration.PackageManager;
 using System.Xml.Linq;
+using Microsoft.TestCommon;
 using Moq;
 using NuGet;
-using Xunit;
 
 namespace System.Web.WebPages.Administration.Test
 {

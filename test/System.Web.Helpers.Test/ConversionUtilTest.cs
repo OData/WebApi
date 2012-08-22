@@ -2,7 +2,7 @@
 
 using System.Drawing;
 using System.Globalization;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Helpers.Test
 {

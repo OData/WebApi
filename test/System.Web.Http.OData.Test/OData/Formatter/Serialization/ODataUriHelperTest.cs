@@ -3,8 +3,7 @@
 using System.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

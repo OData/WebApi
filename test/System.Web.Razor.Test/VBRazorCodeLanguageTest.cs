@@ -2,8 +2,8 @@
 
 using System.Web.Razor.Generator;
 using System.Web.Razor.Parser;
+using Microsoft.TestCommon;
 using Microsoft.VisualBasic;
-using Xunit;
 
 namespace System.Web.Razor.Test
 {

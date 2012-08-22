@@ -5,8 +5,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.TestCommon;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Metadata.Providers
 {
@@ -115,6 +113,6 @@ namespace System.Web.Http.Metadata.Providers
         }
     }
 
-    [RunWith(typeof(PartialTrustRunner))]
+    [PartialTrustRunner]
     public class CachedDataAnnotationsModelMetadataProviderPartialTrustTest : DataAnnotationsModelMetadataProviderTest { }
 }

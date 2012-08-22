@@ -6,9 +6,6 @@ using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

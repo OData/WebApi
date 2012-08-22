@@ -2,10 +2,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.TestCommon;
 using Microsoft.Web.Http.Data;
 using Microsoft.Web.Http.Data.Test.Models;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.ServiceModel.DomainServices.Server.Test
 {

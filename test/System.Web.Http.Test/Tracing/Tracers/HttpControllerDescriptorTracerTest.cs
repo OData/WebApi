@@ -3,8 +3,8 @@
 using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Http.Tracing.Tracers
 {

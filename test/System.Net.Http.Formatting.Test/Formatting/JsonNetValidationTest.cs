@@ -4,8 +4,6 @@ using System.Reflection;
 using System.Text;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Net.Http.Formatting
 {

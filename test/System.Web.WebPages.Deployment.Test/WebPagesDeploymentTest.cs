@@ -5,9 +5,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Reflection;
 using System.Web.WebPages.TestUtils;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Deployment.Test
 {

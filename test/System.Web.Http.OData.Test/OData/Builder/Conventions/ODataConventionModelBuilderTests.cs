@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {

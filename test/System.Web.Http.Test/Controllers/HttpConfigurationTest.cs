@@ -9,8 +9,6 @@ using System.Web.Http.Services;
 using System.Web.Http.Tracing;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http
 {
@@ -181,7 +179,7 @@ namespace System.Web.Http
 
             HttpConfiguration config2 = new HttpConfiguration();
             HttpConfiguration configPassedToAction2 = null;
-            config2.Initializer = (c) => { config1.Initializer(config1); configPassedToAction2 = c;};
+            config2.Initializer = (c) => { config1.Initializer(config1); configPassedToAction2 = c; };
 
             // Act
             config2.Initializer(config2);
@@ -287,7 +285,7 @@ namespace System.Web.Http
 
             // Act
             HttpConfiguration clonedConfig = HttpConfiguration.ApplyControllerSettings(settings, config);
-            clonedConfig.Formatters[0].GetPerRequestFormatterInstance(typeof(string), new HttpRequestMessage(), new MediaTypeHeaderValue("application/mine")); 
+            clonedConfig.Formatters[0].GetPerRequestFormatterInstance(typeof(string), new HttpRequestMessage(), new MediaTypeHeaderValue("application/mine"));
 
             // Assert
             Assert.True(calledTrace);

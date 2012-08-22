@@ -138,6 +138,10 @@
       <Project>{FEDFE6CA-8282-4C5B-A756-E97189690982}</Project>
       <Name>WebApiHelpPage</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
+      <Project>{fccc4cb7-baf7-4a57-9f89-e5766fe536c0}</Project>
+      <Name>Microsoft.TestCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

@@ -2,7 +2,7 @@
 
 using System.ServiceModel;
 using System.Web.Http.SelfHost.ServiceModel;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Net.Http.Formatting
 {

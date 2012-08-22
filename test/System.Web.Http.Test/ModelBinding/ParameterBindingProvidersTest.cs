@@ -3,9 +3,8 @@
 using System.Collections.ObjectModel;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.ModelBinding
 {

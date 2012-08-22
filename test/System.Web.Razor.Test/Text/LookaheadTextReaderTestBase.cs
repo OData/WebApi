@@ -3,7 +3,7 @@
 using System.Text;
 using System.Web.Razor.Resources;
 using System.Web.Razor.Text;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Text
 {

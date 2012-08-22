@@ -3,10 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using Microsoft.TestCommon;
 using Moq;
 using WebMatrix.Data.Test.Mocks;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace WebMatrix.Data.Test
 {

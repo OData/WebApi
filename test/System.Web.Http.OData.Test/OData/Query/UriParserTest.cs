@@ -6,7 +6,7 @@ using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
 {

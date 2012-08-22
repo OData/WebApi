@@ -3,8 +3,6 @@
 using System.Collections.Generic;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Formatting
 {

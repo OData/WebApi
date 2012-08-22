@@ -10,8 +10,6 @@ using System.Web.TestUtil;
 using System.Web.WebPages;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Helpers.Test
 {

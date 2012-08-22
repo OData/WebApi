@@ -6,7 +6,7 @@ using System.Web.Razor.Parser;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Test.Framework;
 using System.Web.Razor.Text;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Parser.Html
 {

@@ -14,9 +14,6 @@ using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData
 {
@@ -187,9 +184,9 @@ namespace System.Web.Http.OData
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
-            
+
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null), "request"); 
+            Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null), "request");
         }
 
         [Theory]

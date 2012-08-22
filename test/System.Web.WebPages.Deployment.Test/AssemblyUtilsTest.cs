@@ -5,7 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Deployment.Test
 {

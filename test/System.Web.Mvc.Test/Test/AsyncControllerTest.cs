@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Web.Mvc.Async;
 using System.Web.Mvc.Async.Test;
 using System.Web.Routing;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Test
 {

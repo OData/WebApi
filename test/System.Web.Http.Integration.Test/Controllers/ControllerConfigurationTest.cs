@@ -2,8 +2,7 @@
 
 using System.Net;
 using System.Net.Http;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http
 {

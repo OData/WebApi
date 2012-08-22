@@ -5,9 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.TestCommon;
 using Moq;
 using WebMatrix.Data;
-using Xunit;
 
 namespace WebMatrix.WebData.Test
 {

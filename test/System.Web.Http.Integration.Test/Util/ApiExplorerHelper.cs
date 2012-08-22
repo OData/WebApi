@@ -7,8 +7,8 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Http.ApiExplorer
 {

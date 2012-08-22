@@ -7,10 +7,9 @@ using System.IO;
 using System.Threading;
 using System.Web.Mvc.Html;
 using System.Web.Routing;
+using Microsoft.TestCommon;
 using Microsoft.Web.UnitTestUtil;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Mvc.Ajax.Test
 {

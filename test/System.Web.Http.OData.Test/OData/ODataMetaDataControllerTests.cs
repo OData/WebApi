@@ -3,7 +3,7 @@
 using System.Net.Http;
 using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Formatter;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
 {

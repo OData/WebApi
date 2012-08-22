@@ -2,8 +2,7 @@
 
 using System.Linq;
 using System.Net.Http;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ModelBinding
 {

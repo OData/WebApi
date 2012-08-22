@@ -5,9 +5,8 @@ using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
 using UrlHelper = System.Web.Http.Routing.UrlHelper;
 
 namespace System.Web.Http.WebHost.Routing

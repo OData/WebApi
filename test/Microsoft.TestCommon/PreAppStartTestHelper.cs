@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 using System.Reflection;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.TestUtils
 {

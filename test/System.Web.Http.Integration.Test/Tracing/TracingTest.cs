@@ -6,8 +6,6 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http.Tracing;
 using Microsoft.TestCommon;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http.ModelBinding
 {

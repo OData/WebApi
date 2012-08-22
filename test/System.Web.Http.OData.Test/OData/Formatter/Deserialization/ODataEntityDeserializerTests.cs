@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {

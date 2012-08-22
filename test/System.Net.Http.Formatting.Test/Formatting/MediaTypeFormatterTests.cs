@@ -9,9 +9,6 @@ using System.Text;
 using System.Web.Http;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
-using FactAttribute = Microsoft.TestCommon.WsrFactAttribute;
 
 namespace System.Net.Http.Formatting
 {

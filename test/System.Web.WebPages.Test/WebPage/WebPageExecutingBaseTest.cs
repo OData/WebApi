@@ -3,8 +3,8 @@
 using System.IO;
 using System.Text;
 using System.Web.WebPages.Instrumentation;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.WebPages.Test
 {

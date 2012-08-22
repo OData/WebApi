@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Web.WebPages.Scope;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Test
 {

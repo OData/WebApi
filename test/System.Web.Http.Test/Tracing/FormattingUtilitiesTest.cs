@@ -13,9 +13,6 @@ using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Tracing
 {

@@ -4,8 +4,6 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Web.Http
 {

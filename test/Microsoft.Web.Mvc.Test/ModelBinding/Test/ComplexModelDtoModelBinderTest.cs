@@ -3,8 +3,8 @@
 using System;
 using System.Linq;
 using System.Web.Mvc;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace Microsoft.Web.Mvc.ModelBinding.Test
 {

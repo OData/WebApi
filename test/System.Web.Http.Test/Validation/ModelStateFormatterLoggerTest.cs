@@ -2,8 +2,7 @@
 
 using System.Net.Http.Formatting;
 using System.Web.Http.ModelBinding;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Validation
 {

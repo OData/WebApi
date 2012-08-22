@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Net.Http.Formatting
 {

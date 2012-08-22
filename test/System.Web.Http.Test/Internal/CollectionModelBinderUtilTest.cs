@@ -6,8 +6,7 @@ using System.Linq;
 using System.Web.Http.Metadata.Providers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Internal
 {

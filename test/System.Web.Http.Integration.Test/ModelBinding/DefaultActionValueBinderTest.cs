@@ -16,7 +16,6 @@ using System.Web.Http.ValueProviders;
 using Microsoft.TestCommon;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit;
 
 namespace System.Web.Http.ModelBinding
 {

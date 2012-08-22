@@ -2,8 +2,7 @@
 
 using System.IO;
 using System.Web.Razor.Text;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Text
 {

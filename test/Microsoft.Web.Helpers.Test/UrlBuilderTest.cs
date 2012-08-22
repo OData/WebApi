@@ -8,8 +8,8 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.WebPages;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace Microsoft.Web.Helpers.Test
 {

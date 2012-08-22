@@ -3,8 +3,7 @@
 using System;
 using System.Threading;
 using System.Web.Mvc.Async;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace Microsoft.Web.Mvc.Test
 {

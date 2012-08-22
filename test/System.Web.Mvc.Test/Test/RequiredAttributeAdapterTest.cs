@@ -2,7 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
 {

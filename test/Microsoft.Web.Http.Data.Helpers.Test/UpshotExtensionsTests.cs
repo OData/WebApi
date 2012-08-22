@@ -2,10 +2,9 @@
 
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
+using Microsoft.TestCommon;
 using Microsoft.Web.Http.Data.Test;
 using Microsoft.Web.UnitTestUtil;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace Microsoft.Web.Http.Data.Helpers.Test
 {

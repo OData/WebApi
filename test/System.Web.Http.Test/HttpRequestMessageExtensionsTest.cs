@@ -9,9 +9,8 @@ using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http
 {

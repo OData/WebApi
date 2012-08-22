@@ -2,10 +2,8 @@
 
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.TestCommon;
 using System.Web.Http.OData.TestCommon.Models;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {

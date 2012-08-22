@@ -4,8 +4,7 @@ using System.Web.Http.Metadata.Providers;
 using System.Web.Http.Util;
 using System.Web.Http.Validation;
 using System.Web.TestUtil;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ModelBinding
 {

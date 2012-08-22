@@ -8,7 +8,6 @@ using System.Web.Security;
 using DotNetOpenAuth.AspNet;
 using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace Microsoft.Web.WebPages.OAuth.Test
 {
@@ -17,7 +16,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
         [Fact]
         public void RegisterClientThrowsOnNullValue()
         {
-            AssertEx.ThrowsArgumentNull(() => OAuthWebSecurity.RegisterClient(null), "client");
+            Assert.ThrowsArgumentNull(() => OAuthWebSecurity.RegisterClient(null), "client");
         }
 
         [Fact]
@@ -28,12 +27,12 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             client.Setup(c => c.ProviderName).Returns((string)null);
 
             // Act & Assert
-            AssertEx.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client.Object), "client");
+            Assert.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client.Object), "client");
 
             client.Setup(c => c.ProviderName).Returns("");
 
             // Act & Assert
-            AssertEx.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client.Object), "client");
+            Assert.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client.Object), "client");
         }
 
         [Fact]
@@ -49,7 +48,7 @@ namespace Microsoft.Web.WebPages.OAuth.Test
             OAuthWebSecurity.RegisterClient(client1.Object);
 
             // Act & Assert
-            AssertEx.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client2.Object), null);
+            Assert.ThrowsArgument(() => OAuthWebSecurity.RegisterClient(client2.Object), null);
         }
 
         [Fact]

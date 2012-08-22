@@ -4,8 +4,7 @@ using System.Web.Razor.Parser;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Resources;
 using System.Web.Razor.Test.Framework;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Parser.VB
 {

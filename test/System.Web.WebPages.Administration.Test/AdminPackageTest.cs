@@ -6,9 +6,8 @@ using System.Text;
 using System.Web.Helpers;
 using System.Web.Hosting;
 using System.Web.Security;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.WebPages.Administration.Test
 {

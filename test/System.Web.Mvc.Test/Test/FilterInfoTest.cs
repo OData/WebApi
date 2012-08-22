@@ -2,8 +2,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
 
 namespace System.Web.Mvc.Test
 {

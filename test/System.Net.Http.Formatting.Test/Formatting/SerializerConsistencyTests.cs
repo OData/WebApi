@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Runtime.Serialization;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Net.Formatting.Tests
 {

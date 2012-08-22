@@ -4,8 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.Edm;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
 {

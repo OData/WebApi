@@ -3,8 +3,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ValueProviders.Providers
 {

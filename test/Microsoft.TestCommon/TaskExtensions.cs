@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Xunit;
+using Microsoft.TestCommon;
 
 // No namespace so that these extensions are available for all test classes
 

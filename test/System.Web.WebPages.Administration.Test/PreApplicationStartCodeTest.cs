@@ -2,7 +2,7 @@
 
 using System.Linq;
 using System.Web.WebPages.TestUtils;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.WebPages.Administration.Test
 {

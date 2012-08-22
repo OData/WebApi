@@ -5,8 +5,7 @@ using System.Web.Razor.Parser;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Test.Framework;
 using System.Web.Razor.Tokenizer.Symbols;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Parser.VB
 {

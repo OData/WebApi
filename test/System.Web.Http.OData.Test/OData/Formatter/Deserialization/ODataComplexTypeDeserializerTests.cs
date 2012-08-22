@@ -2,9 +2,8 @@
 
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {

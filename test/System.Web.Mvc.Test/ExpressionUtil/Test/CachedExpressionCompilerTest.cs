@@ -3,7 +3,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.ExpressionUtil.Test
 {

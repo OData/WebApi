@@ -2,8 +2,7 @@
 
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
+using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Async.Test
 {

@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
@@ -15,10 +13,6 @@ using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
-using Moq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.OData.Formatter
 {

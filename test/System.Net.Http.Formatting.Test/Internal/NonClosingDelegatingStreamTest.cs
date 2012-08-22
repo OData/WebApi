@@ -2,10 +2,9 @@
 
 using System.IO;
 using System.Net.Http.Mocks;
+using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Net.Http.Internal
 {

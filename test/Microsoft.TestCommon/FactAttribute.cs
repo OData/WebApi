@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using Xunit;
 using Xunit.Sdk;
 
 namespace Microsoft.TestCommon
@@ -11,9 +10,9 @@ namespace Microsoft.TestCommon
     /// An override of <see cref="FactAttribute"/> that provides extended capabilities.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class WsrFactAttribute : FactAttribute
+    public class FactAttribute : Xunit.FactAttribute
     {
-        public WsrFactAttribute()
+        public FactAttribute()
         {
             Timeout = TimeoutConstant.DefaultTimeout;
             Platforms = Platform.All;

@@ -3,7 +3,7 @@
 using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Properties;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.ApiExplorer
 {

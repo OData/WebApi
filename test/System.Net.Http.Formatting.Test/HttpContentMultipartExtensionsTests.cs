@@ -7,10 +7,6 @@ using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.TestCommon;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
-using FactAttribute = Microsoft.TestCommon.WsrFactAttribute;
-using TheoryAttribute = Microsoft.TestCommon.WsrTheoryAttribute;
 
 namespace System.Net.Http
 {

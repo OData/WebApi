@@ -12,7 +12,7 @@ using System.Text;
 using System.Web.Razor.Generator;
 using System.Web.Razor.Test.Utils;
 using System.Web.WebPages.TestUtils;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Razor.Test.Generator
 {

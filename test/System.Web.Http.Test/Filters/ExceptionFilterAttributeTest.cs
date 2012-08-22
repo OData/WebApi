@@ -2,9 +2,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.Filters
 {

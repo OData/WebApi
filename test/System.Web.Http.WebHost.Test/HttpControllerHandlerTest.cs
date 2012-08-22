@@ -16,9 +16,6 @@ using System.Web.Http.Hosting;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Http.WebHost
 {
@@ -189,7 +186,8 @@ namespace System.Web.Http.WebHost
         }
 
         [Fact]
-        public void SuppressFormsAuthenticationRedirect_DoesntRequireSuppressRedirect() {
+        public void SuppressFormsAuthenticationRedirect_DoesntRequireSuppressRedirect()
+        {
             // Arrange
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             IDictionary contextItems = new Hashtable();
@@ -202,18 +200,21 @@ namespace System.Web.Http.WebHost
             HttpControllerHandler.EnsureSuppressFormsAuthenticationRedirect(contextMock.Object);
 
             // Assert
-            if (suppressRedirect == null) {
+            if (suppressRedirect == null)
+            {
                 // .NET 4.0
                 Assert.False(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
             }
-            else {
+            else
+            {
                 // .NET 4.5
                 Assert.False((bool)suppressRedirect.GetValue(contextMock.Object.Response, null));
             }
         }
 
         [Fact]
-        public void SuppressFormsAuthenticationRedirect_RequireSuppressRedirect() {
+        public void SuppressFormsAuthenticationRedirect_RequireSuppressRedirect()
+        {
             // Arrange
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             IDictionary contextItems = new Hashtable();
@@ -226,12 +227,14 @@ namespace System.Web.Http.WebHost
             HttpControllerHandler.EnsureSuppressFormsAuthenticationRedirect(contextMock.Object);
 
             // Assert
-            if (suppressRedirect == null) {
+            if (suppressRedirect == null)
+            {
                 // .NET 4.0
                 Assert.True(contextItems.Contains(SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey));
                 Assert.True((bool)contextItems[SuppressFormsAuthRedirectModule.DisableAuthenticationRedirectKey]);
             }
-            else {
+            else
+            {
                 // .NET 4.5
                 Assert.True((bool)suppressRedirect.GetValue(contextMock.Object.Response, null));
             }
@@ -412,7 +415,7 @@ namespace System.Web.Http.WebHost
             HttpResponseMessage errorResponse = new HttpResponseMessage(HttpStatusCode.MethodNotAllowed);
             errorResponse.Headers.Add("myHeader", "myValue");
             errorResponse.Content = new StringContent("user message", Encoding.UTF8, "application/fake");
- 
+
             Mock<JsonMediaTypeFormatter> formatterMock = new Mock<JsonMediaTypeFormatter>() { CallBase = true };
             formatterMock.Setup(m => m.WriteToStreamAsync(It.IsAny<Type>(),
                                                           It.IsAny<object>(),
@@ -433,7 +436,7 @@ namespace System.Web.Http.WebHost
             task.Wait();
 
             // Assert preparation -- deserialize the response
-            
+
             memoryStream.Seek(0L, SeekOrigin.Begin);
             string responseContent = null;
             using (var streamReader = new StreamReader(memoryStream))
@@ -499,7 +502,7 @@ namespace System.Web.Http.WebHost
                                                             It.IsAny<object>(),
                                                             It.IsAny<Stream>(),
                                                             It.IsAny<HttpContent>(),
-                                                            It.IsAny<TransportContext>())).Throws(new NotSupportedException("Expected error")); 
+                                                            It.IsAny<TransportContext>())).Throws(new NotSupportedException("Expected error"));
 
             // Create a local config to hook to the request to condition
             // the formatter selection for the error response
@@ -652,7 +655,7 @@ namespace System.Web.Http.WebHost
             HttpResponseBase responseBase = responseBaseMock.Object;
             Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>() { DefaultValue = DefaultValue.Mock };
             contextMock.SetupGet(m => m.Response).Returns(responseBase);
- 
+
             HttpRequestMessage request = new HttpRequestMessage();
             request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => true));
             HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };

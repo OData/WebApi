@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder.Conventions;
-using Xunit;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
 {

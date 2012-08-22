@@ -5,8 +5,6 @@ using System.Text;
 using System.Web.Http;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Extensions;
 
 namespace System.Net.Http.Formatting
 {

@@ -6,8 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.ModelBinding;
-using Xunit;
-using Xunit.Extensions;
+using Microsoft.TestCommon;
 
 namespace System.Web.Http.Tracing.Diagnostics.Test
 {
@@ -99,9 +98,9 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
 
             // Act & Assert
             ArgumentNullException exception = Assert.Throws<ArgumentNullException>(
-                                                () => writer.Trace(new HttpRequestMessage(), 
-                                                                    null, 
-                                                                    TraceLevel.Info, 
+                                                () => writer.Trace(new HttpRequestMessage(),
+                                                                    null,
+                                                                    TraceLevel.Info,
                                                                     (tr) => { }));
             Assert.Equal("category", exception.ParamName);
         }
@@ -132,7 +131,7 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
             // Act & Assert
             ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(
                                                 () => writer.Trace(new HttpRequestMessage(),
-                                                                    "MyCategory", 
+                                                                    "MyCategory",
                                                                     level,
                                                                     (tr) => { }));
             Assert.Equal("level", exception.ParamName);
@@ -161,8 +160,8 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
 
         [Theory]
         [InlineData(TraceLevel.Debug, TraceEventType.Verbose)]
-        [InlineData(TraceLevel.Info,  TraceEventType.Information)]
-        [InlineData(TraceLevel.Warn,  TraceEventType.Warning)]
+        [InlineData(TraceLevel.Info, TraceEventType.Information)]
+        [InlineData(TraceLevel.Warn, TraceEventType.Warning)]
         [InlineData(TraceLevel.Error, TraceEventType.Error)]
         [InlineData(TraceLevel.Fatal, TraceEventType.Critical)]
         public void Trace_Writes_Correct_EventType_To_TraceListeners(TraceLevel level, TraceEventType diagnosticLevel)
@@ -181,7 +180,7 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
             writer.Trace(request, "TestCategory", level, (tr) => { tr.Message = "TestMessage"; });
 
             // Assert
-            Assert.Equal(diagnosticLevel, ((TestTraceListener) writer.TraceSource.Listeners[0]).TraceEventType);
+            Assert.Equal(diagnosticLevel, ((TestTraceListener)writer.TraceSource.Listeners[0]).TraceEventType);
         }
 
         [Theory]
@@ -206,7 +205,8 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
             InvalidOperationException exception = new InvalidOperationException("TestException");
 
             // Act
-            writer.Trace(request, "TestCategory", level, (tr) => {
+            writer.Trace(request, "TestCategory", level, (tr) =>
+            {
                 tr.Message = "TestMessage";
                 tr.Operation = "TestOperation";
                 tr.Operator = "TestOperator";
@@ -220,7 +220,7 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
                                                 request.GetCorrelationId().ToString(),
                                                 exception.ToString());
 
-            string actual = ((TestTraceListener) writer.TraceSource.Listeners[0]).Messages[0].Trim();
+            string actual = ((TestTraceListener)writer.TraceSource.Listeners[0]).Messages[0].Trim();
             string timePrefix = "] ";
             actual = actual.Substring(actual.IndexOf(timePrefix) + timePrefix.Length);
             Assert.Equal(expected, actual);
@@ -375,7 +375,7 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
             InvalidOperationException exception = new InvalidOperationException("TestException");
 
             // Act
-            writer.Trace(request, "TestCategory", level-1, (tr) => {});
+            writer.Trace(request, "TestCategory", level - 1, (tr) => { });
 
             // Assert
             Assert.Equal(0, ((TestTraceListener)writer.TraceSource.Listeners[0]).Messages.Count);

@@ -10,9 +10,8 @@ using System.Web.Razor.Test.Utils;
 using System.Web.Razor.Text;
 using System.Web.WebPages.TestUtils;
 using Microsoft.CSharp;
+using Microsoft.TestCommon;
 using Moq;
-using Xunit;
-using Assert = Microsoft.TestCommon.AssertEx;
 
 namespace System.Web.Razor.Test.Editor
 {

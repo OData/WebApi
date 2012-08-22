@@ -104,6 +104,7 @@
     <Compile Include="Test\AllowHtmlAttributeTest.cs" />
     <Compile Include="Test\HtmlHelper`1Test.cs" />
     <Compile Include="Test\HttpHeadAttributeTest.cs" />
+    <Compile Include="Test\HttpOptionsAttributeTest.cs" />
     <Compile Include="Test\HttpPatchAttributeTest.cs" />
     <Compile Include="Test\MockableUnvalidatedRequestValues.cs" />
     <Compile Include="Test\DescriptorUtilTest.cs" />

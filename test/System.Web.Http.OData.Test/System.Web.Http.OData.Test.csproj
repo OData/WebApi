@@ -141,7 +141,6 @@
     <Compile Include="OData\Query\SkipQueryOptionTests.cs" />
     <Compile Include="OData\Query\TopQueryOptionTests.cs" />
     <Compile Include="OData\Query\UriParserTest.cs" />
-    <Compile Include="OData\Formatter\Serialization\EnumHelperTestBase.cs" />
     <Compile Include="OData\Formatter\Serialization\DefaultODataSerializerProviderTests.cs" />
     <Compile Include="OData\Formatter\Serialization\Models\Address.cs" />
     <Compile Include="OData\Formatter\Serialization\Models\Customer.cs" />

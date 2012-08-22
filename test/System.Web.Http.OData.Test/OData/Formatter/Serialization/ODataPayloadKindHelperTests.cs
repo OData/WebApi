@@ -7,28 +7,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class ODataPayloadKindHelperTests : EnumHelperTestBase<ODataPayloadKind>
     {
-        [Fact]
-        public void IsDefined_ReturnsTrueForDefinedValues()
+        public ODataPayloadKindHelperTests()
+            : base(ODataPayloadKindHelper.IsDefined, ODataPayloadKindHelper.Validate, (ODataPayloadKind)999)
         {
-            Check_IsDefined_ReturnsTrueForDefinedValues(ODataPayloadKindHelper.IsDefined, ODataPayloadKind.Unsupported);
-        }
-
-        [Fact]
-        public void IsDefined_ReturnsFalseForUndefinedValues()
-        {
-            Check_IsDefined_ReturnsFalseForUndefinedValues(ODataPayloadKindHelper.IsDefined, (ODataPayloadKind)999);
-        }
-
-        [Fact]
-        public void Validate_DoesNotThrowForDefinedValues()
-        {
-            Check_Validate_DoesNotThrowForDefinedValues(ODataPayloadKindHelper.Validate, ODataPayloadKind.Unsupported);
-        }
-
-        [Fact]
-        public void Validate_ThrowsForUndefinedValues()
-        {
-            Check_Validate_ThrowsForUndefinedValues(ODataPayloadKindHelper.Validate, (ODataPayloadKind)999);
         }
     }
 }

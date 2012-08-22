@@ -20,7 +20,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 || payloadKind == ODataPayloadKind.Parameter
                 || payloadKind == ODataPayloadKind.Property
                 || payloadKind == ODataPayloadKind.ServiceDocument
-                || payloadKind == ODataPayloadKind.Value;
+                || payloadKind == ODataPayloadKind.Value
+                || payloadKind == ODataPayloadKind.Unsupported;
         }
 
         public static void Validate(ODataPayloadKind payloadKind, string parameterName)

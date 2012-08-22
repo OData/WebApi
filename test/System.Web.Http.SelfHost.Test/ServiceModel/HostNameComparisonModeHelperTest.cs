@@ -8,28 +8,9 @@ namespace System.Net.Http.Formatting
 {
     public class HostNameComparisonModeHelperTest : EnumHelperTestBase<HostNameComparisonMode>
     {
-        [Fact]
-        public void IsDefined_ReturnsTrueForDefinedValues()
+        public HostNameComparisonModeHelperTest()
+            : base(HostNameComparisonModeHelper.IsDefined, HostNameComparisonModeHelper.Validate, (HostNameComparisonMode)999)
         {
-            Check_IsDefined_ReturnsTrueForDefinedValues(HostNameComparisonModeHelper.IsDefined);
-        }
-
-        [Fact]
-        public void IsDefined_ReturnsFalseForUndefinedValues()
-        {
-            Check_IsDefined_ReturnsFalseForUndefinedValues(HostNameComparisonModeHelper.IsDefined, (HostNameComparisonMode)999);
-        }
-
-        [Fact]
-        public void Validate_DoesNotThrowForDefinedValues()
-        {
-            Check_Validate_DoesNotThrowForDefinedValues(HostNameComparisonModeHelper.Validate);
-        }
-
-        [Fact]
-        public void Validate_ThrowsForUndefinedValues()
-        {
-            Check_Validate_ThrowsForUndefinedValues(HostNameComparisonModeHelper.Validate, (HostNameComparisonMode)999);
         }
     }
 }

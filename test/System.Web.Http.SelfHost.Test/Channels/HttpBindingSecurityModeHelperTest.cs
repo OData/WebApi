@@ -7,28 +7,9 @@ namespace System.Net.Http.Formatting
 {
     public class HttpBindingSecurityModeHelperTest : EnumHelperTestBase<HttpBindingSecurityMode>
     {
-        [Fact]
-        public void IsDefined_ReturnsTrueForDefinedValues()
+        public HttpBindingSecurityModeHelperTest()
+            : base(HttpBindingSecurityModeHelper.IsDefined, HttpBindingSecurityModeHelper.Validate, (HttpBindingSecurityMode)999)
         {
-            Check_IsDefined_ReturnsTrueForDefinedValues(HttpBindingSecurityModeHelper.IsDefined);
-        }
-
-        [Fact]
-        public void IsDefined_ReturnsFalseForUndefinedValues()
-        {
-            Check_IsDefined_ReturnsFalseForUndefinedValues(HttpBindingSecurityModeHelper.IsDefined, (HttpBindingSecurityMode)999);
-        }
-
-        [Fact]
-        public void Validate_DoesNotThrowForDefinedValues()
-        {
-            Check_Validate_DoesNotThrowForDefinedValues(HttpBindingSecurityModeHelper.Validate);
-        }
-
-        [Fact]
-        public void Validate_ThrowsForUndefinedValues()
-        {
-            Check_Validate_ThrowsForUndefinedValues(HttpBindingSecurityModeHelper.Validate, (HttpBindingSecurityMode)999);
         }
     }
 }

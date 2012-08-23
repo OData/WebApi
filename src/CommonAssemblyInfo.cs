@@ -22,12 +22,12 @@ using System.Runtime.InteropServices;
 #if ASPNETMVC && ASPNETWEBPAGES
 #error Runtime projects cannot define both ASPNETMVC and ASPNETWEBPAGES
 #elif ASPNETMVC
-[assembly: AssemblyVersion("5.0.0.0")] // ASPNETMVC
-[assembly: AssemblyFileVersion("5.0.0.0")] // ASPNETMVC
+[assembly: AssemblyVersion("4.1.0.0")] // ASPNETMVC
+[assembly: AssemblyFileVersion("4.1.0.0")] // ASPNETMVC
 [assembly: AssemblyProduct("Microsoft ASP.NET MVC")]
 #elif ASPNETWEBPAGES
-[assembly: AssemblyVersion("3.0.0.0")] // ASPNETWEBPAGES
-[assembly: AssemblyFileVersion("3.0.0.0")] // ASPNETWEBPAGES
+[assembly: AssemblyVersion("2.1.0.0")] // ASPNETWEBPAGES
+[assembly: AssemblyFileVersion("2.1.0.0")] // ASPNETWEBPAGES
 [assembly: AssemblyProduct("Microsoft ASP.NET Web Pages")]
 #else
 #error Runtime projects must define either ASPNETMVC or ASPNETWEBPAGES

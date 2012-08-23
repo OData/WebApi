@@ -163,10 +163,10 @@
     <value>The server failed to build an EdmModel for type '{0}' against action '{1}' on controller '{2}'.</value>
   </data>
   <data name="FailedToBuildEdmModelBecauseReturnTypeIsNull" xml:space="preserve">
-    <value>The server failed to build an EdmModel because the return type is void against action '{0}' on controller '{1}'.</value>
+    <value>The '{0}' type cannot be used with action '{1}' on controller '{2}' because the action does not return a value.</value>
   </data>
   <data name="FailedToRetrieveTypeToBuildEdmModel" xml:space="preserve">
-    <value>The server failed to retrieve a inner generic type from type '{0}' against action '{1}' on controller '{2}'.</value>
+    <value>The '{0}' type cannot be used with action '{1}' on controller '{2}' because the return type '{3}' does not specify the type of the collection.</value>
   </data>
   <data name="QueryParameterNotSupported" xml:space="preserve">
     <value>The query parameter '{0}' is not supported.</value>

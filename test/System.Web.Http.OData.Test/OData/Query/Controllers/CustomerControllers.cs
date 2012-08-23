@@ -47,6 +47,12 @@ namespace System.Web.Http.OData.Query.Controllers
             throw new NotImplementedException();
         }
 
+        [Queryable]
+        public NonGenericEnumerable GetNonGenericEnumerable()
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable GetNonQueryable()
         {
             throw new NotImplementedException();

@@ -109,6 +109,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\EdmModelAsserts.cs" />
+    <Compile Include="TestCommon\Models\NonGenericEnumerable.cs" />
     <Compile Include="TestCommon\ODataMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\PeopleController.cs" />
     <Compile Include="OData\Formatter\ODataTestUtil.cs" />

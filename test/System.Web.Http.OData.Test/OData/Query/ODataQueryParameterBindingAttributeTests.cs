@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -41,9 +40,9 @@ namespace System.Web.Http.OData.Query
             {
                 return new TheoryDataSet<string>
                 {
-                    { "GetObject" },
-                    { "GetNonQueryable" },
-                    { "GetTwoGenericsCollection" }
+                    "GetObject",
+                    "GetNonQueryable",
+                    "GetTwoGenericsCollection",
                 };
             }
         }
@@ -83,6 +82,7 @@ namespace System.Web.Http.OData.Query
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
@@ -95,9 +95,37 @@ namespace System.Web.Http.OData.Query
             // Act
             HttpParameterBinding binding = attribute.GetBinding(parameterDescriptor);
 
-            HttpResponseException responseException = Assert.Throws<HttpResponseException>(() =>
-            binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait());
-            Assert.Equal(HttpStatusCode.InternalServerError, responseException.Response.StatusCode);
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait(),
+                String.Format(
+                        "The 'ODataQueryParameterBinding' type cannot be used with action '{0}' on controller 'CustomerLowLevel' because the return type '{1}' does not specify the type of the collection.",
+                        actionDescriptor.ActionName,
+                        actionDescriptor.ReturnType.FullName));
+        }
+
+        [Fact]
+        public void VoidReturnTypeThrows()
+        {
+            // Arrange
+            ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
+            HttpConfiguration config = new HttpConfiguration();
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
+            MethodInfo methodInfo = typeof(CustomerLowLevelController).GetMethod("GetVoidReturn");
+            ParameterInfo parameterInfo = methodInfo.GetParameters().First();
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, methodInfo);
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpParameterDescriptor parameterDescriptor = new ReflectedHttpParameterDescriptor(actionDescriptor, parameterInfo);
+            HttpParameterBinding binding = attribute.GetBinding(parameterDescriptor);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait(),
+                "The 'ODataQueryParameterBinding' type cannot be used with action 'GetVoidReturn' on controller 'CustomerLowLevel' because the action does not return a value.");
         }
     }
 
@@ -140,6 +168,11 @@ namespace System.Web.Http.OData.Query
         }
 
         public TwoGenericsCollection GetTwoGenericsCollection(ODataQueryOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void GetVoidReturn(ODataQueryOptions options)
         {
             throw new NotImplementedException();
         }

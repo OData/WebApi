@@ -123,6 +123,29 @@ namespace System.Web.Http.OData
             Assert.Equal(HttpStatusCode.BadRequest, errorResponse.Response.StatusCode);
         }
 
+        [Fact]
+        public void NonGenericEnumerableReturnTypeThrows()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$skip=1");
+            HttpConfiguration config = new HttpConfiguration();
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("GetNonGenericEnumerable"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            context.Response.Content = new ObjectContent(typeof(object), new NonGenericEnumerable(), new JsonMediaTypeFormatter());
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => attribute.OnActionExecuted(context),
+                "The 'QueryableAttribute' type cannot be used with action 'GetNonGenericEnumerable' on controller 'CustomerHighLevel' because the return type 'System.Web.Http.OData.TestCommon.Models.NonGenericEnumerable' does not specify the type of the collection.");
+        }
+
         [Theory]
         [InlineData("$top=1")]
         [InlineData("$skip=1")]

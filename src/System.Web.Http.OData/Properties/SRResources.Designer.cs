@@ -286,7 +286,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The server failed to build an EdmModel because the return type is void against action &apos;{0}&apos; on controller &apos;{1}&apos;..
+        ///   Looks up a localized string similar to The &apos;{0}&apos; type cannot be used with action &apos;{1}&apos; on controller &apos;{2}&apos; because the action does not return a value..
         /// </summary>
         internal static string FailedToBuildEdmModelBecauseReturnTypeIsNull {
             get {
@@ -295,7 +295,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The server failed to retrieve a inner generic type from type &apos;{0}&apos; against action &apos;{1}&apos; on controller &apos;{2}&apos;..
+        ///   Looks up a localized string similar to The &apos;{0}&apos; type cannot be used with action &apos;{1}&apos; on controller &apos;{2}&apos; because the return type &apos;{3}&apos; does not specify the type of the collection..
         /// </summary>
         internal static string FailedToRetrieveTypeToBuildEdmModel {
             get {

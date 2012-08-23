@@ -60,20 +60,30 @@ namespace System.Web.Http.OData
 
                 IEdmModel model = configuration.GetEdmModel();
 
+                // It is a developer programming error to use this binding attribute
+                // on actions that return void.
                 if (actionDescriptor.ReturnType == null)
                 {
-                    throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.InternalServerError,
-                                 Error.Format(SRResources.FailedToBuildEdmModelBecauseReturnTypeIsNull,
-                               actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName)));
+                    throw Error.InvalidOperation(
+                                    SRResources.FailedToBuildEdmModelBecauseReturnTypeIsNull,
+                                    this.GetType().Name,
+                                    actionDescriptor.ActionName,
+                                    actionDescriptor.ControllerDescriptor.ControllerName);
                 }
 
                 Type entityClrType = TypeHelper.GetImplementedIEnumerableType(actionDescriptor.ReturnType);
 
                 if (entityClrType == null)
                 {
-                    throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.InternalServerError,
-                           Error.Format(SRResources.FailedToRetrieveTypeToBuildEdmModel, actionDescriptor.ReturnType.FullName,
-                               actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName)));
+                    // It is a developer programming error to use this binding attribute
+                    // on actions that return a collection whose element type cannot be
+                    // determined, such as a non-generic IQueryable or IEnumerable.
+                    throw Error.InvalidOperation(
+                                    SRResources.FailedToRetrieveTypeToBuildEdmModel,
+                                    this.GetType().Name,
+                                    actionDescriptor.ActionName, 
+                                    actionDescriptor.ControllerDescriptor.ControllerName,
+                                    actionDescriptor.ReturnType.FullName);
                 }
 
                 if (model == null)

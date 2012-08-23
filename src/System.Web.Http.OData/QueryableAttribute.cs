@@ -105,6 +105,18 @@ namespace System.Web.Http
                         Type originalQueryType = query.GetType();
                         Type entityClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
 
+                        if (entityClrType == null)
+                        {
+                            // The element type cannot be determined because the type of the content
+                            // is not IEnumerable<T> or IQueryable<T>.
+                            throw Error.InvalidOperation(
+                                SRResources.FailedToRetrieveTypeToBuildEdmModel,
+                                this.GetType().Name,
+                                actionDescriptor.ActionName,
+                                actionDescriptor.ControllerDescriptor.ControllerName,
+                                originalQueryType.FullName);
+                        }
+
                         // Primitive types do not construct an EDM model and deal only with the CLR Type
                         if (TypeHelper.IsQueryPrimitiveType(entityClrType))
                         {
@@ -115,31 +127,12 @@ namespace System.Web.Http
                             // Get model for the entire app
                             IEdmModel model = configuration.GetEdmModel();
 
-                            if (entityClrType == null)
-                            {
-                                // The actual type is not IEnumerable or IQueryable
-                                actionExecutedContext.Response = request.CreateErrorResponse(
-                                   HttpStatusCode.InternalServerError,
-                                   Error.Format(SRResources.FailedToRetrieveTypeToBuildEdmModel, originalQueryType.FullName,
-                                       actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName));
-                                return;
-                            }
-
                             if (model == null)
                             {
                                 // user has not configured anything, now let's create one just for this type
                                 // and cache it in the action descriptor
                                 model = actionDescriptor.GetEdmModel(entityClrType);
-                            }
-
-                            if (model == null)
-                            {
-                                // we need to send 500 if we can't create a model
-                                actionExecutedContext.Response = request.CreateErrorResponse(
-                                    HttpStatusCode.InternalServerError,
-                                    Error.Format(SRResources.FailedToBuildEdmModel, entityClrType.FullName,
-                                        actionDescriptor.ActionName, actionDescriptor.ControllerDescriptor.ControllerName));
-                                return;
+                                Contract.Assert(model != null);
                             }
 
                             // parses the query from request uri

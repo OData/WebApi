@@ -126,7 +126,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             elementType = type;
 
-            // see if this type is in the black list
+            // see if this type should be ignored.
             if (_ignoredCollectionTypes.Contains(type))
             {
                 return false;

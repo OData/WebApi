@@ -76,7 +76,7 @@ namespace System.Web.Http.OData.Query
             response.EnsureSuccessStatusCode();
             List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
             AreEqual(
-                new List<QueryCompositionCustomer>  
+                new List<QueryCompositionCustomer>
                 {   
                     new QueryCompositionCustomer { Id = 3, Name = "NewLow" },
                     new QueryCompositionCustomer { Id = 11, Name = "Lowest" }, 
@@ -98,8 +98,8 @@ namespace System.Web.Http.OData.Query
             response.EnsureSuccessStatusCode();
             List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
             AreEqual(
-                new List<QueryCompositionCustomer>  
-                {   
+                new List<QueryCompositionCustomer>
+                {
                     new QueryCompositionCustomer { Id = 11, Name = "Lowest" }, 
                     new QueryCompositionCustomer { Id = 22, Name = "Middle" }, 
                 },

@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
 
             var properties = ConventionsHelpers.GetProperties(edmType.Object);
-            var expectedProperties = new string[] { "Base_I", "Base_Complex", "Base_Str", "Derived_I", "Derived_Complex", "Collection" };
+            var expectedProperties = new string[] { "Base_I", "Base_Complex", "Base_Str", "Derived_I", "Derived_Complex", "Collection", "PrivateSetPublicGet" };
 
             Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
         }
@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             edmType.Setup(t => t.IgnoredProperties).Returns(typeof(GetProperties_Derived).GetProperties().Where(p => new string[] { "Base_I", "Derived_I" }.Contains(p.Name)));
 
             var properties = ConventionsHelpers.GetProperties(edmType.Object);
-            var expectedProperties = new string[] { "Base_Complex", "Base_Str", "Derived_Complex", "Collection" };
+            var expectedProperties = new string[] { "Base_Complex", "Base_Str", "Derived_Complex", "Collection", "PrivateSetPublicGet" };
 
             Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
         }
@@ -206,6 +206,10 @@ namespace System.Web.Http.OData.Builder.Conventions
         private static int SomeStaticProperty3 { get; set; }
 
         public string Derived_I { get; set; }
+
+        public string PrivateSetPublicGet { get; private set; }
+
+        public string PrivateGetPublicSet { private get; set; }
 
         public GetProperties_Complex Derived_Complex { get; set; }
 

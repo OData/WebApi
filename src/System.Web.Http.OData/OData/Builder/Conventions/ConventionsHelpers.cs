@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (propertyInfo.CanRead && (propertyInfo.CanWrite || propertyInfo.PropertyType.IsCollection()))
+            if (propertyInfo.CanRead)
             {
                 // non-public getters are not valid properties
                 MethodInfo publicGetter = propertyInfo.GetGetMethod();

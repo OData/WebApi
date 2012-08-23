@@ -42,7 +42,7 @@ namespace System.Web.Http.OData
             PropertyInfo propertyInfo = type.GetProperty(property.Name);
             Type returnType = propertyInfo.PropertyType;
 
-            Expression orderByLambda = GetPropertyAccessLambda(type, propertyInfo);
+            Expression orderByLambda = GetPropertyAccessLambda(type, property.Name);
             MethodInfo orderByMethod = null;
 
             IOrderedQueryable orderedQuery = null;
@@ -85,12 +85,12 @@ namespace System.Web.Http.OData
         {
             MethodInfo whereMethod = ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(type);
             return whereMethod.Invoke(null, new object[] { query, where }) as IQueryable;
-        }        
+        }
 
-        public static Expression GetPropertyAccessLambda(Type type, Reflection.PropertyInfo propertyInfo)
+        private static Expression GetPropertyAccessLambda(Type type, string propertyName)
         {
             ParameterExpression p1 = Expression.Parameter(type, "p1");
-            MemberExpression propertyOnP1 = Expression.Property(p1, propertyInfo.GetGetMethod());
+            MemberExpression propertyOnP1 = Expression.Property(p1, propertyName);
             return Expression.Lambda(propertyOnP1, p1);
         }
     }

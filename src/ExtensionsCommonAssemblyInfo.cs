@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyCompany("Microsoft Open Technologies, Inc")]
+[assembly: AssemblyCompany("Microsoft Open Technologies, Inc.")]
 [assembly: AssemblyCopyright("© Microsoft Open Technologies, Inc. All rights reserved.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]

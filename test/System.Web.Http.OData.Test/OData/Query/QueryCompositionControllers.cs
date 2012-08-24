@@ -105,10 +105,13 @@ namespace System.Web.Http.OData.Query
         }
     }
 
-
-    public class QueryCompositionCustomer
+    public class QueryCompositionCustomerBase
     {
         public int Id { get; set; }
+    }
+
+    public class QueryCompositionCustomer : QueryCompositionCustomerBase
+    {
         public string Name { get; set; }
         public QueryCompositionAddress Address { get; set; }
         public QueryCompositionCustomer RelationshipManager { get; set; }

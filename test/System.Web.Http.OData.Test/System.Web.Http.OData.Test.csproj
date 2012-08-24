@@ -46,7 +46,7 @@
       <HintPath>..\..\packages\Microsoft.Data.OData.5.0.1\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.OData.Contrib">
-      <HintPath>..\..\packages\Microsoft.Data.OData.Contrib.5.0.1.50813\lib\net40\Microsoft.Data.OData.Contrib.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Data.OData.Contrib.5.0.1.50822\lib\net40\Microsoft.Data.OData.Contrib.dll</HintPath>
     </Reference>
     <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>

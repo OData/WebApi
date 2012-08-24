@@ -277,15 +277,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The server failed to build an EdmModel for type &apos;{0}&apos; against action &apos;{1}&apos; on controller &apos;{2}&apos;..
-        /// </summary>
-        internal static string FailedToBuildEdmModel {
-            get {
-                return ResourceManager.GetString("FailedToBuildEdmModel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; type cannot be used with action &apos;{1}&apos; on controller &apos;{2}&apos; because the action does not return a value..
         /// </summary>
         internal static string FailedToBuildEdmModelBecauseReturnTypeIsNull {

@@ -159,9 +159,6 @@
   <data name="EntitySetNotFound" xml:space="preserve">
     <value>No EntitySet exists in the EdmModel with EntityClrType '{0}'.</value>
   </data>
-  <data name="FailedToBuildEdmModel" xml:space="preserve">
-    <value>The server failed to build an EdmModel for type '{0}' against action '{1}' on controller '{2}'.</value>
-  </data>
   <data name="FailedToBuildEdmModelBecauseReturnTypeIsNull" xml:space="preserve">
     <value>The '{0}' type cannot be used with action '{1}' on controller '{2}' because the action does not return a value.</value>
   </data>

@@ -5,9 +5,9 @@ using System.Net.Http.Internal;
 
 namespace System.Net.Http.Mocks
 {
-    internal class MockDelegatingStream : DelegatingStream
+    internal class MockNonClosingDelegatingStream : NonClosingDelegatingStream
     {
-        public MockDelegatingStream(Stream innerStream)
+        public MockNonClosingDelegatingStream(Stream innerStream)
             : base(innerStream)
         {
         }

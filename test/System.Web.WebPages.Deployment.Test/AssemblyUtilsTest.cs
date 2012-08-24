@@ -36,17 +36,17 @@ namespace System.Web.WebPages.Deployment.Test
             var assemblies = new[]
             {
                 new AssemblyName("System.Web.WebPages.Deployment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
-                new AssemblyName("System.Web.WebPages.Development, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
-                new AssemblyName("System.Web.WebPages.Deployment, Version=2.1.0.0, Culture=neutral, PublicKeyToken=7777777777777777"),
+                new AssemblyName("System.Web.WebPages.Development, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
+                new AssemblyName("System.Web.WebPages.Deployment, Version=2.2.0.0, Culture=neutral, PublicKeyToken=7777777777777777"),
                 new AssemblyName("System.Web.WebPages.Deployment, Version=2.3.0.0, Culture=en-US, PublicKeyToken=31bf3856ad364e35"),
-                new AssemblyName("System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
+                new AssemblyName("System.Web.WebPages.Deployment, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
             };
 
             // Act
             var maxVersion = AssemblyUtils.GetMaxWebPagesVersion(assemblies);
 
             // Assert
-            Assert.Equal(new Version("2.0.0.0"), maxVersion);
+            Assert.Equal(new Version("2.1.0.0"), maxVersion);
         }
 
         [Fact]

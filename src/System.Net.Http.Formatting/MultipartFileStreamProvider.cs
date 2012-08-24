@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Http.Internal;
 using System.Web.Http;
 
 namespace System.Net.Http
@@ -104,7 +105,7 @@ namespace System.Net.Http
             MultipartFileData fileData = new MultipartFileData(headers, localFilePath);
             _fileData.Add(fileData);
 
-            return File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous);
+            return new MultipartWriteDelegatingStream(File.Create(localFilePath, _bufferSize, FileOptions.Asynchronous));
         }
 
         /// <summary>

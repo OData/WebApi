@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Net.Http.Formatting.Mocks;
 using System.Text;
 using Microsoft.TestCommon;
 using Moq;
@@ -33,7 +34,7 @@ namespace System.Net.Http.Handlers
             // Arrange
             Mock<Stream> mockInnerStream = new Mock<Stream>();
             object userState = new object();
-            IAsyncResult mockIAsyncResult = CreateMockCompletedAsyncResult(true, userState);
+            IAsyncResult mockIAsyncResult = MockCompletedAsyncResult.Create(true, userState);
             mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()))
                 .Returns(mockIAsyncResult);
             ProgressStream progressStream = ProgressStreamTest.CreateProgressStream();
@@ -74,7 +75,7 @@ namespace System.Net.Http.Handlers
             // Arrange
             Mock<Stream> mockInnerStream = new Mock<Stream>();
             object userState = new object();
-            IAsyncResult mockIAsyncResult = CreateMockCompletedAsyncResult(true, userState);
+            IAsyncResult mockIAsyncResult = MockCompletedAsyncResult.Create(true, userState);
             mockInnerStream.Setup(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()))
                 .Returns(mockIAsyncResult);
 
@@ -93,15 +94,6 @@ namespace System.Net.Http.Handlers
             Assert.Same(request, mockProgressHandler.Sender);
             Assert.Equal(count, mockProgressHandler.EventArgs.BytesTransferred);
             Assert.Same(userState, mockProgressHandler.EventArgs.UserState);
-        }
-
-        private static IAsyncResult CreateMockCompletedAsyncResult(bool completedSynchronously, object userState)
-        {
-            Mock<IAsyncResult> mockIAsyncResult = new Mock<IAsyncResult>();
-            mockIAsyncResult.Setup(ar => ar.AsyncState).Returns(userState);
-            mockIAsyncResult.Setup(ar => ar.IsCompleted).Returns(true);
-            mockIAsyncResult.Setup(ar => ar.CompletedSynchronously).Returns(completedSynchronously);
-            return mockIAsyncResult.Object;
         }
     }
 }

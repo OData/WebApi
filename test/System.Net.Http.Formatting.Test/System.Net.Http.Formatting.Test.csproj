@@ -81,6 +81,7 @@
     <Compile Include="Formatting\JTokenCreatorSurrogate.cs" />
     <Compile Include="Formatting\JTokenRoundTripComparer.cs" />
     <Compile Include="Formatting\MediaTypeMappingTests.cs" />
+    <Compile Include="Internal\MultipartWriteDelegatingStreamTest.cs" />
     <Compile Include="Internal\ReadOnlyStreamWithEncodingPreambleTest.cs" />
     <Compile Include="MimeBodyPartTest.cs" />
     <Compile Include="HttpHeaderExtensionsTest.cs" />
@@ -90,6 +91,9 @@
     <Compile Include="Formatting\XmlHttpRequestHeaderMappingTest.cs" />
     <Compile Include="Formatting\MediaTypeFormatterMatchTest.cs" />
     <Compile Include="HttpContentFormDataExtensionsTest.cs" />
+    <Compile Include="Mocks\MockAsyncCallback.cs" />
+    <Compile Include="Mocks\MockCompletedAsyncResult.cs" />
+    <Compile Include="Mocks\MockMultipartWriteDelegatingStream.cs" />
     <Compile Include="Mocks\MockMediaTypeMapping.cs" />
     <Compile Include="Mocks\MockContentNegotiator.cs" />
     <Compile Include="PushStreamContentTest.cs" />

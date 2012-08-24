@@ -89,6 +89,7 @@
     <Compile Include="CloneableExtensions.cs" />
     <Compile Include="Formatting\MediaTypeHeaderValueRange.cs" />
     <Compile Include="HttpContentFormDataExtensions.cs" />
+    <Compile Include="Internal\MultipartWriteDelegatingStream.cs" />
     <Compile Include="Internal\ReadOnlyStreamWithEncodingPreamble.cs" />
     <Compile Include="Internal\TypeExtensions.cs" />
     <Compile Include="MultipartRelatedStreamProvider.cs" />

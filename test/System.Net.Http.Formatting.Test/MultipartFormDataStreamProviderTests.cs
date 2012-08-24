@@ -3,6 +3,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Net.Http.Internal;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 
@@ -66,7 +67,7 @@ namespace System.Net.Http
                 stream1 = provider.GetStream(content, content.ElementAt(1).Headers);
 
                 Assert.IsType<MemoryStream>(stream0);
-                Assert.IsType<FileStream>(stream1);
+                Assert.IsType<MultipartWriteDelegatingStream>(stream1);
 
                 Assert.Equal(1, provider.FileData.Count);
                 string partialFileName = String.Format("{0}BodyPart_", tempPath);

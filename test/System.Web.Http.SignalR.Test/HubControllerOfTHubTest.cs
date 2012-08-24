@@ -1,0 +1,42 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Web.Http;
+using Microsoft.TestCommon;
+using Moq;
+using SignalR;
+using SignalR.Hubs;
+
+public class HubControllerOfTTest
+{
+    [Fact]
+    public void HubContext_ReturnsContextResolvedFromConnectionManager()
+    {
+        DefaultContextController controller = new DefaultContextController();
+        controller.Configuration = new HttpConfiguration();
+        Mock<IConnectionManager> mockConnectionManager = new Mock<IConnectionManager>();
+        IHubContext context = new Mock<IHubContext>().Object;
+        mockConnectionManager.Setup(mock => mock.GetHubContext<MyHub>()).Returns(context);
+        Mock<System.Web.Http.Dependencies.IDependencyResolver> mockDependencyResolver = new Mock<System.Web.Http.Dependencies.IDependencyResolver>();
+        mockDependencyResolver.Setup(mock => mock.GetService(typeof(IConnectionManager))).Returns(mockConnectionManager.Object);
+        controller.Configuration.DependencyResolver = mockDependencyResolver.Object;
+
+        Assert.Same(context, controller.GetHubContext());
+    }
+
+    public class DefaultContextController : HubController<MyHub>
+    {
+        public IHubContext GetHubContext()
+        {
+            return HubContext;
+        }
+
+        public IConnectionManager GetConnectionManager()
+        {
+            return ConnectionManager;
+        }
+    }
+
+    public class MyHub : Hub
+    {
+    }
+}

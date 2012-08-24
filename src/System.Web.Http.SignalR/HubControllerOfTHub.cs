@@ -1,0 +1,29 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics.Contracts;
+using SignalR;
+using SignalR.Hubs;
+
+namespace System.Web.Http
+{
+    /// <summary>
+    /// Defines a base class for <see cref="ApiController"/> that exposes functionality for calling back
+    /// to clients connected to a particular SignalR hub.
+    /// </summary>
+    /// <typeparam name="THub">The type of the hub. Must implement the <see cref="IHub"/> interface.</typeparam>
+    [CLSCompliant(false)]
+    public abstract class HubController<THub> : HubControllerBase where THub : IHub
+    {
+        /// <summary>
+        /// Gets the <see cref="IHubContext"/> for the associated hub.
+        /// </summary>
+        protected override IHubContext HubContext
+        {
+            get
+            {
+                Contract.Assert(ConnectionManager != null);
+                return ConnectionManager.GetHubContext<THub>();
+            }
+        }
+    }
+}

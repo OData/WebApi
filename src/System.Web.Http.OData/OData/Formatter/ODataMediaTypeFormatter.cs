@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -330,6 +331,28 @@ namespace System.Web.Http.OData.Formatter
             });
         }
 
+        private IEnumerable<KeyValuePair<string, string>> GetResponseMessageHeaders(Type graphType, ODataFormat odataFormat, ODataVersion version)
+        {
+            IODataResponseMessage responseMessage = new ODataMessageWrapper();
+
+            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
+            {
+                BaseUri = new Uri(ODataFormatterConstants.DefaultNamespace),
+                Version = version,
+                Indent = false
+            };
+            writerSettings.SetContentType(odataFormat);
+            using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings))
+            {
+                ODataSerializer serializer = ODataSerializerProvider.GetODataPayloadSerializer(graphType);
+
+                // get the OData specific headers for the payloadkind
+                ODataUtils.SetHeadersForPayload(messageWriter, serializer.ODataPayloadKind);
+            }
+
+            return responseMessage.Headers;
+        }
+
         private static ODataFormat GetODataFormat(HttpContentHeaders contentHeaders)
         {
             Contract.Assert(contentHeaders != null);
@@ -360,63 +383,35 @@ namespace System.Web.Http.OData.Formatter
             // generating the response. So if the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same version; Else use
             // the DataServiceVersionHeader. Our response might require a higher version of the client and it might fail.
             // If the client doesn't send these headers respond with the default version (V3).
-            return GetODataVersion(request.Headers, ODataFormatterConstants.ODataMaxServiceVersion) ??
-                GetODataVersion(request.Headers, ODataFormatterConstants.ODataServiceVersion) ??
+            return GetODataVersion(request.Headers, ODataFormatterConstants.ODataMaxServiceVersion, ODataFormatterConstants.ODataServiceVersion) ??
                 ODataFormatterConstants.DefaultODataVersion;
         }
 
-        private static ODataVersion? GetODataVersion(HttpHeaders headers, string headerName)
+        private static ODataVersion? GetODataVersion(HttpHeaders headers, params string[] headerNames)
         {
-            ODataVersion? version = null;
-            IEnumerable<string> values;
-
-            if (headers.TryGetValues(headerName, out values))
+            foreach (string headerName in headerNames)
             {
-                foreach (string value in values)
+                IEnumerable<string> values;
+                if (headers.TryGetValues(headerName, out values))
                 {
+                    string value = values.FirstOrDefault();
+                    Contract.Assert(value != null);
                     string trimmedValue = value.Trim(' ', ';');
-                    version = GetODataVersion(trimmedValue);
+                    try
+                    {
+                        return ODataUtils.StringToODataVersion(trimmedValue);
+                    }
+                    catch (ODataException)
+                    {
+                        // Parsing ODataVersion failed, try next header
+                    }
                 }
             }
 
-            return version;
+            return null;
         }
 
-        private static ODataVersion? GetODataVersion(string versionString)
-        {
-            try
-            {
-                return ODataUtils.StringToODataVersion(versionString);
-            }
-            catch (ODataException)
-            {
-                return null;
-            }
-        }
-
-        private IEnumerable<KeyValuePair<string, string>> GetResponseMessageHeaders(Type graphType, ODataFormat odataFormat, ODataVersion version)
-        {
-            IODataResponseMessage responseMessage = new ODataMessageWrapper();
-
-            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
-            {
-                BaseUri = new Uri(ODataFormatterConstants.DefaultNamespace),
-                Version = version,
-                Indent = false
-            };
-            writerSettings.SetContentType(odataFormat);
-            using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings))
-            {
-                ODataSerializer serializer = ODataSerializerProvider.GetODataPayloadSerializer(graphType);
-
-                // get the OData specific headers for the payloadkind
-                ODataUtils.SetHeadersForPayload(messageWriter, serializer.ODataPayloadKind);
-            }
-
-            return responseMessage.Headers;
-        }
-
-        private static bool TryGetInnerTypeForDelta(ref Type type)
+        internal static bool TryGetInnerTypeForDelta(ref Type type)
         {
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Delta<>))
             {

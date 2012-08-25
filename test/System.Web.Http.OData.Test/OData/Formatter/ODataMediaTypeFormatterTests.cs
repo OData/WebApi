@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -89,6 +90,30 @@ namespace System.Web.Http.OData.Formatter
             IEnumerable<string> headervalues;
             Assert.True(contentHeaders.TryGetValues("DataServiceVersion", out headervalues));
             Assert.Equal(headervalues, new string[] { expectedDataServiceVersion + ";" });
+        }
+
+        [Fact]
+        public void TryGetInnerTypeForDelta_ChangesRefToGenericParameter_ForDeltas()
+        {
+            Type type = typeof(Delta<Customer>);
+
+            bool success = ODataMediaTypeFormatter.TryGetInnerTypeForDelta(ref type);
+
+            Assert.Same(typeof(Customer), type);
+            Assert.True(success);
+        }
+
+        [Theory]
+        [InlineData(typeof(int))]
+        [InlineData(typeof(List<string>))]
+        public void TryGetInnerTypeForDelta_ReturnsFalse_ForNonDeltas(Type originalType)
+        {
+            Type type = originalType;
+
+            bool success = ODataMediaTypeFormatter.TryGetInnerTypeForDelta(ref type);
+
+            Assert.Same(originalType, type);
+            Assert.False(success);
         }
 
         [Fact(Skip = "OData formatter doesn't support writing nulls")]

@@ -339,4 +339,10 @@
   <data name="GetEdmModelCalledMoreThanOnce" xml:space="preserve">
     <value>GetEdmModel cannot be called more than once. Consider using a different instance of the model builder or reusing the model you have built earlier.</value>
   </data>
+  <data name="CollectionPropertiesMustReturnIEnumerable" xml:space="preserve">
+    <value>CollectionProperties must implement IEnumerable&lt;&gt;. The Property '{0}' declared on '{1}' does not implement IEnumerable&lt;&gt;. </value>
+  </data>
+  <data name="MustBeCollectionProperty" xml:space="preserve">
+    <value>The '{0}' property on '{1}' must be a Collection property.</value>
+  </data>
 </root>

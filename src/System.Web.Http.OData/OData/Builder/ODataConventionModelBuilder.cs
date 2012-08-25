@@ -291,7 +291,7 @@ namespace System.Web.Http.OData.Builder
         {
             Contract.Assert(type != null);
             Contract.Assert(property != null);
-            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive);
+            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Collection);
 
             if (!isCollection)
             {
@@ -308,12 +308,15 @@ namespace System.Web.Http.OData.Builder
             {
                 if (!_isQueryCompositionMode)
                 {
-                    throw Error.NotSupported(SRResources.CollectionPropertiesNotSupported, property.Name, property.ReflectedType.FullName);
+                    type.AddCollectionProperty(property);
                 }
                 else
                 {
-                    Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
-                    // Ignore these primitive collection properties. They cannot be queried anyways.
+                    // Ignore these CollectionProperties. 
+                    // CollectionProperties are supported by the modelBuilders now, but not in queries, at least not until the 
+                    // bug in the UriParser that results in incorrect parameters types on Any/All nodes is fixed.
+                    // see disabled tests in FilterQueryOptionTest for more information.
+                    Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");  
                 }
             }
         }
@@ -395,6 +398,16 @@ namespace System.Web.Http.OData.Builder
                 // go visit other end of each of this node's edges.
                 foreach (PropertyConfiguration property in currentType.Properties.Where(property => property.Kind != PropertyKind.Primitive))
                 {
+                    if (property.Kind == PropertyKind.Collection)
+                    { 
+                        // if the elementType is primitive we don't need to do anything.
+                        CollectionPropertyConfiguration colProperty = property as CollectionPropertyConfiguration;
+                        if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(colProperty.ElementType) != null)
+                        {
+                            break;
+                        }
+                    }
+
                     IStructuralTypeConfiguration propertyType = GetStructuralTypeOrNull(property.RelatedClrType);
                     Contract.Assert(propertyType != null, "we should already have seen this type");
 

@@ -13,5 +13,7 @@ namespace System.Web.Http.OData.Builder.TestModels
         public string ShareSymbol { get; set; }
         public Decimal? SharePrice { get; set; }
         public List<Order> Orders { get; set; }
+        public List<string> Aliases { get; set; }
+        public List<Address> Addresses { get; set; }
     }
 }

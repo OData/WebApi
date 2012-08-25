@@ -14,7 +14,6 @@ namespace System.Web.Http.OData
         public bool Equals(IEdmTypeReference x, IEdmTypeReference y)
         {
             Contract.Assert(x != null);
-
             return x.IsEquivalentTo(y);
         }
 

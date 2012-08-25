@@ -39,7 +39,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 throw Error.ArgumentNull("edmType");
             }
-
             return _serializerCache.GetOrAdd(edmType, CreateEdmTypeSerializer);
         }
 

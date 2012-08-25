@@ -133,6 +133,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CollectionProperties must implement IEnumerable&lt;&gt;. The Property &apos;{0}&apos; declared on &apos;{1}&apos; does not implement IEnumerable&lt;&gt;. .
+        /// </summary>
+        internal static string CollectionPropertiesMustReturnIEnumerable {
+            get {
+                return ResourceManager.GetString("CollectionPropertiesMustReturnIEnumerable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; is a collection property. Collection properties are not supported..
         /// </summary>
         internal static string CollectionPropertiesNotSupported {
@@ -417,6 +426,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string MultipleMatchingClrTypesForEdmType {
             get {
                 return ResourceManager.GetString("MultipleMatchingClrTypesForEdmType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; property on &apos;{1}&apos; must be a Collection property..
+        /// </summary>
+        internal static string MustBeCollectionProperty {
+            get {
+                return ResourceManager.GetString("MustBeCollectionProperty", resourceCulture);
             }
         }
         

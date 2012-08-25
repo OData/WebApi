@@ -17,6 +17,8 @@ namespace System.Web.Http.OData.Builder
 
         ComplexPropertyConfiguration AddComplexProperty(PropertyInfo propertyInfo);
 
+        CollectionPropertyConfiguration AddCollectionProperty(PropertyInfo propertyInfo);
+
         void RemoveProperty(PropertyInfo propertyInfo);
     }
 }

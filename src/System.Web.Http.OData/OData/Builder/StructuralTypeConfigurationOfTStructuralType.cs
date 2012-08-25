@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq.Expressions;
@@ -14,6 +15,11 @@ namespace System.Web.Http.OData.Builder
         protected StructuralTypeConfiguration(IStructuralTypeConfiguration configuration)
         {
             _configuration = configuration;
+        }
+
+        public IEnumerable<PropertyConfiguration> Properties
+        {
+            get { return _configuration.Properties; }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
@@ -65,6 +71,13 @@ namespace System.Web.Http.OData.Builder
             return GetComplexPropertyConfiguration(propertyExpression);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
+        public CollectionPropertyConfiguration CollectionProperty<TElementType>(Expression<Func<TStructuralType, IEnumerable<TElementType>>> propertyExpression)
+        {
+            return GetCollectionPropertyConfiguration(propertyExpression);
+        }
+
         private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional = false)
         {
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
@@ -81,6 +94,18 @@ namespace System.Web.Http.OData.Builder
         {
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
             ComplexPropertyConfiguration property = _configuration.AddComplexProperty(propertyInfo);
+            if (optional)
+            {
+                property.IsOptional();
+            }
+
+            return property;
+        }
+
+        private CollectionPropertyConfiguration GetCollectionPropertyConfiguration(Expression propertyExpression, bool optional = false)
+        {
+            PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+            CollectionPropertyConfiguration property = _configuration.AddCollectionProperty(propertyInfo);
             if (optional)
             {
                 property.IsOptional();

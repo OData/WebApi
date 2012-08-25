@@ -88,6 +88,24 @@ namespace System.Web.Http.OData.Builder
                     prop.PropertyInfo.Name,
                     new EdmComplexTypeReference(complexType, prop.OptionalProperty));
             }
+            foreach (CollectionPropertyConfiguration prop in config.Properties.OfType<CollectionPropertyConfiguration>())
+            {
+                IEdmTypeReference elementTypeReference = null;
+                if (_types.ContainsKey(prop.ElementType))
+                {
+                    IEdmComplexType elementType = _types[prop.ElementType] as IEdmComplexType;
+                    elementTypeReference = new EdmComplexTypeReference(elementType, false);                
+                }
+                else 
+                { 
+                    elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(prop.ElementType);      
+                }
+                type.AddStructuralProperty(
+                    prop.PropertyInfo.Name,
+                    new EdmCollectionTypeReference(
+                        new EdmCollectionType(elementTypeReference),
+                        prop.OptionalProperty));
+            }
         }
 
         private void CreateComplexTypeBody(EdmComplexType type, IComplexTypeConfiguration config)

@@ -201,7 +201,7 @@ namespace System.Web.Http.OData.Formatter
         public static IEdmPrimitiveTypeReference GetEdmPrimitiveTypeReferenceOrNull(Type clrType)
         {
             IEdmPrimitiveType primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
-            return primitiveType != null ? new EdmPrimitiveTypeReference(primitiveType, IsNullable(clrType)) : null;
+            return primitiveType != null ? _coreModel.GetPrimitive(primitiveType.PrimitiveKind, IsNullable(clrType)) : null;
         }
 
         // Mangle the invalid EDM literal Type.FullName (System.Collections.Generic.IEnumerable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]) 

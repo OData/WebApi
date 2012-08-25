@@ -2,9 +2,11 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
+using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -129,6 +131,55 @@ namespace System.Web.Http.OData.Builder
                 // Make sure the complex type is in the model.
 
                 ModelBuilder.AddComplexType(propertyInfo.PropertyType);
+            }
+
+            return propertyConfiguration;
+        }
+
+        public virtual CollectionPropertyConfiguration AddCollectionProperty(PropertyInfo propertyInfo)
+        {
+            if (propertyInfo == null)
+            {
+                throw Error.ArgumentNull("propertyInfo");
+            }
+
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+            }            
+
+            // Remove from the ignored properties
+            if (IgnoredProperties.Contains(propertyInfo))
+            {
+                RemovedProperties.Remove(propertyInfo);
+            }
+
+            CollectionPropertyConfiguration propertyConfiguration = null;
+            if (ExplicitProperties.ContainsKey(propertyInfo))
+            {
+                propertyConfiguration = ExplicitProperties[propertyInfo] as CollectionPropertyConfiguration;
+                if (propertyConfiguration == null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.MustBeCollectionProperty, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
+                }
+            }
+            else
+            {
+                propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo);
+                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                
+                // If the ElementType is the same as this type this is recursive complex type nesting
+                if (propertyConfiguration.ElementType == ClrType)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed);
+                }
+
+                // If the ElementType is not primitive treat as a ComplexType and Add to the model.
+                IEdmPrimitiveTypeReference edmType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(propertyConfiguration.ElementType);
+                if (edmType == null)
+                {
+                    ModelBuilder.AddComplexType(propertyConfiguration.ElementType);
+                }
             }
 
             return propertyConfiguration;

@@ -104,6 +104,7 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="OData\Builder\CollectionPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />

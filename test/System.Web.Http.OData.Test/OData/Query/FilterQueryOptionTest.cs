@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
@@ -64,6 +66,38 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(QueryNodeKind.PropertyAccess, binaryNode.Left.Kind);
             var propertyAccessNode = binaryNode.Left as PropertyAccessQueryNode;
             Assert.Equal("Name", propertyAccessNode.Property.Name);
+        }
+
+        [Fact(Skip="Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly")]
+        public void CanConstructValidAnyQueryOverPrimitiveCollectionProperty()
+        {
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var filter = new FilterQueryOption("Aliases/any(a: a eq 'alias')", context);
+            var node = filter.QueryNode;
+            var anyNode = node.Expression as AnyQueryNode;
+            var aParameter = anyNode.Parameters.SingleOrDefault(p => p.Name == "a");
+            var aParameterType = aParameter.ParameterType.Definition as IEdmPrimitiveType;
+
+            Assert.NotNull(aParameter);
+            Assert.NotNull(aParameterType);
+            Assert.Equal("String", aParameter.Name);            
+        }
+
+        [Fact(Skip = "Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly")]
+        public void CanConstructValidAnyQueryOverComplexCollectionProperty()
+        {
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().Add_Address_ComplexType().GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var filter = new FilterQueryOption("Addresses/any(a: a/HouseNumber eq 1)", context);
+            var node = filter.QueryNode;
+            var anyNode = node.Expression as AnyQueryNode;
+            var aParameter = anyNode.Parameters.SingleOrDefault(p => p.Name == "a");
+            var aParameterType = aParameter.ParameterType.Definition as IEdmComplexType;
+
+            Assert.NotNull(aParameter);
+            Assert.NotNull(aParameterType);
+            Assert.Equal("Address", aParameter.Name); 
         }
     }
 }

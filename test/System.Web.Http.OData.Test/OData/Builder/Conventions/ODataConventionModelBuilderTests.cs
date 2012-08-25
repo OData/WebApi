@@ -82,11 +82,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             version.AssertHasPrimitiveProperty(model, "Minor", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
 
-        [Theory]
+        [Theory(Skip="ODataConventionModelBuilder always treats unknown element types are Entities")]
         [InlineData(typeof(Version[]))]
         [InlineData(typeof(IEnumerable<Version>))]
         [InlineData(typeof(List<Version>))]
-        public void ModelBuilder_ThrowsForComplexCollection(Type complexCollectionPropertyType)
+        public void ModelBuilder_SupportsComplexCollectionWhenNotToldElementTypeIsComplex(Type complexCollectionPropertyType)
         {
             var modelBuilder = new ODataConventionModelBuilder();
             Type entityType = CreateDynamicType(
@@ -100,16 +100,53 @@ namespace System.Web.Http.OData.Builder.Conventions
                     }
                 });
             modelBuilder.AddEntity(entityType);
+            IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
 
-            Assert.Throws<NotSupportedException>(
-                () => modelBuilder.GetEdmModel(),
-                "The property 'Property1' on type 'SampleNamespace.SampleType' is a collection property. Collection properties are not supported.");
+            Assert.NotNull(entity);
+            Assert.Equal(2, entity.DeclaredProperties.Count());
+
+            IEdmStructuralProperty property1 = entity.DeclaredProperties.OfType<IEdmStructuralProperty>().SingleOrDefault(p => p.Name == "Property1");
+            Assert.NotNull(property1);
+            Assert.Equal(EdmTypeKind.Collection, property1.Type.Definition.TypeKind);
+            Assert.Equal(EdmTypeKind.Complex, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);
         }
 
         [Theory]
+        [InlineData(typeof(Version[]))]
+        [InlineData(typeof(IEnumerable<Version>))]
+        [InlineData(typeof(List<Version>))]
+        public void ModelBuilder_SupportsComplexCollectionWhenToldElementTypeIsComplex(Type complexCollectionPropertyType)
+        {
+            var modelBuilder = new ODataConventionModelBuilder();
+            Type entityType = CreateDynamicType(
+                new DynamicType
+                {
+                    TypeName = "SampleType",
+                    Properties = 
+                    {
+                        new DynamicProperty { Name = "ID", Type = typeof(int) }, 
+                        new DynamicProperty { Name = "Property1", Type = complexCollectionPropertyType }
+                    }
+                });
+            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddComplexType(typeof(Version));
+            IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
+
+            Assert.NotNull(entity);
+            Assert.Equal(2, entity.DeclaredProperties.Count());
+
+            IEdmStructuralProperty property1 = entity.DeclaredProperties.OfType<IEdmStructuralProperty>().SingleOrDefault(p => p.Name == "Property1");
+            Assert.NotNull(property1);
+            Assert.Equal(EdmTypeKind.Collection, property1.Type.Definition.TypeKind);
+            Assert.Equal(EdmTypeKind.Complex, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);                 
+        }
+      
+        [Theory]
         [InlineData(typeof(int[]))]
         [InlineData(typeof(string[]))]
-        public void ModelBuilder_ThrowsForPrimitiveCollection(Type primitiveCollectionPropertyType)
+        public void ModelBuilder_SupportsPrimitiveCollection(Type primitiveCollectionPropertyType)
         {
             var modelBuilder = new ODataConventionModelBuilder();
             Type entityType = CreateDynamicType(
@@ -123,10 +160,16 @@ namespace System.Web.Http.OData.Builder.Conventions
                     }
                 });
             modelBuilder.AddEntity(entityType);
+            IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
+           
+            Assert.NotNull(entity);
+            Assert.Equal(2, entity.DeclaredProperties.Count());
 
-            Assert.Throws<NotSupportedException>(
-                () => modelBuilder.GetEdmModel(),
-                "The property 'Property1' on type 'SampleNamespace.SampleType' is a collection property. Collection properties are not supported.");
+            IEdmStructuralProperty property1 = entity.DeclaredProperties.OfType<IEdmStructuralProperty>().SingleOrDefault(p => p.Name == "Property1");
+            Assert.NotNull(property1);
+            Assert.Equal(EdmTypeKind.Collection, property1.Type.Definition.TypeKind);
+            Assert.Equal(EdmTypeKind.Primitive, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);           
         }
 
         [Theory]

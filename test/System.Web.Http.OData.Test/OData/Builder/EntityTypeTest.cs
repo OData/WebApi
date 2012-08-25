@@ -67,5 +67,36 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(customerType.DeclaredKey.SingleOrDefault(k => k.Name == "CustomerId"));
             Assert.NotNull(customerType.DeclaredKey.SingleOrDefault(k => k.Name == "Name"));
         }
+
+        [Fact]
+        public void CanCreateEntityWithCollectionProperties()
+        {
+            var builder = new ODataModelBuilder();
+            var customer = builder.Entity<Customer>();
+            customer.HasKey(c => c.CustomerId);
+            customer.CollectionProperty(c => c.Aliases);
+            customer.CollectionProperty(c => c.Addresses);
+
+
+            var aliasesProperty = customer.Properties.OfType<CollectionPropertyConfiguration>().SingleOrDefault(p => p.Name == "Aliases");
+            var addressesProperty = customer.Properties.OfType<CollectionPropertyConfiguration>().SingleOrDefault(p => p.Name == "Addresses");
+
+            Assert.Equal(3, customer.Properties.Count());
+            Assert.Equal(2, customer.Properties.OfType<CollectionPropertyConfiguration>().Count());
+            Assert.NotNull(aliasesProperty);
+            Assert.Equal(typeof(string), aliasesProperty.ElementType);
+            Assert.NotNull(addressesProperty);
+            Assert.Equal(typeof(Address), addressesProperty.ElementType);
+
+            Assert.Equal(2, builder.StructuralTypes.Count());
+            var addressType = builder.StructuralTypes.Skip(1).FirstOrDefault();
+            Assert.NotNull(addressType);
+            Assert.Equal(StructuralTypeKind.ComplexType, addressType.Kind);
+            Assert.Equal(typeof(Address).FullName, addressType.FullName);
+
+            var model = builder.GetServiceModel();
+            var edmCustomerType = model.FindType(typeof(Customer).FullName) as IEdmEntityType;
+            var edmAddressType = model.FindType(typeof(Address).FullName) as IEdmComplexType;
+        }
     }
 }

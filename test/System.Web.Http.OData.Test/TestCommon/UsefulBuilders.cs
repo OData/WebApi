@@ -40,6 +40,13 @@ namespace System.Web.Http.OData
             customer.Property(c => c.ShareSymbol);
             return builder;
         }
+        public static ODataModelBuilder Add_Customer_EntityType_With_CollectionProperties(this ODataModelBuilder builder)
+        {
+            builder.Add_Customer_EntityType();
+            builder.Entity<Customer>().CollectionProperty(c => c.Aliases);
+            builder.Entity<Customer>().CollectionProperty(c => c.Addresses);
+            return builder;
+        }
         public static ODataModelBuilder Add_Order_EntityType(this ODataModelBuilder builder)
         {
             var order = builder.Entity<Order>();

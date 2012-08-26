@@ -107,8 +107,8 @@ namespace System.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<MockException>(
                 () => multiResolver.Current,
-                @"IDependencyResolver.GetServices(System.Web.Mvc.Test.MultiServiceResolverTest+TestProvider) invocation failed with mock behavior Strict.
-All invocations on the mock must have a corresponding setup."
+                "IDependencyResolver.GetServices(System.Web.Mvc.Test.MultiServiceResolverTest+TestProvider) invocation failed with mock behavior Strict." + Environment.NewLine
+              + "All invocations on the mock must have a corresponding setup."
                 );
         }
 

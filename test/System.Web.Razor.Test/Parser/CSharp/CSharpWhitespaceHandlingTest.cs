@@ -12,8 +12,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void StatementBlockDoesNotAcceptTrailingNewlineIfNewlinesAreSignificantToAncestor()
         {
-            ParseBlockTest(@"@: @if (true) { }
-}",
+            ParseBlockTest("@: @if (true) { }" + Environment.NewLine
+                         + "}",
                            new MarkupBlock(
                                Factory.MarkupTransition()
                                    .Accepts(AcceptedCharacters.None),

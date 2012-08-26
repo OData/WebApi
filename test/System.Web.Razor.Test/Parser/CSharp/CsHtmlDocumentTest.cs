@@ -15,7 +15,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void UnterminatedBlockCommentCausesRazorError()
         {
-            ParseDocumentTest(@"@* Foo Bar",
+            ParseDocumentTest("@* Foo Bar",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new CommentBlock(
@@ -30,8 +30,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInMarkupDocumentIsHandledCorrectly()
         {
-            ParseDocumentTest(@"<ul>
-                @* This is a block comment </ul> *@ foo",
+            ParseDocumentTest("<ul>" + Environment.NewLine
+                            + "                @* This is a block comment </ul> *@ foo",
                               new MarkupBlock(
                                   Factory.Markup("<ul>\r\n                "),
                                   new CommentBlock(
@@ -48,8 +48,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInMarkupBlockIsHandledCorrectly()
         {
-            ParseBlockTest(@"<ul>
-                @* This is a block comment </ul> *@ foo </ul>",
+            ParseBlockTest("<ul>" + Environment.NewLine
+                         + "                @* This is a block comment </ul> *@ foo </ul>",
                            new MarkupBlock(
                                Factory.Markup("<ul>\r\n                "),
                                new CommentBlock(
@@ -66,10 +66,10 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentAtStatementStartInCodeBlockIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@if(Request.IsAuthenticated) {
-    @* User is logged in! } *@
-    Write(""Hello friend!"");
-}",
+            ParseDocumentTest("@if(Request.IsAuthenticated) {" + Environment.NewLine
+                            + "    @* User is logged in! } *@" + Environment.NewLine
+                            + "    Write(\"Hello friend!\");" + Environment.NewLine
+                            + "}",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new StatementBlock(
@@ -88,10 +88,10 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInStatementInCodeBlockIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@if(Request.IsAuthenticated) {
-    var foo = @* User is logged in! ; *@;
-    Write(""Hello friend!"");
-}",
+            ParseDocumentTest("@if(Request.IsAuthenticated) {" + Environment.NewLine
+                            + "    var foo = @* User is logged in! ; *@;" + Environment.NewLine
+                            + "    Write(\"Hello friend!\");" + Environment.NewLine
+                            + "}",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new StatementBlock(
@@ -110,58 +110,58 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInStringIsIgnored()
         {
-            ParseDocumentTest(@"@if(Request.IsAuthenticated) {
-    var foo = ""@* User is logged in! ; *@"";
-    Write(""Hello friend!"");
-}",
+            ParseDocumentTest("@if(Request.IsAuthenticated) {" + Environment.NewLine
+                            + "    var foo = \"@* User is logged in! ; *\";" + Environment.NewLine
+                            + "    Write(\"Hello friend!\");" + Environment.NewLine
+                            + "}",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new StatementBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"if(Request.IsAuthenticated) {
-    var foo = ""@* User is logged in! ; *@"";
-    Write(""Hello friend!"");
-}").AsStatement())));
+                                      Factory.Code("if(Request.IsAuthenticated) {" + Environment.NewLine
+                                                 + "    var foo = \"@* User is logged in! ; *\";" + Environment.NewLine
+                                                 + "    Write(\"Hello friend!\");" + Environment.NewLine
+                                                 + "}").AsStatement())));
         }
 
         [Fact]
         public void BlockCommentInCSharpBlockCommentIsIgnored()
         {
-            ParseDocumentTest(@"@if(Request.IsAuthenticated) {
-    var foo = /*@* User is logged in! */ *@ */;
-    Write(""Hello friend!"");
-}",
+            ParseDocumentTest("@if(Request.IsAuthenticated) {" + Environment.NewLine
+                            + "    var foo = /*@* User is logged in! */ *@ */;" + Environment.NewLine
+                            + "    Write(\"Hello friend!\");" + Environment.NewLine
+                            + "}",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new StatementBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"if(Request.IsAuthenticated) {
-    var foo = /*@* User is logged in! */ *@ */;
-    Write(""Hello friend!"");
-}").AsStatement())));
+                                      Factory.Code("if(Request.IsAuthenticated) {" + Environment.NewLine
+                                                 + "    var foo = /*@* User is logged in! */ *@ */;" + Environment.NewLine
+                                                 + "    Write(\"Hello friend!\");" + Environment.NewLine
+                                                 + "}").AsStatement())));
         }
 
         [Fact]
         public void BlockCommentInCSharpLineCommentIsIgnored()
         {
-            ParseDocumentTest(@"@if(Request.IsAuthenticated) {
-    var foo = //@* User is logged in! */ *@;
-    Write(""Hello friend!"");
-}",
+            ParseDocumentTest("@if(Request.IsAuthenticated) {" + Environment.NewLine
+                            + "    var foo = //@* User is logged in! */ *@;" + Environment.NewLine
+                            + "    Write(\"Hello friend!\");" + Environment.NewLine
+                            + "}",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new StatementBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"if(Request.IsAuthenticated) {
-    var foo = //@* User is logged in! */ *@;
-    Write(""Hello friend!"");
-}").AsStatement())));
+                                      Factory.Code("if(Request.IsAuthenticated) {" + Environment.NewLine
+                                                 + "    var foo = //@* User is logged in! */ *@;" + Environment.NewLine
+                                                 + "    Write(\"Hello friend!\");" + Environment.NewLine
+                                                 + "}").AsStatement())));
         }
 
         [Fact]
         public void BlockCommentInImplicitExpressionIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@Html.Foo@*bar*@",
+            ParseDocumentTest("@Html.Foo@*bar*@",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new ExpressionBlock(
@@ -182,12 +182,12 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentAfterDotOfImplicitExpressionIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@Html.@*bar*@",
+            ParseDocumentTest("@Html.@*bar*@",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new ExpressionBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"Html").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)
+                                      Factory.Code("Html").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.NonWhiteSpace)
                                       ),
                                   Factory.Markup("."),
                                   new CommentBlock(
@@ -203,12 +203,12 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInParensOfImplicitExpressionIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@Html.Foo(@*bar*@ 4)",
+            ParseDocumentTest("@Html.Foo(@*bar*@ 4)",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new ExpressionBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"Html.Foo(").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.Any),
+                                      Factory.Code("Html.Foo(").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.Any),
                                       new CommentBlock(
                                           Factory.CodeTransition(CSharpSymbolType.RazorCommentTransition),
                                           Factory.MetaCode("*", CSharpSymbolType.RazorCommentStar).Accepts(AcceptedCharacters.None),
@@ -224,12 +224,12 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInBracketsOfImplicitExpressionIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@Html.Foo[@*bar*@ 4]",
+            ParseDocumentTest("@Html.Foo[@*bar*@ 4]",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new ExpressionBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"Html.Foo[").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.Any),
+                                      Factory.Code("Html.Foo[").AsImplicitExpression(CSharpCodeParser.DefaultKeywords).Accepts(AcceptedCharacters.Any),
                                       new CommentBlock(
                                           Factory.CodeTransition(CSharpSymbolType.RazorCommentTransition),
                                           Factory.MetaCode("*", CSharpSymbolType.RazorCommentStar).Accepts(AcceptedCharacters.None),
@@ -245,12 +245,12 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInParensOfConditionIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@if(@*bar*@) {}",
+            ParseDocumentTest("@if(@*bar*@) {}",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new StatementBlock(
                                       Factory.CodeTransition(),
-                                      Factory.Code(@"if(").AsStatement(),
+                                      Factory.Code("if(").AsStatement(),
                                       new CommentBlock(
                                           Factory.CodeTransition(CSharpSymbolType.RazorCommentTransition),
                                           Factory.MetaCode("*", CSharpSymbolType.RazorCommentStar).Accepts(AcceptedCharacters.None),
@@ -265,13 +265,13 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void BlockCommentInExplicitExpressionIsHandledCorrectly()
         {
-            ParseDocumentTest(@"@(1 + @*bar*@ 1)",
+            ParseDocumentTest("@(1 + @*bar*@ 1)",
                               new MarkupBlock(
                                   Factory.EmptyHtml(),
                                   new ExpressionBlock(
                                       Factory.CodeTransition(),
                                       Factory.MetaCode("(").Accepts(AcceptedCharacters.None),
-                                      Factory.Code(@"1 + ").AsExpression(),
+                                      Factory.Code("1 + ").AsExpression(),
                                       new CommentBlock(
                                           Factory.CodeTransition(CSharpSymbolType.RazorCommentTransition),
                                           Factory.MetaCode("*", CSharpSymbolType.RazorCommentStar).Accepts(AcceptedCharacters.None),

@@ -80,6 +80,8 @@
     </Compile>
     <Compile Include="CultureReplacer.cs" />
     <Compile Include="FactAttribute.cs" />
+    <Compile Include="StringAssertions.cs" />
+    <Compile Include="StringAssertException.cs" />
     <Compile Include="TheoryAttribute.cs" />
     <Compile Include="DictionaryEqualityComparer.cs" />
     <Compile Include="ExceptionAssertions.cs">

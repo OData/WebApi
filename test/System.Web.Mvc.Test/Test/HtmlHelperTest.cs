@@ -377,9 +377,9 @@ namespace System.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => helper.RenderPartialInternal("partial-view", null /* viewData */, null /* model */, TextWriter.Null, engine.Object),
-                @"The partial view 'partial-view' was not found or no view engine supports the searched locations. The following locations were searched:
-location1
-location2");
+                "The partial view 'partial-view' was not found or no view engine supports the searched locations. The following locations were searched:" + Environment.NewLine
+              + "location1" + Environment.NewLine
+              + "location2");
 
             engine.Verify();
         }
@@ -545,28 +545,28 @@ location2");
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride((HttpVerbs)10000),
-                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.
-Parameter name: httpVerb"
+                "The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch." + Environment.NewLine
+              + "Parameter name: httpVerb"
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride(HttpVerbs.Get),
-                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.
-Parameter name: httpVerb"
+                "The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch." + Environment.NewLine
+              + "Parameter name: httpVerb"
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride(HttpVerbs.Post),
-                @"The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch.
-Parameter name: httpVerb"
+                "The specified HttpVerbs value is not supported. The supported values are Delete, Head, Put, Options, and Patch." + Environment.NewLine
+              + "Parameter name: httpVerb"
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride("gEt"),
-                @"The GET and POST HTTP methods are not supported.
-Parameter name: httpMethod"
+                "The GET and POST HTTP methods are not supported." + Environment.NewLine
+              + "Parameter name: httpMethod"
                 );
             Assert.Throws<ArgumentException>(
                 () => htmlHelper.HttpMethodOverride("pOsT"),
-                @"The GET and POST HTTP methods are not supported.
-Parameter name: httpMethod"
+                "The GET and POST HTTP methods are not supported." + Environment.NewLine
+              + "Parameter name: httpMethod"
                 );
         }
 

@@ -17,9 +17,9 @@ namespace System.Net.Http.Internal
             using (MemoryStream inputStream = new MemoryStream())
             {
                 // Arrange
-                string message = "Hello, world" + Environment.NewLine +     // English
-                                 "こんにちは、世界" + Environment.NewLine +  // Japanese
-                                 "مرحبا، العالم";                          // Arabic
+                string message = "Hello, world" + Environment.NewLine     // English
+                               + "こんにちは、世界" + Environment.NewLine  // Japanese
+                               + "مرحبا، العالم";                       // Arabic
 
                 byte[] preamble = encoding.GetPreamble();
                 byte[] encodedMessage = encoding.GetBytes(message);

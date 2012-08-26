@@ -99,12 +99,12 @@ namespace System.Web.Mvc
             if (castRoute != null)
             {
                 errorText = String.Format(CultureInfo.CurrentCulture, MvcResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteUrl,
-                                          controllerName, castRoute.Url, typeList);
+                                          controllerName, castRoute.Url, typeList, Environment.NewLine);
             }
             else
             {
                 errorText = String.Format(CultureInfo.CurrentCulture, MvcResources.DefaultControllerFactory_ControllerNameAmbiguous_WithoutRouteUrl,
-                                          controllerName, typeList);
+                                          controllerName, typeList, Environment.NewLine);
             }
 
             return new InvalidOperationException(errorText);

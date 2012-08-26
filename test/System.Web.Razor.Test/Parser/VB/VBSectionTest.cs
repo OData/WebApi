@@ -14,8 +14,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void ParseSectionBlockCapturesNewlineImmediatelyFollowing()
         {
-            ParseDocumentTest(@"@Section
-",
+            ParseDocumentTest("@Section" + Environment.NewLine,
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator(String.Empty),
@@ -37,10 +36,10 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void ParseSectionRequiresNameBeOnSameLineAsSectionKeyword()
         {
-            ParseDocumentTest(@"@Section 
-Foo
-    <p>Body</p>
-End Section",
+            ParseDocumentTest("@Section " + Environment.NewLine
+                            + "Foo" + Environment.NewLine
+                            + "    <p>Body</p>" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator(String.Empty),
@@ -60,11 +59,11 @@ End Section",
         [Fact]
         public void ParseSectionAllowsNameToBeOnDifferentLineAsSectionKeywordIfUnderscoresUsed()
         {
-            ParseDocumentTest(@"@Section _
-_
-Foo
-    <p>Body</p>
-End Section",
+            ParseDocumentTest("@Section _" + Environment.NewLine
+                            + "_" + Environment.NewLine
+                            + "Foo" + Environment.NewLine
+                            + "    <p>Body</p>" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("Foo"),
@@ -79,9 +78,9 @@ End Section",
         [Fact]
         public void ParseSectionReportsErrorAndTerminatesSectionBlockIfKeywordNotFollowedByIdentifierStartCharacter()
         {
-            ParseDocumentTest(@"@Section 9
-    <p>Foo</p>
-End Section",
+            ParseDocumentTest("@Section 9" + Environment.NewLine
+                            + "    <p>Foo</p>" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator(String.Empty),
@@ -101,11 +100,11 @@ End Section",
         [Fact]
         public void ParserOutputsErrorOnNestedSections()
         {
-            ParseDocumentTest(@"@Section foo
-    @Section bar
-        <p>Foo</p>
-    End Section
-End Section",
+            ParseDocumentTest("@Section foo" + Environment.NewLine
+                            + "    @Section bar" + Environment.NewLine
+                            + "        <p>Foo</p>" + Environment.NewLine
+                            + "    End Section" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -151,8 +150,8 @@ End Section",
         [Fact]
         public void ParseSectionHandlesUnterminatedSection()
         {
-            ParseDocumentTest(@"@Section foo
-    <p>Foo</p>",
+            ParseDocumentTest("@Section foo" + Environment.NewLine
+                            + "    <p>Foo</p>",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -171,9 +170,9 @@ End Section",
         [Fact]
         public void ParseDocumentParsesNamedSectionCorrectly()
         {
-            ParseDocumentTest(@"@Section foo
-    <p>Foo</p>
-End Section",
+            ParseDocumentTest("@Section foo" + Environment.NewLine
+                            + "    <p>Foo</p>" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -188,8 +187,8 @@ End Section",
         [Fact]
         public void ParseSectionTerminatesOnFirstEndSection()
         {
-            ParseDocumentTest(@"@Section foo
-    <p>End Section</p>",
+            ParseDocumentTest("@Section foo" + Environment.NewLine
+                            + "    <p>End Section</p>",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -204,9 +203,9 @@ End Section",
         [Fact]
         public void ParseSectionAllowsEndSectionInVBExpression()
         {
-            ParseDocumentTest(@"@Section foo
-    I really want to render the word @(""End Section""), so this is how I do it
-End Section",
+            ParseDocumentTest("@Section foo" + Environment.NewLine
+                            + "    I really want to render the word @(\"End Section\"), so this is how I do it" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -231,9 +230,9 @@ End Section",
         [Fact]
         public void SectionBodyTreatsTwoAtSignsAsEscapeSequence()
         {
-            ParseDocumentTest(@"@Section Foo
-    <foo>@@bar</foo>
-End Section",
+            ParseDocumentTest("@Section Foo" + Environment.NewLine
+                            + "    <foo>@@bar</foo>" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("Foo"),
@@ -250,9 +249,9 @@ End Section",
         [Fact]
         public void SectionBodyTreatsPairsOfAtSignsAsEscapeSequence()
         {
-            ParseDocumentTest(@"@Section Foo
-    <foo>@@@@@bar</foo>
-End Section",
+            ParseDocumentTest("@Section Foo" + Environment.NewLine
+                            + "    <foo>@@@@@bar</foo>" + Environment.NewLine
+                            + "End Section",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("Foo"),

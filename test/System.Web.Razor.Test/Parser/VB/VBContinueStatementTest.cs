@@ -13,10 +13,10 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void VB_Do_Statement_With_Continue()
         {
-            ParseBlockTest(@"@Do While True
-    Continue Do
-Loop
-' Not in the block!",
+            ParseBlockTest("@Do While True" + Environment.NewLine
+                         + "    Continue Do" + Environment.NewLine
+                         + "Loop" + Environment.NewLine
+                         + "' Not in the block!",
                 new StatementBlock(
                     Factory.CodeTransition(SyntaxConstants.TransitionString)
                            .Accepts(AcceptedCharacters.None),
@@ -28,10 +28,10 @@ Loop
         [Fact]
         public void VB_For_Statement_With_Continue()
         {
-            ParseBlockTest(@"@For i = 1 To 12
-    Continue For
-Next i
-' Not in the block!",
+            ParseBlockTest("@For i = 1 To 12" + Environment.NewLine
+                         + "    Continue For" + Environment.NewLine
+                         + "Next i" + Environment.NewLine
+                         + "' Not in the block!",
                 new StatementBlock(
                     Factory.CodeTransition(SyntaxConstants.TransitionString)
                            .Accepts(AcceptedCharacters.None),
@@ -43,10 +43,10 @@ Next i
         [Fact]
         public void VB_While_Statement_With_Continue()
         {
-            ParseBlockTest(@"@While True
-    Continue While
-End While
-' Not in the block!",
+            ParseBlockTest("@While True" + Environment.NewLine
+                         + "    Continue While" + Environment.NewLine
+                         + "End While" + Environment.NewLine
+                         + "' Not in the block!",
                 new StatementBlock(
                     Factory.CodeTransition(SyntaxConstants.TransitionString)
                            .Accepts(AcceptedCharacters.None),

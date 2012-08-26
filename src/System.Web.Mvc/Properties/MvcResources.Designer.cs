@@ -421,9 +421,7 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Multiple types were found that match the controller named &apos;{0}&apos;. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the &apos;MapRoute&apos; method that takes a &apos;namespaces&apos; parameter.
-        ///
-        ///The request for &apos;{0}&apos; has found the following matching controllers:{1}.
+        ///   Looks up a localized string similar to Multiple types were found that match the controller named &apos;{0}&apos;. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the &apos;MapRoute&apos; method that takes a &apos;namespaces&apos; parameter.{2}{2}The request for &apos;{0}&apos; has found the following matching controllers:{1}.
         /// </summary>
         internal static string DefaultControllerFactory_ControllerNameAmbiguous_WithoutRouteUrl {
             get {
@@ -432,9 +430,7 @@ namespace System.Web.Mvc.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Multiple types were found that match the controller named &apos;{0}&apos;. This can happen if the route that services this request (&apos;{1}&apos;) does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the &apos;MapRoute&apos; method that takes a &apos;namespaces&apos; parameter.
-        ///
-        ///The request for &apos;{0}&apos; has found the following matching controllers:{2}.
+        ///   Looks up a localized string similar to Multiple types were found that match the controller named &apos;{0}&apos;. This can happen if the route that services this request (&apos;{1}&apos;) does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the &apos;MapRoute&apos; method that takes a &apos;namespaces&apos; parameter.{3}{3}The request for &apos;{0}&apos; has found the following matching controllers:{2}.
         /// </summary>
         internal static string DefaultControllerFactory_ControllerNameAmbiguous_WithRouteUrl {
             get {

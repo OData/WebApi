@@ -17,20 +17,16 @@ namespace System.Web.Mvc.Test
             // Act & Assert
             Assert.ThrowsArgumentNull(
                 () => resolver.InnerSetResolver((IDependencyResolver)null),
-                "resolver"
-                );
+                "resolver");
             Assert.ThrowsArgumentNull(
                 () => resolver.InnerSetResolver((object)null),
-                "commonServiceLocator"
-                );
+                "commonServiceLocator");
             Assert.ThrowsArgumentNull(
                 () => resolver.InnerSetResolver(null, type => null),
-                "getService"
-                );
+                "getService");
             Assert.ThrowsArgumentNull(
                 () => resolver.InnerSetResolver(type => null, null),
-                "getServices"
-                );
+                "getServices");
         }
 
         [Fact]
@@ -169,24 +165,20 @@ namespace System.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<ArgumentException>(
                 () => resolver.InnerSetResolver(new MissingGetInstance()),
-                @"The type System.Web.Mvc.Test.DependencyResolverTest+MissingGetInstance does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator.
-Parameter name: commonServiceLocator"
-                );
+                "The type System.Web.Mvc.Test.DependencyResolverTest+MissingGetInstance does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator." + Environment.NewLine
+              + "Parameter name: commonServiceLocator");
             Assert.Throws<ArgumentException>(
                 () => resolver.InnerSetResolver(new MissingGetAllInstances()),
-                @"The type System.Web.Mvc.Test.DependencyResolverTest+MissingGetAllInstances does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator.
-Parameter name: commonServiceLocator"
-                );
+                "The type System.Web.Mvc.Test.DependencyResolverTest+MissingGetAllInstances does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator." + Environment.NewLine
+              + "Parameter name: commonServiceLocator");
             Assert.Throws<ArgumentException>(
                 () => resolver.InnerSetResolver(new GetInstanceHasWrongSignature()),
-                @"The type System.Web.Mvc.Test.DependencyResolverTest+GetInstanceHasWrongSignature does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator.
-Parameter name: commonServiceLocator"
-                );
+                "The type System.Web.Mvc.Test.DependencyResolverTest+GetInstanceHasWrongSignature does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator." + Environment.NewLine
+              + "Parameter name: commonServiceLocator");
             Assert.Throws<ArgumentException>(
                 () => resolver.InnerSetResolver(new GetAllInstancesHasWrongSignature()),
-                @"The type System.Web.Mvc.Test.DependencyResolverTest+GetAllInstancesHasWrongSignature does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator.
-Parameter name: commonServiceLocator"
-                );
+                "The type System.Web.Mvc.Test.DependencyResolverTest+GetAllInstancesHasWrongSignature does not appear to implement Microsoft.Practices.ServiceLocation.IServiceLocator." + Environment.NewLine
+              + "Parameter name: commonServiceLocator");
         }
 
 
@@ -237,6 +229,5 @@ Parameter name: commonServiceLocator"
             Assert.NotSame(result1, result2);
             Assert.Equal(15, otherResult);
         }
-
     }
 }

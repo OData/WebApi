@@ -37,8 +37,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseHelperCorrectlyParsesIncompleteHelperPreceedingCodeBlock()
         {
-            ParseDocumentTest(@"@helper
-@{}",
+            ParseDocumentTest("@helper" + Environment.NewLine
+                            + "@{}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(
@@ -137,8 +137,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseHelperStatementCapturesWhitespaceToEndOfLineIfHelperStatementMissingName()
         {
-            ParseDocumentTest(@"@helper                       
-    ",
+            ParseDocumentTest("@helper                       " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("                      ", 8, 0, 8), headerComplete: false),
@@ -156,8 +156,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseHelperStatementCapturesWhitespaceToEndOfLineIfHelperStatementMissingOpenParen()
         {
-            ParseDocumentTest(@"@helper Foo    
-    ",
+            ParseDocumentTest("@helper Foo    " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo    ", 8, 0, 8), headerComplete: false),
@@ -173,9 +173,9 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseHelperStatementCapturesAllContentToEndOfFileIfHelperStatementMissingCloseParenInParameterList()
         {
-            ParseDocumentTest(@"@helper Foo(Foo Bar
-Biz
-Boz",
+            ParseDocumentTest("@helper Foo(Foo Bar" + Environment.NewLine
+                            + "Biz" + Environment.NewLine
+                            + "Boz",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(Foo Bar\r\nBiz\r\nBoz", 8, 0, 8), headerComplete: false),
@@ -190,8 +190,7 @@ Boz",
         [Fact]
         public void ParseHelperStatementCapturesWhitespaceToEndOfLineIfHelperStatementMissingOpenBraceAfterParameterList()
         {
-            ParseDocumentTest(@"@helper Foo(string foo)    
-",
+            ParseDocumentTest("@helper Foo(string foo)    " + Environment.NewLine,
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo)    ", 8, 0, 8), headerComplete: false),
@@ -206,8 +205,8 @@ Boz",
         [Fact]
         public void ParseHelperStatementContinuesParsingHelperUntilEOF()
         {
-            ParseDocumentTest(@"@helper Foo(string foo) {    
-    <p>Foo</p>",
+            ParseDocumentTest("@helper Foo(string foo) {    " + Environment.NewLine
+                            + "    <p>Foo</p>",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo) {", 8, 0, 8), headerComplete: true),
@@ -231,9 +230,9 @@ Boz",
         [Fact]
         public void ParseHelperStatementCorrectlyParsesHelperWithEmbeddedCode()
         {
-            ParseDocumentTest(@"@helper Foo(string foo) {    
-    <p>@foo</p>
-}",
+            ParseDocumentTest("@helper Foo(string foo) {    " + Environment.NewLine
+                            + "    <p>@foo</p>" + Environment.NewLine
+                            + "}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo) {", 8, 0, 8), headerComplete: true),
@@ -258,13 +257,13 @@ Boz",
         [Fact]
         public void ParseHelperStatementCorrectlyParsesHelperWithNewlinesBetweenCloseParenAndOpenBrace()
         {
-            ParseDocumentTest(@"@helper Foo(string foo)
-
-
-
-{    
-    <p>@foo</p>
-}",
+            ParseDocumentTest("@helper Foo(string foo)" + Environment.NewLine
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + "{    " + Environment.NewLine
+                            + "    <p>@foo</p>" + Environment.NewLine
+                            + "}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo)\r\n\r\n\r\n\r\n{", 8, 0, 8), headerComplete: true),
@@ -289,8 +288,8 @@ Boz",
         [Fact]
         public void ParseHelperStatementGivesWhitespaceAfterOpenBraceToMarkupInDesignMode()
         {
-            ParseDocumentTest(@"@helper Foo(string foo) {    
-    ",
+            ParseDocumentTest("@helper Foo(string foo) {    " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo) {", 8, 0, 8), headerComplete: true),
@@ -315,10 +314,10 @@ Boz",
         [Fact]
         public void ParseHelperAcceptsNestedHelpersButOutputsError()
         {
-            ParseDocumentTest(@"@helper Foo(string foo) {
-    @helper Bar(string baz) {
-    }
-}",
+            ParseDocumentTest(@"@helper Foo(string foo) {" + Environment.NewLine
+                            + "    @helper Bar(string baz) {" + Environment.NewLine
+                            + "    }" + Environment.NewLine
+                            + "}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo) {", 8, 0, 8), headerComplete: true),

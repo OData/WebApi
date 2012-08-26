@@ -24,9 +24,9 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void ParseBlockAcceptsImplicitExpression()
         {
-            ParseBlockTest(@"If True Then
-    @foo
-End If",
+            ParseBlockTest("If True Then" + Environment.NewLine
+                         + "    @foo" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.Code("If True Then\r\n    ").AsStatement(),
                     new ExpressionBlock(
@@ -42,10 +42,10 @@ End If",
         [Fact]
         public void ParseBlockAcceptsIfStatementWithinCodeBlockIfInDesignTimeMode()
         {
-            ParseBlockTest(@"If True Then
-    @If True Then
-    End If
-End If",
+            ParseBlockTest("If True Then" + Environment.NewLine
+                         + "    @If True Then" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.Code("If True Then\r\n    ").AsStatement(),
                     new StatementBlock(
@@ -61,9 +61,9 @@ End If",
         [Fact]
         public void ParseBlockSupportsSpacesInStrings()
         {
-            ParseBlockTest(@"for each p in db.Query(""SELECT * FROM PRODUCTS"")
-    @<p>@p.Name</p>
-next",
+            ParseBlockTest("for each p in db.Query(\"SELECT * FROM PRODUCTS\")" + Environment.NewLine
+                         + "    @<p>@p.Name</p>" + Environment.NewLine
+                         + "next",
                 new StatementBlock(
                     Factory.Code("for each p in db.Query(\"SELECT * FROM PRODUCTS\")\r\n")
                            .AsStatement(),
@@ -85,11 +85,11 @@ next",
         [Fact]
         public void ParseBlockSupportsSimpleCodeBlock()
         {
-            ParseBlockTest(@"Code
-    If foo IsNot Nothing
-        Bar(foo)
-    End If
-End Code",
+            ParseBlockTest("Code" + Environment.NewLine
+                         + "    If foo IsNot Nothing" + Environment.NewLine
+                         + "        Bar(foo)" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End Code",
                 new StatementBlock(
                     Factory.MetaCode("Code").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    If foo IsNot Nothing\r\n        Bar(foo)\r\n    End If\r\n")
@@ -100,12 +100,12 @@ End Code",
         [Fact]
         public void ParseBlockRejectsNewlineBetweenEndAndCodeIfNotPrefixedWithUnderscore()
         {
-            ParseBlockTest(@"Code
-    If foo IsNot Nothing
-        Bar(foo)
-    End If
-End
-Code",
+            ParseBlockTest("Code" + Environment.NewLine
+                         + "    If foo IsNot Nothing" + Environment.NewLine
+                         + "        Bar(foo)" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End" + Environment.NewLine
+                         + "Code",
                 new StatementBlock(
                     Factory.MetaCode("Code").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    If foo IsNot Nothing\r\n        Bar(foo)\r\n    End If\r\nEnd\r\nCode")
@@ -118,14 +118,14 @@ Code",
         [Fact]
         public void ParseBlockAcceptsNewlineBetweenEndAndCodeIfPrefixedWithUnderscore()
         {
-            ParseBlockTest(@"Code
-    If foo IsNot Nothing
-        Bar(foo)
-    End If
-End _
-_
- _
-Code",
+            ParseBlockTest("Code" + Environment.NewLine
+                         + "    If foo IsNot Nothing" + Environment.NewLine
+                         + "        Bar(foo)" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End _" + Environment.NewLine
+                         + "_" + Environment.NewLine
+                         + " _" + Environment.NewLine
+                         + "Code",
                 new StatementBlock(
                     Factory.MetaCode("Code").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    If foo IsNot Nothing\r\n        Bar(foo)\r\n    End If\r\n")
@@ -136,15 +136,15 @@ Code",
         [Fact]
         public void ParseBlockSupportsSimpleFunctionsBlock()
         {
-            ParseBlockTest(@"Functions
-    Public Sub Foo()
-        Bar()
-    End Sub
-
-    Private Function Bar() As Object
-        Return Nothing
-    End Function
-End Functions",
+            ParseBlockTest("Functions" + Environment.NewLine
+                         + "    Public Sub Foo()" + Environment.NewLine
+                         + "        Bar()" + Environment.NewLine
+                         + "    End Sub" + Environment.NewLine
+                         + Environment.NewLine
+                         + "    Private Function Bar() As Object" + Environment.NewLine
+                         + "        Return Nothing" + Environment.NewLine
+                         + "    End Function" + Environment.NewLine
+                         + "End Functions",
                 new FunctionsBlock(
                     Factory.MetaCode("Functions").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    Public Sub Foo()\r\n        Bar()\r\n    End Sub\r\n\r\n    Private Function Bar() As Object\r\n        Return Nothing\r\n    End Function\r\n")
@@ -155,12 +155,12 @@ End Functions",
         [Fact]
         public void ParseBlockRejectsNewlineBetweenEndAndFunctionsIfNotPrefixedWithUnderscore()
         {
-            ParseBlockTest(@"Functions
-    If foo IsNot Nothing
-        Bar(foo)
-    End If
-End
-Functions",
+            ParseBlockTest("Functions" + Environment.NewLine
+                         + "    If foo IsNot Nothing" + Environment.NewLine
+                         + "        Bar(foo)" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End" + Environment.NewLine
+                         + "Functions",
                 new FunctionsBlock(
                     Factory.MetaCode("Functions").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    If foo IsNot Nothing\r\n        Bar(foo)\r\n    End If\r\nEnd\r\nFunctions")
@@ -173,14 +173,14 @@ Functions",
         [Fact]
         public void ParseBlockAcceptsNewlineBetweenEndAndFunctionsIfPrefixedWithUnderscore()
         {
-            ParseBlockTest(@"Functions
-    If foo IsNot Nothing
-        Bar(foo)
-    End If
-End _
-_
- _
-Functions",
+            ParseBlockTest("Functions" + Environment.NewLine
+                         + "    If foo IsNot Nothing" + Environment.NewLine
+                         + "        Bar(foo)" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End _" + Environment.NewLine
+                         + "_" + Environment.NewLine
+                         + " _" + Environment.NewLine
+                         + "Functions",
                 new FunctionsBlock(
                     Factory.MetaCode("Functions").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    If foo IsNot Nothing\r\n        Bar(foo)\r\n    End If\r\n")
@@ -191,9 +191,9 @@ Functions",
         [Fact]
         public void ParseBlockCorrectlyHandlesExtraEndsInEndCode()
         {
-            ParseBlockTest(@"Code
-    Bar End
-End Code",
+            ParseBlockTest("Code" + Environment.NewLine
+                         + "    Bar End" + Environment.NewLine
+                         + "End Code",
                 new StatementBlock(
                     Factory.MetaCode("Code").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    Bar End\r\n").AsStatement(),
@@ -203,9 +203,9 @@ End Code",
         [Fact]
         public void ParseBlockCorrectlyHandlesExtraEndsInEndFunctions()
         {
-            ParseBlockTest(@"Functions
-    Bar End
-End Functions",
+            ParseBlockTest("Functions" + Environment.NewLine
+                         + "    Bar End" + Environment.NewLine
+                         + "End Functions",
                 new FunctionsBlock(
                     Factory.MetaCode("Functions").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    Bar End\r\n").AsFunctionsBody().AutoCompleteWith(null, atEndOfSpan: false),
@@ -220,16 +220,15 @@ End Functions",
         [InlineData("With", "End", "With")]
         public void KeywordAllowsNewlinesIfPrefixedByUnderscore(string startKeyword, string endKeyword1, string endKeyword2)
         {
-            string code = startKeyword + @"
-    ' In the block
-" + endKeyword1 + @" _
-_
-_
-_
-_
-_
-  " + endKeyword2 + @"
-";
+            string code = startKeyword + Environment.NewLine
+                        + "    ' In the block" + Environment.NewLine
+                        + endKeyword1 + " _" + Environment.NewLine
+                        + "_" + Environment.NewLine
+                        + "_" + Environment.NewLine
+                        + "_" + Environment.NewLine
+                        + "_" + Environment.NewLine
+                        + "_" + Environment.NewLine
+                        + "  " + endKeyword2 + Environment.NewLine;
             ParseBlockTest(code + "foo bar baz",
                 new StatementBlock(
                     Factory.Code(code)
@@ -246,11 +245,11 @@ _
         [InlineData("Using", "EndUsing", "End Using")]
         public void EndTerminatedKeywordRequiresSpaceBetweenEndAndKeyword(string startKeyword, string wrongEndKeyword, string endKeyword)
         {
-            string code = startKeyword + @"
-    ' This should not end the code
-    " + wrongEndKeyword + @"
-    ' But this should
-" + endKeyword;
+            string code = startKeyword + Environment.NewLine
+                        + "    ' This should not end the code" + Environment.NewLine
+                        + "    " + wrongEndKeyword + Environment.NewLine
+                        + "    ' But this should" + Environment.NewLine
+                        + endKeyword;
             ParseBlockTest(code,
                 new StatementBlock(
                     Factory.Code(code)
@@ -269,10 +268,9 @@ _
         [InlineData("Using", "End Using", false)]
         public void EndSequenceInString(string keyword, string endSequence, bool acceptToEndOfLine)
         {
-            string code = keyword + @"
-    """ + endSequence + @"""
-" + endSequence + (acceptToEndOfLine ? @" foo bar baz" : "") + @"
-";
+            string code = keyword + Environment.NewLine
+                        + "    \"" + endSequence + "\"" + Environment.NewLine
+                        + endSequence + (acceptToEndOfLine ? " foo bar baz" : "") + Environment.NewLine;
             ParseBlockTest(code + "biz boz",
                 new StatementBlock(
                     Factory.Code(code).AsStatement().Accepts(GetAcceptedCharacters(acceptToEndOfLine))));
@@ -289,10 +287,9 @@ _
         [InlineData("Using", "End Using", false)]
         private void CommentedEndSequence(string keyword, string endSequence, bool acceptToEndOfLine)
         {
-            string code = keyword + @"
-    '" + endSequence + @"
-" + endSequence + (acceptToEndOfLine ? @" foo bar baz" : "") + @"
-";
+            string code = keyword + Environment.NewLine
+                        + "    '" + endSequence + Environment.NewLine
+                        + endSequence + (acceptToEndOfLine ? @" foo bar baz" : "") + Environment.NewLine;
             ParseBlockTest(code + "biz boz",
                 new StatementBlock(
                     Factory.Code(code).AsStatement().Accepts(GetAcceptedCharacters(acceptToEndOfLine))));
@@ -310,12 +307,11 @@ _
         [InlineData("Using", "End Using", false)]
         private void NestedKeywordBlock(string keyword, string endSequence, bool acceptToEndOfLine)
         {
-            string code = keyword + @"
-    " + keyword + @"
-        Bar(foo)
-    " + endSequence + @"
-" + endSequence + (acceptToEndOfLine ? @" foo bar baz" : "") + @"
-";
+            string code = keyword + Environment.NewLine
+                        + "    " + keyword + Environment.NewLine
+                        + "        Bar(foo)" + Environment.NewLine
+                        + "    " + endSequence + Environment.NewLine
+                        + endSequence + (acceptToEndOfLine ? " foo bar baz" : "") + Environment.NewLine;
             ParseBlockTest(code + "biz boz",
                 new StatementBlock(
                     Factory.Code(code).AsStatement().Accepts(GetAcceptedCharacters(acceptToEndOfLine))));
@@ -333,10 +329,9 @@ _
         [InlineData("Using", "End Using", false)]
         private void SimpleKeywordBlock(string keyword, string endSequence, bool acceptToEndOfLine)
         {
-            string code = keyword + @"
-    Bar(foo)
-" + endSequence + (acceptToEndOfLine ? @" foo bar baz" : "") + @"
-";
+            string code = keyword + Environment.NewLine
+                        + "    Bar(foo)" + Environment.NewLine
+                        + endSequence + (acceptToEndOfLine ? " foo bar baz" : "") + Environment.NewLine;
             ParseBlockTest(code + "biz boz",
                 new StatementBlock(
                     Factory.Code(code).AsStatement().Accepts(GetAcceptedCharacters(acceptToEndOfLine))));
@@ -351,12 +346,11 @@ _
         [InlineData("For Each p in Products", "Continue For", "Next", true)]
         private void KeywordWithExitOrContinue(string startKeyword, string exitKeyword, string endKeyword, bool acceptToEndOfLine)
         {
-            string code = startKeyword + @"
-    ' This is before the exit
-    " + exitKeyword + @"
-    ' This is after the exit
-" + endKeyword + @"
-";
+            string code = startKeyword + Environment.NewLine
+                         + "    ' This is before the exit" + Environment.NewLine
+                         + "    " + exitKeyword + Environment.NewLine
+                         + "    ' This is after the exit" + Environment.NewLine
+                         + endKeyword + Environment.NewLine;
             ParseBlockTest(code + "foo bar baz",
                 new StatementBlock(
                     Factory.Code(code).AsStatement().Accepts(GetAcceptedCharacters(acceptToEndOfLine))));

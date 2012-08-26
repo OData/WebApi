@@ -77,11 +77,11 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseBlockShouldAcceptMultiLineVerbatimStrings()
         {
-            ParseBlockTest(@"@(@""
-Foo
-Bar
-Baz
-"")",
+            ParseBlockTest(@"@(@""" + Environment.NewLine
+                         + @"Foo" + Environment.NewLine
+                         + @"Bar" + Environment.NewLine
+                         + @"Baz" + Environment.NewLine
+                         + @""")",
                            new ExpressionBlock(
                                Factory.CodeTransition(),
                                Factory.MetaCode("(").Accepts(AcceptedCharacters.None),

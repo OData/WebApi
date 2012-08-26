@@ -24,38 +24,38 @@ namespace System.Web.Mvc.Html.Test
             // Boolean values
 
             Assert.Equal(
-                @"<input checked=""checked"" class=""check-box"" id=""FieldPrefix"" name=""FieldPrefix"" type=""checkbox"" value=""true"" /><input name=""FieldPrefix"" type=""hidden"" value=""false"" />",
+                "<input checked=\"checked\" class=\"check-box\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"checkbox\" value=\"true\" /><input name=\"FieldPrefix\" type=\"hidden\" value=\"false\" />",
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<bool>(true)));
 
             Assert.Equal(
-                @"<input class=""check-box"" id=""FieldPrefix"" name=""FieldPrefix"" type=""checkbox"" value=""true"" /><input name=""FieldPrefix"" type=""hidden"" value=""false"" />",
+                "<input class=\"check-box\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"checkbox\" value=\"true\" /><input name=\"FieldPrefix\" type=\"hidden\" value=\"false\" />",
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<bool>(false)));
 
             Assert.Equal(
-                @"<input class=""check-box"" id=""FieldPrefix"" name=""FieldPrefix"" type=""checkbox"" value=""true"" /><input name=""FieldPrefix"" type=""hidden"" value=""false"" />",
+                "<input class=\"check-box\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"checkbox\" value=\"true\" /><input name=\"FieldPrefix\" type=\"hidden\" value=\"false\" />",
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<bool>(null)));
 
             // Nullable<Boolean> values
 
             Assert.Equal(
-                @"<select class=""list-box tri-state"" id=""FieldPrefix"" name=""FieldPrefix""><option value="""">Not Set</option>
-<option selected=""selected"" value=""true"">True</option>
-<option value=""false"">False</option>
-</select>",
+                "<select class=\"list-box tri-state\" id=\"FieldPrefix\" name=\"FieldPrefix\"><option value=\"\">Not Set</option>" + Environment.NewLine
+              + "<option selected=\"selected\" value=\"true\">True</option>" + Environment.NewLine
+              + "<option value=\"false\">False</option>" + Environment.NewLine
+              + "</select>",
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(true)));
 
             Assert.Equal(
-                @"<select class=""list-box tri-state"" id=""FieldPrefix"" name=""FieldPrefix""><option value="""">Not Set</option>
-<option value=""true"">True</option>
-<option selected=""selected"" value=""false"">False</option>
-</select>",
+                "<select class=\"list-box tri-state\" id=\"FieldPrefix\" name=\"FieldPrefix\"><option value=\"\">Not Set</option>" + Environment.NewLine
+              + "<option value=\"true\">True</option>" + Environment.NewLine
+              + "<option selected=\"selected\" value=\"false\">False</option>" + Environment.NewLine
+              + "</select>",
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(false)));
 
             Assert.Equal(
-                @"<select class=""list-box tri-state"" id=""FieldPrefix"" name=""FieldPrefix""><option selected=""selected"" value="""">Not Set</option>
-<option value=""true"">True</option>
-<option value=""false"">False</option>
-</select>",
+                "<select class=\"list-box tri-state\" id=\"FieldPrefix\" name=\"FieldPrefix\"><option selected=\"selected\" value=\"\">Not Set</option>" + Environment.NewLine
+              + "<option value=\"true\">True</option>" + Environment.NewLine
+              + "<option value=\"false\">False</option>" + Environment.NewLine
+              + "</select>",
                 DefaultEditorTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(null)));
         }
 
@@ -112,9 +112,10 @@ namespace System.Web.Mvc.Html.Test
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -128,9 +129,10 @@ Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = ModelProperty[0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = ModelProperty[0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -144,11 +146,12 @@ Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = M
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = bar, ModelType = System.String, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = baz, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = bar, ModelType = System.String, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = baz, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -162,9 +165,10 @@ Model = baz, ModelType = System.String, PropertyName = (null), HtmlFieldName = [
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = (null), ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = (null), ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -178,9 +182,10 @@ Model = (null), ModelType = System.String, PropertyName = (null), HtmlFieldName 
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -194,11 +199,12 @@ Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), Html
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = 1, ModelType = System.Int32, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = 2.3, ModelType = System.Double, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = Hello World, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = 1, ModelType = System.Int32, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = 2.3, ModelType = System.Double, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = Hello World, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -212,11 +218,12 @@ Model = Hello World, ModelType = System.String, PropertyName = (null), HtmlField
             string result = DefaultEditorTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = 1, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = (null), ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = 1, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = (null), ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = Edit, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         // DecimalTemplate
@@ -227,16 +234,16 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
             Assert.Equal(
                 String.Format(
                     CultureInfo.CurrentCulture,
-                    @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""{0:0.00}"" />",
+                    "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"{0:0.00}\" />",
                     12.35M),
                 DefaultEditorTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M)));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""Formatted Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"Formatted Value\" />",
                 DefaultEditorTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M, "Formatted Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M, "<script>alert('XSS!')</script>")));
         }
 
@@ -246,27 +253,27 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void HiddenInputTemplateTests()
         {
             Assert.Equal(
-                @"Hidden Value<input id=""FieldPrefix"" name=""FieldPrefix"" type=""hidden"" value=""Hidden Value"" />",
+                "Hidden Value<input id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"Hidden Value\" />",
                 DefaultEditorTemplates.HiddenInputTemplate(MakeHtmlHelper<string>("Hidden Value")));
 
             Assert.Equal(
-                @"&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;<input id=""FieldPrefix"" name=""FieldPrefix"" type=""hidden"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;<input id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.HiddenInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
 
             var helperWithInvisibleHtml = MakeHtmlHelper<string>("<script>alert('XSS!')</script>", "<b>Encode me!</b>");
             helperWithInvisibleHtml.ViewData.ModelMetadata.HideSurroundingHtml = true;
             Assert.Equal(
-                @"<input id=""FieldPrefix"" name=""FieldPrefix"" type=""hidden"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.HiddenInputTemplate(helperWithInvisibleHtml));
 
             byte[] byteValues = { 1, 2, 3, 4, 5 };
 
             Assert.Equal(
-                @"&quot;AQIDBAU=&quot;<input id=""FieldPrefix"" name=""FieldPrefix"" type=""hidden"" value=""AQIDBAU="" />",
+                "&quot;AQIDBAU=&quot;<input id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"AQIDBAU=\" />",
                 DefaultEditorTemplates.HiddenInputTemplate(MakeHtmlHelper<Binary>(new Binary(byteValues))));
 
             Assert.Equal(
-                @"System.Byte[]<input id=""FieldPrefix"" name=""FieldPrefix"" type=""hidden"" value=""AQIDBAU="" />",
+                "System.Byte[]<input id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"hidden\" value=\"AQIDBAU=\" />",
                 DefaultEditorTemplates.HiddenInputTemplate(MakeHtmlHelper<byte[]>(byteValues)));
         }
 
@@ -276,17 +283,15 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void MultilineTextTemplateTests()
         {
             Assert.Equal(
-                @"<textarea class=""text-box multi-line"" id=""FieldPrefix"" name=""FieldPrefix"">
-Multiple
-Line
-Value!</textarea>",
-                DefaultEditorTemplates.MultilineTextTemplate(MakeHtmlHelper<string>("", @"Multiple
-Line
-Value!")));
+                "<textarea class=\"text-box multi-line\" id=\"FieldPrefix\" name=\"FieldPrefix\">" + Environment.NewLine
+              + "Multiple" + Environment.NewLine
+              + "Line" + Environment.NewLine
+              + "Value!</textarea>",
+                DefaultEditorTemplates.MultilineTextTemplate(MakeHtmlHelper<string>("", "Multiple" + Environment.NewLine + "Line" + Environment.NewLine + "Value!")));
 
             Assert.Equal(
-                @"<textarea class=""text-box multi-line"" id=""FieldPrefix"" name=""FieldPrefix"">
-&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;</textarea>",
+                "<textarea class=\"text-box multi-line\" id=\"FieldPrefix\" name=\"FieldPrefix\">" + Environment.NewLine
+              + "&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;</textarea>",
                 DefaultEditorTemplates.MultilineTextTemplate(MakeHtmlHelper<string>("", "<script>alert('XSS!')</script>")));
         }
 
@@ -319,11 +324,11 @@ Value!")));
         [Fact]
         public void ObjectTemplateEditsSimplePropertiesOnObjectByDefault()
         {
-            string expected = @"<div class=""editor-label""><label for=""FieldPrefix_Property1"">Property1</label></div>
-<div class=""editor-field"">Model = p1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-<div class=""editor-label""><label for=""FieldPrefix_Property2"">Property2</label></div>
-<div class=""editor-field"">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-";
+            string expected =
+                "<div class=\"editor-label\"><label for=\"FieldPrefix_Property1\">Property1</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = p1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine
+              + "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Property2</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel { Property1 = "p1", Property2 = null };
@@ -339,11 +344,11 @@ Value!")));
         [Fact]
         public void ObjectTemplateWithModelError()
         {
-            string expected = @"<div class=""editor-label""><label for=""FieldPrefix_Property1"">Property1</label></div>
-<div class=""editor-field"">Model = p1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) <span class=""field-validation-error"">Error Message</span></div>
-<div class=""editor-label""><label for=""FieldPrefix_Property2"">Property2</label></div>
-<div class=""editor-field"">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-";
+            string expected =
+                "<div class=\"editor-label\"><label for=\"FieldPrefix_Property1\">Property1</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = p1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) <span class=\"field-validation-error\">Error Message</span></div>" + Environment.NewLine
+              + "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Property2</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel { Property1 = "p1", Property2 = null };
@@ -360,10 +365,10 @@ Value!")));
         [Fact]
         public void ObjectTemplateWithDisplayNameMetadata()
         {
-            string expected = @"<div class=""editor-field"">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-<div class=""editor-label""><label for=""FieldPrefix_Property2"">Custom display name</label></div>
-<div class=""editor-field"">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-";
+            string expected =
+                "<div class=\"editor-field\">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine
+              + "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Custom display name</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -386,9 +391,9 @@ Value!")));
         [Fact]
         public void ObjectTemplateWithShowForEditorMetadata()
         {
-            string expected = @"<div class=""editor-label""><label for=""FieldPrefix_Property1"">Property1</label></div>
-<div class=""editor-field"">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-";
+            string expected =
+                "<div class=\"editor-label\"><label for=\"FieldPrefix_Property1\">Property1</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -411,9 +416,9 @@ Value!")));
         [Fact]
         public void ObjectTemplatePreventsRecursionOnModelValue()
         {
-            string expected = @"<div class=""editor-label""><label for=""FieldPrefix_Property2"">Property2</label></div>
-<div class=""editor-field"">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-";
+            string expected =
+                "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Property2</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -437,9 +442,9 @@ Value!")));
         [Fact]
         public void ObjectTemplatePreventsRecursionOnModelTypeForNullModelValues()
         {
-            string expected = @"<div class=""editor-label""><label for=""FieldPrefix_Property2"">Property2</label></div>
-<div class=""editor-field"">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>
-";
+            string expected =
+                "<div class=\"editor-label\"><label for=\"FieldPrefix_Property2\">Property2</label></div>" + Environment.NewLine
+              + "<div class=\"editor-field\">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = Edit, AdditionalViewData = (null) </div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -505,18 +510,18 @@ Value!")));
         public void PasswordTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line password"" id=""FieldPrefix"" name=""FieldPrefix"" type=""password"" value=""Value"" />",
+                "<input class=\"text-box single-line password\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"password\" value=\"Value\" />",
                 DefaultEditorTemplates.PasswordTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line password"" id=""FieldPrefix"" name=""FieldPrefix"" type=""password"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line password\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"password\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.PasswordTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
         [Fact]
         public void ObjectTemplateWithHiddenHtml()
         {
-            string expected = @"Model = propValue1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null)";
+            string expected = "Model = propValue1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = Edit, AdditionalViewData = (null)";
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -558,11 +563,11 @@ Value!")));
         public void StringTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"Value\" />",
                 DefaultEditorTemplates.StringTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""text"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"text\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.StringTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -572,11 +577,11 @@ Value!")));
         public void PhoneNumberInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""tel"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"tel\" value=\"Value\" />",
                 DefaultEditorTemplates.PhoneNumberInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""tel"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"tel\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.PhoneNumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -586,11 +591,11 @@ Value!")));
         public void UrlInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""url"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"url\" value=\"Value\" />",
                 DefaultEditorTemplates.UrlInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""url"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"url\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.UrlInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -600,11 +605,11 @@ Value!")));
         public void EmailAddressTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""email"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"email\" value=\"Value\" />",
                 DefaultEditorTemplates.EmailAddressInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""email"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"email\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.EmailAddressInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -614,11 +619,11 @@ Value!")));
         public void DateTimeInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""datetime"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime\" value=\"Value\" />",
                 DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""datetime"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"datetime\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.DateTimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -628,11 +633,11 @@ Value!")));
         public void DateInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""date"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"date\" value=\"Value\" />",
                 DefaultEditorTemplates.DateInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""date"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"date\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.DateInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -642,11 +647,11 @@ Value!")));
         public void TimeInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""time"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"time\" value=\"Value\" />",
                 DefaultEditorTemplates.TimeInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""time"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"time\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.TimeInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -656,11 +661,11 @@ Value!")));
         public void NumberInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""number"" value=""Value"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"number\" value=\"Value\" />",
                 DefaultEditorTemplates.NumberInputTemplate(MakeHtmlHelper<string>("Value")));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""number"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"number\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.NumberInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 
@@ -670,16 +675,16 @@ Value!")));
         public void ColorInputTemplateTests()
         {
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""color"" value=""#33F4CC"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"#33F4CC\" />",
                 DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<string>("#33F4CC")));
             
             var color = Color.FromArgb(0x33, 0xf4, 0xcc);
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""color"" value=""#33F4CC"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"#33F4CC\" />",
                 DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<Color>(color)));
 
             Assert.Equal(
-                @"<input class=""text-box single-line"" id=""FieldPrefix"" name=""FieldPrefix"" type=""color"" value=""&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"" />",
+                "<input class=\"text-box single-line\" id=\"FieldPrefix\" name=\"FieldPrefix\" type=\"color\" value=\"&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\" />",
                 DefaultEditorTemplates.ColorInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
         }
 

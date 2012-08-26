@@ -56,9 +56,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void RazorCommentInImplicitExpressionMethodCall()
         {
-            ParseDocumentTest(@"@foo(
-@**@
-",
+            ParseDocumentTest("@foo(" + Environment.NewLine
+                            + "@**@" + Environment.NewLine,
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new ExpressionBlock(
@@ -113,10 +112,10 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void RazorCommentInVerbatimBlock()
         {
-            ParseDocumentTest(@"@{
-    <text
-    @**@
-}",
+            ParseDocumentTest("@{" + Environment.NewLine
+                            + "    <text" + Environment.NewLine
+                            + "    @**@" + Environment.NewLine
+                            + "}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new StatementBlock(

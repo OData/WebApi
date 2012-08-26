@@ -14,8 +14,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseSectionBlockCapturesNewlineImmediatelyFollowing()
         {
-            ParseDocumentTest(@"@section
-",
+            ParseDocumentTest("@section" + Environment.NewLine,
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator(String.Empty),
@@ -31,28 +30,28 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseSectionBlockCapturesWhitespaceToEndOfLineInSectionStatementMissingOpenBrace()
         {
-            ParseDocumentTest(@"@section Foo         
-    ",
+            ParseDocumentTest("@section Foo         " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("Foo"),
                         Factory.CodeTransition(),
                         Factory.MetaCode("section Foo         \r\n")),
-                    Factory.Markup(@"    ")),
+                    Factory.Markup("    ")),
                 new RazorError(RazorResources.ParseError_MissingOpenBraceAfterSection, 12, 0, 12));
         }
 
         [Fact]
         public void ParseSectionBlockCapturesWhitespaceToEndOfLineInSectionStatementMissingName()
         {
-            ParseDocumentTest(@"@section         
-    ",
+            ParseDocumentTest("@section         " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator(String.Empty),
                         Factory.CodeTransition(),
                         Factory.MetaCode("section         \r\n")),
-                    Factory.Markup(@"    ")),
+                    Factory.Markup("    ")),
                 new RazorError(
                     String.Format(
                         RazorResources.ParseError_Unexpected_Character_At_Section_Name_Start,
@@ -170,8 +169,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseSectionBlockReportsErrorAndAcceptsWhitespaceToEndOfLineIfSectionNotFollowedByOpenBrace()
         {
-            ParseDocumentTest(@"@section foo      
-",
+            ParseDocumentTest("@section foo      " + Environment.NewLine,
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -183,15 +181,15 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void ParseSectionBlockAcceptsOpenBraceMultipleLinesBelowSectionName()
         {
-            ParseDocumentTest(@"@section foo      
-
-
-
-
-
-{
-<p>Foo</p>
-}",
+            ParseDocumentTest("@section foo      " + Environment.NewLine
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + "{" + Environment.NewLine
+                            + "<p>Foo</p>" + Environment.NewLine
+                            + "}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("foo"),
@@ -277,10 +275,10 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void SectionIsCorrectlyTerminatedWhenCloseBraceImmediatelyFollowsCodeBlock()
         {
-            ParseDocumentTest(@"@section Foo {
-@if(true) {
-}
-}",
+            ParseDocumentTest("@section Foo {" + Environment.NewLine
+                            + "@if(true) {" + Environment.NewLine
+                            + "}" + Environment.NewLine
+                            + "}",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new SectionBlock(new SectionCodeGenerator("Foo"),

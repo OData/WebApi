@@ -125,7 +125,7 @@ namespace System.Web.Http.Dispatcher
                 typeList.Append(matchedType.FullName);
             }
 
-            string errorMessage = Error.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, route.RouteTemplate, typeList);
+            string errorMessage = Error.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, route.RouteTemplate, typeList, Environment.NewLine);
             return new InvalidOperationException(errorMessage);
         }
 

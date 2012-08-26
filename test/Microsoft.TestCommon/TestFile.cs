@@ -48,7 +48,9 @@ namespace System.Web.WebPages.TestUtils
         {
             using (StreamReader reader = new StreamReader(OpenRead()))
             {
-                return reader.ReadToEnd();
+                // The .Replace() calls normalize line endings, in case you get \n instead of \r\n
+                // since all the unit tests rely on the assumption that the files will have \r\n endings.
+                return reader.ReadToEnd().Replace("\r", "").Replace("\n", "\r\n");
             }
         }
 

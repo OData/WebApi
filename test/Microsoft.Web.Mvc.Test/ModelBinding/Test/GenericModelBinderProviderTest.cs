@@ -25,8 +25,8 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new GenericModelBinderProvider(typeof(List<int>), _ => null); },
-                @"The type 'System.Collections.Generic.List`1[System.Int32]' is not an open generic type.
-Parameter name: modelType");
+                "The type 'System.Collections.Generic.List`1[System.Int32]' is not an open generic type." + Environment.NewLine
+              + "Parameter name: modelType");
         }
 
         [Fact]
@@ -51,8 +51,8 @@ Parameter name: modelType");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new GenericModelBinderProvider(typeof(List<int>), new MutableObjectModelBinder()); },
-                @"The type 'System.Collections.Generic.List`1[System.Int32]' is not an open generic type.
-Parameter name: modelType");
+                "The type 'System.Collections.Generic.List`1[System.Int32]' is not an open generic type." + Environment.NewLine
+              + "Parameter name: modelType");
         }
 
         [Fact]
@@ -69,8 +69,8 @@ Parameter name: modelType");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new GenericModelBinderProvider(typeof(List<>), typeof(string)); },
-                @"The type 'System.String' does not implement the interface 'Microsoft.Web.Mvc.ModelBinding.IExtensibleModelBinder'.
-Parameter name: modelBinderType");
+                "The type 'System.String' does not implement the interface 'Microsoft.Web.Mvc.ModelBinding.IExtensibleModelBinder'." + Environment.NewLine
+              + "Parameter name: modelBinderType");
         }
 
         [Fact]
@@ -87,8 +87,8 @@ Parameter name: modelBinderType");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new GenericModelBinderProvider(typeof(List<>), typeof(DictionaryModelBinder<,>)); },
-                @"The open model type 'System.Collections.Generic.List`1[T]' has 1 generic type argument(s), but the open binder type 'Microsoft.Web.Mvc.ModelBinding.DictionaryModelBinder`2[TKey,TValue]' has 2 generic type argument(s). The binder type must not be an open generic type or must have the same number of generic arguments as the open model type.
-Parameter name: modelBinderType");
+                "The open model type 'System.Collections.Generic.List`1[T]' has 1 generic type argument(s), but the open binder type 'Microsoft.Web.Mvc.ModelBinding.DictionaryModelBinder`2[TKey,TValue]' has 2 generic type argument(s). The binder type must not be an open generic type or must have the same number of generic arguments as the open model type." + Environment.NewLine
+              + "Parameter name: modelBinderType");
         }
 
         [Fact]
@@ -97,8 +97,8 @@ Parameter name: modelBinderType");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new GenericModelBinderProvider(typeof(List<int>), typeof(MutableObjectModelBinder)); },
-                @"The type 'System.Collections.Generic.List`1[System.Int32]' is not an open generic type.
-Parameter name: modelType");
+                "The type 'System.Collections.Generic.List`1[System.Int32]' is not an open generic type." + Environment.NewLine
+              + "Parameter name: modelType");
         }
 
         [Fact]

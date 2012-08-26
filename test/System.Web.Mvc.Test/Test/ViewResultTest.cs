@@ -95,9 +95,9 @@ namespace System.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => result.ExecuteResult(context),
-                @"The view '" + _viewName + @"' or its master was not found or no view engine supports the searched locations. The following locations were searched:
-location1
-location2");
+                "The view '" + _viewName + "' or its master was not found or no view engine supports the searched locations. The following locations were searched:" + Environment.NewLine
+              + "location1" + Environment.NewLine
+              + "location2");
 
             viewEngine.Verify();
             viewEngineCollection.Verify();

@@ -502,6 +502,7 @@ namespace Microsoft.TestCommon
         }
 
         // Custom ThrowsException so we can filter the stack trace.
+        [Serializable]
         private class ThrowsException : Xunit.Sdk.ThrowsException
         {
             public ThrowsException(Type type) : base(type) { }

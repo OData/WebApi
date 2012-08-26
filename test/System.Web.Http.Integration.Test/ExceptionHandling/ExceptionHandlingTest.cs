@@ -216,7 +216,7 @@ namespace System.Web.Http
                 {
                     Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
                     Assert.Contains(
-                        String.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, "{controller}", String.Empty),
+                        String.Format(SRResources.DefaultControllerFactory_ControllerNameAmbiguous_WithRouteTemplate, controllerName, "{controller}", String.Empty, Environment.NewLine),
                         response.Content.ReadAsAsync<HttpError>().Result["ExceptionMessage"] as string);
                 }
             );

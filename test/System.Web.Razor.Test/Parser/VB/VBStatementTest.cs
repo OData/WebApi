@@ -13,7 +13,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void VB_Inherits_Statement()
         {
-            ParseBlockTest(@"@Inherits System.Foo.Bar(Of Baz)",
+            ParseBlockTest("@Inherits System.Foo.Bar(Of Baz)",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Inherits ").Accepts(AcceptedCharacters.None),
@@ -58,7 +58,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void VB_Option_Strict_Statement()
         {
-            ParseBlockTest(@"@Option Strict Off",
+            ParseBlockTest("@Option Strict Off",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Option Strict Off")
@@ -68,7 +68,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void VB_Option_Explicit_Statement()
         {
-            ParseBlockTest(@"@Option Explicit Off",
+            ParseBlockTest("@Option Explicit Off",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Option Explicit Off")
@@ -90,9 +90,9 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void VB_Using_Statement()
         {
-            ParseBlockTest(@"@Using foo as Bar
-    foo()
-End Using",
+            ParseBlockTest("@Using foo as Bar" + Environment.NewLine
+                         + "    foo()" + Environment.NewLine
+                         + "End Using",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Using foo as Bar\r\n    foo()\r\nEnd Using")
@@ -103,9 +103,9 @@ End Using",
         [Fact]
         public void VB_Do_Loop_Statement()
         {
-            ParseBlockTest(@"@Do
-    foo()
-Loop While True",
+            ParseBlockTest("@Do" + Environment.NewLine
+                         + "    foo()" + Environment.NewLine
+                         + "Loop While True",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Do\r\n    foo()\r\nLoop While True")
@@ -116,9 +116,9 @@ Loop While True",
         [Fact]
         public void VB_While_Statement()
         {
-            ParseBlockTest(@"@While True
-    foo()
-End While",
+            ParseBlockTest("@While True" + Environment.NewLine
+                         + "    foo()" + Environment.NewLine
+                         + "End While",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("While True\r\n    foo()\r\nEnd While")
@@ -129,13 +129,13 @@ End While",
         [Fact]
         public void VB_If_Statement()
         {
-            ParseBlockTest(@"@If True Then
-    foo()
-ElseIf False Then
-    bar()
-Else
-    baz()
-End If",
+            ParseBlockTest("@If True Then" + Environment.NewLine
+                         + "    foo()" + Environment.NewLine
+                         + "ElseIf False Then" + Environment.NewLine
+                         + "    bar()" + Environment.NewLine
+                         + "Else" + Environment.NewLine
+                         + "    baz()" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("If True Then\r\n    foo()\r\nElseIf False Then\r\n    bar()\r\nElse\r\n    baz()\r\nEnd If")
@@ -146,14 +146,14 @@ End If",
         [Fact]
         public void VB_Select_Statement()
         {
-            ParseBlockTest(@"@Select Case foo
-    Case 1
-        foo()
-    Case 2
-        bar()
-    Case Else
-        baz()
-End Select",
+            ParseBlockTest("@Select Case foo" + Environment.NewLine
+                         + "    Case 1" + Environment.NewLine
+                         + "        foo()" + Environment.NewLine
+                         + "    Case 2" + Environment.NewLine
+                         + "        bar()" + Environment.NewLine
+                         + "    Case Else" + Environment.NewLine
+                         + "        baz()" + Environment.NewLine
+                         + "End Select",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Select Case foo\r\n    Case 1\r\n        foo()\r\n    Case 2\r\n        bar()\r\n    Case Else\r\n        baz()\r\nEnd Select")
@@ -164,9 +164,9 @@ End Select",
         [Fact]
         public void VB_For_Statement()
         {
-            ParseBlockTest(@"@For Each foo In bar
-    baz()
-Next",
+            ParseBlockTest("@For Each foo In bar" + Environment.NewLine
+                         + "    baz()" + Environment.NewLine
+                         + "Next",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("For Each foo In bar\r\n    baz()\r\nNext")
@@ -177,13 +177,13 @@ Next",
         [Fact]
         public void VB_Try_Statement()
         {
-            ParseBlockTest(@"@Try
-    foo()
-Catch ex as Exception
-    bar()
-Finally
-    baz()
-End Try",
+            ParseBlockTest("@Try" + Environment.NewLine
+                         + "    foo()" + Environment.NewLine
+                         + "Catch ex as Exception" + Environment.NewLine
+                         + "    bar()" + Environment.NewLine
+                         + "Finally" + Environment.NewLine
+                         + "    baz()" + Environment.NewLine
+                         + "End Try",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Try\r\n    foo()\r\nCatch ex as Exception\r\n    bar()\r\nFinally\r\n    baz()\r\nEnd Try")
@@ -194,9 +194,9 @@ End Try",
         [Fact]
         public void VB_With_Statement()
         {
-            ParseBlockTest(@"@With foo
-    .bar()
-End With",
+            ParseBlockTest("@With foo" + Environment.NewLine
+                         + "    .bar()" + Environment.NewLine
+                         + "End With",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("With foo\r\n    .bar()\r\nEnd With")
@@ -207,9 +207,9 @@ End With",
         [Fact]
         public void VB_SyncLock_Statement()
         {
-            ParseBlockTest(@"@SyncLock foo
-    foo.bar()
-End SyncLock",
+            ParseBlockTest("@SyncLock foo" + Environment.NewLine
+                         + "    foo.bar()" + Environment.NewLine
+                         + "End SyncLock",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("SyncLock foo\r\n    foo.bar()\r\nEnd SyncLock")

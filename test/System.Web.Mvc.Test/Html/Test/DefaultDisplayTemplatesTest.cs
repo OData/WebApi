@@ -22,29 +22,29 @@ namespace System.Web.Mvc.Html.Test
             // Boolean values
 
             Assert.Equal(
-                @"<input checked=""checked"" class=""check-box"" disabled=""disabled"" type=""checkbox"" />",
+                "<input checked=\"checked\" class=\"check-box\" disabled=\"disabled\" type=\"checkbox\" />",
                 DefaultDisplayTemplates.BooleanTemplate(MakeHtmlHelper<bool>(true)));
 
             Assert.Equal(
-                @"<input class=""check-box"" disabled=""disabled"" type=""checkbox"" />",
+                "<input class=\"check-box\" disabled=\"disabled\" type=\"checkbox\" />",
                 DefaultDisplayTemplates.BooleanTemplate(MakeHtmlHelper<bool>(false)));
 
             Assert.Equal(
-                @"<input class=""check-box"" disabled=""disabled"" type=""checkbox"" />",
+                "<input class=\"check-box\" disabled=\"disabled\" type=\"checkbox\" />",
                 DefaultDisplayTemplates.BooleanTemplate(MakeHtmlHelper<bool>(null)));
 
             // Nullable<Boolean> values
 
             Assert.Equal(
-                @"<select class=""tri-state list-box"" disabled=""disabled""><option value="""">Not Set</option><option selected=""selected"" value=""true"">True</option><option value=""false"">False</option></select>",
+                "<select class=\"tri-state list-box\" disabled=\"disabled\"><option value=\"\">Not Set</option><option selected=\"selected\" value=\"true\">True</option><option value=\"false\">False</option></select>",
                 DefaultDisplayTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(true)));
 
             Assert.Equal(
-                @"<select class=""tri-state list-box"" disabled=""disabled""><option value="""">Not Set</option><option value=""true"">True</option><option selected=""selected"" value=""false"">False</option></select>",
+                "<select class=\"tri-state list-box\" disabled=\"disabled\"><option value=\"\">Not Set</option><option value=\"true\">True</option><option selected=\"selected\" value=\"false\">False</option></select>",
                 DefaultDisplayTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(false)));
 
             Assert.Equal(
-                @"<select class=""tri-state list-box"" disabled=""disabled""><option selected=""selected"" value="""">Not Set</option><option value=""true"">True</option><option value=""false"">False</option></select>",
+                "<select class=\"tri-state list-box\" disabled=\"disabled\"><option selected=\"selected\" value=\"\">Not Set</option><option value=\"true\">True</option><option value=\"false\">False</option></select>",
                 DefaultDisplayTemplates.BooleanTemplate(MakeHtmlHelper<Nullable<bool>>(null)));
         }
 
@@ -101,9 +101,10 @@ namespace System.Web.Mvc.Html.Test
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -117,9 +118,10 @@ Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = ModelProperty[0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = ModelProperty[0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -133,11 +135,12 @@ Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = M
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = bar, ModelType = System.String, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = baz, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = foo, ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = bar, ModelType = System.String, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = baz, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -151,9 +154,10 @@ Model = baz, ModelType = System.String, PropertyName = (null), HtmlFieldName = [
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = (null), ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = (null), ModelType = System.String, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -167,9 +171,10 @@ Model = (null), ModelType = System.String, PropertyName = (null), HtmlFieldName 
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -183,11 +188,12 @@ Model = (null), ModelType = System.Web.IHttpHandler, PropertyName = (null), Html
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = 1, ModelType = System.Int32, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = 2.3, ModelType = System.Double, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = Hello World, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = 1, ModelType = System.Int32, PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = 2.3, ModelType = System.Double, PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = Hello World, ModelType = System.String, PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         [Fact]
@@ -201,11 +207,12 @@ Model = Hello World, ModelType = System.String, PropertyName = (null), HtmlField
             string result = DefaultDisplayTemplates.CollectionTemplate(html, CollectionSpyCallback);
 
             // Assert
-            Assert.Equal(@"
-Model = 1, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = (null), ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)
-Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
-                         result);
+            Assert.Equal(
+                Environment.NewLine
+              + "Model = 1, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [0], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = (null), ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [1], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)" + Environment.NewLine
+              + "Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], PropertyName = (null), HtmlFieldName = [2], TemplateName = (null), Mode = ReadOnly, TemplateInfo.HtmlFieldPrefix = , AdditionalViewData = (null)",
+                result);
         }
 
         // DecimalTemplate
@@ -218,11 +225,11 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
                 DefaultDisplayTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M)));
 
             Assert.Equal(
-                @"Formatted Value",
+                "Formatted Value",
                 DefaultDisplayTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M, "Formatted Value")));
 
             Assert.Equal(
-                @"&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;",
+                "&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;",
                 DefaultDisplayTemplates.DecimalTemplate(MakeHtmlHelper<decimal>(12.3456M, "<script>alert('XSS!')</script>")));
         }
 
@@ -232,19 +239,19 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void EmailAddressTemplateTests()
         {
             Assert.Equal(
-                @"<a href=""mailto:foo@bar.com"">foo@bar.com</a>",
+                "<a href=\"mailto:foo@bar.com\">foo@bar.com</a>",
                 DefaultDisplayTemplates.EmailAddressTemplate(MakeHtmlHelper<string>("foo@bar.com")));
 
             Assert.Equal(
-                @"<a href=""mailto:foo@bar.com"">The FooBar User</a>",
+                "<a href=\"mailto:foo@bar.com\">The FooBar User</a>",
                 DefaultDisplayTemplates.EmailAddressTemplate(MakeHtmlHelper<string>("foo@bar.com", "The FooBar User")));
 
             Assert.Equal(
-                @"<a href=""mailto:&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"">&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;</a>",
+                "<a href=\"mailto:&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\">&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;</a>",
                 DefaultDisplayTemplates.EmailAddressTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>")));
 
             Assert.Equal(
-                @"<a href=""mailto:&lt;script>alert(&#39;XSS!&#39;)&lt;/script>"">&lt;b&gt;Encode me!&lt;/b&gt;</a>",
+                "<a href=\"mailto:&lt;script>alert(&#39;XSS!&#39;)&lt;/script>\">&lt;b&gt;Encode me!&lt;/b&gt;</a>",
                 DefaultDisplayTemplates.EmailAddressTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>", "<b>Encode me!</b>")));
         }
 
@@ -254,11 +261,11 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void HiddenInputTemplateTests()
         {
             Assert.Equal(
-                @"Hidden Value",
+                "Hidden Value",
                 DefaultDisplayTemplates.HiddenInputTemplate(MakeHtmlHelper<string>("Hidden Value")));
 
             Assert.Equal(
-                @"&lt;b&gt;Encode me!&lt;/b&gt;",
+                "&lt;b&gt;Encode me!&lt;/b&gt;",
                 DefaultDisplayTemplates.HiddenInputTemplate(MakeHtmlHelper<string>("<script>alert('XSS!')</script>", "<b>Encode me!</b>")));
 
             var helperWithInvisibleHtml = MakeHtmlHelper<string>("<script>alert('XSS!')</script>", "<b>Encode me!</b>");
@@ -274,11 +281,11 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void HtmlTemplateTests()
         {
             Assert.Equal(
-                @"Hello, world!",
+                "Hello, world!",
                 DefaultDisplayTemplates.HtmlTemplate(MakeHtmlHelper<string>("", "Hello, world!")));
 
             Assert.Equal(
-                @"<b>Hello, world!</b>",
+                "<b>Hello, world!</b>",
                 DefaultDisplayTemplates.HtmlTemplate(MakeHtmlHelper<string>("", "<b>Hello, world!</b>")));
         }
 
@@ -311,11 +318,11 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         [Fact]
         public void ObjectTemplateDisplaysSimplePropertiesOnObjectByDefault()
         {
-            string expected = @"<div class=""display-label"">Property1</div>
-<div class=""display-field"">Model = p1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-<div class=""display-label"">Property2</div>
-<div class=""display-field"">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-";
+            string expected =
+                "<div class=\"display-label\">Property1</div>" + Environment.NewLine
+              + "<div class=\"display-field\">Model = p1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine
+              + "<div class=\"display-label\">Property2</div>" + Environment.NewLine
+              + "<div class=\"display-field\">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel { Property1 = "p1", Property2 = null };
@@ -331,10 +338,10 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         [Fact]
         public void ObjectTemplateWithDisplayNameMetadata()
         {
-            string expected = @"<div class=""display-field"">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-<div class=""display-label"">Custom display name</div>
-<div class=""display-field"">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-";
+            string expected =
+                "<div class=\"display-field\">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine
+              + "<div class=\"display-label\">Custom display name</div>" + Environment.NewLine
+              + "<div class=\"display-field\">Model = (null), ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -357,9 +364,9 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         [Fact]
         public void ObjectTemplateWithShowForDisplayMetadata()
         {
-            string expected = @"<div class=""display-label"">Property1</div>
-<div class=""display-field"">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-";
+            string expected =
+                "<div class=\"display-label\">Property1</div>" + Environment.NewLine
+              + "<div class=\"display-field\">Model = (null), ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -382,9 +389,9 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         [Fact]
         public void ObjectTemplatePreventsRecursionOnModelValue()
         {
-            string expected = @"<div class=""display-label"">Property2</div>
-<div class=""display-field"">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-";
+            string expected =
+                "<div class=\"display-label\">Property2</div>" + Environment.NewLine
+              + "<div class=\"display-field\">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -408,9 +415,9 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         [Fact]
         public void ObjectTemplatePreventsRecursionOnModelTypeForNullModelValues()
         {
-            string expected = @"<div class=""display-label"">Property2</div>
-<div class=""display-field"">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>
-";
+            string expected =
+                "<div class=\"display-label\">Property2</div>" + Environment.NewLine
+              + "<div class=\"display-field\">Model = propValue2, ModelType = System.String, PropertyName = Property2, HtmlFieldName = Property2, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)</div>" + Environment.NewLine;
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -469,7 +476,7 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         [Fact]
         public void ObjectTemplateWithHiddenHtml()
         {
-            string expected = @"Model = propValue1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)";
+            string expected = "Model = propValue1, ModelType = System.String, PropertyName = Property1, HtmlFieldName = Property1, TemplateName = (null), Mode = ReadOnly, AdditionalViewData = (null)";
 
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
@@ -511,11 +518,11 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void StringTemplateTests()
         {
             Assert.Equal(
-                @"Hello, world!",
+                "Hello, world!",
                 DefaultDisplayTemplates.StringTemplate(MakeHtmlHelper<string>("", "Hello, world!")));
 
             Assert.Equal(
-                @"&lt;b&gt;Hello, world!&lt;/b&gt;",
+                "&lt;b&gt;Hello, world!&lt;/b&gt;",
                 DefaultDisplayTemplates.StringTemplate(MakeHtmlHelper<string>("", "<b>Hello, world!</b>")));
         }
 
@@ -525,11 +532,11 @@ Model = 2, ModelType = System.Nullable`1[[System.Int32, mscorlib, Version=4.0.0.
         public void UrlTemplateTests()
         {
             Assert.Equal(
-                @"<a href=""http://www.microsoft.com/testing.aspx?value1=foo&amp;value2=bar"">http://www.microsoft.com/testing.aspx?value1=foo&amp;value2=bar</a>",
+                "<a href=\"http://www.microsoft.com/testing.aspx?value1=foo&amp;value2=bar\">http://www.microsoft.com/testing.aspx?value1=foo&amp;value2=bar</a>",
                 DefaultDisplayTemplates.UrlTemplate(MakeHtmlHelper<string>("http://www.microsoft.com/testing.aspx?value1=foo&value2=bar")));
 
             Assert.Equal(
-                @"<a href=""http://www.microsoft.com/testing.aspx?value1=foo&amp;value2=bar"">&lt;b&gt;Microsoft!&lt;/b&gt;</a>",
+                "<a href=\"http://www.microsoft.com/testing.aspx?value1=foo&amp;value2=bar\">&lt;b&gt;Microsoft!&lt;/b&gt;</a>",
                 DefaultDisplayTemplates.UrlTemplate(MakeHtmlHelper<string>("http://www.microsoft.com/testing.aspx?value1=foo&value2=bar", "<b>Microsoft!</b>")));
         }
 

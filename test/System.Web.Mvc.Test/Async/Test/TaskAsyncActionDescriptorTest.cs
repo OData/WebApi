@@ -62,8 +62,8 @@ namespace System.Web.Mvc.Async.Test
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new TaskAsyncActionDescriptor(getHashCodeMethod, "SomeAction", cd); },
-                @"Cannot create a descriptor for instance method 'Int32 GetHashCode()' on type 'System.Object' because the type does not derive from ControllerBase.
-Parameter name: taskMethodInfo");
+                "Cannot create a descriptor for instance method 'Int32 GetHashCode()' on type 'System.Object' because the type does not derive from ControllerBase." + Environment.NewLine
+              + "Parameter name: taskMethodInfo");
         }
 
         [Fact]

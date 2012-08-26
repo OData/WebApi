@@ -159,8 +159,8 @@ namespace System.Web.Mvc.Async.Test
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { AsyncResultWrapper.End<int>(asyncResult); },
-                @"The provided IAsyncResult is not valid for this method.
-Parameter name: asyncResult");
+                "The provided IAsyncResult is not valid for this method." + Environment.NewLine
+              + "Parameter name: asyncResult");
         }
 
         [Fact]
@@ -184,8 +184,8 @@ Parameter name: asyncResult");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { AsyncResultWrapper.End(asyncResult, "some other tag"); },
-                @"The provided IAsyncResult is not valid for this method.
-Parameter name: asyncResult");
+                "The provided IAsyncResult is not valid for this method." + Environment.NewLine
+              + "Parameter name: asyncResult");
         }
 
         [Fact]
@@ -201,7 +201,7 @@ Parameter name: asyncResult");
             AsyncResultWrapper.End(asyncResult);
             Assert.Throws<InvalidOperationException>(
                 delegate { AsyncResultWrapper.End(asyncResult); },
-                @"The provided IAsyncResult has already been consumed.");
+                "The provided IAsyncResult has already been consumed.");
         }
 
         [Fact]

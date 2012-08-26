@@ -77,12 +77,12 @@ namespace System.Web.Razor.Test.Parser.PartialParsing
         public void ImplicitExpressionAcceptsIdentifierExpansionAtEndOfNonWhitespaceCharacters()
         {
             var factory = SpanFactory.CreateCsHtml();
-            StringTextBuffer changed = new StringTextBuffer(@"@{
-    @food
-}");
-            StringTextBuffer old = new StringTextBuffer(@"@{
-    @foo
-}");
+            StringTextBuffer changed = new StringTextBuffer("@{" + Environment.NewLine
+                                                          + "    @food" + Environment.NewLine
+                                                          + "}");
+            StringTextBuffer old = new StringTextBuffer("@{" + Environment.NewLine
+                                                      + "    @foo" + Environment.NewLine
+                                                      + "}");
             RunPartialParseTest(new TextChange(12, 0, old, 1, changed),
                 new MarkupBlock(
                     factory.EmptyHtml(),
@@ -104,12 +104,12 @@ namespace System.Web.Razor.Test.Parser.PartialParsing
         public void ImplicitExpressionAcceptsIdentifierAfterDotAtEndOfNonWhitespaceCharacters()
         {
             var factory = SpanFactory.CreateCsHtml();
-            StringTextBuffer changed = new StringTextBuffer(@"@{
-    @foo.d
-}");
-            StringTextBuffer old = new StringTextBuffer(@"@{
-    @foo.
-}");
+            StringTextBuffer changed = new StringTextBuffer("@{" + Environment.NewLine
+                                                          + "    @foo.d" + Environment.NewLine
+                                                          + "}");
+            StringTextBuffer old = new StringTextBuffer("@{" + Environment.NewLine
+                                                      + "    @foo." + Environment.NewLine
+                                                      + "}");
             RunPartialParseTest(new TextChange(13, 0, old, 1, changed),
                 new MarkupBlock(
                     factory.EmptyHtml(),
@@ -131,12 +131,12 @@ namespace System.Web.Razor.Test.Parser.PartialParsing
         public void ImplicitExpressionAcceptsDotAtEndOfNonWhitespaceCharacters()
         {
             var factory = SpanFactory.CreateCsHtml();
-            StringTextBuffer changed = new StringTextBuffer(@"@{
-    @foo.
-}");
-            StringTextBuffer old = new StringTextBuffer(@"@{
-    @foo
-}");
+            StringTextBuffer changed = new StringTextBuffer("@{" + Environment.NewLine
+                                                          + "    @foo." + Environment.NewLine
+                                                          + "}");
+            StringTextBuffer old = new StringTextBuffer("@{" + Environment.NewLine
+                                                      + "    @foo" + Environment.NewLine
+                                                      + "}");
             RunPartialParseTest(new TextChange(12, 0, old, 1, changed),
                 new MarkupBlock(
                     factory.EmptyHtml(),

@@ -60,13 +60,13 @@ namespace System.Web.WebPages.Razor.Test
         [Fact]
         public void PostProcessGeneratedCodeAddsApplicationInstanceProperty()
         {
-            const string expectedPropertyCode = @"
-protected Foo.Bar ApplicationInstance {
-    get {
-        return ((Foo.Bar)(Context.ApplicationInstance));
-    }
-}
-";
+            string expectedPropertyCode =
+                Environment.NewLine
+              + "protected Foo.Bar ApplicationInstance {" + Environment.NewLine
+              + "    get {" + Environment.NewLine
+              + "        return ((Foo.Bar)(Context.ApplicationInstance));" + Environment.NewLine
+              + "    }" + Environment.NewLine
+              + "}" + Environment.NewLine;
 
             // Arrange
             WebPageRazorHost host = new WebPageRazorHost("Foo.cshtml")

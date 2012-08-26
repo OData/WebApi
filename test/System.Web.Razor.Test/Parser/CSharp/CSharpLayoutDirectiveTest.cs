@@ -29,7 +29,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void LayoutDirectiveAcceptsAllTextToEndOfLine()
         {
-            ParseBlockTest(@"@layout Foo Bar Baz",
+            ParseBlockTest("@layout Foo Bar Baz",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("layout ").Accepts(AcceptedCharacters.None),
@@ -43,7 +43,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void LayoutDirectiveAcceptsAnyIfNoWhitespaceFollowingLayoutKeyword()
         {
-            ParseBlockTest(@"@layout",
+            ParseBlockTest("@layout",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("layout")
@@ -54,7 +54,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void LayoutDirectiveOutputsMarkerSpanIfAnyWhitespaceAfterLayoutKeyword()
         {
-            ParseBlockTest(@"@layout ",
+            ParseBlockTest("@layout ",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("layout ").Accepts(AcceptedCharacters.None),
@@ -69,8 +69,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void LayoutDirectiveAcceptsTrailingNewlineButDoesNotIncludeItInLayoutPath()
         {
-            ParseBlockTest(@"@layout Foo
-",
+            ParseBlockTest("@layout Foo" + Environment.NewLine,
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("layout ").Accepts(AcceptedCharacters.None),
@@ -85,8 +84,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void LayoutDirectiveCorrectlyRestoresContextAfterCompleting()
         {
-            ParseDocumentTest(@"@layout Foo
-@foo",
+            ParseDocumentTest("@layout Foo" + Environment.NewLine
+                            + "@foo",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new DirectiveBlock(

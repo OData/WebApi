@@ -63,8 +63,8 @@ namespace System.Web.Mvc.Async.Test
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new ReflectedAsyncActionDescriptor(getHashCodeMethod, _completedMethod, "SomeAction", cd); },
-                @"Cannot create a descriptor for instance method 'Int32 GetHashCode()' on type 'System.Object' because the type does not derive from ControllerBase.
-Parameter name: asyncMethodInfo");
+                "Cannot create a descriptor for instance method 'Int32 GetHashCode()' on type 'System.Object' because the type does not derive from ControllerBase." + Environment.NewLine
+              + "Parameter name: asyncMethodInfo");
         }
 
         [Fact]
@@ -88,8 +88,8 @@ Parameter name: asyncMethodInfo");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { new ReflectedAsyncActionDescriptor(_asyncMethod, getHashCodeMethod, "SomeAction", cd); },
-                @"Cannot create a descriptor for instance method 'Int32 GetHashCode()' on type 'System.Object' because the type does not derive from ControllerBase.
-Parameter name: completedMethodInfo");
+                "Cannot create a descriptor for instance method 'Int32 GetHashCode()' on type 'System.Object' because the type does not derive from ControllerBase." + Environment.NewLine
+              + "Parameter name: completedMethodInfo");
         }
 
         [Fact]
@@ -165,7 +165,7 @@ Parameter name: completedMethodInfo");
             // Act & assert
             Assert.Throws<InvalidOperationException>(
                 delegate { ad.BeginExecute(controllerContext, new Dictionary<string, object>(), null, null); },
-                @"The controller of type 'System.Web.Mvc.Async.Test.ReflectedAsyncActionDescriptorTest+RegularSyncController' must subclass AsyncController or implement the IAsyncManagerContainer interface.");
+                "The controller of type 'System.Web.Mvc.Async.Test.ReflectedAsyncActionDescriptorTest+RegularSyncController' must subclass AsyncController or implement the IAsyncManagerContainer interface.");
         }
 
         [Fact]

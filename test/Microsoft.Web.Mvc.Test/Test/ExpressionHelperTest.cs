@@ -112,7 +112,8 @@ namespace Microsoft.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<ArgumentException>(
                 () => ExpressionHelper.GetRouteValuesFromExpression(expression),
-                "Expression must be a method call." + Environment.NewLine + "Parameter name: action");
+                "Expression must be a method call." + Environment.NewLine
+              + "Parameter name: action");
         }
 
         [Fact]
@@ -124,7 +125,8 @@ namespace Microsoft.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<ArgumentException>(
                 () => ExpressionHelper.GetRouteValuesFromExpression(index),
-                "Controller name must end in 'Controller'." + Environment.NewLine + "Parameter name: action");
+                "Controller name must end in 'Controller'." + Environment.NewLine
+              + "Parameter name: action");
         }
 
         [Fact]
@@ -136,7 +138,8 @@ namespace Microsoft.Web.Mvc.Test
             // Act & Assert
             Assert.Throws<ArgumentException>(
                 () => ExpressionHelper.GetRouteValuesFromExpression(index),
-                "Cannot route to class named 'Controller'." + Environment.NewLine + "Parameter name: action");
+                "Cannot route to class named 'Controller'." + Environment.NewLine
+              + "Parameter name: action");
         }
 
         [Fact]

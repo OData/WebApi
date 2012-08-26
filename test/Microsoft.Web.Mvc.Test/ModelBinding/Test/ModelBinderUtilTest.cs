@@ -259,8 +259,8 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { ModelBinderUtil.ValidateBindingContext(bindingContext, typeof(string), true); },
-                @"The binding context has a Model of type 'System.Int32', but this binder can only operate on models of type 'System.String'.
-Parameter name: bindingContext");
+                "The binding context has a Model of type 'System.Int32', but this binder can only operate on models of type 'System.String'." + Environment.NewLine
+              + "Parameter name: bindingContext");
         }
 
         [Fact]
@@ -275,8 +275,8 @@ Parameter name: bindingContext");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { ModelBinderUtil.ValidateBindingContext(bindingContext, typeof(string), false); },
-                @"The binding context has a null Model, but this binder requires a non-null model of type 'System.String'.
-Parameter name: bindingContext");
+                "The binding context has a null Model, but this binder requires a non-null model of type 'System.String'." + Environment.NewLine
+              + "Parameter name: bindingContext");
         }
 
         [Fact]
@@ -288,8 +288,8 @@ Parameter name: bindingContext");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { ModelBinderUtil.ValidateBindingContext(bindingContext, typeof(string), true); },
-                @"The binding context cannot have a null ModelMetadata.
-Parameter name: bindingContext");
+                "The binding context cannot have a null ModelMetadata." + Environment.NewLine
+              + "Parameter name: bindingContext");
         }
 
         [Fact]
@@ -304,8 +304,8 @@ Parameter name: bindingContext");
             // Act & assert
             Assert.Throws<ArgumentException>(
                 delegate { ModelBinderUtil.ValidateBindingContext(bindingContext, typeof(string), true); },
-                @"The binding context has a ModelType of 'System.Object', but this binder can only operate on models of type 'System.String'.
-Parameter name: bindingContext");
+                "The binding context has a ModelType of 'System.Object', but this binder can only operate on models of type 'System.String'." + Environment.NewLine
+              + "Parameter name: bindingContext");
         }
 
         private static ModelMetadata GetMetadata(Type modelType)

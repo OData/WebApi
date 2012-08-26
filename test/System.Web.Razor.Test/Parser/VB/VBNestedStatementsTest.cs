@@ -12,10 +12,10 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void VB_Nested_If_Statement()
         {
-            ParseBlockTest(@"@If True Then
-    If False Then
-    End If
-End If",
+            ParseBlockTest("@If True Then" + Environment.NewLine
+                         + "    If False Then" + Environment.NewLine
+                         + "    End If" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("If True Then\r\n    If False Then\r\n    End If\r\nEnd If")
@@ -26,10 +26,10 @@ End If",
         [Fact]
         public void VB_Nested_Do_Statement()
         {
-            ParseBlockTest(@"@Do While True
-    Do
-    Loop Until False
-Loop",
+            ParseBlockTest("@Do While True" + Environment.NewLine
+                         + "    Do" + Environment.NewLine
+                         + "    Loop Until False" + Environment.NewLine
+                         + "Loop",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Do While True\r\n    Do\r\n    Loop Until False\r\nLoop")
@@ -40,9 +40,9 @@ Loop",
         [Fact]
         public void VB_Nested_Markup_Statement_In_If()
         {
-            ParseBlockTest(@"@If True Then
-    @<p>Tag</p>
-End If",
+            ParseBlockTest("@If True Then" + Environment.NewLine
+                         + "    @<p>Tag</p>" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("If True Then\r\n")
@@ -60,11 +60,11 @@ End If",
         [Fact]
         public void VB_Nested_Markup_Statement_In_Code()
         {
-            ParseBlockTest(@"@Code
-    Foo()
-    @<p>Tag</p>
-    Bar()
-End Code",
+            ParseBlockTest("@Code" + Environment.NewLine
+                         + "    Foo()" + Environment.NewLine
+                         + "    @<p>Tag</p>" + Environment.NewLine
+                         + "    Bar()" + Environment.NewLine
+                         + "End Code",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Code")
@@ -85,9 +85,9 @@ End Code",
         [Fact]
         public void VB_Nested_Markup_Statement_In_Do()
         {
-            ParseBlockTest(@"@Do
-    @<p>Tag</p>
-Loop While True",
+            ParseBlockTest("@Do" + Environment.NewLine
+                         + "    @<p>Tag</p>" + Environment.NewLine
+                         + "Loop While True",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Do\r\n")
@@ -105,9 +105,9 @@ Loop While True",
         [Fact]
         public void VB_Nested_Single_Line_Markup_Statement_In_Do()
         {
-            ParseBlockTest(@"@Do
-    @:<p>Tag
-Loop While True",
+            ParseBlockTest("@Do" + Environment.NewLine
+                         + "    @:<p>Tag" + Environment.NewLine
+                         + "Loop While True",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("Do\r\n")
@@ -126,9 +126,9 @@ Loop While True",
         [Fact]
         public void VB_Nested_Implicit_Expression_In_If()
         {
-            ParseBlockTest(@"@If True Then
-    @Foo.Bar
-End If",
+            ParseBlockTest("@If True Then" + Environment.NewLine
+                         + "    @Foo.Bar" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("If True Then\r\n    ")
@@ -146,9 +146,9 @@ End If",
         [Fact]
         public void VB_Nested_Explicit_Expression_In_If()
         {
-            ParseBlockTest(@"@If True Then
-    @(Foo.Bar + 42)
-End If",
+            ParseBlockTest("@If True Then" + Environment.NewLine
+                         + "    @(Foo.Bar + 42)" + Environment.NewLine
+                         + "End If",
                 new StatementBlock(
                     Factory.CodeTransition(),
                     Factory.Code("If True Then\r\n    ")

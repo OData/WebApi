@@ -86,8 +86,8 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void FunctionsDirectiveAutoCompleteAtStartOfFile()
         {
-            ParseBlockTest(@"@functions{
-foo",
+            ParseBlockTest("@functions{" + Environment.NewLine
+                         + "foo",
                            new FunctionsBlock(
                                Factory.CodeTransition("@")
                                    .Accepts(AcceptedCharacters.None),
@@ -106,8 +106,8 @@ foo",
         [Fact]
         public void HelperDirectiveAutoCompleteAtStartOfFile()
         {
-            ParseBlockTest(@"@helper Strong(string value) {
-<p></p>",
+            ParseBlockTest("@helper Strong(string value) {" + Environment.NewLine
+                         + "<p></p>",
                            new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Strong(string value) {", 8, 0, 8), headerComplete: true),
                                            Factory.CodeTransition(),
                                            Factory.MetaCode("helper ")
@@ -135,8 +135,8 @@ foo",
         [Fact]
         public void SectionDirectiveAutoCompleteAtStartOfFile()
         {
-            ParseBlockTest(@"@section Header {
-<p>Foo</p>",
+            ParseBlockTest("@section Header {" + Environment.NewLine
+                         + "<p>Foo</p>",
                 new SectionBlock(new SectionCodeGenerator("Header"),
                     Factory.CodeTransition(),
                     Factory.MetaCode("section Header {")
@@ -151,8 +151,8 @@ foo",
         [Fact]
         public void VerbatimBlockAutoCompleteAtStartOfFile()
         {
-            ParseBlockTest(@"@{
-<p></p>",
+            ParseBlockTest("@{" + Environment.NewLine
+                         + "<p></p>",
                            new StatementBlock(
                                Factory.CodeTransition(),
                                Factory.MetaCode("{").Accepts(AcceptedCharacters.None),

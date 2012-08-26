@@ -13,9 +13,9 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void InnerImplicitExpressionWithOnlySingleAtAcceptsSingleSpaceOrNewlineAtDesignTime()
         {
-            ParseBlockTest(@"Code
-    @
-End Code",
+            ParseBlockTest("Code" + Environment.NewLine
+                         + "    @" + Environment.NewLine
+                         + "End Code",
                 new StatementBlock(
                     Factory.MetaCode("Code").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    ").AsStatement(),
@@ -36,9 +36,9 @@ End Code",
         [Fact]
         public void InnerImplicitExpressionDoesNotAcceptDotAfterAt()
         {
-            ParseBlockTest(@"Code
-    @.
-End Code",
+            ParseBlockTest("Code" + Environment.NewLine
+                         + "    @." + Environment.NewLine
+                         + "End Code",
                 new StatementBlock(
                     Factory.MetaCode("Code").Accepts(AcceptedCharacters.None),
                     Factory.Code("\r\n    ").AsStatement(),
@@ -96,15 +96,15 @@ End Code",
             string code;
             if (isImplicit)
             {
-                code = @"If foo IsNot Nothing Then
-    @" + expression + @"
-End If";
+                code = "If foo IsNot Nothing Then" + Environment.NewLine
+                     + "    @" + expression + Environment.NewLine
+                     + "End If";
             }
             else
             {
-                code = @"If foo IsNot Nothing Then
-    @(" + expression + @")
-End If";
+                code = "If foo IsNot Nothing Then" + Environment.NewLine
+                     + "    @(" + expression + ")" + Environment.NewLine
+                     + "End If";
             }
 
             ParseBlockTest(code,

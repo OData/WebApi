@@ -165,7 +165,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("");
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">some error text</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">some error text</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -191,7 +191,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo");
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -204,7 +204,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("quux");
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">The value &#39;quuxValue&#39; is invalid.</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">The value &#39;quuxValue&#39; is invalid.</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -230,7 +230,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo", new { bar = "bar" });
 
             // Assert
-            Assert.Equal(@"<span bar=""bar"" class=""field-validation-error"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span bar=\"bar\" class=\"field-validation-error\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -243,7 +243,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo", new { foo_bar = "bar" });
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"" foo-bar=""bar"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\" foo-bar=\"bar\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -256,7 +256,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error");
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">bar error</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">bar error</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error", new { baz = "baz" });
 
             // Assert
-            Assert.Equal(@"<span baz=""baz"" class=""field-validation-error"">bar error</span>", html.ToHtmlString());
+            Assert.Equal("<span baz=\"baz\" class=\"field-validation-error\">bar error</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -282,7 +282,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo", "bar error", new { foo_baz = "baz" });
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"" foo-baz=""baz"">bar error</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\" foo-baz=\"baz\">bar error</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -328,7 +328,7 @@ namespace System.Web.Mvc.Html.Test
                 MvcHtmlString html = htmlHelper.ValidationMessage("baz"); // 'baz' is valid
 
                 // Assert
-                Assert.Equal(@"<span class=""field-validation-valid"" id=""baz_validationMessage""></span>", html.ToHtmlString());
+                Assert.Equal("<span class=\"field-validation-valid\" id=\"baz_validationMessage\"></span>", html.ToHtmlString());
                 Assert.NotNull(formContext.GetValidationMetadataForField("baz"));
                 Assert.Equal("baz_validationMessage", formContext.FieldValidators["baz"].ValidationMessageId);
                 Assert.True(formContext.FieldValidators["baz"].ReplaceValidationMessageContents);
@@ -377,7 +377,7 @@ namespace System.Web.Mvc.Html.Test
                 MvcHtmlString html = htmlHelper.ValidationMessage("baz"); // 'baz' is valid
 
                 // Assert
-                Assert.Equal(@"<span class=""field-validation-valid"" data-valmsg-for=""baz"" data-valmsg-replace=""true""></span>", html.ToHtmlString());
+                Assert.Equal("<span class=\"field-validation-valid\" data-valmsg-for=\"baz\" data-valmsg-replace=\"true\"></span>", html.ToHtmlString());
             }
             finally
             {
@@ -421,7 +421,7 @@ namespace System.Web.Mvc.Html.Test
                 MvcHtmlString html = htmlHelper.ValidationMessage("baz", "some explicit message"); // 'baz' is valid
 
                 // Assert
-                Assert.Equal(@"<span class=""field-validation-valid"" id=""baz_validationMessage"">some explicit message</span>", html.ToHtmlString());
+                Assert.Equal("<span class=\"field-validation-valid\" id=\"baz_validationMessage\">some explicit message</span>", html.ToHtmlString());
                 Assert.NotNull(formContext.GetValidationMetadataForField("baz"));
                 Assert.Equal("baz_validationMessage", formContext.FieldValidators["baz"].ValidationMessageId);
                 Assert.False(formContext.FieldValidators["baz"].ReplaceValidationMessageContents);
@@ -470,7 +470,7 @@ namespace System.Web.Mvc.Html.Test
                 MvcHtmlString html = htmlHelper.ValidationMessage("baz", "some explicit message"); // 'baz' is valid
 
                 // Assert
-                Assert.Equal(@"<span class=""field-validation-valid"" data-valmsg-for=""baz"" data-valmsg-replace=""false"">some explicit message</span>", html.ToHtmlString());
+                Assert.Equal("<span class=\"field-validation-valid\" data-valmsg-for=\"baz\" data-valmsg-replace=\"false\">some explicit message</span>", html.ToHtmlString());
             }
             finally
             {
@@ -533,7 +533,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo);
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -546,7 +546,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.quux);
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">The value &#39;quuxValue&#39; is invalid.</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">The value &#39;quuxValue&#39; is invalid.</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -559,7 +559,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, null /* validationMessage */, new { bar = "bar" });
 
             // Assert
-            Assert.Equal(@"<span bar=""bar"" class=""field-validation-error"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span bar=\"bar\" class=\"field-validation-error\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -572,7 +572,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, null /* validationMessage */, new { foo_bar = "bar" });
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"" foo-bar=""bar"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\" foo-bar=\"bar\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -585,7 +585,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, "bar error");
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">bar error</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">bar error</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -598,7 +598,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.foo, "bar error", new { baz = "baz" });
 
             // Assert
-            Assert.Equal(@"<span baz=""baz"" class=""field-validation-error"">bar error</span>", html.ToHtmlString());
+            Assert.Equal("<span baz=\"baz\" class=\"field-validation-error\">bar error</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -633,7 +633,7 @@ namespace System.Web.Mvc.Html.Test
                 MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.baz);
 
                 // Assert
-                Assert.Equal(@"<span class=""field-validation-valid"" id=""baz_validationMessage""></span>", html.ToHtmlString());
+                Assert.Equal("<span class=\"field-validation-valid\" id=\"baz_validationMessage\"></span>", html.ToHtmlString());
                 Assert.NotNull(formContext.GetValidationMetadataForField("baz"));
                 Assert.Equal("baz_validationMessage", formContext.FieldValidators["baz"].ValidationMessageId);
                 Assert.Equal(expectedValidationRules, formContext.FieldValidators["baz"].ValidationRules.ToArray());
@@ -681,7 +681,7 @@ namespace System.Web.Mvc.Html.Test
                 MvcHtmlString html = htmlHelper.ValidationMessageFor(m => m.baz);
 
                 // Assert
-                Assert.Equal(@"<span class=""field-validation-valid"" data-valmsg-for=""baz"" data-valmsg-replace=""true""></span>", html.ToHtmlString());
+                Assert.Equal("<span class=\"field-validation-valid\" data-valmsg-for=\"baz\" data-valmsg-replace=\"true\"></span>", html.ToHtmlString());
             }
             finally
             {
@@ -718,12 +718,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary();
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors""><ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -738,12 +739,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary();
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors"" id=""validationSummary""><ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\" id=\"validationSummary\"><ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
             Assert.Equal("validationSummary", htmlHelper.ViewContext.FormContext.ValidationSummaryId);
         }
 
@@ -760,11 +762,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary();
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors"" data-valmsg-summary=""true""><ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>", html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\" data-valmsg-summary=\"true\"><ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -779,12 +783,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary(null /* message */, htmlAttributes);
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors my-class""><ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors my-class\"><ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -799,13 +804,14 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary("This is my message.", htmlAttributes);
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors my-class""><span>This is my message.</span>
-<ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors my-class\"><span>This is my message.</span>" + Environment.NewLine
+              + "<ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -833,9 +839,10 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary();
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-valid"" id=""validationSummary""><ul><li style=""display:none""></li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-valid\" id=\"validationSummary\"><ul><li style=\"display:none\"></li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -848,12 +855,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary(null /* message */, new { baz = "baz" });
 
             // Assert
-            Assert.Equal(@"<div baz=""baz"" class=""validation-summary-errors""><ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div baz=\"baz\" class=\"validation-summary-errors\"><ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -866,12 +874,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary(null /* message */, new { foo_baz = "baz" });
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors"" foo-baz=""baz""><ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\" foo-baz=\"baz\"><ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -884,13 +893,14 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary("This is my message.", new { baz = "baz" });
 
             // Assert
-            Assert.Equal(@"<div baz=""baz"" class=""validation-summary-errors""><span>This is my message.</span>
-<ul><li>foo error &lt;1&gt;</li>
-<li>foo error 2</li>
-<li>bar error &lt;1&gt;</li>
-<li>bar error 2</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div baz=\"baz\" class=\"validation-summary-errors\"><span>This is my message.</span>" + Environment.NewLine
+              + "<ul><li>foo error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>foo error 2</li>" + Environment.NewLine
+              + "<li>bar error &lt;1&gt;</li>" + Environment.NewLine
+              + "<li>bar error 2</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -903,10 +913,11 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary(true /* excludePropertyErrors */, "This is my message.");
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors""><span>This is my message.</span>
-<ul><li style=""display:none""></li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><span>This is my message.</span>" + Environment.NewLine
+              + "<ul><li style=\"display:none\"></li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -919,11 +930,12 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary(true /* excludePropertyErrors */, "This is my message.");
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors""><span>This is my message.</span>
-<ul><li>Something is wrong.</li>
-<li>Something else is also wrong.</li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><span>This is my message.</span>" + Environment.NewLine
+              + "<ul><li>Something is wrong.</li>" + Environment.NewLine
+              + "<li>Something else is also wrong.</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -936,10 +948,11 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary(true /* excludePropertyErrors */, "This is my message.");
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors""><span>This is my message.</span>
-<ul><li style=""display:none""></li>
-</ul></div>",
-                         html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><span>This is my message.</span>" + Environment.NewLine
+              + "<ul><li style=\"display:none\"></li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
         }
 
         [Fact]
@@ -952,7 +965,7 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationMessage("foo");
 
             // Assert
-            Assert.Equal(@"<span class=""field-validation-error"">foo error &lt;1&gt;</span>", html.ToHtmlString());
+            Assert.Equal("<span class=\"field-validation-error\">foo error &lt;1&gt;</span>", html.ToHtmlString());
         }
 
         [Fact]
@@ -965,11 +978,13 @@ namespace System.Web.Mvc.Html.Test
             MvcHtmlString html = htmlHelper.ValidationSummary();
 
             // Assert
-            Assert.Equal(@"<div class=""validation-summary-errors""><ul><li>Error 1</li>
-<li>Error 2</li>
-<li>Error 3</li>
-<li>Error 4</li>
-</ul></div>", html.ToHtmlString());
+            Assert.Equal(
+                "<div class=\"validation-summary-errors\"><ul><li>Error 1</li>" + Environment.NewLine
+              + "<li>Error 2</li>" + Environment.NewLine
+              + "<li>Error 3</li>" + Environment.NewLine
+              + "<li>Error 4</li>" + Environment.NewLine
+              + "</ul></div>",
+                html.ToHtmlString());
 
         }
 
@@ -1067,7 +1082,6 @@ namespace System.Web.Mvc.Html.Test
             viewData.ModelState.AddModelError(prefix + ".quux", new InvalidOperationException("Some error text."));
             return viewData;
         }
-
 
         private static ViewDataDictionary<ModelWithOrdering> GetViewDataWithModelWithDisplayOrderErrors()
         {

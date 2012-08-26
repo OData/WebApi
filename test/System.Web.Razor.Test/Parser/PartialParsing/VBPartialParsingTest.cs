@@ -152,12 +152,12 @@ namespace System.Web.Razor.Test.Parser.PartialParsing
         public void ImplicitExpressionAcceptsIdentifierExpansionAtEndOfNonWhitespaceCharacters()
         {
             var factory = SpanFactory.CreateVbHtml();
-            StringTextBuffer changed = new StringTextBuffer(@"@Code
-    @food
-End Code");
-            StringTextBuffer old = new StringTextBuffer(@"@Code
-    @foo
-End Code");
+            StringTextBuffer changed = new StringTextBuffer("@Code" + Environment.NewLine
+                                                          + "    @food" + Environment.NewLine
+                                                          + "End Code");
+            StringTextBuffer old = new StringTextBuffer("@Code" + Environment.NewLine
+                                                      + "    @foo" + Environment.NewLine
+                                                      + "End Code");
             RunPartialParseTest(new TextChange(15, 0, old, 1, changed),
                 new MarkupBlock(
                     factory.EmptyHtml(),

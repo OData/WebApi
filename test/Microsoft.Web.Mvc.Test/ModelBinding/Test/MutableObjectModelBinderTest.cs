@@ -485,8 +485,9 @@ namespace Microsoft.Web.Mvc.ModelBinding.Test
             testableBinder.SetPropertyPublic(null, bindingContext, propertyMetadata, dtoResult);
 
             // Assert
-            Assert.Equal(@"Date of death can't be before date of birth.
-Parameter name: value", bindingContext.ModelState["foo"].Errors[0].Exception.Message);
+            Assert.Equal("Date of death can't be before date of birth." + Environment.NewLine
+                       + "Parameter name: value",
+                         bindingContext.ModelState["foo"].Errors[0].Exception.Message);
         }
 
         [Fact]
@@ -571,8 +572,9 @@ Parameter name: value", bindingContext.ModelState["foo"].Errors[0].Exception.Mes
             // Assert
             Assert.False(bindingContext.ModelState.IsValid);
             Assert.Equal(1, bindingContext.ModelState["foo.NameNoAttribute"].Errors.Count);
-            Assert.Equal(@"This is a different exception.
-Parameter name: value", bindingContext.ModelState["foo.NameNoAttribute"].Errors[0].Exception.Message);
+            Assert.Equal("This is a different exception." + Environment.NewLine
+                       + "Parameter name: value",
+                         bindingContext.ModelState["foo.NameNoAttribute"].Errors[0].Exception.Message);
         }
 
         [Fact]

@@ -31,7 +31,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void LayoutDirectiveAcceptsAllTextToEndOfLine()
         {
-            ParseBlockTest(@"@Layout Foo Bar Baz",
+            ParseBlockTest("@Layout Foo Bar Baz",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Layout ").Accepts(AcceptedCharacters.None),
@@ -45,7 +45,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void LayoutDirectiveAcceptsAnyIfNoWhitespaceFollowingLayoutKeyword()
         {
-            ParseBlockTest(@"@Layout",
+            ParseBlockTest("@Layout",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Layout")
@@ -56,7 +56,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void LayoutDirectiveOutputsMarkerSpanIfAnyWhitespaceAfterLayoutKeyword()
         {
-            ParseBlockTest(@"@Layout ",
+            ParseBlockTest("@Layout ",
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Layout ").Accepts(AcceptedCharacters.None),
@@ -71,8 +71,7 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void LayoutDirectiveAcceptsTrailingNewlineButDoesNotIncludeItInLayoutPath()
         {
-            ParseBlockTest(@"@Layout Foo
-",
+            ParseBlockTest("@Layout Foo" + Environment.NewLine,
                 new DirectiveBlock(
                     Factory.CodeTransition(),
                     Factory.MetaCode("Layout ").Accepts(AcceptedCharacters.None),

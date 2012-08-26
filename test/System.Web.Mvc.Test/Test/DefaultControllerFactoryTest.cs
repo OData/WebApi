@@ -32,11 +32,13 @@ namespace System.Web.Mvc.Test
             InvalidOperationException exception = DefaultControllerFactory.CreateAmbiguousControllerException(route, "Foo", matchingTypes);
 
             // Assert
-            Assert.Equal(@"Multiple types were found that match the controller named 'Foo'. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter.
-
-The request for 'Foo' has found the following matching controllers:
-System.Object
-System.String", exception.Message);
+            Assert.Equal(
+                "Multiple types were found that match the controller named 'Foo'. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter." + Environment.NewLine
+              + Environment.NewLine
+              + "The request for 'Foo' has found the following matching controllers:" + Environment.NewLine
+              + "System.Object" + Environment.NewLine
+              + "System.String",
+                exception.Message);
         }
 
         [Fact]
@@ -55,11 +57,13 @@ System.String", exception.Message);
             InvalidOperationException exception = DefaultControllerFactory.CreateAmbiguousControllerException(route, "Foo", matchingTypes);
 
             // Assert
-            Assert.Equal(@"Multiple types were found that match the controller named 'Foo'. This can happen if the route that services this request ('{controller}/blah') does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter.
-
-The request for 'Foo' has found the following matching controllers:
-System.Object
-System.String", exception.Message);
+            Assert.Equal(
+                "Multiple types were found that match the controller named 'Foo'. This can happen if the route that services this request ('{controller}/blah') does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter." + Environment.NewLine
+              + Environment.NewLine
+              + "The request for 'Foo' has found the following matching controllers:" + Environment.NewLine
+              + "System.Object" + Environment.NewLine
+              + "System.String",
+                exception.Message);
         }
 
         [Fact]
@@ -422,11 +426,11 @@ System.String", exception.Message);
             // Act
             Assert.Throws<InvalidOperationException>(
                 delegate { factory.GetControllerType(requestContext, "C1"); },
-                @"Multiple types were found that match the controller named 'C1'. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter.
-
-The request for 'C1' has found the following matching controllers:
-NS1a.NS1b.C1Controller
-NS3a.NS3b.C1Controller");
+                "Multiple types were found that match the controller named 'C1'. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter." + Environment.NewLine
+              + Environment.NewLine
+              + "The request for 'C1' has found the following matching controllers:" + Environment.NewLine
+              + "NS1a.NS1b.C1Controller" + Environment.NewLine
+              + "NS3a.NS3b.C1Controller");
 
             // Assert
             Assert.Equal(4, controllerTypeCache.Count);
@@ -447,11 +451,11 @@ NS3a.NS3b.C1Controller");
             // Act
             Assert.Throws<InvalidOperationException>(
                 delegate { factory.GetControllerType(requestContext, "C1"); },
-                @"Multiple types were found that match the controller named 'C1'. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter.
-
-The request for 'C1' has found the following matching controllers:
-NS1a.NS1b.C1Controller
-NS1a.NS1b.C1Controller");
+                "Multiple types were found that match the controller named 'C1'. This can happen if the route that services this request does not specify namespaces to search for a controller that matches the request. If this is the case, register this route by calling an overload of the 'MapRoute' method that takes a 'namespaces' parameter." + Environment.NewLine
+              + Environment.NewLine
+              + "The request for 'C1' has found the following matching controllers:" + Environment.NewLine
+              + "NS1a.NS1b.C1Controller" + Environment.NewLine
+              + "NS1a.NS1b.C1Controller");
 
             // Assert
             Assert.Equal(4, controllerTypeCache.Count);

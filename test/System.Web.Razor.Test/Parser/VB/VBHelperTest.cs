@@ -65,8 +65,8 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void ParseHelperStatementTerminatesEarlyIfHeaderNotComplete()
         {
-            ParseDocumentTest(@"@Helper
-@Helper",
+            ParseDocumentTest("@Helper" + Environment.NewLine
+                            + "@Helper",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(
@@ -124,8 +124,8 @@ namespace System.Web.Razor.Test.Parser.VB
         [Fact]
         public void ParseHelperStatementAllowsDifferentlyCasedEndHelperKeyword()
         {
-            ParseDocumentTest(@"@Helper Foo()
-end helper",
+            ParseDocumentTest("@Helper Foo()" + Environment.NewLine
+                            + "end helper",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo()", 8, 0, 8), headerComplete: true),
@@ -141,8 +141,8 @@ end helper",
         [Fact]
         public void ParseHelperStatementCapturesWhitespaceToEndOfLineIfHelperStatementMissingName()
         {
-            ParseDocumentTest(@"@Helper                       
-    ",
+            ParseDocumentTest("@Helper                       " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("                      ", 8, 0, 8), headerComplete: false),
@@ -160,8 +160,8 @@ end helper",
         [Fact]
         public void ParseHelperStatementCapturesWhitespaceToEndOfLineIfHelperStatementMissingOpenParen()
         {
-            ParseDocumentTest(@"@Helper Foo    
-    ",
+            ParseDocumentTest("@Helper Foo    " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo    ", 8, 0, 8), headerComplete: false),
@@ -177,9 +177,9 @@ end helper",
         [Fact]
         public void ParseHelperStatementCapturesAllContentToEndOfFileIfHelperStatementMissingCloseParenInParameterList()
         {
-            ParseDocumentTest(@"@Helper Foo(Foo Bar
-Biz
-Boz",
+            ParseDocumentTest("@Helper Foo(Foo Bar" + Environment.NewLine
+                            + "Biz" + Environment.NewLine
+                            + "Boz",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(Foo Bar\r\nBiz\r\nBoz", 8, 0, 8), headerComplete: false),
@@ -192,8 +192,7 @@ Boz",
         [Fact]
         public void ParseHelperStatementCapturesWhitespaceToEndOfLineIfHelperStatementMissingOpenBraceAfterParameterList()
         {
-            ParseDocumentTest(@"@Helper Foo(foo as String)    
-",
+            ParseDocumentTest("@Helper Foo(foo as String)    " + Environment.NewLine,
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(foo as String)", 8, 0, 8), headerComplete: true),
@@ -212,8 +211,8 @@ Boz",
         [Fact]
         public void ParseHelperStatementContinuesParsingHelperUntilEOF()
         {
-            ParseDocumentTest(@"@Helper Foo(foo as String)
-    @<p>Foo</p>",
+            ParseDocumentTest("@Helper Foo(foo as String)" + Environment.NewLine
+                            + "    @<p>Foo</p>",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(foo as String)", 8, 0, 8), headerComplete: true),
@@ -237,9 +236,9 @@ Boz",
         [Fact]
         public void ParseHelperStatementCorrectlyParsesHelperWithEmbeddedCode()
         {
-            ParseDocumentTest(@"@Helper Foo(foo as String, bar as String)
-    @<p>@foo</p>
-End Helper",
+            ParseDocumentTest("@Helper Foo(foo as String, bar as String)" + Environment.NewLine
+                            + "    @<p>@foo</p>" + Environment.NewLine
+                            + "End Helper",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(foo as String, bar as String)", 8, 0, 8), headerComplete: true),
@@ -266,8 +265,8 @@ End Helper",
         [Fact]
         public void ParseHelperStatementGivesWhitespaceAfterCloseParenToMarkup()
         {
-            ParseDocumentTest(@"@Helper Foo(string foo)     
-    ",
+            ParseDocumentTest("@Helper Foo(string foo)     " + Environment.NewLine
+                            + "    ",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo)", 8, 0, 8), headerComplete: true),
@@ -290,10 +289,10 @@ End Helper",
         [Fact]
         public void ParseHelperAcceptsNestedHelpersButOutputsError()
         {
-            ParseDocumentTest(@"@Helper Foo(string foo)
-    @Helper Bar(string baz)
-    End Helper
-End Helper",
+            ParseDocumentTest("@Helper Foo(string foo)" + Environment.NewLine
+                            + "    @Helper Bar(string baz)" + Environment.NewLine
+                            + "    End Helper" + Environment.NewLine
+                            + "End Helper",
                 new MarkupBlock(
                     Factory.EmptyHtml(),
                     new HelperBlock(new HelperCodeGenerator(new LocationTagged<string>("Foo(string foo)", 8, 0, 8), headerComplete: true),

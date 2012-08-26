@@ -30,7 +30,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void InnerImplicitExpressionWithOnlySingleAtOutputsZeroLengthCodeSpan()
         {
-            ParseBlockTest(@"{@}",
+            ParseBlockTest("{@}",
                            new StatementBlock(
                                Factory.MetaCode("{").Accepts(AcceptedCharacters.None),
                                Factory.EmptyCSharp().AsStatement(),
@@ -50,7 +50,7 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void InnerImplicitExpressionDoesNotAcceptDotAfterAt()
         {
-            ParseBlockTest(@"{@.}",
+            ParseBlockTest("{@.}",
                            new StatementBlock(
                                Factory.MetaCode("{").Accepts(AcceptedCharacters.None),
                                Factory.EmptyCSharp().AsStatement(),
@@ -70,9 +70,9 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void InnerImplicitExpressionWithOnlySingleAtAcceptsSingleSpaceOrNewlineAtDesignTime()
         {
-            ParseBlockTest(@"{
-    @
-}",
+            ParseBlockTest("{" + Environment.NewLine
+                         + "    @" + Environment.NewLine
+                         + "}",
                            new StatementBlock(
                                Factory.MetaCode("{").Accepts(AcceptedCharacters.None),
                                Factory.Code("\r\n    ").AsStatement(),
@@ -89,14 +89,14 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void InnerImplicitExpressionDoesNotAcceptTrailingNewlineInRunTimeMode()
         {
-            ParseBlockTest(@"{@foo.
-}",
+            ParseBlockTest("{@foo." + Environment.NewLine
+                         + "}",
                            new StatementBlock(
                                Factory.MetaCode("{").Accepts(AcceptedCharacters.None),
                                Factory.EmptyCSharp().AsStatement(),
                                new ExpressionBlock(
                                    Factory.CodeTransition(),
-                                   Factory.Code(@"foo.").AsImplicitExpression(KeywordSet, acceptTrailingDot: true).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                                   Factory.Code("foo.").AsImplicitExpression(KeywordSet, acceptTrailingDot: true).Accepts(AcceptedCharacters.NonWhiteSpace)),
                                Factory.Code("\r\n").AsStatement(),
                                Factory.MetaCode("}").Accepts(AcceptedCharacters.None)));
         }
@@ -104,14 +104,14 @@ namespace System.Web.Razor.Test.Parser.CSharp
         [Fact]
         public void InnerImplicitExpressionAcceptsTrailingNewlineInDesignTimeMode()
         {
-            ParseBlockTest(@"{@foo.
-}",
+            ParseBlockTest("{@foo." + Environment.NewLine
+                         + "}",
                            new StatementBlock(
                                Factory.MetaCode("{").Accepts(AcceptedCharacters.None),
                                Factory.EmptyCSharp().AsStatement(),
                                new ExpressionBlock(
                                    Factory.CodeTransition(),
-                                   Factory.Code(@"foo.").AsImplicitExpression(KeywordSet, acceptTrailingDot: true).Accepts(AcceptedCharacters.NonWhiteSpace)),
+                                   Factory.Code("foo.").AsImplicitExpression(KeywordSet, acceptTrailingDot: true).Accepts(AcceptedCharacters.NonWhiteSpace)),
                                Factory.Code("\r\n").AsStatement(),
                                Factory.MetaCode("}").Accepts(AcceptedCharacters.None)),
                            designTimeParser: true);

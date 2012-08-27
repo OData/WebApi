@@ -395,15 +395,17 @@ namespace System.Web.Http.OData.Formatter
                 if (headers.TryGetValues(headerName, out values))
                 {
                     string value = values.FirstOrDefault();
-                    Contract.Assert(value != null);
-                    string trimmedValue = value.Trim(' ', ';');
-                    try
+                    if (value != null)
                     {
-                        return ODataUtils.StringToODataVersion(trimmedValue);
-                    }
-                    catch (ODataException)
-                    {
-                        // Parsing ODataVersion failed, try next header
+                        string trimmedValue = value.Trim(' ', ';');
+                        try
+                        {
+                            return ODataUtils.StringToODataVersion(trimmedValue);
+                        }
+                        catch (ODataException)
+                        {
+                            // Parsing ODataVersion failed, try next header
+                        }
                     }
                 }
             }

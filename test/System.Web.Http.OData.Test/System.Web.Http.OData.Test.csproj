@@ -119,6 +119,8 @@
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
     <Compile Include="OData\DefaultODataActionResolverTest.cs" />
+    <Compile Include="OData\Formatter\CollectionsTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpersTest.cs" />
     <Compile Include="OData\Formatter\ODataActionTests.cs" />
     <Compile Include="OData\Formatter\InheritanceTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializerTest.cs" />

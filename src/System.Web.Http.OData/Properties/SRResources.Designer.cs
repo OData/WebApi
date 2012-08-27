@@ -133,6 +133,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; returned a null value. The input stream contains collection items which cannot be added if the instance is null..
+        /// </summary>
+        internal static string CannotAddToNullCollection {
+            get {
+                return ResourceManager.GetString("CannotAddToNullCollection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot apply {0} of &apos;{1}&apos; to {2} of &apos;{3}&apos;..
         /// </summary>
         internal static string CannotApplyODataQueryOptionsOfT {
@@ -228,6 +237,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string CollectionPropertiesMustReturnIEnumerable {
             get {
                 return ResourceManager.GetString("CollectionPropertiesMustReturnIEnumerable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the property &apos;{1}&apos; on type &apos;{2}&apos; does not have an Add method. Consider using a collection type that does have an Add method - for example IList&lt;T&gt; or ICollection&lt;T&gt;..
+        /// </summary>
+        internal static string CollectionShouldHaveAddMethod {
+            get {
+                return ResourceManager.GetString("CollectionShouldHaveAddMethod", resourceCulture);
             }
         }
         
@@ -453,6 +471,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string GetEdmModelCalledMoreThanOnce {
             get {
                 return ResourceManager.GetString("GetEdmModelCalledMoreThanOnce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value of the property &apos;{0}&apos; on type &apos;{1}&apos; is an array. Consider adding a setter for the property..
+        /// </summary>
+        internal static string GetOnlyCollectionCannotBeArray {
+            get {
+                return ResourceManager.GetString("GetOnlyCollectionCannotBeArray", resourceCulture);
             }
         }
         
@@ -804,6 +831,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string PropertyDoesNotBelongToType {
             get {
                 return ResourceManager.GetString("PropertyDoesNotBelongToType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the property &apos;{1}&apos; on type &apos;{2}&apos; must be a collection..
+        /// </summary>
+        internal static string PropertyIsNotCollection {
+            get {
+                return ResourceManager.GetString("PropertyIsNotCollection", resourceCulture);
             }
         }
         

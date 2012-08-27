@@ -39,9 +39,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             serializer.WriteObject(addresses, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { ServiceOperationName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
-            IEnumerable<Address> readAddresses = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable<Address>;
+            IEnumerable readAddresses = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
 
-            Assert.Equal(addresses, readAddresses, new AddressComparer());
+            Assert.Equal(addresses, readAddresses.Cast<Address>(), new AddressComparer());
         }
 
         [Fact]
@@ -57,9 +57,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             serializer.WriteObject(numbers, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { ServiceOperationName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
-            IEnumerable<int> readnumbers = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable<int>;
+            IEnumerable readnumbers = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
 
-            Assert.Equal(numbers, readnumbers);
+            Assert.Equal(numbers, readnumbers.Cast<int>());
         }
 
         private static IEdmModel GetEdmModel()

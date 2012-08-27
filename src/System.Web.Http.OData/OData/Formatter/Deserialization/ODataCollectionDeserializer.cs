@@ -45,29 +45,30 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return null;
             }
 
+            return ReadItems(collection, readContext);
+        }
+
+        private IEnumerable ReadItems(ODataCollectionValue collection, ODataDeserializerContext readContext)
+        {
             RecurseEnter(readContext);
 
             IEdmTypeReference elementType = _edmCollectionType.ElementType();
             ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(elementType);
-
             Contract.Assert(deserializer != null);
 
-            IList collectionValue = CreateNewCollection(EdmLibHelpers.GetClrType(elementType, EdmModel));
             foreach (object entry in collection.Items)
             {
                 if (elementType.IsPrimitive())
                 {
-                    collectionValue.Add(entry);
+                    yield return entry;
                 }
                 else
                 {
-                    collectionValue.Add(deserializer.ReadInline(entry, readContext));
+                    yield return deserializer.ReadInline(entry, readContext);
                 }
             }
 
             RecurseLeave(readContext);
-
-            return collectionValue;
         }
 
         private ODataCollectionValue ReadCollection(ODataMessageReader messageReader)

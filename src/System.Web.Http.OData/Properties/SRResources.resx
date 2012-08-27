@@ -348,6 +348,9 @@
   <data name="DefaultRouteMissingOrIncorrect" xml:space="preserve">
     <value>The feed self link could not be generated for the route named '{0}'.</value>
   </data>
+  <data name="CollectionShouldHaveAddMethod" xml:space="preserve">
+    <value>The type '{0}' of the property '{1}' on type '{2}' does not have an Add method. Consider using a collection type that does have an Add method - for example IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
+  </data>
   <data name="InvalidBindingParameterType" xml:space="preserve">
     <value>Invalid bindingParameter type '{0}'. A bindingParameter must be either an EntityType or a Collection of EntityTypes.</value>
   </data>
@@ -440,5 +443,14 @@
   </data>
   <data name="NoODataFormatterForMetadata" xml:space="preserve">
     <value>No OData formatter was found to write the OData metadata. Consider registering an appropriate ODataMediaTypeFormatter on the configuration's formatter collection.</value>
+  </data>
+  <data name="CannotAddToNullCollection" xml:space="preserve">
+    <value>The property '{0}' on type '{1}' returned a null value. The input stream contains collection items which cannot be added if the instance is null.</value>
+  </data>
+  <data name="PropertyIsNotCollection" xml:space="preserve">
+    <value>The type '{0}' of the property '{1}' on type '{2}' must be a collection.</value>
+  </data>
+  <data name="GetOnlyCollectionCannotBeArray" xml:space="preserve">
+    <value>The value of the property '{0}' on type '{1}' is an array. Consider adding a setter for the property.</value>
   </data>
 </root>

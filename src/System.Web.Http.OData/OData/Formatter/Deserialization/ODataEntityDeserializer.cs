@@ -316,7 +316,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.InvalidOperation(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
             }
 
-            SetProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
+            SetCollectionProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
         }
 
         private void ApplyValueProperties(ODataEntry entry, IEdmStructuredTypeReference entityType, object entityResource, ODataDeserializerContext readContext)

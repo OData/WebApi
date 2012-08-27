@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -88,11 +87,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return Activator.CreateInstance(clrType);
         }
 
-        internal static IList CreateNewCollection(Type elementType)
-        {
-            return Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType)) as IList;
-        }
-
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
@@ -100,6 +94,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             string propertyName = property.Name;
             IEdmTypeReference propertyType = edmProperty != null ? edmProperty.Type : null; // open properties have null values
 
+            // If we are in patch mode and we are deserializing an entity object then we are updating Delta<T> and not T.
             bool isDelta = readContext.IsPatchMode && resourceType.IsEntity();
 
             if (isDelta && resourceType.AsEntity().Key().Select(key => key.Name).Contains(propertyName))
@@ -118,12 +113,62 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             EdmTypeKind propertyKind;
             object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
 
-            if (propertyKind == EdmTypeKind.Primitive)
+            if (propertyKind == EdmTypeKind.Collection)
             {
-                value = EdmPrimitiveHelpers.ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName, isDelta));
+                SetCollectionProperty(resource, propertyName, isDelta, value);
             }
+            else
+            {
+                if (propertyKind == EdmTypeKind.Primitive)
+                {
+                    value = EdmPrimitiveHelpers.ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName, isDelta));
+                }
 
-            SetProperty(resource, propertyName, isDelta, value);
+                SetProperty(resource, propertyName, isDelta, value);
+            }
+        }
+
+        internal static void SetCollectionProperty(object resource, string propertyName, bool isDelta, object value)
+        {
+            if (value != null)
+            {
+                IEnumerable collection = value as IEnumerable;
+                Contract.Assert(collection != null, "SetCollectionProperty is always passed the result of ODataFeedDeserializer or ODataCollectionDeserializer");
+
+                Type resourceType = resource.GetType();
+                Type propertyType = GetPropertyType(resource, propertyName, isDelta);
+
+                Type elementType;
+                if (!propertyType.IsCollection(out elementType))
+                {
+                    throw Error.InvalidOperation(SRResources.PropertyIsNotCollection, propertyType.FullName, propertyName, resourceType.FullName);
+                }
+
+                IEnumerable newCollection;
+                if (CanSetProperty(resource, propertyName, isDelta) &&
+                    CollectionDeserializationHelpers.TryCreateInstance(propertyType, elementType, out newCollection))
+                {
+                    // settable collections
+                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
+                    if (propertyType.IsArray)
+                    {
+                        newCollection = CollectionDeserializationHelpers.ToArray(newCollection, elementType);
+                    }
+
+                    SetProperty(resource, propertyName, isDelta, newCollection);
+                }
+                else
+                {
+                    // get-only collections.
+                    newCollection = GetProperty(resource, propertyName, isDelta) as IEnumerable;
+                    if (newCollection == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.CannotAddToNullCollection, propertyName, resourceType.FullName);
+                    }
+
+                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
+                }
+            }
         }
 
         internal static void SetProperty(object resource, string propertyName, bool isDelta, object value)
@@ -216,27 +261,47 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return oDataValue;
         }
 
+        private static bool CanSetProperty(object resource, string propertyName, bool isDelta)
+        {
+            if (isDelta)
+            {
+                return true;
+            }
+            else
+            {
+                PropertyInfo property = resource.GetType().GetProperty(propertyName);
+                return property != null && property.GetSetMethod() != null;
+            }
+        }
+
+        private static object GetProperty(object resource, string propertyName, bool isDelta)
+        {
+            if (isDelta)
+            {
+                IDelta delta = resource as IDelta;
+                Contract.Assert(delta != null);
+
+                object value;
+                delta.TryGetPropertyValue(propertyName, out value);
+                return value;
+            }
+            else
+            {
+                PropertyInfo property = resource.GetType().GetProperty(propertyName);
+                Contract.Assert(property != null, "ODataLib should have already verified that the property exists on the type.");
+                return property.GetValue(resource, index: null);
+            }
+        }
+
         private static object ConvertCollectionValue(ODataCollectionValue collection, IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmCollectionTypeReference collectionType = propertyType as IEdmCollectionTypeReference;
             Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");
 
-            IList collectionList = CreateNewCollection(EdmLibHelpers.GetClrType(collectionType.ElementType(), deserializerProvider.EdmModel));
+            IEdmTypeReference itemType = collectionType.ElementType();
 
-            RecurseEnter(readContext);
-
-            Contract.Assert(collection.Items != null, "The ODataLib reader should always populate the ODataCollectionValue.Items collection.");
-            foreach (object odataItem in collection.Items)
-            {
-                IEdmTypeReference itemType = collectionType.ElementType();
-                EdmTypeKind propertyKind;
-                collectionList.Add(ConvertValue(odataItem, ref itemType, deserializerProvider, readContext, out propertyKind));
-                Contract.Assert(propertyKind != EdmTypeKind.Primitive, "no collection property support yet.");
-            }
-
-            RecurseLeave(readContext);
-
-            return collectionList;
+            ODataEntryDeserializer deserializer = deserializerProvider.GetODataDeserializer(collectionType);
+            return deserializer.ReadInline(collection, readContext);
         }
     }
 }

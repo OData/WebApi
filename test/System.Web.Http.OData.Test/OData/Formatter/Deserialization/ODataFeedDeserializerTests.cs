@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Formatter.Serialization.Models;
@@ -36,9 +38,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             serializer.WriteObject(customers, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext());
             stream.Seek(0, SeekOrigin.Begin);
-            IEnumerable<Customer> readCustomers = _instance.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable<Customer>;
+            IEnumerable readCustomers = _instance.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
 
-            Assert.Equal(customers, readCustomers, new CustomerComparer());
+            Assert.Equal(customers, readCustomers.Cast<Customer>(), new CustomerComparer());
         }
 
         private static IEdmModel GetEdmModel()

@@ -54,8 +54,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return null;
             }
 
+            return ReadItems(feed, readContext);
+        }
+
+        private IEnumerable ReadItems(ODataFeed feed, ODataDeserializerContext readContext)
+        {
             ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(_edmEntityType);
-            IList feedValue = CreateNewCollection(EdmLibHelpers.GetClrType(_edmEntityType, EdmModel));
 
             ODataFeedAnnotation feedAnnotation = feed.GetAnnotation<ODataFeedAnnotation>();
             Contract.Assert(feedAnnotation != null, "Each feed we create should gave annotation on it.");
@@ -65,10 +69,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 ODataEntryAnnotation annotation = entry.GetAnnotation<ODataEntryAnnotation>();
                 Contract.Assert(annotation != null);
 
-                feedValue.Add(deserializer.ReadInline(entry, readContext));
+                yield return deserializer.ReadInline(entry, readContext);
             }
-
-            return feedValue;
         }
     }
 }

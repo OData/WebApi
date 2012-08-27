@@ -117,6 +117,7 @@
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\LinkGenerationConstants.cs" />
+    <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
     <Compile Include="OData\ODataActionParameters.cs" />
     <Compile Include="OData\Builder\ActionConfiguration.cs" />
     <Compile Include="OData\Builder\BindingParameterConfiguration.cs" />

@@ -92,11 +92,11 @@
     <Compile Include="Async\TaskWrapperAsyncResult.cs" />
     <Compile Include="BuildManagerCompiledView.cs" />
     <Compile Include="BuildManagerViewEngine.cs" />
-    <Compile Include="CachedAssociatedMetadataProvider`1.cs" />
+    <Compile Include="CachedAssociatedMetadataProvider.cs" />
     <Compile Include="CachedDataAnnotationsMetadataAttributes.cs" />
     <Compile Include="CachedDataAnnotationsModelMetadata.cs" />
     <Compile Include="CachedDataAnnotationsModelMetadataProvider.cs" />
-    <Compile Include="CachedModelMetadata`1.cs" />
+    <Compile Include="CachedModelMetadata.cs" />
     <Compile Include="CancellationTokenModelBinder.cs" />
     <Compile Include="CompareAttributeAdapter.cs" />
     <Compile Include="DataTypeAttributeAdapter.cs" />
@@ -132,7 +132,7 @@
     <Compile Include="ExpressionUtil\ExpressionFingerprintChain.cs" />
     <Compile Include="ExpressionUtil\FingerprintingExpressionVisitor.cs" />
     <Compile Include="ExpressionUtil\HashCodeCombiner.cs" />
-    <Compile Include="ExpressionUtil\Hoisted`2.cs" />
+    <Compile Include="ExpressionUtil\Hoisted.cs" />
     <Compile Include="ExpressionUtil\HoistingExpressionVisitor.cs" />
     <Compile Include="ExpressionUtil\IndexExpressionFingerprint.cs" />
     <Compile Include="ExpressionUtil\LambdaExpressionFingerprint.cs" />
@@ -177,7 +177,7 @@
     <Compile Include="ValidationAttributeHelpers.cs" />
     <Compile Include="ViewStartPage.cs" />
     <Compile Include="WebViewPage.cs" />
-    <Compile Include="WebViewPage`1.cs" />
+    <Compile Include="WebViewPageOfTModel.cs" />
     <Compile Include="HttpNotFoundResult.cs" />
     <Compile Include="HttpStatusCodeResult.cs" />
     <Compile Include="IMvcControlBuilder.cs" />
@@ -230,7 +230,7 @@
     <Compile Include="Async\TriggerListener.cs" />
     <Compile Include="Async\SimpleAsyncResult.cs" />
     <Compile Include="Async\EndInvokeDelegate.cs" />
-    <Compile Include="Async\EndInvokeDelegate`1.cs" />
+    <Compile Include="Async\EndInvokeDelegateOfTResult.cs" />
     <Compile Include="Async\SynchronizationContextUtil.cs" />
     <Compile Include="AuthorizationContext.cs" />
     <Compile Include="ByteArrayModelBinder.cs" />
@@ -259,7 +259,7 @@
     <Compile Include="MvcHtmlString.cs" />
     <Compile Include="DataAnnotationsModelValidator.cs" />
     <Compile Include="DataAnnotationsModelValidatorProvider.cs" />
-    <Compile Include="DataAnnotationsModelValidator`1.cs" />
+    <Compile Include="DataAnnotationsModelValidatorOfTAttribute.cs" />
     <Compile Include="EmptyModelValidatorProvider.cs" />
     <Compile Include="ExpressionHelper.cs" />
     <Compile Include="FieldValidationMetadata.cs" />
@@ -313,8 +313,8 @@
     <Compile Include="ControllerBase.cs" />
     <Compile Include="ActionNameAttribute.cs" />
     <Compile Include="AcceptVerbsAttribute.cs" />
-    <Compile Include="AjaxHelper`1.cs" />
-    <Compile Include="HtmlHelper`1.cs" />
+    <Compile Include="AjaxHelperOfTModel.cs" />
+    <Compile Include="HtmlHelperOfTModel.cs" />
     <Compile Include="DictionaryHelpers.cs" />
     <Compile Include="AjaxRequestExtensions.cs" />
     <Compile Include="ModelBinderDictionary.cs" />
@@ -324,7 +324,7 @@
     <Compile Include="ViewTemplateUserControl.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="ViewTemplateUserControl`1.cs">
+    <Compile Include="ViewTemplateUserControlOfTModel.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ViewType.cs" />
@@ -345,7 +345,7 @@
     <Compile Include="ControllerDescriptorCache.cs" />
     <Compile Include="ReflectedParameterBindingInfo.cs" />
     <Compile Include="ParameterBindingInfo.cs" />
-    <Compile Include="ReaderWriterCache`2.cs" />
+    <Compile Include="ReaderWriterCache.cs" />
     <Compile Include="DescriptorUtil.cs" />
     <Compile Include="ReflectedControllerDescriptor.cs" />
     <Compile Include="ControllerDescriptor.cs" />
@@ -405,7 +405,7 @@
     <Compile Include="IAuthorizationFilter.cs" />
     <Compile Include="JsonResult.cs" />
     <Compile Include="NameValueCollectionExtensions.cs" />
-    <Compile Include="ViewDataDictionary`1.cs" />
+    <Compile Include="ViewDataDictionaryOfTModel.cs" />
     <Compile Include="EmptyResult.cs" />
     <Compile Include="MultiSelectList.cs" />
     <Compile Include="RedirectResult.cs" />
@@ -433,13 +433,13 @@
     <Compile Include="ViewMasterPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="ViewMasterPage`1.cs">
+    <Compile Include="ViewMasterPageOfTModel.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ViewPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="ViewPage`1.cs">
+    <Compile Include="ViewPageOfTModel.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ViewResult.cs" />
@@ -447,7 +447,7 @@
     <Compile Include="ViewUserControl.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="ViewUserControl`1.cs">
+    <Compile Include="ViewUserControlOfTModel.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="VirtualPathProviderViewEngine.cs" />

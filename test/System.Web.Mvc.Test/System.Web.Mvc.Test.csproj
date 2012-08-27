@@ -75,7 +75,7 @@
     <Compile Include="Html\Test\NameExtensionsTest.cs" />
     <Compile Include="Html\Test\ValueExtensionsTest.cs" />
     <Compile Include="Razor\Test\MvcCSharpRazorCodeGeneratorTest.cs" />
-    <Compile Include="Test\AjaxHelper`1Test.cs" />
+    <Compile Include="Test\AjaxHelperOfTModelTest.cs" />
     <Compile Include="Test\CancellationTokenModelBinderTest.cs" />
     <Compile Include="Test\CachedAssociatedMetadataProviderTest.cs" />
     <Compile Include="Test\CachedDataAnnotationsModelMetadataProviderTest.cs" />
@@ -104,7 +104,7 @@
     <Compile Include="Test\DataTypeUtilTest.cs" />
     <Compile Include="Test\FilterInfoTest.cs" />
     <Compile Include="Test\AllowHtmlAttributeTest.cs" />
-    <Compile Include="Test\HtmlHelper`1Test.cs" />
+    <Compile Include="Test\HtmlHelperOfTModelTest.cs" />
     <Compile Include="Test\HttpHeadAttributeTest.cs" />
     <Compile Include="Test\HttpOptionsAttributeTest.cs" />
     <Compile Include="Test\HttpPatchAttributeTest.cs" />

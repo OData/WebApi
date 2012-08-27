@@ -115,6 +115,7 @@
     <Compile Include="ServiceModel\Channels\LayeredChannelAcceptor.cs" />
     <Compile Include="ServiceModel\Channels\LayeredChannelListener.cs" />
     <Compile Include="ServiceModel\Channels\TransportDefaults.cs" />
+    <Compile Include="ServiceModel\Channels\CompletedAsyncResultOfT.cs" />
     <Compile Include="ServiceModel\HostNameComparisonModeHelper.cs" />
     <Compile Include="ServiceModel\HttpClientCredentialTypeHelper.cs" />
     <Compile Include="ServiceModel\HttpProxyCredentialTypeHelper.cs" />

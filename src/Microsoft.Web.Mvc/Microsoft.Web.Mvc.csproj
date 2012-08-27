@@ -82,7 +82,7 @@
     <Compile Include="DynamicViewPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DynamicViewPage`1.cs">
+    <Compile Include="DynamicViewPageOfTModel.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ExpressionUtil\BinaryExpressionFingerprint.cs" />
@@ -94,7 +94,7 @@
     <Compile Include="ExpressionUtil\ExpressionFingerprintChain.cs" />
     <Compile Include="ExpressionUtil\FingerprintingExpressionVisitor.cs" />
     <Compile Include="ExpressionUtil\HashCodeCombiner.cs" />
-    <Compile Include="ExpressionUtil\Hoisted`2.cs" />
+    <Compile Include="ExpressionUtil\Hoisted.cs" />
     <Compile Include="ExpressionUtil\HoistingExpressionVisitor.cs" />
     <Compile Include="ExpressionUtil\IndexExpressionFingerprint.cs" />
     <Compile Include="ExpressionUtil\LambdaExpressionFingerprint.cs" />
@@ -114,23 +114,23 @@
     <Compile Include="ModelCopier.cs" />
     <Compile Include="ModelBinding\CollectionModelBinderProvider.cs" />
     <Compile Include="ModelBinding\CollectionModelBinderUtil.cs" />
-    <Compile Include="ModelBinding\CollectionModelBinder`1.cs" />
+    <Compile Include="ModelBinding\CollectionModelBinder.cs" />
     <Compile Include="ModelBinding\ComplexModelDtoModelBinderProvider.cs" />
     <Compile Include="ModelBinding\ArrayModelBinderProvider.cs" />
-    <Compile Include="ModelBinding\ArrayModelBinder`1.cs" />
+    <Compile Include="ModelBinding\ArrayModelBinder.cs" />
     <Compile Include="ModelBinding\BindingBehaviorAttribute.cs" />
     <Compile Include="ModelBinding\BindingBehavior.cs" />
     <Compile Include="ModelBinding\BindNeverAttribute.cs" />
     <Compile Include="ModelBinding\BindRequiredAttribute.cs" />
     <Compile Include="ModelBinding\GenericModelBinderProvider.cs" />
     <Compile Include="ModelBinding\DictionaryModelBinderProvider.cs" />
-    <Compile Include="ModelBinding\DictionaryModelBinder`2.cs" />
+    <Compile Include="ModelBinding\DictionaryModelBinder.cs" />
     <Compile Include="UrlAttribute.cs" />
     <Compile Include="ValueProviderUtil.cs" />
     <Compile Include="ElementalValueProvider.cs" />
     <Compile Include="ModelBinding\KeyValuePairModelBinderProvider.cs" />
     <Compile Include="ModelBinding\KeyValuePairModelBinderUtil.cs" />
-    <Compile Include="ModelBinding\KeyValuePairModelBinder`2.cs" />
+    <Compile Include="ModelBinding\KeyValuePairModelBinder.cs" />
     <Compile Include="TypeDescriptorHelper.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="ModelBinding\ComplexModelDto.cs" />
@@ -191,7 +191,7 @@
     <Compile Include="MvcSerializer.cs" />
     <Compile Include="AjaxOnlyAttribute.cs" />
     <Compile Include="CachedExpressionCompiler.cs" />
-    <Compile Include="ReaderWriterCache`2.cs" />
+    <Compile Include="ReaderWriterCache.cs" />
     <Compile Include="ButtonBuilder.cs" />
     <Compile Include="ButtonsAndLinkExtensions.cs" />
     <Compile Include="ContentTypeAttribute.cs" />

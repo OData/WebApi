@@ -5,7 +5,7 @@ using Moq;
 
 namespace System.Web.Mvc.Test
 {
-    public class AjaxHelper_1Test
+    public class AjaxHelperOfTModelTest
     {
         [Fact]
         public void ViewBagAndViewDataStayInSync()

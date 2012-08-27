@@ -5,7 +5,7 @@ using Moq;
 
 namespace System.Web.Mvc.Test
 {
-    public class HtmlHelper_1Test
+    public class HtmlHelperOfTModelTest
     {
         [Fact]
         public void StronglyTypedViewBagAndStronglyTypedViewDataStayInSync()

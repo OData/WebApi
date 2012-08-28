@@ -21,10 +21,21 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         return new ODataEntityDeserializer(edmType.AsEntity(), this);
 
                     case EdmTypeKind.Primitive:
-                        return new ODataRawValueDeserializer(edmType.AsPrimitive());
+                        return new ODataPrimitiveDeserializer(edmType.AsPrimitive());
 
                     case EdmTypeKind.Complex:
                         return new ODataComplexTypeDeserializer(edmType.AsComplex(), this);
+
+                    case EdmTypeKind.Collection:
+                        IEdmCollectionTypeReference collectionType = edmType.AsCollection();
+                        if (collectionType.ElementType().IsEntity())
+                        {
+                            return new ODataFeedDeserializer(collectionType, this);
+                        }
+                        else
+                        {
+                            return new ODataCollectionDeserializer(collectionType, this);
+                        }
                 }
             }
 

@@ -104,12 +104,16 @@
       <DependentUpon>BaselineResource.resx</DependentUpon>
     </Compile>
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItemTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionOfTEdmTypeConfigurationAndTAttributeTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionOfTEdmTypeConfigurationTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEdmTypeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\IgnoreDataMemberAttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\RequiredAttributeEdmPropertyConventionTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializerTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializerTests.cs" />
     <Compile Include="OData\Formatter\EdmLibHelpersTests.cs" />
     <Compile Include="OData\Formatter\ODataFormatterConstantsTest.cs" />
     <Compile Include="OData\Query\Controllers\PrimitiveController.cs" />

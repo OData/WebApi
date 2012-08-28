@@ -16,6 +16,9 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
+    /// <summary>
+    /// Base class for all <see cref="ODataDeserializer" />'s that deserialize into an object backed by <see cref="IEdmType"/>.
+    /// </summary>
     public abstract class ODataEntryDeserializer : ODataDeserializer
     {
         protected ODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
@@ -35,6 +38,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             DeserializerProvider = deserializerProvider;
         }
 
+        /// <summary>
+        /// The edm type.
+        /// </summary>
         public IEdmTypeReference EdmType { get; private set; }
 
         public IEdmModel EdmModel
@@ -45,8 +51,17 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
+        /// <summary>
+        /// The <see cref="ODataDeserializerProvider"/> to use for deserializing inner items.
+        /// </summary>
         public ODataDeserializerProvider DeserializerProvider { get; private set; }
 
+        /// <summary>
+        /// Deserializes the item into a new object of type corresponding to <see cref="EdmType"/>.
+        /// </summary>
+        /// <param name="item">The item to deserialize.</param>
+        /// <param name="readContext">The <see cref="ODataDeserializerContext"/></param>
+        /// <returns>The deserialized object.</returns>
         public virtual object ReadInline(object item, ODataDeserializerContext readContext)
         {
             throw Error.NotSupported(SRResources.DoesNotSupportReadInLine, GetType().Name);
@@ -76,9 +91,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return Activator.CreateInstance(clrType);
         }
 
-        internal static IList CreateNewCollection()
+        internal static IList CreateNewCollection(Type elementType)
         {
-            return new List<object>();
+            return Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType)) as IList;
         }
 
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
@@ -98,6 +113,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 value = ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName, isDelta), propertyName, resource.GetType().FullName);
             }
 
+            SetProperty(resource, propertyName, isDelta, value);
+        }
+
+        internal static void SetProperty(object resource, string propertyName, bool isDelta, object value)
+        {
             if (!isDelta)
             {
                 resource.GetType().GetProperty(propertyName).SetValue(resource, value, index: null);
@@ -252,17 +272,17 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         private static object ConvertCollectionValue(ODataCollectionValue collection, IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            IEdmCollectionType collectionType = propertyType as IEdmCollectionType;
+            IEdmCollectionTypeReference collectionType = propertyType as IEdmCollectionTypeReference;
             Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");
 
-            IList collectionList = CreateNewCollection();
+            IList collectionList = CreateNewCollection(EdmLibHelpers.GetClrType(collectionType.ElementType(), deserializerProvider.EdmModel));
 
             RecurseEnter(readContext);
 
             Contract.Assert(collection.Items != null, "The ODataLib reader should always populate the ODataCollectionValue.Items collection.");
             foreach (object odataItem in collection.Items)
             {
-                IEdmTypeReference itemType = collectionType.ElementType;
+                IEdmTypeReference itemType = collectionType.ElementType();
                 EdmTypeKind propertyKind;
                 collectionList.Add(ConvertValue(odataItem, ref itemType, deserializerProvider, readContext, out propertyKind));
                 Contract.Assert(propertyKind != EdmTypeKind.Primitive, "no collection property support yet.");

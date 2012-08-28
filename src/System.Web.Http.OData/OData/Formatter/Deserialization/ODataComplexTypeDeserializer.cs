@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class ODataComplexTypeDeserializer : ODataEntryDeserializer
+    internal class ODataComplexTypeDeserializer : ODataEntryDeserializer<ODataComplexValue>
     {
         public ODataComplexTypeDeserializer(IEdmComplexTypeReference edmComplexType, ODataDeserializerProvider deserializerProvider)
             : base(edmComplexType, ODataPayloadKind.Property, deserializerProvider)
@@ -16,12 +16,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         public IEdmComplexTypeReference EdmComplexType { get; private set; }
 
-        public override object ReadInline(object item, ODataDeserializerContext readContext)
+        public override object ReadInline(ODataComplexValue complexValue, ODataDeserializerContext readContext)
         {
-            ODataComplexValue complexValue = item as ODataComplexValue;
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
             if (complexValue == null)
             {
-                throw Error.Argument("item", SRResources.ItemMustBeOfType, typeof(ODataComplexValue).Name);
+                return null;
             }
 
             RecurseEnter(readContext);

@@ -97,6 +97,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The argument must be of type &apos;{0}&apos;..
+        /// </summary>
+        internal static string ArgumentMustBeOfType {
+            get {
+                return ResourceManager.GetString("ArgumentMustBeOfType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot autoCreate binding because there are two or more candidate EntitySets..
         /// </summary>
         internal static string CannotAutoCreateMultipleCandidates {
@@ -120,6 +129,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string CanNotParseInteger {
             get {
                 return ResourceManager.GetString("CanNotParseInteger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot apply PATCH to navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
+        /// </summary>
+        internal static string CannotPatchNavigationProperties {
+            get {
+                return ResourceManager.GetString("CannotPatchNavigationProperties", resourceCulture);
             }
         }
         

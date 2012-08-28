@@ -153,6 +153,13 @@
     <Compile Include="OData\EntityInstanceContextOfTEntityType.cs" />
     <Compile Include="OData\EntityInstanceContext.cs" />
     <Compile Include="OData\CompiledPropertyAccessor.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializer.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntryAnnotation.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItem.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataFeedAnnotation.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializer.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataNavigationLinkAnnotation.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializer.cs" />
     <Compile Include="OData\Formatter\EdmTypeReferenceEqualityComparer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
@@ -193,7 +200,6 @@
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializer.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataRawValueDeserializer.cs" />
     <Compile Include="OData\Formatter\EdmLibHelpers.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntrySerializer.cs" />

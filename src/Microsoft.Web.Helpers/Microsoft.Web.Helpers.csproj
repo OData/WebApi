@@ -124,6 +124,7 @@
     <Compile Include="Themes.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ThemesImplementation.cs" />
     <Compile Include="Twitter.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

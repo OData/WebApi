@@ -129,7 +129,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         {
                             ODataEntry parentEntry = (ODataEntry)itemsStack.Peek();
                             ODataEntryAnnotation parentEntryAnnotation = parentEntry.GetAnnotation<ODataEntryAnnotation>();
-                            Contract.Assert(parentEntryAnnotation != null, "Every entry we added to the stack should have the navigation link annotation on it.");
+                            Contract.Assert(parentEntryAnnotation != null, "Every entry we added to the stack should have the entry annotation on it.");
                             parentEntryAnnotation.Add(navigationLink);
                         }
 

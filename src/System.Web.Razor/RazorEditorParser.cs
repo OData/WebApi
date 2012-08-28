@@ -98,7 +98,10 @@ namespace System.Web.Razor
         public RazorEngineHost Host { get; private set; }
         public string FileName { get; private set; }
         public bool LastResultProvisional { get; private set; }
-        public Block CurrentParseTree { get { return _currentParseTree; } }
+        public Block CurrentParseTree
+        {
+            get { return _currentParseTree; }
+        }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Since this method is heavily affected by side-effects, particularly calls to CheckForStructureChanges, it should not be made into a property")]
         public virtual string GetAutoCompleteString()
@@ -247,7 +250,7 @@ namespace System.Web.Razor
                 _currentParseTree = args.GeneratorResults.Document;
                 _lastChangeOwner = null;
             }
-            
+
             Debug.Assert(args != null, "Event arguments cannot be null");
             EventHandler<DocumentParseCompleteEventArgs> handler = DocumentParseComplete;
             if (handler != null)

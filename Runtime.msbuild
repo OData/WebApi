@@ -1,10 +1,7 @@
 <Project DefaultTargets="UnitTest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-
-        <!-- TODO: CodeAnalysis is off by default in VS11 because FxCop cannot load custom rules built against Dev10 -->
-        <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(VS110COMNTOOLS)' == ''">true</CodeAnalysis>
-
+        <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' ">true</CodeAnalysis>
         <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>

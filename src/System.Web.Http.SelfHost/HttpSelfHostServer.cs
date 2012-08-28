@@ -166,6 +166,7 @@ namespace System.Web.Http.SelfHost
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "ReplyContext and HttpResponseMessage are disposed later.")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail here so we have to catch all exceptions.")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This method is a coordinator, so this coupling is expected.")]
         private void ProcessRequestContext(ChannelContext channelContext, System.ServiceModel.Channels.RequestContext requestContext)
         {
             Contract.Assert(channelContext != null);

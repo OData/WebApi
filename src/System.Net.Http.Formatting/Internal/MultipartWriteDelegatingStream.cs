@@ -20,8 +20,8 @@ namespace System.Net.Http.Internal
         {
         }
 
-        [SuppressMessage("Microsoft.WebAPI", "CR4000:DoNotUseProblematicTaskTypes", Justification = "FromAsync is used to get around a rave condition.")]
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "FromAsync is used to get around a rave condition.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTaskRule", Justification = "FromAsync is used to get around a race condition.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1202:DoNotUseProblematicTaskTypesRule", Justification = "FromAsync is used to get around a race condition.")]
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             Task writeTask = Task.Factory.FromAsync(InnerStream.BeginWrite, InnerStream.EndWrite, buffer, offset, count, state);

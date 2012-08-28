@@ -97,7 +97,7 @@ namespace System.Web.Razor.Parser
             });
         }
 
-        [SuppressMessage("Microsoft.WebAPI", "CR4002:DoNotConstructTaskInstances", Justification = "This rule is not applicable to this assembly.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1200:DoNotConstructTaskInstances", Justification = "This rule is not applicable to this assembly.")]
         public virtual Task CreateParseTask(TextReader input,
                                             ParserVisitor consumer)
         {

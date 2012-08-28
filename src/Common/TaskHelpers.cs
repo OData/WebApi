@@ -301,7 +301,7 @@ namespace System.Threading.Tasks
         /// <param name="tcs">completion source to set</param>
         /// <param name="source">Task to get values from.</param>
         /// <returns>true if this successfully sets the completion source.</returns>
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This is a known safe usage of Task.Result, since it only occurs when we know the task's state to be completed.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "This is a known safe usage of Task.Result, since it only occurs when we know the task's state to be completed.")]
         internal static bool TrySetFromTask<TResult>(this TaskCompletionSource<TResult> tcs, Task source)
         {
             if (source.Status == TaskStatus.Canceled)
@@ -333,7 +333,7 @@ namespace System.Threading.Tasks
         /// <param name="tcs">completion source to set</param>
         /// <param name="source">Task to get values from.</param>
         /// <returns>true if this successfully sets the completion source.</returns>
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This is a known safe usage of Task.Result, since it only occurs when we know the task's state to be completed.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "This is a known safe usage of Task.Result, since it only occurs when we know the task's state to be completed.")]
         internal static bool TrySetFromTask<TResult>(this TaskCompletionSource<Task<TResult>> tcs, Task source)
         {
             if (source.Status == TaskStatus.Canceled)

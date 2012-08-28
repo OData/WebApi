@@ -69,9 +69,9 @@
             Command='$(NuGetCommand) install StyleCop -source $(PackageSources) -o "$(PackagesDir)" -Version 4.7.10.0 > NUL'
             LogStandardErrorAsError="true" />
         <Exec
-            Command='$(NuGetCommand) install Microsoft.Web.FxCop -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
+            Command='$(NuGetCommand) install Microsoft.Web.FxCop.v11 -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
             LogStandardErrorAsError="true"
-            Condition=" !Exists('$(PackagesDir)\Microsoft.Web.FxCop') " />
+            Condition=" !Exists('$(PackagesDir)\Microsoft.Web.FxCop.v11') " />
         <Exec
             Command='$(NuGetCommand) install Microsoft.Web.StyleCop -source $(PackageSources) -o "$(PackagesDir)" -ExcludeVersion > NUL'
             LogStandardErrorAsError="true"

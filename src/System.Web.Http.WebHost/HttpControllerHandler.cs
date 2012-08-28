@@ -23,6 +23,7 @@ namespace System.Web.Http.WebHost
     /// A <see cref="IHttpAsyncHandler"/> that passes ASP.NET requests into the <see cref="HttpServer"/>
     /// pipeline and write the result back.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This class is a coordinator, so this coupling is expected.")]
     public class HttpControllerHandler : IHttpAsyncHandler
     {
         internal static readonly string HttpContextBaseKey = "MS_HttpContext";
@@ -143,7 +144,7 @@ namespace System.Web.Http.WebHost
         /// <param name="callback">The callback.</param>
         /// <param name="state">The state.</param>
         /// <returns>An <see cref="IAsyncResult"/> that contains information about the status of the process. </returns>
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This is commented in great details.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "This is commented in great details.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Object gets passed to a task")]
         protected virtual IAsyncResult BeginProcessRequest(HttpContextBase httpContextBase, AsyncCallback callback, object state)
         {

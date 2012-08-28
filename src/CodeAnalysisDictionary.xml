@@ -41,12 +41,20 @@
             <Word>fwlink</Word>
             <Word>Edm</Word>
             <Word>Deserializer</Word>
+            <Word>Api</Word>
+            <Word>ws</Word>
+            <Word>enc</Word>
+            <Word>dir</Word>
+            <Word>Auth</Word>
+            <Word>bg</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>
+            <Term CompoundAlternate="WebPages">WebPages</Term>
             <Term CompoundAlternate="TimeLine">TimeLine</Term>
             <Term CompoundAlternate="OAuth">oAuth</Term>
             <Term CompoundAlternate="UserName">userName</Term>
+            <Term CompoundAlternate="HasId">HasId</Term>
         </Compound>
     </Words>
     <Acronyms>

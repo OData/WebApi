@@ -84,7 +84,7 @@ namespace System.Web.Mvc.Async
             return base.UniqueId + DescriptorUtil.CreateUniqueId(TaskMethodInfo);
         }
 
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This is commented in great detail.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "This is commented in great detail.")]
         public override IAsyncResult BeginExecute(ControllerContext controllerContext, IDictionary<string, object> parameters, AsyncCallback callback, object state)
         {
             if (controllerContext == null)

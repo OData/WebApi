@@ -159,7 +159,7 @@ namespace System.Web.Http.SelfHost.Channels
                 }
             }
 
-            [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "The WriteMessage() API is synchronous, and Wait() won't deadlock in self-host.")]
+            [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "The WriteMessage() API is synchronous, and Wait() won't deadlock in self-host.")]
             public override void WriteMessage(Message message, Stream stream)
             {
                 if (message == null)

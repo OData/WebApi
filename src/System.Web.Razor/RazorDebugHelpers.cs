@@ -131,8 +131,8 @@ namespace System.Web.Razor
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "This is debug only")]
-        [SuppressMessage("Microsoft.WebAPI", "CR4000:DoNotUseProblematicTaskTypes", Justification = "This rule is not applicable to this assembly.")]
-        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "This rule is not applicable to this assembly.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1202:DoNotUseProblematicTaskTypes", Justification = "This rule is not applicable to this assembly.")]
+        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "This rule is not applicable to this assembly.")]
         private static void RunTask(Action action)
         {
             Task.Factory.StartNew(() =>

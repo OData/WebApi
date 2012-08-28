@@ -60,7 +60,7 @@ namespace System.Web.Razor.Test.Editor
                 factory.Markup("</p>"));
             ITextBuffer oldBuffer = new StringTextBuffer("<p>@</p>");
             ITextBuffer newBuffer = new StringTextBuffer("<p>@f</p>");
-            Assert.True(RazorEditorParser.TreesAreDifferent(
+            Assert.True(BackgroundParser.TreesAreDifferent(
                 original, modified, new[] {
                     new TextChange(position: 4, oldLength: 0, oldBuffer: oldBuffer, newLength: 1, newBuffer: newBuffer)
                 }));
@@ -89,7 +89,7 @@ namespace System.Web.Razor.Test.Editor
             modified.LinkNodes();
             ITextBuffer oldBuffer = new StringTextBuffer("<p>@f</p>");
             ITextBuffer newBuffer = new StringTextBuffer("<p>@foo</p>");
-            Assert.False(RazorEditorParser.TreesAreDifferent(
+            Assert.False(BackgroundParser.TreesAreDifferent(
                 original, modified, new[] {
                     new TextChange(position: 5, oldLength: 0, oldBuffer: oldBuffer, newLength: 2, newBuffer: newBuffer)
                 }));
@@ -170,33 +170,6 @@ namespace System.Web.Razor.Test.Editor
             Assert.Equal(PartialParseResult.Rejected, result);
             MiscUtils.DoWithTimeoutIfNotDebugging(parseComplete.Wait);
             Assert.Equal(2, parseCount);
-        }
-
-        private static void SetupMockWorker(Mock<RazorEditorParser> parser, ManualResetEventSlim running)
-        {
-            SetUpMockWorker(parser, running, null);
-        }
-
-        private static void SetUpMockWorker(Mock<RazorEditorParser> parser, ManualResetEventSlim running, Action<int> backgroundThreadIdReceiver)
-        {
-            parser.Setup(p => p.CreateBackgroundTask(It.IsAny<RazorEngineHost>(), It.IsAny<string>(), It.IsAny<TextChange>()))
-                  .Returns<RazorEngineHost, string, TextChange>((host, fileName, change) =>
-                  {
-                      var task = new Mock<BackgroundParseTask>(new RazorTemplateEngine(host), fileName, change) { CallBase = true };
-                      task.Setup(t => t.Run(It.IsAny<CancellationToken>()))
-                          .Callback<CancellationToken>((token) =>
-                          {
-                              if (backgroundThreadIdReceiver != null)
-                              {
-                                  backgroundThreadIdReceiver(Thread.CurrentThread.ManagedThreadId);
-                              }
-                              running.Set();
-                              while (!token.IsCancellationRequested)
-                              {
-                              }
-                          });
-                      return task.Object;
-                  });
         }
 
         private TextChange CreateDummyChange()

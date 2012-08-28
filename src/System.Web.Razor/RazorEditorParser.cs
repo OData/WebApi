@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web.Razor.Editor;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Resources;
@@ -59,12 +61,10 @@ namespace System.Web.Razor
     {
         // Lock for this document
         private object _lock = new object();
-        private Stack<BackgroundParseTask> _outstandingParserTasks = new Stack<BackgroundParseTask>();
         private Span _lastChangeOwner;
         private Span _lastAutoCompleteSpan;
-#if DEBUG
-        private CodeCompileUnit _currentCompileUnit;
-#endif
+        private BackgroundParser _parser;
+        private Block _currentParseTree;
 
         /// <summary>
         /// Constructs the editor parser.  One instance should be used per active editor.  This
@@ -85,6 +85,9 @@ namespace System.Web.Razor
 
             Host = host;
             FileName = sourceFileName;
+            _parser = new BackgroundParser(host, sourceFileName);
+            _parser.ResultsReady += (sender, args) => OnDocumentParseComplete(args);
+            _parser.Start();
         }
 
         /// <summary>
@@ -95,7 +98,7 @@ namespace System.Web.Razor
         public RazorEngineHost Host { get; private set; }
         public string FileName { get; private set; }
         public bool LastResultProvisional { get; private set; }
-        public Block CurrentParseTree { get; private set; }
+        public Block CurrentParseTree { get { return _currentParseTree; } }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Since this method is heavily affected by side-effects, particularly calls to CheckForStructureChanges, it should not be made into a property")]
         public virtual string GetAutoCompleteString()
@@ -124,6 +127,12 @@ namespace System.Web.Razor
         public virtual PartialParseResult CheckForStructureChanges(TextChange change)
         {
             // Validate the change
+            long? elapsedMs = null;
+#if EDITOR_TRACING
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+#endif
+            RazorEditorTrace.TraceLine("[P][{0}] Recieved Change: {1}", Path.GetFileName(FileName), change);
             if (change.NewBuffer == null)
             {
                 throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture,
@@ -134,38 +143,36 @@ namespace System.Web.Razor
 
             PartialParseResult result = PartialParseResult.Rejected;
 
-            // Lock the state objects
-            lock (_lock)
+            // If there isn't already a parse underway, try partial-parsing
+            string changeString = String.Empty;
+            using (_parser.SynchronizeMainThreadState())
             {
-                // If there isn't already a parse underway, try partial-parsing
-                if (CurrentParseTree != null && _outstandingParserTasks.Count == 0)
+                // Capture the string value of the change while we're synchronized
+                changeString = change.ToString();
+
+                // Check if we can partial-parse
+                if (CurrentParseTree != null && _parser.IsIdle)
                 {
                     result = TryPartialParse(change);
                 }
-
-                // If partial parsing failed or there were outstanding parser tasks, start a full reparse
-                if (result.HasFlag(PartialParseResult.Rejected))
-                {
-                    QueueFullReparse(change);
-                }
-#if DEBUG
-                else
-                {
-                    if (CurrentParseTree != null)
-                    {
-                        RazorDebugHelpers.WriteDebugTree(FileName, CurrentParseTree, result, change, this, false);
-                    }
-                    if (_currentCompileUnit != null)
-                    {
-                        RazorDebugHelpers.WriteGeneratedCode(FileName, _currentCompileUnit);
-                    }
-                }
-#endif
-
-                // Otherwise, remember if this was provisionally accepted for next partial parse
-                LastResultProvisional = result.HasFlag(PartialParseResult.Provisional);
             }
+
+            // If partial parsing failed or there were outstanding parser tasks, start a full reparse
+            if (result.HasFlag(PartialParseResult.Rejected))
+            {
+                _parser.QueueChange(change);
+            }
+
+            // Otherwise, remember if this was provisionally accepted for next partial parse
+            LastResultProvisional = result.HasFlag(PartialParseResult.Provisional);
             VerifyFlagsAreValid(result);
+
+#if EDITOR_TRACING
+            sw.Stop();
+            elapsedMs = sw.ElapsedMilliseconds;
+            sw.Reset();
+#endif
+            RazorEditorTrace.TraceLine("[P][{0}] {3} Change in {2}ms: {1}", Path.GetFileName(FileName), changeString, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
             return result;
         }
 
@@ -184,26 +191,8 @@ namespace System.Web.Razor
         {
             if (disposing)
             {
-                lock (_lock)
-                {
-                    if (_outstandingParserTasks.Count > 0)
-                    {
-                        foreach (var task in _outstandingParserTasks)
-                        {
-                            task.Dispose();
-                        }
-                    }
-                }
+                _parser.Dispose();
             }
-        }
-
-        private void QueueFullReparse(TextChange change)
-        {
-            if (_outstandingParserTasks.Count > 0)
-            {
-                _outstandingParserTasks.Peek().Cancel();
-            }
-            _outstandingParserTasks.Push(CreateBackgroundTask(Host, FileName, change).ContinueWith(OnParseCompleted));
         }
 
         private PartialParseResult TryPartialParse(TextChange change)
@@ -220,12 +209,7 @@ namespace System.Web.Razor
                     _lastChangeOwner.ReplaceWith(editResult.EditedSpan);
                 }
 
-                // If the last change was provisional, then the result of this span's attempt to parse partially goes
-                // Otherwise, accept the change if this span accepted it, but if it didn't, just do the standard search.
-                if (LastResultProvisional || result.HasFlag(PartialParseResult.Accepted))
-                {
-                    return result;
-                }
+                return result;
             }
 
             // Locate the span responsible for this change
@@ -256,91 +240,27 @@ namespace System.Web.Razor
             return result;
         }
 
-        private void OnParseCompleted(GeneratorResults results, BackgroundParseTask parseTask)
-        {
-            try
-            {
-                // Lock the state objects
-                bool treeStructureChanged = true;
-                TextChange lastChange;
-                lock (_lock)
-                {
-                    // Are we still active?
-                    if (_outstandingParserTasks.Count == 0 || !ReferenceEquals(parseTask, _outstandingParserTasks.Peek()))
-                    {
-                        // We aren't, just abort
-                        return;
-                    }
-
-                    // Ok, we're active. Flush out the changes from all the parser tasks and clear the stack of outstanding parse tasks
-                    TextChange[] changes = _outstandingParserTasks.Select(t => t.Change).Reverse().ToArray();
-                    lastChange = changes.Last();
-                    _outstandingParserTasks.Clear();
-
-                    // Take the current tree and check for differences
-                    treeStructureChanged = CurrentParseTree == null || TreesAreDifferent(CurrentParseTree, results.Document, changes);
-                    CurrentParseTree = results.Document;
-#if DEBUG
-                    _currentCompileUnit = results.GeneratedCode;
-#endif
-                    _lastChangeOwner = null;
-                }
-
-                // Done, now exit the lock and fire the event
-                OnDocumentParseComplete(new DocumentParseCompleteEventArgs()
-                {
-                    GeneratorResults = results,
-                    SourceChange = lastChange,
-                    TreeStructureChanged = treeStructureChanged
-                });
-            }
-            finally
-            {
-                parseTask.Dispose();
-            }
-        }
-
-        internal static bool TreesAreDifferent(Block leftTree, Block rightTree, TextChange[] changes)
-        {
-            // Apply all the pending changes to the original tree
-            // PERF: If this becomes a bottleneck, we can probably do it the other way around,
-            //  i.e. visit the tree and find applicable changes for each node.
-            foreach (TextChange change in changes)
-            {
-                Span changeOwner = leftTree.LocateOwner(change);
-
-                // Apply the change to the tree
-                if (changeOwner == null)
-                {
-                    return true;
-                }
-                EditResult result = changeOwner.EditHandler.ApplyChange(changeOwner, change, force: true);
-                changeOwner.ReplaceWith(result.EditedSpan);
-            }
-
-            // Now compare the trees
-            bool treesDifferent = !leftTree.EquivalentTo(rightTree);
-#if DEBUG
-            if (RazorDebugHelpers.OutputDebuggingEnabled)
-            {
-                Debug.WriteLine(String.Format(CultureInfo.CurrentCulture, "Processed {0} changes, trees were{1} different", changes.Length, treesDifferent ? String.Empty : " not"));
-            }
-#endif
-            return treesDifferent;
-        }
-
         private void OnDocumentParseComplete(DocumentParseCompleteEventArgs args)
         {
+            using (_parser.SynchronizeMainThreadState())
+            {
+                _currentParseTree = args.GeneratorResults.Document;
+                _lastChangeOwner = null;
+            }
+            
             Debug.Assert(args != null, "Event arguments cannot be null");
             EventHandler<DocumentParseCompleteEventArgs> handler = DocumentParseComplete;
             if (handler != null)
             {
-                handler(this, args);
+                try
+                {
+                    handler(this, args);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("[RzEd] Document Parse Complete Handler Threw: " + ex.ToString());
+                }
             }
-#if DEBUG
-            RazorDebugHelpers.WriteDebugTree(FileName, args.GeneratorResults.Document, PartialParseResult.Rejected, args.SourceChange, this, args.TreeStructureChanged);
-            RazorDebugHelpers.WriteGeneratedCode(FileName, args.GeneratorResults.GeneratedCode);
-#endif
         }
 
         [Conditional("DEBUG")]
@@ -358,11 +278,6 @@ namespace System.Web.Razor
             Debug.Assert(result.HasFlag(PartialParseResult.Accepted) ||
                          !result.HasFlag(PartialParseResult.Provisional),
                          "Partial Parse result was Rejected AND had Provisional flag set");
-        }
-
-        internal virtual BackgroundParseTask CreateBackgroundTask(RazorEngineHost host, string fileName, TextChange change)
-        {
-            return BackgroundParseTask.StartNew(new RazorTemplateEngine(Host), FileName, change);
         }
     }
 }

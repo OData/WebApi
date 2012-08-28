@@ -22,6 +22,7 @@
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES;$(DefineConstants)</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ASPNETWEBPAGES;EDITOR_TRACING</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
@@ -67,7 +68,8 @@
     </Compile>
     <Compile Include="DocumentParseCompleteEventArgs.cs" />
     <Compile Include="Editor\AutoCompleteEditHandler.cs" />
-    <Compile Include="Editor\BackgroundParseTask.cs" />
+    <Compile Include="Editor\BackgroundParser.cs" />
+    <Compile Include="Editor\RazorEditorTrace.cs" />
     <Compile Include="Generator\AttributeBlockCodeGenerator.cs" />
     <Compile Include="Generator\CodeWriterExtensions.cs" />
     <Compile Include="Generator\DynamicAttributeBlockCodeGenerator.cs" />

@@ -91,7 +91,7 @@ namespace System.Web.WebPages.Administration.PackageManager
             var packagesToUpdate = GetPackages(LocalRepository, searchTerms);
             if (filterPreferredPackages)
             {
-                packagesToUpdate = packagesToUpdate.Where(p => p.Tags.ToLower().Contains(WebPagesPreferredTag));
+                packagesToUpdate = packagesToUpdate.Where(p => !String.IsNullOrEmpty(p.Tags) && p.Tags.ToLower().Contains(WebPagesPreferredTag));
             }
             return SourceRepository.GetUpdates(packagesToUpdate, includePrerelease: false).AsQueryable();
         }

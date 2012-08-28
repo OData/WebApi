@@ -23,6 +23,21 @@ namespace System.Web.Razor.Test.Text
         }
 
         [Fact]
+        public void UpdateLocationAdvancesCorrectlyForMultiLineString()
+        {
+            // Arrange
+            SourceLocationTracker tracker = new SourceLocationTracker(TestStartLocation);
+
+            // Act
+            tracker.UpdateLocation("foo\nbar\rbaz\r\nbox");
+
+            // Assert
+            Assert.Equal(26, tracker.CurrentLocation.AbsoluteIndex);
+            Assert.Equal(45, tracker.CurrentLocation.LineIndex);
+            Assert.Equal(3, tracker.CurrentLocation.CharacterIndex);
+        }
+
+        [Fact]
         public void UpdateLocationAdvancesAbsoluteIndexOnNonNewlineCharacter()
         {
             // Arrange

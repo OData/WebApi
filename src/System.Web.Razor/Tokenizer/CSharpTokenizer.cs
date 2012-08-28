@@ -274,7 +274,12 @@ namespace System.Web.Razor.Tokenizer
             if (CurrentCharacter == '\\')
             {
                 TakeCurrent(); // Take the '\'
-                TakeCurrent(); // Take the next char as well (multi-char escapes don't matter)
+                
+                // If the next char is the same quote that started this
+                if (CurrentCharacter == quote || CurrentCharacter == '\\')
+                {
+                    TakeCurrent(); // Take it so that we don't prematurely end the literal.
+                }
                 return Stay();
             }
             else if (EndOfFile || ParserHelpers.IsNewLine(CurrentCharacter))

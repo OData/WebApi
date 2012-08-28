@@ -2,9 +2,11 @@
 
 using System.Diagnostics;
 using System.Linq;
+using System.Web.Razor.Editor;
 using System.Web.Razor.Generator;
 using System.Web.Razor.Parser.SyntaxTree;
 using System.Web.Razor.Text;
+using System.Web.Razor.Tokenizer;
 
 namespace System.Web.Razor.Parser
 {
@@ -27,6 +29,7 @@ namespace System.Web.Razor.Parser
 
             // Create a new span containing this content
             SpanBuilder span = new SpanBuilder();
+            span.EditHandler = new SpanEditHandler(HtmlTokenizer.Tokenize);
             FillSpan(span, block.Children.Cast<Span>().First().Start, content);
             return span.Build();
         }

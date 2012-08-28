@@ -174,6 +174,36 @@ namespace System.Web.Razor.Test.Tokenizer
         }
 
         [Fact]
+        public void Character_Literal_Terminated_By_EOL_Even_When_Last_Char_Is_Slash()
+        {
+            TestTokenizer("'foo\\\n", new CSharpSymbol(0, 0, 0, "'foo\\", CSharpSymbolType.CharacterLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void Character_Literal_Terminated_By_EOL_Even_When_Last_Char_Is_Slash_And_Followed_By_Stuff()
+        {
+            TestTokenizer("'foo\\\nflarg", new CSharpSymbol(0, 0, 0, "'foo\\", CSharpSymbolType.CharacterLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void Character_Literal_Terminated_By_CRLF_Even_When_Last_Char_Is_Slash()
+        {
+            TestTokenizer("'foo\\\r\n", new CSharpSymbol(0, 0, 0, "'foo\\", CSharpSymbolType.CharacterLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void Character_Literal_Terminated_By_CRLF_Even_When_Last_Char_Is_Slash_And_Followed_By_Stuff()
+        {
+            TestTokenizer("'foo\\\r\nflarg", new CSharpSymbol(0, 0, 0, "'foo\\", CSharpSymbolType.CharacterLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void Character_Literal_Allows_Escaped_Escape()
+        {
+            TestTokenizer("'foo\\\\'blah", new CSharpSymbol(0, 0, 0, "'foo\\\\'", CSharpSymbolType.CharacterLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
         public void String_Literal_Is_Recognized()
         {
             TestSingleToken("\"foo\"", CSharpSymbolType.StringLiteral);
@@ -195,6 +225,36 @@ namespace System.Web.Razor.Test.Tokenizer
         public void String_Literal_Is_Terminated_By_EOL_If_Unterminated()
         {
             TestTokenizer("\"foo\n", new CSharpSymbol(0, 0, 0, "\"foo", CSharpSymbolType.StringLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void String_Literal_Terminated_By_EOL_Even_When_Last_Char_Is_Slash()
+        {
+            TestTokenizer("\"foo\\\n", new CSharpSymbol(0, 0, 0, "\"foo\\", CSharpSymbolType.StringLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void String_Literal_Terminated_By_EOL_Even_When_Last_Char_Is_Slash_And_Followed_By_Stuff()
+        {
+            TestTokenizer("\"foo\\\nflarg", new CSharpSymbol(0, 0, 0, "\"foo\\", CSharpSymbolType.StringLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void String_Literal_Terminated_By_CRLF_Even_When_Last_Char_Is_Slash()
+        {
+            TestTokenizer("\"foo\\\r\n", new CSharpSymbol(0, 0, 0, "\"foo\\", CSharpSymbolType.StringLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void String_Literal_Terminated_By_CRLF_Even_When_Last_Char_Is_Slash_And_Followed_By_Stuff()
+        {
+            TestTokenizer("\"foo\\\r\nflarg", new CSharpSymbol(0, 0, 0, "\"foo\\", CSharpSymbolType.StringLiteral), IgnoreRemaining);
+        }
+
+        [Fact]
+        public void String_Literal_Allows_Escaped_Escape()
+        {
+            TestTokenizer("\"foo\\\\\"blah", new CSharpSymbol(0, 0, 0, "\"foo\\\\\"", CSharpSymbolType.StringLiteral), IgnoreRemaining);
         }
 
         [Fact]

@@ -2,9 +2,14 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
+using System.Reflection;
 using System.Web.Http.OData.Properties;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -83,40 +88,131 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             string propertyName = property.Name;
             IEdmTypeReference propertyType = edmProperty != null ? edmProperty.Type : null; // open properties have null values
 
-            object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext);
+            EdmTypeKind propertyKind;
+            object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
 
-            // If we are in patch mode and we are deserializing an entity object then we are updating Delta<T> and not T.
-            if (!readContext.IsPatchMode || !resourceType.IsEntity())
+            bool isDelta = readContext.IsPatchMode && resourceType.IsEntity();
+
+            if (propertyKind == EdmTypeKind.Primitive)
+            {
+                value = ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName, isDelta), propertyName, resource.GetType().FullName);
+            }
+
+            if (!isDelta)
             {
                 resource.GetType().GetProperty(propertyName).SetValue(resource, value, index: null);
             }
             else
             {
+                // If we are in patch mode and we are deserializing an entity object then we are updating Delta<T> and not T.
                 (resource as IDelta).TrySetPropertyValue(propertyName, value);
             }
         }
 
-        internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext)
+        internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext, out EdmTypeKind typeKind)
         {
             if (oDataValue == null)
             {
+                typeKind = EdmTypeKind.None;
                 return null;
             }
 
             ODataComplexValue complexValue = oDataValue as ODataComplexValue;
             if (complexValue != null)
             {
+                typeKind = EdmTypeKind.Complex;
                 return ConvertComplexValue(complexValue, ref propertyType, deserializerProvider, readContext);
             }
 
             ODataCollectionValue collection = oDataValue as ODataCollectionValue;
             if (collection != null)
             {
+                typeKind = EdmTypeKind.Collection;
                 Contract.Assert(propertyType != null, "Open collection properties are not supported.");
                 return ConvertCollectionValue(collection, propertyType, deserializerProvider, readContext);
             }
 
+            typeKind = EdmTypeKind.Primitive;
             return ConvertPrimitiveValue(oDataValue, ref propertyType);
+        }
+
+        internal static Type GetPropertyType(object resource, string propertyName, bool isDelta)
+        {
+            Contract.Assert(resource != null);
+            Contract.Assert(propertyName != null);
+
+            if (isDelta)
+            {
+                IDelta delta = resource as IDelta;
+                Contract.Assert(delta != null);
+
+                Type type;
+                delta.TryGetPropertyType(propertyName, out type);
+                return type;
+            }
+            else
+            {
+                PropertyInfo property = resource.GetType().GetProperty(propertyName);
+                return property == null ? null : property.PropertyType;
+            }
+        }
+
+        internal static object ConvertPrimitiveValue(object value, Type type, string propertyName, string typeName)
+        {
+            Contract.Assert(value != null);
+            Contract.Assert(type != null);
+
+            string str = value as string;
+
+            if (type == typeof(char))
+            {
+                if (str == null || str.Length != 1)
+                {
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeStringLengthOne, propertyName, typeName));
+                }
+
+                return str[0];
+            }
+            else if (type == typeof(char?))
+            {
+                if (str == null || str.Length > 1)
+                {
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeStringMaxLengthOne, propertyName, typeName));
+                }
+
+                return str.Length > 0 ? str[0] : (char?)null;
+            }
+            else if (type == typeof(char[]))
+            {
+                if (str == null)
+                {
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeString, propertyName, typeName));
+                }
+
+                return str.ToCharArray();
+            }
+            else if (type == typeof(Binary))
+            {
+                return new Binary((byte[])value);
+            }
+            else if (type == typeof(XElement))
+            {
+                if (str == null)
+                {
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeString, propertyName, typeName));
+                }
+
+                return XElement.Parse(str);
+            }
+            else
+            {
+                type = Nullable.GetUnderlyingType(type) ?? type;
+                Contract.Assert(type == typeof(uint) || type == typeof(ushort) || type == typeof(ulong));
+
+                // Note that we are not casting the return value to nullable<T> as even if we do it
+                // CLR would unbox it back to T.
+                return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+            }
         }
 
         private static object ConvertComplexValue(ODataComplexValue complexValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext)
@@ -161,7 +257,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             foreach (object odataItem in collection.Items)
             {
                 IEdmTypeReference itemType = collectionType.ElementType;
-                collectionList.Add(ConvertValue(odataItem, ref itemType, deserializerProvider, readContext));
+                EdmTypeKind propertyKind;
+                collectionList.Add(ConvertValue(odataItem, ref itemType, deserializerProvider, readContext, out propertyKind));
+                Contract.Assert(propertyKind != EdmTypeKind.Primitive, "no collection property support yet.");
             }
 
             RecurseLeave(readContext);

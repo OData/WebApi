@@ -18,7 +18,7 @@ using Microsoft.Data.Edm.Library;
 
 namespace System.Web.Http.OData.Formatter
 {
-    public static class EdmLibHelpers
+    internal static class EdmLibHelpers
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
 
@@ -28,28 +28,28 @@ namespace System.Web.Http.OData.Formatter
             new[]
             {
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(string), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Boolean), GetPrimitiveType(EdmPrimitiveTypeKind.Boolean)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Boolean?), GetPrimitiveType(EdmPrimitiveTypeKind.Boolean)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Byte), GetPrimitiveType(EdmPrimitiveTypeKind.Byte)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Byte?), GetPrimitiveType(EdmPrimitiveTypeKind.Byte)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(bool), GetPrimitiveType(EdmPrimitiveTypeKind.Boolean)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(bool?), GetPrimitiveType(EdmPrimitiveTypeKind.Boolean)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(byte), GetPrimitiveType(EdmPrimitiveTypeKind.Byte)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(byte?), GetPrimitiveType(EdmPrimitiveTypeKind.Byte)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(DateTime), GetPrimitiveType(EdmPrimitiveTypeKind.DateTime)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(DateTime?), GetPrimitiveType(EdmPrimitiveTypeKind.DateTime)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Decimal), GetPrimitiveType(EdmPrimitiveTypeKind.Decimal)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Decimal?), GetPrimitiveType(EdmPrimitiveTypeKind.Decimal)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Double), GetPrimitiveType(EdmPrimitiveTypeKind.Double)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Double?), GetPrimitiveType(EdmPrimitiveTypeKind.Double)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(decimal), GetPrimitiveType(EdmPrimitiveTypeKind.Decimal)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(decimal?), GetPrimitiveType(EdmPrimitiveTypeKind.Decimal)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(double), GetPrimitiveType(EdmPrimitiveTypeKind.Double)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(double?), GetPrimitiveType(EdmPrimitiveTypeKind.Double)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Guid), GetPrimitiveType(EdmPrimitiveTypeKind.Guid)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Guid?), GetPrimitiveType(EdmPrimitiveTypeKind.Guid)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Int16), GetPrimitiveType(EdmPrimitiveTypeKind.Int16)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Int16?), GetPrimitiveType(EdmPrimitiveTypeKind.Int16)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Int32), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Int32?), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Int64), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Int64?), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(SByte), GetPrimitiveType(EdmPrimitiveTypeKind.SByte)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(SByte?), GetPrimitiveType(EdmPrimitiveTypeKind.SByte)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Single), GetPrimitiveType(EdmPrimitiveTypeKind.Single)),
-                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Single?), GetPrimitiveType(EdmPrimitiveTypeKind.Single)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(short), GetPrimitiveType(EdmPrimitiveTypeKind.Int16)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(short?), GetPrimitiveType(EdmPrimitiveTypeKind.Int16)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(int), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(int?), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(long), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(long?), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(sbyte), GetPrimitiveType(EdmPrimitiveTypeKind.SByte)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(sbyte?), GetPrimitiveType(EdmPrimitiveTypeKind.SByte)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(float), GetPrimitiveType(EdmPrimitiveTypeKind.Single)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(float?), GetPrimitiveType(EdmPrimitiveTypeKind.Single)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(byte[]), GetPrimitiveType(EdmPrimitiveTypeKind.Binary)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Stream), GetPrimitiveType(EdmPrimitiveTypeKind.Stream)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Geography), GetPrimitiveType(EdmPrimitiveTypeKind.Geography)),
@@ -76,6 +76,15 @@ namespace System.Web.Http.OData.Formatter
                 // Keep the Binary and XElement in the end, since there are not the default mappings for Edm.Binary and Edm.String.
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(XElement), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Binary), GetPrimitiveType(EdmPrimitiveTypeKind.Binary)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ushort), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ushort?), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(uint), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(uint?), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ulong), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ulong?), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(char[]), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(char), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
+                new KeyValuePair<Type, IEdmPrimitiveType>(typeof(char?), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
             }
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 

@@ -124,6 +124,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot apply PATCH navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
+        /// </summary>
+        internal static string CannotPatchNavigationProperties {
+            get {
+                return ResourceManager.GetString("CannotPatchNavigationProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot serialize a null &apos;{0}&apos;..
         /// </summary>
         internal static string CannotSerializerNull {
@@ -147,6 +156,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string CollectionPropertiesNotSupported {
             get {
                 return ResourceManager.GetString("CollectionPropertiesNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; has a non-null value. Collection properties with value should have the Add method..
+        /// </summary>
+        internal static string CollectionShouldHaveAddMethod {
+            get {
+                return ResourceManager.GetString("CollectionShouldHaveAddMethod", resourceCulture);
             }
         }
         
@@ -588,6 +606,42 @@ namespace System.Web.Http.OData.Properties {
         internal static string PropertyDoesNotBelongToType {
             get {
                 return ResourceManager.GetString("PropertyDoesNotBelongToType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a collection..
+        /// </summary>
+        internal static string PropertyIsNotCollection {
+            get {
+                return ResourceManager.GetString("PropertyIsNotCollection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a string..
+        /// </summary>
+        internal static string PropertyMustBeString {
+            get {
+                return ResourceManager.GetString("PropertyMustBeString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a string with a length of 1..
+        /// </summary>
+        internal static string PropertyMustBeStringLengthOne {
+            get {
+                return ResourceManager.GetString("PropertyMustBeStringLengthOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a string with a maximum length of 1..
+        /// </summary>
+        internal static string PropertyMustBeStringMaxLengthOne {
+            get {
+                return ResourceManager.GetString("PropertyMustBeStringMaxLengthOne", resourceCulture);
             }
         }
         

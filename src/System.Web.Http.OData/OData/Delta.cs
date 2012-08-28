@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
@@ -42,21 +41,21 @@ namespace System.Web.Http.OData
         /// <returns>True if successful</returns>
         public bool TrySetPropertyValue(string name, object value)
         {
-            if (name == null) 
+            if (name == null)
             {
                 throw Error.ArgumentNull("name");
             }
 
-            if (!_propertiesThatExist.ContainsKey(name)) 
+            if (!_propertiesThatExist.ContainsKey(name))
             {
                 return false;
             }
 
             PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
             Type valueType = value != null ? value.GetType() : null;
-            if (cacheHit.Property.PropertyType != valueType) 
+            if (cacheHit.Property.PropertyType != valueType)
             {
-                if (!(cacheHit.Property.PropertyType.IsClass && value == null)) 
+                if (!(cacheHit.Property.PropertyType.IsClass && value == null))
                 {
                     return false;
                 }
@@ -80,19 +79,52 @@ namespace System.Web.Http.OData
         /// <returns>True if the Property was found</returns>
         public bool TryGetPropertyValue(string name, out object value)
         {
-            if (name == null) 
+            if (name == null)
             {
                 throw Error.ArgumentNull("name");
             }
 
-            if (!_propertiesThatExist.ContainsKey(name)) 
+            if (_propertiesThatExist.ContainsKey(name))
+            {
+                PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
+                value = cacheHit.GetValue(_entity);
+                return true;
+            }
+            else
             {
                 value = null;
                 return false;
             }
-            PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
-            value = cacheHit.GetValue(_entity);
-            return true;
+        }
+
+        /// <summary>
+        /// Attempts to get the <see cref="Type"/> of the Property called <paramref name="name"/> from the underlying Entity.
+        /// <remarks>
+        /// Only properties that exist on <typeparamref name="TEntityType"/> can be retrieved.
+        /// Both modified and unmodified properties can be retrieved.
+        /// </remarks>
+        /// </summary>
+        /// <param name="name">The name of the Property</param>
+        /// <param name="type">The type of the Property</param>
+        /// <returns>Returns <c>true</c> if the Property was found and <c>false</c> if not.</returns>
+        public bool TryGetPropertyType(string name, out Type type)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            PropertyAccessor<TEntityType> value;
+            if (_propertiesThatExist.TryGetValue(name, out value))
+            {
+                type = value.Property.PropertyType;
+                return true;
+            }
+            else
+            {
+                type = null;
+                return false;
+            }
         }
 
         /// <summary>
@@ -101,7 +133,7 @@ namespace System.Web.Http.OData
         /// </summary>
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            if (binder == null) 
+            if (binder == null)
             {
                 throw Error.ArgumentNull("binder");
             }
@@ -115,7 +147,7 @@ namespace System.Web.Http.OData
         /// </summary>
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            if (binder == null) 
+            if (binder == null)
             {
                 throw Error.ArgumentNull("binder");
             }
@@ -157,12 +189,12 @@ namespace System.Web.Http.OData
         /// <param name="original">The entity to be updated.</param>
         public void CopyChangedValues(TEntityType original)
         {
-            if (original == null) 
+            if (original == null)
             {
                 throw Error.ArgumentNull("original");
             }
             PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
-            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy) 
+            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_entity, original);
             }
@@ -175,13 +207,13 @@ namespace System.Web.Http.OData
         /// <param name="original">The entity to be updated.</param>
         public void CopyUnchangedValues(TEntityType original)
         {
-            if (original == null) 
+            if (original == null)
             {
                 throw Error.ArgumentNull("original");
             }
 
             PropertyAccessor<TEntityType>[] propertiesToCopy = GetUnchangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
-            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy) 
+            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_entity, original);
             }
@@ -216,5 +248,5 @@ namespace System.Web.Http.OData
                                 .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new CompiledPropertyAccessor<TEntityType>(p))
                                 .ToDictionary(p => p.Property.Name);
         }
-    }  
+    }
 }

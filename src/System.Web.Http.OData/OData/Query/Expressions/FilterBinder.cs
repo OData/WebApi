@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 
@@ -21,6 +23,12 @@ namespace System.Web.Http.OData.Query.Expressions
     internal class FilterBinder
     {
         private const string ODataItParameterName = "$it";
+
+        /// <summary>
+        /// restrict the maximum number of expressions that we generate to prevent DoS attacks.
+        /// </summary>
+        private const int MaxBindCount = 100;
+        private int _currentBindCount = 0;
 
         private static readonly Expression _nullConstant = Expression.Constant(null);
         private static readonly Expression _falseConstant = Expression.Constant(false);
@@ -105,6 +113,8 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             CollectionQueryNode collectionNode = node as CollectionQueryNode;
             SingleValueQueryNode singleValueNode = node as SingleValueQueryNode;
+
+            IncrementBindCount();
 
             if (collectionNode != null)
             {
@@ -294,12 +304,8 @@ namespace System.Web.Http.OData.Query.Expressions
                 if (_nullPropagation)
                 {
                     // handle null as false
-                    // if(body == null) return false; else return body;
-                    body = Expression.Condition(
-                                test: Expression.Equal(body, Expression.Constant(null, typeof(bool?))),
-                                ifTrue: _falseConstant,
-                                ifFalse: Expression.Convert(body, typeof(bool)),
-                                type: typeof(bool));
+                    // body => body == true. passing liftToNull:false would convert null to false.
+                    body = Expression.Equal(body, Expression.Constant(true, typeof(bool?)), liftToNull: false, method: null);
                 }
                 else
                 {
@@ -323,11 +329,12 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression CreatePropertyAccessExpression(Expression source, string propertyName)
         {
-            Expression propertyAccessExpression = Expression.Property(source, propertyName);
-
             if (_nullPropagation && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
             {
-                // source.property => source == null ? null : [CastToNullable]source.property
+                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), propertyName);
+
+                // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
+                // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
                 return
                     Expression.Condition(
                         test: Expression.Equal(source, _nullConstant),
@@ -336,7 +343,7 @@ namespace System.Web.Http.OData.Query.Expressions
             }
             else
             {
-                return propertyAccessExpression;
+                return Expression.Property(source, propertyName);
             }
         }
 
@@ -363,51 +370,59 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             switch (node.Name)
             {
-                case "startswith":
+                case ClrCanonicalFunctions.StartswithFunctionName:
                     return BindStartsWith(node);
 
-                case "endswith":
+                case ClrCanonicalFunctions.EndswithFunctionName:
                     return BindEndsWith(node);
 
-                case "substringof":
+                case ClrCanonicalFunctions.SubstringofFunctionName:
                     return BindSubstringOf(node);
 
-                case "substring":
+                case ClrCanonicalFunctions.SubstringFunctionName:
                     return BindSubstring(node);
 
-                case "length":
+                case ClrCanonicalFunctions.LengthFunctionName:
                     return BindLength(node);
 
-                case "indexof":
+                case ClrCanonicalFunctions.IndexofFunctionName:
                     return BindIndexOf(node);
 
-                case "tolower":
+                case ClrCanonicalFunctions.TolowerFunctionName:
                     return BindToLower(node);
 
-                case "toupper":
+                case ClrCanonicalFunctions.ToupperFunctionName:
                     return BindToUpper(node);
 
-                case "trim":
+                case ClrCanonicalFunctions.TrimFunctionName:
                     return BindTrim(node);
 
-                case "concat":
+                case ClrCanonicalFunctions.ConcatFunctionName:
                     return BindConcat(node);
 
-                case "year":
-                case "month":
-                case "day":
-                case "hour":
-                case "minute":
-                case "second":
-                    return BindDateProperty(node);
+                case ClrCanonicalFunctions.YearFunctionName:
+                case ClrCanonicalFunctions.MonthFunctionName:
+                case ClrCanonicalFunctions.DayFunctionName:
+                case ClrCanonicalFunctions.HourFunctionName:
+                case ClrCanonicalFunctions.MinuteFunctionName:
+                case ClrCanonicalFunctions.SecondFunctionName:
+                    return BindDateOrDateTimeOffsetProperty(node);
 
-                case "round":
+                case ClrCanonicalFunctions.YearsFunctionName:
+                case ClrCanonicalFunctions.MonthsFunctionName:
+                case ClrCanonicalFunctions.DaysFunctionName:
+                case ClrCanonicalFunctions.HoursFunctionName:
+                case ClrCanonicalFunctions.MinutesFunctionName:
+                case ClrCanonicalFunctions.SecondsFunctionName:
+                    return BindTimeSpanProperty(node);
+
+                case ClrCanonicalFunctions.RoundFunctionName:
                     return BindRound(node);
 
-                case "floor":
+                case ClrCanonicalFunctions.FloorFunctionName:
                     return BindFloor(node);
 
-                case "ceiling":
+                case ClrCanonicalFunctions.CeilingFunctionName:
                     return BindCeiling(node);
 
                 default:
@@ -443,6 +458,79 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
+        // we don't have to do null checks inside the function for arguments as we do the null checks before calling
+        // the function when null propagation is enabled.
+        // this method converts back "arg == null ? null : convert(arg)" to "arg" 
+        // Also, note that we can do this generically only because none of the odata functions that we support can take null 
+        // as an argument.
+        private Expression RemoveInnerNullPropagation(Expression expression)
+        {
+            Contract.Assert(expression != null);
+
+            if (_nullPropagation)
+            {
+                // only null propagation generates conditional expressions
+                if (expression.NodeType == ExpressionType.Conditional)
+                {
+                    expression = (expression as ConditionalExpression).IfFalse;
+                    Contract.Assert(expression != null);
+
+                    if (expression.NodeType == ExpressionType.Convert)
+                    {
+                        UnaryExpression unaryExpression = expression as UnaryExpression;
+                        Contract.Assert(unaryExpression != null);
+
+                        if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+                        {
+                            // this is a cast from T to Nullable<T> which is redundant.
+                            expression = unaryExpression.Operand;
+                        }
+                    }
+                }
+            }
+
+            return expression;
+        }
+
+        // creates an expression for the corresponding OData function.
+        private Expression MakeFunctionCall(MemberInfo member, params Expression[] arguments)
+        {
+            Contract.Assert(member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method);
+
+            IEnumerable<Expression> functionCallArguments = arguments;
+            if (_nullPropagation)
+            {
+                // we don't have to check if the argument is null inside the function call as we do it already
+                // before calling the function. So remove the redunadant null checks.
+                functionCallArguments = arguments.Select(a => RemoveInnerNullPropagation(a));
+            }
+
+            // if the argument is of type Nullable<T>, then translate the argument to Nullable<T>.Value as none 
+            // of the cannonical functions have overloads for Nullable<> arguments.
+            functionCallArguments = ExtractValueFromNullableArguments(functionCallArguments);
+
+            Expression functionCall;
+            if (member.MemberType == MemberTypes.Method)
+            {
+                MethodInfo method = member as MethodInfo;
+                if (method.IsStatic)
+                {
+                    functionCall = Expression.Call(null, method, functionCallArguments);
+                }
+                else
+                {
+                    functionCall = Expression.Call(functionCallArguments.First(), method, functionCallArguments.Skip(1));
+                }
+            }
+            else
+            {
+                // property
+                functionCall = Expression.Property(functionCallArguments.First(), member as PropertyInfo);
+            }
+
+            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+        }
+
         private Expression BindCeiling(SingleValueFunctionCallQueryNode node)
         {
             Contract.Assert("ceiling" == node.Name);
@@ -451,9 +539,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            Expression functionCall = Expression.Call(null, ClrCanonicalFunctions.Ceiling, ExtractValueFromNullableArguments(arguments));
-
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Ceiling, arguments);
         }
 
         private Expression BindFloor(SingleValueFunctionCallQueryNode node)
@@ -464,8 +550,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            Expression functionCall = Expression.Call(null, ClrCanonicalFunctions.Floor, ExtractValueFromNullableArguments(arguments));
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Floor, arguments);
         }
 
         private Expression BindRound(SingleValueFunctionCallQueryNode node)
@@ -476,23 +561,38 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            Expression functionCall = Expression.Call(null, ClrCanonicalFunctions.Round, ExtractValueFromNullableArguments(arguments));
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Round, arguments);
         }
 
-        private Expression BindDateProperty(SingleValueFunctionCallQueryNode node)
+        private Expression BindDateOrDateTimeOffsetProperty(SingleValueFunctionCallQueryNode node)
         {
-            Contract.Assert(new string[] { "year", "month", "day", "hour", "minute", "second" }.Contains(node.Name));
-
             Expression[] arguments = BindArguments(node.Arguments);
 
             Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
-            string propertyName = node.Name.Substring(0, 1).ToUpperInvariant() + node.Name.Substring(1);
+            PropertyInfo property;
+            if (IsDate(arguments[0].Type))
+            {
+                Contract.Assert(ClrCanonicalFunctions.DateProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.DateProperties[node.Name];
+            }
+            else
+            {
+                Contract.Assert(ClrCanonicalFunctions.DateTimeOffsetProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.DateTimeOffsetProperties[node.Name];
+            }
 
-            Expression functionCall = Expression.Property(ExtractValueFromNullableArguments(arguments)[0], propertyName);
+            return MakeFunctionCall(ClrCanonicalFunctions.DateProperties[node.Name], arguments);
+        }
 
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+        private Expression BindTimeSpanProperty(SingleValueFunctionCallQueryNode node)
+        {
+            Expression[] arguments = BindArguments(node.Arguments);
+
+            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
+            Contract.Assert(ClrCanonicalFunctions.TimeSpanProperties.ContainsKey(node.Name));
+
+            return MakeFunctionCall(ClrCanonicalFunctions.TimeSpanProperties[node.Name], arguments);
         }
 
         private Expression BindConcat(SingleValueFunctionCallQueryNode node)
@@ -503,8 +603,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(null, ClrCanonicalFunctions.Concat, arguments);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Concat, arguments);
         }
 
         private Expression BindTrim(SingleValueFunctionCallQueryNode node)
@@ -515,8 +614,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.Trim);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Trim, arguments);
         }
 
         private Expression BindToUpper(SingleValueFunctionCallQueryNode node)
@@ -527,8 +625,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.ToUpper);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.ToUpper, arguments);
         }
 
         private Expression BindToLower(SingleValueFunctionCallQueryNode node)
@@ -539,8 +636,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.ToLower);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.ToLower, arguments);
         }
 
         private Expression BindIndexOf(SingleValueFunctionCallQueryNode node)
@@ -551,8 +647,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.IndexOf, arguments[1]);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.IndexOf, arguments);
         }
 
         private Expression BindSubstring(SingleValueFunctionCallQueryNode node)
@@ -573,11 +668,11 @@ namespace System.Web.Http.OData.Query.Expressions
                 if (_nullPropagation)
                 {
                     // Safe function is static and takes string "this" as first argument
-                    functionCall = Expression.Call(null, ClrCanonicalFunctions.SubstringStartNoThrow, arguments[0], arguments[1]);
+                    functionCall = MakeFunctionCall(ClrCanonicalFunctions.SubstringStartNoThrow, arguments);
                 }
                 else
                 {
-                    functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.SubstringStart, arguments[1]);
+                    functionCall = MakeFunctionCall(ClrCanonicalFunctions.SubstringStart, arguments);
                 }
             }
             else
@@ -590,15 +685,15 @@ namespace System.Web.Http.OData.Query.Expressions
                 if (_nullPropagation)
                 {
                     // Safe function is static and takes string "this" as first argument
-                    functionCall = Expression.Call(null, ClrCanonicalFunctions.SubstringStartAndLengthNoThrow, arguments[0], arguments[1], arguments[2]);
+                    functionCall = MakeFunctionCall(ClrCanonicalFunctions.SubstringStartAndLengthNoThrow, arguments);
                 }
                 else
                 {
-                    functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.SubstringStartAndLength, arguments[1], arguments[2]);
+                    functionCall = MakeFunctionCall(ClrCanonicalFunctions.SubstringStartAndLength, arguments);
                 }
             }
 
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return functionCall;
         }
 
         private Expression BindLength(SingleValueFunctionCallQueryNode node)
@@ -609,8 +704,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
-            Expression functionCall = Expression.Property(arguments[0], "Length");
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Length, arguments);
         }
 
         private Expression BindSubstringOf(SingleValueFunctionCallQueryNode node)
@@ -622,8 +716,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
             // NOTE: this is reversed because it is reverse in WCF DS and in the OData spec
-            Expression functionCall = Expression.Call(arguments[1], ClrCanonicalFunctions.Contains, arguments[0]);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.Contains, arguments[1], arguments[0]);
         }
 
         private Expression BindStartsWith(SingleValueFunctionCallQueryNode node)
@@ -634,8 +727,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.StartsWith, arguments[1]);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.StartsWith, arguments);
         }
 
         private Expression BindEndsWith(SingleValueFunctionCallQueryNode node)
@@ -646,8 +738,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
-            Expression functionCall = Expression.Call(arguments[0], ClrCanonicalFunctions.EndsWith, arguments[1]);
-            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.EndsWith, arguments);
         }
 
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)
@@ -759,6 +850,14 @@ namespace System.Web.Http.OData.Query.Expressions
             return lambdaIt;
         }
 
+        private void IncrementBindCount()
+        {
+            if (++_currentBindCount > MaxBindCount)
+            {
+                throw new ODataException(SRResources.RecursionLimitExceeded);
+            }
+        }
+
         private static Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
         {
             ExpressionType binaryExpressionType;
@@ -772,9 +871,9 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private static Expression[] ExtractValueFromNullableArguments(Expression[] arguments)
+        private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)
         {
-            return arguments.Select(arg => IsNullable(arg.Type) ? Expression.Property(arg, "Value") : arg).ToArray();
+            return arguments.Select(arg => Nullable.GetUnderlyingType(arg.Type) != null ? Expression.Property(arg, "Value") : arg);
         }
 
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)
@@ -903,6 +1002,11 @@ namespace System.Web.Http.OData.Query.Expressions
         private static bool IsDoubleOrDecimal(Type type)
         {
             return IsType<double>(type) || IsType<decimal>(type);
+        }
+
+        private static bool IsDate(Type type)
+        {
+            return IsType<DateTime>(type);
         }
 
         private static bool IsDateOrOffset(Type type)

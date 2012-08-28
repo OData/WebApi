@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -10,6 +12,33 @@ namespace System.Web.Http.OData.Query.Expressions
     internal class ClrCanonicalFunctions
     {
         private static string _defaultString = default(string);
+
+        // function names
+        internal const string StartswithFunctionName = "startswith";
+        internal const string EndswithFunctionName = "endswith";
+        internal const string SubstringofFunctionName = "substringof";
+        internal const string SubstringFunctionName = "substring";
+        internal const string LengthFunctionName = "length";
+        internal const string IndexofFunctionName = "indexof";
+        internal const string TolowerFunctionName = "tolower";
+        internal const string ToupperFunctionName = "toupper";
+        internal const string TrimFunctionName = "trim";
+        internal const string ConcatFunctionName = "concat";
+        internal const string YearFunctionName = "year";
+        internal const string YearsFunctionName = "years";
+        internal const string MonthFunctionName = "month";
+        internal const string MonthsFunctionName = "months";
+        internal const string DayFunctionName = "day";
+        internal const string DaysFunctionName = "days";
+        internal const string HourFunctionName = "hour";
+        internal const string HoursFunctionName = "hours";
+        internal const string MinuteFunctionName = "minute";
+        internal const string MinutesFunctionName = "minutes";
+        internal const string SecondFunctionName = "second";
+        internal const string SecondsFunctionName = "seconds";
+        internal const string RoundFunctionName = "round";
+        internal const string FloorFunctionName = "floor";
+        internal const string CeilingFunctionName = "ceiling";
 
         // string functions
         public static readonly MethodInfo StartsWith;
@@ -29,6 +58,42 @@ namespace System.Web.Http.OData.Query.Expressions
         public static readonly MethodInfo Ceiling;
         public static readonly MethodInfo Round;
         public static readonly MethodInfo Floor;
+
+        // Date properties
+        public static readonly Dictionary<string, PropertyInfo> DateProperties = new[]
+        {
+            new KeyValuePair<string, PropertyInfo>(YearFunctionName, typeof(DateTime).GetProperty("Year")),
+            new KeyValuePair<string, PropertyInfo>(MonthFunctionName, typeof(DateTime).GetProperty("Month")),
+            new KeyValuePair<string, PropertyInfo>(DayFunctionName, typeof(DateTime).GetProperty("Day")),
+            new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(DateTime).GetProperty("Hour")),
+            new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(DateTime).GetProperty("Minute")),
+            new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTime).GetProperty("Second")),
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        // DateTimeOffset properties
+        public static readonly Dictionary<string, PropertyInfo> DateTimeOffsetProperties = new[]
+        {
+            new KeyValuePair<string, PropertyInfo>(YearFunctionName, typeof(DateTimeOffset).GetProperty("Year")),
+            new KeyValuePair<string, PropertyInfo>(MonthFunctionName, typeof(DateTimeOffset).GetProperty("Month")),
+            new KeyValuePair<string, PropertyInfo>(DayFunctionName, typeof(DateTimeOffset).GetProperty("Day")),
+            new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(DateTimeOffset).GetProperty("Hour")),
+            new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(DateTimeOffset).GetProperty("Minute")),
+            new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTimeOffset).GetProperty("Second")),
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        // TimeSpan properties
+        public static readonly Dictionary<string, PropertyInfo> TimeSpanProperties = new[]
+        {
+            new KeyValuePair<string, PropertyInfo>(YearsFunctionName, typeof(TimeSpan).GetProperty("Years")),
+            new KeyValuePair<string, PropertyInfo>(MonthsFunctionName, typeof(TimeSpan).GetProperty("Months")),
+            new KeyValuePair<string, PropertyInfo>(DaysFunctionName, typeof(TimeSpan).GetProperty("Days")),
+            new KeyValuePair<string, PropertyInfo>(HoursFunctionName, typeof(TimeSpan).GetProperty("Hours")),
+            new KeyValuePair<string, PropertyInfo>(MinutesFunctionName, typeof(TimeSpan).GetProperty("Minutes")),
+            new KeyValuePair<string, PropertyInfo>(SecondsFunctionName, typeof(TimeSpan).GetProperty("Seconds")),
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        // String Properties
+        public static readonly PropertyInfo Length = typeof(string).GetProperty("Length");
 
         [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "Initialization is order dependent")]
         static ClrCanonicalFunctions()

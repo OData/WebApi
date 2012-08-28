@@ -21,6 +21,22 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private static Dictionary<Type, IEdmModel> _modelCache = new Dictionary<Type, IEdmModel>();
 
+        public static TheoryDataSet<string> LongInputs
+        {
+            get
+            {
+                return GetLongInputsTestData(100);
+            }
+        }
+
+        public static TheoryDataSet<string> CloseToLongInputs
+        {
+            get
+            {
+                return GetLongInputsTestData(95);
+            }
+        }
+
         #region Inequalities
         [Theory]
         [InlineData(null, true, true)]
@@ -76,7 +92,7 @@ namespace System.Web.Http.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "$filter=UnitPrice gt 5.00m",
                 Error.Format("$it => ($it.UnitPrice > Convert({0:0.00}))", 5.0),
-                Error.Format("$it => IIF((($it.UnitPrice > Convert({0:0.00})) == null), False, Convert(($it.UnitPrice > Convert({0:0.00}))))", 5.0));
+                Error.Format("$it => (($it.UnitPrice > Convert({0:0.00})) == True)", 5.0));
 
             RunFilters(filters,
                 new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
@@ -92,7 +108,7 @@ namespace System.Web.Http.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "$filter=UnitPrice ge 5.00m",
                 Error.Format("$it => ($it.UnitPrice >= Convert({0:0.00}))", 5.0),
-                Error.Format("$it => IIF((($it.UnitPrice >= Convert({0:0.00})) == null), False, Convert(($it.UnitPrice >= Convert({0:0.00}))))", 5.0));
+                Error.Format("$it => (($it.UnitPrice >= Convert({0:0.00})) == True)", 5.0));
 
             RunFilters(filters,
                 new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
@@ -234,7 +250,7 @@ namespace System.Web.Http.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "$filter=not Discontinued",
                 "$it => Convert(Not($it.Discontinued))",
-                "$it => IIF((Not($it.Discontinued) == null), False, Convert(Not($it.Discontinued)))");
+                "$it => (Not($it.Discontinued) == True)");
 
             RunFilters(filters,
                 new Product { Discontinued = ToNullable<bool>(discontinued) },
@@ -247,7 +263,7 @@ namespace System.Web.Http.OData.Query.Expressions
             VerifyQueryDeserialization(
                 "$filter=not (not(not    (Discontinued)))",
                 "$it => Convert(Not(Not(Not($it.Discontinued))))",
-                "$it => IIF((Not(Not(Not($it.Discontinued))) == null), False, Convert(Not(Not(Not($it.Discontinued)))))");
+                "$it => (Not(Not(Not($it.Discontinued))) == True)");
         }
         #endregion
 
@@ -261,7 +277,7 @@ namespace System.Web.Http.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "$filter=UnitPrice sub 1.00m lt 5.00m",
                 Error.Format("$it => (($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
-                Error.Format("$it => IIF(((($it.UnitPrice - Convert(1.00)) < Convert(5.00)) == null), False, Convert((($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00}))))", 1.0, 5.0));
+                Error.Format("$it => ((($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00})) == True)", 1.0, 5.0));
 
             RunFilters(filters,
                new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
@@ -341,6 +357,21 @@ namespace System.Web.Http.OData.Query.Expressions
                 new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
         }
         #endregion
+
+        [Theory]
+        [PropertyData("LongInputs")]
+        public void LongInputs_CauseRecursionLimitExceededException(string filter)
+        {
+            Assert.Throws<ODataException>(() => VerifyQueryDeserialization(filter), "The recursion limit has been exceeded.");
+        }
+
+        [Theory]
+        [PropertyData("CloseToLongInputs")]
+        public void AlmostLongInputs_DonotCauseRecursionLimitExceededExceptionOrTimeoutDuringCompilation(string filter)
+        {
+            var filters = VerifyQueryDeserialization(filter);
+            RunFilter(filters.WithNullPropagation, new Product());
+        }
 
         [Theory]
         [InlineData(null, null, true, true)]
@@ -592,11 +623,11 @@ namespace System.Web.Http.OData.Query.Expressions
 
         [Theory]
         [InlineData("Abcd", -1, "Abcd", true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd",  0, "Abcd", true, true)]
-        [InlineData("Abcd",  1, "bcd",  true, true)]
-        [InlineData("Abcd",  3, "d",    true, true)]
-        [InlineData("Abcd",  4, "",     true, true)]
-        [InlineData("Abcd",  5, "",     true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", 0, "Abcd", true, true)]
+        [InlineData("Abcd", 1, "bcd", true, true)]
+        [InlineData("Abcd", 3, "d", true, true)]
+        [InlineData("Abcd", 4, "", true, true)]
+        [InlineData("Abcd", 5, "", true, typeof(ArgumentOutOfRangeException))]
         public void StringSubstringStart(string productName, int startIndex, string compareString, bool withNullPropagation, object withoutNullPropagation)
         {
             string filter = string.Format("$filter=substring(ProductName, {0}) eq '{1}'", startIndex, compareString);
@@ -608,19 +639,19 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Abcd", -1,  4, "Abcd", true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd", -1,  3, "Abc",  true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd",  0,  1, "A",    true, true)]
-        [InlineData("Abcd",  0,  4, "Abcd", true, true)]
-        [InlineData("Abcd",  0,  3, "Abc",  true, true)]
-        [InlineData("Abcd",  0,  5, "Abcd", true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd",  1,  3, "bcd",  true, true)]
-        [InlineData("Abcd",  1,  5, "bcd",  true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd",  2,  1, "c",    true, true)]
-        [InlineData("Abcd",  3,  1, "d",    true, true)]
-        [InlineData("Abcd",  4,  1, "",     true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd",  0, -1, "",     true, typeof(ArgumentOutOfRangeException))]
-        [InlineData("Abcd",  5, -1, "",     true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", -1, 4, "Abcd", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", -1, 3, "Abc", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", 0, 1, "A", true, true)]
+        [InlineData("Abcd", 0, 4, "Abcd", true, true)]
+        [InlineData("Abcd", 0, 3, "Abc", true, true)]
+        [InlineData("Abcd", 0, 5, "Abcd", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", 1, 3, "bcd", true, true)]
+        [InlineData("Abcd", 1, 5, "bcd", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", 2, 1, "c", true, true)]
+        [InlineData("Abcd", 3, 1, "d", true, true)]
+        [InlineData("Abcd", 4, 1, "", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", 0, -1, "", true, typeof(ArgumentOutOfRangeException))]
+        [InlineData("Abcd", 5, -1, "", true, typeof(ArgumentOutOfRangeException))]
         public void StringSubstringStartAndLength(string productName, int startIndex, int length, string compareString, bool withNullPropagation, object withoutNullPropagation)
         {
             string filter = string.Format("$filter=substring(ProductName, {0}, {1}) eq '{2}'", startIndex, length, compareString);
@@ -696,7 +727,7 @@ namespace System.Web.Http.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "$filter=length(ProductName) gt 0",
                 "$it => ($it.ProductName.Length > 0)",
-                "$it => IIF(((IIF(($it.ProductName == null), null, Convert($it.ProductName.Length)) > Convert(0)) == null), False, Convert((IIF(($it.ProductName == null), null, Convert($it.ProductName.Length)) > Convert(0))))");
+                "$it => ((IIF(($it.ProductName == null), null, Convert($it.ProductName.Length)) > Convert(0)) == True)");
 
             RunFilters(filters,
               new Product { ProductName = productName },
@@ -799,6 +830,20 @@ namespace System.Web.Http.OData.Query.Expressions
               new Product { },
               new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
+
+        [Fact]
+        public void RecursiveMethodCall()
+        {
+            var filters = VerifyQueryDeserialization(
+                "$filter=floor(floor(UnitPrice)) eq 123m",
+                "$it => (Floor(Floor($it.UnitPrice.Value)) == 123)",
+                "$it => ((IIF((IIF(($it.UnitPrice == null), null, Convert(Floor($it.UnitPrice.Value))) == null), null, Convert(Floor(Floor($it.UnitPrice.Value)))) == Convert(123)) == True)");
+
+            RunFilters(filters,
+              new Product { },
+              new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
+        }
+
         #endregion
 
         #region Date Functions
@@ -869,6 +914,35 @@ namespace System.Web.Http.OData.Query.Expressions
                 "$it => ($it.DiscontinuedDate.Value.Second == 33)",
                 NotTesting);
         }
+
+        [Theory(Skip = "DateTimeOffsets are not handled well in the uri parser")]
+        [InlineData("$filter=year(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Year == 100")]
+        [InlineData("$filter=month(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Month == 100")]
+        [InlineData("$filter=day(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Day == 100")]
+        [InlineData("$filter=hour(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Hour == 100")]
+        [InlineData("$filter=minute(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Minute == 100")]
+        [InlineData("$filter=second(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Second == 100")]
+        public void DateTimeOffsetFunctions(string filter, string expression)
+        {
+            VerifyQueryDeserialization(
+                filter,
+                expression);
+        }
+
+        [Theory(Skip = "Timespans are not handled well in the uri parser")]
+        [InlineData("$filter=years(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Years == 100")]
+        [InlineData("$filter=months(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Months == 100")]
+        [InlineData("$filter=days(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Days == 100")]
+        [InlineData("$filter=hours(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Hours == 100")]
+        [InlineData("$filter=minutes(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Minutes == 100")]
+        [InlineData("$filter=seconds(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Seconds == 100")]
+        public void TimespanFunctions(string filter, string expression)
+        {
+            VerifyQueryDeserialization(
+                filter,
+                expression);
+        }
+
         #endregion
 
         #region Math Functions
@@ -1023,6 +1097,19 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         #endregion
+
+        private static TheoryDataSet<string> GetLongInputsTestData(int maxCount)
+        {
+            return new TheoryDataSet<string>
+                {
+                    "$filter=" + String.Join(" and ", Enumerable.Range(1, (maxCount/5) + 1).Select(_ => "SupplierID eq 1")),
+                    "$filter=" + String.Join(" ", Enumerable.Range(1, maxCount).Select(_ => "not")) + " Discontinued",
+                    "$filter=" + String.Join(" add ", Enumerable.Range(1, maxCount/2)) + " eq 5050",
+                    "$filter=" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/ProductID eq 1",
+                    "$filter=" + Enumerable.Range(1,maxCount).Aggregate("'abc'", (prev,i) => String.Format("trim({0})", prev)) + " eq '123'",
+                    "$filter= Category/Products/any(" + Enumerable.Range(1,maxCount/4).Aggregate("", (prev,i) => String.Format("p{1}: p{1}/Category/Products/any({0})", prev, i)) +")"
+                };
+        }
 
         private void RunFilters(dynamic filters, Product product, dynamic expectedValue)
         {

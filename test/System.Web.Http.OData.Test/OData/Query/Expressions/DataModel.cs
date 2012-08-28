@@ -22,6 +22,10 @@ namespace System.Web.Http.OData.Query.Expressions
         public DateTime? DiscontinuedDate { get; set; }
         public DateTime NonNullableDiscontinuedDate { get; set; }
 
+        public DateTimeOffset DiscontinuedOffset { get; set; }
+        public TimeSpan DiscontinuedSince { get; set; }
+
+
         public Category Category { get; set; }
 
         public Address SupplierAddress { get; set; }

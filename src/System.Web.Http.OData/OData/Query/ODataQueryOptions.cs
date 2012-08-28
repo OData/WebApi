@@ -8,6 +8,7 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Query;
 
 namespace System.Web.Http.OData.Query
 {
@@ -109,12 +110,24 @@ namespace System.Web.Http.OData.Query
         /// </summary>
         public ODataRawQueryOptions RawValues { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="FilterQueryOption"/>.
+        /// </summary>
         public FilterQueryOption Filter { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="OrderByQueryOption"/>.
+        /// </summary>
         public OrderByQueryOption OrderBy { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="SkipQueryOption"/>.
+        /// </summary>
         public SkipQueryOption Skip { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="TopQueryOption"/>.
+        /// </summary>
         public TopQueryOption Top { get; private set; }
 
         /// <summary>
@@ -201,15 +214,20 @@ namespace System.Web.Http.OData.Query
             }
 
             OrderByQueryOption orderBy = OrderBy;
-            if (orderBy == null && (Skip != null || Top != null) && canUseDefaultOrderBy && !Context.IsPrimitiveClrType)
+
+            // $skip or $top require a stable sort for predictable results.
+            // If either is present in the query and we have permission,
+            // generate an $orderby that will produce a stable sort.
+            if ((Skip != null || Top != null) && canUseDefaultOrderBy && !Context.IsPrimitiveClrType)
             {
-                // Instead of failing early here if we cannot generate a default OrderBy,
+                // If there is no OrderBy present, we manufacture a default.
+                // If an OrderBy is already present, we add any missing
+                // properties necessary to make a stable sort.
+                // Instead of failing early here if we cannot generate the OrderBy,
                 // let the IQueryable backend fail (if it has to).
-                string orderByRaw = GenerateDefaultOrderBy(Context);
-                if (!String.IsNullOrEmpty(orderByRaw))
-                {
-                    orderBy = new OrderByQueryOption(orderByRaw, Context);
-                }
+                orderBy = orderBy == null
+                            ? GenerateDefaultOrderBy(Context)
+                            : EnsureStableSortOrderBy(orderBy, Context);
             }
 
             if (orderBy != null)
@@ -238,30 +256,78 @@ namespace System.Web.Http.OData.Query
             }
         }
 
-        private static string GenerateDefaultOrderBy(ODataQueryContext context)
+        // Returns a sorted list of all properties that may legally appear
+        // in an OrderBy.  If the entity type has keys, all are returned.
+        // Otherwise, when no keys are present, all primitive properties are returned.
+        private static IEnumerable<IEdmStructuralProperty> GetAvailableOrderByProperties(ODataQueryContext context)
         {
             Contract.Assert(context != null && context.EntitySet != null);
 
             IEdmEntityType entityType = context.EntitySet.ElementType;
+            IEnumerable<IEdmStructuralProperty> properties = 
+                entityType.Key().Any()
+                    ? entityType.Key()
+                    : entityType
+                        .StructuralProperties()
+                        .Where(property => property.Type.IsPrimitive());
 
-            // choose the keys alphabetically. This would return a stable sort.
-            string sortOrder = String.Join(",", entityType
-                                                .Key()
-                                                .OrderBy(property => property.Name)
-                                                .Select(property => property.Name));
-            if (String.IsNullOrEmpty(sortOrder))
+            // Sort properties alphabetically for stable sort
+            return properties.OrderBy(property => property.Name);
+        }
+
+        // Generates the OrderByQueryOption to use by default for $skip or $top
+        // when no other $orderby is available.  It will produce a stable sort.
+        // This may return a null if there are no available properties.
+        private static OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context)
+        {
+            string orderByRaw = String.Join(",", 
+                                    GetAvailableOrderByProperties(context)
+                                        .Select(property => property.Name));
+            return String.IsNullOrEmpty(orderByRaw)
+                    ? null
+                    : new OrderByQueryOption(orderByRaw, context);
+        }
+
+        /// <summary>
+        /// Ensures the given <see cref="OrderByQueryOption"/> will produce a stable sort.
+        /// If it will, the input <paramref name="orderBy"/> will be returned
+        /// unmodified.  If the given <see cref="OrderByQueryOption"/> will not produce a
+        /// stable sort, a new <see cref="OrderByQueryOption"/> instance will be created
+        /// and returned.
+        /// </summary>
+        /// <param name="orderBy">The <see cref="OrderByQueryOption"/> to evaluate.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/>.</param>
+        /// <returns>An <see cref="OrderByQueryOption"/> that will produce a stable sort.</returns>
+        private static OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context)
+        {
+            Contract.Assert(orderBy != null);
+            Contract.Assert(context != null && context.EntitySet != null);
+
+            // Strategy: create a hash of all properties already used in the given OrderBy
+            // and remove them from the list of properties we need to add to make the sort stable.
+            HashSet<string> usedPropertyNames = 
+                new HashSet<string>(
+                    orderBy.PropertyNodes
+                        .Select<OrderByPropertyNode, string>(node => node.Property.Name));
+
+            IEnumerable<IEdmStructuralProperty> propertiesToAdd = 
+                GetAvailableOrderByProperties(context)
+                    .Where(prop => !usedPropertyNames.Contains(prop.Name));
+
+            if (propertiesToAdd.Any())
             {
-                // If there are no keys, choose the primitive properties alphabetically. This 
-                // might not result in a stable sort especially if there are duplicates and is only
-                // a best effort solution.
-                sortOrder = String.Join(",", entityType
-                            .StructuralProperties()
-                            .Where(property => property.Type.IsPrimitive())
-                            .OrderBy(property => property.Name)
-                            .Select(property => property.Name));
+                // The existing query options has too few properties to create a stable sort.
+                // Clone the given one and add the remaining properties to end, thereby making
+                // the sort stable but preserving the user's original intent for the major
+                // sort order.
+                orderBy = new OrderByQueryOption(orderBy.RawValue, context);
+                foreach (IEdmStructuralProperty property in propertiesToAdd)
+                {
+                    orderBy.PropertyNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+                }
             }
 
-            return sortOrder;
+            return orderBy;
         }
     }
 }

@@ -52,20 +52,21 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void GetQueryNodeParsesQuery()
+        public void PropertyNodes_Getter_Parses_Query()
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer), "Customers");
             var orderby = new OrderByQueryOption("Name,Website", context);
-            var node = orderby.QueryNode;
 
-            Assert.Equal(QueryNodeKind.PropertyAccess, node.Expression.Kind);
-            var websiteNode = node.Expression as PropertyAccessQueryNode;
-            Assert.Equal("Website", websiteNode.Property.Name);
+            // Act
+            ICollection<OrderByPropertyNode> nodes = orderby.PropertyNodes;
 
-            var nameNode = ((OrderByQueryNode)node.Collection).Expression;
-            Assert.Equal(QueryNodeKind.PropertyAccess, nameNode.Kind);
-            Assert.Equal("Name", ((PropertyAccessQueryNode)nameNode).Property.Name);
+            // Assert
+            Assert.NotNull(nodes);
+            Assert.Equal(2, nodes.Count);
+            Assert.Equal("Name", nodes.First().Property.Name);
+            Assert.Equal("Website", nodes.Last().Property.Name);
         }
 
         [Theory]

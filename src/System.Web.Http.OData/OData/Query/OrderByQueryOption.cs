@@ -18,6 +18,7 @@ namespace System.Web.Http.OData.Query
     public class OrderByQueryOption
     {
         private OrderByQueryNode _queryNode;
+        private ICollection<OrderByPropertyNode> _propertyNodes;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
@@ -47,10 +48,33 @@ namespace System.Web.Http.OData.Query
         public ODataQueryContext Context { get; private set; }
 
         /// <summary>
+        /// Gets the collection of <see cref="OrderByPropertyNode"/> instance
+        /// for the current <see cref="OrderByQueryOption"/>.
+        /// </summary>
+        /// <remarks>
+        /// This collection can be modified as needed.
+        /// </remarks>
+        public ICollection<OrderByPropertyNode> PropertyNodes
+        {
+            get
+            {
+                if (_propertyNodes == null)
+                {
+                    _propertyNodes = OrderByPropertyNode.CreateCollection(QueryNode);
+                }
+                return _propertyNodes;
+            }
+        }
+
+        /// <summary>
+        ///  Gets the raw $orderby value.
+        /// </summary>
+        public string RawValue { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="OrderByQueryNode"/> for this query option.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification = "TODO: remove this when implement TODO below")]
-        public OrderByQueryNode QueryNode
+        private OrderByQueryNode QueryNode
         {
             get
             {
@@ -66,11 +90,6 @@ namespace System.Web.Http.OData.Query
                 return _queryNode;
             }
         }
-
-        /// <summary>
-        ///  Gets the raw $orderby value.
-        /// </summary>
-        public string RawValue { get; private set; }
 
         /// <summary>
         /// Apply the $orderby query to the given IQueryable.
@@ -95,16 +114,16 @@ namespace System.Web.Http.OData.Query
         private IOrderedQueryable ApplyToCore(IQueryable query)
         {
             // TODO 463999: [OData] Consider moving OrderByPropertyNode to ODataLib
-            OrderByPropertyNode props = OrderByPropertyNode.Create(QueryNode);
+            ICollection<OrderByPropertyNode> props = PropertyNodes;
 
             bool alreadyOrdered = false;
             IQueryable querySoFar = query;
             HashSet<IEdmProperty> propertiesSoFar = new HashSet<IEdmProperty>();
 
-            while (props != null)
+            foreach (OrderByPropertyNode prop in props)
             {
-                IEdmProperty property = props.Property;
-                OrderByDirection direction = props.Direction;
+                IEdmProperty property = prop.Property;
+                OrderByDirection direction = prop.Direction;
 
                 // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
                 if (propertiesSoFar.Contains(property))
@@ -115,7 +134,6 @@ namespace System.Web.Http.OData.Query
 
                 querySoFar = ExpressionHelpers.OrderBy(querySoFar, property, direction, Context.EntityClrType, alreadyOrdered);
                 alreadyOrdered = true;
-                props = props.ThenBy;
             }
 
             return querySoFar as IOrderedQueryable;

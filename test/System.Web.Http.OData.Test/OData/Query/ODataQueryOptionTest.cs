@@ -61,6 +61,91 @@ namespace System.Web.Http.OData.Query
             }
         }
 
+        // Used to test modifications to $orderby when $skip or $top are present
+        // and the entity type has 2 keys -- CustomerId and Name.
+        // Tuple is: query expression, canUseDefaultOrderBy, expected expression
+        public static TheoryDataSet<string, bool, string> SkipTopOrderByUsingKeysTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, bool, string>
+                {
+                    // First key present with $skip, adds 2nd key
+                    { "$orderby=CustomerId&$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+
+                    // First key present with $top, adds 2nd key
+                    { "$orderby=CustomerId&$top=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Take(1)" },
+
+                    // First key present with $skip and $top, adds 2nd key
+                    { "$orderby=CustomerId&$skip=1&$top=2", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1).Take(2)" },
+
+                    // First key present, no $skip or $top, no modification
+                    { "$orderby=CustomerId", false, "OrderBy(p1 => p1.CustomerId)" },
+
+                    // First key present, 'canUseDefaultOrderBy' is false, no modification
+                    { "$orderby=CustomerId&$skip=1", false, "OrderBy(p1 => p1.CustomerId).Skip(1)" },
+
+                    // Second key present, adds 1st key after 2nd
+                    { "$orderby=Name&$skip=1", true, "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+
+                    // Second key plus 'asc' suffix, adds 1st key and preserves suffix
+                    { "$orderby=Name asc&$skip=1", true, "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+
+                    // Second key plus 'desc' suffix, adds 1st key and preserves suffix
+                    { "$orderby=Name desc&$skip=1", true, "OrderByDescending(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+
+                    // All keys present, no modification
+                    { "$orderby=CustomerId,Name&$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+
+                    // All keys present but in reverse order, no modification
+                    { "$orderby=Name,CustomerId&$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+
+                    // First key present but with extraneous whitespace, adds 2nd key
+                    { "$orderby= CustomerId &$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+
+                    // All keys present with extraneous whitespace, no modification
+                    { "$orderby= \t CustomerId \t , Name \t desc \t &$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenByDescending(p1 => p1.Name).Skip(1)" },
+
+                    // Ordering on non-key property, adds all keys
+                    { "$orderby=Website&$skip=1", true,  "OrderBy(p1 => p1.Website).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+                };
+            }
+        }
+
+        // Used to test modifications to $orderby when $skip or $top are present
+        // and the entity type has a no key properties.
+        // Tuple is: query expression, canUseDefaultOrderBy, expected expression
+        public static TheoryDataSet<string, bool, string> SkipTopOrderByWithNoKeysTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, bool, string>
+                {
+                    // Single property present with $skip, adds all remaining in alphabetic order
+                    { "$orderby=CustomerId&$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Skip(1)" },
+
+                    // Single property present with $top, adds all remaining in alphabetic order
+                    { "$orderby=CustomerId&$top=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Take(1)" },
+
+                    // Single property present with $skip and $top, adds all remaining in alphabetic order
+                    { "$orderby=CustomerId&$skip=1&$top=2", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Skip(1).Take(2)" },
+
+                    // Single property present, no $skip or $top, no modification
+                    { "$orderby=SharePrice", false,  "OrderBy(p1 => p1.SharePrice)" },
+
+                    // Single property present, canUseDefaultOrderBy is false, no modification
+                    { "$orderby=SharePrice&$skip=1", false,  "OrderBy(p1 => p1.SharePrice).Skip(1)" },
+
+                    // All properties present, non-alphabetic order, no modification
+                    { "$orderby=Name,SharePrice,CustomerId,Website,ShareSymbol&$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Website).ThenBy(p1 => p1.ShareSymbol).Skip(1)" },
+
+                    // All properties present, extraneous whitespace, non-alphabetic order, no modification
+                    { "$orderby= \t Name \t , \t SharePrice \t , \t CustomerId \t , \t Website \t , \t ShareSymbol \t &$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Website).ThenBy(p1 => p1.ShareSymbol).Skip(1)" },
+
+                };
+            }
+        }
+
         // Move items from this list to SupportedQueryNames as they become supported
         public static TheoryDataSet<string> UnsupportedQueryNames
         {
@@ -119,6 +204,129 @@ namespace System.Web.Http.OData.Query
             Assert.Equal("Select", queryOptions.RawValues.Select);
             Assert.Equal("allpages", queryOptions.RawValues.InlineCount);
             Assert.Equal("SkipToken", queryOptions.RawValues.SkipToken);
+        }
+
+        [Fact]
+        public void ApplyTo_Throws_With_Null_Queryable()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+            );
+
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null), "query");
+        }
+
+        [Fact]
+        public void ApplyTo_HandleNullPropagation_Throws_With_Null_Queryable()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+            );
+
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, handleNullPropagation: true), "query");
+        }
+
+        [Fact]
+        public void ApplyTo_HandleNullPropagation_CanUseDefaultOrderBy_Throws_With_Null_Queryable()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
+            );
+
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, handleNullPropagation: true, canUseDefaultOrderBy: true), "query");
+        }
+
+        [Theory]
+        [PropertyData("SkipTopOrderByUsingKeysTestData")]
+        public void ApplyTo_Adds_Missing_Keys_To_OrderBy(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                .Add_Customers_With_Keys_EntitySet(c => new { c.CustomerId, c.Name }).GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers?" + oDataQuery)
+            );
+
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+
+            // Act
+            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+
+            // Assert
+            string queryExpression = finalQuery.Expression.ToString();
+            queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
+
+            Assert.Equal(queryExpression, expectedExpression);
+        }
+
+        [Theory]
+        [PropertyData("SkipTopOrderByWithNoKeysTestData")]
+        public void ApplyTo_Adds_Missing_NonKey_Properties_To_OrderBy(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                .Add_Customers_No_Keys_EntitySet().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers?" + oDataQuery)
+            );
+
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+
+            // Act
+            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+
+            // Assert
+            string queryExpression = finalQuery.Expression.ToString();
+            queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
+
+            Assert.Equal(queryExpression, expectedExpression);
+        }
+
+        [Fact]
+        public void ApplyTo_Does_Not_Replace_Original_OrderBy_With_Missing_Keys()
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Customers_No_Keys_EntitySet().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers?$orderby=Name")
+            );
+
+            // Act
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            OrderByQueryOption originalOption = queryOptions.OrderBy;
+
+            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: true);
+
+            // Assert
+            Assert.ReferenceEquals(originalOption, queryOptions.OrderBy);
         }
 
         [Fact]
@@ -336,8 +544,8 @@ namespace System.Web.Http.OData.Query
         [Theory]
         [InlineData("$orderby=Name", "OrderBy(p1 => p1.Name)")]
         [InlineData("$orderby=Website", "OrderBy(p1 => p1.Website)")]
-        [InlineData("$orderby=Name&$skip=1", "OrderBy(p1 => p1.Name).Skip(1)")]
-        [InlineData("$orderby=Website&$top=1&$skip=1", "OrderBy(p1 => p1.Website).Skip(1).Take(1)")]
+        [InlineData("$orderby=Name&$skip=1", "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)")]
+        [InlineData("$orderby=Website&$top=1&$skip=1", "OrderBy(p1 => p1.Website).ThenBy(p1 => p1.CustomerId).Skip(1).Take(1)")]
         public void ApplyTo_DoesnotPickDefaultOrder_IfOrderByIsPresent(string oDataQuery, string expectedExpression)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
@@ -361,9 +569,32 @@ namespace System.Web.Http.OData.Query
         [InlineData("$skip=1", false, "Skip(1)")]
         [InlineData("$filter=1 eq 1", true, "Where($it => (1 == 1))")]
         [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
-        public void ApplyTo_Understands_CanUseDefaultOrderByParameter(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        public void ApplyTo_Builds_Default_OrderBy_With_Keys(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://server/service/Customers?" + oDataQuery)
+            );
+
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+
+            string queryExpression = finalQuery.Expression.ToString();
+            queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
+
+            Assert.Equal(queryExpression, expectedExpression);
+        }
+
+        [Theory]
+        [InlineData("$skip=1", true, "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Skip(1)")]
+        [InlineData("$skip=1", false, "Skip(1)")]
+        [InlineData("$filter=1 eq 1", true, "Where($it => (1 == 1))")]
+        [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
+        public void ApplyTo_Builds_Default_OrderBy_No_Keys(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        {
+            var model = new ODataModelBuilder().Add_Customer_No_Keys_EntityType().Add_Customers_No_Keys_EntitySet().GetEdmModel();
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,

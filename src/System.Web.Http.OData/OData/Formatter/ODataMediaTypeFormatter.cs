@@ -64,8 +64,6 @@ namespace System.Web.Http.OData.Formatter
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
         }
 
-        public bool IsClient { get; set; }
-
         public IEdmModel Model { get; private set; }
 
         /// <summary>
@@ -96,7 +94,7 @@ namespace System.Web.Http.OData.Formatter
             base.GetPerRequestFormatterInstance(type, request, mediaType);
 
             ODataVersion version = GetResponseODataVersion(request);
-            return new ODataMediaTypeFormatter(version, ODataDeserializerProvider, ODataSerializerProvider) { IsClient = false, Request = request };
+            return new ODataMediaTypeFormatter(version, ODataDeserializerProvider, ODataSerializerProvider) { Request = request };
         }
 
         /// <inheritdoc/>
@@ -186,17 +184,8 @@ namespace System.Web.Http.OData.Formatter
                 ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings { DisableMessageStreamDisposal = true };
                 try
                 {
-                    if (IsClient)
-                    {
-                        IODataResponseMessage oDataResponseMessage = new ODataMessageWrapper(readStream, contentHeaders);
-                        oDataMessageReader = new ODataMessageReader(oDataResponseMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
-                    }
-                    else
-                    {
-                        IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
-                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
-                    }
-
+                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
+                    oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
                     ODataDeserializerReadContext readContext = new ODataDeserializerReadContext { IsPatchMode = isPatchMode };
 
                     result = deserializer.Read(oDataMessageReader, readContext);
@@ -251,82 +240,55 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.InvalidOperation(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);
                 }
 
-                if (IsClient)
+                UrlHelper urlHelper = Request.GetUrlHelper();
+                NameValueCollection queryStringValues = Request.RequestUri.ParseQueryString();
+
+                IEdmEntitySet targetEntitySet = null;
+                ODataUriHelpers.TryGetEntitySetAndEntityType(Request.RequestUri, Model, out targetEntitySet);
+
+                ODataQueryProjectionNode rootProjectionNode = null;
+                if (targetEntitySet != null)
                 {
-                    // TODO: Bug 467617: figure out the story for the operation name on the client side and server side.
-                    string operationName = (value != null ? value.GetType() : type).Name;
-
-                    // serialize a request
-                    IODataRequestMessage requestMessage = new ODataMessageWrapper(writeStream);
-                    ODataResponseContext responseContext = new ODataResponseContext(requestMessage, odataFormat, version, new Uri(ODataFormatterConstants.DefaultNamespace), operationName);
-
-                    ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
-                    {
-                        BaseUri = responseContext.BaseAddress,
-                        Version = responseContext.ODataVersion,
-                        Indent = responseContext.IsIndented,
-                        DisableMessageStreamDisposal = true,
-                    };
-
-                    writerSettings.SetContentType(responseContext.ODataFormat);
-                    using (ODataMessageWriter messageWriter = new ODataMessageWriter(requestMessage, writerSettings, Model))
-                    {
-                        ODataSerializerWriteContext writeContext = new ODataSerializerWriteContext(responseContext);
-                        serializer.WriteObject(value, messageWriter, writeContext);
-                    }
+                    // TODO: Bug 467621: Move to ODataUriParser once it is done.
+                    rootProjectionNode = ODataUriHelpers.GetODataQueryProjectionNode(queryStringValues["$select"], queryStringValues["$expand"], targetEntitySet);
                 }
-                else
+
+                // serialize a response
+                Uri baseAddress = new Uri(Request.RequestUri, Request.GetConfiguration().VirtualPathRoot);
+
+                // TODO: Bug 467617: figure out the story for the operation name on the client side and server side.
+                // This is clearly a workaround. We are assuming that the operation name is the last segment in the request uri 
+                // which works for most cases and fall back to the type name of the object being written.
+                // We should rather use uri parser semantic tree to figure out the operation name from the request url.
+                string operationName = ODataUriHelpers.GetOperationName(Request.RequestUri, baseAddress);
+                operationName = operationName ?? type.Name;
+
+                IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
+                ODataResponseContext responseContext = new ODataResponseContext(responseMessage, odataFormat, version, baseAddress, operationName);
+
+                ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
-                    UrlHelper urlHelper = Request.GetUrlHelper();
-                    NameValueCollection queryStringValues = Request.RequestUri.ParseQueryString();
+                    BaseUri = responseContext.BaseAddress,
+                    Version = responseContext.ODataVersion,
+                    Indent = responseContext.IsIndented,
+                    DisableMessageStreamDisposal = true,
+                };
+                if (contentHeaders != null && contentHeaders.ContentType != null)
+                {
+                    writerSettings.SetContentType(contentHeaders.ContentType.ToString(), Encoding.UTF8.WebName);
+                }
 
-                    IEdmEntitySet targetEntitySet = null;
-                    ODataUriHelpers.TryGetEntitySetAndEntityType(Request.RequestUri, Model, out targetEntitySet);
+                using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, ODataDeserializerProvider.EdmModel))
+                {
+                    ODataSerializerWriteContext writeContext = new ODataSerializerWriteContext(responseContext)
+                                                                    {
+                                                                        EntitySet = targetEntitySet,
+                                                                        UrlHelper = urlHelper,
+                                                                        RootProjectionNode = rootProjectionNode,
+                                                                        CurrentProjectionNode = rootProjectionNode
+                                                                    };
 
-                    ODataQueryProjectionNode rootProjectionNode = null;
-                    if (targetEntitySet != null)
-                    {
-                        // TODO: Bug 467621: Move to ODataUriParser once it is done.
-                        rootProjectionNode = ODataUriHelpers.GetODataQueryProjectionNode(queryStringValues["$select"], queryStringValues["$expand"], targetEntitySet);
-                    }
-
-                    // serialize a response
-                    Uri baseAddress = new Uri(Request.RequestUri, Request.GetConfiguration().VirtualPathRoot);
-
-                    // TODO: Bug 467617: figure out the story for the operation name on the client side and server side.
-                    // This is clearly a workaround. We are assuming that the operation name is the last segment in the request uri 
-                    // which works for most cases and fall back to the type name of the object being written.
-                    // We should rather use uri parser semantic tree to figure out the operation name from the request url.
-                    string operationName = ODataUriHelpers.GetOperationName(Request.RequestUri, baseAddress);
-                    operationName = operationName ?? type.Name;
-
-                    IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
-                    ODataResponseContext responseContext = new ODataResponseContext(responseMessage, odataFormat, version, baseAddress, operationName);
-
-                    ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
-                    {
-                        BaseUri = responseContext.BaseAddress,
-                        Version = responseContext.ODataVersion,
-                        Indent = responseContext.IsIndented,
-                        DisableMessageStreamDisposal = true,
-                    };
-                    if (contentHeaders != null && contentHeaders.ContentType != null)
-                    {
-                        writerSettings.SetContentType(contentHeaders.ContentType.ToString(), Encoding.UTF8.WebName);
-                    }
-
-                    using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, ODataDeserializerProvider.EdmModel))
-                    {
-                        ODataSerializerWriteContext writeContext = new ODataSerializerWriteContext(responseContext)
-                                                                       {
-                                                                           EntitySet = targetEntitySet,
-                                                                           UrlHelper = urlHelper,
-                                                                           RootProjectionNode = rootProjectionNode,
-                                                                           CurrentProjectionNode = rootProjectionNode
-                                                                       };
-
-                        serializer.WriteObject(value, messageWriter, writeContext);
-                    }
+                    serializer.WriteObject(value, messageWriter, writeContext);
                 }
             });
         }

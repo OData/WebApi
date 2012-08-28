@@ -13,7 +13,6 @@ namespace System.Web.Http.OData.Formatter
         const string baseAddress = "http://localhost:8081/";
 
         private ODataMediaTypeFormatter _serverFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-        private ODataMediaTypeFormatter _clientFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel()) { IsClient = true };
 
         private static readonly MediaTypeWithQualityHeaderValue _atomMediaType = ODataTestUtil.ApplicationAtomMediaTypeWithQuality;
         private static readonly MediaTypeWithQualityHeaderValue _jsonMediaType = ODataTestUtil.ApplicationJsonMediaTypeWithQuality;

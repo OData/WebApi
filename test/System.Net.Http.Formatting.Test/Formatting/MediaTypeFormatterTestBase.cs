@@ -235,6 +235,7 @@ namespace System.Net.Http.Formatting
             SampleType sampleType = new SampleType { Number = 42 };
             MemoryStream memStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
+            content.Headers.ContentType = ExpectedSupportedMediaTypes.First();
 
             // Act
             return formatter.WriteToStreamAsync(typeof(SampleType), sampleType, memStream, content, null).ContinueWith(

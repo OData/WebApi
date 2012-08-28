@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             person.ComplexProperty(p => p.FavoriteHobby);
             person.ComplexProperty(p => p.Gender);
 
-            _formatter = new ODataMediaTypeFormatter(model.GetEdmModel()) { IsClient = true };
+            _formatter = new ODataMediaTypeFormatter(model.GetEdmModel());
         }
 
         [Fact(Skip = "Requires new functionality in the odata formatter")]

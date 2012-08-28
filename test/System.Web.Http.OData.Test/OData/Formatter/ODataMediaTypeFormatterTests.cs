@@ -138,7 +138,11 @@ namespace System.Web.Http.OData.Formatter
         {
             ODataConventionModelBuilder model = new ODataConventionModelBuilder();
             model.Entity<SampleType>();
-            return new ODataMediaTypeFormatter(model.GetEdmModel()) { IsClient = true };
+            var formatter = new ODataMediaTypeFormatter(model.GetEdmModel());
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
+            request.Properties["MS_HttpConfiguration"] = new HttpConfiguration();
+            formatter.Request = request;
+            return formatter;
         }
 
         public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes

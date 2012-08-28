@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class CollectionTest
     {
-        ODataMediaTypeFormatter _formatter = new ODataMediaTypeFormatter() { IsClient = true };
+        ODataMediaTypeFormatter _formatter = new ODataMediaTypeFormatter();
 
         /// <summary>
         /// Arrays the of ints serializes as O data.

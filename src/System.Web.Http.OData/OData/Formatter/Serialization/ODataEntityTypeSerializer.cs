@@ -147,12 +147,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         serializer.WriteObjectInline(propertyValue, writer, childWriteContext);
                         writer.WriteEnd();
                     }
-                    else if (!writeContext.IsRequest)
-                    {
-                        // delayed links cannot be written on requests
-                        writer.WriteStart(navigationLink);
-                        writer.WriteEnd();
-                    }
+
+                    writer.WriteStart(navigationLink);
+                    writer.WriteEnd();
                 }
             }
         }

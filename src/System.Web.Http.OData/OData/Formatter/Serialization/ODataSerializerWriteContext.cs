@@ -41,17 +41,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
             get { return _responseContext; }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is request.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is request; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsRequest
-        {
-            get { return _responseContext.ODataRequestMessage != null; }
-        }
-
         public UrlHelper UrlHelper { get; set; }
 
         public ODataQueryProjectionNode RootProjectionNode { get; set; }

@@ -5,13 +5,12 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter
 {
     /// <summary>
-    /// This class contains information that the DataContractODataSerializer will use during
+    /// This class contains information that the <see cref="ODataSerializer"/> will use during
     /// serialization.
     /// </summary>
     public class ODataResponseContext
     {
         private IODataResponseMessage _responseMessage;
-        private IODataRequestMessage _requestMessage;
         private Uri _baseAddress;
         private string _serviceOperationName;
 
@@ -56,31 +55,6 @@ namespace System.Web.Http.OData.Formatter
             IsIndented = true;
         }
 
-        public ODataResponseContext(IODataRequestMessage requestMessage, ODataFormat format, ODataVersion version, Uri baseAddress, string serviceOperationName)
-        {
-            if (requestMessage == null)
-            {
-                throw Error.ArgumentNull("requestMessage");
-            }
-
-            if (baseAddress == null)
-            {
-                throw Error.ArgumentNull("baseAddress");
-            }
-
-            if (String.IsNullOrEmpty(serviceOperationName))
-            {
-                throw Error.ArgumentNullOrEmpty("serviceOperationName");
-            }
-
-            _requestMessage = requestMessage;
-            ODataFormat = format;
-            ODataVersion = version;
-            _baseAddress = baseAddress;
-            _serviceOperationName = serviceOperationName;
-            IsIndented = true;
-        }
-
         /// <summary>
         /// Gets or sets the instance of IODataResponseMessage which gives information
         /// such as contentType, ODataFormatVersion, stream etc.
@@ -97,25 +71,6 @@ namespace System.Web.Http.OData.Formatter
                 }
 
                 _responseMessage = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the instance of IODataRequestMessage which gives information
-        /// such as contentType, ODataFormatVersion, stream etc.
-        /// </summary>
-        public IODataRequestMessage ODataRequestMessage
-        {
-            get { return _requestMessage; }
-
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.ArgumentNull("value");
-                }
-
-                _requestMessage = value;
             }
         }
 

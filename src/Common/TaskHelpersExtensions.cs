@@ -827,6 +827,7 @@ namespace System.Threading.Tasks
         }
     }
 
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Packaged as one file to make it easy to link against")]
     internal abstract class CatchInfoBase<TTask>
         where TTask : Task
     {
@@ -868,6 +869,7 @@ namespace System.Threading.Tasks
         }
     }
 
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Packaged as one file to make it easy to link against")]
     internal class CatchInfo : CatchInfoBase<Task>
     {
         private static CatchResult _completed = new CatchResult { Task = TaskHelpers.Completed() };
@@ -907,6 +909,7 @@ namespace System.Threading.Tasks
         }
     }
 
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Packaged as one file to make it easy to link against")]
     internal class CatchInfo<T> : CatchInfoBase<Task<T>>
     {
         public CatchInfo(Task<T> task)

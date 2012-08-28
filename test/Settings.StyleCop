@@ -65,6 +65,11 @@
             <BooleanProperty Name="Enabled">False</BooleanProperty>
           </RuleSettings>
         </Rule>
+        <Rule Name="FileMayOnlyContainASingleClass">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
         <Rule Name="FileMayOnlyContainASingleNamespace">
           <RuleSettings>
             <BooleanProperty Name="Enabled">False</BooleanProperty>

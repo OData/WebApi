@@ -107,7 +107,8 @@
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionOfTPropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionOfTPropertyConfigurationAndTAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmPropertyConvention.cs" />

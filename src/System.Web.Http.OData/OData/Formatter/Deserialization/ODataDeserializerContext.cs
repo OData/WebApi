@@ -4,24 +4,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 {
     public class ODataDeserializerContext
     {
-        private int _maxReferenceDepth = 200;
-        private int _currentReferenceDepth;
-
-        public ODataDeserializerContext()
-        {
-            _currentReferenceDepth = -2;
-        }
-
-        public int MaxReferenceDepth
-        {
-            get { return _maxReferenceDepth; }
-        }
+        private const int MaxReferenceDepth = 200;
+        private int _currentReferenceDepth = 0;
 
         public bool IsPatchMode { get; set; }
 
         public bool IncrementCurrentReferenceDepth()
         {
-            if (++_currentReferenceDepth > _maxReferenceDepth)
+            if (++_currentReferenceDepth > MaxReferenceDepth)
             {
                 return false;
             }

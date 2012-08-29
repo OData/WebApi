@@ -40,17 +40,16 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        [Fact]
-        public void HasCorrectKindPropertyInfoAndName()
+        [Theory]
+        [PropertyData("GetValidPropertiesAndElementTypes")]
+        public void HasCorrectKindPropertyInfoAndName(PropertyInfo property, Type elementType)
         {
-            PropertyInfo listStrings = typeof(LotsOfCollectionProperties).GetProperty("ListStrings");
-
-            CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(listStrings);
+            CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property);
             Assert.Equal(PropertyKind.Collection, configuration.Kind);
-            Assert.Equal(typeof(string), configuration.ElementType);
-            Assert.Equal(typeof(string), configuration.RelatedClrType);
-            Assert.Equal(listStrings, configuration.PropertyInfo);
-            Assert.Equal("ListStrings", configuration.Name);
+            Assert.Equal(elementType, configuration.ElementType);
+            Assert.Equal(elementType, configuration.RelatedClrType);
+            Assert.Equal(property, configuration.PropertyInfo);
+            Assert.Equal(property.Name, configuration.Name);
         }
 
         [Fact]

@@ -43,12 +43,18 @@ namespace System.Web.Http.OData.Builder
             get { return _elementType; }
         }
 
+        /// <summary>
+        /// Sets the CollectionProperty to optional (i.e. nullable).
+        /// </summary>
         public CollectionPropertyConfiguration IsOptional()
         {
             OptionalProperty = true;
             return this;
         }
 
+        /// <summary>
+        /// Sets the CollectionProperty to required (i.e. non-nullable).
+        /// </summary>
         public CollectionPropertyConfiguration IsRequired()
         {
             OptionalProperty = false;

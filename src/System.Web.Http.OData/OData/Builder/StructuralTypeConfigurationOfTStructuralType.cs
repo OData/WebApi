@@ -14,6 +14,10 @@ namespace System.Web.Http.OData.Builder
 
         protected StructuralTypeConfiguration(IStructuralTypeConfiguration configuration)
         {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
             _configuration = configuration;
         }
 

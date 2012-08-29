@@ -73,38 +73,49 @@ namespace System.Web.Http.OData.Builder
 
         private void CreateStructuralTypeBody(EdmStructuredType type, IStructuralTypeConfiguration config)
         {
-            foreach (PrimitivePropertyConfiguration prop in config.Properties.OfType<PrimitivePropertyConfiguration>())
-            {
-                type.AddStructuralProperty(
-                    prop.PropertyInfo.Name,
-                    GetTypeKind(prop.PropertyInfo.PropertyType),
-                    prop.OptionalProperty);
-            }
-            foreach (ComplexPropertyConfiguration prop in config.Properties.OfType<ComplexPropertyConfiguration>())
-            {
-                IEdmComplexType complexType = _types[prop.RelatedClrType] as IEdmComplexType;
-
-                type.AddStructuralProperty(
-                    prop.PropertyInfo.Name,
-                    new EdmComplexTypeReference(complexType, prop.OptionalProperty));
-            }
-            foreach (CollectionPropertyConfiguration prop in config.Properties.OfType<CollectionPropertyConfiguration>())
-            {
-                IEdmTypeReference elementTypeReference = null;
-                if (_types.ContainsKey(prop.ElementType))
+            foreach (PropertyConfiguration property in config.Properties)
+            { 
+                switch (property.Kind)
                 {
-                    IEdmComplexType elementType = _types[prop.ElementType] as IEdmComplexType;
-                    elementTypeReference = new EdmComplexTypeReference(elementType, false);                
+                    case PropertyKind.Primitive:
+                        PrimitivePropertyConfiguration primitiveProperty = property as PrimitivePropertyConfiguration;
+                        type.AddStructuralProperty(
+                            primitiveProperty.PropertyInfo.Name,
+                            GetTypeKind(primitiveProperty.PropertyInfo.PropertyType),
+                            primitiveProperty.OptionalProperty);
+                        break;
+
+                    case PropertyKind.Complex:
+                        ComplexPropertyConfiguration complexProperty = property as ComplexPropertyConfiguration;
+                        IEdmComplexType complexType = _types[complexProperty.RelatedClrType] as IEdmComplexType;
+
+                        type.AddStructuralProperty(
+                            complexProperty.PropertyInfo.Name,
+                            new EdmComplexTypeReference(complexType, complexProperty.OptionalProperty));
+                        break;
+
+                    case PropertyKind.Collection:
+                        CollectionPropertyConfiguration collectionProperty = property as CollectionPropertyConfiguration;
+                        IEdmTypeReference elementTypeReference = null;
+                        if (_types.ContainsKey(collectionProperty.ElementType))
+                        {
+                            IEdmComplexType elementType = _types[collectionProperty.ElementType] as IEdmComplexType;
+                            elementTypeReference = new EdmComplexTypeReference(elementType, false);                
+                        }
+                        else 
+                        {
+                            elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);      
+                        }
+                        type.AddStructuralProperty(
+                            collectionProperty.PropertyInfo.Name,
+                            new EdmCollectionTypeReference(
+                                new EdmCollectionType(elementTypeReference),
+                                collectionProperty.OptionalProperty));
+                        break;
+
+                    default:
+                        break;
                 }
-                else 
-                { 
-                    elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(prop.ElementType);      
-                }
-                type.AddStructuralProperty(
-                    prop.PropertyInfo.Name,
-                    new EdmCollectionTypeReference(
-                        new EdmCollectionType(elementTypeReference),
-                        prop.OptionalProperty));
             }
         }
 

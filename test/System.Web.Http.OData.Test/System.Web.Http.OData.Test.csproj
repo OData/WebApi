@@ -103,6 +103,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BaselineResource.resx</DependentUpon>
     </Compile>
+    <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
+    <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItemTests.cs" />

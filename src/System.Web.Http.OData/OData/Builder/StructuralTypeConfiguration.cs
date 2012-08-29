@@ -16,27 +16,31 @@ namespace System.Web.Http.OData.Builder
         {
             ClrType = clrType;
             ModelBuilder = modelBuilder;
+            Name = ClrType.EdmName();
+            Namespace = ClrType.Namespace;
             ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
             RemovedProperties = new List<PropertyInfo>();
         }
 
-        public abstract StructuralTypeKind Kind { get; }
+        public abstract EdmTypeKind Kind { get; }
 
         public Type ClrType { get; private set; }
 
         public string FullName
         {
-            get { return ClrType.EdmFullName(); }
+            get { return Namespace + "." + Name; }
         }
 
         public string Namespace
         {
-            get { return ClrType.Namespace; }
+            get;
+            protected set;
         }
 
         public string Name
         {
-            get { return ClrType.EdmName(); }
+            get;
+            protected set;
         }
 
         public IEnumerable<PropertyConfiguration> Properties
@@ -49,7 +53,7 @@ namespace System.Web.Http.OData.Builder
             get { return RemovedProperties; }
         }
 
-        protected ODataModelBuilder ModelBuilder { get; private set; }
+        public ODataModelBuilder ModelBuilder { get; private set; }
 
         protected ICollection<PropertyInfo> RemovedProperties { get; private set; }
 

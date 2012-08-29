@@ -11,7 +11,7 @@ namespace System.Web.Http.OData
     {
         public static IEdmModel GetServiceModel(this ODataModelBuilder builder)
         {
-            return EdmModelHelperMethods.BuildEdmModel("Default", "Container", builder.StructuralTypes, builder.EntitySets);
+            return EdmModelHelperMethods.BuildEdmModel(builder);
         }
 
         public static ODataModelBuilder Add_Address_ComplexType(this ODataModelBuilder builder)

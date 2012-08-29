@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
@@ -15,6 +17,24 @@ namespace System.Web.Http.OData.Builder
     {
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
         private Dictionary<string, IEntitySetConfiguration> _entitySets = new Dictionary<string, IEntitySetConfiguration>();
+        private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
+        private List<ProcedureConfiguration> _procedures = new List<ProcedureConfiguration>();
+
+        public ODataModelBuilder() 
+        {
+            Namespace = "Default";
+            ContainerName = "Container";
+        }
+
+        /// <summary>
+        /// The namespace that will be used for the resulting model
+        /// </summary>
+        public string Namespace { get; set; }
+
+        /// <summary>
+        /// The name of the container that will hold all the EntitySets, Actions and Functions
+        /// </summary>
+        public string ContainerName { get; set; }
 
         /// <summary>
         /// The collection of EDM entity sets in the model to be built.
@@ -30,6 +50,14 @@ namespace System.Web.Http.OData.Builder
         public IEnumerable<IStructuralTypeConfiguration> StructuralTypes
         {
             get { return _structuralTypes.Values; }
+        }
+
+        /// <summary>
+        /// The collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built
+        /// </summary>
+        public IEnumerable<ProcedureConfiguration> Procedures
+        {
+            get { return _procedures; }
         }
 
         /// <summary>
@@ -130,6 +158,14 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Adds a procedure to the model.
+        /// </summary>
+        public virtual void AddProcedure(ProcedureConfiguration procedure)
+        {
+            _procedures.Add(procedure);
+        }
+
+        /// <summary>
         /// Registers an entity set as a part of the model and returns an object that can be used to configure the entity set.
         /// This method can be called multiple times for the same type to perform multiple lines of configuration.
         /// </summary>
@@ -201,13 +237,89 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Remove the procedure from the model
+        /// <remarks>
+        /// If there is more than one procedure with the name specified this method will not work.
+        /// You need to use the other RemoveProcedure(..) overload instead.
+        /// </remarks>
+        /// </summary>
+        /// <param name="name">The name of the procedure to be removed</param>
+        /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
+        public virtual bool RemoveProcedure(string name)
+        { 
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            ProcedureConfiguration[] toRemove = _procedures.Where(p => p.Name == name).ToArray();
+            int count = toRemove.Count();
+            if (count == 1)
+            {
+                return RemoveProcedure(toRemove[0]);
+            }
+            else if (count == 0)
+            {
+                // For consistency with RemoveStructuralType().
+                // uses same semantics as Dictionary.Remove(key).
+                return false;
+            }
+            else
+            {
+                throw Error.InvalidOperation(SRResources.MoreThanOneProcedureFound, name);
+            }
+        }
+
+        /// <summary>
+        /// Remove the procedure from the model
+        /// </summary>
+        /// <param name="procedure">The procedure to be removed</param>
+        /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
+        public virtual bool RemoveProcedure(ProcedureConfiguration procedure)
+        {
+            if (procedure == null)
+            {
+                throw Error.ArgumentNull("procedure");
+            }
+            return _procedures.Remove(procedure);
+        }
+
+        /// <summary>
+        /// Attempts to find either a pre-configured structural type or a primitive type that matches the T.
+        /// If no matches are found NULL is returned.
+        /// </summary>
+        public IEdmTypeConfiguration GetTypeConfigurationOrNull(Type type)
+        {
+            if (_primitiveTypes.ContainsKey(type))
+            {
+                return _primitiveTypes[type];
+            }
+            else
+            {
+                IEdmPrimitiveType edmType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type);
+                PrimitiveTypeConfiguration primitiveType = null;
+                if (edmType != null)
+                {
+                    primitiveType = new PrimitiveTypeConfiguration(this, edmType, type);
+                    _primitiveTypes[type] = primitiveType;
+                    return primitiveType;
+                }
+                else if (_structuralTypes.ContainsKey(type))
+                {
+                    return _structuralTypes[type];
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Creates a <see cref="IEdmModel"/> based on the configuration performed using this builder. 
         /// </summary>
         /// <returns>The model that was built.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property is not appropriate, method does work")]
         public virtual IEdmModel GetEdmModel()
         {
-            return EdmModelHelperMethods.BuildEdmModel("Default", "Container", StructuralTypes, EntitySets);
+            return EdmModelHelperMethods.BuildEdmModel(this);
         }
     }
 }

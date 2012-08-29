@@ -104,7 +104,10 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="OData\Builder\ActionConfiguration.cs" />
+    <Compile Include="OData\Builder\BindingParameterConfiguration.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\CollectionTypeConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />
@@ -125,25 +128,31 @@
     <Compile Include="ODataRouteNames.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConvention.cs" />
     <Compile Include="OData\Builder\EdmTypeBuilder.cs" />
+    <Compile Include="OData\Builder\EntityCollectionConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\EntitySetConfiguration.cs" />
     <Compile Include="OData\Builder\EntitySetConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\EntityTypeConfiguration.cs" />
     <Compile Include="OData\Builder\EntityTypeConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\IComplexTypeConfiguration.cs" />
+    <Compile Include="OData\Builder\ICollectionTypeConfiguration.cs" />
     <Compile Include="OData\Builder\IEntitySetConfiguration.cs" />
     <Compile Include="OData\Builder\IEntityTypeConfiguration.cs" />
     <Compile Include="OData\Builder\IStructuralTypeConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationPropertyBinding.cs" />
     <Compile Include="OData\Builder\NavigationPropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\NonBindingParameterConfiguration.cs" />
     <Compile Include="OData\Builder\ODataConventionModelBuilder.cs" />
     <Compile Include="OData\Builder\ODataModelBuilder.cs" />
+    <Compile Include="OData\Builder\ParameterConfiguration.cs" />
     <Compile Include="OData\Builder\PrimitivePropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\PrimitiveTypeConfiguration.cs" />
+    <Compile Include="OData\Builder\ProcedureConfiguration.cs" />
+    <Compile Include="OData\Builder\ProcedureKind.cs" />
     <Compile Include="OData\Builder\PropertyConfiguration.cs" />
     <Compile Include="OData\Builder\PropertyKind.cs" />
     <Compile Include="OData\Builder\StructuralPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfiguration.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationOfTStructuralType.cs" />
-    <Compile Include="OData\Builder\StructuralTypeKind.cs" />
     <Compile Include="OData\Builder\Conventions\ConventionsHelpers.cs" />
     <Compile Include="OData\Builder\Conventions\EntityKeyConvention.cs" />
     <Compile Include="OData\Builder\IEdmTypeConfiguration.cs" />

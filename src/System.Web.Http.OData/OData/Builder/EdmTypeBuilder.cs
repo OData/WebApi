@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Builder
 
         private static IEdmType CreateEdmTypeHeader(IStructuralTypeConfiguration config)
         {
-            if (config.Kind == StructuralTypeKind.ComplexType)
+            if (config.Kind == EdmTypeKind.Complex)
             {
                 return new EdmComplexType(config.Namespace, config.Name);
             }

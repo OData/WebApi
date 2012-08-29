@@ -11,6 +11,7 @@ namespace System.Web.Http.OData.Builder
     public class EntityTypeConfiguration<TEntityType> : StructuralTypeConfiguration<TEntityType> where TEntityType : class
     {
         private IEntityTypeConfiguration _configuration;
+        private EntityCollectionConfiguration<TEntityType> _collection;
 
         public EntityTypeConfiguration(ODataModelBuilder modelBuilder)
             : this(new EntityTypeConfiguration(modelBuilder, typeof(TEntityType)))
@@ -21,11 +22,21 @@ namespace System.Web.Http.OData.Builder
             : base(configuration)
         {
             _configuration = configuration;
+            _collection = new EntityCollectionConfiguration<TEntityType>(configuration);
         }
 
         public IEnumerable<NavigationPropertyConfiguration> NavigationProperties
         {
             get { return _configuration.NavigationProperties; }
+        }
+
+        /// <summary>
+        /// Used to access a Collection of Entities throw which you can configure
+        /// actions that are bindable to EntityCollections.
+        /// </summary>
+        public EntityCollectionConfiguration<TEntityType> Collection
+        {
+            get { return _collection; }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
@@ -59,6 +70,18 @@ namespace System.Web.Http.OData.Builder
         public NavigationPropertyConfiguration HasRequired<TTargetEntity>(Expression<Func<TEntityType, TTargetEntity>> navigationPropertyExpression) where TTargetEntity : class
         {
             return GetOrCreateNavigationProperty(navigationPropertyExpression, EdmMultiplicity.One);
+        }
+
+        /// <summary>
+        /// Create an Action that binds to this EntityType.
+        /// </summary>
+        /// <param name="name">The name of the action.</param>
+        /// <returns>The ActionConfiguration to allow further configuration of the new Action.</returns>
+        public ActionConfiguration Action(string name)
+        {
+            ActionConfiguration action = new ActionConfiguration(_configuration.ModelBuilder, name);
+            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration);
+            return action;
         }
 
         internal NavigationPropertyConfiguration GetOrCreateNavigationProperty(Expression navigationPropertyExpression, EdmMultiplicity multiplicity)

@@ -11,8 +11,6 @@ namespace System.Web.Http.OData.Builder
 
         IEnumerable<PropertyInfo> IgnoredProperties { get; }
 
-        StructuralTypeKind Kind { get; }
-
         PrimitivePropertyConfiguration AddProperty(PropertyInfo propertyInfo);
 
         ComplexPropertyConfiguration AddComplexProperty(PropertyInfo propertyInfo);

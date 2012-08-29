@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Builder
             Assert.Equal(2, builder.StructuralTypes.Count());
             var addressType = builder.StructuralTypes.Skip(1).FirstOrDefault();
             Assert.NotNull(addressType);
-            Assert.Equal(StructuralTypeKind.ComplexType, addressType.Kind);
+            Assert.Equal(EdmTypeKind.Complex, addressType.Kind);
             Assert.Equal(typeof(Address).FullName, addressType.FullName);
 
             var model = builder.GetServiceModel();

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using Microsoft.Data.Edm;
+
 namespace System.Web.Http.OData.Builder
 {
     public class ComplexTypeConfiguration : StructuralTypeConfiguration, IComplexTypeConfiguration
@@ -9,11 +11,11 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
-        public override StructuralTypeKind Kind
+        public override EdmTypeKind Kind
         {
             get
             {
-                return StructuralTypeKind.ComplexType;
+                return EdmTypeKind.Complex;
             }
         }
     }

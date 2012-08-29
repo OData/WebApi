@@ -20,9 +20,9 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
-        public override StructuralTypeKind Kind
+        public override EdmTypeKind Kind
         {
-            get { return StructuralTypeKind.EntityType; }
+            get { return EdmTypeKind.Entity; }
         }
 
         public IEnumerable<NavigationPropertyConfiguration> NavigationProperties

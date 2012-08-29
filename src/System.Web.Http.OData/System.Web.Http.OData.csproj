@@ -185,7 +185,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProvider.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataDeserializerReadContext.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataRawValueDeserializer.cs" />
@@ -210,9 +210,8 @@
     <Compile Include="OData\Formatter\Serialization\ODataEnumSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataFeedSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializer.cs" />
-    <Compile Include="OData\Formatter\ODataResponseContext.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProvider.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataSerializerWriteContext.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializer.cs" />
     <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />

@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             _edmEntityTypeReference = edmEntityType;
         }
 
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerWriteContext writeContext)
+        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -41,7 +41,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             writer.Flush();
         }
 
-        public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerWriteContext writeContext)
+        public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             if (writer == null)
             {
@@ -64,7 +64,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        private void WriteEntry(object graph, IEnumerable<ODataProperty> propertyBag, ODataWriter writer, ODataSerializerWriteContext writeContext)
+        private void WriteEntry(object graph, IEnumerable<ODataProperty> propertyBag, ODataWriter writer, ODataSerializerContext writeContext)
         {
             IEdmEntityType entityType = _edmEntityTypeReference.EntityDefinition();
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(SerializerProvider.EdmModel, writeContext.EntitySet, entityType, writeContext.UrlHelper, graph);
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
-        private void WriteNavigationLinks(EntityInstanceContext context, ODataWriter writer, ODataSerializerWriteContext writeContext)
+        private void WriteNavigationLinks(EntityInstanceContext context, ODataWriter writer, ODataSerializerContext writeContext)
         {
             foreach (IEdmNavigationProperty navProperty in _edmEntityTypeReference.NavigationProperties())
             {
@@ -138,11 +138,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                             throw Error.NotSupported(SRResources.TypeCannotBeSerialized, navProperty.Type.FullName(), typeof(ODataMediaTypeFormatter).Name);
                         }
 
-                        ODataSerializerWriteContext childWriteContext = new ODataSerializerWriteContext(writeContext.ResponseContext);
+                        ODataSerializerContext childWriteContext = new ODataSerializerContext();
                         childWriteContext.UrlHelper = writeContext.UrlHelper;
                         childWriteContext.EntitySet = currentEntitySet;
                         childWriteContext.RootProjectionNode = writeContext.RootProjectionNode;
                         childWriteContext.CurrentProjectionNode = expandNode;
+                        childWriteContext.ServiceOperationName = writeContext.ServiceOperationName;
 
                         serializer.WriteObjectInline(propertyValue, writer, childWriteContext);
                         writer.WriteEnd();
@@ -154,7 +155,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        private IEnumerable<ODataProperty> CreatePropertyBag(object graph, ODataSerializerWriteContext writeContext)
+        private IEnumerable<ODataProperty> CreatePropertyBag(object graph, ODataSerializerContext writeContext)
         {
             IEnumerable<IEdmStructuralProperty> selectProperties;
             if (writeContext.CurrentProjectionNode != null && writeContext.CurrentProjectionNode.Selects.Any())

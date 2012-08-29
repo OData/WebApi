@@ -2,12 +2,12 @@
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    public class ODataDeserializerReadContext
+    public class ODataDeserializerContext
     {
         private int _maxReferenceDepth = 200;
         private int _currentReferenceDepth;
 
-        public ODataDeserializerReadContext()
+        public ODataDeserializerContext()
         {
             _currentReferenceDepth = -2;
         }

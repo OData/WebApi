@@ -28,7 +28,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerWriteContext writeContext)
+        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -40,7 +40,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             writer.Flush();
         }
 
-        public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerWriteContext writeContext)
+        public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             if (writer == null)
             {
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        private void WriteFeed(object graph, ODataWriter writer, ODataSerializerWriteContext writeContext)
+        private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             ODataSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(_edmCollectionType.ElementType());
             if (entrySerializer == null)

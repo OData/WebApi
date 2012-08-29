@@ -40,7 +40,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         void CreateProperty_Serializes_AllElementsInTheCollection()
         {
-            var property = _serializer.CreateProperty(new int[] { 1, 2, 3 }, "TestCollection", new ODataSerializerWriteContext());
+            var property = _serializer.CreateProperty(new int[] { 1, 2, 3 }, "TestCollection", new ODataSerializerContext());
 
             Assert.Equal(property.Name, "TestCollection");
             var values = Assert.IsType<ODataCollectionValue>(property.Value);

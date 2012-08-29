@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <param name="messageReader">The messageReader to use</param>
         /// <param name="readContext">The read context</param>
         /// <returns></returns>
-        public virtual object Read(ODataMessageReader messageReader, ODataDeserializerReadContext readContext)
+        public virtual object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
         {
             throw Error.NotSupported(SRResources.DeserializerDoesNotSupportRead, GetType().Name);
         }

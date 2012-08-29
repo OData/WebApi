@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
         }
 
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerWriteContext writeContext)
+        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (graph == null)
             {

@@ -132,7 +132,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ODataMessageWriter writer = new ODataMessageWriter(new ODataMessageWrapper(new MemoryStream()) as IODataResponseMessage);
 
-            Assert.DoesNotThrow(() => serializer.WriteObject(graph, writer, new ODataSerializerWriteContext(new ODataResponseContext { ServiceOperationName = "PropertyName" })));
+            Assert.DoesNotThrow(() => serializer.WriteObject(graph, writer, new ODataSerializerContext() { ServiceOperationName = "PropertyName" }));
         }
 
         [Theory]

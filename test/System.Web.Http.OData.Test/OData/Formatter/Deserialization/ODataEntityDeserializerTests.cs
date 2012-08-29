@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     public class ODataEntityDeserializerTests
     {
         private IEdmModel _edmModel = EdmTestHelpers.GetModel();
-        private ODataDeserializerReadContext _readContext = new ODataDeserializerReadContext();
+        private ODataDeserializerContext _readContext = new ODataDeserializerContext();
         private IEdmEntityTypeReference _productEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(Product)).AsEntity();
         private IEdmEntityTypeReference _supplierEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(Supplier)).AsEntity();
         private ODataDeserializerProvider _deserializerProvider = new DefaultODataDeserializerProvider(EdmTestHelpers.GetModel());

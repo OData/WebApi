@@ -32,7 +32,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             Assert.ThrowsArgument(() =>
             {
-                deserializer.ReadInline(10, new ODataDeserializerReadContext());
+                deserializer.ReadInline(10, new ODataDeserializerContext());
             }, "item");
         }
 
@@ -57,7 +57,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataEntityDeserializerTests.Address address =
                 deserializer.ReadInline(
                 complexValue,
-                new ODataDeserializerReadContext()) as ODataEntityDeserializerTests.Address;
+                new ODataDeserializerContext()) as ODataEntityDeserializerTests.Address;
 
             // Assert
             Assert.NotNull(address);

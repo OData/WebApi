@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         public IEdmEntityTypeReference EdmEntityType { get; private set; }
 
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerReadContext readContext)
+        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
             {
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return ReadInline(topLevelEntry, readContext);
         }
 
-        public override object ReadInline(object item, ODataDeserializerReadContext readContext)
+        public override object ReadInline(object item, ODataDeserializerContext readContext)
         {
             ODataEntry topLevelEntry = item as ODataEntry;
             if (item == null)
@@ -61,7 +61,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return topLevelEntryAnnotation.EntityResource;
         }
 
-        private ODataEntry ReadEntry(ODataReader odataReader, IEdmEntityTypeReference entityType, ODataDeserializerReadContext readContext)
+        private ODataEntry ReadEntry(ODataReader odataReader, IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             ODataEntry topLevelEntry = null;
             Stack<ODataItem> itemsStack = new Stack<ODataItem>();
@@ -190,7 +190,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return topLevelEntry;
         }
 
-        private void CreateEntityResource(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, ODataDeserializerReadContext readContext)
+        private void CreateEntityResource(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
             Type clrType = EdmLibHelpers.GetClrType(entityType, EdmModel);
             if (clrType == null)
@@ -213,7 +213,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             entryAnnotation.EntityType = entityType;
         }
 
-        private void ApplyEntityProperties(ODataEntry entry, ODataEntryAnnotation entryAnnotation, ODataDeserializerReadContext readContext)
+        private void ApplyEntityProperties(ODataEntry entry, ODataEntryAnnotation entryAnnotation, ODataDeserializerContext readContext)
         {
             object entityResource = entryAnnotation.EntityResource;
             IEdmEntityTypeReference entityType = entryAnnotation.EntityType;
@@ -222,7 +222,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ApplyNavigationProperties(entryAnnotation, entityType, entityResource, readContext);
         }
 
-        private void ApplyNavigationProperties(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, object entityResource, ODataDeserializerReadContext readContext)
+        private void ApplyNavigationProperties(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, object entityResource, ODataDeserializerContext readContext)
         {
             Contract.Assert(entityType.TypeKind() == EdmTypeKind.Entity, "Only entity types can be specified for entities.");
 
@@ -235,7 +235,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        private void ApplyNavigationProperty(ODataNavigationLink navigationLink, IEdmNavigationProperty navigationProperty, object entityResource, ODataDeserializerReadContext readContext)
+        private void ApplyNavigationProperty(ODataNavigationLink navigationLink, IEdmNavigationProperty navigationProperty, object entityResource, ODataDeserializerContext readContext)
         {
             ODataNavigationLinkAnnotation navigationLinkAnnotation = navigationLink.GetAnnotation<ODataNavigationLinkAnnotation>();
             Contract.Assert(navigationLinkAnnotation != null, "navigationLinkAnnotation != null");
@@ -264,7 +264,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        private void ApplyEntryInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataEntry entry, ODataDeserializerReadContext readContext)
+        private void ApplyEntryInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataEntry entry, ODataDeserializerContext readContext)
         {
             Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
             Contract.Assert(entityResource != null, "entityResource != null");
@@ -284,7 +284,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        private void ApplyFeedInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataFeed feed, ODataDeserializerReadContext readContext)
+        private void ApplyFeedInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataFeed feed, ODataDeserializerContext readContext)
         {
             ODataFeedAnnotation feedAnnotation = feed.GetAnnotation<ODataFeedAnnotation>();
             Contract.Assert(feedAnnotation != null, "Each feed we create should gave annotation on it.");
@@ -327,7 +327,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             list.Add(childEntityResource);
         }
 
-        private object CreateNestedEntityAndApplyProperties(ODataEntry entry, IEdmEntityTypeReference elementType, ODataDeserializerReadContext readContext)
+        private object CreateNestedEntityAndApplyProperties(ODataEntry entry, IEdmEntityTypeReference elementType, ODataDeserializerContext readContext)
         {
             ODataEntryAnnotation annotation = entry.GetAnnotation<ODataEntryAnnotation>();
             Contract.Assert(annotation != null);
@@ -379,7 +379,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // Ignore Navigation Links for now
         }
 
-        private void ApplyValueProperties(ODataEntry entry, IEdmStructuredTypeReference entityType, object entityResource, ODataDeserializerReadContext readContext)
+        private void ApplyValueProperties(ODataEntry entry, IEdmStructuredTypeReference entityType, object entityResource, ODataDeserializerContext readContext)
         {
             foreach (ODataProperty property in entry.Properties)
             {

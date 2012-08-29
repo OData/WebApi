@@ -47,12 +47,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         public ODataDeserializerProvider DeserializerProvider { get; private set; }
 
-        public virtual object ReadInline(object item, ODataDeserializerReadContext readContext)
+        public virtual object ReadInline(object item, ODataDeserializerContext readContext)
         {
             throw Error.NotSupported(SRResources.DoesNotSupportReadInLine, GetType().Name);
         }
 
-        internal static void RecurseEnter(ODataDeserializerReadContext readContext)
+        internal static void RecurseEnter(ODataDeserializerContext readContext)
         {
             if (!readContext.IncrementCurrentReferenceDepth())
             {
@@ -60,7 +60,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        internal static void RecurseLeave(ODataDeserializerReadContext readContext)
+        internal static void RecurseLeave(ODataDeserializerContext readContext)
         {
             readContext.DecrementCurrentReferenceDepth();
         }
@@ -81,7 +81,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return new List<object>();
         }
 
-        internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext)
+        internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
 
@@ -109,7 +109,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext, out EdmTypeKind typeKind)
+        internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext, out EdmTypeKind typeKind)
         {
             if (oDataValue == null)
             {
@@ -215,7 +215,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        private static object ConvertComplexValue(ODataComplexValue complexValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext)
+        private static object ConvertComplexValue(ODataComplexValue complexValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmComplexTypeReference edmComplexType;
             if (propertyType == null)
@@ -244,7 +244,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return oDataValue;
         }
 
-        private static object ConvertCollectionValue(ODataCollectionValue collection, IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerReadContext readContext)
+        private static object ConvertCollectionValue(ODataCollectionValue collection, IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmCollectionType collectionType = propertyType as IEdmCollectionType;
             Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");

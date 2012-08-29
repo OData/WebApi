@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         public IEdmComplexTypeReference EdmComplexType { get; private set; }
 
-        public override object ReadInline(object item, ODataDeserializerReadContext readContext)
+        public override object ReadInline(object item, ODataDeserializerContext readContext)
         {
             ODataComplexValue complexValue = item as ODataComplexValue;
             if (complexValue == null)

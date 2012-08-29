@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void CreateProperty_WritesAllDeclaredProperties()
         {
-            var property = _serializer.CreateProperty(_address, "ComplexElement", new ODataSerializerWriteContext());
+            var property = _serializer.CreateProperty(_address, "ComplexElement", new ODataSerializerContext());
 
             Assert.Equal("ComplexElement", property.Name);
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(property.Value);

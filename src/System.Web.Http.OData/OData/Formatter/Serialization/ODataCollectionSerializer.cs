@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerWriteContext writeContext)
+        public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -37,10 +37,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
             writer.WriteStart(
                 new ODataCollectionStart
                 {
-                    Name = writeContext.ResponseContext.ServiceOperationName
+                    Name = writeContext.ServiceOperationName
                 });
 
-            ODataProperty property = CreateProperty(graph, writeContext.ResponseContext.ServiceOperationName, writeContext);
+            ODataProperty property = CreateProperty(graph, writeContext.ServiceOperationName, writeContext);
             if (property != null)
             {
                 ODataCollectionValue collectionValue = property.Value as ODataCollectionValue;
@@ -56,7 +56,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override ODataProperty CreateProperty(object graph, string elementName, ODataSerializerWriteContext writeContext)
+        public override ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
         {
             if (String.IsNullOrWhiteSpace(elementName))
             {

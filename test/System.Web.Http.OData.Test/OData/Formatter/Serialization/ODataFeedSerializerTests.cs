@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         ODataFeedSerializer _serializer;
         IEdmCollectionTypeReference _customersType;
         UrlHelper _urlHelper;
-        ODataSerializerWriteContext _writeContext;
+        ODataSerializerContext _writeContext;
 
         public ODataFeedSerializerTests()
         {
@@ -48,7 +48,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     isNullable: false);
 
             _urlHelper = new Mock<UrlHelper>(new HttpRequestMessage()).Object;
-            _writeContext = new ODataSerializerWriteContext(new ODataResponseContext()) { EntitySet = _customerSet, UrlHelper = _urlHelper };
+            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, UrlHelper = _urlHelper };
         }
 
         [Fact]

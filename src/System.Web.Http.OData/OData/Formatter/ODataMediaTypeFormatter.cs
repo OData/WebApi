@@ -186,7 +186,7 @@ namespace System.Web.Http.OData.Formatter
                 {
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                     oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
-                    ODataDeserializerReadContext readContext = new ODataDeserializerReadContext { IsPatchMode = isPatchMode };
+                    ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode };
 
                     result = deserializer.Read(oDataMessageReader, readContext);
                 }
@@ -264,13 +264,12 @@ namespace System.Web.Http.OData.Formatter
                 operationName = operationName ?? type.Name;
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
-                ODataResponseContext responseContext = new ODataResponseContext(responseMessage, odataFormat, version, baseAddress, operationName);
 
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
-                    BaseUri = responseContext.BaseAddress,
-                    Version = responseContext.ODataVersion,
-                    Indent = responseContext.IsIndented,
+                    BaseUri = baseAddress,
+                    Version = version,
+                    Indent = true,
                     DisableMessageStreamDisposal = true,
                 };
                 if (contentHeaders != null && contentHeaders.ContentType != null)
@@ -280,12 +279,13 @@ namespace System.Web.Http.OData.Formatter
 
                 using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, ODataDeserializerProvider.EdmModel))
                 {
-                    ODataSerializerWriteContext writeContext = new ODataSerializerWriteContext(responseContext)
+                    ODataSerializerContext writeContext = new ODataSerializerContext()
                                                                     {
                                                                         EntitySet = targetEntitySet,
                                                                         UrlHelper = urlHelper,
                                                                         RootProjectionNode = rootProjectionNode,
-                                                                        CurrentProjectionNode = rootProjectionNode
+                                                                        CurrentProjectionNode = rootProjectionNode,
+                                                                        ServiceOperationName = operationName
                                                                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);

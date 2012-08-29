@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader messageReader = new ODataMessageReader(new MockODataRequestMessage(requestMessage));
 
             // Act
-            Uri uri = deserializer.Read(messageReader, new ODataDeserializerReadContext()) as Uri;
+            Uri uri = deserializer.Read(messageReader, new ODataDeserializerContext()) as Uri;
 
             // Assert
             Assert.NotNull(uri);

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
@@ -78,6 +79,7 @@ namespace System.Net.Http
             get { return _bufferSize; }
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Stream is closed by caller (MultipartWriteDelegatingStream is just a wrapper that calls into the inner stream.)")]
         public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
         {
             if (parent == null)

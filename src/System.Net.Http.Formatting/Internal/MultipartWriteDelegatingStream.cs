@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -19,6 +20,8 @@ namespace System.Net.Http.Internal
         {
         }
 
+        [SuppressMessage("Microsoft.WebAPI", "CR4000:DoNotUseProblematicTaskTypes", Justification = "FromAsync is used to get around a rave condition.")]
+        [SuppressMessage("Microsoft.WebAPI", "CR4001:DoNotCallProblematicMethodsOnTask", Justification = "FromAsync is used to get around a rave condition.")]
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             Task writeTask = Task.Factory.FromAsync(InnerStream.BeginWrite, InnerStream.EndWrite, buffer, offset, count, state);

@@ -3,12 +3,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Razor.Parser.SyntaxTree;
+using System.Web.Razor.Resources;
 using System.Web.Razor.Text;
 using System.Web.Razor.Utils;
 
@@ -52,6 +54,7 @@ namespace System.Web.Razor.Editor
             _main.QueueChange(change);
         }
 
+        [SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "_main", Justification = "MainThreadState is disposed when the background thread shuts down")]
         public void Dispose()
         {
             _main.Cancel();
@@ -109,6 +112,7 @@ namespace System.Web.Razor.Editor
             {
             }
 
+            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This method is only empty in Release builds. In Debug builds it contains references to instance variables")]
             [Conditional("DEBUG")]
             protected void SetThreadId(int id)
             {
@@ -117,6 +121,7 @@ namespace System.Web.Razor.Editor
 #endif
             }
 
+            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This method is only empty in Release builds. In Debug builds it contains references to instance variables")]
             [Conditional("DEBUG")]
             protected void EnsureOnThread()
             {
@@ -126,6 +131,7 @@ namespace System.Web.Razor.Editor
 #endif
             }
 
+            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "This method is only empty in Release builds. In Debug builds it contains references to instance variables")]
             [Conditional("DEBUG")]
             protected void EnsureNotOnThread()
             {
@@ -141,8 +147,9 @@ namespace System.Web.Razor.Editor
             private CancellationTokenSource _cancelSource = new CancellationTokenSource();
             private ManualResetEventSlim _hasParcel = new ManualResetEventSlim(false);
             private CancellationTokenSource _currentParcelCancelSource;
+
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Field is used in debug code and may be used later")]
             private string _fileName;
-            
             private object _stateLock = new object();
             private IList<TextChange> _changes = new List<TextChange>();
 
@@ -185,7 +192,7 @@ namespace System.Web.Razor.Editor
 
             public void QueueChange(TextChange change)
             {
-                RazorEditorTrace.TraceLine("[M][{0}] Queuing Parse for: {1}", Path.GetFileName(_fileName), change);
+                RazorEditorTrace.TraceLine(RazorResources.Trace_QueuingParse, Path.GetFileName(_fileName), change);
                 EnsureOnThread();
                 lock (_stateLock)
                 {
@@ -250,6 +257,11 @@ namespace System.Web.Razor.Editor
             {
                 if (disposing)
                 {
+                    if (_currentParcelCancelSource != null)
+                    {
+                        _currentParcelCancelSource.Dispose();
+                        _currentParcelCancelSource = null;
+                    }
                     _cancelSource.Dispose();
                     _hasParcel.Dispose();
                 }
@@ -295,7 +307,7 @@ namespace System.Web.Razor.Editor
 
                 try
                 {
-                    RazorEditorTrace.TraceLine("[BG][{0}] Startup", fileNameOnly);
+                    RazorEditorTrace.TraceLine(RazorResources.Trace_BackgroundThreadStart, fileNameOnly);
                     EnsureOnThread();
                     while (!_shutdownToken.IsCancellationRequested)
                     {
@@ -303,7 +315,7 @@ namespace System.Web.Razor.Editor
                         WorkParcel parcel = _main.GetParcel();
                         if (parcel.Changes.Any())
                         {
-                            RazorEditorTrace.TraceLine("[BG][{0}] {1} changes arrived", fileNameOnly, parcel.Changes.Count);
+                            RazorEditorTrace.TraceLine(RazorResources.Trace_ChangesArrived, fileNameOnly, parcel.Changes.Count);
                             try
                             {
                                 DocumentParseCompleteEventArgs args = null;
@@ -315,7 +327,7 @@ namespace System.Web.Razor.Editor
 #if EDITOR_TRACING
                                         if (_previouslyDiscarded != null && _previouslyDiscarded.Any())
                                         {
-                                            RazorEditorTrace.TraceLine("[BG][{0}] Collecting {1} discarded changes", fileNameOnly, _previouslyDiscarded.Count);
+                                            RazorEditorTrace.TraceLine(RazorResources.Trace_CollectedDiscardedChanges, fileNameOnly, _previouslyDiscarded.Count);
                                         }
 #endif
                                         var allChanges = Enumerable.Concat(
@@ -333,7 +345,7 @@ namespace System.Web.Razor.Editor
                                             sw.Reset();
 #endif
                                             RazorEditorTrace.TraceLine(
-                                                "[BG][{0}] Parse Complete in {1}ms",
+                                                RazorResources.Trace_ParseComplete,
                                                 fileNameOnly,
                                                 elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?");
 
@@ -353,7 +365,7 @@ namespace System.Web.Razor.Editor
                                                 sw.Reset();
 #endif
                                                 _currentParseTree = results.Document;
-                                                RazorEditorTrace.TraceLine("[BG][{0}] Trees Compared in {1}ms. Different = {2}",
+                                                RazorEditorTrace.TraceLine(RazorResources.Trace_TreesCompared,
                                                     fileNameOnly,
                                                     elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?",
                                                     treeStructureChanged);
@@ -369,7 +381,7 @@ namespace System.Web.Razor.Editor
                                             else
                                             {
                                                 // Parse completed but we were cancelled in the mean time. Add these to the discarded changes set
-                                                RazorEditorTrace.TraceLine("[BG][{0}] Discarded {1} changes", fileNameOnly, allChanges.Count);
+                                                RazorEditorTrace.TraceLine(RazorResources.Trace_ChangesDiscarded, fileNameOnly, allChanges.Count);
                                                 _previouslyDiscarded = allChanges;
                                             }
 
@@ -404,7 +416,7 @@ namespace System.Web.Razor.Editor
                         }
                         else
                         {
-                            RazorEditorTrace.TraceLine("[BG][{0}] no changes arrived?", fileNameOnly, parcel.Changes.Count);
+                            RazorEditorTrace.TraceLine(RazorResources.Trace_NoChangesArrived, fileNameOnly, parcel.Changes.Count);
                             Thread.Yield();
                         }
                     }
@@ -415,7 +427,7 @@ namespace System.Web.Razor.Editor
                 }
                 finally
                 {
-                    RazorEditorTrace.TraceLine("[BG][{0}] Shutdown", fileNameOnly);
+                    RazorEditorTrace.TraceLine(RazorResources.Trace_BackgroundThreadShutdown, fileNameOnly);
 
                     // Clean up main thread resources
                     _main.Dispose();

@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Razor.Resources;
 using System.Web.Razor.Text;
 
 namespace System.Web.Razor.Editor
@@ -23,8 +25,9 @@ namespace System.Web.Razor.Editor
                 if (Boolean.TryParse(Environment.GetEnvironmentVariable("RAZOR_EDITOR_TRACE"), out enabled))
                 {
                     Trace.WriteLine(String.Format(
-                        "[RzEd] Editor Tracing {0}",
-                        enabled ? "Enabled" : "Disabled"));
+                        CultureInfo.CurrentCulture,
+                        RazorResources.Trace_Startup,
+                        enabled ? RazorResources.Trace_Enabled : RazorResources.Trace_Disabled));
                     _enabled = enabled;
                 }
                 else
@@ -41,14 +44,10 @@ namespace System.Web.Razor.Editor
             if (IsEnabled())
             {
                 Trace.WriteLine(String.Format(
-                    "[RzEd] {0}",
-                    String.Format(format, args)));
+                    CultureInfo.CurrentCulture,
+                    RazorResources.Trace_Format,
+                    String.Format(CultureInfo.CurrentCulture, format, args)));
             }
-        }
-
-        private static string FormatList(IEnumerable<TextChange> changes)
-        {
-            return String.Join(",", changes.Select(c => c.ToString()));
         }
     }
 }

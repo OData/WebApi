@@ -60,7 +60,6 @@ namespace System.Web.Razor
     public class RazorEditorParser : IDisposable
     {
         // Lock for this document
-        private object _lock = new object();
         private Span _lastChangeOwner;
         private Span _lastAutoCompleteSpan;
         private BackgroundParser _parser;
@@ -135,7 +134,7 @@ namespace System.Web.Razor
             Stopwatch sw = new Stopwatch();
             sw.Start();
 #endif
-            RazorEditorTrace.TraceLine("[P][{0}] Recieved Change: {1}", Path.GetFileName(FileName), change);
+            RazorEditorTrace.TraceLine(RazorResources.Trace_EditorReceivedChange, Path.GetFileName(FileName), change);
             if (change.NewBuffer == null)
             {
                 throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture,
@@ -175,7 +174,7 @@ namespace System.Web.Razor
             elapsedMs = sw.ElapsedMilliseconds;
             sw.Reset();
 #endif
-            RazorEditorTrace.TraceLine("[P][{0}] {3} Change in {2}ms: {1}", Path.GetFileName(FileName), changeString, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
+            RazorEditorTrace.TraceLine(RazorResources.Trace_EditorProcessedChange, Path.GetFileName(FileName), changeString, elapsedMs.HasValue ? elapsedMs.Value.ToString() : "?", result.ToString());
             return result;
         }
 
@@ -243,6 +242,7 @@ namespace System.Web.Razor
             return result;
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exceptions are being caught here intentionally")]
         private void OnDocumentParseComplete(DocumentParseCompleteEventArgs args)
         {
             using (_parser.SynchronizeMainThreadState())

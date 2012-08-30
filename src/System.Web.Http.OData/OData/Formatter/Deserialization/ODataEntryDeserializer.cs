@@ -162,6 +162,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Contract.Assert(value != null);
             Contract.Assert(type != null);
 
+            // if value is of the same type nothing to do here.
+            if (value.GetType() == type || value.GetType() == Nullable.GetUnderlyingType(type))
+            {
+                return value;
+            }
+
             string str = value as string;
 
             if (type == typeof(char))

@@ -71,6 +71,7 @@
     <Compile Include="..\ExtensionsCommonAssemblyInfo.cs">
       <Link>Properties\ExtensionsCommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HubController.cs" />
     <Compile Include="HubControllerBase.cs" />
     <Compile Include="HubControllerOfTHub.cs" />

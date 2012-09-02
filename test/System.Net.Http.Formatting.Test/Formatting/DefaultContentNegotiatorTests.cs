@@ -72,20 +72,45 @@ namespace System.Net.Http.Formatting
             }
         }
 
-        public static TheoryDataSet<bool, string[], string> MatchTypeData
+        public static TheoryDataSet<bool, string[], bool> ShouldMatchOnTypeData
         {
             get
             {
-                // bool excludeMatchOnTypeOnly, string[] supportedMediaTypes, string expectedMediaType
-                return new TheoryDataSet<bool, string[], string>
+                // bool excludeMatchOnType, string[] acceptHeaders, bool expectedResult
+                return new TheoryDataSet<bool, string[], bool>
                 {
-                    { false, new string[0], "application/octet-stream" }, 
+                    { false, new string[0], true }, 
+                    { true, new string[0], true }, 
 
-                    { false, new string[] { "text/xml", "application/xml" }, "text/xml" }, 
-                    { false, new string[] { "application/xml", "text/xml" }, "application/xml" }, 
+                    { false, new string[] { "application/xml" }, true }, 
+                    { true, new string[] { "application/xml" }, false }, 
+                    
+                    { false, new string[] { "application/xml; q=1.0" }, true }, 
+                    { true, new string[] { "application/xml; q=1.0" }, false }, 
 
-                    { true, new string[] { "text/xml", "application/xml" }, null }, 
-                    { true, new string[] { "application/xml", "text/xml" }, null }, 
+                    { false, new string[] { "application/xml; q=0.0" }, true }, 
+                    { true, new string[] { "application/xml; q=0.0" }, false }, 
+
+                    { false, new string[] { "application/xml; q=0.0", "application/json" }, true }, 
+                    { true, new string[] { "application/xml; q=0.0", "application/json" }, false }, 
+
+                    { false, new string[] { "text/nomatch" }, true }, 
+                    { true, new string[] { "text/nomatch" }, false }, 
+                };
+            }
+        }
+
+        public static TheoryDataSet<string[], string> MatchTypeData
+        {
+            get
+            {
+                // string[] supportedMediaTypes, string expectedMediaType
+                return new TheoryDataSet<string[], string>
+                {
+                    { new string[0], "application/octet-stream" }, 
+
+                    { new string[] { "text/xml", "application/xml" }, "text/xml" }, 
+                    { new string[] { "application/xml", "text/xml" }, "application/xml" }, 
                 };
             }
         }
@@ -409,6 +434,31 @@ namespace System.Net.Http.Formatting
             Assert.IsType<XmlMediaTypeFormatter>(result.Formatter);
         }
 
+        [Theory]
+        [InlineData(true)] 
+        [InlineData(false)]
+        public void Negotiate_ObservesExcludeMatchOnTypeOnly(bool excludeMatchOnTypeOnly)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator(excludeMatchOnTypeOnly);
+            _request.Content = new StringContent("test");
+            _request.Headers.Accept.ParseAdd("text/html");
+
+            // Act
+            var result = negotiator.Negotiate(typeof(string), _request, new MediaTypeFormatterCollection());
+
+            // Assert
+            if (excludeMatchOnTypeOnly)
+            {
+                Assert.Null(result);
+            }
+            else
+            {
+                Assert.NotNull(result);
+                Assert.Equal("application/json", result.MediaType.MediaType);
+            }
+        }
+
         [Fact]
         public void ComputeFormatterMatches_ThrowsOnNull()
         {
@@ -549,6 +599,29 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
+        public void ShouldMatchOnType_ThrowsOnNull()
+        {
+            MockContentNegotiator negotiator = new MockContentNegotiator();
+            Assert.ThrowsArgumentNull(() => negotiator.ShouldMatchOnType(sortedAcceptValues: null), "sortedAcceptValues");
+        }
+
+        [Theory]
+        [PropertyData("ShouldMatchOnTypeData")]
+        public void ShouldMatchOnType_ReturnsExpectedResult(bool excludeMatchOnType, string[] acceptHeaders, bool expectedResult)
+        {
+            // Arrange
+            MockContentNegotiator negotiator = new MockContentNegotiator(excludeMatchOnType);
+            List<MediaTypeWithQualityHeaderValue> unsortedAcceptHeaders = acceptHeaders.Select(a => MediaTypeWithQualityHeaderValue.Parse(a)).ToList();
+            IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptHeaders = negotiator.SortMediaTypeWithQualityHeaderValuesByQFactor(unsortedAcceptHeaders);
+
+            // Act
+            bool result = negotiator.ShouldMatchOnType(sortedAcceptHeaders);
+
+            // Assert
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
         public void MatchType_ThrowsOnNull()
         {
             MockContentNegotiator negotiator = new MockContentNegotiator();
@@ -561,10 +634,10 @@ namespace System.Net.Http.Formatting
 
         [Theory]
         [PropertyData("MatchTypeData")]
-        public void MatchType_ReturnsMatch(bool excludeMatchOnTypeOnly, string[] supportedMediaTypes, string expectedMediaType)
+        public void MatchType_ReturnsMatch(string[] supportedMediaTypes, string expectedMediaType)
         {
             // Arrange
-            MockContentNegotiator negotiator = new MockContentNegotiator(excludeMatchOnTypeOnly);
+            MockContentNegotiator negotiator = new MockContentNegotiator();
 
             MockMediaTypeFormatter formatter = new MockMediaTypeFormatter();
             foreach (string supportedMediaType in supportedMediaTypes)
@@ -576,17 +649,10 @@ namespace System.Net.Http.Formatting
             MediaTypeFormatterMatch match = negotiator.MatchType(typeof(object), formatter);
 
             // Assert
-            if (expectedMediaType == null)
-            {
-                Assert.Null(match);
-            }
-            else
-            {
-                Assert.Same(formatter, match.Formatter);
-                Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), match.MediaType);
-                Assert.Equal(1.0, match.Quality);
-                Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnCanWriteType, match.Ranking);
-            }
+            Assert.Same(formatter, match.Formatter);
+            Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), match.MediaType);
+            Assert.Equal(1.0, match.Quality);
+            Assert.Equal(MediaTypeFormatterMatchRanking.MatchOnCanWriteType, match.Ranking);
         }
 
         [Fact]

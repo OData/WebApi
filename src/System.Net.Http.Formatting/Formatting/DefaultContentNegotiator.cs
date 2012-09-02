@@ -161,8 +161,12 @@ namespace System.Net.Http.Formatting
                     continue;
                 }
 
+                // Check whether we should match on type or stop the matching process. 
+                // The latter is used to generate 406 (Not Acceptable) status codes.
+                bool shouldMatchOnType = ShouldMatchOnType(sortedAcceptValues);
+
                 // Match against the type of object we are writing out
-                if ((match = MatchType(type, formatter)) != null)
+                if (shouldMatchOnType && (match = MatchType(type, formatter)) != null)
                 {
                     matches.Add(match);
                     continue;
@@ -441,10 +445,25 @@ namespace System.Net.Http.Formatting
         }
 
         /// <summary>
+        /// Determine whether to match on type or not. This is used to determine whether to
+        /// generate a 406 response or use the default media type formatter in case there
+        /// is no match against anything in the request. If ExcludeMatchOnTypeOnly is true 
+        /// then we don't match on type unless there are no accept headers.
+        /// </summary>
+        /// <param name="sortedAcceptValues">The sorted accept header values to match.</param>
+        /// <returns>True if not ExcludeMatchOnTypeOnly and accept headers with a q-factor bigger than 0.0 are present.</returns>
+        protected virtual bool ShouldMatchOnType(IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptValues)
+        {
+            if (sortedAcceptValues == null)
+            {
+                throw Error.ArgumentNull("sortedAcceptValues");
+            }
+
+            return !(ExcludeMatchOnTypeOnly && sortedAcceptValues.Any());
+        }
+
+        /// <summary>
         /// Pick the first supported media type and indicate we've matched only on type
-        /// If ExcludeMatchOnTypeOnly is true then we don't match on type only which means
-        /// that we return null if we can't match on anything in the request. This is useful
-        /// for generating 406 (Not Acceptable) status codes.
         /// </summary>
         /// <param name="type">The type to be serialized.</param>
         /// <param name="formatter">The formatter we are matching against.</param>
@@ -462,13 +481,8 @@ namespace System.Net.Http.Formatting
 
             // We already know that we do match on type -- otherwise we wouldn't even be called --
             // so this is just a matter of determining how we match.
-            if (!ExcludeMatchOnTypeOnly)
-            {
-                MediaTypeHeaderValue mediaType = formatter.SupportedMediaTypes.FirstOrDefault();
-                return new MediaTypeFormatterMatch(formatter, mediaType, FormattingUtilities.Match, MediaTypeFormatterMatchRanking.MatchOnCanWriteType);
-            }
-
-            return null;
+            MediaTypeHeaderValue mediaType = formatter.SupportedMediaTypes.FirstOrDefault();
+            return new MediaTypeFormatterMatch(formatter, mediaType, FormattingUtilities.Match, MediaTypeFormatterMatchRanking.MatchOnCanWriteType);
         }
 
         /// <summary>

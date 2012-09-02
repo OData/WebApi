@@ -48,6 +48,11 @@ namespace System.Net.Http.Formatting.Mocks
             return base.MatchRequestMediaType(request, formatter);
         }
 
+        public new bool ShouldMatchOnType(IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptValues)
+        {
+            return base.ShouldMatchOnType(sortedAcceptValues);
+        }
+
         public new MediaTypeFormatterMatch MatchType(Type type, MediaTypeFormatter formatter)
         {
             return base.MatchType(type, formatter);

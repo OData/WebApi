@@ -13,7 +13,7 @@ namespace System.Web.Http
         public static readonly string Metadata = "OData.$metadata";
 
         /// <summary>
-        /// Route name for OData service doc's.
+        /// Route name for OData service document.
         /// </summary>
         public static readonly string ServiceDocument = "OData.servicedoc";
 

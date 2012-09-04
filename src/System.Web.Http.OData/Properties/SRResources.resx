@@ -354,6 +354,9 @@
   <data name="ArgumentMustBeOfType" xml:space="preserve">
     <value>The argument must be of type '{0}'.</value>
   </data>
+  <data name="CannotPatchKeyProperty" xml:space="preserve">
+    <value>Cannot apply PATCH on key property '{0}' on entity type '{1}' when '{2}' is '{3}'.</value>
+  </data>
   <data name="DefaultRouteMissingOrIncorrect" xml:space="preserve">
     <value>The feed self link could not be generated for the route named '{0}'.</value>
   </data>

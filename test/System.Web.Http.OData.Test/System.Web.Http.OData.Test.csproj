@@ -117,6 +117,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializerTests.cs" />
     <Compile Include="OData\Formatter\EdmLibHelpersTests.cs" />
     <Compile Include="OData\Formatter\ODataFormatterConstantsTest.cs" />
+    <Compile Include="OData\Formatter\PatchKeyModeHelperTests.cs" />
     <Compile Include="OData\Query\Controllers\PrimitiveController.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionTests.cs" />

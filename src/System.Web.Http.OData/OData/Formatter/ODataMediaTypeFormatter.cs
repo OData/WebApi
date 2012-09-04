@@ -30,6 +30,8 @@ namespace System.Web.Http.OData.Formatter
     {
         private readonly ODataVersion _defaultODataVersion = ODataFormatterConstants.DefaultODataVersion;
 
+        private PatchKeyMode _patchKeyMode;
+
         /// <summary>
         /// This constructor is used for unit testing purposes only
         /// </summary>
@@ -64,7 +66,27 @@ namespace System.Web.Http.OData.Formatter
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
         }
 
+        /// <summary>
+        /// The <see cref="IEdmModel"/> used by this formatter.
+        /// </summary>
         public IEdmModel Model { get; private set; }
+
+        /// <summary>
+        /// The <see cref="PatchKeyMode"/> to be used during deserialization.
+        /// </summary>
+        public PatchKeyMode PatchKeyMode
+        {
+            get
+            {
+                return _patchKeyMode;
+            }
+
+            set
+            {
+                PatchKeyModeHelper.Validate(value, "value");
+                _patchKeyMode = value;
+            }
+        }
 
         /// <summary>
         /// The incoming <see cref="HttpRequestMessage" />.
@@ -186,7 +208,7 @@ namespace System.Web.Http.OData.Formatter
                 {
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                     oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
-                    ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode };
+                    ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, PatchKeyMode = PatchKeyMode };
 
                     result = deserializer.Read(oDataMessageReader, readContext);
                 }

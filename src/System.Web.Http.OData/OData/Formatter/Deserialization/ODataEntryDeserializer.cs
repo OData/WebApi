@@ -7,6 +7,7 @@ using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Properties;
 using System.Xml.Linq;
@@ -103,10 +104,23 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             string propertyName = property.Name;
             IEdmTypeReference propertyType = edmProperty != null ? edmProperty.Type : null; // open properties have null values
 
+            bool isDelta = readContext.IsPatchMode && resourceType.IsEntity();
+
+            if (isDelta && resourceType.AsEntity().Key().Select(key => key.Name).Contains(propertyName))
+            {
+                // we are patching a key property.
+                if (readContext.PatchKeyMode == PatchKeyMode.Ignore)
+                {
+                    return;
+                }
+                else if (readContext.PatchKeyMode == PatchKeyMode.Throw)
+                {
+                    throw Error.InvalidOperation(SRResources.CannotPatchKeyProperty, propertyName, resourceType.FullName(), typeof(PatchKeyMode).Name, PatchKeyMode.Throw);
+                }
+            }
+
             EdmTypeKind propertyKind;
             object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
-
-            bool isDelta = readContext.IsPatchMode && resourceType.IsEntity();
 
             if (propertyKind == EdmTypeKind.Primitive)
             {

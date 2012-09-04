@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -10,10 +10,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.Conventions;
+using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using Microsoft.Data.Edm.Library;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -132,6 +136,39 @@ namespace System.Web.Http.OData.Formatter
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
             throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void ODataFormatter_DefaultPatchKeyMode_Is_Ignore()
+        {
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();
+            Assert.Equal(PatchKeyMode.Ignore, formatter.PatchKeyMode);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_PassesPatchKeyModeToTheDeserializers()
+        {
+            ODataDeserializerContext context = null;
+            Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Entry);
+            deserializer
+                .Setup(d => d.Read(It.IsAny<ODataMessageReader>(), It.IsAny<ODataDeserializerContext>()))
+                .Callback((ODataMessageReader reader, ODataDeserializerContext deserializerContext) =>
+                {
+                    context = deserializerContext;
+                });
+            Mock<Type> type = new Mock<Type>();
+            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>(EdmCoreModel.Instance);
+            deserializerProvider.Setup(d => d.GetODataDeserializer(type.Object)).Returns(deserializer.Object);
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, new DefaultODataSerializerProvider(EdmCoreModel.Instance));
+            formatter.PatchKeyMode = PatchKeyMode.Patch;
+
+            Mock<Stream> stream = new Mock<Stream>();
+            Mock<HttpContent> content = new Mock<HttpContent>();
+            Mock<IFormatterLogger> formatterLogger = new Mock<IFormatterLogger>();
+
+            formatter.ReadFromStreamAsync(type.Object, stream.Object, content.Object, formatterLogger.Object);
+
+            Assert.Equal(context.PatchKeyMode, PatchKeyMode.Patch);
         }
 
         public override ODataMediaTypeFormatter CreateFormatter()

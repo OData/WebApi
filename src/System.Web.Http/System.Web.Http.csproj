@@ -101,6 +101,8 @@
     <Compile Include="Controllers\IActionResultConverter.cs" />
     <Compile Include="Controllers\HttpActionContext.cs" />
     <Compile Include="Controllers\IControllerConfiguration.cs" />
+    <Compile Include="Tracing\TraceLevelHelper.cs" />
+    <Compile Include="Tracing\TraceKindHelper.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />
     <Compile Include="Validation\ModelValidatorCache.cs" />
     <Compile Include="Controllers\ResponseMessageResultConverter.cs" />

@@ -142,6 +142,8 @@
     <Compile Include="Services\ControllerServicesTests.cs" />
     <Compile Include="Services\DefaultServicesTests.cs" />
     <Compile Include="Services\ServicesExtensionsTests.cs" />
+    <Compile Include="Tracing\TraceRecordTest.cs" />
+    <Compile Include="Tracing\TraceLevelHelperTest.cs" />
     <Compile Include="Tracing\FormattingUtilitiesTest.cs" />
     <Compile Include="Tracing\HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="Tracing\ITraceWriterExtensionsTest.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Tracing\Tracers\MessageHandlerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\RequestMessageHandlerTracerTest.cs" />
     <Compile Include="Tracing\Tracers\XmlMediaTypeFormatterTracerTest.cs" />
+    <Compile Include="Tracing\TraceKindHelperTest.cs" />
     <Compile Include="Util\ContextUtil.cs" />
     <Compile Include="Filters\HttpActionExecutedContextTest.cs" />
     <Compile Include="Filters\ActionFilterAttributeTest.cs" />

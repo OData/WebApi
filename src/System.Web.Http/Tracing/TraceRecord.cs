@@ -11,6 +11,9 @@ namespace System.Web.Http.Tracing
     /// </summary>
     public class TraceRecord
     {
+        private TraceKind _traceKind;
+        private TraceLevel _traceLevel;
+
         private Lazy<Dictionary<object, object>> _properties = new Lazy<Dictionary<object, object>>(
             () => new Dictionary<object, object>());
 
@@ -36,12 +39,34 @@ namespace System.Web.Http.Tracing
         /// <summary>
         /// Gets or sets the kind of trace.
         /// </summary>
-        public TraceKind Kind { get; set; }
+        public TraceKind Kind
+        {
+            get
+            {
+                return _traceKind;
+            }
+            set
+            {
+                TraceKindHelper.Validate(value, "value");
+                _traceKind = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the tracing level.
         /// </summary>
-        public TraceLevel Level { get; set; }
+        public TraceLevel Level
+        {
+            get
+            {
+                return _traceLevel;
+            }
+            set
+            {
+                TraceLevelHelper.Validate(value, "value");
+                _traceLevel = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the message.

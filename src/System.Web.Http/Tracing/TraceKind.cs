@@ -10,7 +10,7 @@ namespace System.Web.Http.Tracing
         /// <summary>
         /// Single trace, not part of a Begin/End trace pair
         /// </summary>
-        Trace,
+        Trace = 0,
 
         /// <summary>
         /// Trace marking the beginning of some operation.

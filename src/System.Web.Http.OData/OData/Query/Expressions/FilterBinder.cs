@@ -734,7 +734,21 @@ namespace System.Web.Http.OData.Query.Expressions
                 ParameterExpression parameter;
                 if (!_lambdaParameters.TryGetValue(parameterNode.Name, out parameter))
                 {
-                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(parameterNode.ParameterType, _model, _assembliesResolver), parameterNode.Name);
+                    // Work-around issue 481323 where UriParser yields a collection parameter type
+                    // for primitive collections rather than the inner element type of the collection.
+                    // Remove this block of code when 481323 is resolved.
+                    IEdmTypeReference edmTypeReference = parameterNode.ParameterType;
+                    IEdmCollectionTypeReference collectionTypeReference = edmTypeReference as IEdmCollectionTypeReference;
+                    if (collectionTypeReference != null)
+                    {
+                        IEdmCollectionType collectionType = collectionTypeReference.Definition as IEdmCollectionType;
+                        if (collectionType != null)
+                        {
+                            edmTypeReference = collectionType.ElementType;
+                        }
+                    }
+
+                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(edmTypeReference, _model, _assembliesResolver), parameterNode.Name);
                     Contract.Assert(lambdaIt == null, "There can be only one parameter in an Any/All lambda");
                     lambdaIt = parameter;
                 }

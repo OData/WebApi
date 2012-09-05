@@ -45,7 +45,11 @@ namespace System.Web.Http.OData.Query
                     { "Address/City eq 'redmond'", true, new int[] { 11 } },
                     { "Address/City eq null", true, new int[] { 22 , 3 } },
                     { "RelationshipManager/Name eq null", true, new int[] { 11, 22, 3 } },
-                    { "RelationshipManager/Name ne null", true, new int[] { 33 } }
+                    { "RelationshipManager/Name ne null", true, new int[] { 33 } },
+                    { "Tags/any(tag: tag eq 'tag1')", true, new int[] { 22, 3 } },
+                    { "Tags/any(tag: tag eq 'tag3')", true, new int[] { 3 } },
+                    { "Tags/all(tag: tag eq 'tag33')", true, new int[] { 33 } },
+                    { "Contacts/any(contact: contact/Name eq 'Primary')", true, new int[] { 11, 33 } },
                 };
             }
         }

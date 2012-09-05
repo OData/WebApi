@@ -312,18 +312,12 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                if (!_isQueryCompositionMode)
+                if (_isQueryCompositionMode)
                 {
-                    type.AddCollectionProperty(property);
-                }
-                else
-                {
-                    // Ignore these CollectionProperties. 
-                    // CollectionProperties are supported by the modelBuilders now, but not in queries, at least not until the 
-                    // bug in the UriParser that results in incorrect parameters types on Any/All nodes is fixed.
-                    // see disabled tests in FilterQueryOptionTest for more information.
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
+                
+                type.AddCollectionProperty(property);
             }
         }
 
@@ -410,7 +404,7 @@ namespace System.Web.Http.OData.Builder
                         CollectionPropertyConfiguration colProperty = property as CollectionPropertyConfiguration;
                         if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(colProperty.ElementType) != null)
                         {
-                            break;
+                            continue;
                         }
                     }
 

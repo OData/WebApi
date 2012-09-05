@@ -12,10 +12,40 @@ namespace System.Web.Http.OData.Query
     {
         internal static List<QueryCompositionCustomer> CustomerList = new List<QueryCompositionCustomer>
             {  
-                new QueryCompositionCustomer { Id = 11, Name = "Lowest", Address = new QueryCompositionAddress { City = "redmond", Zipcode = "98052" } }, 
-                new QueryCompositionCustomer { Id = 33, Name = "Highest", Address = new QueryCompositionAddress { City = "seattle", Zipcode = "98000" } }, 
-                new QueryCompositionCustomer { Id = 22, Name = "Middle"}, 
-                new QueryCompositionCustomer { Id = 3, Name = "NewLow" },
+                new QueryCompositionCustomer 
+                { 
+                    Id = 11, 
+                    Name = "Lowest", 
+                    Address = new QueryCompositionAddress { City = "redmond", Zipcode = "98052" }, 
+                    Contacts = new QueryCompositionCustomer[]
+                    {
+                        new QueryCompositionCustomer { Id = 111, Name = "Primary" },
+                        new QueryCompositionCustomer { Id = 112, Name = "Secondary" },
+                    }
+                }, 
+                new QueryCompositionCustomer 
+                { 
+                    Id = 33, 
+                    Name = "Highest", 
+                    Address = new QueryCompositionAddress { City = "seattle", Zipcode = "98000" },
+                    Contacts = new QueryCompositionCustomer[]
+                    {
+                        new QueryCompositionCustomer { Id = 331, Name = "Primary" },
+                    },
+                    Tags = new string[] {"tag33"} 
+                }, 
+                new QueryCompositionCustomer 
+                { 
+                    Id = 22, 
+                    Name = "Middle",
+                    Tags = new string[] {"tag1", "tag22"} 
+                }, 
+                new QueryCompositionCustomer 
+                { 
+                    Id = 3, 
+                    Name = "NewLow", 
+                    Tags = new string[] {"tag1", "tag3"} 
+                },
             };
 
         static QueryCompositionCustomerController()
@@ -115,6 +145,8 @@ namespace System.Web.Http.OData.Query
         public string Name { get; set; }
         public QueryCompositionAddress Address { get; set; }
         public QueryCompositionCustomer RelationshipManager { get; set; }
+        public IEnumerable<string> Tags { get; set; }
+        public IEnumerable<QueryCompositionCustomer> Contacts { get; set; }
     }
 
     public class QueryCompositionAddress

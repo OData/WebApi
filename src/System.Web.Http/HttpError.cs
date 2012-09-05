@@ -158,7 +158,6 @@ namespace System.Web.Http
         public HttpError ModelState
         {
             get { return GetPropertyValue<HttpError>(ModelStateKey); }
-            set { this[ModelStateKey] = value; }
         }
 
         /// <summary>
@@ -228,7 +227,6 @@ namespace System.Web.Http
         public HttpError InnerException
         {
             get { return GetPropertyValue<HttpError>(InnerExceptionKey); }
-            set { this[InnerExceptionKey] = value; }
         }
 
         private TValue GetPropertyValue<TValue>(string key)

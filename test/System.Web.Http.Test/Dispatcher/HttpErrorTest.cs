@@ -211,18 +211,6 @@ namespace System.Web.Http.Dispatcher
         }
 
         [Fact]
-        public void HttpError_ModelState_RoundTrips()
-        {
-            HttpError modelState = new HttpError();
-            Assert.Reflection.Property(
-                new HttpError(),
-                e => e.ModelState,
-                expectedDefaultValue: null,
-                allowNull: true,
-                roundTripTestValue: modelState);
-        }
-
-        [Fact]
         public void HttpError_ExceptionMessage_RoundTrips()
         {
             string exceptionMessage = "ExceptionMessage";
@@ -266,18 +254,6 @@ namespace System.Web.Http.Dispatcher
                 expectedDefaultValue: exception.StackTrace,
                 allowNull: true,
                 roundTripTestValue: "HelloAgain");
-        }
-
-        [Fact]
-        public void HttpError_InnerException_RoundTrips()
-        {
-            HttpError exception = new HttpError();
-            Assert.Reflection.Property(
-                new HttpError(),
-                e => e.InnerException,
-                expectedDefaultValue: null,
-                allowNull: true,
-                roundTripTestValue: exception);
         }
     }
 }

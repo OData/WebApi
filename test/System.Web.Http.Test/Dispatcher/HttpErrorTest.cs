@@ -185,5 +185,99 @@ namespace System.Web.Http.Dispatcher
                 "<Error><Message>An error has occurred.</Message><ExceptionMessage>error</ExceptionMessage><ExceptionType>System.ArgumentException</ExceptionType><StackTrace /><InnerException><Message>An error has occurred.</Message><ExceptionMessage>innerError</ExceptionMessage><ExceptionType>System.Exception</ExceptionType><StackTrace /></InnerException></Error>",
                 serializedError);
         }
+
+        [Fact]
+        public void HttpError_Message_RoundTrips()
+        {
+            string message = "HelloWorld";
+            Assert.Reflection.Property(
+                new HttpError(message),
+                e => e.Message,
+                expectedDefaultValue: message,
+                allowNull: true,
+                roundTripTestValue: "HelloAgain");
+        }
+
+        [Fact]
+        public void HttpError_MessageDetail_RoundTrips()
+        {
+            string messageDetail = "HelloWorld";
+            Assert.Reflection.Property(
+                new HttpError("message", messageDetail),
+                e => e.MessageDetail,
+                expectedDefaultValue: messageDetail,
+                allowNull: true,
+                roundTripTestValue: "HelloAgain");
+        }
+
+        [Fact]
+        public void HttpError_ModelState_RoundTrips()
+        {
+            HttpError modelState = new HttpError();
+            Assert.Reflection.Property(
+                new HttpError(),
+                e => e.ModelState,
+                expectedDefaultValue: null,
+                allowNull: true,
+                roundTripTestValue: modelState);
+        }
+
+        [Fact]
+        public void HttpError_ExceptionMessage_RoundTrips()
+        {
+            string exceptionMessage = "ExceptionMessage";
+            Exception exception = new Exception(exceptionMessage);
+            Assert.Reflection.Property(
+                new HttpError(exception, includeErrorDetail: true),
+                e => e.ExceptionMessage,
+                expectedDefaultValue: exceptionMessage,
+                allowNull: true,
+                roundTripTestValue: "HelloAgain");
+        }
+
+        [Fact]
+        public void HttpError_ExceptionType_RoundTrips()
+        {
+            ApplicationException exception = new ApplicationException("HelloWorld");
+            Assert.Reflection.Property(
+                new HttpError(exception, includeErrorDetail: true),
+                e => e.ExceptionType,
+                expectedDefaultValue: exception.GetType().FullName,
+                allowNull: true,
+                roundTripTestValue: "HelloAgain");
+        }
+
+        [Fact]
+        public void HttpError_StackTrace_RoundTrips()
+        {
+            Exception exception;
+            try
+            {
+                throw new Exception("HelloWorld");
+            }
+            catch (Exception e)
+            {
+                exception = e;
+            }
+
+            Assert.Reflection.Property(
+                new HttpError(exception, includeErrorDetail: true),
+                e => e.StackTrace,
+                expectedDefaultValue: exception.StackTrace,
+                allowNull: true,
+                roundTripTestValue: "HelloAgain");
+        }
+
+        [Fact]
+        public void HttpError_InnerException_RoundTrips()
+        {
+            HttpError exception = new HttpError();
+            Assert.Reflection.Property(
+                new HttpError(),
+                e => e.InnerException,
+                expectedDefaultValue: null,
+                allowNull: true,
+                roundTripTestValue: exception);
+        }
     }
 }

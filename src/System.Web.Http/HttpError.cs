@@ -115,11 +115,12 @@ namespace System.Web.Http
                 }
             }
 
-            Add(ModelStateKey, modelStateError);                        
+            Add(ModelStateKey, modelStateError);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpError"/> class containing error message <paramref name="message"/> and error message detail <paramref name="messageDetail"/>.
+        /// Initializes a new instance of the <see cref="HttpError"/> class containing error message <paramref name="message"/> 
+        /// and error message detail <paramref name="messageDetail"/>.
         /// </summary>
         /// <param name="message">The error message to associate with this instance.</param>
         /// <param name="messageDetail">The error message detail to associate with this instance.</param>
@@ -135,23 +136,109 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// The error message associated with this instance.
+        /// The high-level, user-visible message explaining the cause of the error. Information carried in this field 
+        /// should be considered public in that it will go over the wire regardless of the <see cref="IncludeErrorDetailPolicy"/>. 
+        /// As a result care should be taken not to disclose sensitive information about the server or the application.
         /// </summary>
         public string Message
         {
-            get
-            {
-                if (ContainsKey(MessageKey))
-                {
-                    return this[MessageKey] as string;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
+            get { return GetPropertyValue<String>(MessageKey); }
             set { this[MessageKey] = value; }
+        }
+
+        /// <summary>
+        /// The <see cref="ModelState"/> containing information about the errors that occurred during model binding.
+        /// </summary>
+        /// <remarks>
+        /// The inclusion of <see cref="System.Exception"/> information carried in the <see cref="ModelState"/> is
+        /// controlled by the <see cref="IncludeErrorDetailPolicy"/>. All other information in the <see cref="ModelState"/>
+        /// should be considered public in that it will go over the wire. As a result care should be taken not to 
+        /// disclose sensitive information about the server or the application.
+        /// </remarks>
+        public HttpError ModelState
+        {
+            get { return GetPropertyValue<HttpError>(ModelStateKey); }
+            set { this[ModelStateKey] = value; }
+        }
+
+        /// <summary>
+        /// A detailed description of the error intended for the developer to understand exactly what failed.
+        /// </summary>
+        /// <remarks>
+        /// The inclusion of this field is controlled by the <see cref="IncludeErrorDetailPolicy"/>. The 
+        /// field is expected to contain information about the server or the application that should not 
+        /// be disclosed broadly.
+        /// </remarks>
+        public string MessageDetail
+        {
+            get { return GetPropertyValue<String>(MessageDetailKey); }
+            set { this[MessageDetailKey] = value; }
+        }
+
+        /// <summary>
+        /// The message of the <see cref="System.Exception"/> if available.
+        /// </summary>
+        /// <remarks>
+        /// The inclusion of this field is controlled by the <see cref="IncludeErrorDetailPolicy"/>. The 
+        /// field is expected to contain information about the server or the application that should not 
+        /// be disclosed broadly.
+        /// </remarks>
+        public string ExceptionMessage
+        {
+            get { return GetPropertyValue<String>(ExceptionMessageKey); }
+            set { this[ExceptionMessageKey] = value; }
+        }
+
+        /// <summary>
+        /// The type of the <see cref="System.Exception"/> if available.
+        /// </summary>
+        /// <remarks>
+        /// The inclusion of this field is controlled by the <see cref="IncludeErrorDetailPolicy"/>. The 
+        /// field is expected to contain information about the server or the application that should not 
+        /// be disclosed broadly.
+        /// </remarks>
+        public string ExceptionType
+        {
+            get { return GetPropertyValue<String>(ExceptionTypeKey); }
+            set { this[ExceptionTypeKey] = value; }
+        }
+
+        /// <summary>
+        /// The stack trace information associated with this instance if available.
+        /// </summary>
+        /// <remarks>
+        /// The inclusion of this field is controlled by the <see cref="IncludeErrorDetailPolicy"/>. The 
+        /// field is expected to contain information about the server or the application that should not 
+        /// be disclosed broadly.
+        /// </remarks>
+        public string StackTrace
+        {
+            get { return GetPropertyValue<String>(StackTraceKey); }
+            set { this[StackTraceKey] = value; }
+        }
+
+        /// <summary>
+        /// The inner <see cref="System.Exception"/> associated with this instance if available.
+        /// </summary>
+        /// <remarks>
+        /// The inclusion of this field is controlled by the <see cref="IncludeErrorDetailPolicy"/>. The 
+        /// field is expected to contain information about the server or the application that should not 
+        /// be disclosed broadly.
+        /// </remarks>
+        public HttpError InnerException
+        {
+            get { return GetPropertyValue<HttpError>(InnerExceptionKey); }
+            set { this[InnerExceptionKey] = value; }
+        }
+
+        private TValue GetPropertyValue<TValue>(string key)
+        {
+            TValue value;
+            if (this.TryGetValue(key, out value))
+            {
+                return value;
+            }
+            return default(TValue);
         }
 
         XmlSchema IXmlSerializable.GetSchema()

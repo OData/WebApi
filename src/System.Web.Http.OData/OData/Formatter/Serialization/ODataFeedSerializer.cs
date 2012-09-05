@@ -3,9 +3,11 @@
 using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Atom;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -15,6 +17,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     internal class ODataFeedSerializer : ODataEntrySerializer
     {
         private const string FeedNamespace = "http://schemas.datacontract.org/2004/07/";
+        private const string SelfLinkRelation = "self";
 
         private IEdmCollectionTypeReference _edmCollectionType;
 
@@ -76,6 +79,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
             if (enumerable != null)
             {
                 ODataFeed feed = new ODataFeed();
+
+                if (writeContext.EntitySet != null)
+                {
+                    IEntitySetLinkBuilder linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                    Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(new FeedContext(writeContext.EntitySet, writeContext.UrlHelper, graph));
+                    if (feedSelfLink != null)
+                    {
+                        feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = SelfLinkRelation, Href = feedSelfLink } });
+                    }
+                }
 
                 // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
                 feed.Id = FeedNamespace + _edmCollectionType.FullName();

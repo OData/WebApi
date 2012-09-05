@@ -196,6 +196,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The feed self link could not be generated for the route named &apos;{0}&apos;..
+        /// </summary>
+        internal static string DefaultRouteMissingOrIncorrect {
+            get {
+                return ResourceManager.GetString("DefaultRouteMissingOrIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; does not support Read..
         /// </summary>
         internal static string DeserializerDoesNotSupportRead {

@@ -106,6 +106,7 @@
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItemTests.cs" />
+    <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConventionTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionOfTEdmTypeConfigurationAndTAttributeTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionOfTEdmTypeConfigurationTests.cs" />

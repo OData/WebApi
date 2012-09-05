@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder.Conventions;
+using System.Xml.Linq;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
@@ -170,6 +173,30 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
                     ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonRegularJson);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetFeedInODataAtomFormat_HasSelfLink()
+        {
+            _config.Formatters.Insert(0, _serverFormatter);
+
+            using (HttpServer host = new HttpServer(_config))
+            {
+                _client = new HttpClient(host);
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri(baseAddress + "People"));
+                requestMessage.Headers.Accept.Add(_atomMediaType);
+                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                {
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
+                    XElement[] links = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom")).ToArray();
+                    Assert.Equal(1, links.Length);
+                    Assert.Equal("self", links.First().Attribute("rel").Value);
+                    Assert.Equal(baseAddress + "People", links.First().Attribute("href").Value);
                 }
             }
         }

@@ -6,6 +6,13 @@ namespace System.Web.Http.OData.Builder
 {
     public interface IEntitySetLinkBuilder
     {
+        /// <summary>
+        /// Builds the feed self link.
+        /// </summary>
+        /// <param name="context">The entity set instance context.</param>
+        /// <returns>A URI </returns>
+        Uri BuildFeedSelfLink(FeedContext context);
+
         string BuildIdLink(EntityInstanceContext context);
 
         Uri BuildEditLink(EntityInstanceContext context);

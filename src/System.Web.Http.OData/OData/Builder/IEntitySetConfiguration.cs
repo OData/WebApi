@@ -32,6 +32,9 @@ namespace System.Web.Http.OData.Builder
         string GetUrl();
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
+        Func<FeedContext, Uri> GetFeedSelfLink();
+
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
         Func<EntityInstanceContext, Uri> GetReadLink();
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
@@ -41,6 +44,13 @@ namespace System.Web.Http.OData.Builder
         Func<EntityInstanceContext, string> GetIdLink();
 
         Func<EntityInstanceContext, IEdmNavigationProperty, Uri> GetNavigationPropertyLink(string navigationPropertyName);
+
+        /// <summary>
+        /// Adds a self link to the feed.
+        /// </summary>
+        /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
+        /// <returns>The entity set configuration currently being configured.</returns>
+        IEntitySetConfiguration HasFeedSelfLink(Func<FeedContext, Uri> feedSelfLinkFactory);
 
         IEntitySetConfiguration HasEditLink(Func<EntityInstanceContext, Uri> editLinkFactory);
 

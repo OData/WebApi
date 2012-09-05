@@ -139,6 +139,34 @@ namespace System.Web.Http.OData.Builder
             return _configuration.AddBinding(EntityType.HasOptional(navigationExpression), targetSet._configuration);
         }
 
+        /// <summary>
+        /// Adds a self link to the feed.
+        /// </summary>
+        /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
+        public void HasFeedSelfLink(Func<FeedContext, string> feedSelfLinkFactory)
+        {
+            if (feedSelfLinkFactory == null)
+            {
+                throw Error.ArgumentNull("feedSelfLinkFactory");
+            }
+
+            _configuration.HasFeedSelfLink(feedContext => new Uri(feedSelfLinkFactory(feedContext)));
+        }
+
+        /// <summary>
+        /// Adds a self link to the feed.
+        /// </summary>
+        /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
+        public void HasFeedSelfLink(Func<FeedContext, Uri> feedSelfLinkFactory)
+        {
+            if (feedSelfLinkFactory == null)
+            {
+                throw Error.ArgumentNull("feedSelfLinkFactory");
+            }
+
+            _configuration.HasFeedSelfLink(feedSelfLinkFactory);
+        }
+        
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         public void HasEditLink(Func<EntityInstanceContext<TEntityType>, string> editLinkFactory)
         {

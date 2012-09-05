@@ -9,16 +9,17 @@ namespace System.Web.Http.OData.Builder
 {
     public class EntitySetConfiguration : IEntitySetConfiguration
     {
-        private readonly ODataModelBuilder _modelBuilder = null;
+        private readonly ODataModelBuilder _modelBuilder;
 
         private readonly Dictionary<NavigationPropertyConfiguration, NavigationPropertyBinding> _entitySetBindings =
             new Dictionary<NavigationPropertyConfiguration, NavigationPropertyBinding>();
 
-        private string _url = null;
-        private Func<EntityInstanceContext, Uri> _editLinkFactory = null;
-        private Func<EntityInstanceContext, Uri> _readLinkFactory = null;
-        private Func<EntityInstanceContext, string> _idLinkFactory = null;
-        private readonly IDictionary<string, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilders = null;
+        private string _url;
+        private Func<FeedContext, Uri> _feedSelfLinkFactory;
+        private Func<EntityInstanceContext, Uri> _editLinkFactory;
+        private Func<EntityInstanceContext, Uri> _readLinkFactory;
+        private Func<EntityInstanceContext, string> _idLinkFactory;
+        private readonly IDictionary<string, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilders;
 
         internal EntitySetConfiguration(ODataModelBuilder modelBuilder, Type entityType, string name)
             : this(modelBuilder, new EntityTypeConfiguration(modelBuilder, entityType), name)
@@ -52,6 +53,17 @@ namespace System.Web.Http.OData.Builder
         public IEntitySetConfiguration HasUrl(string url)
         {
             _url = url;
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a self link to the feed.
+        /// </summary>
+        /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
+        /// <returns>The entity set configuration currently being configured.</returns>
+        public IEntitySetConfiguration HasFeedSelfLink(Func<FeedContext, Uri> feedSelfLinkFactory)
+        {
+            _feedSelfLinkFactory = feedSelfLinkFactory;
             return this;
         }
 
@@ -177,6 +189,11 @@ namespace System.Web.Http.OData.Builder
         public string GetUrl()
         {
             return _url;
+        }
+
+        public Func<FeedContext, Uri> GetFeedSelfLink()
+        {
+            return _feedSelfLinkFactory;
         }
 
         public Func<EntityInstanceContext, Uri> GetEditLink()

@@ -78,6 +78,7 @@ namespace System.Web.Http.OData.Formatter
                 ODataModelBuilder model = new ODataModelBuilder();
 
                 var people = model.EntitySet<FormatterPerson>("People");
+                people.HasFeedSelfLink(context => new Uri(context.UrlHelper.Link(ODataRouteNames.Default, new { })));
                 people.HasIdLink(context => context.UrlHelper.Link(ODataRouteNames.GetById, new { Id = (context.EntityInstance as FormatterPerson).PerId }));
                 people.HasEditLink(context => new Uri(context.UrlHelper.Link(ODataRouteNames.GetById, new { Id = (context.EntityInstance as FormatterPerson).PerId })));
                 people.HasReadLink(context => new Uri(context.UrlHelper.Link(ODataRouteNames.GetById, new { Id = (context.EntityInstance as FormatterPerson).PerId })));

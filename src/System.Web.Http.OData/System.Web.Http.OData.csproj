@@ -160,6 +160,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataNavigationLinkAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializer.cs" />
+    <Compile Include="OData\FeedContext.cs" />
     <Compile Include="OData\Formatter\EdmTypeReferenceEqualityComparer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />

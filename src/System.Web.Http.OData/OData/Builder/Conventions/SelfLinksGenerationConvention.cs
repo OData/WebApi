@@ -6,7 +6,15 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     public class SelfLinksGenerationConvention : IEntitySetConvention
     {
-        public string SelfRouteName { get; set; }
+        /// <summary>
+        /// Gets or sets the route name used for addressing root level entity sets.
+        /// </summary>
+        public string DefaultRouteName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the route name used for addressing entities by their keys.
+        /// </summary>
+        public string GetByIdRouteName { get; set; }
 
         public void Apply(IEntitySetConfiguration configuration, ODataModelBuilder model)
         {
@@ -15,24 +23,44 @@ namespace System.Web.Http.OData.Builder.Conventions
                 throw Error.ArgumentNull("configuration");
             }
 
+            // Configure the self link for the feed
+            if (configuration.GetFeedSelfLink() == null)
+            {
+                configuration.HasFeedSelfLink(entitySetContext =>
+                {
+                    string routeName = DefaultRouteName ?? ODataRouteNames.Default;
+                    string selfLink = entitySetContext.UrlHelper.Link(
+                        routeName,
+                        new
+                        {
+                            controller = configuration.Name
+                        });
+                    if (selfLink == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.DefaultRouteMissingOrIncorrect, routeName);
+                    }
+                    return new Uri(selfLink);
+                });
+            }
+
             // We only need to configure the EditLink by convention, ReadLink and IdLink both delegate to EditLink
             if (configuration.GetEditLink() == null)
             {
                 configuration.HasEditLink(entityContext => 
                     {
-                        string routeName = SelfRouteName ?? ODataRouteNames.GetById;
-                        string editlink = entityContext.UrlHelper.Link(
+                        string routeName = GetByIdRouteName ?? ODataRouteNames.GetById;
+                        string editLink = entityContext.UrlHelper.Link(
                             routeName,
                             new
                             {
                                 controller = configuration.Name,
                                 id = ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)
                             });
-                        if (editlink == null)
+                        if (editLink == null)
                         {
                             throw Error.InvalidOperation(SRResources.GetByIdRouteMissingOrIncorrect, routeName);
                         }
-                        return new Uri(editlink);
+                        return new Uri(editLink);
                     });
             }
         }

@@ -1,9 +1,21 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+
 namespace System.Web.Http.OData.Formatter
 {
     public class PeopleController : ApiController
     {
+        public FormatterPerson[] GetPeople()
+        {
+            return new FormatterPerson[]
+            {
+                new FormatterPerson { MyGuid = new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), PerId = 0, Age = 10, Name = "Asha", Order = new FormatterOrder() { OrderName = "FirstOrder", OrderAmount = 235342 }},
+                new FormatterPerson { MyGuid = new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902e"), PerId = 1, Age = 11, Name = "Bsha", Order = new FormatterOrder() { OrderName = "SecondOrder", OrderAmount = 123 }},
+                new FormatterPerson { MyGuid = new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902f"), PerId = 2, Age = 12, Name = "Csha", Order = new FormatterOrder() { OrderName = "ThirdOrder", OrderAmount = 456 }}
+            };
+        }
+
         public FormatterPerson GetPerson(int id)
         {
             FormatterPerson obj = new FormatterPerson() { MyGuid = new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), PerId = id, Age = 10, Name = "Asha", Order = new FormatterOrder() { OrderName = "FirstOrder", OrderAmount = 235342 } };

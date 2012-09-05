@@ -8,10 +8,11 @@ namespace System.Web.Http.OData.Builder
 {
     internal class EntitySetLinkBuilderAnnotation : IEntitySetLinkBuilder
     {
-        private readonly Func<EntityInstanceContext, string> _idLinkBuilderFunc;
-        private readonly Func<EntityInstanceContext, Uri> _editLinkBuilderFunc;
-        private readonly Func<EntityInstanceContext, Uri> _readLinkBuilderFunc;
-        private readonly IDictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilderFuncLookup;
+        private readonly Func<FeedContext, Uri> _feedSelfLinkBuilder;
+        private readonly Func<EntityInstanceContext, string> _idLinkBuilder;
+        private readonly Func<EntityInstanceContext, Uri> _editLinkBuilder;
+        private readonly Func<EntityInstanceContext, Uri> _readLinkBuilder;
+        private readonly IDictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilderLookup;
         private readonly IEntitySetConfiguration _entitySet;
 
         /// <summary>
@@ -30,19 +31,31 @@ namespace System.Web.Http.OData.Builder
 
             _entitySet = entitySet;
 
-            Func<EntityInstanceContext, string> idLinkBuilderFunc = entitySet.GetIdLink();
-            Func<EntityInstanceContext, Uri> editLinkBuilderFunc = entitySet.GetEditLink();
-            Func<EntityInstanceContext, Uri> readLinkBuilderFunc = entitySet.GetReadLink();
-
-            _idLinkBuilderFunc = idLinkBuilderFunc;
-            _editLinkBuilderFunc = editLinkBuilderFunc;
-            _readLinkBuilderFunc = readLinkBuilderFunc;
-            _navigationPropertyLinkBuilderFuncLookup = new Dictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>();
+            _feedSelfLinkBuilder = entitySet.GetFeedSelfLink();
+            _idLinkBuilder = entitySet.GetIdLink();
+            _editLinkBuilder = entitySet.GetEditLink();
+            _readLinkBuilder = entitySet.GetReadLink();
+            _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>();
         }
 
         public void AddNavigationPropertyLinkBuilder(IEdmNavigationProperty navigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri> linkBuilder)
         {
-            _navigationPropertyLinkBuilderFuncLookup[navigationProperty] = linkBuilder;
+            _navigationPropertyLinkBuilderLookup[navigationProperty] = linkBuilder;
+        }
+
+        public virtual Uri BuildFeedSelfLink(FeedContext context)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (_feedSelfLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return _feedSelfLinkBuilder(context);
         }
 
         public virtual string BuildIdLink(EntityInstanceContext context)
@@ -52,12 +65,12 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("context");
             }
 
-            if (_idLinkBuilderFunc == null)
+            if (_idLinkBuilder == null)
             {
                 return BuildEditLink(context).ToString();
             }
 
-            return _idLinkBuilderFunc(context);
+            return _idLinkBuilder(context);
         }
 
         public virtual Uri BuildEditLink(EntityInstanceContext context)
@@ -67,12 +80,12 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("context");
             }
 
-            if (_editLinkBuilderFunc == null)
+            if (_editLinkBuilder == null)
             {
                 throw Error.InvalidOperation(SRResources.NoEditLinkFactoryFound, _entitySet.Name);
             }
 
-            return _editLinkBuilderFunc(context);
+            return _editLinkBuilder(context);
         }
 
         public virtual Uri BuildReadLink(EntityInstanceContext context)
@@ -82,12 +95,12 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("context");
             }
 
-            if (_readLinkBuilderFunc == null)
+            if (_readLinkBuilder == null)
             {
                 return BuildEditLink(context);
             }
 
-            return _readLinkBuilderFunc(context);
+            return _readLinkBuilder(context);
         }
 
         public virtual Uri BuildNavigationLink(EntityInstanceContext context, IEdmNavigationProperty navigationProperty)
@@ -103,12 +116,12 @@ namespace System.Web.Http.OData.Builder
             }
 
             Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkBuilderFunc;
-            if (!_navigationPropertyLinkBuilderFuncLookup.TryGetValue(navigationProperty, out navigationLinkBuilderFunc))
+            if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilderFunc))
             {
                 throw Error.InvalidOperation(SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, _entitySet.Name);
             }
 
-            return _navigationPropertyLinkBuilderFuncLookup[navigationProperty](context, navigationProperty);
+            return _navigationPropertyLinkBuilderLookup[navigationProperty](context, navigationProperty);
         }
     }
 }

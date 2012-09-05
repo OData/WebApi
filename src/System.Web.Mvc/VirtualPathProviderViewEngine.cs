@@ -77,7 +77,7 @@ namespace System.Web.Mvc
             set { _displayModeProvider = value; }
         }
 
-        private string CreateCacheKey(string prefix, string name, string controllerName, string areaName)
+        internal virtual string CreateCacheKey(string prefix, string name, string controllerName, string areaName)
         {
             return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat,
                                  GetType().AssemblyQualifiedName, prefix, name, controllerName, areaName);
@@ -178,7 +178,14 @@ namespace System.Web.Mvc
                 {
                     string cachedLocation = ViewLocationCache.GetViewLocation(controllerContext.HttpContext, AppendDisplayModeToCacheKey(cacheKey, displayMode.DisplayModeId));
 
-                    if (cachedLocation != null)
+                    if (cachedLocation == null)
+                    {
+                        // If any matching display mode location is not in the cache, fall back to the uncached behavior, which will repopulate all of our caches.
+                        return null;
+                    }
+
+                    // A non-empty cachedLocation indicates that we have a matching file on disk. Return that result.
+                    if (cachedLocation.Length > 0)
                     {
                         if (controllerContext.DisplayMode == null)
                         {
@@ -187,6 +194,7 @@ namespace System.Web.Mvc
 
                         return cachedLocation;
                     }
+                    // An empty cachedLocation value indicates that we don't have a matching file on disk. Keep going down the list of possible display modes.
                 }
 
                 // GetPath is called again without using the cache.
@@ -224,9 +232,8 @@ namespace System.Web.Mvc
                         controllerContext.DisplayMode = virtualPathDisplayInfo.DisplayMode;
                     }
 
-                    // Populate the cache with the existing paths returned by all display modes.
-                    // Since we currently don't keep track of cache misses, if we cache view.aspx on a request from a standard browser
-                    // we don't want a cache hit for view.aspx from a mobile browser so we populate the cache with view.Mobile.aspx.
+                    // Populate the cache for all other display modes. We want to cache both file system hits and misses so that we can distinguish
+                    // in future requests whether a file's status was evicted from the cache (null value) or if the file doesn't exist (empty string).
                     IEnumerable<IDisplayMode> allDisplayModes = DisplayModeProvider.Modes;
                     foreach (IDisplayMode displayMode in allDisplayModes)
                     {
@@ -234,10 +241,12 @@ namespace System.Web.Mvc
                         {
                             DisplayInfo displayInfoToCache = displayMode.GetDisplayInfo(controllerContext.HttpContext, virtualPath, virtualPathExists: path => FileExists(controllerContext, path));
 
+                            string cacheValue = String.Empty;
                             if (displayInfoToCache != null && displayInfoToCache.FilePath != null)
                             {
-                                ViewLocationCache.InsertViewLocation(controllerContext.HttpContext, AppendDisplayModeToCacheKey(cacheKey, displayInfoToCache.DisplayMode.DisplayModeId), displayInfoToCache.FilePath);
+                                cacheValue = displayInfoToCache.FilePath;
                             }
+                            ViewLocationCache.InsertViewLocation(controllerContext.HttpContext, AppendDisplayModeToCacheKey(cacheKey, displayMode.DisplayModeId), cacheValue);
                         }
                     }
                     break;

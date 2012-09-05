@@ -20,8 +20,23 @@ namespace System.Web.Mvc.Test
 
         public void Dispose()
         {
-            _engine.MockPathProvider.Verify();
+            // If any mock failures get reported in this method they might mask other failures that occurred in the main test body.
+            // If you are seeing any test failures, try commenting out these lines first to aid in debugging.
             _engine.MockCache.Verify();
+            _engine.MockPathProvider.Verify();
+        }
+
+        [Fact]
+        public void CreateCacheKey_IncludesAssemblyName()
+        {
+            // Arrange
+            var engine = new DerivedVirtualPathProviderViewEngine();
+
+            // Act
+            var key = engine.CreateCacheKey("prefix", "viewName", "controllerName", "areaName");
+
+            // Assert
+            Assert.Equal(":ViewCacheEntry:System.Web.Mvc.Test.VirtualPathProviderViewEngineTest+DerivedVirtualPathProviderViewEngine, System.Web.Mvc.Test, Version=0.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35:prefix:viewName:controllerName:areaName:", key);
         }
 
         [Fact]
@@ -93,9 +108,10 @@ namespace System.Web.Mvc.Test
             _engine.ClearMasterLocations(); // If master is not provided, master locations can be empty
 
             SetupFileExists("~/vpath/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View), "~/vpath/controllerName/viewName.view");
 
             SetupFileDoesNotExist("~/vpath/controllerName/viewName.Mobile.view");
+            SetupCacheMiss(CreateCacheKey(Cache.View, displayMode: "Mobile"));
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, "viewName", null, false);
@@ -117,7 +133,7 @@ namespace System.Web.Mvc.Test
             _engine.ClearMasterLocations();
 
             SetupFileExists(path);
-            SetupCacheHit(path);
+            SetupCacheHit(CreateCacheBaseKey(Cache.View, path, "", ""), path);
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, path, null, false);
@@ -140,7 +156,7 @@ namespace System.Web.Mvc.Test
             _engine.ClearMasterLocations();
 
             SetupFileExists(path);
-            SetupCacheHit(path);
+            SetupCacheHit(CreateCacheBaseKey(Cache.View, path, "", ""), path);
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, path, null, false);
@@ -160,9 +176,7 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileDoesNotExist(path);
-            _engine.MockCache
-                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), ""))
-                .Verifiable();
+            SetupCacheMiss(CreateCacheBaseKey(Cache.View, path, "", ""));
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, path, null, false);
@@ -178,9 +192,7 @@ namespace System.Web.Mvc.Test
         public void FindView_PathViewNotSupportedAndNoMaster_ReturnsSearchedLocationsResult(string path)
         {
             // Arrange
-            _engine.MockCache
-                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), ""))
-                .Verifiable();
+            SetupCacheMiss(CreateCacheBaseKey(Cache.View, path, "", ""));
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, path, null, false);
@@ -197,9 +209,9 @@ namespace System.Web.Mvc.Test
             // Arrange
             _engine.ClearMasterLocations();
             SetupFileExists("~/vpath/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/controllerName/viewName.view");
-
+            SetupCacheHit(CreateCacheKey(Cache.View), "~/vpath/controllerName/viewName.view");
             SetupFileDoesNotExist("~/vpath/controllerName/viewName.Mobile.view");
+            SetupCacheMiss(CreateCacheKey(Cache.View, displayMode: "Mobile"));
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
@@ -230,8 +242,11 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileExists("~/vpath/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View), "~/vpath/controllerName/viewName.view");
+
             SetupFileDoesNotExist("~/vpath/controllerName/viewName.Mobile.view");
+            SetupCacheMiss(CreateCacheKey(Cache.View, displayMode: "Mobile"));
+
             SetupFileDoesNotExist("~/vpath/controllerName/masterName.master");
 
             // Act
@@ -249,8 +264,11 @@ namespace System.Web.Mvc.Test
             // Arrange
             _context.RouteData.DataTokens["area"] = "areaName";
             SetupFileExists("~/vpath/areaName/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/areaName/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View, area: "areaName"), "~/vpath/areaName/controllerName/viewName.view");
+
             SetupFileDoesNotExist("~/vpath/areaName/controllerName/viewName.Mobile.view");
+            SetupCacheMiss(CreateCacheKey(Cache.View, area: "areaName", displayMode: "Mobile"));
+
             SetupFileDoesNotExist("~/vpath/areaName/controllerName/masterName.master");
             SetupFileDoesNotExist("~/vpath/controllerName/masterName.master");
 
@@ -269,14 +287,16 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileExists("~/vpath/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View), "~/vpath/controllerName/viewName.view");
 
             SetupFileDoesNotExist("~/vpath/controllerName/viewName.Mobile.view");
+            SetupCacheMiss(CreateCacheKey(Cache.View, displayMode: "Mobile"));
 
             SetupFileExists("~/vpath/controllerName/masterName.master");
-            SetupCacheHit("~/vpath/controllerName/masterName.master");
+            SetupCacheHit(CreateCacheKey(Cache.Master), "~/vpath/controllerName/masterName.master");
 
             SetupFileDoesNotExist("~/vpath/controllerName/masterName.Mobile.master");
+            SetupCacheMiss(CreateCacheKey(Cache.Master, displayMode: "Mobile"));
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, "viewName", "masterName", false);
@@ -295,16 +315,19 @@ namespace System.Web.Mvc.Test
             // Arrange
             _context.RouteData.DataTokens["area"] = "areaName";
             SetupFileExists("~/vpath/areaName/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/areaName/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View, area: "areaName"), "~/vpath/areaName/controllerName/viewName.view");
 
             SetupFileDoesNotExist("~/vpath/areaName/controllerName/viewName.Mobile.view");
-            
+            SetupCacheMiss(CreateCacheKey(Cache.View, area: "areaName", displayMode: "Mobile"));
+
             SetupFileDoesNotExist("~/vpath/areaName/controllerName/masterName.master");
 
             SetupFileExists("~/vpath/controllerName/masterName.master");
-            SetupCacheHit("~/vpath/controllerName/masterName.master");
-            
+            SetupCacheHit(CreateCacheKey(Cache.Master, area: "areaName"), "~/vpath/controllerName/masterName.master");
+
             SetupFileDoesNotExist("~/vpath/controllerName/masterName.Mobile.master");
+            SetupCacheMiss(CreateCacheKey(Cache.Master, area: "areaName", displayMode: "Mobile"));
+
 
             // Act
             ViewEngineResult result = _engine.FindView(_context, "viewName", "masterName", false);
@@ -323,19 +346,19 @@ namespace System.Web.Mvc.Test
             // Arrange
             _mobileContext.RouteData.DataTokens["area"] = "areaName";
             SetupFileExists("~/vpath/areaName/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/areaName/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View, area: "areaName"), "~/vpath/areaName/controllerName/viewName.view");
 
             SetupFileExists("~/vpath/areaName/controllerName/viewName.Mobile.view");
-            SetupCacheHit("~/vpath/areaName/controllerName/viewName.Mobile.view");
-            
+            SetupCacheHit(CreateCacheKey(Cache.View, area: "areaName", displayMode: "Mobile"), "~/vpath/areaName/controllerName/viewName.Mobile.view");
+
             SetupFileDoesNotExist("~/vpath/areaName/controllerName/masterName.master");
             SetupFileDoesNotExist("~/vpath/areaName/controllerName/masterName.Mobile.master");
-            
+
             SetupFileExists("~/vpath/controllerName/masterName.master");
-            SetupCacheHit("~/vpath/controllerName/masterName.master");
+            SetupCacheHit(CreateCacheKey(Cache.Master, area: "areaName"), "~/vpath/controllerName/masterName.master");
 
             SetupFileExists("~/vpath/controllerName/masterName.Mobile.master");
-            SetupCacheHit("~/vpath/controllerName/masterName.Mobile.master");
+            SetupCacheHit(CreateCacheKey(Cache.Master, area: "areaName", displayMode: "Mobile"), "~/vpath/controllerName/masterName.Mobile.master");
 
             // Act
             ViewEngineResult result = _engine.FindView(_mobileContext, "viewName", "masterName", false);
@@ -415,9 +438,10 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileExists("~/vpath/controllerName/partialName.partial");
-            SetupCacheHit("~/vpath/controllerName/partialName.partial");
+            SetupCacheHit(CreateCacheKey(Cache.Partial), "~/vpath/controllerName/partialName.partial");
 
             SetupFileDoesNotExist("~/vpath/controllerName/partialName.Mobile.partial");
+            SetupCacheMiss(CreateCacheKey(Cache.Partial, displayMode: "Mobile"));
 
             // Act
             ViewEngineResult result = _engine.FindPartialView(_context, "partialName", false);
@@ -436,7 +460,7 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileExists(path);
-            SetupCacheHit(path);
+            SetupCacheHit(CreateCacheBaseKey(Cache.Partial, path, "", ""), path);
 
             // Act
             ViewEngineResult result = _engine.FindPartialView(_context, path, false);
@@ -456,7 +480,7 @@ namespace System.Web.Mvc.Test
             // Arrange
             _engine.FileExtensions = null; // Set FileExtensions to null to simulate View Engines that do not set this property
             SetupFileExists(path);
-            SetupCacheHit(path);
+            SetupCacheHit(CreateCacheBaseKey(Cache.Partial, path, "", ""), path);
 
             // Act
             ViewEngineResult result = _engine.FindPartialView(_context, path, false);
@@ -475,9 +499,7 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileDoesNotExist(path);
-            _engine.MockCache
-                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), ""))
-                .Verifiable();
+            SetupCacheMiss(CreateCacheBaseKey(Cache.Partial, path, "", ""));
 
             // Act
             ViewEngineResult result = _engine.FindPartialView(_context, path, false);
@@ -493,9 +515,7 @@ namespace System.Web.Mvc.Test
         public void FindPartialView_PathViewNotSupported_ReturnsSearchedLocationsResult(string path)
         {
             // Arrange
-            _engine.MockCache
-                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), ""))
-                .Verifiable();
+            SetupCacheMiss(CreateCacheBaseKey(Cache.Partial, path, "", ""));
 
             // Act
             ViewEngineResult result = _engine.FindPartialView(_context, path, false);
@@ -525,11 +545,13 @@ namespace System.Web.Mvc.Test
         {
             // Arrange
             SetupFileExists("~/vpath/controllerName/viewName.view");
-            SetupCacheHit("~/vpath/controllerName/viewName.view");
+            SetupCacheHit(CreateCacheKey(Cache.View), "~/vpath/controllerName/viewName.view");
 
             SetupFileDoesNotExist("~/vpath/controllerName/viewName.Mobile.view");
+            SetupCacheMiss(CreateCacheKey(Cache.View, displayMode: "Mobile"));
 
             SetupFileDoesNotExist("~/vpath/controllerName/partialName.partial");
+            SetupCacheMiss(CreateCacheKey(Cache.Partial));
 
             SetupFileExists("~/vpath/controllerName/partialName.Mobile.partial");
             _engine.MockCache
@@ -574,10 +596,13 @@ namespace System.Web.Mvc.Test
             // Arrange
             SetupFileExists(VIEW_VIRTUAL);
             SetupFileDoesNotExist(MOBILE_VIEW_VIRTUAL);
+            SetupCacheMiss(CreateCacheKey(Cache.View, name: "name", displayMode: "Mobile"));
             SetupFileExists(MASTER_VIRTUAL);
             SetupFileDoesNotExist("~/vpath/controllerName/name.Mobile.master");
+            SetupCacheMiss(CreateCacheKey(Cache.Master, name: "name", displayMode: "Mobile"));
             SetupFileExists(PARTIAL_VIRTUAL);
             SetupFileDoesNotExist("~/vpath/controllerName/name.Mobile.partial");
+            SetupCacheMiss(CreateCacheKey(Cache.Partial, name: "name", displayMode: "Mobile"));
             _engine.MockCache
                 .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), VIEW_VIRTUAL))
                 .Callback<HttpContextBase, string, string>((httpContext, key, path) => keyView = key)
@@ -642,6 +667,7 @@ namespace System.Web.Mvc.Test
 
             SetupFileExists(VIEW_VIRTUAL); // It wasn't found, so they call vpp.FileExists
             SetupFileDoesNotExist(MOBILE_VIEW_VIRTUAL);
+            SetupCacheMiss(CreateCacheKey(Cache.View, name: "name", displayMode: "Mobile"));
             _engine.MockCache // Then they set the value into the cache
                 .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), VIEW_VIRTUAL))
                 .Callback<HttpContextBase, string, string>((httpContext, key, virtualPath) =>
@@ -731,21 +757,20 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void NoValueInCacheButFileExistsReturnsNullIfUsingCache()
+        public void NoValueInCacheButFileExists_ReturnsNullIfUsingCache()
         {
             // Arrange
+            string mobileKey = CreateCacheKey(Cache.View, name: "name", displayMode: "Mobile");
             _engine.MockCache
-                .Setup(c => c.GetViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>()))
+                .Setup(c => c.GetViewLocation(It.IsAny<HttpContextBase>(), mobileKey))
                 .Returns((string)null)
                 .Verifiable();
-            _engine.MockCache
-                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), It.IsAny<string>()));
 
             // Act
-            IView viewNotInCacheResult = _engine.FindView(_mobileContext, "name", masterName: null, useCache: true).View;
+            IView viewNotInCache = _engine.FindView(_mobileContext, "name", masterName: null, useCache: true).View;
 
             // Assert
-            Assert.Null(viewNotInCacheResult);
+            Assert.Null(viewNotInCache);
 
             // On a cache miss we should never check the file system. FindView will be called on a second pass
             // without using the cache.
@@ -753,12 +778,37 @@ namespace System.Web.Mvc.Test
             _engine.MockPathProvider.Verify(vpp => vpp.FileExists(VIEW_VIRTUAL), Times.Never());
 
             SetupFileExists(MOBILE_VIEW_VIRTUAL);
+            SetupCacheHit(CreateCacheKey(Cache.View, name: "name", displayMode: "Mobile"), MOBILE_VIEW_VIRTUAL);
             SetupFileExists(VIEW_VIRTUAL);
+            SetupCacheHit(CreateCacheKey(Cache.View, name: "name"), VIEW_VIRTUAL);
 
             // Act & Assert
-
+            ViewEngineResult result = _engine.FindView(_mobileContext, "name", masterName: null, useCache: false);
             //At this point the view on disk should be found and cached.
-            Assert.NotNull(_engine.FindView(_mobileContext, "name", masterName: null, useCache: false).View);
+            var view = Assert.IsType<TestView>(result.View);
+            Assert.Equal(MOBILE_VIEW_VIRTUAL, view.Path);
+        }
+
+        [Fact]
+        public void NoValueInCacheAndFileDoesNotExist_ReturnsNullIfUsingCache()
+        {
+            // Arrange
+            string mobileKey = CreateCacheKey(Cache.View, name: "name", displayMode: "Mobile");
+            _engine.MockCache
+                .Setup(c => c.GetViewLocation(It.IsAny<HttpContextBase>(), mobileKey))
+                .Returns("")
+                .Verifiable();
+            string desktopKey = CreateCacheKey(Cache.View, name: "name");
+            _engine.MockCache
+                .Setup(c => c.GetViewLocation(It.IsAny<HttpContextBase>(), desktopKey))
+                .Returns("")
+                .Verifiable();
+
+            // Act
+            IView viewNotInCache = _engine.FindView(_mobileContext, "name", masterName: null, useCache: true).View;
+
+            // Assert
+            Assert.Null(viewNotInCache);
         }
 
         [Fact]
@@ -772,6 +822,22 @@ namespace System.Web.Mvc.Test
 
             // Assert
             Assert.True(((TestView)view).Disposed);
+        }
+
+        private static string CreateCacheBaseKey(string prefix, string name, string controllerName, string area)
+        {
+            var r = String.Join(":", prefix, name, controllerName, area) + ":";
+            return r;
+        }
+
+        private static string CreateCacheKey(Cache prefix, string name = null, string controller = "controllerName", string area = "", string displayMode = "")
+        {
+            if (name == null)
+            {
+                name = prefix.ToString().ToLowerInvariant() + "Name";
+            }
+            var r = CreateCacheBaseKey(prefix, name, controller, area) + displayMode + ":";
+            return r;
         }
 
         private static ControllerContext CreateContext(bool isMobileDevice = false)
@@ -801,16 +867,45 @@ namespace System.Web.Mvc.Test
             SetupFileExistsHelper(path, exists: false);
         }
 
-        private void SetupCacheHit(string path)
+        private void SetupCacheHit(string key, string path)
         {
             _engine.MockCache
-                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), It.IsAny<string>(), path))
+                .Setup(c => c.InsertViewLocation(It.IsAny<HttpContextBase>(), key, path))
                 .Verifiable();
+        }
+
+        private void SetupCacheMiss(string key)
+        {
+            SetupCacheHit(key, "");
         }
 
         private void SetupFileExistsHelper(string path, bool exists)
         {
             _engine.MockPathProvider.Setup(vpp => vpp.FileExists(path)).Returns(exists).Verifiable();
+        }
+
+        private class Cache
+        {
+            private string _value;
+
+            private Cache(string value)
+            {
+                _value = value;
+            }
+
+            public static Cache View = new Cache("View");
+            public static Cache Partial = new Cache("Partial");
+            public static Cache Master = new Cache("Master");
+
+            public override string ToString()
+            {
+                return _value;
+            }
+
+            public static implicit operator string(Cache c)
+            {
+                return c.ToString();
+            }
         }
 
         private class TestView : IView, IDisposable
@@ -880,10 +975,28 @@ namespace System.Web.Mvc.Test
                 return new TestView() { ControllerContext = controllerContext, Path = viewPath, MasterPath = masterPath };
             }
 
+            internal override string CreateCacheKey(string prefix, string name, string controllerName, string areaName)
+            {
+                return VirtualPathProviderViewEngineTest.CreateCacheBaseKey(prefix, name, controllerName, areaName);
+            }
+
             private static string GetExtension(string virtualPath)
             {
                 var extension = virtualPath.Substring(virtualPath.LastIndexOf('.'));
                 return extension;
+            }
+        }
+
+        public class DerivedVirtualPathProviderViewEngine : VirtualPathProviderViewEngine
+        {
+            protected override IView CreatePartialView(ControllerContext controllerContext, string partialPath)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override IView CreateView(ControllerContext controllerContext, string viewPath, string masterPath)
+            {
+                throw new NotImplementedException();
             }
         }
     }

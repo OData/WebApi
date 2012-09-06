@@ -2,15 +2,11 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Properties;
-using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -124,7 +120,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (propertyKind == EdmTypeKind.Primitive)
             {
-                value = ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName, isDelta), propertyName, resource.GetType().FullName);
+                value = EdmPrimitiveHelpers.ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName, isDelta));
             }
 
             SetProperty(resource, propertyName, isDelta, value);
@@ -188,82 +184,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 PropertyInfo property = resource.GetType().GetProperty(propertyName);
                 return property == null ? null : property.PropertyType;
-            }
-        }
-
-        internal static object ConvertPrimitiveValue(object value, Type type, string propertyName, string typeName)
-        {
-            Contract.Assert(value != null);
-            Contract.Assert(type != null);
-
-            // if value is of the same type nothing to do here.
-            if (value.GetType() == type || value.GetType() == Nullable.GetUnderlyingType(type))
-            {
-                return value;
-            }
-
-            string str = value as string;
-
-            if (type == typeof(char))
-            {
-                if (str == null || str.Length != 1)
-                {
-                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeStringLengthOne, propertyName, typeName));
-                }
-
-                return str[0];
-            }
-            else if (type == typeof(char?))
-            {
-                if (str == null || str.Length > 1)
-                {
-                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeStringMaxLengthOne, propertyName, typeName));
-                }
-
-                return str.Length > 0 ? str[0] : (char?)null;
-            }
-            else if (type == typeof(char[]))
-            {
-                if (str == null)
-                {
-                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeString, propertyName, typeName));
-                }
-
-                return str.ToCharArray();
-            }
-            else if (type == typeof(Binary))
-            {
-                return new Binary((byte[])value);
-            }
-            else if (type == typeof(XElement))
-            {
-                if (str == null)
-                {
-                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeString, propertyName, typeName));
-                }
-
-                return XElement.Parse(str);
-            }
-            else
-            {
-                type = Nullable.GetUnderlyingType(type) ?? type;
-                if (type.IsEnum)
-                {
-                    if (str == null)
-                    {
-                        throw new ValidationException(Error.Format(SRResources.PropertyMustBeString, propertyName, typeName));
-                    }
-
-                    return Enum.Parse(type, str);
-                }
-                else
-                {
-                    Contract.Assert(type == typeof(uint) || type == typeof(ushort) || type == typeof(ulong));
-
-                    // Note that we are not casting the return value to nullable<T> as even if we do it
-                    // CLR would unbox it back to T.
-                    return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
-                }
             }
         }
 

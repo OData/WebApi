@@ -538,6 +538,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The binding context cannot have a null ModelMetadata..
+        /// </summary>
+        internal static string ModelBinderUtil_ModelMetadataCannotBeNull {
+            get {
+                return ResourceManager.GetString("ModelBinderUtil_ModelMetadataCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to More than one Procedure called &apos;{0}&apos; was found. Try using the other RemoveProcedure override..
         /// </summary>
         internal static string MoreThanOneProcedureFound {
@@ -763,7 +772,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a string..
+        ///   Looks up a localized string similar to The value must be a string..
         /// </summary>
         internal static string PropertyMustBeString {
             get {
@@ -772,7 +781,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a string with a length of 1..
+        ///   Looks up a localized string similar to The value must be a string with a length of 1..
         /// </summary>
         internal static string PropertyMustBeStringLengthOne {
             get {
@@ -781,7 +790,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a string with a maximum length of 1..
+        ///   Looks up a localized string similar to The value must be a string with a maximum length of 1..
         /// </summary>
         internal static string PropertyMustBeStringMaxLengthOne {
             get {
@@ -948,6 +957,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string UriQueryStringInvalid {
             get {
                 return ResourceManager.GetString("UriQueryStringInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value &apos;{0}&apos; is invalid. {1}.
+        /// </summary>
+        internal static string ValueIsInvalid {
+            get {
+                return ResourceManager.GetString("ValueIsInvalid", resourceCulture);
             }
         }
         

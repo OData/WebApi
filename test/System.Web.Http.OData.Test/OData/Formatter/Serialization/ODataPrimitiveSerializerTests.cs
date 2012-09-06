@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.IO;
 using System.Linq;
-using System.Web.Http.OData.Formatter.Deserialization;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -20,7 +19,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             get
             {
-                return ODataEntryDeserializerTests
+                return EdmPrimitiveHelpersTest
                     .ConvertPrimitiveValue_NonStandardPrimitives_Data
                     .Select(data => new[] { data[1], data[0] });
             }

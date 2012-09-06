@@ -111,6 +111,8 @@
     <Compile Include="OData\Formatter\ODataActionTests.cs" />
     <Compile Include="OData\Formatter\InheritanceTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializerTest.cs" />
+    <Compile Include="OData\Formatter\EdmPrimitiveHelpersTest.cs" />
+    <Compile Include="OData\Formatter\ODataModelBinderProviderTest.cs" />
     <Compile Include="OData\Formatter\PartialTrustTest.cs" />
     <Compile Include="OData\Builder\EdmTypeConfigurationExtensionsTest.cs" />
     <Compile Include="OData\Builder\TestModels\InheritanceModels.cs" />

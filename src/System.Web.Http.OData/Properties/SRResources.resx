@@ -169,7 +169,7 @@
     <value>The query parameter '{0}' is not supported.</value>
   </data>
   <data name="RequestMustContainConfiguration" xml:space="preserve">
-    <value>Request message does not contain a HttpConfiguration object.</value>
+    <value>Request message does not contain an HttpConfiguration object.</value>
   </data>
   <data name="ActionContextMustHaveDescriptor" xml:space="preserve">
     <value>The HttpActionContext.ActionDescriptor is null.</value>

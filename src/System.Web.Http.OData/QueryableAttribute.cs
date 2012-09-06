@@ -21,40 +21,45 @@ namespace System.Web.Http
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public class QueryableAttribute : ActionFilterAttribute
     {
-        private bool? _handleNullPropagation;
+        private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
 
         /// <summary>
         /// Enables a controller action to support OData query parameters.
         /// </summary>
         public QueryableAttribute()
         {
+            EnsureStableOrdering = true;
         }
 
         /// <summary>
-        /// Enables a controller action to support OData query parameters.
+        /// Gets or sets a value indicating whether query composition should
+        /// alter the original query when necessary to ensure a stable sort order.
         /// </summary>
-        /// <param name="handleNullPropagation">If this filter should handle null propagation</param>
-        public QueryableAttribute(bool handleNullPropagation)
-        {
-            _handleNullPropagation = handleNullPropagation;
-        }
+        /// <value>A <c>true</c> value indicates the original query should
+        /// be modified when necessary to guarantee a stable sort order.
+        /// A <c>false</c> value indicates the sort order can be considered
+        /// stable without modifying the query.  Query providers that ensure
+        /// a stable sort order should set this value to <c>false</c>.
+        /// The default value is <c>true</c>.</value>
+        public bool EnsureStableOrdering { get; set; }
 
         /// <summary>
-        /// Gets whether this filter should handle null propagation.
+        /// Gets or sets a value indicating how null propagation should
+        /// be handled during query composition. 
         /// </summary>
-        public bool HandleNullPropagation
+        /// <value>
+        /// The default is <see cref="HandleNullPropagationOption.Default"/>.
+        /// </value>
+        public HandleNullPropagationOption HandleNullPropagation
         {
             get
             {
-                return _handleNullPropagation.Value;
+                return _handleNullPropagationOption;
             }
-        }
-
-        public override void OnActionExecuting(HttpActionContext actionContext)
-        {
-            if (actionContext == null)
+            set
             {
-                throw Error.ArgumentNull("actionContext");
+                HandleNullPropagationOptionHelper.Validate(value, "value");
+                _handleNullPropagationOption = value;
             }
         }
 
@@ -159,14 +164,13 @@ namespace System.Web.Http
                             queryable = query.AsQueryable();
                         }
 
-                        if (_handleNullPropagation != null)
+                        ODataQuerySettings querySettings = new ODataQuerySettings
                         {
-                            queryable = queryOptions.ApplyTo(queryable, _handleNullPropagation.Value);
-                        }
-                        else
-                        {
-                            queryable = queryOptions.ApplyTo(queryable);
-                        }
+                            EnsureStableOrdering = EnsureStableOrdering,
+                            HandleNullPropagation = HandleNullPropagation
+                        };
+
+                        queryable = queryOptions.ApplyTo(queryable, querySettings);
 
                         Contract.Assert(queryable != null);
 

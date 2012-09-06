@@ -53,6 +53,71 @@ namespace System.Web.Http.OData
             get { return ODataQueryOptionTest.UnsupportedQueryNames; }
         }
 
+        [Fact]
+        public void Ctor_Initializes_Properties()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            // Act & Assert
+            Assert.Equal(HandleNullPropagationOption.Default, attribute.HandleNullPropagation);
+            Assert.True(attribute.EnsureStableOrdering);
+        }
+
+        [Fact]
+        public void EnsureStableOrdering_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty<QueryableAttribute>(
+                new QueryableAttribute(),
+                o => o.EnsureStableOrdering,
+                true);
+        }
+
+        [Fact]
+        public void HandleNullPropagation_Property_RoundTrips()
+        {
+            Assert.Reflection.EnumProperty<QueryableAttribute, HandleNullPropagationOption>(
+                new QueryableAttribute(),
+                o => o.HandleNullPropagation,
+                HandleNullPropagationOption.Default,
+                HandleNullPropagationOption.Default - 1,
+                HandleNullPropagationOption.True);
+        }
+
+        [Fact]
+        public void OnActionExecuted_Throws_Null_Context()
+        {
+            Assert.ThrowsArgumentNull(() => new QueryableAttribute().OnActionExecuted(null), "actionExecutedContext");
+        }
+
+        [Fact]
+        public void OnActionExecuted_Throws_Null_Request()
+        {
+            Assert.ThrowsArgument(
+                () => new QueryableAttribute().OnActionExecuted(new HttpActionExecutedContext()), 
+                "actionExecutedContext",
+                String.Format("The HttpExecutedActionContext.Request is null.{0}Parameter name: actionExecutedContext", Environment.NewLine));
+        }
+
+        [Fact]
+        public void OnActionExecuted_Throws_Null_Configuration()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
+            HttpConfiguration config = new HttpConfiguration();
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+
+            Assert.ThrowsArgument(
+                () => new QueryableAttribute().OnActionExecuted(context), 
+                "actionExecutedContext",
+                String.Format("Request message does not contain an HttpConfiguration object.{0}Parameter name: actionExecutedContext", Environment.NewLine));
+        }
+
         [Theory]
         [PropertyData("DifferentReturnTypeWorksTestData")]
         public void DifferentReturnTypeWorks(string methodName, object responseObject, bool isNoOp)

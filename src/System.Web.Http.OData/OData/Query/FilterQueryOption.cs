@@ -80,27 +80,50 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the filter query to the given IQueryable.
         /// </summary>
+        /// <remarks>
+        /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
+        /// how this method should handle null propagation.
+        /// </remarks>
         /// <param name="query">The IQueryable that we are applying filter query against.</param>
-        /// <param name="handleNullPropagation">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
+        /// <param name="querySettings">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
         /// <returns>The query that the filter query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, bool handleNullPropagation)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
-            return ApplyTo(query, handleNullPropagation, _defaultAssembliesResolver);
+            return ApplyTo(query, querySettings, _defaultAssembliesResolver);
         }
 
         /// <summary>
         /// Apply the filter query to the given IQueryable.
         /// </summary>
+        /// <remarks>
+        /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
+        /// how this method should handle null propagation.
+        /// </remarks>
         /// <param name="query">The IQueryable that we are applying filter query against.</param>
-        /// <param name="handleNullPropagation">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
+        /// <param name="querySettings">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
         /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
         /// <returns>The query that the filter query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, bool handleNullPropagation, IAssembliesResolver assembliesResolver)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)
         {
+            if (query == null)
+            {
+                throw Error.ArgumentNull("query");
+            }
+
+            if (querySettings == null)
+            {
+                throw Error.ArgumentNull("querySettings");
+            }
+
+            if (assembliesResolver == null)
+            {
+                throw Error.ArgumentNull("assembliesResolver");
+            }
+
             FilterQueryNode node = QueryNode;
             Contract.Assert(node != null);
 
-            Expression filter = FilterBinder.Bind(node, Context.EntityClrType, Context.Model, assembliesResolver, handleNullPropagation);
+            Expression filter = FilterBinder.Bind(node, Context.EntityClrType, Context.Model, assembliesResolver, querySettings);
             query = ExpressionHelpers.Where(query, filter, Context.EntityClrType);
             return query;
         }

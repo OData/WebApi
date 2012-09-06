@@ -56,26 +56,28 @@ namespace System.Web.Http.OData.Query.Expressions
         private Stack<Dictionary<string, ParameterExpression>> _parametersStack;
         private Dictionary<string, ParameterExpression> _lambdaParameters;
 
-        private bool _nullPropagation;
+        private ODataQuerySettings _querySettings;
         private IAssembliesResolver _assembliesResolver;
 
-        private FilterBinder(IEdmModel model, IAssembliesResolver assembliesResolver, bool handleNullPropagation)
+        private FilterBinder(IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             Contract.Assert(model != null);
             Contract.Assert(assembliesResolver != null);
+            Contract.Assert(querySettings != null);
+            Contract.Assert(querySettings.HandleNullPropagation != HandleNullPropagationOption.Default);
 
-            _nullPropagation = handleNullPropagation;
+            _querySettings = querySettings;
             _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
             _model = model;
             _assembliesResolver = assembliesResolver;
         }
 
-        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, bool handleNullPropagation)
+        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
-            return Bind(filterNode, typeof(TEntityType), model, assembliesResolver, handleNullPropagation) as Expression<Func<TEntityType, bool>>;
+            return Bind(filterNode, typeof(TEntityType), model, assembliesResolver, querySettings) as Expression<Func<TEntityType, bool>>;
         }
 
-        public static Expression Bind(FilterQueryNode filterNode, Type filterType, IEdmModel model, IAssembliesResolver assembliesResolver, bool handleNullPropagation)
+        public static Expression Bind(FilterQueryNode filterNode, Type filterType, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             if (filterNode == null)
             {
@@ -97,7 +99,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 throw Error.ArgumentNull("assembliesResolver");
             }
 
-            FilterBinder binder = new FilterBinder(model, assembliesResolver, handleNullPropagation);
+            FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings);
             Expression filter = binder.BindFilterQueryNode(filterNode);
 
             Type expectedFilterType = typeof(Func<,>).MakeGenericType(filterType, typeof(bool));
@@ -199,7 +201,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Expression right = Bind(binaryOperatorNode.Right);
 
             // handle null propagation only if either of the operands can be null
-            bool isNullPropagationRequired = _nullPropagation && (IsNullable(left.Type) || IsNullable(right.Type));
+            bool isNullPropagationRequired = _querySettings.HandleNullPropagation == HandleNullPropagationOption.True && (IsNullable(left.Type) || IsNullable(right.Type));
             if (isNullPropagationRequired)
             {
                 // |----------------------------------------------------------------|
@@ -301,7 +303,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             if (IsNullable(body.Type))
             {
-                if (_nullPropagation)
+                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {
                     // handle null as false
                     // body => body == true. passing liftToNull:false would convert null to false.
@@ -329,7 +331,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression CreatePropertyAccessExpression(Expression source, string propertyName)
         {
-            if (_nullPropagation && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
             {
                 Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), propertyName);
 
@@ -432,7 +434,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression CreateFunctionCallWithNullPropagation(Expression functionCall, Expression[] arguments)
         {
-            if (_nullPropagation)
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 Expression test = CheckIfArgumentsAreNull(arguments);
 
@@ -467,7 +469,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert(expression != null);
 
-            if (_nullPropagation)
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 // only null propagation generates conditional expressions
                 if (expression.NodeType == ExpressionType.Conditional)
@@ -498,7 +500,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert(member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method);
 
             IEnumerable<Expression> functionCallArguments = arguments;
-            if (_nullPropagation)
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 // we don't have to check if the argument is null inside the function call as we do it already
                 // before calling the function. So remove the redunadant null checks.
@@ -665,7 +667,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 // When null propagation is allowed, we use a safe version of String.Substring(int).
                 // But for providers that would not recognize custom expressions like this, we map 
                 // directly to String.Substring(int)
-                if (_nullPropagation)
+                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {
                     // Safe function is static and takes string "this" as first argument
                     functionCall = MakeFunctionCall(ClrCanonicalFunctions.SubstringStartNoThrow, arguments);
@@ -682,7 +684,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 // When null propagation is allowed, we use a safe version of String.Substring(int, int).
                 // But for providers that would not recognize custom expressions like this, we map 
                 // directly to String.Substring(int, int)
-                if (_nullPropagation)
+                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {
                     // Safe function is static and takes string "this" as first argument
                     functionCall = MakeFunctionCall(ClrCanonicalFunctions.SubstringStartAndLengthNoThrow, arguments);
@@ -763,7 +765,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Expression all = All(source, body);
 
-            if (_nullPropagation && IsNullable(source.Type))
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
                 // IFF(source == null) null; else Any(body);
                 all = ToNullable(all);
@@ -797,7 +799,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Expression any = Any(source, body);
 
-            if (_nullPropagation && IsNullable(source.Type))
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
                 // IFF(source == null) null; else Any(body);
                 any = ToNullable(any);

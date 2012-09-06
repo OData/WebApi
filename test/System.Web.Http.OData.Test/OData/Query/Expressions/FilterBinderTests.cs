@@ -1151,7 +1151,10 @@ namespace System.Web.Http.OData.Query.Expressions
 
             var semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
 
-            var filterExpr = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode, model, new DefaultAssembliesResolver(), handleNullPropagation: false);
+            var filterExpr = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode,
+                                                    model,
+                                                    new DefaultAssembliesResolver(),
+                                                    new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
 
             if (!String.IsNullOrEmpty(expectedResult))
             {
@@ -1160,7 +1163,10 @@ namespace System.Web.Http.OData.Query.Expressions
 
             expectedResultWithNullPropagation = expectedResultWithNullPropagation ?? expectedResult;
 
-            var filterExprWithNullPropagation = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode, model, new DefaultAssembliesResolver(), handleNullPropagation: true);
+            var filterExprWithNullPropagation = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode,
+                                                                     model,
+                                                                     new DefaultAssembliesResolver(),
+                                                                     new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
 
             if (!String.IsNullOrEmpty(expectedResultWithNullPropagation))
             {

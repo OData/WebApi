@@ -150,59 +150,31 @@ namespace System.Web.Http.OData.Query
         /// <returns>The query that the query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query)
         {
-            if (query == null)
-            {
-                throw Error.ArgumentNull("query");
-            }
-
-            bool handleNullPropagation;
-
-            string queryProviderAssemblyName = query.Provider.GetType().Assembly.GetName().Name;
-            switch (queryProviderAssemblyName)
-            {
-                case EntityFrameworkQueryProviderAssemblyName:
-                    handleNullPropagation = false;
-                    break;
-
-                case Linq2SqlQueryProviderAssemblyName:
-                    handleNullPropagation = false;
-                    break;
-
-                case Linq2ObjectsQueryProviderAssemblyName:
-                    handleNullPropagation = true;
-                    break;
-
-                default:
-                    handleNullPropagation = true;
-                    break;
-            }
-
-            return ApplyTo(query, handleNullPropagation);
+            return ApplyTo(query, new ODataQuerySettings());
         }
 
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The IQueryable that we are applying query against.</param>
-        /// <param name="handleNullPropagation">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
+        /// <param name="querySettings">The settings to use in query composition.</param>
         /// <returns>The query that the query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, bool handleNullPropagation)
-        {
-            return ApplyTo(query, handleNullPropagation, canUseDefaultOrderBy: true);
-        }
-
-        /// <summary>
-        /// Apply the individual query to the given IQueryable in the right order.
-        /// </summary>
-        /// <param name="query">The IQueryable that we are applying query against.</param>
-        /// <param name="handleNullPropagation">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
-        /// <param name="canUseDefaultOrderBy">If a default ordering can be used if the query doesn't specify one and has a $skip or $top.</param>
-        /// <returns>The query that the query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, bool handleNullPropagation, bool canUseDefaultOrderBy)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
             if (query == null)
             {
                 throw Error.ArgumentNull("query");
+            }
+
+            if (querySettings == null)
+            {
+                throw Error.ArgumentNull("querySettings");
+            }
+
+            // Ensure we have decided how to handle null propagation
+            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
+            {
+                querySettings.HandleNullPropagation = GetDefaultHandleNullPropagationOption(query);
             }
 
             IQueryable result = query;
@@ -210,7 +182,7 @@ namespace System.Web.Http.OData.Query
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
             if (Filter != null)
             {
-                result = Filter.ApplyTo(result, handleNullPropagation, _assembliesResolver);
+                result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
             OrderByQueryOption orderBy = OrderBy;
@@ -218,7 +190,7 @@ namespace System.Web.Http.OData.Query
             // $skip or $top require a stable sort for predictable results.
             // If either is present in the query and we have permission,
             // generate an $orderby that will produce a stable sort.
-            if ((Skip != null || Top != null) && canUseDefaultOrderBy && !Context.IsPrimitiveClrType)
+            if ((Skip != null || Top != null) && querySettings.EnsureStableOrdering && !Context.IsPrimitiveClrType)
             {
                 // If there is no OrderBy present, we manufacture a default.
                 // If an OrderBy is already present, we add any missing
@@ -246,6 +218,35 @@ namespace System.Web.Http.OData.Query
             }
 
             return result;
+        }
+
+        private static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)
+        {
+            Contract.Assert(query != null);
+
+            HandleNullPropagationOption options;
+
+            string queryProviderAssemblyName = query.Provider.GetType().Assembly.GetName().Name;
+            switch (queryProviderAssemblyName)
+            {
+                case EntityFrameworkQueryProviderAssemblyName:
+                    options = HandleNullPropagationOption.False;
+                    break;
+
+                case Linq2SqlQueryProviderAssemblyName:
+                    options = HandleNullPropagationOption.False;
+                    break;
+
+                case Linq2ObjectsQueryProviderAssemblyName:
+                    options = HandleNullPropagationOption.True;
+                    break;
+
+                default:
+                    options = HandleNullPropagationOption.True;
+                    break;
+            }
+
+            return options;
         }
 
         private static void ThrowIfEmpty(string queryValue, string queryName)

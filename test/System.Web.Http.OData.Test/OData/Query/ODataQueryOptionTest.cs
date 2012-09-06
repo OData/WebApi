@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Query
 
         // Used to test modifications to $orderby when $skip or $top are present
         // and the entity type has 2 keys -- CustomerId and Name.
-        // Tuple is: query expression, canUseDefaultOrderBy, expected expression
+        // Tuple is: query expression, ensureStableOrdering, expected expression
         public static TheoryDataSet<string, bool, string> SkipTopOrderByUsingKeysTestData
         {
             get
@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Query
                     // First key present, no $skip or $top, no modification
                     { "$orderby=CustomerId", false, "OrderBy(p1 => p1.CustomerId)" },
 
-                    // First key present, 'canUseDefaultOrderBy' is false, no modification
+                    // First key present, 'ensureStableOrdering' is false, no modification
                     { "$orderby=CustomerId&$skip=1", false, "OrderBy(p1 => p1.CustomerId).Skip(1)" },
 
                     // Second key present, adds 1st key after 2nd
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData.Query
 
         // Used to test modifications to $orderby when $skip or $top are present
         // and the entity type has a no key properties.
-        // Tuple is: query expression, canUseDefaultOrderBy, expected expression
+        // Tuple is: query expression, ensureStableOrdering, expected expression
         public static TheoryDataSet<string, bool, string> SkipTopOrderByWithNoKeysTestData
         {
             get
@@ -133,7 +133,7 @@ namespace System.Web.Http.OData.Query
                     // Single property present, no $skip or $top, no modification
                     { "$orderby=SharePrice", false,  "OrderBy(p1 => p1.SharePrice)" },
 
-                    // Single property present, canUseDefaultOrderBy is false, no modification
+                    // Single property present, ensureStableOrdering is false, no modification
                     { "$orderby=SharePrice&$skip=1", false,  "OrderBy(p1 => p1.SharePrice).Skip(1)" },
 
                     // All properties present, non-alphabetic order, no modification
@@ -224,7 +224,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void ApplyTo_HandleNullPropagation_Throws_With_Null_Queryable()
+        public void ApplyTo_With_QuerySettings_Throws_With_Null_Queryable()
         {
             // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
@@ -237,11 +237,11 @@ namespace System.Web.Http.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, handleNullPropagation: true), "query");
+            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, new ODataQuerySettings()), "query");
         }
 
         [Fact]
-        public void ApplyTo_HandleNullPropagation_CanUseDefaultOrderBy_Throws_With_Null_Queryable()
+        public void ApplyTo_Throws_With_Null_QuerySettings()
         {
             // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
@@ -254,12 +254,12 @@ namespace System.Web.Http.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, handleNullPropagation: true, canUseDefaultOrderBy: true), "query");
+            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
         }
 
         [Theory]
         [PropertyData("SkipTopOrderByUsingKeysTestData")]
-        public void ApplyTo_Adds_Missing_Keys_To_OrderBy(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        public void ApplyTo_Adds_Missing_Keys_To_OrderBy(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             // Arrange
             var model = new ODataModelBuilder()
@@ -271,9 +271,13 @@ namespace System.Web.Http.OData.Query
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            ODataQuerySettings querySettings = new ODataQuerySettings 
+            { 
+                EnsureStableOrdering = ensureStableOrdering,
+            };
 
             // Act
-            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             // Assert
             string queryExpression = finalQuery.Expression.ToString();
@@ -284,7 +288,7 @@ namespace System.Web.Http.OData.Query
 
         [Theory]
         [PropertyData("SkipTopOrderByWithNoKeysTestData")]
-        public void ApplyTo_Adds_Missing_NonKey_Properties_To_OrderBy(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        public void ApplyTo_Adds_Missing_NonKey_Properties_To_OrderBy(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             // Arrange
             var model = new ODataModelBuilder()
@@ -296,9 +300,13 @@ namespace System.Web.Http.OData.Query
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            ODataQuerySettings querySettings = new ODataQuerySettings 
+            {
+                EnsureStableOrdering = ensureStableOrdering,
+            };
 
             // Act
-            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             // Assert
             string queryExpression = finalQuery.Expression.ToString();
@@ -322,8 +330,9 @@ namespace System.Web.Http.OData.Query
             // Act
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
             OrderByQueryOption originalOption = queryOptions.OrderBy;
+            ODataQuerySettings querySettings = new ODataQuerySettings();
 
-            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: true);
+            IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             // Assert
             Assert.ReferenceEquals(originalOption, queryOptions.OrderBy);
@@ -569,7 +578,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("$skip=1", false, "Skip(1)")]
         [InlineData("$filter=1 eq 1", true, "Where($it => (1 == 1))")]
         [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
-        public void ApplyTo_Builds_Default_OrderBy_With_Keys(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        public void ApplyTo_Builds_Default_OrderBy_With_Keys(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
@@ -579,7 +588,12 @@ namespace System.Web.Http.OData.Query
             );
 
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
-            IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+            ODataQuerySettings querySettings = new ODataQuerySettings 
+            { 
+                EnsureStableOrdering = ensureStableOrdering
+            };
+
+            IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             string queryExpression = finalQuery.Expression.ToString();
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
@@ -592,7 +606,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("$skip=1", false, "Skip(1)")]
         [InlineData("$filter=1 eq 1", true, "Where($it => (1 == 1))")]
         [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
-        public void ApplyTo_Builds_Default_OrderBy_No_Keys(string oDataQuery, bool canUseDefaultOrderBy, string expectedExpression)
+        public void ApplyTo_Builds_Default_OrderBy_No_Keys(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             var model = new ODataModelBuilder().Add_Customer_No_Keys_EntityType().Add_Customers_No_Keys_EntitySet().GetEdmModel();
 
@@ -602,7 +616,11 @@ namespace System.Web.Http.OData.Query
             );
 
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
-            IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: canUseDefaultOrderBy);
+            ODataQuerySettings querySettings = new ODataQuerySettings 
+            { 
+                EnsureStableOrdering = ensureStableOrdering 
+            };
+            IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             string queryExpression = finalQuery.Expression.ToString();
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);

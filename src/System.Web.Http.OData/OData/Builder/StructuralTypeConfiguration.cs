@@ -171,7 +171,10 @@ namespace System.Web.Http.OData.Builder
                 // If the ElementType is the same as this type this is recursive complex type nesting
                 if (propertyConfiguration.ElementType == ClrType)
                 {
-                    throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed);
+                    throw Error.Argument("propertyInfo", 
+                                         SRResources.RecursiveComplexTypesNotAllowed,
+                                         ClrType.Name,
+                                         propertyConfiguration.Name);
                 }
 
                 // If the ElementType is not primitive treat as a ComplexType and Add to the model.

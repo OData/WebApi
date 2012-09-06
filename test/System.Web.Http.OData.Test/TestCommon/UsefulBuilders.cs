@@ -42,6 +42,15 @@ namespace System.Web.Http.OData
             return builder;
         }
 
+        public static ODataModelBuilder Add_Customer_EntityType_With_Address(this ODataModelBuilder builder)
+        {
+            builder.Add_Customer_EntityType();
+            builder.Add_Address_ComplexType();
+            var customer = builder.Entity<Customer>();
+            customer.ComplexProperty(c => c.Address);
+            return builder;
+        }
+
         public static ODataModelBuilder Add_Customer_EntityType_With_CollectionProperties(this ODataModelBuilder builder)
         {
             builder.Add_Customer_EntityType();

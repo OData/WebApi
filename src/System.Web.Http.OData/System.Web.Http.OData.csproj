@@ -169,6 +169,9 @@
     <Compile Include="OData\ODataMetadataControllerConfigurationAttribute.cs" />
     <Compile Include="OData\ODataResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />
+    <Compile Include="OData\Query\HandleNullPropagationOption.cs" />
+    <Compile Include="OData\Query\HandleNullPropagationOptionHelper.cs" />
+    <Compile Include="OData\Query\ODataQuerySettings.cs" />
     <Compile Include="OData\Query\ODataRawQueryOptions.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelper.cs" />
     <Compile Include="OData\ODataResult.cs" />

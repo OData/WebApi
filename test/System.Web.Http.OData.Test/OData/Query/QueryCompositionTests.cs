@@ -133,7 +133,7 @@ namespace System.Web.Http.OData.Query
         [Theory]
         [InlineData("QueryCompositionCustomerLowLevelWithoutDefaultOrder", true)]
         [InlineData("QueryCompositionCustomerLowLevelWithoutDefaultOrder", false)]
-        public void QueryableOnActionTopSkipFallsBackToBackendOrderIf_canUseDefaultOrderBy_IsFalse(string controllerName, bool useCustomEdmModel)
+        public void QueryableOnActionTopSkipFallsBackToBackendOrderIf_EnsureStableOrdering_IsFalse(string controllerName, bool useCustomEdmModel)
         {
             HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel));
             HttpClient client = new HttpClient(server);

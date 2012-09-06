@@ -115,7 +115,11 @@ namespace System.Web.Http.OData.Query
             IQueryable<QueryCompositionCustomer> result = null;
             try
             {
-                result = queryOptions.ApplyTo(QueryCompositionCustomerController.CustomerList.AsQueryable(), handleNullPropagation: true, canUseDefaultOrderBy: false) as IQueryable<QueryCompositionCustomer>;
+                ODataQuerySettings querySettings = new ODataQuerySettings 
+                { 
+                    EnsureStableOrdering = false
+                };
+                result = queryOptions.ApplyTo(QueryCompositionCustomerController.CustomerList.AsQueryable(), querySettings) as IQueryable<QueryCompositionCustomer>;
             }
             catch (ODataException exception)
             {

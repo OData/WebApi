@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
@@ -57,10 +56,16 @@ namespace System.Web.Http.OData
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property not appropriate")]
         protected virtual IEdmModel GetModel()
         {
-            IEdmModel model = Request.GetConfiguration().Formatters.ODataFormatter().Model;
+            HttpConfiguration configuration = Request.GetConfiguration();
+            if (configuration == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+            }
+
+            IEdmModel model = configuration.GetEdmModel();
             if (model == null)
             {
-                throw Error.NotSupported(SRResources.ODataFormatterMissing, typeof(ODataMediaTypeFormatter).Name);
+                throw Error.InvalidOperation(SRResources.EdmModelMissing, typeof(IEdmModel).Name, "SetODataFormatter", typeof(HttpConfiguration).Name);
             }
 
             model.SetEdmxVersion(_defaultEdmxVersion);

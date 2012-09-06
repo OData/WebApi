@@ -165,7 +165,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
     <Compile Include="OData\IDeltaOfTEntityType.cs" />
-    <Compile Include="OData\MediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\ODataMetadataControllerConfigurationAttribute.cs" />
     <Compile Include="OData\ODataResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />

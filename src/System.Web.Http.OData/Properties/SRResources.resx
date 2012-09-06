@@ -258,9 +258,6 @@
   <data name="ManyToManyNavigationPropertyMustReturnCollection" xml:space="preserve">
     <value>The property '{0}' on the type '{1}' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.</value>
   </data>
-  <data name="ODataFormatterMissing" xml:space="preserve">
-    <value>The formatter collection is missing '{0}'. Did you forget to add it to your configuration?</value>
-  </data>
   <data name="CreatingLinksByConventionNotSupported" xml:space="preserve">
     <value>Creating Links by convention is not supported.</value>
   </data>
@@ -359,5 +356,17 @@
   </data>
   <data name="DefaultRouteMissingOrIncorrect" xml:space="preserve">
     <value>The feed self link could not be generated for the route named '{0}'.</value>
+  </data>
+  <data name="ResetODataFormatterNotSupported" xml:space="preserve">
+    <value>You already have a {0} on your {1}. Set your {0} once using the 'SetODataFormatter' method on '{1}' only.</value>
+  </data>
+  <data name="EdmModelOnConfigurationMismatch" xml:space="preserve">
+    <value>The '{0}' on the configuration does not match the '{0}' in the given formatter. Setting '{1}' using the method '{2}' also sets the corresponding '{0}'.</value>
+  </data>
+  <data name="EdmModelMismatch" xml:space="preserve">
+    <value>The given '{0}' does not match the '{0}' in the formatter on the configuration. Setting '{1}' using the method '{2}' also sets the corresponding '{0}'.</value>
+  </data>
+  <data name="EdmModelMissing" xml:space="preserve">
+    <value>The configuration is missing '{0}'. Try calling '{1}' on '{2}'.</value>
   </data>
 </root>

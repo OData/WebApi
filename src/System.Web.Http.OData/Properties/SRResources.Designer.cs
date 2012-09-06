@@ -223,6 +223,33 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given &apos;{0}&apos; does not match the &apos;{0}&apos; in the formatter on the configuration. Setting &apos;{1}&apos; using the method &apos;{2}&apos; also sets the corresponding &apos;{0}&apos;..
+        /// </summary>
+        internal static string EdmModelMismatch {
+            get {
+                return ResourceManager.GetString("EdmModelMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The configuration is missing &apos;{0}&apos;. Try calling &apos;{1}&apos; on &apos;{2}&apos;..
+        /// </summary>
+        internal static string EdmModelMissing {
+            get {
+                return ResourceManager.GetString("EdmModelMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; on the configuration does not match the &apos;{0}&apos; in the given formatter. Setting &apos;{1}&apos; using the method &apos;{2}&apos; also sets the corresponding &apos;{0}&apos;..
+        /// </summary>
+        internal static string EdmModelOnConfigurationMismatch {
+            get {
+                return ResourceManager.GetString("EdmModelOnConfigurationMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is not an supported edm type..
         /// </summary>
         internal static string EdmTypeNotSupported {
@@ -547,15 +574,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The formatter collection is missing &apos;{0}&apos;. Did you forget to add it to your configuration?.
-        /// </summary>
-        internal static string ODataFormatterMissing {
-            get {
-                return ResourceManager.GetString("ODataFormatterMissing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unknown function &apos;{0}&apos;..
         /// </summary>
         internal static string ODataFunctionNotSupported {
@@ -705,6 +723,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestMustContainConfiguration {
             get {
                 return ResourceManager.GetString("RequestMustContainConfiguration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You already have a {0} on your {1}. Set your {0} once using the &apos;SetODataFormatter&apos; method on &apos;{1}&apos; only..
+        /// </summary>
+        internal static string ResetODataFormatterNotSupported {
+            get {
+                return ResourceManager.GetString("ResetODataFormatterNotSupported", resourceCulture);
             }
         }
         

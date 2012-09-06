@@ -9,16 +9,29 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public abstract class StructuralPropertyConfiguration : PropertyConfiguration
     {
+        private bool _optionalProperty;
+
         protected StructuralPropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
-            OptionalProperty = IsNullable(property.PropertyType);
+            _optionalProperty = IsNullable(property.PropertyType);
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this property is optional or required.
-        /// </summary>
-        public bool OptionalProperty { get; set; }
+        public bool OptionalProperty
+        {
+            get
+            {
+                return _optionalProperty;
+            }
+
+            set
+            {
+                _optionalProperty = value;
+                IsOptionalPropertyExplicitlySet = true;
+            }
+        }
+
+        internal bool IsOptionalPropertyExplicitlySet { get; set; }
 
         private static bool IsNullable(Type type)
         {

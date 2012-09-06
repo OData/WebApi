@@ -895,6 +895,28 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_Doesnot_Override_NavigationPropertyConfiguration()
+        {
+            MockType type1 =
+                new MockType("Entity1")
+                .Property<int>("ID");
+
+            MockType type2 =
+                new MockType("Entity2")
+                .Property<int>("ID")
+                .Property(type1, "Relation");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type2).AddNavigationProperty(type2.GetProperty("Relation"), EdmMultiplicity.One);
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType entity = model.AssertHasEntityType(type2);
+
+            // bug in edmlib causing this to ZeroOrOne.
+            entity.AssertHasNavigationProperty(model, "Relation", type1, isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+        }
+
+        [Fact]
         public void ODataConventionModelBuilder_IgnoresIndexerProperties()
         {
             MockType type =

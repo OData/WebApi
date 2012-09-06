@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -32,6 +33,38 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             // Assert
             Assert.False(structuralProperty.Object.OptionalProperty);
+        }
+
+        [Fact]
+        public void RequiredAttributeEdmPropertyConvention_ConfiguresRequiredPropertyAsRequired()
+        {
+            MockType type =
+                new MockType("Entity")
+                .Property(typeof(int), "ID")
+                .Property(typeof(int?), "Count", new RequiredAttribute());
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type);
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType entity = model.AssertHasEntityType(type);
+            entity.AssertHasPrimitiveProperty(model, "Count", EdmPrimitiveTypeKind.Int32, isNullable: false);
+        }
+
+        [Fact]
+        public void RequiredAttributeEdmPropertyConvention_DoesnotOverwriteExistingConfiguration()
+        {
+            MockType type =
+                new MockType("Entity")
+                .Property(typeof(int), "ID")
+                .Property(typeof(int), "Count", new RequiredAttribute());
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type).AddProperty(type.GetProperty("Count")).IsOptional();
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType entity = model.AssertHasEntityType(type);
+            entity.AssertHasPrimitiveProperty(model, "Count", EdmPrimitiveTypeKind.Int32, isNullable: true);
         }
     }
 }

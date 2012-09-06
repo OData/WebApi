@@ -27,7 +27,10 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("edmProperty");
             }
 
-            edmProperty.OptionalProperty = false;
+            if (!edmProperty.IsOptionalPropertyExplicitlySet)
+            {
+                edmProperty.OptionalProperty = false;
+            }
         }
     }
 }

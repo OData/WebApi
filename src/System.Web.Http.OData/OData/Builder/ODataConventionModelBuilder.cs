@@ -27,6 +27,7 @@ namespace System.Web.Http.OData.Builder
             new DataContractAttributeEdmTypeConvention(),
             new NotMappedAttributeConvention(), // NotMappedAttributeConvention has to run before EntityKeyConvention
             new EntityKeyConvention(),
+            new DataMemberAttributeEdmPropertyConvention(),
             new RequiredAttributeEdmPropertyConvention(),
             new KeyAttributeEdmPropertyConvention(),
             new IgnoreDataMemberAttributeEdmPropertyConvention(),
@@ -366,13 +367,17 @@ namespace System.Web.Http.OData.Builder
                 }
                 else
                 {
-                    if (!isCollection)
+                    // don't add this property if the user has already added it.
+                    if (!entity.NavigationProperties.Where(p => p.Name == property.Name).Any())
                     {
-                        entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
-                    }
-                    else
-                    {
-                        entity.AddNavigationProperty(property, EdmMultiplicity.Many);
+                        if (!isCollection)
+                        {
+                            entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
+                        }
+                        else
+                        {
+                            entity.AddNavigationProperty(property, EdmMultiplicity.Many);
+                        }
                     }
                 }
             }

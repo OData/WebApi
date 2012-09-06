@@ -110,6 +110,7 @@
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IProcedureConvention.cs" />
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\ODataActionParameters.cs" />
     <Compile Include="OData\Builder\ActionConfiguration.cs" />
     <Compile Include="OData\Builder\BindingParameterConfiguration.cs" />

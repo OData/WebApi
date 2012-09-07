@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Query
@@ -67,6 +68,25 @@ namespace System.Web.Http.OData.Query
         public IQueryable<QueryCompositionCustomer> Get()
         {
             return QueryCompositionCustomerController.CustomerList.AsQueryable();
+        }
+    }
+
+    public class QueryCompositionCustomerWithTaskOfIEnumerableController : ApiController
+    {
+        [Queryable]
+        public Task<IEnumerable<QueryCompositionCustomer>> Get()
+        {
+            return TaskHelpers.FromResult(QueryCompositionCustomerController.CustomerList as IEnumerable<QueryCompositionCustomer>);
+        }
+    }
+
+    public class QueryCompositionCustomerWithTaskOfHttpResponseMessageController : ApiController
+    {
+        [Queryable]
+        public Task<HttpResponseMessage> Get()
+        {
+            return TaskHelpers.FromResult(
+                Request.CreateResponse(HttpStatusCode.OK, QueryCompositionCustomerController.CustomerList.AsEnumerable()));
         }
     }
 

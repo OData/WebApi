@@ -24,6 +24,8 @@ namespace System.Web.Http.OData.Query
                 return new TheoryDataSet<string, bool> 
                 {
                     { "QueryCompositionCustomer", true },
+                    { "QueryCompositionCustomerWithTaskOfIEnumerable", false },
+                    { "QueryCompositionCustomerWithTaskOfHttpResponseMessage", false },
                     { "QueryCompositionCustomerLowLevel", true },
                     { "QueryCompositionCustomerQueryable", true },
                     { "QueryCompositionCustomerGlobal", true },

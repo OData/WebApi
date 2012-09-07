@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,6 +10,7 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -337,15 +339,17 @@ namespace System.Web.Http.OData.Query.Expressions
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
+
+                Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
                 return
                     Expression.Condition(
                         test: Expression.Equal(source, _nullConstant),
-                        ifTrue: Expression.Constant(null, ToNullable(propertyAccessExpression.Type)),
-                        ifFalse: ToNullable(propertyAccessExpression));
+                        ifTrue: Expression.Constant(null, ifFalse.Type),
+                        ifFalse: ifFalse);
             }
             else
             {
-                return Expression.Property(source, propertyName);
+                return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
             }
         }
 
@@ -860,6 +864,70 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
+        // If the expression is of non-standard edm primitive type (like uint), convert the expression to its standard edm type.
+        // Also, note that only expressions generated for ushort, uint and ulong can be understood by linq2sql and EF.
+        // The rest (char, char[], Binary) would cause issues with linq2sql and EF.
+        private Expression ConvertNonStandardPrimitives(Expression source)
+        {
+            Type conversionType;
+            if (EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out conversionType))
+            {
+                Type sourceType = source.Type;
+                sourceType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
+
+                Contract.Assert(sourceType != conversionType);
+
+                Expression convertedExpression = null;
+
+                switch (Type.GetTypeCode(sourceType))
+                {
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                        convertedExpression = Expression.Convert(ExtractValueFromNullableExpression(source), conversionType);
+                        break;
+
+                    case TypeCode.Char:
+                        convertedExpression = Expression.Call(ExtractValueFromNullableExpression(source), "ToString", typeArguments: null, arguments: null);
+                        break;
+
+                    case TypeCode.Object:
+                        if (sourceType == typeof(char[]))
+                        {
+                            convertedExpression = Expression.New(typeof(string).GetConstructor(new[] { typeof(char[]) }), source);
+                        }
+                        else if (sourceType == typeof(XElement))
+                        {
+                            convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
+                        }
+                        else if (sourceType == typeof(Binary))
+                        {
+                            convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
+                        }
+                        break;
+
+                    default:
+                        Contract.Assert(false, Error.Format("missing non-standard type support for {0}", sourceType.Name));
+                        break;
+                }
+
+                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
+                {
+                    // source == null ? null : source
+                    return Expression.Condition(
+                        CheckForNull(source),
+                        ifTrue: Expression.Constant(null, ToNullable(convertedExpression.Type)),
+                        ifFalse: ToNullable(convertedExpression));
+                }
+                else
+                {
+                    return convertedExpression;
+                }
+            }
+
+            return source;
+        }
+
         private static Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
         {
             ExpressionType binaryExpressionType;
@@ -875,7 +943,12 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)
         {
-            return arguments.Select(arg => Nullable.GetUnderlyingType(arg.Type) != null ? Expression.Property(arg, "Value") : arg);
+            return arguments.Select(arg => ExtractValueFromNullableExpression(arg));
+        }
+
+        private static Expression ExtractValueFromNullableExpression(Expression source)
+        {
+            return Nullable.GetUnderlyingType(source.Type) != null ? Expression.Property(source, "Value") : source;
         }
 
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)

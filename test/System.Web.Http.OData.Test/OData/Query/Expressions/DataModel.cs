@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace System.Web.Http.OData.Query.Expressions
 {
@@ -25,6 +27,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public DateTimeOffset DiscontinuedOffset { get; set; }
         public TimeSpan DiscontinuedSince { get; set; }
 
+        public ushort? UnsignedReorderLevel { get; set; }
 
         public Category Category { get; set; }
 
@@ -65,6 +68,20 @@ namespace System.Web.Http.OData.Query.Expressions
         public long LongProp { get; set; }
         public int IntProp { get; set; }
 
-        public string Inaccessable() { return String.Empty; }
+        public ushort UShortProp { get; set; }
+        public uint UIntProp { get; set; }
+        public ulong ULongProp { get; set; }
+        public char CharProp { get; set; }
+
+        public ushort? NullableUShortProp { get; set; }
+        public uint? NullableUIntProp { get; set; }
+        public ulong? NullableULongProp { get; set; }
+        public char? NullableCharProp { get; set; }
+
+        public char[] CharArrayProp { get; set; }
+        public Binary BinaryProp { get; set; }
+        public XElement XElementProp { get; set; }
+
+        public string Inaccessible() { return String.Empty; }
     }
 }

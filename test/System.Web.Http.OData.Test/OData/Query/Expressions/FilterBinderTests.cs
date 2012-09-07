@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -1085,6 +1087,47 @@ namespace System.Web.Http.OData.Query.Expressions
         }
         #endregion
 
+        [Theory]
+        [InlineData("$filter=UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
+        [InlineData("$filter=ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]
+        [InlineData("$filter=UIntProp eq 12", "$it => (Convert($it.UIntProp) == Convert(12))")]
+        [InlineData("$filter=CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
+        [InlineData("$filter=CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
+        // [InlineData("$filter=BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))")] , 
+        // Issue 391: The above test doesn't work in linq2objects but works in linq2sql and EF.
+        [InlineData("$filter=XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
+        public void NonstandardEdmPrimtives(string filter, string expression)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter, expression, NotTesting);
+
+            RunFilters(filters,
+                new DataTypes
+                {
+                    UShortProp = 12,
+                    ULongProp = 12,
+                    UIntProp = 12,
+                    CharProp = 'a',
+                    CharArrayProp = new[] { 'a' },
+                    BinaryProp = new Binary(new byte[] { 35, 171, 255 }),
+                    XElementProp = new XElement("name")
+                },
+                new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
+        [Theory]
+        [InlineData("$filter=NullableUShortProp eq 12", "$it => (Convert($it.NullableUShortProp.Value) == Convert(12))")]
+        [InlineData("$filter=NullableULongProp eq 12L", "$it => (Convert($it.NullableULongProp.Value) == Convert(12))")]
+        [InlineData("$filter=NullableUIntProp eq 12", "$it => (Convert($it.NullableUIntProp.Value) == Convert(12))")]
+        [InlineData("$filter=NullableCharProp eq 'a'", "$it => ($it.NullableCharProp.Value.ToString() == \"a\")")]
+        public void Nullable_NonstandardEdmPrimitives(string filter, string expression)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter, expression, NotTesting);
+
+            RunFilters(filters,
+                new DataTypes(),
+                new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
+        }
+
         #region Negative Tests
 
         [Fact]
@@ -1106,14 +1149,15 @@ namespace System.Web.Http.OData.Query.Expressions
                     "$filter=" + String.Join(" ", Enumerable.Range(1, maxCount).Select(_ => "not")) + " Discontinued",
                     "$filter=" + String.Join(" add ", Enumerable.Range(1, maxCount/2)) + " eq 5050",
                     "$filter=" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/ProductID eq 1",
+                    "$filter=" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/UnsignedReorderLevel eq 1",
                     "$filter=" + Enumerable.Range(1,maxCount).Aggregate("'abc'", (prev,i) => String.Format("trim({0})", prev)) + " eq '123'",
                     "$filter= Category/Products/any(" + Enumerable.Range(1,maxCount/4).Aggregate("", (prev,i) => String.Format("p{1}: p{1}/Category/Products/any({0})", prev, i)) +")"
                 };
         }
 
-        private void RunFilters(dynamic filters, Product product, dynamic expectedValue)
+        private void RunFilters<T>(dynamic filters, T product, dynamic expectedValue)
         {
-            var filterWithNullPropagation = filters.WithNullPropagation as Expression<Func<Product, bool>>;
+            var filterWithNullPropagation = filters.WithNullPropagation as Expression<Func<T, bool>>;
             if (expectedValue.WithNullPropagation is Type)
             {
                 Assert.Throws(expectedValue.WithNullPropagation as Type, () => RunFilter(filterWithNullPropagation, product));
@@ -1123,7 +1167,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 Assert.Equal(RunFilter(filterWithNullPropagation, product), expectedValue.WithNullPropagation);
             }
 
-            var filterWithoutNullPropagation = filters.WithoutNullPropagation as Expression<Func<Product, bool>>;
+            var filterWithoutNullPropagation = filters.WithoutNullPropagation as Expression<Func<T, bool>>;
             if (expectedValue.WithoutNullPropagation is Type)
             {
                 Assert.Throws(expectedValue.WithoutNullPropagation as Type, () => RunFilter(filterWithoutNullPropagation, product));
@@ -1134,9 +1178,9 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private bool RunFilter(Expression<Func<Product, bool>> filter, Product product)
+        private bool RunFilter<T>(Expression<Func<T, bool>> filter, T instance)
         {
-            return filter.Compile().Invoke(product);
+            return filter.Compile().Invoke(instance);
         }
 
         private dynamic VerifyQueryDeserialization(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null)

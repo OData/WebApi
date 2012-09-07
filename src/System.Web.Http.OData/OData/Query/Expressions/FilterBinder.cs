@@ -931,6 +931,14 @@ namespace System.Web.Http.OData.Query.Expressions
         private static Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
         {
             ExpressionType binaryExpressionType;
+
+            if (left.Type != right.Type)
+            {
+                // one of them must be nullable and the other is not.
+                left = ToNullable(left);
+                right = ToNullable(right);
+            }
+
             if (_binaryOperatorMapping.TryGetValue(binaryOperator, out binaryExpressionType))
             {
                 return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: null);

@@ -195,6 +195,24 @@ namespace System.Web.Http.OData.Query.Expressions
                 NotTesting);
         }
 
+        [Fact]
+        public void BooleanComparisonOnNullableAndNonNullableType()
+        {
+            VerifyQueryDeserialization(
+                "$filter=Discontinued eq true",
+                "$it => ($it.Discontinued == Convert(True))",
+                "$it => (($it.Discontinued == Convert(True)) == True)");
+        }
+
+        [Fact]
+        public void BooleanComparisonOnNullableType()
+        {
+            VerifyQueryDeserialization(
+                "$filter=Discontinued eq Discontinued",
+                "$it => ($it.Discontinued == $it.Discontinued)",
+                "$it => (($it.Discontinued == $it.Discontinued) == True)");
+        }
+
         [Theory]
         [InlineData(null, null, false, false)]
         [InlineData(5.0, 0, true, true)]

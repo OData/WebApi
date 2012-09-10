@@ -19,7 +19,7 @@ namespace System.Web.WebPages
     /// </summary>
     internal class FileExistenceCache
     {
-        private const int TickPerMiliseconds = 10000;
+        private const int TicksPerMillisecond = 10000;
         private readonly VirtualPathProvider _virtualPathProvider;
         private ConcurrentDictionary<string, bool> _cache;
         private long _creationTick;
@@ -28,7 +28,7 @@ namespace System.Web.WebPages
         public FileExistenceCache(VirtualPathProvider virtualPathProvider, int milliSecondsBeforeReset = 1000)
         {
             _virtualPathProvider = virtualPathProvider;
-            _ticksBeforeReset = milliSecondsBeforeReset * TickPerMiliseconds;
+            _ticksBeforeReset = milliSecondsBeforeReset * TicksPerMillisecond;
             Reset();
         }
 
@@ -40,8 +40,8 @@ namespace System.Web.WebPages
 
         public int MilliSecondsBeforeReset
         {
-            get { return _ticksBeforeReset / TickPerMiliseconds; }
-            internal set { _ticksBeforeReset = value * TickPerMiliseconds; }
+            get { return _ticksBeforeReset / TicksPerMillisecond; }
+            internal set { _ticksBeforeReset = value * TicksPerMillisecond; }
         }
 
         internal IDictionary<string, bool> CacheInternal

@@ -141,6 +141,7 @@
     <Compile Include="OData\Query\QueryableFilterProviderTest.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethodsTest.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOptionHelperTest.cs" />
+    <Compile Include="OData\Query\ODataQueryOptionsOfTEntityTest.cs" />
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />
     <Compile Include="OData\Query\PartialTrustTest.cs" />

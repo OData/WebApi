@@ -195,6 +195,7 @@
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethods.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOption.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOptionHelper.cs" />
+    <Compile Include="OData\Query\ODataQueryOptionsOfTEntity.cs" />
     <Compile Include="OData\Query\ODataQuerySettings.cs" />
     <Compile Include="OData\Query\ODataRawQueryOptions.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelper.cs" />

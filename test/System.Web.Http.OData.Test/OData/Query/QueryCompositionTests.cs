@@ -312,6 +312,18 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void ODataQueryOptionsOfT_Works()
+        {
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT", false));
+            HttpClient client = new HttpClient(server);
+
+            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT/?$filter=Id ge 22").Result;
+            response.EnsureSuccessStatusCode();
+            int count = response.Content.ReadAsAsync<int>().Result;
+            Assert.Equal(2, count);
+        }
+
+        [Fact]
         public void AnonymousTypes_Work_With_QueryableAttribute()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionAnonymousTypesController", useCustomEdmModel: false));

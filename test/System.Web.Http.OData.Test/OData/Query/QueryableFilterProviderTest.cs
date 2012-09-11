@@ -35,6 +35,7 @@ namespace System.Web.Http.OData.Query
         [InlineData("GetList")]
         [InlineData("GetObject")]
         [InlineData("GetGenericQueryableWithODataQueryOption")]
+        [InlineData("GetGenericQueryableWithODataQueryOptionOfT")]
         [InlineData("GetGenericQueryableWithODataQueryOption2")]
         public void GetFilters_ReturnsEmptyCollection_ForNonQueryableActions(string actionName)
         {
@@ -119,12 +120,17 @@ namespace System.Web.Http.OData.Query
             return null;
         }
 
+        public IQueryable GetGenericQueryableWithODataQueryOptionOfT(ODataQueryOptions<string> queryOptions)
+        {
+            return null;
+        }
+
         public IQueryable<string> GetGenericQueryableWithODataQueryOption2(string s, ODataQueryOptions queryOptions)
         {
             return null;
         }
 
-        [Queryable(ResultLimit=100)]
+        [Queryable(ResultLimit = 100)]
         public IQueryable GetQueryableWithFilterAttribute()
         {
             return null;

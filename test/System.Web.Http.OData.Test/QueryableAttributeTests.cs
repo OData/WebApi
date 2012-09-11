@@ -95,7 +95,7 @@ namespace System.Web.Http.OData
         public void OnActionExecuted_Throws_Null_Request()
         {
             Assert.ThrowsArgument(
-                () => new QueryableAttribute().OnActionExecuted(new HttpActionExecutedContext()), 
+                () => new QueryableAttribute().OnActionExecuted(new HttpActionExecutedContext()),
                 "actionExecutedContext",
                 String.Format("The HttpExecutedActionContext.Request is null.{0}Parameter name: actionExecutedContext", Environment.NewLine));
         }
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
 
             Assert.ThrowsArgument(
-                () => new QueryableAttribute().OnActionExecuted(context), 
+                () => new QueryableAttribute().OnActionExecuted(context),
                 "actionExecutedContext",
                 String.Format("Request message does not contain an HttpConfiguration object.{0}Parameter name: actionExecutedContext", Environment.NewLine));
         }
@@ -209,7 +209,7 @@ namespace System.Web.Http.OData
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => attribute.OnActionExecuted(context),
-                "The 'QueryableAttribute' type cannot be used with action 'GetNonGenericEnumerable' on controller 'CustomerHighLevel' because the return type 'System.Web.Http.OData.TestCommon.Models.NonGenericEnumerable' does not specify the type of the collection.");
+                "Cannot create an EDM model as the action 'QueryableAttribute' on controller 'GetNonGenericEnumerable' has a return type 'CustomerHighLevel' that does not implement IEnumerable<T>.");
         }
 
         [Fact]

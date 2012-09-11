@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter;
 
@@ -66,6 +67,12 @@ namespace System.Web.Http
         /// <returns></returns>
         internal static Type GetImplementedIEnumerableType(Type type)
         {
+            // get inner type from Task<T>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                type = type.GetGenericArguments().First();
+            }
+
             if (type.IsGenericType && type.IsInterface &&
                 (type.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
                  type.GetGenericTypeDefinition() == typeof(IQueryable<>)))

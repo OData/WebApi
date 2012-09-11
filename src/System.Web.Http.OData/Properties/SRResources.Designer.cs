@@ -124,6 +124,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot apply {0} of &apos;{1}&apos; to {2} of &apos;{3}&apos;..
+        /// </summary>
+        internal static string CannotApplyODataQueryOptionsOfT {
+            get {
+                return ResourceManager.GetString("CannotApplyODataQueryOptionsOfT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A binary operator with incompatible types was detected. Found operand types &apos;{0}&apos; and &apos;{1}&apos; for operator kind &apos;{2}&apos;..
         /// </summary>
         internal static string BinaryOperatorNotSupported {
@@ -403,6 +412,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The entity type &apos;{0}&apos; does not match the expected entity type &apos;{1}&apos; as set on the query context..
+        /// </summary>
+        internal static string EntityTypeMismatch {
+            get {
+                return ResourceManager.GetString("EntityTypeMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; is not supported by the ODataErrorSerializer..
         /// </summary>
         internal static string ErrorTypeMustBeODataError {
@@ -412,7 +430,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; type cannot be used with action &apos;{1}&apos; on controller &apos;{2}&apos; because the action does not return a value..
+        ///   Looks up a localized string similar to Cannot create an EDM model as the action &apos;{0}&apos; on controller &apos;{1}&apos; has a void return type..
         /// </summary>
         internal static string FailedToBuildEdmModelBecauseReturnTypeIsNull {
             get {
@@ -421,7 +439,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The &apos;{0}&apos; type cannot be used with action &apos;{1}&apos; on controller &apos;{2}&apos; because the return type &apos;{3}&apos; does not specify the type of the collection..
+        ///   Looks up a localized string similar to Cannot create an EDM model as the action &apos;{0}&apos; on controller &apos;{1}&apos; has a return type &apos;{2}&apos; that does not implement IEnumerable&lt;T&gt;..
         /// </summary>
         internal static string FailedToRetrieveTypeToBuildEdmModel {
             get {

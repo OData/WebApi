@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using System.Web.Http.Metadata;
@@ -14,6 +15,7 @@ using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Query
 {
@@ -29,7 +31,10 @@ namespace System.Web.Http.OData.Query
                     { "GetIEnumerableOfCustomer", typeof(BellevueCustomer) },
                     { "GetCollectionOfCustomer", typeof(SeattleCustomer) },
                     { "GetListOfCustomer", typeof(RedmondCustomer) },
-                    { "GetStronglyTypedCustomer", typeof(Customer) }
+                    { "GetStronglyTypedCustomer", typeof(Customer) },
+                    { "GetObject_WithODataQueryOptionsOfT", typeof(Customer) },
+                    { "GetNonQueryable_WithODataQueryOptionsOfT", typeof(Customer) },
+                    { "GetTwoGenericsCollection_WithODataQueryOptionsOfT", typeof(Customer) },
                 };
             }
         }
@@ -99,8 +104,9 @@ namespace System.Web.Http.OData.Query
             Assert.Throws<InvalidOperationException>(
                 () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait(),
                 String.Format(
-                        "The 'ODataQueryParameterBinding' type cannot be used with action '{0}' on controller 'CustomerLowLevel' because the return type '{1}' does not specify the type of the collection.",
+                        "Cannot create an EDM model as the action '{0}' on controller '{1}' has a return type '{2}' that does not implement IEnumerable<T>.",
                         actionDescriptor.ActionName,
+                        actionDescriptor.ControllerDescriptor.ControllerName,
                         actionDescriptor.ReturnType.FullName));
         }
 
@@ -125,7 +131,38 @@ namespace System.Web.Http.OData.Query
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait(),
-                "The 'ODataQueryParameterBinding' type cannot be used with action 'GetVoidReturn' on controller 'CustomerLowLevel' because the action does not return a value.");
+                "Cannot create an EDM model as the action 'GetVoidReturn' on controller 'CustomerLowLevel' has a void return type.");
+        }
+
+        [Theory]
+        [InlineData(typeof(int[]), typeof(int))]
+        [InlineData(typeof(IEnumerable<int>), typeof(int))]
+        [InlineData(typeof(List<int>), typeof(int))]
+        [InlineData(typeof(IQueryable<int>), typeof(int))]
+        [InlineData(typeof(Task<IQueryable<int>>), typeof(int))]
+        public void GetEntityClrTypeFromActionReturnType_Returns_CorrectEntityType(Type returnType, Type elementType)
+        {
+            Mock<HttpActionDescriptor> action = new Mock<HttpActionDescriptor>();
+            action.Setup(a => a.ReturnType).Returns(returnType);
+
+            Assert.Equal(
+                elementType,
+                ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.GetEntityClrTypeFromActionReturnType(action.Object));
+        }
+
+        [Theory]
+        [InlineData(typeof(ODataQueryOptions<int>), typeof(int))]
+        [InlineData(typeof(ODataQueryOptions<string>), typeof(string))]
+        [InlineData(typeof(ODataQueryOptions), null)]
+        [InlineData(typeof(int), null)]
+        public void GetEntityClrTypeFromParameterType_Returns_CorrectEntityType(Type parameterType, Type elementType)
+        {
+            Mock<HttpParameterDescriptor> parameter = new Mock<HttpParameterDescriptor>();
+            parameter.Setup(p => p.ParameterType).Returns(parameterType);
+
+            Assert.Equal(
+                elementType,
+                ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.GetEntityClrTypeFromParameterType(parameter.Object));
         }
     }
 
@@ -173,6 +210,27 @@ namespace System.Web.Http.OData.Query
         }
 
         public void GetVoidReturn(ODataQueryOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object GetObject_WithODataQueryOptionsOfT(ODataQueryOptions<Customer> options)
+        {
+            // this can return Customer or BellevueCustomer
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable GetNonQueryable_WithODataQueryOptionsOfT(ODataQueryOptions<Customer> options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TwoGenericsCollection GetTwoGenericsCollection_WithODataQueryOptionsOfT(ODataQueryOptions<Customer> options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void GetVoidReturn_WithODataQueryOptionsOfT(ODataQueryOptions<Customer> options)
         {
             throw new NotImplementedException();
         }

@@ -123,6 +123,29 @@ namespace System.Web.Http.OData.Query
         }
     }
 
+    public class QueryCompositionCustomerLowLevel_ODataQueryOptionsOfTController : ApiController
+    {
+        public int GetCount(ODataQueryOptions<QueryCompositionCustomer> queryOptions)
+        {
+            if (!ModelState.IsValid)
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            IQueryable<QueryCompositionCustomer> result = null;
+            try
+            {
+                result = queryOptions.ApplyTo(QueryCompositionCustomerController.CustomerList.AsQueryable()) as IQueryable<QueryCompositionCustomer>;
+            }
+            catch (ODataException exception)
+            {
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, exception));
+            }
+
+            return result.Count();
+        }
+    }
+
     public class QueryCompositionCustomerLowLevelWithoutDefaultOrderController : ApiController
     {
         // demo 2: low level APIs

@@ -161,7 +161,7 @@ namespace System.Web.Http.OData.Query
         /// </summary>
         /// <param name="query">The IQueryable that we are applying query against.</param>
         /// <returns>The query that the query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query)
+        public virtual IQueryable ApplyTo(IQueryable query)
         {
             return ApplyTo(query, new ODataQuerySettings());
         }
@@ -172,7 +172,7 @@ namespace System.Web.Http.OData.Query
         /// <param name="query">The IQueryable that we are applying query against.</param>
         /// <param name="querySettings">The settings to use in query composition.</param>
         /// <returns>The query that the query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
+        public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
             if (query == null)
             {
@@ -291,7 +291,7 @@ namespace System.Web.Http.OData.Query
             Contract.Assert(context != null && context.EntitySet != null);
 
             IEdmEntityType entityType = context.EntitySet.ElementType;
-            IEnumerable<IEdmStructuralProperty> properties = 
+            IEnumerable<IEdmStructuralProperty> properties =
                 entityType.Key().Any()
                     ? entityType.Key()
                     : entityType
@@ -307,7 +307,7 @@ namespace System.Web.Http.OData.Query
         // This may return a null if there are no available properties.
         private static OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context)
         {
-            string orderByRaw = String.Join(",", 
+            string orderByRaw = String.Join(",",
                                     GetAvailableOrderByProperties(context)
                                         .Select(property => property.Name));
             return String.IsNullOrEmpty(orderByRaw)
@@ -332,12 +332,12 @@ namespace System.Web.Http.OData.Query
 
             // Strategy: create a hash of all properties already used in the given OrderBy
             // and remove them from the list of properties we need to add to make the sort stable.
-            HashSet<string> usedPropertyNames = 
+            HashSet<string> usedPropertyNames =
                 new HashSet<string>(
                     orderBy.PropertyNodes
                         .Select<OrderByPropertyNode, string>(node => node.Property.Name));
 
-            IEnumerable<IEdmStructuralProperty> propertiesToAdd = 
+            IEnumerable<IEdmStructuralProperty> propertiesToAdd =
                 GetAvailableOrderByProperties(context)
                     .Where(prop => !usedPropertyNames.Contains(prop.Name));
 

@@ -160,10 +160,10 @@
     <value>No EntitySet exists in the EdmModel with EntityClrType '{0}'.</value>
   </data>
   <data name="FailedToBuildEdmModelBecauseReturnTypeIsNull" xml:space="preserve">
-    <value>The '{0}' type cannot be used with action '{1}' on controller '{2}' because the action does not return a value.</value>
+    <value>Cannot create an EDM model as the action '{0}' on controller '{1}' has a void return type.</value>
   </data>
   <data name="FailedToRetrieveTypeToBuildEdmModel" xml:space="preserve">
-    <value>The '{0}' type cannot be used with action '{1}' on controller '{2}' because the return type '{3}' does not specify the type of the collection.</value>
+    <value>Cannot create an EDM model as the action '{0}' on controller '{1}' has a return type '{2}' that does not implement IEnumerable&lt;T&gt;.</value>
   </data>
   <data name="QueryParameterNotSupported" xml:space="preserve">
     <value>The query parameter '{0}' is not supported.</value>
@@ -419,6 +419,12 @@
   </data>
   <data name="ModelBinderUtil_ModelMetadataCannotBeNull" xml:space="preserve">
     <value>The binding context cannot have a null ModelMetadata.</value>
+  </data>
+  <data name="EntityTypeMismatch" xml:space="preserve">
+    <value>The entity type '{0}' does not match the expected entity type '{1}' as set on the query context.</value>
+  </data>
+  <data name="CannotApplyODataQueryOptionsOfT" xml:space="preserve">
+    <value>Cannot apply {0} of '{1}' to {2} of '{3}'.</value>
   </data>
   <data name="HasActionLinkRequiresBindToEntity" xml:space="preserve">
     <value>To register an action link factory, actions must be bindable to a single entity. Action '{0}' does not meet this requirement.</value>

@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using System.Net;
+using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -10,7 +12,6 @@ using System.Web.Http.Metadata;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData
 {
@@ -24,6 +25,9 @@ namespace System.Web.Http.OData
 
         internal class ODataQueryParameterBinding : HttpParameterBinding
         {
+            private static MethodInfo _createODataQueryOptions = typeof(ODataQueryParameterBinding).GetMethod("CreateODataQueryOptions");
+            private const string CreateODataQueryOptionsCtorKey = "MS_CreateODataQueryOptionsOfT";
+
             public ODataQueryParameterBinding(HttpParameterDescriptor parameterDescriptor)
                 : base(parameterDescriptor)
             {
@@ -58,15 +62,39 @@ namespace System.Web.Http.OData
                     throw Error.Argument("actionContext", SRResources.RequestMustContainConfiguration);
                 }
 
-                IEdmModel model = configuration.GetEdmModel();
+                // Get the entity type from the parameter type if it is ODataQueryOptions<T>.
+                // Fall back to the return type if not. Also, note that the entity type from the return type and ODataQueryOptions<T> 
+                // can be different (example implementing $select or $expand).
+                Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
 
+                IEdmModel model = configuration.GetEdmModel() ?? actionDescriptor.GetEdmModel(entityClrType);
+                ODataQueryContext entitySetContext = new ODataQueryContext(model, entityClrType);
+
+                Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions> createODataQueryOptions =
+                    (Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions>)Descriptor.Properties.GetOrAdd(CreateODataQueryOptionsCtorKey, _ =>
+                    {
+                        return Delegate.CreateDelegate(typeof(Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions>), _createODataQueryOptions.MakeGenericMethod(entityClrType));
+                    });
+
+                ODataQueryOptions parameterValue = createODataQueryOptions(entitySetContext, request);
+                SetValue(actionContext, parameterValue);
+
+                return TaskHelpers.FromResult(0);
+            }
+
+            public static ODataQueryOptions<T> CreateODataQueryOptions<T>(ODataQueryContext context, HttpRequestMessage request)
+            {
+                return new ODataQueryOptions<T>(context, request);
+            }
+
+            internal static Type GetEntityClrTypeFromActionReturnType(HttpActionDescriptor actionDescriptor)
+            {
                 // It is a developer programming error to use this binding attribute
                 // on actions that return void.
                 if (actionDescriptor.ReturnType == null)
                 {
                     throw Error.InvalidOperation(
                                     SRResources.FailedToBuildEdmModelBecauseReturnTypeIsNull,
-                                    this.GetType().Name,
                                     actionDescriptor.ActionName,
                                     actionDescriptor.ControllerDescriptor.ControllerName);
                 }
@@ -80,31 +108,28 @@ namespace System.Web.Http.OData
                     // determined, such as a non-generic IQueryable or IEnumerable.
                     throw Error.InvalidOperation(
                                     SRResources.FailedToRetrieveTypeToBuildEdmModel,
-                                    this.GetType().Name,
-                                    actionDescriptor.ActionName, 
+                                    actionDescriptor.ActionName,
                                     actionDescriptor.ControllerDescriptor.ControllerName,
                                     actionDescriptor.ReturnType.FullName);
                 }
 
-                if (model == null)
+                return entityClrType;
+            }
+
+            internal static Type GetEntityClrTypeFromParameterType(HttpParameterDescriptor parameterDescriptor)
+            {
+                Contract.Assert(parameterDescriptor != null);
+
+                Type parameterType = parameterDescriptor.ParameterType;
+                Contract.Assert(parameterType != null);
+
+                if (parameterType.IsGenericType &&
+                    parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>))
                 {
-                    model = actionDescriptor.GetEdmModel(entityClrType);
+                    return parameterType.GetGenericArguments().Single();
                 }
 
-                ODataQueryOptions parameterValue = null;
-                ODataQueryContext entitySetContext = new ODataQueryContext(model, entityClrType);
-
-                try
-                {
-                    parameterValue = new ODataQueryOptions(entitySetContext, request);
-                    SetValue(actionContext, parameterValue);
-                }
-                catch (ODataException exception)
-                {
-                    throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.BadRequest, exception));
-                }
-
-                return TaskHelpers.FromResult(0);
+                return null;
             }
         }
     }

@@ -47,7 +47,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void EqualityOperatorWithNull(string productName, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=ProductName eq null",
+                "ProductName eq null",
                 "$it => ($it.ProductName == null)");
 
             RunFilters(filters,
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void EqualityOperator(string productName, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=ProductName eq 'Doritos'",
+                "ProductName eq 'Doritos'",
                 "$it => ($it.ProductName == \"Doritos\")");
 
             RunFilters(filters,
@@ -77,7 +77,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NotEqualOperator(string productName, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=ProductName ne 'Doritos'",
+                "ProductName ne 'Doritos'",
                 "$it => ($it.ProductName != \"Doritos\")");
 
             RunFilters(filters,
@@ -92,7 +92,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void GreaterThanOperator(object unitPrice, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice gt 5.00m",
+                "UnitPrice gt 5.00m",
                 Error.Format("$it => ($it.UnitPrice > Convert({0:0.00}))", 5.0),
                 Error.Format("$it => (($it.UnitPrice > Convert({0:0.00})) == True)", 5.0));
 
@@ -108,7 +108,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void GreaterThanEqualOperator(object unitPrice, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice ge 5.00m",
+                "UnitPrice ge 5.00m",
                 Error.Format("$it => ($it.UnitPrice >= Convert({0:0.00}))", 5.0),
                 Error.Format("$it => (($it.UnitPrice >= Convert({0:0.00})) == True)", 5.0));
 
@@ -124,7 +124,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void LessThanOperator(object unitPrice, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice lt 5.00m",
+                "UnitPrice lt 5.00m",
                 Error.Format("$it => ($it.UnitPrice < Convert({0:0.00}))", 5.0),
                 NotTesting);
 
@@ -140,7 +140,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void LessThanOrEqualOperator(object unitPrice, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice le 5.00m",
+                "UnitPrice le 5.00m",
                 Error.Format("$it => ($it.UnitPrice <= Convert({0:0.00}))", 5.0),
                 NotTesting);
 
@@ -153,7 +153,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NegativeNumbers()
         {
             VerifyQueryDeserialization(
-                "$filter=UnitPrice le -5.00m",
+                "UnitPrice le -5.00m",
                 Error.Format("$it => ($it.UnitPrice <= Convert({0:0.00}))", -5.0),
                 NotTesting);
         }
@@ -166,7 +166,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateTimeOffsetInEqualities(string clause, string expectedExpression)
         {
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=" + clause,
+                "" + clause,
                 expectedExpression);
         }
 
@@ -178,7 +178,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateInEqualities(string clause, string expectedExpression)
         {
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=" + clause,
+                "" + clause,
                 expectedExpression);
         }
 
@@ -190,7 +190,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void BooleanOperatorNullableTypes()
         {
             VerifyQueryDeserialization(
-                "$filter=UnitPrice eq 5.00m or CategoryID eq 0",
+                "UnitPrice eq 5.00m or CategoryID eq 0",
                 Error.Format("$it => (($it.UnitPrice == Convert(5.00)) OrElse ($it.CategoryID == 0))", 5.0, 0),
                 NotTesting);
         }
@@ -199,7 +199,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void BooleanComparisonOnNullableAndNonNullableType()
         {
             VerifyQueryDeserialization(
-                "$filter=Discontinued eq true",
+                "Discontinued eq true",
                 "$it => ($it.Discontinued == Convert(True))",
                 "$it => (($it.Discontinued == Convert(True)) == True)");
         }
@@ -208,7 +208,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void BooleanComparisonOnNullableType()
         {
             VerifyQueryDeserialization(
-                "$filter=Discontinued eq Discontinued",
+                "Discontinued eq Discontinued",
                 "$it => ($it.Discontinued == $it.Discontinued)",
                 "$it => (($it.Discontinued == $it.Discontinued) == True)");
         }
@@ -220,7 +220,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void OrOperator(object unitPrice, object unitsInStock, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice eq 5.00m or UnitsInStock eq 0",
+                "UnitPrice eq 5.00m or UnitsInStock eq 0",
                 Error.Format("$it => (($it.UnitPrice == Convert({0:0.00})) OrElse (Convert($it.UnitsInStock) == Convert({1})))", 5.0, 0),
                 NotTesting);
 
@@ -236,7 +236,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AndOperator(object unitPrice, object unitsInStock, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice eq 5.00m and UnitsInStock eq 10.00m",
+                "UnitPrice eq 5.00m and UnitsInStock eq 10.00m",
                 Error.Format("$it => (($it.UnitPrice == Convert({0:0.00})) AndAlso (Convert($it.UnitsInStock) == Convert({1:0.00})))", 5.0, 10.0),
                 NotTesting);
 
@@ -252,7 +252,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Negation(object unitPrice, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=not (UnitPrice eq 5.00m)",
+                "not (UnitPrice eq 5.00m)",
                 Error.Format("$it => Not(($it.UnitPrice == Convert({0:0.00})))", 5.0),
                 NotTesting);
 
@@ -268,7 +268,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void BoolNegation(bool discontinued, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=not Discontinued",
+                "not Discontinued",
                 "$it => Convert(Not($it.Discontinued))",
                 "$it => (Not($it.Discontinued) == True)");
 
@@ -281,7 +281,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void NestedNegation()
         {
             VerifyQueryDeserialization(
-                "$filter=not (not(not    (Discontinued)))",
+                "not (not(not    (Discontinued)))",
                 "$it => Convert(Not(Not(Not($it.Discontinued))))",
                 "$it => (Not(Not(Not($it.Discontinued))) == True)");
         }
@@ -295,7 +295,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Subtraction(object unitPrice, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=UnitPrice sub 1.00m lt 5.00m",
+                "UnitPrice sub 1.00m lt 5.00m",
                 Error.Format("$it => (($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 Error.Format("$it => ((($it.UnitPrice - Convert({0:0.00})) < Convert({1:0.00})) == True)", 1.0, 5.0));
 
@@ -308,7 +308,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Addition()
         {
             VerifyQueryDeserialization(
-                "$filter=UnitPrice add 1.00m lt 5.00m",
+                "UnitPrice add 1.00m lt 5.00m",
                 Error.Format("$it => (($it.UnitPrice + Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
@@ -317,7 +317,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Multiplication()
         {
             VerifyQueryDeserialization(
-                "$filter=UnitPrice mul 1.00m lt 5.00m",
+                "UnitPrice mul 1.00m lt 5.00m",
                 Error.Format("$it => (($it.UnitPrice * Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
@@ -326,7 +326,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Division()
         {
             VerifyQueryDeserialization(
-                "$filter=UnitPrice div 1.00m lt 5.00m",
+                "UnitPrice div 1.00m lt 5.00m",
                 Error.Format("$it => (($it.UnitPrice / Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
@@ -335,7 +335,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Modulo()
         {
             VerifyQueryDeserialization(
-                "$filter=UnitPrice mod 1.00m lt 5.00m",
+                "UnitPrice mod 1.00m lt 5.00m",
                 Error.Format("$it => (($it.UnitPrice % Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
@@ -358,7 +358,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("UnitsInStock eq UnitsOnOrder", 1, 1, true, true)]
         public void NullHandling(string filter, object unitsInStock, object unitsOnOrder, bool withNullPropagation, bool withoutNullPropagation)
         {
-            var filters = VerifyQueryDeserialization("$filter=" + filter);
+            var filters = VerifyQueryDeserialization("" + filter);
 
             RunFilters(filters,
                 new Product { UnitsInStock = ToNullable<short>(unitsInStock), UnitsOnOrder = ToNullable<short>(unitsOnOrder) },
@@ -370,7 +370,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("UnitsInStock ne null", null, false, false)]  // NULL != constant NULL is false when null propagation is enabled
         public void NullHandling_LiteralNull(string filter, object unitsInStock, bool withNullPropagation, bool withoutNullPropagation)
         {
-            var filters = VerifyQueryDeserialization("$filter=" + filter);
+            var filters = VerifyQueryDeserialization("" + filter);
 
             RunFilters(filters,
                 new Product { UnitsInStock = ToNullable<short>(unitsInStock) },
@@ -400,7 +400,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void Grouping(string productName, object unitsInStock, bool withNullPropagation, bool withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=((ProductName ne 'Doritos') or (UnitPrice lt 5.00m))",
+                "((ProductName ne 'Doritos') or (UnitPrice lt 5.00m))",
                 Error.Format("$it => (($it.ProductName != \"Doritos\") OrElse ($it.UnitPrice < Convert({0:0.00})))", 5.0),
                 NotTesting);
 
@@ -413,7 +413,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void MemberExpressions()
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=Category/CategoryName eq 'Snacks'",
+                "Category/CategoryName eq 'Snacks'",
                 "$it => ($it.Category.CategoryName == \"Snacks\")",
                 "$it => (IIF(($it.Category == null), null, $it.Category.CategoryName) == \"Snacks\")");
 
@@ -430,7 +430,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void MemberExpressionsRecursive()
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=Category/Product/Category/CategoryName eq 'Snacks'",
+                "Category/Product/Category/CategoryName eq 'Snacks'",
                 "$it => ($it.Category.Product.Category.CategoryName == \"Snacks\")",
                 NotTesting);
 
@@ -443,7 +443,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void ComplexPropertyNavigation()
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=SupplierAddress/City eq 'Redmond'",
+                "SupplierAddress/City eq 'Redmond'",
                 "$it => ($it.SupplierAddress.City == \"Redmond\")",
                 "$it => (IIF(($it.SupplierAddress == null), null, $it.SupplierAddress.City) == \"Redmond\")");
 
@@ -462,7 +462,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AnyOnNavigationEnumerableCollections()
         {
             var filters = VerifyQueryDeserialization(
-               "$filter=Category/EnumerableProducts/any(P: P/ProductName eq 'Snacks')",
+               "Category/EnumerableProducts/any(P: P/ProductName eq 'Snacks')",
                "$it => $it.Category.EnumerableProducts.Any(P => (P.ProductName == \"Snacks\"))",
                NotTesting);
 
@@ -498,7 +498,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AnyOnNavigationQueryableCollections()
         {
             var filters = VerifyQueryDeserialization(
-               "$filter=Category/QueryableProducts/any(P: P/ProductName eq 'Snacks')",
+               "Category/QueryableProducts/any(P: P/ProductName eq 'Snacks')",
                "$it => $it.Category.QueryableProducts.Any(P => (P.ProductName == \"Snacks\"))",
                NotTesting);
 
@@ -534,7 +534,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AnyOnNavigation_NullCollection()
         {
             var filters = VerifyQueryDeserialization(
-               "$filter=Category/EnumerableProducts/any(P: P/ProductName eq 'Snacks')",
+               "Category/EnumerableProducts/any(P: P/ProductName eq 'Snacks')",
                "$it => $it.Category.EnumerableProducts.Any(P => (P.ProductName == \"Snacks\"))",
                NotTesting);
 
@@ -565,7 +565,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AllOnNavigation_NullCollection()
         {
             var filters = VerifyQueryDeserialization(
-               "$filter=Category/EnumerableProducts/all(P: P/ProductName eq 'Snacks')",
+               "Category/EnumerableProducts/all(P: P/ProductName eq 'Snacks')",
                "$it => $it.Category.EnumerableProducts.All(P => (P.ProductName == \"Snacks\"))",
                NotTesting);
 
@@ -596,7 +596,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AnyOnNavigationEnumerableCollections_EmptyFilter()
         {
             VerifyQueryDeserialization(
-               "$filter=Category/EnumerableProducts/any()",
+               "Category/EnumerableProducts/any()",
                "$it => $it.Category.EnumerableProducts.Any()",
                NotTesting);
         }
@@ -605,7 +605,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AnyOnNavigationQueryableCollections_EmptyFilter()
         {
             VerifyQueryDeserialization(
-               "$filter=Category/QueryableProducts/any()",
+               "Category/QueryableProducts/any()",
                "$it => $it.Category.QueryableProducts.Any()",
                NotTesting);
         }
@@ -614,7 +614,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AllOnNavigationEnumerableCollections()
         {
             VerifyQueryDeserialization(
-               "$filter=Category/EnumerableProducts/all(P: P/ProductName eq 'Snacks')",
+               "Category/EnumerableProducts/all(P: P/ProductName eq 'Snacks')",
                "$it => $it.Category.EnumerableProducts.All(P => (P.ProductName == \"Snacks\"))",
                NotTesting);
         }
@@ -623,7 +623,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void AllOnNavigationQueryableCollections()
         {
             VerifyQueryDeserialization(
-               "$filter=Category/QueryableProducts/all(P: P/ProductName eq 'Snacks')",
+               "Category/QueryableProducts/all(P: P/ProductName eq 'Snacks')",
                "$it => $it.Category.QueryableProducts.All(P => (P.ProductName == \"Snacks\"))",
                NotTesting);
         }
@@ -632,7 +632,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void RecursiveAllAny()
         {
             var filter = VerifyQueryDeserialization(
-               "$filter=Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
+               "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
                "$it => $it.Category.QueryableProducts.All(P => P.Category.EnumerableProducts.Any(PP => (PP.ProductName == \"Snacks\")))",
                NotTesting);
         }
@@ -650,7 +650,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("Abcd", 5, "", true, typeof(ArgumentOutOfRangeException))]
         public void StringSubstringStart(string productName, int startIndex, string compareString, bool withNullPropagation, object withoutNullPropagation)
         {
-            string filter = string.Format("$filter=substring(ProductName, {0}) eq '{1}'", startIndex, compareString);
+            string filter = string.Format("substring(ProductName, {0}) eq '{1}'", startIndex, compareString);
             var filters = VerifyQueryDeserialization(filter);
 
             RunFilters(filters,
@@ -674,7 +674,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("Abcd", 5, -1, "", true, typeof(ArgumentOutOfRangeException))]
         public void StringSubstringStartAndLength(string productName, int startIndex, int length, string compareString, bool withNullPropagation, object withoutNullPropagation)
         {
-            string filter = string.Format("$filter=substring(ProductName, {0}, {1}) eq '{2}'", startIndex, length, compareString);
+            string filter = string.Format("substring(ProductName, {0}, {1}) eq '{2}'", startIndex, length, compareString);
             var filters = VerifyQueryDeserialization(filter);
 
             RunFilters(filters,
@@ -692,7 +692,7 @@ namespace System.Web.Http.OData.Query.Expressions
             // string.Contains expression
 
             var filters = VerifyQueryDeserialization(
-                "$filter=substringof('Abc', ProductName)",
+                "substringof('Abc', ProductName)",
                 "$it => $it.ProductName.Contains(\"Abc\")",
                 NotTesting);
 
@@ -701,7 +701,7 @@ namespace System.Web.Http.OData.Query.Expressions
               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
 
             filters = VerifyQueryDeserialization(
-                "$filter=substringof(ProductName, 'Abc')",
+                "substringof(ProductName, 'Abc')",
                 "$it => \"Abc\".Contains($it.ProductName)",
                 NotTesting);
         }
@@ -713,7 +713,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringStartsWith(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=startswith(ProductName, 'Abc')",
+                "startswith(ProductName, 'Abc')",
                 "$it => $it.ProductName.StartsWith(\"Abc\")",
                 NotTesting);
 
@@ -729,7 +729,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringEndsWith(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=endswith(ProductName, 'Abc')",
+                "endswith(ProductName, 'Abc')",
                 "$it => $it.ProductName.EndsWith(\"Abc\")",
                 NotTesting);
 
@@ -745,7 +745,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringLength(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=length(ProductName) gt 0",
+                "length(ProductName) gt 0",
                 "$it => ($it.ProductName.Length > 0)",
                 "$it => ((IIF(($it.ProductName == null), null, Convert($it.ProductName.Length)) > Convert(0)) == True)");
 
@@ -761,7 +761,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringIndexOf(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=indexof(ProductName, 'Abc') eq 5",
+                "indexof(ProductName, 'Abc') eq 5",
                 "$it => ($it.ProductName.IndexOf(\"Abc\") == 5)",
                 NotTesting);
 
@@ -777,7 +777,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringSubstring(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=substring(ProductName, 3) eq 'uctName'",
+                "substring(ProductName, 3) eq 'uctName'",
                 "$it => ($it.ProductName.Substring(3) == \"uctName\")",
                 NotTesting);
 
@@ -786,7 +786,7 @@ namespace System.Web.Http.OData.Query.Expressions
               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
 
             VerifyQueryDeserialization(
-                "$filter=substring(ProductName, 3, 4) eq 'uctN'",
+                "substring(ProductName, 3, 4) eq 'uctN'",
                 "$it => ($it.ProductName.Substring(3, 4) == \"uctN\")",
                 NotTesting);
         }
@@ -798,7 +798,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringToLower(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=tolower(ProductName) eq 'tasty treats'",
+                "tolower(ProductName) eq 'tasty treats'",
                 "$it => ($it.ProductName.ToLower() == \"tasty treats\")",
                 NotTesting);
 
@@ -814,7 +814,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringToUpper(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=toupper(ProductName) eq 'TASTY TREATS'",
+                "toupper(ProductName) eq 'TASTY TREATS'",
                 "$it => ($it.ProductName.ToUpper() == \"TASTY TREATS\")",
                 NotTesting);
 
@@ -830,7 +830,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringTrim(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=trim(ProductName) eq 'Tasty Treats'",
+                "trim(ProductName) eq 'Tasty Treats'",
                 "$it => ($it.ProductName.Trim() == \"Tasty Treats\")",
                 NotTesting);
 
@@ -843,7 +843,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringConcat()
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=concat('Food', 'Bar') eq 'FoodBar'",
+                "concat('Food', 'Bar') eq 'FoodBar'",
                 "$it => (Concat(\"Food\", \"Bar\") == \"FoodBar\")");
 
             RunFilters(filters,
@@ -855,7 +855,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void RecursiveMethodCall()
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=floor(floor(UnitPrice)) eq 123m",
+                "floor(floor(UnitPrice)) eq 123m",
                 "$it => (Floor(Floor($it.UnitPrice.Value)) == 123)",
                 "$it => ((IIF((IIF(($it.UnitPrice == null), null, Convert(Floor($it.UnitPrice.Value))) == null), null, Convert(Floor(Floor($it.UnitPrice.Value)))) == Convert(123)) == True)");
 
@@ -871,7 +871,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateDay()
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=day(DiscontinuedDate) eq 8",
+                "day(DiscontinuedDate) eq 8",
                 "$it => ($it.DiscontinuedDate.Value.Day == 8)",
                 NotTesting);
 
@@ -887,7 +887,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateDayNonNullable()
         {
             VerifyQueryDeserialization(
-                "$filter=day(NonNullableDiscontinuedDate) eq 8",
+                "day(NonNullableDiscontinuedDate) eq 8",
                 "$it => ($it.NonNullableDiscontinuedDate.Day == 8)");
         }
 
@@ -895,7 +895,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateMonth()
         {
             VerifyQueryDeserialization(
-                "$filter=month(DiscontinuedDate) eq 8",
+                "month(DiscontinuedDate) eq 8",
                 "$it => ($it.DiscontinuedDate.Value.Month == 8)",
                 NotTesting);
         }
@@ -904,7 +904,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateYear()
         {
             VerifyQueryDeserialization(
-                "$filter=year(DiscontinuedDate) eq 1974",
+                "year(DiscontinuedDate) eq 1974",
                 "$it => ($it.DiscontinuedDate.Value.Year == 1974)",
                 NotTesting);
         }
@@ -912,7 +912,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [Fact]
         public void DateHour()
         {
-            VerifyQueryDeserialization("$filter=hour(DiscontinuedDate) eq 8",
+            VerifyQueryDeserialization("hour(DiscontinuedDate) eq 8",
                 "$it => ($it.DiscontinuedDate.Value.Hour == 8)",
                 NotTesting);
         }
@@ -921,7 +921,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateMinute()
         {
             VerifyQueryDeserialization(
-                "$filter=minute(DiscontinuedDate) eq 12",
+                "minute(DiscontinuedDate) eq 12",
                 "$it => ($it.DiscontinuedDate.Value.Minute == 12)",
                 NotTesting);
         }
@@ -930,18 +930,18 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateSecond()
         {
             VerifyQueryDeserialization(
-                "$filter=second(DiscontinuedDate) eq 33",
+                "second(DiscontinuedDate) eq 33",
                 "$it => ($it.DiscontinuedDate.Value.Second == 33)",
                 NotTesting);
         }
 
         [Theory(Skip = "DateTimeOffsets are not handled well in the uri parser")]
-        [InlineData("$filter=year(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Year == 100")]
-        [InlineData("$filter=month(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Month == 100")]
-        [InlineData("$filter=day(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Day == 100")]
-        [InlineData("$filter=hour(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Hour == 100")]
-        [InlineData("$filter=minute(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Minute == 100")]
-        [InlineData("$filter=second(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Second == 100")]
+        [InlineData("year(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Year == 100")]
+        [InlineData("month(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Month == 100")]
+        [InlineData("day(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Day == 100")]
+        [InlineData("hour(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Hour == 100")]
+        [InlineData("minute(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Minute == 100")]
+        [InlineData("second(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Second == 100")]
         public void DateTimeOffsetFunctions(string filter, string expression)
         {
             VerifyQueryDeserialization(
@@ -950,12 +950,12 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory(Skip = "Timespans are not handled well in the uri parser")]
-        [InlineData("$filter=years(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Years == 100")]
-        [InlineData("$filter=months(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Months == 100")]
-        [InlineData("$filter=days(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Days == 100")]
-        [InlineData("$filter=hours(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Hours == 100")]
-        [InlineData("$filter=minutes(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Minutes == 100")]
-        [InlineData("$filter=seconds(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Seconds == 100")]
+        [InlineData("years(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Years == 100")]
+        [InlineData("months(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Months == 100")]
+        [InlineData("days(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Days == 100")]
+        [InlineData("hours(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Hours == 100")]
+        [InlineData("minutes(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Minutes == 100")]
+        [InlineData("seconds(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Seconds == 100")]
         public void TimespanFunctions(string filter, string expression)
         {
             VerifyQueryDeserialization(
@@ -973,7 +973,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void MathRound(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=round(UnitPrice) gt 5.00m",
+                "round(UnitPrice) gt 5.00m",
                 Error.Format("$it => (Round($it.UnitPrice.Value) > {0:0.00})", 5.0),
                 NotTesting);
 
@@ -989,7 +989,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void MathFloor(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=floor(UnitPrice) eq 5m",
+                "floor(UnitPrice) eq 5m",
                 "$it => (Floor($it.UnitPrice.Value) == 5)",
                 NotTesting);
 
@@ -1005,7 +1005,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void MathCeiling(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "$filter=ceiling(UnitPrice) eq 5m",
+                "ceiling(UnitPrice) eq 5m",
                 "$it => (Ceiling($it.UnitPrice.Value) == 5)",
                 NotTesting);
 
@@ -1020,12 +1020,12 @@ namespace System.Web.Http.OData.Query.Expressions
         public void GuidExpression()
         {
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=GuidProp eq guid'0EFDAECF-A9F0-42F3-A384-1295917AF95E'",
+                "GuidProp eq guid'0EFDAECF-A9F0-42F3-A384-1295917AF95E'",
                 "$it => ($it.GuidProp == 0efdaecf-a9f0-42f3-a384-1295917af95e)");
 
             // verify case insensitivity
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=GuidProp eq GuiD'0EFDAECF-A9F0-42F3-A384-1295917AF95E'",
+                "GuidProp eq GuiD'0EFDAECF-A9F0-42F3-A384-1295917AF95E'",
                 "$it => ($it.GuidProp == 0efdaecf-a9f0-42f3-a384-1295917af95e)");
         }
 
@@ -1037,7 +1037,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var dateTime = new DateTime(2000, 12, 12, 12, 0, 0);
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=" + clause,
+                "" + clause,
                 Error.Format(expectedExpression, dateTime));
         }
 
@@ -1053,7 +1053,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var dateTimeOffset = new DateTimeOffset(2002, 10, 10, 17, 0, 0, TimeSpan.FromHours(offsetHours));
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=" + clause,
+                "" + clause,
                 Error.Format(expectedExpression, dateTimeOffset));
         }
 
@@ -1062,11 +1062,11 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // long L
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=LongProp lt 987654321L and LongProp gt 123456789l",
+                "LongProp lt 987654321L and LongProp gt 123456789l",
                 "$it => (($it.LongProp < 987654321) AndAlso ($it.LongProp > 123456789))");
 
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=LongProp lt -987654321L and LongProp gt -123456789l",
+                "LongProp lt -987654321L and LongProp gt -123456789l",
                 "$it => (($it.LongProp < -987654321) AndAlso ($it.LongProp > -123456789))");
         }
 
@@ -1075,12 +1075,12 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // Float F
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=FloatProp lt 4321.56F and FloatProp gt 1234.56f",
+                "FloatProp lt 4321.56F and FloatProp gt 1234.56f",
                 Error.Format("$it => (($it.FloatProp < {0:0.00}) AndAlso ($it.FloatProp > {1:0.00}))", 4321.56, 1234.56));
 
             // Decimal M
             VerifyQueryDeserialization<DataTypes>(
-                "$filter=DecimalProp lt 4321.56M and DecimalProp gt 1234.56m",
+                "DecimalProp lt 4321.56M and DecimalProp gt 1234.56m",
                 Error.Format("$it => (($it.DecimalProp < {0:0.00}) AndAlso ($it.DecimalProp > {1:0.00}))", 4321.56, 1234.56));
         }
 
@@ -1100,20 +1100,58 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringLiterals(string literal, string expected)
         {
             VerifyQueryDeserialization<Product>(
-                "$filter=ProductName eq " + literal,
+                "ProductName eq " + literal,
                 String.Format("$it => ($it.ProductName == \"{0}\")", expected));
         }
+
+        [Theory]
+        [InlineData('$')]
+        [InlineData('&')]
+        [InlineData('+')]
+        [InlineData(',')]
+        [InlineData('/')]
+        [InlineData(':')]
+        [InlineData(';')]
+        [InlineData('=')]
+        [InlineData('?')]
+        [InlineData('@')]
+        [InlineData(' ')]
+        [InlineData('<')]
+        [InlineData('>')]
+        [InlineData('#')]
+        [InlineData('%')]
+        [InlineData('{')]
+        [InlineData('}')]
+        [InlineData('|')]
+        [InlineData('\\')]
+        [InlineData('^')]
+        [InlineData('~')]
+        [InlineData('[')]
+        [InlineData(']')]
+        [InlineData('`')]
+        public void SpecialCharactersInStringLiteral(char c)
+        {
+            var filters = VerifyQueryDeserialization<Product>(
+                "ProductName eq '" + c + "'",
+                String.Format("$it => ($it.ProductName == \"{0}\")", c));
+
+            RunFilters(
+                filters,
+                new Product { ProductName = c.ToString() },
+                new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
         #endregion
 
         [Theory]
-        [InlineData("$filter=UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
-        [InlineData("$filter=ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]
-        [InlineData("$filter=UIntProp eq 12", "$it => (Convert($it.UIntProp) == Convert(12))")]
-        [InlineData("$filter=CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
-        [InlineData("$filter=CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
-        // [InlineData("$filter=BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))")] , 
+        [InlineData("UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
+        [InlineData("ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]
+        [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == Convert(12))")]
+        [InlineData("CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
+        [InlineData("CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
+        // [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))")] , 
         // Issue 391: The above test doesn't work in linq2objects but works in linq2sql and EF.
-        [InlineData("$filter=XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
+        [InlineData("XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
         public void NonstandardEdmPrimtives(string filter, string expression)
         {
             var filters = VerifyQueryDeserialization<DataTypes>(filter, expression, NotTesting);
@@ -1133,10 +1171,10 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("$filter=NullableUShortProp eq 12", "$it => (Convert($it.NullableUShortProp.Value) == Convert(12))")]
-        [InlineData("$filter=NullableULongProp eq 12L", "$it => (Convert($it.NullableULongProp.Value) == Convert(12))")]
-        [InlineData("$filter=NullableUIntProp eq 12", "$it => (Convert($it.NullableUIntProp.Value) == Convert(12))")]
-        [InlineData("$filter=NullableCharProp eq 'a'", "$it => ($it.NullableCharProp.Value.ToString() == \"a\")")]
+        [InlineData("NullableUShortProp eq 12", "$it => (Convert($it.NullableUShortProp.Value) == Convert(12))")]
+        [InlineData("NullableULongProp eq 12L", "$it => (Convert($it.NullableULongProp.Value) == Convert(12))")]
+        [InlineData("NullableUIntProp eq 12", "$it => (Convert($it.NullableUIntProp.Value) == Convert(12))")]
+        [InlineData("NullableCharProp eq 'a'", "$it => ($it.NullableCharProp.Value.ToString() == \"a\")")]
         public void Nullable_NonstandardEdmPrimitives(string filter, string expression)
         {
             var filters = VerifyQueryDeserialization<DataTypes>(filter, expression, NotTesting);
@@ -1153,7 +1191,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Assert.Throws<ODataException>(() =>
                 VerifyQueryDeserialization(
-                "$filter=length(123) eq 12",
+                "length(123) eq 12",
                 ""));
         }
 
@@ -1163,13 +1201,13 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             return new TheoryDataSet<string>
                 {
-                    "$filter=" + String.Join(" and ", Enumerable.Range(1, (maxCount/5) + 1).Select(_ => "SupplierID eq 1")),
-                    "$filter=" + String.Join(" ", Enumerable.Range(1, maxCount).Select(_ => "not")) + " Discontinued",
-                    "$filter=" + String.Join(" add ", Enumerable.Range(1, maxCount/2)) + " eq 5050",
-                    "$filter=" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/ProductID eq 1",
-                    "$filter=" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/UnsignedReorderLevel eq 1",
-                    "$filter=" + Enumerable.Range(1,maxCount).Aggregate("'abc'", (prev,i) => String.Format("trim({0})", prev)) + " eq '123'",
-                    "$filter= Category/Products/any(" + Enumerable.Range(1,maxCount/4).Aggregate("", (prev,i) => String.Format("p{1}: p{1}/Category/Products/any({0})", prev, i)) +")"
+                    "" + String.Join(" and ", Enumerable.Range(1, (maxCount/5) + 1).Select(_ => "SupplierID eq 1")),
+                    "" + String.Join(" ", Enumerable.Range(1, maxCount).Select(_ => "not")) + " Discontinued",
+                    "" + String.Join(" add ", Enumerable.Range(1, maxCount/2)) + " eq 5050",
+                    "" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/ProductID eq 1",
+                    "" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/UnsignedReorderLevel eq 1",
+                    "" + Enumerable.Range(1,maxCount).Aggregate("'abc'", (prev,i) => String.Format("trim({0})", prev)) + " eq '123'",
+                    " Category/Products/any(" + Enumerable.Range(1,maxCount/4).Aggregate("", (prev,i) => String.Format("p{1}: p{1}/Category/Products/any({0})", prev, i)) +")"
                 };
         }
 
@@ -1209,7 +1247,7 @@ namespace System.Web.Http.OData.Query.Expressions
         private dynamic VerifyQueryDeserialization<T>(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null) where T : class
         {
             IEdmModel model = GetModel<T>();
-            var queryUri = new Uri(_serviceBaseUri, string.Format("Products?{0}", filter));
+            var queryUri = new Uri(_serviceBaseUri, string.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
 
             var semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
 

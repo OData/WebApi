@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Web.Http.OData.Properties;
@@ -83,7 +82,7 @@ namespace System.Web.Http.OData.Query
                     // TODO: Bug 462293: Review this code with Alex!
                     // 1. Do I need to create this fake uri?
                     Uri fakeServiceRootUri = new Uri("http://server/");
-                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, String.Format(CultureInfo.InvariantCulture, "{0}/?$orderby={1}", Context.EntitySet.Name, RawValue));
+                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, String.Format(CultureInfo.InvariantCulture, "{0}/?$orderby={1}", Context.EntitySet.Name, Uri.EscapeDataString(RawValue)));
                     SemanticTree semanticTree = SemanticTree.ParseUri(fakeQueryOptionsUri, fakeServiceRootUri, Context.Model);
                     _queryNode = semanticTree.Query as OrderByQueryNode;
                 }

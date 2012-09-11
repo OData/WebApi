@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Runtime.Serialization;
+
 namespace System.Web.Http.OData
 {
+    [DataContract]
     public abstract class ODataResult
     {
         private long? _count;
@@ -12,12 +15,14 @@ namespace System.Web.Http.OData
             Count = count;
         }
 
+        [DataMember]
         public Uri NextPageLink
         {
             get;
             private set;
         }
 
+        [DataMember]
         public long? Count
         {
             get 

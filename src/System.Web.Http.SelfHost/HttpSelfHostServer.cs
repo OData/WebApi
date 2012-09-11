@@ -1040,14 +1040,32 @@ namespace System.Web.Http.SelfHost
             /// Releases unmanaged and - optionally - managed resources
             /// </summary>
             /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged SRResources.</param>
+            [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail here so we have to catch all exceptions.")]
             protected virtual void Dispose(bool disposing)
             {
                 if (!_disposed)
                 {
                     if (disposing)
                     {
-                        RequestContext.Close();
-                        Reply.Close();
+                        // RequestContext.Close can throw if the client disconnects before it finishes receiving the response
+                        // Catch here to avoid throwing in a Dispose method
+                        try
+                        {
+                            RequestContext.Close();
+                        }
+                        catch
+                        {
+                        }
+
+                        // HttpMessage.Close can throw if the request message throws in its Dispose implementation
+                        // Catch here to avoid throwing in a Dispose method
+                        try
+                        {
+                            Reply.Close();
+                        }
+                        catch
+                        {
+                        }
                     }
 
                     _disposed = true;

@@ -192,7 +192,7 @@
     <Compile Include="OData\Formatter\Serialization\ComplexTypeTest.cs" />
     <Compile Include="OData\Formatter\Serialization\EntityTypeTest.cs" />
     <Compile Include="OData\Formatter\Serialization\FeedTest.cs" />
-    <Compile Include="OData\Formatter\Serialization\PrimitiveTypesTest.cs" />
+    <Compile Include="OData\Formatter\PrimitiveTypesTest.cs" />
     <Compile Include="OData\Formatter\Serialization\SerializationTestsHelpers.cs" />
     <Compile Include="TestCommon\Models\ComplexTypes\Attributed\Person.cs" />
     <Compile Include="TestCommon\Models\ComplexTypes\POCO\Address.cs" />

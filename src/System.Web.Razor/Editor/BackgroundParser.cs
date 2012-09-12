@@ -17,9 +17,12 @@ namespace System.Web.Razor.Editor
         private MainThreadState _main;
         private BackgroundThread _bg;
 
-        public bool IsIdle
+        public BackgroundParser(RazorEngineHost host, string fileName)
         {
-            get { return _main.IsIdle; }
+            _main = new MainThreadState(fileName);
+            _bg = new BackgroundThread(_main, host, fileName);
+
+            _main.ResultsReady += (sender, args) => OnResultsReady(args);
         }
 
         /// <summary>
@@ -27,12 +30,9 @@ namespace System.Web.Razor.Editor
         /// </summary>
         public event EventHandler<DocumentParseCompleteEventArgs> ResultsReady;
 
-        public BackgroundParser(RazorEngineHost host, string fileName)
+        public bool IsIdle
         {
-            _main = new MainThreadState(fileName);
-            _bg = new BackgroundThread(_main, host, fileName);
-
-            _main.ResultsReady += (sender, args) => OnResultsReady(args);
+            get { return _main.IsIdle; }
         }
 
         public void Start()
@@ -144,25 +144,29 @@ namespace System.Web.Razor.Editor
             private object _stateLock = new object();
             private IList<TextChange> _changes = new List<TextChange>();
 
-            public CancellationToken CancelToken { get { return _cancelSource.Token; } }
-
-            public event EventHandler<DocumentParseCompleteEventArgs> ResultsReady;
-
-            public bool IsIdle
-            {
-                get {
-                    lock (_stateLock)
-                    {
-                        return _currentParcelCancelSource == null;
-                    }
-                }
-            }
-
             public MainThreadState(string fileName)
             {
                 _fileName = fileName;
 
                 SetThreadId(Thread.CurrentThread.ManagedThreadId);
+            }
+
+            public event EventHandler<DocumentParseCompleteEventArgs> ResultsReady;
+
+            public CancellationToken CancelToken
+            {
+                get { return _cancelSource.Token; }
+            }
+
+            public bool IsIdle
+            {
+                get
+                {
+                    lock (_stateLock)
+                    {
+                        return _currentParcelCancelSource == null;
+                    }
+                }
             }
 
             public void Cancel()
@@ -253,7 +257,7 @@ namespace System.Web.Razor.Editor
         private class BackgroundThread : ThreadStateBase
         {
             private MainThreadState _main;
-            private Thread _bgThread;
+            private Thread _backgroundThread;
             private CancellationToken _shutdownToken;
             private RazorEngineHost _host;
             private string _fileName;
@@ -264,18 +268,18 @@ namespace System.Web.Razor.Editor
             {
                 // Run on MAIN thread!
                 _main = main;
-                _bgThread = new Thread(WorkerLoop);
+                _backgroundThread = new Thread(WorkerLoop);
                 _shutdownToken = _main.CancelToken;
                 _host = host;
                 _fileName = fileName;
 
-                SetThreadId(_bgThread.ManagedThreadId);
+                SetThreadId(_backgroundThread.ManagedThreadId);
             }
 
             // **** ANY THREAD ****
             public void Start()
             {
-                _bgThread.Start();
+                _backgroundThread.Start();
             }
 
             // **** BACKGROUND THREAD ****
@@ -444,14 +448,14 @@ namespace System.Web.Razor.Editor
 
         private class WorkParcel
         {
-            public CancellationToken CancelToken { get; private set; }
-            public IList<TextChange> Changes { get; private set; }
-
             public WorkParcel(IList<TextChange> changes, CancellationToken cancelToken)
             {
                 Changes = changes;
                 CancelToken = cancelToken;
             }
+
+            public CancellationToken CancelToken { get; private set; }
+            public IList<TextChange> Changes { get; private set; }
         }
     }
 }

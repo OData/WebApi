@@ -38,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
@@ -195,6 +195,9 @@
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting\ObjectContent.cs">
       <Link>ObjectContent.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\ObjectContentOfT.cs">
+      <Link>ObjectContentOfT.cs</Link>
     </Compile>
     <Compile Include="..\System.Net.Http.Formatting\PushStreamContent.cs">
       <Link>PushStreamContent.cs</Link>

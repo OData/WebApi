@@ -384,4 +384,16 @@
   <data name="UnsupportedEdmTypeKind" xml:space="preserve">
     <value>Found unsupported EdmTypeKind '{0}' in list of available types.</value>
   </data>
+  <data name="CannotDefineKeysOnDerivedTypes" xml:space="preserve">
+    <value>Cannot define keys on type '{0}' deriving from '{1}'. Only the root type in the entity inheritance hierarchy can contain keys.</value>
+  </data>
+  <data name="CannotRedefineBaseTypeProperty" xml:space="preserve">
+    <value>Cannot redefine property '{0}' already defined on the base type '{1}'.</value>
+  </data>
+  <data name="TypeDoesNotInheritFromBaseType" xml:space="preserve">
+    <value>'{0}' does not inherit from '{1}'.</value>
+  </data>
+  <data name="PropertyAlreadyDefinedInDerivedType" xml:space="preserve">
+    <value>Cannot define property '{0}' in the base entity type '{1}' as the derived type '{2}' already defines it.</value>
+  </data>
 </root>

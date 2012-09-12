@@ -107,6 +107,8 @@
     <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Formatter\PartialTrustTest.cs" />
+    <Compile Include="OData\Builder\EdmTypeConfigurationExtensionsTest.cs" />
+    <Compile Include="OData\Builder\TestModels\InheritanceModels.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItemTests.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConventionTest.cs" />
@@ -126,7 +128,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeConventionTests.cs" />
-    <Compile Include="OData\Builder\Conventions\EdmModelAsserts.cs" />
+    <Compile Include="OData\Builder\EdmModelAsserts.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOptionHelperTest.cs" />
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />

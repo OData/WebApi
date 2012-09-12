@@ -8,28 +8,46 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
-    // TODO: support inheritance
     // TODO: add support for FK properties
     // CUT: support for bi-directional properties
+
+    /// <summary>
+    /// Represents an <see cref="IEdmEntityType"/> that can be built using <see cref="ODataModelBuilder"/>.
+    /// </summary>
     public class EntityTypeConfiguration : StructuralTypeConfiguration, IEntityTypeConfiguration
     {
         private List<PrimitivePropertyConfiguration> _keys = new List<PrimitivePropertyConfiguration>();
+        private IEntityTypeConfiguration _baseType;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="EntityTypeConfiguration"/>.
+        /// </summary>
+        /// <param name="modelBuilder">The <see cref="ODataModelBuilder"/> being used.</param>
+        /// <param name="clrType">The backing CLR type for this entity type.</param>
         public EntityTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
             : base(modelBuilder, clrType)
         {
         }
 
+        /// <summary>
+        /// Gets the <see cref="EdmTypeKind"/> of this <see cref="IEdmTypeConfiguration"/>
+        /// </summary>
         public override EdmTypeKind Kind
         {
             get { return EdmTypeKind.Entity; }
         }
 
+        /// <summary>
+        /// Gets the collection of <see cref="NavigationPropertyConfiguration"/> of this entity type.
+        /// </summary>
         public IEnumerable<NavigationPropertyConfiguration> NavigationProperties
         {
             get { return ExplicitProperties.Values.OfType<NavigationPropertyConfiguration>(); }
         }
 
+        /// <summary>
+        /// Gets the collection of keys for this entity type.
+        /// </summary>
         public IEnumerable<PrimitivePropertyConfiguration> Keys
         {
             get
@@ -38,13 +56,49 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this type is abstract.
+        /// </summary>
+        public bool IsAbstract { get; set; }
+
+        /// <summary>
+        /// Gets or sets the base type of this entity type.
+        /// </summary>
         public IEntityTypeConfiguration BaseType
         {
-            get { return null; }
+            get
+            {
+                return _baseType;
+            }
+
+            set
+            {
+                DerivesFrom(value);
+            }
         }
 
+        /// <summary>
+        /// Marks this entity type as abstract.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public IEntityTypeConfiguration Abstract()
+        {
+            IsAbstract = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the key property(s) for this entity type.
+        /// </summary>
+        /// <param name="keyProperty">The property to be added to the key properties of this entity type.</param>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public IEntityTypeConfiguration HasKey(PropertyInfo keyProperty)
         {
+            if (BaseType != null)
+            {
+                throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, BaseType.FullName);
+            }
+
             PrimitivePropertyConfiguration propertyConfig = AddProperty(keyProperty);
 
             // keys are always required
@@ -58,6 +112,88 @@ namespace System.Web.Http.OData.Builder
             return this;
         }
 
+        /// <summary>
+        /// Sets the base type of this entity type.
+        /// </summary>
+        /// <param name="baseType">The base entity type.</param>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public IEntityTypeConfiguration DerivesFrom(IEntityTypeConfiguration baseType)
+        {
+            if (baseType == null)
+            {
+                throw Error.ArgumentNull("baseType");
+            }
+
+            if (!baseType.ClrType.IsAssignableFrom(ClrType) || baseType.ClrType == ClrType)
+            {
+                throw Error.InvalidOperation(SRResources.TypeDoesNotInheritFromBaseType, ClrType.FullName, baseType.ClrType.FullName);
+            }
+
+            if (Keys.Any())
+            {
+                throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, baseType.FullName);
+            }
+
+            _baseType = baseType;
+
+            foreach (PropertyConfiguration property in Properties)
+            {
+                ValidatePropertyNotAlreadyDefinedInBaseTypes(property.PropertyInfo);
+            }
+
+            foreach (PropertyConfiguration property in this.DerivedProperties())
+            {
+                ValidatePropertyNotAlreadyDefinedInDerivedTypes(property.PropertyInfo);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a new EDM primitive property to this entity type.
+        /// </summary>
+        /// <param name="propertyInfo">The backing CLR property.</param>
+        /// <returns>Returns the <see cref="PrimitivePropertyConfiguration"/> of the added property.</returns>
+        public override PrimitivePropertyConfiguration AddProperty(PropertyInfo propertyInfo)
+        {
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
+
+            return base.AddProperty(propertyInfo);
+        }
+
+        /// <summary>
+        /// Adds a new EDM complex property to this entity type.
+        /// </summary>
+        /// <param name="propertyInfo">The backing CLR property.</param>
+        /// <returns>Returns the <see cref="ComplexPropertyConfiguration"/> of the added property.</returns>
+        public override ComplexPropertyConfiguration AddComplexProperty(PropertyInfo propertyInfo)
+        {
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
+
+            return base.AddComplexProperty(propertyInfo);
+        }
+
+        /// <summary>
+        /// Adds a new EDM collection property to this entity type.
+        /// </summary>
+        /// <param name="propertyInfo">The backing CLR property.</param>
+        /// <returns>Returns the <see cref="CollectionPropertyConfiguration"/> of the added property.</returns>
+        public override CollectionPropertyConfiguration AddCollectionProperty(PropertyInfo propertyInfo)
+        {
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
+
+            return base.AddCollectionProperty(propertyInfo);
+        }
+
+        /// <summary>
+        /// Adds a new EDM navigation property to this entity type.
+        /// </summary>
+        /// <param name="navigationProperty">The backing CLR property.</param>
+        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
+        /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
         public NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
             if (navigationProperty == null)
@@ -69,6 +205,9 @@ namespace System.Web.Http.OData.Builder
             {
                 throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }
+
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(navigationProperty);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(navigationProperty);
 
             PropertyConfiguration propertyConfig;
             NavigationPropertyConfiguration navigationPropertyConfig;
@@ -95,6 +234,33 @@ namespace System.Web.Http.OData.Builder
                 ModelBuilder.AddEntity(navigationPropertyConfig.RelatedClrType);
             }
             return navigationPropertyConfig;
+        }
+
+        public override void RemoveProperty(PropertyInfo propertyInfo)
+        {
+            base.RemoveProperty(propertyInfo);
+            _keys.RemoveAll(p => p.PropertyInfo == propertyInfo);
+        }
+
+        private void ValidatePropertyNotAlreadyDefinedInBaseTypes(PropertyInfo propertyInfo)
+        {
+            PropertyConfiguration baseProperty = this.DerivedProperties().Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
+            if (baseProperty != null)
+            {
+                throw Error.InvalidOperation(SRResources.CannotRedefineBaseTypeProperty, propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
+            }
+        }
+
+        private void ValidatePropertyNotAlreadyDefinedInDerivedTypes(PropertyInfo propertyInfo)
+        {
+            foreach (IEntityTypeConfiguration derivedEntity in ModelBuilder.DerivedTypes(this))
+            {
+                PropertyConfiguration propertyInDerivedType = derivedEntity.Properties.Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
+                if (propertyInDerivedType != null)
+                {
+                    throw Error.InvalidOperation(SRResources.PropertyAlreadyDefinedInDerivedType, propertyInfo.Name, FullName, derivedEntity.FullName);
+                }
+            }
         }
     }
 }

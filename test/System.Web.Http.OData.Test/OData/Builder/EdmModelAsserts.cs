@@ -7,7 +7,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.Builder.Conventions
+namespace System.Web.Http.OData.Builder
 {
     public static class EdmModelAsserts
     {
@@ -25,6 +25,15 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.NotNull(entityType);
             Assert.Equal(entityType, entitySet.ElementType);
             return entityType;
+        }
+
+        public static IEdmEntityType AssertHasEntityType(this IEdmModel model, Type mappedEntityClrType, Type mappedEntityBaseType)
+        {
+            IEdmEntityType entity = AssertHasEntityType(model, mappedEntityClrType);
+            IEdmEntityType baseEntity = AssertHasEntityType(model, mappedEntityBaseType);
+
+            Assert.Equal(baseEntity, entity.BaseEntityType());
+            return entity;
         }
 
         public static IEdmEntityType AssertHasEntityType(this IEdmModel model, Type mappedEntityClrType)

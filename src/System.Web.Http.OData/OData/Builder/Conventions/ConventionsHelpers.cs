@@ -15,11 +15,6 @@ namespace System.Web.Http.OData.Builder.Conventions
     {
         private static HashSet<Type> _ignoredCollectionTypes = new HashSet<Type>(new Type[] { typeof(string) });
 
-        public static bool IsEntityType(Type type)
-        {
-            return GetKeyProperty(type) != null;
-        }
-
         public static PropertyInfo GetKeyProperty(Type entityType, bool throwOnError = false)
         {
             IEnumerable<PropertyInfo> keys = entityType.GetProperties()

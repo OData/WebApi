@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
@@ -26,11 +27,13 @@ namespace System.Web.Http.OData.Builder
         {
             // Reset
             _types.Clear();
+
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
-                _types.Add(config.ClrType, CreateEdmTypeHeader(config));
+                CreateEdmTypeHeader(config);
             }
+
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeBody(config);
@@ -39,6 +42,34 @@ namespace System.Web.Http.OData.Builder
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
                 yield return _types[config.ClrType];
+            }
+        }
+
+        private void CreateEdmTypeHeader(IStructuralTypeConfiguration config)
+        {
+            if (!_types.ContainsKey(config.ClrType))
+            {
+                if (config.Kind == EdmTypeKind.Complex)
+                {
+                    _types.Add(config.ClrType, new EdmComplexType(config.Namespace, config.Name));
+                }
+                else
+                {
+                    IEntityTypeConfiguration entity = config as IEntityTypeConfiguration;
+                    Contract.Assert(entity != null);
+
+                    IEdmEntityType baseType = null;
+
+                    if (entity.BaseType != null)
+                    {
+                        CreateEdmTypeHeader(entity.BaseType);
+                        baseType = _types[entity.BaseType.ClrType] as IEdmEntityType;
+
+                        Contract.Assert(baseType != null);
+                    }
+
+                    _types.Add(config.ClrType, new EdmEntityType(config.Namespace, config.Name, baseType, entity.IsAbstract, isOpen: false));
+                }
             }
         }
 
@@ -62,7 +93,7 @@ namespace System.Web.Http.OData.Builder
         private void CreateStructuralTypeBody(EdmStructuredType type, IStructuralTypeConfiguration config)
         {
             foreach (PropertyConfiguration property in config.Properties)
-            { 
+            {
                 switch (property.Kind)
                 {
                     case PropertyKind.Primitive:
@@ -88,11 +119,11 @@ namespace System.Web.Http.OData.Builder
                         if (_types.ContainsKey(collectionProperty.ElementType))
                         {
                             IEdmComplexType elementType = _types[collectionProperty.ElementType] as IEdmComplexType;
-                            elementTypeReference = new EdmComplexTypeReference(elementType, false);                
+                            elementTypeReference = new EdmComplexTypeReference(elementType, false);
                         }
-                        else 
+                        else
                         {
-                            elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);      
+                            elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
                         }
                         type.AddStructuralProperty(
                             collectionProperty.PropertyInfo.Name,
@@ -160,18 +191,6 @@ namespace System.Web.Http.OData.Builder
             }
 
             return primitiveType.PrimitiveKind;
-        }
-
-        private static IEdmStructuredType CreateEdmTypeHeader(IStructuralTypeConfiguration config)
-        {
-            if (config.Kind == EdmTypeKind.Complex)
-            {
-                return new EdmComplexType(config.Namespace, config.Name);
-            }
-            else
-            {
-                return new EdmEntityType(config.Namespace, config.Name);
-            }
         }
     }
 }

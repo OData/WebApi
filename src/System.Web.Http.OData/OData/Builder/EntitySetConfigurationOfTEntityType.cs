@@ -16,9 +16,6 @@ namespace System.Web.Http.OData.Builder
         public EntitySetConfiguration(ODataModelBuilder modelBuilder, string name)
             : this(modelBuilder, new EntitySetConfiguration(modelBuilder, typeof(TEntityType), name))
         {
-            _configuration = new EntitySetConfiguration(modelBuilder, typeof(TEntityType), name);
-            _entityType = new EntityTypeConfiguration<TEntityType>(_configuration.EntityType); // TBD: fix this
-            _modelBuilder = modelBuilder;
         }
 
         public EntitySetConfiguration(ODataModelBuilder modelBuilder, IEntitySetConfiguration configuration)
@@ -35,7 +32,7 @@ namespace System.Web.Http.OData.Builder
 
             _configuration = configuration;
             _modelBuilder = modelBuilder;
-            _entityType = new EntityTypeConfiguration<TEntityType>(_configuration.EntityType);
+            _entityType = new EntityTypeConfiguration<TEntityType>(modelBuilder, _configuration.EntityType);
         }
 
         public EntityTypeConfiguration<TEntityType> EntityType
@@ -166,7 +163,7 @@ namespace System.Web.Http.OData.Builder
 
             _configuration.HasFeedSelfLink(feedSelfLinkFactory);
         }
-        
+
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         public void HasEditLink(Func<EntityInstanceContext<TEntityType>, string> editLinkFactory)
         {

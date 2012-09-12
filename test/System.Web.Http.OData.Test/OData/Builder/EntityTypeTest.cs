@@ -98,5 +98,243 @@ namespace System.Web.Http.OData.Builder
             var edmCustomerType = model.FindType(typeof(Customer).FullName) as IEdmEntityType;
             var edmAddressType = model.FindType(typeof(Address).FullName) as IEdmComplexType;
         }
+
+        [Fact]
+        public void CanCreateAbstractEntityType()
+        {
+            var builder = new ODataModelBuilder();
+            builder
+                .Entity<Vehicle>()
+                .Abstract();
+
+            var model = builder.GetEdmModel();
+            var edmCustomerType = model.FindType(typeof(Vehicle).FullName) as IEdmEntityType;
+            Assert.True(edmCustomerType != null);
+            Assert.True(edmCustomerType.IsAbstract);
+        }
+
+        [Fact]
+        public void CanCreateDerivedtypes()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Vehicle>()
+                .Abstract()
+                .HasKey(v => v.Model)
+                .HasKey(v => v.Name)
+                .Property(v => v.WheelCount);
+
+            builder
+                .Entity<Motorcycle>()
+                .DerivesFrom<Vehicle>()
+                .Property(m => m.CanDoAWheelie);
+
+            builder
+                .Entity<Car>()
+                .DerivesFrom<Vehicle>()
+                .Property(c => c.SeatingCapacity);
+
+            var model = builder.GetEdmModel();
+
+            var edmVehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Null(edmVehicle.BaseEntityType());
+            Assert.Equal(2, edmVehicle.Key().Count());
+            edmVehicle.AssertHasKey(model, "Model", EdmPrimitiveTypeKind.Int32);
+            edmVehicle.AssertHasKey(model, "Name", EdmPrimitiveTypeKind.String);
+            Assert.Equal(3, edmVehicle.Properties().Count());
+            edmVehicle.AssertHasPrimitiveProperty(model, "WheelCount", EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var edmMotorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            Assert.Equal(edmVehicle, edmMotorcycle.BaseEntityType());
+            Assert.Equal(2, edmMotorcycle.Key().Count());
+            edmMotorcycle.AssertHasKey(model, "Model", EdmPrimitiveTypeKind.Int32);
+            edmMotorcycle.AssertHasKey(model, "Name", EdmPrimitiveTypeKind.String);
+            Assert.Equal(4, edmMotorcycle.Properties().Count());
+            edmMotorcycle.AssertHasPrimitiveProperty(model, "WheelCount", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            edmMotorcycle.AssertHasPrimitiveProperty(model, "CanDoAWheelie", EdmPrimitiveTypeKind.Boolean, isNullable: false);
+
+            var edmCar = model.AssertHasEntityType(typeof(Car));
+            Assert.Equal(edmVehicle, edmMotorcycle.BaseEntityType());
+            Assert.Equal(2, edmCar.Key().Count());
+            edmCar.AssertHasKey(model, "Model", EdmPrimitiveTypeKind.Int32);
+            edmCar.AssertHasKey(model, "Name", EdmPrimitiveTypeKind.String);
+            Assert.Equal(4, edmCar.Properties().Count());
+            edmCar.AssertHasPrimitiveProperty(model, "WheelCount", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            edmCar.AssertHasPrimitiveProperty(model, "SeatingCapacity", EdmPrimitiveTypeKind.Int32, isNullable: false);
+        }
+
+        [Fact]
+        public void CanCreateDerivedTypesInAnyOrder()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Cruiser>()
+                .DerivesFrom<Motorcycle>();
+
+            builder
+                .Entity<Car>()
+                .DerivesFrom<Vehicle>();
+
+            builder
+                .Entity<Vehicle>();
+
+            builder
+                .Entity<Motorcycle>()
+                .DerivesFrom<Vehicle>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntityType(typeof(Vehicle));
+            model.AssertHasEntityType(typeof(Car), typeof(Vehicle));
+            model.AssertHasEntityType(typeof(Motorcycle), typeof(Vehicle));
+            model.AssertHasEntityType(typeof(Cruiser), typeof(Motorcycle));
+        }
+
+        [Fact]
+        public void HasKeyOnDerivedTypes_Throws()
+        {
+            var builder = new ODataModelBuilder();
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder
+                        .Entity<Motorcycle>()
+                        .DerivesFrom<Vehicle>()
+                        .HasKey(m => m.ID),
+                "Cannot define keys on type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.Http.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
+        }
+
+        [Fact]
+        public void CanDefinePropertyOnDerivedType_NotPresentInBaseEdmType_ButPresentInBaseClrType()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Motorcycle>()
+                .DerivesFrom<Vehicle>()
+                .Property(m => m.Model);
+
+            var model = builder.GetEdmModel();
+
+            var edmVehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Null(edmVehicle.BaseEntityType());
+            Assert.Equal(0, edmVehicle.Properties().Count());
+
+            var edmMotorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            Assert.Equal(edmVehicle, edmMotorcycle.BaseEntityType());
+            Assert.Equal(1, edmMotorcycle.Properties().Count());
+            edmMotorcycle.AssertHasPrimitiveProperty(model, "Model", EdmPrimitiveTypeKind.Int32, isNullable: false);
+        }
+
+        [Fact]
+        public void RedefiningBaseTypeProperty_Throws()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Vehicle>()
+                .Property(v => v.WheelCount);
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder
+                        .Entity<Motorcycle>()
+                        .DerivesFrom<Vehicle>()
+                        .Property(m => m.WheelCount),
+                "Cannot redefine property 'WheelCount' already defined on the base type 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+        }
+
+        [Fact]
+        public void DefiningPropertyOnBaseTypeAlreadyPresentInDerivedType_Throws()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Motorcycle>()
+                .DerivesFrom<Vehicle>()
+                .Property(m => m.Model);
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder
+                        .Entity<Vehicle>()
+                        .Property(v => v.Model),
+                "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' already defines it.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_IfDerivedTypeHasKeys()
+        {
+            var builder = new ODataModelBuilder();
+
+            Assert.Throws<InvalidOperationException>(
+            () => builder
+                    .Entity<Motorcycle>()
+                    .HasKey(m => m.Model)
+                    .DerivesFrom<Vehicle>(),
+            "Cannot define keys on type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.Http.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_IfDerivedTypeDoesntDeriveFromBaseType()
+        {
+            var builder = new ODataModelBuilder();
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder
+                        .Entity<string>()
+                        .DerivesFrom<Vehicle>(),
+                "'System.String' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_WhenSettingTheBaseType_IfDuplicatePropertyInBaseType()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Vehicle>()
+                .Property(v => v.Model);
+
+            var motorcycle = builder
+                            .Entity<Motorcycle>();
+            motorcycle.Property(m => m.Model);
+
+            Assert.Throws<InvalidOperationException>(
+                () => motorcycle.DerivesFrom<Vehicle>(),
+                "Cannot redefine property 'Model' already defined on the base type 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_WhenSettingTheBaseType_IfDuplicatePropertyInDerivedType()
+        {
+            var builder = new ODataModelBuilder();
+
+            builder
+                .Entity<Vehicle>()
+                .Property(v => v.Model);
+
+            builder
+                .Entity<Cruiser>()
+                .DerivesFrom<Motorcycle>()
+                .Property(c => c.Model);
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder
+                    .Entity<Motorcycle>()
+                    .DerivesFrom<Vehicle>(),
+                "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.Http.OData.Builder.TestModels.Cruiser' already defines it.");
+        }
+
+        [Fact]
+        public void CannotDeriveFromItself()
+        {
+            var builder = new ODataModelBuilder();
+
+            Assert.Throws<InvalidOperationException>(
+            () => builder
+                .Entity<Vehicle>()
+                .DerivesFrom<Vehicle>(),
+            "'System.Web.Http.OData.Builder.TestModels.Vehicle' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
+        }
     }
 }

@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Builder
         /// <returns>The configuration object for the specified entity type.</returns>
         public EntityTypeConfiguration<TEntityType> Entity<TEntityType>() where TEntityType : class
         {
-            return new EntityTypeConfiguration<TEntityType>(AddEntity(typeof(TEntityType)));
+            return new EntityTypeConfiguration<TEntityType>(this, AddEntity(typeof(TEntityType)));
         }
 
         /// <summary>

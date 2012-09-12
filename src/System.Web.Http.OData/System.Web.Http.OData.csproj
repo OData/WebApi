@@ -129,6 +129,7 @@
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConvention.cs" />
     <Compile Include="OData\Builder\EdmTypeBuilder.cs" />
     <Compile Include="OData\Builder\EntityCollectionConfigurationOfTEntityType.cs" />
+    <Compile Include="OData\Builder\EdmTypeConfigurationExtensions.cs" />
     <Compile Include="OData\Builder\EntitySetConfiguration.cs" />
     <Compile Include="OData\Builder\EntitySetConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\EntityTypeConfiguration.cs" />

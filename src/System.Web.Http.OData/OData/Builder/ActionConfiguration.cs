@@ -122,7 +122,7 @@ namespace System.Web.Http.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public ActionConfiguration ReturnsCollection<TReturnElementType>()
         {
-            // TODO: I don't like this hack that says the CLR type of the collection is IEnumerable<T>.
+            // TODO: I don't like this temporary solution that says the CLR type of the collection is IEnumerable<T>.
             // It basically has no meaning. That said the CLR type is meaningful for IEdmTypeConfiguration
             // because I still think it is useful for IEdmPrimitiveTypes too.
             // You can imagine the override of this that takes a delegate using the correct CLR type for the return type.

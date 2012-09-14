@@ -196,17 +196,18 @@ namespace System.Web.Http.OData.Builder
                                                                             .ToArray();
                     foreach (NavigationPropertyConfiguration propertyToBeRemoved in propertiesToBeRemoved)
                     {
+                        entityToBePatched.RemoveProperty(propertyToBeRemoved.PropertyInfo);
+
                         if (propertyToBeRemoved.Multiplicity == EdmMultiplicity.Many)
                         {
-                            // complex collections are not supported.
-                            throw Error.NotSupported(SRResources.CollectionPropertiesNotSupported, propertyToBeRemoved.PropertyInfo.Name, propertyToBeRemoved.PropertyInfo.ReflectedType.FullName);
+                            entityToBePatched.AddCollectionProperty(propertyToBeRemoved.PropertyInfo);
                         }
-                        entityToBePatched.RemoveProperty(propertyToBeRemoved.PropertyInfo);
-                        entityToBePatched.AddComplexProperty(propertyToBeRemoved.PropertyInfo);
+                        else
+                        {
+                            entityToBePatched.AddComplexProperty(propertyToBeRemoved.PropertyInfo);
+                        }
                     }
                 }
-
-                AddComplexType(misconfiguredEntityType.ClrType);
             }
         }
 
@@ -271,32 +272,26 @@ namespace System.Web.Http.OData.Builder
                 else
                 {
                     // navigation property in a complex type ?
-                    if (!isCollection)
+                    if (mappedType == null)
                     {
-                        if (mappedType == null)
-                        {
-                            // the user told nothing about this type and this is the first time we are seeing this type.
-                            // complex types cannot contain entities. So, treat it as complex property.
-                            complexType.AddComplexProperty(property);
-                        }
-                        else
-                        {
-                            if (_explicitlyAddedTypes.Contains(mappedType))
-                            {
-                                // user told us that this an entity type.
-                                throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
-                            }
-                            else
-                            {
-                                // we tried to be over-smart earlier and made the bad choice. so patch up now.
-                                ReconfigureEntityTypesAsComplexType(new IEntityTypeConfiguration[] { mappedType as IEntityTypeConfiguration });
-                                complexType.AddComplexProperty(property);
-                            }
-                        }
+                        // the user told nothing about this type and this is the first time we are seeing this type.
+                        // complex types cannot contain entities. So, treat it as complex property.
+                        MapStructuralProperty(complexType, property, PropertyKind.Complex, isCollection);
+                    }
+                    else if (_explicitlyAddedTypes.Contains(mappedType))
+                    {
+                        // user told us that this is an entity type.
+                        throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
                     }
                     else
                     {
-                        throw Error.NotSupported(SRResources.CollectionPropertiesNotSupported, property.Name, property.ReflectedType.FullName);
+                        // we tried to be over-smart earlier and made the bad choice. so patch up now.
+                        IEntityTypeConfiguration mappedTypeAsEntity = mappedType as IEntityTypeConfiguration;
+                        Contract.Assert(mappedTypeAsEntity != null);
+
+                        ReconfigureEntityTypesAsComplexType(new IEntityTypeConfiguration[] { mappedTypeAsEntity });
+
+                        MapStructuralProperty(complexType, property, PropertyKind.Complex, isCollection);
                     }
                 }
             }
@@ -306,7 +301,7 @@ namespace System.Web.Http.OData.Builder
         {
             Contract.Assert(type != null);
             Contract.Assert(property != null);
-            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Collection);
+            Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive);
 
             if (!isCollection)
             {
@@ -330,7 +325,7 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        // figures out the type of the property (primitive, complex, navigation, collecion) and the corresponding edm type if we have seen this type
+        // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type
         // earlier or the user told us about it.
         private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IStructuralTypeConfiguration mappedType)
         {
@@ -379,12 +374,16 @@ namespace System.Web.Http.OData.Builder
                             }
                             else
                             {
+                                // if we know nothing about this type we assume it to be an entity
+                                // and patch up later
                                 return PropertyKind.Navigation;
                             }
                         }
                     }
                     else
                     {
+                        // if we know nothing about this type we assume it to be an entity
+                        // and patch up later
                         isCollection = false;
                         return PropertyKind.Navigation;
                     }

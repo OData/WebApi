@@ -196,16 +196,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; is a collection property. Collection properties are not supported..
-        /// </summary>
-        internal static string CollectionPropertiesNotSupported {
-            get {
-                return ResourceManager.GetString("CollectionPropertiesNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; refers to the entity type &apos;{1}&apos; through the property &apos;{1}&apos;..
+        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; refers to the entity type &apos;{1}&apos; through the property &apos;{2}&apos;..
         /// </summary>
         internal static string ComplexTypeRefersToEntityType {
             get {

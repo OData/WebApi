@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             version.AssertHasPrimitiveProperty(model, "Minor", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
 
-        [Theory(Skip = "ODataConventionModelBuilder always treats unknown element types are Entities")]
+        [Theory]
         [InlineData(typeof(Version[]))]
         [InlineData(typeof(IEnumerable<Version>))]
         [InlineData(typeof(List<Version>))]
@@ -373,6 +373,163 @@ namespace System.Web.Http.OData.Builder.Conventions
             var model = modelBuilder.GetEdmModel();
 
             Assert.NotNull(model);
+        }
+
+        [Fact]
+        public void ComplexType_Containing_EntityCollection_Throws()
+        {
+            Type entityType = CreateDynamicType(
+                new DynamicType
+                {
+                    TypeName = "EntityType"
+                });
+
+            Type complexType = CreateDynamicType(
+                new DynamicType
+                {
+                    TypeName = "ComplexTypeWithEntityCollection",
+                    Properties =
+                    {
+                        new DynamicProperty
+                        {
+                            Name = "CollectionProperty",
+                            Type = CreateCollectionType(entityType)
+                        }
+                    }
+                });
+
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddComplexType(complexType);
+
+            Assert.Throws<InvalidOperationException>(
+                () => modelBuilder.GetEdmModel(),
+                "The complex type 'SampleNamespace.ComplexTypeWithEntityCollection' refers to the entity type 'SampleNamespace.EntityType' through the property 'CollectionProperty'.");
+        }
+
+        [Fact]
+        public void ComplexType_Containing_ComplexCollection_works()
+        {
+            Type complexType = CreateDynamicType(
+                new DynamicType
+                {
+                    TypeName = "ComplexTypeWithComplexCollection",
+                    Properties =
+                    {
+                        new DynamicProperty
+                        {
+                            Name = "CollectionProperty",
+                            Type = typeof(Version[])
+                        }
+                    }
+                });
+
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.AddComplexType(complexType);
+
+            var model = modelBuilder.GetEdmModel();
+
+            IEdmComplexType complexEdmType = model.AssertHasComplexType(complexType);
+            model.AssertHasComplexType(typeof(Version));
+            var collectionProperty = complexEdmType.DeclaredProperties.Where(p => p.Name == "CollectionProperty").SingleOrDefault();
+            Assert.NotNull(collectionProperty);
+            Assert.True(collectionProperty.Type.IsCollection());
+            Assert.Equal(collectionProperty.Type.AsCollection().ElementType().FullName(), "System.Version");
+        }
+
+        [Fact]
+        public void EntityType_Containing_ComplexCollection_Works()
+        {
+            Type entityType = CreateDynamicType(
+                new DynamicType
+                {
+                    TypeName = "EntityTypeWithComplexCollection",
+                    Properties =
+                    {
+                        new DynamicProperty
+                        {
+                            Name = "ID",
+                            Type = typeof(int)
+                        },
+                        new DynamicProperty
+                        {
+                            Name = "CollectionProperty",
+                            Type = typeof(Version[])
+                        }
+                    }
+                });
+
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.AddEntity(entityType);
+
+            var model = modelBuilder.GetEdmModel();
+
+            IEdmEntityType entityEdmType = model.AssertHasEntityType(entityType);
+            model.AssertHasComplexType(typeof(Version));
+            var collectionProperty = entityEdmType.DeclaredProperties.Where(p => p.Name == "CollectionProperty").SingleOrDefault();
+            Assert.NotNull(collectionProperty);
+            Assert.True(collectionProperty.Type.IsCollection());
+            Assert.Equal(collectionProperty.Type.AsCollection().ElementType().FullName(), "System.Version");
+        }
+
+        [Fact]
+        public void EntityType_Containing_ComplexTypeContainingComplexCollection_Works()
+        {
+            Type complexTypeWithComplexCollection = CreateDynamicType(
+                new DynamicType
+                            {
+                                TypeName = "ComplexType",
+                                Properties = 
+                                {
+                                    new DynamicProperty
+                                    {
+                                        Name = "ComplexCollectionProperty",
+                                        Type = typeof(Version[])
+                                    }
+                                }
+                            });
+
+            Type entityType = CreateDynamicType(
+                new DynamicType
+                {
+                    TypeName = "EntityTypeWithComplexCollection",
+                    Properties =
+                    {
+                        new DynamicProperty
+                        {
+                            Name = "ID",
+                            Type = typeof(int)
+                        },
+                        new DynamicProperty
+                        {
+                            Name = "ComplexProperty",
+                            Type = complexTypeWithComplexCollection
+                        }
+                    }
+                });
+
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.AddEntity(entityType);
+
+            var model = modelBuilder.GetEdmModel();
+
+            IEdmEntityType entityEdmType = model.AssertHasEntityType(entityType);
+            model.AssertHasComplexType(typeof(Version));
+            IEdmComplexType edmComplexType = model.AssertHasComplexType(complexTypeWithComplexCollection);
+
+            var collectionProperty = edmComplexType.DeclaredProperties.Where(p => p.Name == "ComplexCollectionProperty").SingleOrDefault();
+            Assert.NotNull(collectionProperty);
+            Assert.True(collectionProperty.Type.IsCollection());
+            Assert.Equal(collectionProperty.Type.AsCollection().ElementType().FullName(), "System.Version");
+        }
+
+        private static Type CreateCollectionType(Type type)
+        {
+            Mock<Type> collectionType = new Mock<Type>();
+            collectionType.Setup(t => t.Namespace).Returns("SampleNamespace");
+            collectionType.Setup(t => t.FullName).Returns("SampleNamespace." + "CollectionType");
+            collectionType.Setup(t => t.GetInterfaces()).Returns(new Type[] { typeof(IEnumerable<>).MakeGenericType(type) });
+            return collectionType.Object;
         }
 
         private static Type CreateDynamicType(DynamicType dynamicType)

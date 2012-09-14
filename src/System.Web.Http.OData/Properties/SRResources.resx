@@ -318,11 +318,8 @@
   <data name="PrimitiveTypeRequired" xml:space="preserve">
     <value>The type '{0}' is not a primitive type.</value>
   </data>
-  <data name="CollectionPropertiesNotSupported" xml:space="preserve">
-    <value>The property '{0}' on type '{1}' is a collection property. Collection properties are not supported.</value>
-  </data>
   <data name="ComplexTypeRefersToEntityType" xml:space="preserve">
-    <value>The complex type '{0}' refers to the entity type '{1}' through the property '{1}'.</value>
+    <value>The complex type '{0}' refers to the entity type '{1}' through the property '{2}'.</value>
   </data>
   <data name="MultipleAttributesFound" xml:space="preserve">
     <value>The member '{0}' on type '{1}' contains multiple instances of the attribute '{2}'.</value>

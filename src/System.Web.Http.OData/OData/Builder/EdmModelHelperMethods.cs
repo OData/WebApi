@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -15,47 +14,6 @@ namespace System.Web.Http.OData.Builder
 {
     public static class EdmModelHelperMethods
     {
-        internal static IEntitySetLinkBuilder GetEntitySetLinkBuilder(this IEdmModel model, IEdmEntitySet entitySet)
-        {
-            IEntitySetLinkBuilder annotation = model.GetAnnotationValue<IEntitySetLinkBuilder>(entitySet);
-            if (annotation == null)
-            {
-                throw Error.NotSupported(SRResources.EntitySetHasNoBuildLinkAnnotation, entitySet.Name);
-            }
-
-            return annotation;
-        }
-
-        internal static void SetEntitySetLinkBuilderAnnotation(this IEdmModel model, IEdmEntitySet entitySet, IEntitySetLinkBuilder entitySetLinkBuilder)
-        {
-            model.SetAnnotationValue(entitySet, entitySetLinkBuilder);
-        }
-
-        internal static string GetEntitySetUrl(this IEdmModel model, IEdmEntitySet entitySet)
-        {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            if (entitySet == null)
-            {
-                throw Error.ArgumentNull("entitySet");
-            }
-
-            EntitySetUrlAnnotation annotation = model.GetAnnotationValue<EntitySetUrlAnnotation>(entitySet);
-            if (annotation == null)
-            {
-                return entitySet.Name;
-            }
-            else
-            {
-                return annotation.Url;
-            }
-        }
-
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Pending")]
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Pending")]
         public static IEdmModel BuildEdmModel(ODataModelBuilder builder)
         {
             if (builder == null)
@@ -64,99 +22,161 @@ namespace System.Web.Http.OData.Builder
             }
 
             EdmModel model = new EdmModel();
+            EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
-            Dictionary<string, IStructuralTypeConfiguration> typeConfigurations = builder.StructuralTypes.ToDictionary(t => t.FullName);
+            // add types and sets, building an index on the way.
+            Dictionary<string, IEdmStructuredType> edmTypeMap = model.AddTypes(builder.StructuralTypes);
+            Dictionary<string, EdmEntitySet> edmEntitySetMap = model.AddEntitySets(builder.EntitySets, container, edmTypeMap);
+            
+            // add procedures
+            container.AddProcedures(builder.Procedures, edmTypeMap, edmEntitySetMap);
 
-            Dictionary<string, IEdmStructuredType> types = EdmTypeBuilder.GetTypes(builder.StructuralTypes)
-                .OfType<IEdmStructuredType>()
-                .ToDictionary(t => t.ToString());
+            // finish up
+            model.AddElement(container);
+            return model;
+        }
 
-            foreach (IEdmStructuredType type in types.Values)
+        private static void AddTypes(this EdmModel model, IEnumerable<IEdmStructuredType> structuredTypes)
+        {
+            Contract.Assert(model != null);
+            Contract.Assert(structuredTypes != null);
+
+            foreach (IEdmStructuredType type in structuredTypes)
             {
-                if (type.TypeKind == EdmTypeKind.Complex)
+                model.AddType(type);
+            }
+        }
+
+        private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, IEnumerable<IEntitySetConfiguration> configurations, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
+        {
+            // build the entitysets and their annotations
+            IEnumerable<Tuple<EdmEntitySet, IEntitySetConfiguration>> entitySets = AddEntitySets(configurations, container, edmTypeMap);
+            var entitySetAndAnnotations = entitySets.Select(e => new
+            {
+                EntitySet = e.Item1,
+                Configuration = e.Item2,
+                Annotations = new
                 {
-                    model.AddElement(type as IEdmComplexType);
+                    LinkBuilder = new EntitySetLinkBuilderAnnotation(e.Item2),
+                    Url = new EntitySetUrlAnnotation { Url = e.Item2.GetUrl() }
                 }
-                else if (type.TypeKind == EdmTypeKind.Entity)
+            }).ToArray();
+
+            // index the entitySets by name
+            Dictionary<string, EdmEntitySet> edmEntitySetMap = entitySetAndAnnotations.ToDictionary(e => e.EntitySet.Name, e => e.EntitySet);
+
+            // apply the annotations
+            foreach (var iter in entitySetAndAnnotations)
+            {
+                EdmEntitySet entitySet = iter.EntitySet;
+                IEntitySetConfiguration configuration = iter.Configuration;
+                model.SetAnnotationValue<EntitySetUrlAnnotation>(entitySet, iter.Annotations.Url);
+                model.SetAnnotationValue<IEntitySetLinkBuilder>(entitySet, iter.Annotations.LinkBuilder);
+
+                foreach (NavigationPropertyConfiguration navigation in configuration.EntityType.NavigationProperties)
                 {
-                    model.AddElement(type as IEdmEntityType);
+                    NavigationPropertyBinding binding = configuration.FindBinding(navigation);
+                    if (binding != null)
+                    {
+                        EdmEntityType edmEntityType = edmTypeMap[configuration.EntityType.FullName] as EdmEntityType;
+                        IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties().Single(np => np.Name == navigation.Name);
+
+                        entitySet.AddNavigationTarget(edmNavigationProperty, edmEntitySetMap[binding.EntitySet.Name]);
+                        iter.Annotations.LinkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, configuration.GetNavigationPropertyLink(edmNavigationProperty.Name));
+                    }
                 }
-                else
+            }
+            return edmEntitySetMap;
+        }
+
+        private static void AddProcedures(this EdmEntityContainer container, IEnumerable<ProcedureConfiguration> configurations, Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+        {
+            foreach (ProcedureConfiguration procedure in configurations)
+            {
+                switch (procedure.Kind)
                 {
-                    throw Error.InvalidOperation(SRResources.UnsupportedEntityTypeInModel);
+                    case ProcedureKind.Action:
+                        ActionConfiguration action = procedure as ActionConfiguration;
+                        IEdmTypeReference returnReference = GetEdmTypeReference(edmTypeMap, action.ReturnType, nullable: true);
+                        IEdmExpression expression = GetEdmEntitySetExpression(edmEntitySetMap, action);
+
+                        EdmFunctionImport functionImport = new EdmFunctionImport(container, action.Name, returnReference, expression, action.IsSideEffecting, action.IsComposable, action.IsBindable);
+                        foreach (ParameterConfiguration parameter in action.Parameters)
+                        {
+                            // TODO: http://aspnetwebstack.codeplex.com/workitem/417
+                            IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: true);
+                            EdmFunctionParameter functionParameter = new EdmFunctionParameter(functionImport, parameter.Name, parameterTypeReference, EdmFunctionParameterMode.In);
+                            functionImport.AddParameter(functionParameter);
+                        }
+                        container.AddElement(functionImport);
+                        break;
+
+                    case ProcedureKind.Function:
+                        Contract.Assert(false, "Functions are not supported.");
+                        break;
+
+                    case ProcedureKind.ServiceOperation:
+                        Contract.Assert(false, "ServiceOperations are not supported.");
+                        break;
                 }
-                
+            }
+        }
+
+        private static Dictionary<string, IEdmStructuredType> AddTypes(this EdmModel model, IEnumerable<IStructuralTypeConfiguration> types)
+        {
+            IStructuralTypeConfiguration[] configTypes = types.ToArray();
+            // build types
+            IEdmStructuredType[] edmTypes = EdmTypeBuilder.GetTypes(configTypes).ToArray();
+            // index types
+            Dictionary<string, IEdmStructuredType> edmTypeMap = edmTypes.ToDictionary(t => (t as IEdmSchemaType).FullName());
+
+            // Add an annotate types
+            model.AddTypes(edmTypes);
+            model.AddClrTypeAnnotations(GenerateEdmToClrMap(configTypes, edmTypeMap));
+            return edmTypeMap;
+        }
+
+        private static Dictionary<IEdmStructuredType, Type> GenerateEdmToClrMap(IEnumerable<IStructuralTypeConfiguration> configTypes, Dictionary<string, IEdmStructuredType> edmTypeMap)
+        {
+            return configTypes.ToDictionary(c => edmTypeMap[c.FullName], c => c.ClrType);
+        }
+
+        private static void AddType(this EdmModel model, IEdmStructuredType type)
+        {
+            if (type.TypeKind == EdmTypeKind.Complex)
+            {
+                model.AddElement(type as IEdmComplexType);
+            }
+            else if (type.TypeKind == EdmTypeKind.Entity)
+            {
+                model.AddElement(type as IEdmEntityType);
+            }
+            else
+            {
+                Contract.Assert(false, "Only ComplexTypes and EntityTypes are supported.");
+            }
+        }
+
+        private static EdmEntitySet AddEntitySet(this EdmEntityContainer container, IEntitySetConfiguration entitySet, IDictionary<string, IEdmStructuredType> edmTypeMap)
+        {
+            return container.AddEntitySet(entitySet.Name, (IEdmEntityType)edmTypeMap[entitySet.EntityType.FullName]);
+        }
+
+        private static IEnumerable<Tuple<EdmEntitySet, IEntitySetConfiguration>> AddEntitySets(IEnumerable<IEntitySetConfiguration> entitySets, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
+        {
+            return entitySets.Select(es => Tuple.Create(container.AddEntitySet(es, edmTypeMap), es));
+        }
+
+        private static void AddClrTypeAnnotations(this EdmModel model, IDictionary<IEdmStructuredType, Type> annotationMap)
+        {
+            foreach (KeyValuePair<IEdmStructuredType, Type> map in annotationMap)
+            {
                 // pre-populate the model with clr-type annotations so that we dont have to scan 
                 // all loaded assemblies to find the clr type for an edm type that we build.
-                Type mappedClrType = typeConfigurations[(type as IEdmSchemaType).FullName()].ClrType;
-                model.SetAnnotationValue<ClrTypeAnnotation>(type, new ClrTypeAnnotation(mappedClrType));
+                IEdmStructuredType edmType = map.Key;
+                Type clrType = map.Value;
+                model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(clrType));
             }
-
-            if (builder.EntitySets.Any() || builder.Procedures.Any())
-            {
-                EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
-
-                Dictionary<string, EdmEntitySet> edmEntitySetMap = new Dictionary<string, EdmEntitySet>();
-                foreach (IEntitySetConfiguration entitySet in builder.EntitySets)
-                {
-                    EdmEntitySet edmEntitySet = container.AddEntitySet(entitySet.Name, (IEdmEntityType)types[entitySet.EntityType.FullName]);
-                    EntitySetLinkBuilderAnnotation entitySetLinkBuilderAnnotation = new EntitySetLinkBuilderAnnotation(entitySet);
-
-                    model.SetEntitySetLinkBuilderAnnotation(edmEntitySet, entitySetLinkBuilderAnnotation);
-                    model.SetAnnotationValue<EntitySetUrlAnnotation>(edmEntitySet, new EntitySetUrlAnnotation { Url = entitySet.GetUrl() });
-                    edmEntitySetMap.Add(edmEntitySet.Name, edmEntitySet);
-                }
-
-                foreach (IEntitySetConfiguration entitySet in builder.EntitySets)
-                {
-                    EdmEntitySet edmEntitySet = edmEntitySetMap[entitySet.Name];
-                    EntitySetLinkBuilderAnnotation entitySetLinkBuilderAnnotation = model.GetEntitySetLinkBuilder(edmEntitySet) as EntitySetLinkBuilderAnnotation;
-                    foreach (NavigationPropertyConfiguration navigation in entitySet.EntityType.NavigationProperties)
-                    {
-                        NavigationPropertyBinding binding = entitySet.FindBinding(navigation);
-                        if (binding != null)
-                        {
-                            EdmEntityType edmEntityType = types[entitySet.EntityType.FullName] as EdmEntityType;
-                            IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties().Single(np => np.Name == navigation.Name);
-
-                            edmEntitySet.AddNavigationTarget(edmNavigationProperty, edmEntitySetMap[binding.EntitySet.Name]);
-                            entitySetLinkBuilderAnnotation.AddNavigationPropertyLinkBuilder(edmNavigationProperty, entitySet.GetNavigationPropertyLink(edmNavigationProperty.Name));
-                        }
-                    }
-                }
-
-                foreach (ProcedureConfiguration procedure in builder.Procedures)
-                {                
-                    switch (procedure.Kind)
-                    {
-                        case ProcedureKind.Action:
-                            ActionConfiguration action = procedure as ActionConfiguration;
-                            IEdmTypeReference returnReference = GetEdmTypeReference(types, action.ReturnType, nullable: true);
-                            IEdmExpression expression = GetEdmEntitySetExpression(edmEntitySetMap, action);
-
-                            EdmFunctionImport functionImport = new EdmFunctionImport(container, action.Name, returnReference, expression, action.IsSideEffecting, action.IsComposable, action.IsBindable);
-                            foreach (ParameterConfiguration parameter in action.Parameters)
-                            {
-                                // TODO: need so support configuring nullability of parameters. Currently we default to nullable.
-                                IEdmTypeReference parameterTypeReference = GetEdmTypeReference(types, parameter.TypeConfiguration, nullable: true);
-                                EdmFunctionParameter functionParameter = new EdmFunctionParameter(functionImport, parameter.Name, parameterTypeReference, EdmFunctionParameterMode.In);
-                                functionImport.AddParameter(functionParameter);
-                            }
-                            container.AddElement(functionImport);
-                            break;
-                        
-                        case ProcedureKind.Function:
-                            Contract.Assert(false, "Functions are not supported.");
-                            break;
-                        
-                        case ProcedureKind.ServiceOperation:
-                            Contract.Assert(false, "ServiceOperations are not supported.");
-                            break;
-                    }
-                }
-                model.AddElement(container);
-            }
-            return model;
         }
 
         private static IEdmExpression GetEdmEntitySetExpression(Dictionary<string, EdmEntitySet> entitySets, ActionConfiguration action)
@@ -179,7 +199,7 @@ namespace System.Web.Http.OData.Builder
         private static IEdmTypeReference GetEdmTypeReference(Dictionary<string, IEdmStructuredType> availableTypes, IEdmTypeConfiguration configuration, bool nullable)
         {
             Contract.Assert(availableTypes != null);
-            
+
             if (configuration == null)
             {
                 return null;
@@ -216,6 +236,45 @@ namespace System.Web.Http.OData.Builder
             else
             {
                 throw Error.InvalidOperation(SRResources.NoMatchingIEdmTypeFound, configuration.FullName);
+            }
+        }
+
+        internal static IEntitySetLinkBuilder GetEntitySetLinkBuilder(this IEdmModel model, IEdmEntitySet entitySet)
+        {
+            IEntitySetLinkBuilder annotation = model.GetAnnotationValue<IEntitySetLinkBuilder>(entitySet);
+            if (annotation == null)
+            {
+                throw Error.NotSupported(SRResources.EntitySetHasNoBuildLinkAnnotation, entitySet.Name);
+            }
+
+            return annotation;
+        }
+
+        internal static void SetEntitySetLinkBuilderAnnotation(this IEdmModel model, IEdmEntitySet entitySet, IEntitySetLinkBuilder entitySetLinkBuilder)
+        {
+            model.SetAnnotationValue(entitySet, entitySetLinkBuilder);
+        }
+
+        internal static string GetEntitySetUrl(this IEdmModel model, IEdmEntitySet entitySet)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (entitySet == null)
+            {
+                throw Error.ArgumentNull("entitySet");
+            }
+
+            EntitySetUrlAnnotation annotation = model.GetAnnotationValue<EntitySetUrlAnnotation>(entitySet);
+            if (annotation == null)
+            {
+                return entitySet.Name;
+            }
+            else
+            {
+                return annotation.Url;
             }
         }
     }

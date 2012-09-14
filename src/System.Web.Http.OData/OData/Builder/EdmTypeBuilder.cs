@@ -15,14 +15,14 @@ namespace System.Web.Http.OData.Builder
     public class EdmTypeBuilder
     {
         private readonly List<IStructuralTypeConfiguration> _configurations;
-        private readonly Dictionary<Type, IEdmType> _types = new Dictionary<Type, IEdmType>();
+        private readonly Dictionary<Type, IEdmStructuredType> _types = new Dictionary<Type, IEdmStructuredType>();
 
         internal EdmTypeBuilder(IEnumerable<IStructuralTypeConfiguration> configurations)
         {
             _configurations = configurations.ToList();
         }
 
-        private IEnumerable<IEdmType> GetEdmTypes()
+        private IEnumerable<IEdmStructuredType> GetEdmTypes()
         {
             // Reset
             _types.Clear();
@@ -39,18 +39,6 @@ namespace System.Web.Http.OData.Builder
             foreach (IStructuralTypeConfiguration config in _configurations)
             {
                 yield return _types[config.ClrType];
-            }
-        }
-
-        private static IEdmType CreateEdmTypeHeader(IStructuralTypeConfiguration config)
-        {
-            if (config.Kind == EdmTypeKind.Complex)
-            {
-                return new EdmComplexType(config.Namespace, config.Name);
-            }
-            else
-            {
-                return new EdmEntityType(config.Namespace, config.Name);
             }
         }
 
@@ -147,7 +135,7 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="configurations">A collection of <see cref="IStructuralTypeConfiguration"/>'s</param>
         /// <returns>The built collection of <see cref="IEdmType"/></returns>
-        public static IEnumerable<IEdmType> GetTypes(IEnumerable<IStructuralTypeConfiguration> configurations)
+        public static IEnumerable<IEdmStructuredType> GetTypes(IEnumerable<IStructuralTypeConfiguration> configurations)
         {
             if (configurations == null)
             {
@@ -172,6 +160,18 @@ namespace System.Web.Http.OData.Builder
             }
 
             return primitiveType.PrimitiveKind;
+        }
+
+        private static IEdmStructuredType CreateEdmTypeHeader(IStructuralTypeConfiguration config)
+        {
+            if (config.Kind == EdmTypeKind.Complex)
+            {
+                return new EdmComplexType(config.Namespace, config.Name);
+            }
+            else
+            {
+                return new EdmEntityType(config.Namespace, config.Name);
+            }
         }
     }
 }

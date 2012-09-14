@@ -297,9 +297,6 @@
   <data name="RecursionLimitExceeded" xml:space="preserve">
     <value>The recursion limit has been exceeded.</value>
   </data>
-  <data name="UnsupportedEntityTypeInModel" xml:space="preserve">
-    <value>Only entity and complex types are permitted.</value>
-  </data>
   <data name="NoNavigationLinkFactoryFound" xml:space="preserve">
     <value>No NavigationLink factory was found for the property '{0}' on entity set '{1}'. Try calling HasNavigationPropertyLink on the EntitySetConfiguration.</value>
   </data>

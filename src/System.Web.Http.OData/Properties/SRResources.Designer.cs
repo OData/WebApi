@@ -826,15 +826,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only entity and complex types are permitted..
-        /// </summary>
-        internal static string UnsupportedEntityTypeInModel {
-            get {
-                return ResourceManager.GetString("UnsupportedEntityTypeInModel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unsupported Expression NodeType..
         /// </summary>
         internal static string UnsupportedExpressionNodeType {

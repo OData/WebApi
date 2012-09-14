@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             version.AssertHasPrimitiveProperty(model, "Minor", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
 
-        [Theory(Skip="ODataConventionModelBuilder always treats unknown element types are Entities")]
+        [Theory(Skip = "ODataConventionModelBuilder always treats unknown element types are Entities")]
         [InlineData(typeof(Version[]))]
         [InlineData(typeof(IEnumerable<Version>))]
         [InlineData(typeof(List<Version>))]
@@ -140,9 +140,9 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmStructuralProperty property1 = entity.DeclaredProperties.OfType<IEdmStructuralProperty>().SingleOrDefault(p => p.Name == "Property1");
             Assert.NotNull(property1);
             Assert.Equal(EdmTypeKind.Collection, property1.Type.Definition.TypeKind);
-            Assert.Equal(EdmTypeKind.Complex, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);                 
+            Assert.Equal(EdmTypeKind.Complex, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);
         }
-      
+
         [Theory]
         [InlineData(typeof(int[]))]
         [InlineData(typeof(string[]))]
@@ -162,14 +162,14 @@ namespace System.Web.Http.OData.Builder.Conventions
             modelBuilder.AddEntity(entityType);
             IEdmModel model = modelBuilder.GetEdmModel();
             IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
-           
+
             Assert.NotNull(entity);
             Assert.Equal(2, entity.DeclaredProperties.Count());
 
             IEdmStructuralProperty property1 = entity.DeclaredProperties.OfType<IEdmStructuralProperty>().SingleOrDefault(p => p.Name == "Property1");
             Assert.NotNull(property1);
             Assert.Equal(EdmTypeKind.Collection, property1.Type.Definition.TypeKind);
-            Assert.Equal(EdmTypeKind.Primitive, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);           
+            Assert.Equal(EdmTypeKind.Primitive, (property1.Type.Definition as IEdmCollectionType).ElementType.Definition.TypeKind);
         }
 
         [Theory]
@@ -363,6 +363,16 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.NotNull(model.FindType("SampleNamespace.ComplexType1"));
             Assert.NotNull(model.FindType("SampleNamespace.ComplexType2"));
             Assert.NotNull(model.FindType("SampleNamespace.ComplexType3"));
+        }
+
+        [Fact]
+        public void ModelBuilder_CanBuild_HttpErrorAsComplextype()
+        {
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.ComplexType<HttpError>();
+            var model = modelBuilder.GetEdmModel();
+
+            Assert.NotNull(model);
         }
 
         private static Type CreateDynamicType(DynamicType dynamicType)

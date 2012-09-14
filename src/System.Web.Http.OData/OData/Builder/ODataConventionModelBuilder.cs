@@ -273,16 +273,25 @@ namespace System.Web.Http.OData.Builder
                     // navigation property in a complex type ?
                     if (!isCollection)
                     {
-                        if (_explicitlyAddedTypes.Contains(mappedType))
+                        if (mappedType == null)
                         {
-                            // user told us that this an entity type.
-                            throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
+                            // the user told nothing about this type and this is the first time we are seeing this type.
+                            // complex types cannot contain entities. So, treat it as complex property.
+                            complexType.AddComplexProperty(property);
                         }
                         else
                         {
-                            // we tried to be over-smart earlier and made the bad choice. so patch up now.
-                            ReconfigureEntityTypesAsComplexType(new IEntityTypeConfiguration[] { mappedType as IEntityTypeConfiguration });
-                            complexType.AddComplexProperty(property);
+                            if (_explicitlyAddedTypes.Contains(mappedType))
+                            {
+                                // user told us that this an entity type.
+                                throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
+                            }
+                            else
+                            {
+                                // we tried to be over-smart earlier and made the bad choice. so patch up now.
+                                ReconfigureEntityTypesAsComplexType(new IEntityTypeConfiguration[] { mappedType as IEntityTypeConfiguration });
+                                complexType.AddComplexProperty(property);
+                            }
                         }
                     }
                     else
@@ -316,11 +325,13 @@ namespace System.Web.Http.OData.Builder
                 {
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
-                
+
                 type.AddCollectionProperty(property);
             }
         }
 
+        // figures out the type of the property (primitive, complex, navigation, collecion) and the corresponding edm type if we have seen this type
+        // earlier or the user told us about it.
         private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IStructuralTypeConfiguration mappedType)
         {
             Contract.Assert(property != null);

@@ -213,18 +213,21 @@ namespace System.Web.Http.OData.Formatter
             return primitiveType != null ? _coreModel.GetPrimitive(primitiveType.PrimitiveKind, IsNullable(clrType)) : null;
         }
 
-        public static bool IsNonstandardEdmPrimitive(Type type, out Type mappedType)
+        // figures out if the given clr type is nonstandard edm primitive like uint, ushort, char[] etc.
+        // and returns the corresponding clr type to which we map like uint => long.
+        public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive)
         {
             IEdmPrimitiveTypeReference edmType = GetEdmPrimitiveTypeReferenceOrNull(type);
             if (edmType == null)
             {
-                mappedType = type;
-                return false;
+                isNonstandardEdmPrimitive = false;
+                return type;
             }
 
             Type reverseLookupClrType = GetClrType(edmType, EdmCoreModel.Instance);
-            mappedType = reverseLookupClrType;
-            return type != mappedType;
+            isNonstandardEdmPrimitive = (type != reverseLookupClrType);
+
+            return reverseLookupClrType;
         }
 
         // Mangle the invalid EDM literal Type.FullName (System.Collections.Generic.IEnumerable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]) 

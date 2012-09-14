@@ -35,8 +35,10 @@ namespace System.Web.Http.OData.Formatter
         [InlineData(typeof(XElement), typeof(string))]
         public void IsNonstandardEdmPrimitive_Returns_True(Type primitiveType, Type mappedType)
         {
-            Type resultMappedType;
-            Assert.True(EdmLibHelpers.IsNonstandardEdmPrimitive(primitiveType, out resultMappedType));
+            bool isNonstandardEdmPrimtive;
+            Type resultMappedType = EdmLibHelpers.IsNonstandardEdmPrimitive(primitiveType, out isNonstandardEdmPrimtive);
+
+            Assert.True(isNonstandardEdmPrimtive);
             Assert.Equal(mappedType, resultMappedType);
         }
 
@@ -53,8 +55,10 @@ namespace System.Web.Http.OData.Formatter
         [InlineData(typeof(TimeSpan))]
         public void IsNonstandardEdmPrimitive_Returns_False(Type primitiveType)
         {
-            Type resultMappedType;
-            Assert.False(EdmLibHelpers.IsNonstandardEdmPrimitive(primitiveType, out resultMappedType));
+            bool isNonstandardEdmPrimtive;
+            Type resultMappedType = EdmLibHelpers.IsNonstandardEdmPrimitive(primitiveType, out isNonstandardEdmPrimtive);
+
+            Assert.False(isNonstandardEdmPrimtive);
             Assert.Equal(primitiveType, resultMappedType);
         }
     }

@@ -869,8 +869,10 @@ namespace System.Web.Http.OData.Query.Expressions
         // The rest (char, char[], Binary) would cause issues with linq2sql and EF.
         private Expression ConvertNonStandardPrimitives(Expression source)
         {
-            Type conversionType;
-            if (EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out conversionType))
+            bool isNonstandardEdmPrimitive;
+            Type conversionType = EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out isNonstandardEdmPrimitive);
+
+            if (isNonstandardEdmPrimitive)
             {
                 Type sourceType = source.Type;
                 sourceType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;

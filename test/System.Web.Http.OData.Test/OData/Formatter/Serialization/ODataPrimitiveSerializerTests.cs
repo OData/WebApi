@@ -10,6 +10,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -31,18 +32,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 return new TheoryDataSet<object>
                 {
+                    null,
                     (char)'1',
-                    (char?) null,
                     (char[]) new char[] {'1' },
                     (UInt16)1,
-                    (UInt16?)null,
                     (UInt32)1,
-                    (UInt32?)null,
                     (UInt64)1,
-                    (UInt64?)null,
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                    (XElement) new XElement(XName.Get("element","namespace")), 
-                    (Binary) new Binary(new byte[] {1})
+                    new XElement(XName.Get("element","namespace")), 
+                    new Binary(new byte[] {1}),
+
+                    // Enums
+                    SimpleEnum.Second,
+                    LongEnum.ThirdLong,
+                    FlagsEnum.One | FlagsEnum.Four
                 };
             }
         }
@@ -53,34 +56,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 return new TheoryDataSet<object>
                 {
+                    null,
                     (string)"1",
                     (Boolean)true,
-                    (Boolean?)null,
                     (Byte)1,
-                    (Byte?)null,
                     (DateTime)DateTime.Now,
-                    (DateTime?)null,
                     (Decimal)1,
-                    (Decimal?)null,
                     (Double)1,
-                    (Double?)null,
                     (Guid)Guid.Empty,
-                    (Guid?)null,
                     (Int16)1,
-                    (Int16?)null,
                     (Int32)1,
-                    (Int32?)null,
                     (Int64)1,
-                    (Int64?)null,
                     (SByte)1,
-                    (SByte?)null,
                     (Single)1,
-                    (Single?)null,
-                    (byte[])new byte[] { 1 },
-                     (TimeSpan) new TimeSpan(),
-                    (TimeSpan?) null,
-                    (DateTimeOffset) new DateTimeOffset(),
-                    (DateTimeOffset?)null
+                    new byte[] { 1 },
+                    new TimeSpan(),
+                    new DateTimeOffset()
                 };
             }
         }

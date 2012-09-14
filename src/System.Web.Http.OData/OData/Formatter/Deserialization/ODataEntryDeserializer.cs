@@ -247,11 +247,23 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             else
             {
                 type = Nullable.GetUnderlyingType(type) ?? type;
-                Contract.Assert(type == typeof(uint) || type == typeof(ushort) || type == typeof(ulong));
+                if (type.IsEnum)
+                {
+                    if (str == null)
+                    {
+                        throw new ValidationException(Error.Format(SRResources.PropertyMustBeString, propertyName, typeName));
+                    }
 
-                // Note that we are not casting the return value to nullable<T> as even if we do it
-                // CLR would unbox it back to T.
-                return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+                    return Enum.Parse(type, str);
+                }
+                else
+                {
+                    Contract.Assert(type == typeof(uint) || type == typeof(ushort) || type == typeof(ulong));
+
+                    // Note that we are not casting the return value to nullable<T> as even if we do it
+                    // CLR would unbox it back to T.
+                    return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+                }
             }
         }
 

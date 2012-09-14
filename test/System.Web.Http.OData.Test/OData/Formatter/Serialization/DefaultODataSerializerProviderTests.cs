@@ -124,20 +124,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void GetODataSerializer_Enum()
-        {
-            var serializerProvider = new DefaultODataSerializerProvider(_edmModel);
-            IEdmTypeReference edmEnumType = new EdmEnumTypeReference(new EdmEnumType("ODataDemo", "SupplierRating"), isNullable: false);
-            var serializer = serializerProvider.GetEdmTypeSerializer(edmEnumType);
-
-            Assert.NotNull(serializer);
-            var enumSerializer = Assert.IsType<ODataEnumSerializer>(serializer);
-            Assert.Equal(enumSerializer.EdmType, edmEnumType);
-            Assert.Equal(enumSerializer.ODataPayloadKind, ODataPayloadKind.Property);
-            Assert.Equal(enumSerializer.SerializerProvider, serializerProvider);
-        }
-
-        [Fact]
         public void GetODataSerializer_ODataError()
         {
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider(_edmModel);

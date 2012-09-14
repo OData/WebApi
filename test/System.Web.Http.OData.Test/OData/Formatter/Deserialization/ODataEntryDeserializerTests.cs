@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -23,13 +24,21 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                      { "123", (char[]) new char[] {'1', '2', '3' }, typeof(char[]) },
                      { (int)1 , (ushort)1, typeof(ushort)},
                      { (int?)1, (ushort?)1,  typeof(ushort?) },
-                     { (long)1, (uint)1,  typeof(uint)},
+                     { (long)1, (uint)1,  typeof(uint) },
                      { (long?)1, (uint?)1, typeof(uint?) },
                      { (long)1 , (ulong)1, typeof(ulong)},
                      { (long?)1 ,(ulong?)1, typeof(ulong?)},
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
                      { "<element xmlns=\"namespace\" />" ,(XElement) new XElement(XName.Get("element","namespace")), typeof(XElement)},
-                     { new byte[] {1} ,(Binary) new Binary(new byte[] {1}), typeof(Binary)}
+                     { new byte[] {1}, new Binary(new byte[] {1}), typeof(Binary)},
+
+                     // Enums
+                     { "Second", SimpleEnum.Second, typeof(SimpleEnum) },
+                     { "Second", SimpleEnum.Second, typeof(SimpleEnum?) },
+                     { "ThirdLong" , LongEnum.ThirdLong, typeof(LongEnum) },
+                     { "ThirdLong" , LongEnum.ThirdLong, typeof(LongEnum?) },
+                     { "One, Four" , FlagsEnum.One | FlagsEnum.Four, typeof(FlagsEnum) },
+                     { "One, Four" , FlagsEnum.One | FlagsEnum.Four, typeof(FlagsEnum?) }
                 };
             }
         }

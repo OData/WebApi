@@ -45,9 +45,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 case EdmTypeKind.Entity:
                     return new ODataEntityTypeSerializer(edmType.AsEntity(), this);
 
-                case EdmTypeKind.Enum:
-                    return new ODataEnumSerializer(edmType.AsEnum(), this);
-
                 default:
                     throw Error.InvalidOperation(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataMediaTypeFormatter).Name);
             }

@@ -8,6 +8,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -19,18 +20,20 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 return new TheoryDataSet<object, object>
                 {
-                    { (char)'1', "1"},
-                    { (char?) null, null},
-                    { (char[]) new char[] {'1' }, "1"},
-                    { (UInt16)1, (int)1},
-                    {(UInt16?)null, null},
-                    {(UInt32)1, (long)1},
-                    { (UInt32?)null, null},
-                    { (UInt64)1, (long)1}, 
-                    { (UInt64?)null, null},
+                    { null, null },
+                    { (char)'1', "1" },
+                    { (char[]) new char[] {'1'}, "1" },
+                    { (UInt16)1, (int)1 },
+                    { (UInt32)1, (long)1 },
+                    { (UInt64)1, (long)1 },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                    { (XElement) new XElement(XName.Get("element","namespace")), new XElement(XName.Get("element","namespace")).ToString()},
-                    { (Binary) new Binary(new byte[] {1}), new byte[] {1}}
+                    { new XElement(XName.Get("element","namespace")), new XElement(XName.Get("element","namespace")).ToString() },
+                    { new Binary(new byte[] {1}), new byte[] {1} },
+
+                    //Enums
+                    { SimpleEnum.Second, "Second" },
+                    { LongEnum.ThirdLong, "ThirdLong" },
+                    { FlagsEnum.One | FlagsEnum.Four, "One, Four" }
                 };
             }
         }

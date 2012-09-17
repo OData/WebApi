@@ -210,6 +210,18 @@
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:null="true" /&gt;</value>
   </data>
+  <data name="ODataJsonPersonRequest" xml:space="preserve">
+    <value>{
+  "PerId":10,
+  "Age":10,
+  "MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d",
+  "Name":"Asha",
+  "Order":{
+    "OrderAmount":235342,
+    "OrderName":"FirstOrder"
+  }
+}</value>
+  </data>
   <data name="ProductInsertData" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
 &lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom"&gt;

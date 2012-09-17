@@ -232,6 +232,24 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;PerId&quot;:10,
+        ///  &quot;Age&quot;:10,
+        ///  &quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,
+        ///  &quot;Name&quot;:&quot;Asha&quot;,
+        ///  &quot;Order&quot;:{
+        ///    &quot;OrderAmount&quot;:235342,
+        ///    &quot;OrderName&quot;:&quot;FirstOrder&quot;
+        ///  }
+        ///}.
+        /// </summary>
+        internal static string ODataJsonPersonRequest {
+            get {
+                return ResourceManager.GetString("ODataJsonPersonRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;entry xml:base=&quot;http://services.odata.org/OData/OData.svc/&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot;&gt;
         ///  &lt;title type=&quot;text&quot;&gt;Bread&lt;/title&gt;

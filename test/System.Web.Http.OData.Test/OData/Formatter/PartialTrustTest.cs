@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Formatter
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                    Assert.Equal("application/json;odata=verbose", response.Content.Headers.ContentType.MediaType);
+                    Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
 
                     ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJson);
                 }

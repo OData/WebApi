@@ -119,6 +119,18 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.Equal("123456", (supplier as dynamic).Address.ZipCode);
         }
 
+        [Fact]
+        public void Read_Throws_On_UnknownEntityType()
+        {
+            IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
+
+            ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+
+            Assert.Throws<ODataException>(
+                () => deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersInsertData), _edmModel), _readContext),
+                "An entry with type 'ODataDemo.Supplier' was found, but it is not assignable to the expected type 'ODataDemo.Product'. The type specified in the entry must be equal to either the expected type or a derived type.");
+        }
+
         private static Type EdmTypeResolver(IEdmTypeReference edmType)
         {
             return Type.GetType(edmType.FullName());

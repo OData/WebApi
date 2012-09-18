@@ -67,14 +67,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
-            ODataSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(_edmCollectionType.ElementType());
-            if (entrySerializer == null)
-            {
-                throw Error.NotSupported(SRResources.TypeCannotBeSerialized, _edmCollectionType.ElementType(), typeof(ODataMediaTypeFormatter).Name);
-            }
-
-            Contract.Assert(entrySerializer.ODataPayloadKind == ODataPayloadKind.Entry);
-
             IEnumerable enumerable = graph as IEnumerable; // Data to serialize
             if (enumerable != null)
             {
@@ -105,6 +97,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 foreach (object entry in enumerable)
                 {
+                    if (entry == null)
+                    {
+                        throw Error.NotSupported(SRResources.NullElementInCollection);
+                    }
+
+                    ODataSerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(entry.GetType());
+                    if (entrySerializer == null)
+                    {
+                        throw Error.NotSupported(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name);
+                    }
+
+                    Contract.Assert(entrySerializer.ODataPayloadKind == ODataPayloadKind.Entry);
+
                     entrySerializer.WriteObjectInline(entry, writer, writeContext);
                 }
 

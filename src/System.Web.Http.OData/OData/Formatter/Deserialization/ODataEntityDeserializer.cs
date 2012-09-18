@@ -48,16 +48,34 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.Argument("entry", SRResources.ItemMustBeOfType, typeof(ODataEntry).Name);
             }
 
-            ODataEntryAnnotation entryAnnotation = entry.GetAnnotation<ODataEntryAnnotation>();
-            Contract.Assert(entryAnnotation != null);
+            if (EdmEntityType.FullName() != entry.TypeName)
+            {
+                // received a derived type in a base type deserializer.
+                // delegate it to the appropriate derived type deserializer.
+                IEdmEntityType entityType = EdmModel.FindType(entry.TypeName) as IEdmEntityType;
+                Contract.Assert(entityType != null, "edmlib should have already validated that it knows the edm type and is the same as or derives from EdmEntityType");
 
-            CreateEntityResource(entryAnnotation, EdmEntityType, readContext);
+                if (entityType.IsAbstract)
+                {
+                    throw Error.InvalidOperation(SRResources.CannotInstantiateAbstractEntityType, entry.TypeName);
+                }
 
-            RecurseEnter(readContext);
-            ApplyEntityProperties(entry, entryAnnotation, readContext);
-            RecurseLeave(readContext);
+                ODataEntityDeserializer deserializer = DeserializerProvider.GetODataDeserializer(new EdmEntityTypeReference(entityType, isNullable: false)) as ODataEntityDeserializer;
+                return deserializer.ReadInline(entry, readContext);
+            }
+            else
+            {
+                ODataEntryAnnotation entryAnnotation = entry.GetAnnotation<ODataEntryAnnotation>();
+                Contract.Assert(entryAnnotation != null);
 
-            return entryAnnotation.EntityResource;
+                CreateEntityResource(entryAnnotation, EdmEntityType, readContext);
+
+                RecurseEnter(readContext);
+                ApplyEntityProperties(entry, entryAnnotation, readContext);
+                RecurseLeave(readContext);
+
+                return entryAnnotation.EntityResource;
+            }
         }
 
         internal static ODataItem ReadEntryOrFeed(ODataReader odataReader, ODataDeserializerContext readContext)

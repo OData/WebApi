@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Builder.TestModels
         [Key]
         public string Name { get; set; }
 
-        public abstract int WheelCount { get; }
+        public abstract int WheelCount { get; set; }
     }
 
     public class Car : Vehicle
@@ -20,6 +20,7 @@ namespace System.Web.Http.OData.Builder.TestModels
         public override int WheelCount
         {
             get { return 4; }
+            set { }
         }
 
         public int SeatingCapacity { get; set; }
@@ -30,6 +31,7 @@ namespace System.Web.Http.OData.Builder.TestModels
         public override int WheelCount
         {
             get { return 2; }
+            set { }
         }
 
         public bool CanDoAWheelie { get; set; }
@@ -39,5 +41,6 @@ namespace System.Web.Http.OData.Builder.TestModels
 
     public class SportBike : Motorcycle
     {
+        public int SportBikeProperty_NotVisible { get; set; }
     }
 }

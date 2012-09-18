@@ -95,8 +95,13 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("edmModel");
             }
 
-            IEdmPrimitiveType primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
-            if (primitiveType != null)
+            if (clrType == null)
+            {
+                throw Error.ArgumentNull("clrType");
+            }
+
+            IEdmPrimitiveType primitiveType;
+            if (_builtInTypesMapping.TryGetValue(clrType, out primitiveType))
             {
                 return primitiveType;
             }
@@ -124,6 +129,12 @@ namespace System.Web.Http.OData.Formatter
 
                 // default to the EdmType with the same name as the ClrType name 
                 returnType = returnType ?? edmModel.FindType(clrType.EdmFullName());
+
+                if (clrType.BaseType != null)
+                {
+                    // go up the inheritance tree to see if we have a mapping defined for the base type.
+                    returnType = returnType ?? edmModel.GetEdmType(clrType.BaseType);
+                }
                 return returnType;
             }
         }

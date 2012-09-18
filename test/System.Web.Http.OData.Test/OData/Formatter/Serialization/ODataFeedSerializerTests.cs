@@ -60,7 +60,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var mockWriter = new Mock<ODataWriter>();
 
             mockSerializerProvider
-                .Setup(p => p.CreateEdmTypeSerializer(_customersType.ElementType()))
+                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
             mockCustomerSerializer
                 .Setup(s => s.WriteObjectInline(_customers[0], It.IsAny<ODataWriter>(), _writeContext))
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 expectedInlineCount
             );
             mockSerializerProvider
-                .Setup(p => p.CreateEdmTypeSerializer(_customersType.ElementType()))
+                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
             mockCustomerSerializer
                 .Setup(s => s.WriteObjectInline(_customers[0], It.IsAny<ODataWriter>(), _writeContext))

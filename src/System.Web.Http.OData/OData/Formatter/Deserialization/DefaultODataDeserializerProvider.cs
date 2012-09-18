@@ -1,11 +1,16 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
     internal class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
+        // cache the clrtype to ODataDeserializer mappings as we might have to crawl the 
+        // inheritance hirerachy to find the mapping.
+        private ConcurrentDictionary<Type, ODataDeserializer> _clrTypeMappingCache = new ConcurrentDictionary<Type, ODataDeserializer>();
+
         public DefaultODataDeserializerProvider(IEdmModel edmModel)
             : base(edmModel)
         {
@@ -54,15 +59,18 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return new ODataEntityReferenceLinkDeserializer();
             }
 
-            IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(type);
-            if (edmType == null)
+            return _clrTypeMappingCache.GetOrAdd(type, (t) =>
             {
-                return null;
-            }
-            else
-            {
-                return GetODataDeserializer(edmType);
-            }
+                IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(t);
+                if (edmType == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return GetODataDeserializer(edmType);
+                }
+            });
         }
     }
 }

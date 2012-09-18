@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -11,6 +12,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     internal class DefaultODataSerializerProvider : ODataSerializerProvider
     {
+        // cache the clrtype to ODataSerializer mappings as we might have to crawl the 
+        // inheritance hirerachy to find the mapping.
+        private ConcurrentDictionary<Type, ODataSerializer> _clrTypeMappingCache = new ConcurrentDictionary<Type, ODataSerializer>();
+
         public DefaultODataSerializerProvider(IEdmModel edmModel)
             : base(edmModel)
         {
@@ -70,21 +75,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 return new ODataErrorSerializer();
             }
-            else if (type == typeof(IEdmModel))
+            else if (typeof(IEdmModel).IsAssignableFrom(type))
             {
                 return new ODataMetadataSerializer();
             }
 
             // if it is not a special type, assume it has a corresponding EdmType.
-            IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(type);
-            if (edmType != null)
+            return _clrTypeMappingCache.GetOrAdd(type, (t) =>
             {
-                return GetEdmTypeSerializer(edmType);
-            }
-            else
-            {
-                return null;
-            }
+                IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(t);
+                if (edmType != null)
+                {
+                    return GetEdmTypeSerializer(edmType);
+                }
+                else
+                {
+                    return null;
+                }
+            });
         }
     }
 }

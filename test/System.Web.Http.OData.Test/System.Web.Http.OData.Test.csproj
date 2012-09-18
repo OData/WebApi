@@ -107,6 +107,7 @@
     <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
+    <Compile Include="OData\Formatter\InheritanceTests.cs" />
     <Compile Include="OData\Formatter\PartialTrustTest.cs" />
     <Compile Include="OData\Builder\EdmTypeConfigurationExtensionsTest.cs" />
     <Compile Include="OData\Builder\TestModels\InheritanceModels.cs" />

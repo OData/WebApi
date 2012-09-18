@@ -2,8 +2,11 @@
 
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.Linq;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Xml.Linq;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
@@ -60,6 +63,69 @@ namespace System.Web.Http.OData.Formatter
 
             Assert.False(isNonstandardEdmPrimtive);
             Assert.Equal(primitiveType, resultMappedType);
+        }
+
+        [Fact]
+        public void GetEdmType_ReturnsBaseType()
+        {
+            IEdmModel model = GetEdmModel();
+            Assert.Equal(model.GetEdmType(typeof(BaseType)), model.SchemaElements.OfType<IEdmEntityType>().Where(t => t.Name == "BaseType").Single());
+        }
+
+        [Fact]
+        public void GetEdmType_ReturnsDerivedType()
+        {
+            IEdmModel model = GetEdmModel();
+            Assert.Equal(model.GetEdmType(typeof(DerivedTypeA)), model.SchemaElements.OfType<IEdmEntityType>().Where(t => t.Name == "DerivedTypeA").Single());
+            Assert.Equal(model.GetEdmType(typeof(DerivedTypeB)), model.SchemaElements.OfType<IEdmEntityType>().Where(t => t.Name == "DerivedTypeB").Single());
+        }
+
+        [Fact]
+        public void GetEdmType_Returns_NearestDerivedType()
+        {
+            IEdmModel model = GetEdmModel();
+            Assert.Equal(model.GetEdmType(typeof(DerivedTypeAA)), model.SchemaElements.OfType<IEdmEntityType>().Where(t => t.Name == "DerivedTypeA").Single());
+        }
+
+        [Fact]
+        public void GetEdmType_ReturnsNull_ForUnknownType()
+        {
+            IEdmModel model = GetEdmModel();
+            Assert.Null(model.GetEdmType(typeof(TypeNotInModel)));
+        }
+
+        private static IEdmModel GetEdmModel()
+        {
+            ODataModelBuilder modelBuilder = new ODataModelBuilder();
+            modelBuilder
+                .Entity<DerivedTypeA>()
+                .DerivesFrom<BaseType>();
+
+            modelBuilder
+                .Entity<DerivedTypeB>()
+                .DerivesFrom<BaseType>();
+
+            return modelBuilder.GetEdmModel();
+        }
+
+        public class BaseType
+        {
+        }
+
+        public class DerivedTypeA : BaseType
+        {
+        }
+
+        public class DerivedTypeB : BaseType
+        {
+        }
+
+        public class DerivedTypeAA : DerivedTypeA
+        {
+        }
+
+        public class TypeNotInModel
+        {
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Web.Http.OData.Formatter.Deserialization;
 using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 

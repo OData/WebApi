@@ -133,6 +133,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An instance of the abstract entity type &apos;{0}&apos; was found. Abstract entity types cannot be instantiated..
+        /// </summary>
+        internal static string CannotInstantiateAbstractEntityType {
+            get {
+                return ResourceManager.GetString("CannotInstantiateAbstractEntityType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to convert &apos;{0}&apos; to an integer..
         /// </summary>
         internal static string CanNotParseInteger {
@@ -651,6 +660,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string NoNavigationLinkFactoryFound {
             get {
                 return ResourceManager.GetString("NoNavigationLinkFactoryFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Collections cannot contain null elements..
+        /// </summary>
+        internal static string NullElementInCollection {
+            get {
+                return ResourceManager.GetString("NullElementInCollection", resourceCulture);
             }
         }
         

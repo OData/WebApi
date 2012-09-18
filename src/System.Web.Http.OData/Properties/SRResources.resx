@@ -402,6 +402,12 @@
   <data name="FunctionNotSupportedOnEnum" xml:space="preserve">
     <value>The '{0}' function cannot be applied to an enumeration-typed argument.</value>
   </data>
+  <data name="CannotInstantiateAbstractEntityType" xml:space="preserve">
+    <value>An instance of the abstract entity type '{0}' was found. Abstract entity types cannot be instantiated.</value>
+  </data>
+  <data name="NullElementInCollection" xml:space="preserve">
+    <value>Collections cannot contain null elements.</value>
+  </data>
   <data name="WriteToStreamAsyncMustHaveRequest" xml:space="preserve">
     <value>The OData formatter does not support writing client requests. This formatter instance must have an associated request.</value>
   </data>

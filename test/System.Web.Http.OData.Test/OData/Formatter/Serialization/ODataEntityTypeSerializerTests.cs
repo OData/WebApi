@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -25,6 +26,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public ODataEntityTypeSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
+
+            _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Customer"), new ClrTypeAnnotation(typeof(Customer)));
+            _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Order"), new ClrTypeAnnotation(typeof(Order)));
+
             _customerSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Customers");
             _customer = new Customer()
             {

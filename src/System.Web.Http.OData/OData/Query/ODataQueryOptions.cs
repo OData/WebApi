@@ -19,9 +19,9 @@ namespace System.Web.Http.OData.Query
     [ODataQueryParameterBinding]
     public class ODataQueryOptions
     {
-        private const string EntityFrameworkQueryProviderAssemblyName = "EntityFramework";
-        private const string Linq2SqlQueryProviderAssemblyName = "System.Data.Linq";
-        private const string Linq2ObjectsQueryProviderAssemblyName = "System.Core";
+        private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
+        private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
+        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
 
         private IAssembliesResolver _assembliesResolver;
 
@@ -226,18 +226,18 @@ namespace System.Web.Http.OData.Query
 
             HandleNullPropagationOption options;
 
-            string queryProviderAssemblyName = query.Provider.GetType().Assembly.GetName().Name;
-            switch (queryProviderAssemblyName)
+            string queryProviderNamespace = query.Provider.GetType().Namespace;
+            switch (queryProviderNamespace)
             {
-                case EntityFrameworkQueryProviderAssemblyName:
+                case EntityFrameworkQueryProviderNamespace:
                     options = HandleNullPropagationOption.False;
                     break;
 
-                case Linq2SqlQueryProviderAssemblyName:
+                case Linq2SqlQueryProviderNamespace:
                     options = HandleNullPropagationOption.False;
                     break;
 
-                case Linq2ObjectsQueryProviderAssemblyName:
+                case Linq2ObjectsQueryProviderNamespace:
                     options = HandleNullPropagationOption.True;
                     break;
 

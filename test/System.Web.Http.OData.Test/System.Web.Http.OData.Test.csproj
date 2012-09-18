@@ -132,6 +132,7 @@
     <Compile Include="OData\Query\HandleNullPropagationOptionHelperTest.cs" />
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />
+    <Compile Include="OData\Query\PartialTrustTest.cs" />
     <Compile Include="TestCommon\Models\NonGenericEnumerable.cs" />
     <Compile Include="TestCommon\ODataMediaTypeMapping.cs" />
     <Compile Include="OData\Formatter\PeopleController.cs" />

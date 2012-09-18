@@ -13,7 +13,7 @@ using Moq;
 
 namespace System.Web.Http.OData.Query
 {
-    public class QueryCompositionTests
+    public class QueryCompositionTests : MarshalByRefObject
     {
         private static IEdmModel _queryCompositionCustomerModel;
 
@@ -270,7 +270,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void QueryableUsesConfiguredAssembliesResolver()
+        public virtual void QueryableUsesConfiguredAssembliesResolver()
         {
             ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);

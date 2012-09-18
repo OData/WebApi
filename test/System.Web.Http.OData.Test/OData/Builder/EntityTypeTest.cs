@@ -170,7 +170,7 @@ namespace System.Web.Http.OData.Builder
             var builder = new ODataModelBuilder();
 
             builder
-                .Entity<Cruiser>()
+                .Entity<SportBike>()
                 .DerivesFrom<Motorcycle>();
 
             builder
@@ -189,7 +189,7 @@ namespace System.Web.Http.OData.Builder
             model.AssertHasEntityType(typeof(Vehicle));
             model.AssertHasEntityType(typeof(Car), typeof(Vehicle));
             model.AssertHasEntityType(typeof(Motorcycle), typeof(Vehicle));
-            model.AssertHasEntityType(typeof(Cruiser), typeof(Motorcycle));
+            model.AssertHasEntityType(typeof(SportBike), typeof(Motorcycle));
         }
 
         [Fact]
@@ -314,7 +314,7 @@ namespace System.Web.Http.OData.Builder
                 .Property(v => v.Model);
 
             builder
-                .Entity<Cruiser>()
+                .Entity<SportBike>()
                 .DerivesFrom<Motorcycle>()
                 .Property(c => c.Model);
 
@@ -322,7 +322,7 @@ namespace System.Web.Http.OData.Builder
                 () => builder
                     .Entity<Motorcycle>()
                     .DerivesFrom<Vehicle>(),
-                "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.Http.OData.Builder.TestModels.Cruiser' already defines it.");
+                "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.Http.OData.Builder.TestModels.SportBike' already defines it.");
         }
 
         [Fact]

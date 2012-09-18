@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Builder.TestModels
         public int ID { get; set; }
     }
 
-    public class Cruiser : Motorcycle
+    public class SportBike : Motorcycle
     {
     }
 }

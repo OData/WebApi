@@ -205,6 +205,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot compare an enum of type &apos;{0}&apos; to an expression of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string ConvertToEnumFailed {
+            get {
+                return ResourceManager.GetString("ConvertToEnumFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} does not support CreateProperty..
         /// </summary>
         internal static string CreatePropertyNotSupported {
@@ -390,6 +399,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string FormatterReadIsNotSupportedForType {
             get {
                 return ResourceManager.GetString("FormatterReadIsNotSupportedForType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; function cannot be applied to an enumeration-typed argument..
+        /// </summary>
+        internal static string FunctionNotSupportedOnEnum {
+            get {
+                return ResourceManager.GetString("FunctionNotSupportedOnEnum", resourceCulture);
             }
         }
         

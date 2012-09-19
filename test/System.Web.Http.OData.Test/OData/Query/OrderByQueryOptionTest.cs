@@ -198,5 +198,28 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(3, results[1].CustomerId);
             Assert.Equal(2, results[2].CustomerId);
         }
+
+        [Fact]
+        public void ApplyToEnums_ReturnsCorrectQueryable()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumModel>("EnumModels");
+            var model = builder.GetEdmModel();
+
+            var context = new ODataQueryContext(model, typeof(EnumModel), "EnumModels");
+            var orderbyOption = new OrderByQueryOption("Flag", context);
+            IEnumerable<EnumModel> enumModels = FilterQueryOptionTest.EnumModelTestData;
+
+            // Act
+            IQueryable queryable = orderbyOption.ApplyTo(enumModels.AsQueryable());
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<EnumModel> actualCustomers = Assert.IsAssignableFrom<IEnumerable<EnumModel>>(queryable);
+            Assert.Equal(
+                new int[] { 2, 1, 3 },
+                actualCustomers.Select(enumModel => enumModel.Id));
+        }
     }
 }

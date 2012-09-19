@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -273,7 +274,16 @@ namespace System.Web.Http.OData.Query.Expressions
             }
             else
             {
-                return Expression.Convert(source, conversionType);
+                Type sourceUnderlyingType = Nullable.GetUnderlyingType(source.Type) ?? source.Type;
+                if (sourceUnderlyingType.IsEnum)
+                {
+                    // we handle enum conversions ourselves
+                    return source;
+                }
+                else
+                {
+                    return Expression.Convert(source, conversionType);
+                }
             }
         }
 
@@ -606,6 +616,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("concat" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
@@ -617,6 +628,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("trim" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
@@ -628,6 +640,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("toupper" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
@@ -639,6 +652,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("tolower" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
@@ -650,6 +664,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("indexof" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
@@ -662,12 +677,16 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Expression[] arguments = BindArguments(node.Arguments);
 
-            Contract.Assert((arguments.Length == 2 && arguments[0].Type == typeof(string) && IsInteger(arguments[1].Type)) ||
-                (arguments.Length == 3 && arguments[0].Type == typeof(string) && IsInteger(arguments[1].Type) && IsInteger(arguments[2].Type)));
-
             Expression functionCall;
             if (arguments.Length == 2)
             {
+                if (arguments[0].Type != typeof(string) || !IsInteger(arguments[1].Type))
+                {
+                    throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, node.Name));
+                }
+
+                Contract.Assert(arguments[0].Type == typeof(string));
+
                 // When null propagation is allowed, we use a safe version of String.Substring(int).
                 // But for providers that would not recognize custom expressions like this, we map 
                 // directly to String.Substring(int)
@@ -683,7 +702,13 @@ namespace System.Web.Http.OData.Query.Expressions
             }
             else
             {
+                if (arguments[0].Type != typeof(string))
+                {
+                    throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, node.Name));
+                }
+
                 // arguments.Length == 3 implies String.Substring(int, int)
+                Contract.Assert(arguments.Length == 3 && arguments[0].Type == typeof(string) && IsInteger(arguments[1].Type) && IsInteger(arguments[2].Type));
 
                 // When null propagation is allowed, we use a safe version of String.Substring(int, int).
                 // But for providers that would not recognize custom expressions like this, we map 
@@ -707,6 +732,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("length" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 1 && arguments[0].Type == typeof(string));
 
@@ -718,6 +744,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("substringof" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
@@ -730,6 +757,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("startswith" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
@@ -741,6 +769,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("endswith" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            ValidateAllStringArguments(node.Name, arguments);
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
@@ -750,6 +779,14 @@ namespace System.Web.Http.OData.Query.Expressions
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)
         {
             return nodes.OfType<SingleValueQueryNode>().Select(n => Bind(n)).ToArray();
+        }
+
+        private static void ValidateAllStringArguments(string functionName, Expression[] arguments)
+        {
+            if (arguments.Any(arg => arg.Type != typeof(string)))
+            {
+                throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, functionName));
+            }
         }
 
         private Expression BindAllQueryNode(AllQueryNode allQueryNode)
@@ -881,36 +918,44 @@ namespace System.Web.Http.OData.Query.Expressions
 
                 Expression convertedExpression = null;
 
-                switch (Type.GetTypeCode(sourceType))
+                if (sourceType.IsEnum)
                 {
-                    case TypeCode.UInt16:
-                    case TypeCode.UInt32:
-                    case TypeCode.UInt64:
-                        convertedExpression = Expression.Convert(ExtractValueFromNullableExpression(source), conversionType);
-                        break;
+                    // we handle enum conversions ourselves
+                    convertedExpression = source;
+                }
+                else
+                {
+                    switch (Type.GetTypeCode(sourceType))
+                    {
+                        case TypeCode.UInt16:
+                        case TypeCode.UInt32:
+                        case TypeCode.UInt64:
+                            convertedExpression = Expression.Convert(ExtractValueFromNullableExpression(source), conversionType);
+                            break;
 
-                    case TypeCode.Char:
-                        convertedExpression = Expression.Call(ExtractValueFromNullableExpression(source), "ToString", typeArguments: null, arguments: null);
-                        break;
+                        case TypeCode.Char:
+                            convertedExpression = Expression.Call(ExtractValueFromNullableExpression(source), "ToString", typeArguments: null, arguments: null);
+                            break;
 
-                    case TypeCode.Object:
-                        if (sourceType == typeof(char[]))
-                        {
-                            convertedExpression = Expression.New(typeof(string).GetConstructor(new[] { typeof(char[]) }), source);
-                        }
-                        else if (sourceType == typeof(XElement))
-                        {
-                            convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
-                        }
-                        else if (sourceType == typeof(Binary))
-                        {
-                            convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
-                        }
-                        break;
+                        case TypeCode.Object:
+                            if (sourceType == typeof(char[]))
+                            {
+                                convertedExpression = Expression.New(typeof(string).GetConstructor(new[] { typeof(char[]) }), source);
+                            }
+                            else if (sourceType == typeof(XElement))
+                            {
+                                convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
+                            }
+                            else if (sourceType == typeof(Binary))
+                            {
+                                convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
+                            }
+                            break;
 
-                    default:
-                        Contract.Assert(false, Error.Format("missing non-standard type support for {0}", sourceType.Name));
-                        break;
+                        default:
+                            Contract.Assert(false, Error.Format("missing non-standard type support for {0}", sourceType.Name));
+                            break;
+                    }
                 }
 
                 if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
@@ -934,6 +979,24 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             ExpressionType binaryExpressionType;
 
+            // When comparing an enum to a string, parse the string, convert both to the enum underlying type, and compare the values
+            // When comparing an enum to an enum, convert both to the underlying type, and compare the values
+            Type leftUnderlyingType = Nullable.GetUnderlyingType(left.Type) ?? left.Type;
+            Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
+
+            if (leftUnderlyingType.IsEnum)
+            {
+                Type enumUnderlyingType = Enum.GetUnderlyingType(leftUnderlyingType);
+                left = Expression.Convert(left, left.Type.IsEnum ? enumUnderlyingType : ToNullable(enumUnderlyingType));
+                right = ConvertToEnumUnderlyingType(right, leftUnderlyingType, enumUnderlyingType);
+            }
+            else if (rightUnderlyingType.IsEnum)
+            {
+                Type enumUnderlyingType = Enum.GetUnderlyingType(rightUnderlyingType);
+                right = Expression.Convert(right, right.Type.IsEnum ? enumUnderlyingType : ToNullable(enumUnderlyingType));
+                left = ConvertToEnumUnderlyingType(left, rightUnderlyingType, enumUnderlyingType);
+            }
+
             if (left.Type != right.Type)
             {
                 // one of them must be nullable and the other is not.
@@ -948,6 +1011,36 @@ namespace System.Web.Http.OData.Query.Expressions
             else
             {
                 throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, binaryOperator, typeof(FilterBinder).Name);
+            }
+        }
+
+        private static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)
+        {
+            if (expression.NodeType == ExpressionType.Constant)
+            {
+                ConstantExpression constantExpression = expression as ConstantExpression;
+                Contract.Assert(constantExpression != null);
+                if (constantExpression.Value == null)
+                {
+                    return expression;
+                }
+                else
+                {
+                    Contract.Assert(constantExpression.Type == typeof(string));
+                    return Expression.Constant(Convert.ChangeType(Enum.Parse(enumType, constantExpression.Value as string), enumUnderlyingType, CultureInfo.InvariantCulture));
+                }
+            }
+            else if (expression.Type == enumType)
+            {
+                return Expression.Convert(expression, enumUnderlyingType);
+            }
+            else if (Nullable.GetUnderlyingType(expression.Type) == enumType)
+            {
+                return Expression.Convert(expression, typeof(Nullable<>).MakeGenericType(enumUnderlyingType));
+            }
+            else
+            {
+                throw Error.NotSupported(SRResources.ConvertToEnumFailed, enumType, expression.Type);
             }
         }
 

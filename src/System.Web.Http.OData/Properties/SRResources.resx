@@ -396,4 +396,10 @@
   <data name="PropertyAlreadyDefinedInDerivedType" xml:space="preserve">
     <value>Cannot define property '{0}' in the base entity type '{1}' as the derived type '{2}' already defines it.</value>
   </data>
+  <data name="ConvertToEnumFailed" xml:space="preserve">
+    <value>Cannot compare an enum of type '{0}' to an expression of type '{1}'.</value>
+  </data>
+  <data name="FunctionNotSupportedOnEnum" xml:space="preserve">
+    <value>The '{0}' function cannot be applied to an enumeration-typed argument.</value>
+  </data>
 </root>

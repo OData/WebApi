@@ -32,7 +32,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 3 "..\..\Analytics.cshtml"
+#line 3 "Analytics.cshtml"
                                              
     var webPropertyIdJson = new HtmlString(HttpUtility.JavaScriptStringEncode(webPropertyId, addDoubleQuotes: false));
 
@@ -53,7 +53,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <script type=\"text/javascript\">\r\
 
 
 
-#line 12 "..\..\Analytics.cshtml"
+#line 12 "Analytics.cshtml"
                  WriteTo(@__razor_helper_writer, webPropertyIdJson);
 
 #line default
@@ -64,7 +64,7 @@ WriteLiteralTo(@__razor_helper_writer, "\");\r\n            pageTracker._trackPa
 
 
 
-#line 16 "..\..\Analytics.cshtml"
+#line 16 "Analytics.cshtml"
 
 #line default
 #line hidden
@@ -79,7 +79,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 18 "..\..\Analytics.cshtml"
+#line 18 "Analytics.cshtml"
                                                   
     var webPropertyIdJson = new HtmlString(HttpUtility.JavaScriptStringEncode(webPropertyId, addDoubleQuotes: false));
 
@@ -91,7 +91,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <script type=\"text/javascript\">\r\
 
 
 
-#line 22 "..\..\Analytics.cshtml"
+#line 22 "Analytics.cshtml"
     WriteTo(@__razor_helper_writer, webPropertyIdJson);
 
 #line default
@@ -109,7 +109,7 @@ WriteLiteralTo(@__razor_helper_writer, @"']);
 
 
 
-#line 30 "..\..\Analytics.cshtml"
+#line 30 "Analytics.cshtml"
 
 #line default
 #line hidden
@@ -124,7 +124,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 32 "..\..\Analytics.cshtml"
+#line 32 "Analytics.cshtml"
                                       
     var accountJson = new HtmlString(HttpUtility.JavaScriptStringEncode(account, addDoubleQuotes: false));
 
@@ -137,7 +137,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <script type=\"text/javascript\">\r\
 
 
 
-#line 37 "..\..\Analytics.cshtml"
+#line 37 "Analytics.cshtml"
 WriteTo(@__razor_helper_writer, accountJson);
 
 #line default
@@ -150,7 +150,7 @@ WriteLiteralTo(@__razor_helper_writer, "\";\r\n        document.write(\"<SCR\" +
 
 
 
-#line 42 "..\..\Analytics.cshtml"
+#line 42 "Analytics.cshtml"
 
 #line default
 #line hidden
@@ -165,7 +165,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 44 "..\..\Analytics.cshtml"
+#line 44 "Analytics.cshtml"
                                                           
     var securityJson = new HtmlString(HttpUtility.JavaScriptStringEncode(security, addDoubleQuotes: false));
 
@@ -177,7 +177,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <script type=\"text/javascript\">\r\
 
 
 
-#line 48 "..\..\Analytics.cshtml"
+#line 48 "Analytics.cshtml"
 WriteTo(@__razor_helper_writer, project);
 
 #line default
@@ -187,7 +187,7 @@ WriteLiteralTo(@__razor_helper_writer, ";\r\n    var sc_invisible=1;\r\n    var 
 
 
 
-#line 50 "..\..\Analytics.cshtml"
+#line 50 "Analytics.cshtml"
 WriteTo(@__razor_helper_writer, securityJson);
 
 #line default
@@ -209,7 +209,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <noscript>\r\n    <div class=\"statc
 
 
 
-#line 58 "..\..\Analytics.cshtml"
+#line 58 "Analytics.cshtml"
                                                                                                                        WriteTo(@__razor_helper_writer, project);
 
 #line default
@@ -219,7 +219,7 @@ WriteLiteralTo(@__razor_helper_writer, "/0/");
 
 
 
-#line 58 "..\..\Analytics.cshtml"
+#line 58 "Analytics.cshtml"
                                                                                                                                   WriteTo(@__razor_helper_writer, security);
 
 #line default
@@ -229,7 +229,7 @@ WriteLiteralTo(@__razor_helper_writer, "/1/\" alt=\"tumblr statistics\"/></a></d
 
 
 
-#line 60 "..\..\Analytics.cshtml"
+#line 60 "Analytics.cshtml"
 
 #line default
 #line hidden

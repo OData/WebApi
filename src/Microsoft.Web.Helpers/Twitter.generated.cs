@@ -14,7 +14,7 @@ namespace Microsoft.Web.Helpers
     using System;
     using System.Collections.Generic;
     
-    #line 3 "..\..\Twitter.cshtml"
+    #line 3 "Twitter.cshtml"
     using System.Globalization;
     
     #line default
@@ -30,7 +30,7 @@ namespace Microsoft.Web.Helpers
     using System.Web.WebPages;
     using System.Web.WebPages.Html;
     
-    #line 4 "..\..\Twitter.cshtml"
+    #line 4 "Twitter.cshtml"
     using Microsoft.Internal.Web.Utils;
     
     #line default
@@ -52,7 +52,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 14 "..\..\Twitter.cshtml"
+#line 14 "Twitter.cshtml"
                                                  
     var tweetTextAttribute = new HtmlString(!tweetText.IsEmpty() ? String.Format(CultureInfo.InvariantCulture, " data-text=\"{0}\"", HttpUtility.HtmlAttributeEncode(tweetText)) : "");
     var urlAttribute = new HtmlString(!url.IsEmpty() ? String.Format(CultureInfo.InvariantCulture, " data-url=\"{0}\"", HttpUtility.HtmlAttributeEncode(url)) : "");
@@ -68,7 +68,7 @@ WriteLiteralTo(@__razor_helper_writer, "<a href=\"http://twitter.com/share\" cla
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                 WriteTo(@__razor_helper_writer, tweetTextAttribute);
 
 #line default
@@ -76,7 +76,7 @@ WriteLiteralTo(@__razor_helper_writer, "<a href=\"http://twitter.com/share\" cla
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                                    WriteTo(@__razor_helper_writer, urlAttribute);
 
 #line default
@@ -84,7 +84,7 @@ WriteLiteralTo(@__razor_helper_writer, "<a href=\"http://twitter.com/share\" cla
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                                                 WriteTo(@__razor_helper_writer, languageAttribute);
 
 #line default
@@ -92,7 +92,7 @@ WriteLiteralTo(@__razor_helper_writer, "<a href=\"http://twitter.com/share\" cla
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                                                                   WriteTo(@__razor_helper_writer, userNameAttribute);
 
 #line default
@@ -100,7 +100,7 @@ WriteLiteralTo(@__razor_helper_writer, "<a href=\"http://twitter.com/share\" cla
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                                                                                     WriteTo(@__razor_helper_writer, relatedAttribute);
 
 #line default
@@ -110,7 +110,7 @@ WriteLiteralTo(@__razor_helper_writer, " data-count=\"");
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                                                                                                                   WriteTo(@__razor_helper_writer, dataCount.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -120,7 +120,7 @@ WriteLiteralTo(@__razor_helper_writer, "\">");
 
 
 
-#line 21 "..\..\Twitter.cshtml"
+#line 21 "Twitter.cshtml"
                                                                                                                                                                                                         WriteTo(@__razor_helper_writer, shareText);
 
 #line default
@@ -135,7 +135,7 @@ WriteLiteralTo(@__razor_helper_writer, "<script type=\"text/javascript\" src=\"h
 
 
 
-#line 22 "..\..\Twitter.cshtml"
+#line 22 "Twitter.cshtml"
 
 #line default
 #line hidden
@@ -153,7 +153,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 27 "..\..\Twitter.cshtml"
+#line 27 "Twitter.cshtml"
                                        
 
 #line default
@@ -163,7 +163,7 @@ WriteLiteralTo(@__razor_helper_writer, "<a href=\"http://www.twitter.com/");
 
 
 
-#line 28 "..\..\Twitter.cshtml"
+#line 28 "Twitter.cshtml"
  WriteTo(@__razor_helper_writer, HttpUtility.UrlEncode(userName));
 
 #line default
@@ -173,7 +173,7 @@ WriteLiteralTo(@__razor_helper_writer, "\"><img src=\"http://twitter-badges.s3.a
 
 
 
-#line 28 "..\..\Twitter.cshtml"
+#line 28 "Twitter.cshtml"
                                                                                      WriteTo(@__razor_helper_writer, HttpUtility.UrlEncode(followStyle + '-' + followColor));
 
 #line default
@@ -183,7 +183,7 @@ WriteLiteralTo(@__razor_helper_writer, ".png\" alt=\"Follow ");
 
 
 
-#line 28 "..\..\Twitter.cshtml"
+#line 28 "Twitter.cshtml"
                                                                                                                                                                WriteTo(@__razor_helper_writer, userName);
 
 #line default
@@ -193,7 +193,7 @@ WriteLiteralTo(@__razor_helper_writer, " on Twitter\"/></a>\r\n");
 
 
 
-#line 29 "..\..\Twitter.cshtml"
+#line 29 "Twitter.cshtml"
 
 #line default
 #line hidden
@@ -225,7 +225,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 48 "..\..\Twitter.cshtml"
+#line 48 "Twitter.cshtml"
                                
 
     if (String.IsNullOrEmpty(userName)) {
@@ -246,7 +246,7 @@ WriteLiteralTo(@__razor_helper_writer, "<script type=\"text/javascript\">\r\nnew
 
 
 
-#line 59 "..\..\Twitter.cshtml"
+#line 59 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, numberOfTweets < 1 ? 1 : (numberOfTweets > 30 ? 30 : numberOfTweets));
 
 #line default
@@ -256,7 +256,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  interval: ");
 
 
 
-#line 60 "..\..\Twitter.cshtml"
+#line 60 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, interval < 2 ? 2000 : (interval > 20 ? 20000 : (interval * 1000)));
 
 #line default
@@ -266,7 +266,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  width: ");
 
 
 
-#line 61 "..\..\Twitter.cshtml"
+#line 61 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture)));
 
 #line default
@@ -276,7 +276,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  height: ");
 
 
 
-#line 62 "..\..\Twitter.cshtml"
+#line 62 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture));
 
 #line default
@@ -286,7 +286,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  theme: {\r\n    shell: {\r\n     
 
 
 
-#line 65 "..\..\Twitter.cshtml"
+#line 65 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(backgroundShellColor.IsEmpty() ? "#333333" : backgroundShellColor));
 
 #line default
@@ -296,7 +296,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 66 "..\..\Twitter.cshtml"
+#line 66 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor));
 
 #line default
@@ -306,7 +306,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    },\r\n    tweets: {\r\n      b
 
 
 
-#line 69 "..\..\Twitter.cshtml"
+#line 69 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsBackgroundColor.IsEmpty() ? "#000000" : tweetsBackgroundColor));
 
 #line default
@@ -316,7 +316,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 70 "..\..\Twitter.cshtml"
+#line 70 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsColor.IsEmpty() ? "#ffffff" : tweetsColor));
 
 #line default
@@ -326,7 +326,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      links: \'");
 
 
 
-#line 71 "..\..\Twitter.cshtml"
+#line 71 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsLinksColor.IsEmpty() ? "#4aed05" : tweetsLinksColor));
 
 #line default
@@ -336,7 +336,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    }\r\n  },\r\n  features: {\r\n
 
 
 
-#line 75 "..\..\Twitter.cshtml"
+#line 75 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -346,7 +346,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    loop: ");
 
 
 
-#line 76 "..\..\Twitter.cshtml"
+#line 76 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, loop.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture));
 
 #line default
@@ -356,7 +356,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    live: ");
 
 
 
-#line 77 "..\..\Twitter.cshtml"
+#line 77 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, live.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture));
 
 #line default
@@ -366,7 +366,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    hashtags: ");
 
 
 
-#line 78 "..\..\Twitter.cshtml"
+#line 78 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, hashTags.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture));
 
 #line default
@@ -376,7 +376,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    timestamp: ");
 
 
 
-#line 79 "..\..\Twitter.cshtml"
+#line 79 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -386,7 +386,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    avatars: ");
 
 
 
-#line 80 "..\..\Twitter.cshtml"
+#line 80 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -396,7 +396,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    behavior: \'");
 
 
 
-#line 81 "..\..\Twitter.cshtml"
+#line 81 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -406,7 +406,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n  }\r\n}).render().setUser(\'");
 
 
 
-#line 83 "..\..\Twitter.cshtml"
+#line 83 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(userName));
 
 #line default
@@ -416,7 +416,7 @@ WriteLiteralTo(@__razor_helper_writer, "\').start();\r\n</script>\r\n");
 
 
 
-#line 85 "..\..\Twitter.cshtml"
+#line 85 "Twitter.cshtml"
 
 #line default
 #line hidden
@@ -450,7 +450,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 107 "..\..\Twitter.cshtml"
+#line 107 "Twitter.cshtml"
                                
      
     if (String.IsNullOrEmpty(searchQuery)) {
@@ -471,7 +471,7 @@ WriteLiteralTo(@__razor_helper_writer, "<script type=\"text/javascript\">\r\nnew
 
 
 
-#line 118 "..\..\Twitter.cshtml"
+#line 118 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(searchQuery));
 
 #line default
@@ -481,7 +481,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  interval: ");
 
 
 
-#line 119 "..\..\Twitter.cshtml"
+#line 119 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, Math.Min(Math.Max(2, interval), 20) * 1000);
 
 #line default
@@ -491,7 +491,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  title: \'");
 
 
 
-#line 120 "..\..\Twitter.cshtml"
+#line 120 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(title));
 
 #line default
@@ -501,7 +501,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  subject: \'");
 
 
 
-#line 121 "..\..\Twitter.cshtml"
+#line 121 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(caption));
 
 #line default
@@ -511,7 +511,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  width: ");
 
 
 
-#line 122 "..\..\Twitter.cshtml"
+#line 122 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture)));
 
 #line default
@@ -521,7 +521,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  height: ");
 
 
 
-#line 123 "..\..\Twitter.cshtml"
+#line 123 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture));
 
 #line default
@@ -531,7 +531,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  theme: {\r\n    shell: {\r\n     
 
 
 
-#line 126 "..\..\Twitter.cshtml"
+#line 126 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(backgroundShellColor.IsEmpty() ? "#8ec1da" : backgroundShellColor));
 
 #line default
@@ -541,7 +541,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 127 "..\..\Twitter.cshtml"
+#line 127 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor));
 
 #line default
@@ -551,7 +551,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    },\r\n    tweets: {\r\n      b
 
 
 
-#line 130 "..\..\Twitter.cshtml"
+#line 130 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsBackgroundColor.IsEmpty() ? "#ffffff" : tweetsBackgroundColor));
 
 #line default
@@ -561,7 +561,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 131 "..\..\Twitter.cshtml"
+#line 131 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsColor.IsEmpty() ? "#444444" : tweetsColor));
 
 #line default
@@ -571,7 +571,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      links: \'");
 
 
 
-#line 132 "..\..\Twitter.cshtml"
+#line 132 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsLinksColor.IsEmpty() ? "#1985b5" : tweetsLinksColor));
 
 #line default
@@ -581,7 +581,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    }\r\n  },\r\n  features: {\r\n
 
 
 
-#line 136 "..\..\Twitter.cshtml"
+#line 136 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -591,7 +591,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    loop: ");
 
 
 
-#line 137 "..\..\Twitter.cshtml"
+#line 137 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, loop.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -601,7 +601,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    live: ");
 
 
 
-#line 138 "..\..\Twitter.cshtml"
+#line 138 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, live.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -611,7 +611,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    hashtags: ");
 
 
 
-#line 139 "..\..\Twitter.cshtml"
+#line 139 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, hashTags.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -621,7 +621,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    timestamp: ");
 
 
 
-#line 140 "..\..\Twitter.cshtml"
+#line 140 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -631,7 +631,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    avatars: ");
 
 
 
-#line 141 "..\..\Twitter.cshtml"
+#line 141 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -641,7 +641,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    toptweets: ");
 
 
 
-#line 142 "..\..\Twitter.cshtml"
+#line 142 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, topTweets.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -651,7 +651,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    behavior: \'");
 
 
 
-#line 143 "..\..\Twitter.cshtml"
+#line 143 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -661,7 +661,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n  }\r\n}).render().start();\r\n</s
 
 
 
-#line 147 "..\..\Twitter.cshtml"
+#line 147 "Twitter.cshtml"
 
 #line default
 #line hidden
@@ -695,7 +695,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 168 "..\..\Twitter.cshtml"
+#line 168 "Twitter.cshtml"
                                
 
     if (String.IsNullOrEmpty(userName)) {
@@ -716,7 +716,7 @@ WriteLiteralTo(@__razor_helper_writer, "<script type=\"text/javascript\">\r\nnew
 
 
 
-#line 179 "..\..\Twitter.cshtml"
+#line 179 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, numberOfTweets < 1 ? 1 : (numberOfTweets > 20 ? 20 : numberOfTweets));
 
 #line default
@@ -726,7 +726,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  interval: ");
 
 
 
-#line 180 "..\..\Twitter.cshtml"
+#line 180 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, interval < 2 ? 2000 : (interval > 20 ? 20000 : (interval * 1000)));
 
 #line default
@@ -736,7 +736,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  title: \'");
 
 
 
-#line 181 "..\..\Twitter.cshtml"
+#line 181 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(title));
 
 #line default
@@ -746,7 +746,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  subject: \'");
 
 
 
-#line 182 "..\..\Twitter.cshtml"
+#line 182 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(caption));
 
 #line default
@@ -756,7 +756,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  width: ");
 
 
 
-#line 183 "..\..\Twitter.cshtml"
+#line 183 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture)));
 
 #line default
@@ -766,7 +766,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  height: ");
 
 
 
-#line 184 "..\..\Twitter.cshtml"
+#line 184 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture));
 
 #line default
@@ -776,7 +776,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  theme: {\r\n    shell: {\r\n     
 
 
 
-#line 187 "..\..\Twitter.cshtml"
+#line 187 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(backgroundShellColor.IsEmpty() ? "#43c43f" : backgroundShellColor));
 
 #line default
@@ -786,7 +786,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 188 "..\..\Twitter.cshtml"
+#line 188 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor));
 
 #line default
@@ -796,7 +796,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    },\r\n    tweets: {\r\n      b
 
 
 
-#line 191 "..\..\Twitter.cshtml"
+#line 191 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsBackgroundColor.IsEmpty() ? "#ffffff" : tweetsBackgroundColor));
 
 #line default
@@ -806,7 +806,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 192 "..\..\Twitter.cshtml"
+#line 192 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsColor.IsEmpty() ? "#444444" : tweetsColor));
 
 #line default
@@ -816,7 +816,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      links: \'");
 
 
 
-#line 193 "..\..\Twitter.cshtml"
+#line 193 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsLinksColor.IsEmpty() ? "#43c43f" : tweetsLinksColor));
 
 #line default
@@ -826,7 +826,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    }\r\n  },\r\n  features: {\r\n
 
 
 
-#line 197 "..\..\Twitter.cshtml"
+#line 197 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -836,7 +836,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    loop: ");
 
 
 
-#line 198 "..\..\Twitter.cshtml"
+#line 198 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, loop.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -846,7 +846,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    live: ");
 
 
 
-#line 199 "..\..\Twitter.cshtml"
+#line 199 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, live.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -856,7 +856,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    hashtags: ");
 
 
 
-#line 200 "..\..\Twitter.cshtml"
+#line 200 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, hashTags.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -866,7 +866,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    timestamp: ");
 
 
 
-#line 201 "..\..\Twitter.cshtml"
+#line 201 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -876,7 +876,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    avatars: ");
 
 
 
-#line 202 "..\..\Twitter.cshtml"
+#line 202 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -886,7 +886,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    behavior: \'");
 
 
 
-#line 203 "..\..\Twitter.cshtml"
+#line 203 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -896,7 +896,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n  }\r\n}).render().setUser(\'");
 
 
 
-#line 205 "..\..\Twitter.cshtml"
+#line 205 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(userName));
 
 #line default
@@ -906,7 +906,7 @@ WriteLiteralTo(@__razor_helper_writer, "\').start();\r\n</script>\r\n");
 
 
 
-#line 207 "..\..\Twitter.cshtml"
+#line 207 "Twitter.cshtml"
 
 #line default
 #line hidden
@@ -941,7 +941,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 229 "..\..\Twitter.cshtml"
+#line 229 "Twitter.cshtml"
                                
 
     if (String.IsNullOrEmpty(userName)) {
@@ -966,7 +966,7 @@ WriteLiteralTo(@__razor_helper_writer, "<script type=\"text/javascript\">\r\nnew
 
 
 
-#line 244 "..\..\Twitter.cshtml"
+#line 244 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, numberOfTweets < 1 ? 1 : (numberOfTweets > 100 ? 100 : numberOfTweets));
 
 #line default
@@ -976,7 +976,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  interval: ");
 
 
 
-#line 245 "..\..\Twitter.cshtml"
+#line 245 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, interval < 2 ? 2000 : (interval > 20 ? 20000 : (interval * 1000)));
 
 #line default
@@ -986,7 +986,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  title: \'");
 
 
 
-#line 246 "..\..\Twitter.cshtml"
+#line 246 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(title));
 
 #line default
@@ -996,7 +996,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  subject: \'");
 
 
 
-#line 247 "..\..\Twitter.cshtml"
+#line 247 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(caption));
 
 #line default
@@ -1006,7 +1006,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n  width: ");
 
 
 
-#line 248 "..\..\Twitter.cshtml"
+#line 248 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, new HtmlString(width <= 0 ? "'auto'" : width.ToString(CultureInfo.InvariantCulture)));
 
 #line default
@@ -1016,7 +1016,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  height: ");
 
 
 
-#line 249 "..\..\Twitter.cshtml"
+#line 249 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, height < 0 ? "0" : height.ToString(CultureInfo.InvariantCulture));
 
 #line default
@@ -1026,7 +1026,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n  theme: {\r\n    shell: {\r\n     
 
 
 
-#line 252 "..\..\Twitter.cshtml"
+#line 252 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(backgroundShellColor.IsEmpty() ? "#ff96e7" : backgroundShellColor));
 
 #line default
@@ -1036,7 +1036,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 253 "..\..\Twitter.cshtml"
+#line 253 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(shellColor.IsEmpty() ? "#ffffff" : shellColor));
 
 #line default
@@ -1046,7 +1046,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    },\r\n    tweets: {\r\n      b
 
 
 
-#line 256 "..\..\Twitter.cshtml"
+#line 256 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsBackgroundColor.IsEmpty() ? "#ffffff" : tweetsBackgroundColor));
 
 #line default
@@ -1056,7 +1056,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      color: \'");
 
 
 
-#line 257 "..\..\Twitter.cshtml"
+#line 257 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsColor.IsEmpty() ? "#444444" : tweetsColor));
 
 #line default
@@ -1066,7 +1066,7 @@ WriteLiteralTo(@__razor_helper_writer, "\',\r\n      links: \'");
 
 
 
-#line 258 "..\..\Twitter.cshtml"
+#line 258 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(tweetsLinksColor.IsEmpty() ? "#b740c2" : tweetsLinksColor));
 
 #line default
@@ -1076,7 +1076,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n    }\r\n  },\r\n  features: {\r\n
 
 
 
-#line 262 "..\..\Twitter.cshtml"
+#line 262 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, scrollBar.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1086,7 +1086,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    loop: ");
 
 
 
-#line 263 "..\..\Twitter.cshtml"
+#line 263 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, loop.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1096,7 +1096,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    live: ");
 
 
 
-#line 264 "..\..\Twitter.cshtml"
+#line 264 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, live.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1106,7 +1106,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    hashtags: ");
 
 
 
-#line 265 "..\..\Twitter.cshtml"
+#line 265 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, hashTags.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1116,7 +1116,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    timestamp: ");
 
 
 
-#line 266 "..\..\Twitter.cshtml"
+#line 266 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, timestamp.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1126,7 +1126,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    avatars: ");
 
 
 
-#line 267 "..\..\Twitter.cshtml"
+#line 267 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, avatars.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1136,7 +1136,7 @@ WriteLiteralTo(@__razor_helper_writer, ",\r\n    behavior: \'");
 
 
 
-#line 268 "..\..\Twitter.cshtml"
+#line 268 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, behavior.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
 #line default
@@ -1146,7 +1146,7 @@ WriteLiteralTo(@__razor_helper_writer, "\'\r\n  }\r\n}).render().setList(\'");
 
 
 
-#line 270 "..\..\Twitter.cshtml"
+#line 270 "Twitter.cshtml"
 WriteTo(@__razor_helper_writer, RawJS(userName));
 
 #line default
@@ -1156,7 +1156,7 @@ WriteLiteralTo(@__razor_helper_writer, "\', \'");
 
 
 
-#line 270 "..\..\Twitter.cshtml"
+#line 270 "Twitter.cshtml"
           WriteTo(@__razor_helper_writer, RawJS(list));
 
 #line default
@@ -1166,7 +1166,7 @@ WriteLiteralTo(@__razor_helper_writer, "\').start();\r\n</script>\r\n");
 
 
 
-#line 272 "..\..\Twitter.cshtml"
+#line 272 "Twitter.cshtml"
 
 #line default
 #line hidden
@@ -1176,7 +1176,7 @@ WriteLiteralTo(@__razor_helper_writer, "\').start();\r\n</script>\r\n");
 }
 
 
-        #line 275 "..\..\Twitter.cshtml"
+        #line 275 "Twitter.cshtml"
 
     private static IHtmlString RawJS(string text) {
         return new HtmlString(HttpUtility.JavaScriptStringEncode(text));

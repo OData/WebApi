@@ -16,7 +16,7 @@ namespace Microsoft.Web.Helpers
     using System;
     using System.Collections.Generic;
     
-    #line 3 "..\..\Bing.cshtml"
+    #line 3 "Bing.cshtml"
     using System.Globalization;
     
     #line default
@@ -26,7 +26,7 @@ namespace Microsoft.Web.Helpers
     using System.Net;
     using System.Text;
     
-    #line 4 "..\..\Bing.cshtml"
+    #line 4 "Bing.cshtml"
     using System.Web;
     
     #line default
@@ -37,13 +37,13 @@ namespace Microsoft.Web.Helpers
     using System.Web.WebPages;
     using System.Web.WebPages.Html;
     
-    #line 5 "..\..\Bing.cshtml"
+    #line 5 "Bing.cshtml"
     using System.Web.WebPages.Scope;
     
     #line default
     #line hidden
     
-    #line 6 "..\..\Bing.cshtml"
+    #line 6 "Bing.cshtml"
     using Microsoft.Internal.Web.Utils;
     
     #line default
@@ -52,7 +52,7 @@ namespace Microsoft.Web.Helpers
     public class Bing : System.Web.WebPages.HelperPage
     {
         
-        #line 8 "..\..\Bing.cshtml"
+        #line 8 "Bing.cshtml"
 
     private const string DefaultBoxWidth = "322px";
     internal static readonly object _siteTitleKey = new object();
@@ -113,21 +113,21 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 61 "..\..\Bing.cshtml"
+#line 61 "Bing.cshtml"
                                                                                                       
     
 #line default
 #line hidden
 
 
-#line 62 "..\..\Bing.cshtml"
+#line 62 "Bing.cshtml"
 WriteTo(@__razor_helper_writer, _SearchBox(boxWidth, siteUrl, siteTitle, new HttpContextWrapper(HttpContext.Current), ScopeStorage.CurrentScope));
 
 #line default
 #line hidden
 
 
-#line 62 "..\..\Bing.cshtml"
+#line 62 "Bing.cshtml"
                                                                                                                      
  
 #line default
@@ -143,7 +143,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 65 "..\..\Bing.cshtml"
+#line 65 "Bing.cshtml"
                                                                                                                                           
     siteTitle = GetSiteTitle(scopeStorage, siteTitle);
     siteUrl = GetSiteUrl(scopeStorage, siteUrl);
@@ -159,7 +159,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <form action=\"http://www.bing.com/s
 
 
 
-#line 72 "..\..\Bing.cshtml"
+#line 72 "Bing.cshtml"
            WriteTo(@__razor_helper_writer, GetCodePageFromRequest(context));
 
 #line default
@@ -169,7 +169,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" />\r\n    <table cellpadding=\"0\" ce
 
 
 
-#line 73 "..\..\Bing.cshtml"
+#line 73 "Bing.cshtml"
                          WriteTo(@__razor_helper_writer, boxWidth);
 
 #line default
@@ -188,7 +188,7 @@ WriteLiteralTo(@__razor_helper_writer, @";"">
 
 
 
-#line 82 "..\..\Bing.cshtml"
+#line 82 "Bing.cshtml"
      if (!String.IsNullOrEmpty(siteUrl)) {
 
 #line default
@@ -199,7 +199,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <tr>\r\n        <td colspan=\"2\" st
 
 
 
-#line 85 "..\..\Bing.cshtml"
+#line 85 "Bing.cshtml"
                                                 WriteTo(@__razor_helper_writer, siteUrl);
 
 #line default
@@ -209,7 +209,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" />");
 
 
 
-#line 85 "..\..\Bing.cshtml"
+#line 85 "Bing.cshtml"
                                                             WriteTo(@__razor_helper_writer, searchSite);
 
 #line default
@@ -219,7 +219,7 @@ WriteLiteralTo(@__razor_helper_writer, "</label>&nbsp;<label><input name=\"q1\" 
 
 
 
-#line 85 "..\..\Bing.cshtml"
+#line 85 "Bing.cshtml"
                                                                                                                                      WriteTo(@__razor_helper_writer, HelpersToolkitResources.BingSearch_DefaultWebSearchText);
 
 #line default
@@ -229,7 +229,7 @@ WriteLiteralTo(@__razor_helper_writer, "</label>\r\n         </td>\r\n    </tr>\
 
 
 
-#line 88 "..\..\Bing.cshtml"
+#line 88 "Bing.cshtml"
     }
 
 #line default
@@ -239,7 +239,7 @@ WriteLiteralTo(@__razor_helper_writer, "    </table>\r\n    </form>\r\n");
 
 
 
-#line 91 "..\..\Bing.cshtml"
+#line 91 "Bing.cshtml"
 
 #line default
 #line hidden

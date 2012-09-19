@@ -16,7 +16,7 @@ namespace Microsoft.Web.Helpers
     using System;
     using System.Collections.Generic;
     
-    #line 3 "..\..\FileUpload.cshtml"
+    #line 3 "FileUpload.cshtml"
     using System.Globalization;
     
     #line default
@@ -26,7 +26,7 @@ namespace Microsoft.Web.Helpers
     using System.Net;
     using System.Text;
     
-    #line 4 "..\..\FileUpload.cshtml"
+    #line 4 "FileUpload.cshtml"
     using System.Web;
     
     #line default
@@ -37,7 +37,7 @@ namespace Microsoft.Web.Helpers
     using System.Web.WebPages;
     using System.Web.WebPages.Html;
     
-    #line 5 "..\..\FileUpload.cshtml"
+    #line 5 "FileUpload.cshtml"
     using Microsoft.Internal.Web.Utils;
     
     #line default
@@ -46,7 +46,7 @@ namespace Microsoft.Web.Helpers
     public class FileUpload : System.Web.WebPages.HelperPage
     {
         
-        #line 7 "..\..\FileUpload.cshtml"
+        #line 7 "FileUpload.cshtml"
 
     private class FileUploadTracker {
         private static readonly object _countKey = new object();
@@ -94,14 +94,14 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 47 "..\..\FileUpload.cshtml"
+#line 47 "FileUpload.cshtml"
                                        
     
 #line default
 #line hidden
 
 
-#line 48 "..\..\FileUpload.cshtml"
+#line 48 "FileUpload.cshtml"
 WriteTo(@__razor_helper_writer, _GetHtml(new HttpContextWrapper(HttpContext.Current), name, initialNumberOfFiles, allowMoreFilesToBeAdded,
                 includeFormTag, addText, uploadText));
 
@@ -109,7 +109,7 @@ WriteTo(@__razor_helper_writer, _GetHtml(new HttpContextWrapper(HttpContext.Curr
 #line hidden
 
 
-#line 49 "..\..\FileUpload.cshtml"
+#line 49 "FileUpload.cshtml"
                                                     
 
 #line default
@@ -126,7 +126,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 53 "..\..\FileUpload.cshtml"
+#line 53 "FileUpload.cshtml"
                                                                                                
     
     if (initialNumberOfFiles < 0) {
@@ -165,7 +165,7 @@ WriteLiteralTo(@__razor_helper_writer, @"        <script type=""text/javascript"
 
 
 
-#line 83 "..\..\FileUpload.cshtml"
+#line 83 "FileUpload.cshtml"
     }
 
     if (includeFormTag) {
@@ -179,7 +179,7 @@ WriteLiteralTo(@__razor_helper_writer, "<form action=\"\" enctype=\"multipart/fo
 
 
 
-#line 87 "..\..\FileUpload.cshtml"
+#line 87 "FileUpload.cshtml"
     }
 
 #line default
@@ -189,7 +189,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <div class=\"file-upload\" id=\"file
 
 
 
-#line 88 "..\..\FileUpload.cshtml"
+#line 88 "FileUpload.cshtml"
                WriteTo(@__razor_helper_writer, count);
 
 #line default
@@ -199,7 +199,7 @@ WriteLiteralTo(@__razor_helper_writer, "\">\r\n");
 
 
 
-#line 89 "..\..\FileUpload.cshtml"
+#line 89 "FileUpload.cshtml"
          for(int i = 0; i < initialNumberOfFiles; i++) {
 
 #line default
@@ -209,7 +209,7 @@ WriteLiteralTo(@__razor_helper_writer, "            <div>\r\n                <in
 
 
 
-#line 91 "..\..\FileUpload.cshtml"
+#line 91 "FileUpload.cshtml"
 WriteTo(@__razor_helper_writer, name);
 
 #line default
@@ -219,7 +219,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" type=\"file\" />\r\n            </div
 
 
 
-#line 93 "..\..\FileUpload.cshtml"
+#line 93 "FileUpload.cshtml"
         }
 
 #line default
@@ -229,7 +229,7 @@ WriteLiteralTo(@__razor_helper_writer, "    </div>\r\n");
 
 
 
-#line 95 "..\..\FileUpload.cshtml"
+#line 95 "FileUpload.cshtml"
 
     if (allowMoreFilesToBeAdded || includeFormTag) {
 
@@ -240,7 +240,7 @@ WriteLiteralTo(@__razor_helper_writer, "        <div class=\"file-upload-buttons
 
 
 
-#line 98 "..\..\FileUpload.cshtml"
+#line 98 "FileUpload.cshtml"
          if (allowMoreFilesToBeAdded) {
 
 #line default
@@ -250,7 +250,7 @@ WriteLiteralTo(@__razor_helper_writer, "            <a href=\"#\" onclick=\"File
 
 
 
-#line 99 "..\..\FileUpload.cshtml"
+#line 99 "FileUpload.cshtml"
                                    WriteTo(@__razor_helper_writer, count);
 
 #line default
@@ -260,7 +260,7 @@ WriteLiteralTo(@__razor_helper_writer, ", ");
 
 
 
-#line 99 "..\..\FileUpload.cshtml"
+#line 99 "FileUpload.cshtml"
                                            WriteTo(@__razor_helper_writer, HttpUtility.JavaScriptStringEncode(name, addDoubleQuotes: true));
 
 #line default
@@ -270,7 +270,7 @@ WriteLiteralTo(@__razor_helper_writer, "); return false;\">");
 
 
 
-#line 99 "..\..\FileUpload.cshtml"
+#line 99 "FileUpload.cshtml"
                                                                                                                              WriteTo(@__razor_helper_writer, addText);
 
 #line default
@@ -280,7 +280,7 @@ WriteLiteralTo(@__razor_helper_writer, "</a>\r\n");
 
 
 
-#line 100 "..\..\FileUpload.cshtml"
+#line 100 "FileUpload.cshtml"
         }
 
 #line default
@@ -288,7 +288,7 @@ WriteLiteralTo(@__razor_helper_writer, "</a>\r\n");
 
 
 
-#line 101 "..\..\FileUpload.cshtml"
+#line 101 "FileUpload.cshtml"
          if (includeFormTag) {
 
 #line default
@@ -298,7 +298,7 @@ WriteLiteralTo(@__razor_helper_writer, "            <input type=\"submit\" value
 
 
 
-#line 102 "..\..\FileUpload.cshtml"
+#line 102 "FileUpload.cshtml"
          WriteTo(@__razor_helper_writer, uploadText);
 
 #line default
@@ -308,7 +308,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" />\r\n");
 
 
 
-#line 103 "..\..\FileUpload.cshtml"
+#line 103 "FileUpload.cshtml"
         }
 
 #line default
@@ -318,7 +318,7 @@ WriteLiteralTo(@__razor_helper_writer, "        </div>\r\n");
 
 
 
-#line 105 "..\..\FileUpload.cshtml"
+#line 105 "FileUpload.cshtml"
     }
     
     if (includeFormTag) {
@@ -332,7 +332,7 @@ WriteLiteralTo(@__razor_helper_writer, "</form>\r\n");
 
 
 
-#line 109 "..\..\FileUpload.cshtml"
+#line 109 "FileUpload.cshtml"
     }
 
 #line default

@@ -14,20 +14,20 @@
 namespace Microsoft.Web.Helpers
 {
     
-    #line 3 "..\..\ReCaptcha.cshtml"
+    #line 3 "ReCaptcha.cshtml"
     using System;
     
     #line default
     #line hidden
     using System.Collections.Generic;
     
-    #line 4 "..\..\ReCaptcha.cshtml"
+    #line 4 "ReCaptcha.cshtml"
     using System.Globalization;
     
     #line default
     #line hidden
     
-    #line 5 "..\..\ReCaptcha.cshtml"
+    #line 5 "ReCaptcha.cshtml"
     using System.IO;
     
     #line default
@@ -35,7 +35,7 @@ namespace Microsoft.Web.Helpers
     using System.Linq;
     using System.Net;
     
-    #line 6 "..\..\ReCaptcha.cshtml"
+    #line 6 "ReCaptcha.cshtml"
     using System.Text;
     
     #line default
@@ -47,13 +47,13 @@ namespace Microsoft.Web.Helpers
     using System.Web.WebPages;
     using System.Web.WebPages.Html;
     
-    #line 7 "..\..\ReCaptcha.cshtml"
+    #line 7 "ReCaptcha.cshtml"
     using System.Web.WebPages.Scope;
     
     #line default
     #line hidden
     
-    #line 8 "..\..\ReCaptcha.cshtml"
+    #line 8 "ReCaptcha.cshtml"
     using Microsoft.Internal.Web.Utils;
     
     #line default
@@ -62,7 +62,7 @@ namespace Microsoft.Web.Helpers
     public class ReCaptcha : System.Web.WebPages.HelperPage
     {
         
-        #line 10 "..\..\ReCaptcha.cshtml"
+        #line 10 "ReCaptcha.cshtml"
 
     private const string _reCaptchaUrl = "http://www.google.com/recaptcha/api";
     private const string _reCaptchaSecureUrl = "https://www.google.com/recaptcha/api";
@@ -212,7 +212,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 152 "..\..\ReCaptcha.cshtml"
+#line 152 "ReCaptcha.cshtml"
                                                
 
     
@@ -220,7 +220,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 #line hidden
 
 
-#line 154 "..\..\ReCaptcha.cshtml"
+#line 154 "ReCaptcha.cshtml"
 WriteTo(@__razor_helper_writer, GetHtmlWithOptions(publicKey, options: new Dictionary<string, object>() {
         { "theme", theme }, { "lang", language }, { "tabindex", tabIndex }
     }));
@@ -229,7 +229,7 @@ WriteTo(@__razor_helper_writer, GetHtmlWithOptions(publicKey, options: new Dicti
 #line hidden
 
 
-#line 156 "..\..\ReCaptcha.cshtml"
+#line 156 "ReCaptcha.cshtml"
       
 
 #line default
@@ -245,21 +245,21 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 159 "..\..\ReCaptcha.cshtml"
+#line 159 "ReCaptcha.cshtml"
                                                                             
     
 #line default
 #line hidden
 
 
-#line 160 "..\..\ReCaptcha.cshtml"
+#line 160 "ReCaptcha.cshtml"
 WriteTo(@__razor_helper_writer, GetHtml(HttpContext.Current == null ? null : new HttpContextWrapper(HttpContext.Current), publicKey, options));
 
 #line default
 #line hidden
 
 
-#line 160 "..\..\ReCaptcha.cshtml"
+#line 160 "ReCaptcha.cshtml"
                                                                                                                   
 
 #line default
@@ -275,7 +275,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 163 "..\..\ReCaptcha.cshtml"
+#line 163 "ReCaptcha.cshtml"
                                                                                               
     if (options != null) {
         var optionJson = new HtmlString(Json.Encode(options));
@@ -287,7 +287,7 @@ WriteLiteralTo(@__razor_helper_writer, "        <script type=\"text/javascript\"
 
 
 
-#line 167 "..\..\ReCaptcha.cshtml"
+#line 167 "ReCaptcha.cshtml"
   WriteTo(@__razor_helper_writer, optionJson);
 
 #line default
@@ -297,7 +297,7 @@ WriteLiteralTo(@__razor_helper_writer, ";\r\n        </script>\r\n");
 
 
 
-#line 169 "..\..\ReCaptcha.cshtml"
+#line 169 "ReCaptcha.cshtml"
     }
 
 #line default
@@ -307,7 +307,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <script src=\"");
 
 
 
-#line 170 "..\..\ReCaptcha.cshtml"
+#line 170 "ReCaptcha.cshtml"
 WriteTo(@__razor_helper_writer, GetChallengeUrl(httpContext, publicKey, GetLastError(httpContext)));
 
 #line default
@@ -317,7 +317,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" type=\"text/javascript\"></script>\r\
 
 
 
-#line 171 "..\..\ReCaptcha.cshtml"
+#line 171 "ReCaptcha.cshtml"
 
 
 #line default
@@ -327,7 +327,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <noscript>\r\n        <iframe frameb
 
 
 
-#line 173 "..\..\ReCaptcha.cshtml"
+#line 173 "ReCaptcha.cshtml"
                      WriteTo(@__razor_helper_writer, GetUrlHelper(httpContext, "noscript", publicKey, errorCode: null));
 
 #line default
@@ -339,7 +339,7 @@ WriteLiteralTo(@__razor_helper_writer, "\" width=\"500px\"></iframe>\r\n        
 
 
 
-#line 178 "..\..\ReCaptcha.cshtml"
+#line 178 "ReCaptcha.cshtml"
 
 #line default
 #line hidden

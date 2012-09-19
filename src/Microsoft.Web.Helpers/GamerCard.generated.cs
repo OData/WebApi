@@ -24,7 +24,7 @@ namespace Microsoft.Web.Helpers
     using System.Web.WebPages;
     using System.Web.WebPages.Html;
     
-    #line 3 "..\..\GamerCard.cshtml"
+    #line 3 "GamerCard.cshtml"
     using Microsoft.Internal.Web.Utils;
     
     #line default
@@ -38,7 +38,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 5 "..\..\GamerCard.cshtml"
+#line 5 "GamerCard.cshtml"
                                   
     if (gamerTag.IsEmpty()) {
         throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "gamerTag");
@@ -52,7 +52,7 @@ WriteLiteralTo(@__razor_helper_writer, "    <iframe frameborder=\"0\" height=\"1
 
 
 
-#line 9 "..\..\GamerCard.cshtml"
+#line 9 "GamerCard.cshtml"
                                                          WriteTo(@__razor_helper_writer, HttpUtility.UrlPathEncode(gamerTag));
 
 #line default
@@ -62,7 +62,7 @@ WriteLiteralTo(@__razor_helper_writer, ".card\" width=\"204\">");
 
 
 
-#line 9 "..\..\GamerCard.cshtml"
+#line 9 "GamerCard.cshtml"
                                                                                                                  WriteTo(@__razor_helper_writer, gamerTag);
 
 #line default
@@ -72,7 +72,7 @@ WriteLiteralTo(@__razor_helper_writer, "</iframe>\r\n");
 
 
 
-#line 10 "..\..\GamerCard.cshtml"
+#line 10 "GamerCard.cshtml"
 
 #line default
 #line hidden

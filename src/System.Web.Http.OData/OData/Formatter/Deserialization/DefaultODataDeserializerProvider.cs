@@ -59,6 +59,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return new ODataEntityReferenceLinkDeserializer();
             }
 
+            if (typeof(ODataActionParameters).IsAssignableFrom(type))
+            {
+                return new ODataActionPayloadDeserializer(type, this);
+            }
+
             return _clrTypeMappingCache.GetOrAdd(type, (t) =>
             {
                 IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(t);

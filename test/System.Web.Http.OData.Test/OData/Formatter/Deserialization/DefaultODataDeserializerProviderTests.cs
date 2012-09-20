@@ -98,5 +98,27 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             Assert.Same(firstCallDeserializer, secondCallDeserializer);
         }
+
+        [Fact]
+        public void GetODataSerializer_ActionPayload()
+        {
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
+            ODataActionPayloadDeserializer basicActionPayload = deserializerProvider.GetODataDeserializer(typeof(ODataActionParameters)) as ODataActionPayloadDeserializer;
+
+            Assert.NotNull(basicActionPayload);
+        }
+
+        [Fact]
+        public void GetODataSerializer_Derived_ActionPayload()
+        {
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
+            ODataActionPayloadDeserializer derivedActionPayload = deserializerProvider.GetODataDeserializer(typeof(MyActionPayload)) as ODataActionPayloadDeserializer;
+
+            Assert.NotNull(derivedActionPayload);
+        }
+
+        public class MyActionPayload : ODataActionParameters
+        { 
+        }
     }
 }

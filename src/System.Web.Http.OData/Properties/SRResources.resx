@@ -408,4 +408,10 @@
   <data name="WriteToStreamAsyncMustHaveRequest" xml:space="preserve">
     <value>The OData formatter does not support writing client requests. This formatter instance must have an associated request.</value>
   </data>
+  <data name="ActionNotFound" xml:space="preserve">
+    <value>Action '{0}' not found.</value>
+  </data>
+  <data name="ActionResolutionFailed" xml:space="preserve">
+    <value>Ambiguous request. Multiple action overloads called '{0}' found.</value>
+  </data>
 </root>

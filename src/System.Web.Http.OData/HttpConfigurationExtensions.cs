@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using System.Linq;
+using System.Web.Http.OData;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -13,6 +14,7 @@ namespace System.Web.Http
     {
         private const string EdmModelKey = "MS_EdmModel";
         private const string ODataFormatterKey = "MS_ODataFormatter";
+        private const string ODataActionResolverKey = "MS_ODataActionResolver";
 
         /// <summary>
         /// Retrieve the EdmModel from the configuration Properties collection. Null if user has not set it.
@@ -129,6 +131,44 @@ namespace System.Web.Http
                 configuration.Properties.TryAdd(ODataFormatterKey, formatter);
                 configuration.Formatters.Insert(0, formatter);
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IODataActionResolver"/> on the configuration.
+        /// </summary>
+        /// <remarks>
+        /// If not <see cref="IODataActionResolver"/> is configured this returns the <see cref="DefaultODataActionResolver"/> 
+        /// </remarks>
+        /// <param name="configuration">Configuration o check.</param>
+        /// <returns>Returns an <see cref="IODataActionResolver"/> for this configuration.</returns>
+        public static IODataActionResolver GetODataActionResolver(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            // returns one if user sets one, null otherwise
+            object result = configuration.Properties.GetOrAdd(ODataActionResolverKey, new DefaultODataActionResolver());
+            return result as IODataActionResolver;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="IODataActionResolver"/> on the configuration
+        /// </summary>
+        /// <param name="configuration">Configuration to be updated.</param>
+        /// <param name="resolver">The <see cref="IODataActionResolver"/> this configuration should use.</param>
+        public static void SetODataActionResolver(this HttpConfiguration configuration, IODataActionResolver resolver)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+            if (resolver == null)
+            {
+                throw Error.ArgumentNull("resolver");
+            }
+            configuration.Properties[ODataActionResolverKey] = resolver;
         }
     }
 }

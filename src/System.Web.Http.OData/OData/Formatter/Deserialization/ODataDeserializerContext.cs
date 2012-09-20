@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Net.Http;
+using Microsoft.Data.Edm;
+
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
     /// <summary>
@@ -34,6 +37,25 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 PatchKeyModeHelper.Validate(value, "value");
                 _patchKeyMode = value;
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the HttpRequestMessage. 
+        /// The HttpRequestMessage can then be used by ODataDeserializers to learn more about the Request that triggered the deserialization
+        /// </summary>
+        public HttpRequestMessage Request
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or set the EdmModel associated with the Request.
+        /// </summary>
+        public IEdmModel Model
+        {
+            get;
+            set;
         }
 
         /// <summary>

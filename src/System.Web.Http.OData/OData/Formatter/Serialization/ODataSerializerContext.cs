@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Net.Http;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
@@ -35,5 +36,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// and complex types.
         /// </summary>
         public string ServiceOperationName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the HttpRequestMessage. 
+        /// The HttpRequestMessage can then be used by ODataSerializers to learn more about the Request that triggered the serialization
+        /// </summary>
+        public HttpRequestMessage Request { get; set; }
     }
 }

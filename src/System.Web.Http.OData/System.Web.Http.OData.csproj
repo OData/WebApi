@@ -104,6 +104,7 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="OData\ODataActionParameters.cs" />
     <Compile Include="OData\Builder\ActionConfiguration.cs" />
     <Compile Include="OData\Builder\BindingParameterConfiguration.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfiguration.cs" />
@@ -158,9 +159,12 @@
     <Compile Include="OData\Builder\Conventions\EntityTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationOfTComplexType.cs" />
+    <Compile Include="OData\DefaultODataActionResolver.cs" />
     <Compile Include="OData\EntityInstanceContextOfTEntityType.cs" />
     <Compile Include="OData\EntityInstanceContext.cs" />
     <Compile Include="OData\CompiledPropertyAccessor.cs" />
+    <Compile Include="OData\Formatter\ODataParameterBindingAttribute.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItem.cs" />
@@ -170,11 +174,13 @@
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializer.cs" />
     <Compile Include="OData\FeedContext.cs" />
     <Compile Include="OData\Formatter\EdmTypeReferenceEqualityComparer.cs" />
+    <Compile Include="OData\Formatter\ODataFormatterParameterBinding.cs" />
     <Compile Include="OData\Formatter\PatchKeyMode.cs" />
     <Compile Include="OData\Formatter\PatchKeyModeHelper.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
     <Compile Include="OData\IDeltaOfTEntityType.cs" />
+    <Compile Include="OData\IODataActionResolver.cs" />
     <Compile Include="OData\ODataMetadataControllerConfigurationAttribute.cs" />
     <Compile Include="OData\ODataResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />

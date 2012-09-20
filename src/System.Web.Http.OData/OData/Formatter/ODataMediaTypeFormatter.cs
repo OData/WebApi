@@ -210,7 +210,7 @@ namespace System.Web.Http.OData.Formatter
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
-                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, PatchKeyMode = PatchKeyMode };
+                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, PatchKeyMode = PatchKeyMode, Request = Request, Model = Model };
                         result = deserializer.Read(oDataMessageReader, readContext);
                     }
                     catch (Exception e)

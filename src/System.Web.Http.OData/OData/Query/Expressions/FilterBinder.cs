@@ -676,16 +676,15 @@ namespace System.Web.Http.OData.Query.Expressions
             Contract.Assert("substring" == node.Name);
 
             Expression[] arguments = BindArguments(node.Arguments);
+            if (arguments[0].Type != typeof(string))
+            {
+                throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, node.Name));
+            }
 
             Expression functionCall;
             if (arguments.Length == 2)
             {
-                if (arguments[0].Type != typeof(string) || !IsInteger(arguments[1].Type))
-                {
-                    throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, node.Name));
-                }
-
-                Contract.Assert(arguments[0].Type == typeof(string));
+                Contract.Assert(IsInteger(arguments[1].Type));
 
                 // When null propagation is allowed, we use a safe version of String.Substring(int).
                 // But for providers that would not recognize custom expressions like this, we map 
@@ -702,13 +701,8 @@ namespace System.Web.Http.OData.Query.Expressions
             }
             else
             {
-                if (arguments[0].Type != typeof(string))
-                {
-                    throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, node.Name));
-                }
-
                 // arguments.Length == 3 implies String.Substring(int, int)
-                Contract.Assert(arguments.Length == 3 && arguments[0].Type == typeof(string) && IsInteger(arguments[1].Type) && IsInteger(arguments[2].Type));
+                Contract.Assert(arguments.Length == 3 && IsInteger(arguments[1].Type) && IsInteger(arguments[2].Type));
 
                 // When null propagation is allowed, we use a safe version of String.Substring(int, int).
                 // But for providers that would not recognize custom expressions like this, we map 
@@ -984,17 +978,12 @@ namespace System.Web.Http.OData.Query.Expressions
             Type leftUnderlyingType = Nullable.GetUnderlyingType(left.Type) ?? left.Type;
             Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
 
-            if (leftUnderlyingType.IsEnum)
+            if (leftUnderlyingType.IsEnum || rightUnderlyingType.IsEnum)
             {
-                Type enumUnderlyingType = Enum.GetUnderlyingType(leftUnderlyingType);
-                left = Expression.Convert(left, left.Type.IsEnum ? enumUnderlyingType : ToNullable(enumUnderlyingType));
-                right = ConvertToEnumUnderlyingType(right, leftUnderlyingType, enumUnderlyingType);
-            }
-            else if (rightUnderlyingType.IsEnum)
-            {
-                Type enumUnderlyingType = Enum.GetUnderlyingType(rightUnderlyingType);
-                right = Expression.Convert(right, right.Type.IsEnum ? enumUnderlyingType : ToNullable(enumUnderlyingType));
-                left = ConvertToEnumUnderlyingType(left, rightUnderlyingType, enumUnderlyingType);
+                Type enumType = leftUnderlyingType.IsEnum ? leftUnderlyingType : rightUnderlyingType;
+                Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
+                left = ConvertToEnumUnderlyingType(left, enumType, enumUnderlyingType);
+                right = ConvertToEnumUnderlyingType(right, enumType, enumUnderlyingType);
             }
 
             if (left.Type != right.Type)

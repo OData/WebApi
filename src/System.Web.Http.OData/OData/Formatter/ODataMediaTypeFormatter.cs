@@ -238,6 +238,11 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("writeStream");
             }
 
+            if (Request == null)
+            {
+                throw Error.NotSupported(SRResources.WriteToStreamAsyncMustHaveRequest);
+            }
+
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             return TaskHelpers.RunSynchronously(() =>
             {

@@ -914,5 +914,14 @@ namespace System.Web.Http.OData.Properties {
                 return ResourceManager.GetString("WriteObjectNotSupported", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OData formatter does not support writing client requests. This formatter instance must have an associated request..
+        /// </summary>
+        internal static string WriteToStreamAsyncMustHaveRequest {
+            get {
+                return ResourceManager.GetString("WriteToStreamAsyncMustHaveRequest", resourceCulture);
+            }
+        }
     }
 }

@@ -139,6 +139,18 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void WriteToStreamAsync_ThrowsNotSupported_WithoutRequest()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            var formatter = new ODataMediaTypeFormatter(builder.GetEdmModel());
+
+            Assert.Throws<NotSupportedException>(
+                () => formatter.WriteToStreamAsync(typeof(Customer), new Customer(), new MemoryStream(), content: null, transportContext: null),
+                "The OData formatter does not support writing client requests. This formatter instance must have an associated request.");
+        }
+
+        [Fact]
         public void ODataFormatter_DefaultPatchKeyMode_Is_Ignore()
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();

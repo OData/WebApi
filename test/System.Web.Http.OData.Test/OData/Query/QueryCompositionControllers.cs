@@ -135,8 +135,8 @@ namespace System.Web.Http.OData.Query
             IQueryable<QueryCompositionCustomer> result = null;
             try
             {
-                ODataQuerySettings querySettings = new ODataQuerySettings 
-                { 
+                ODataQuerySettings querySettings = new ODataQuerySettings
+                {
                     EnsureStableOrdering = false
                 };
                 result = queryOptions.ApplyTo(QueryCompositionCustomerController.CustomerList.AsQueryable(), querySettings) as IQueryable<QueryCompositionCustomer>;
@@ -156,6 +156,19 @@ namespace System.Web.Http.OData.Query
         public IQueryable<QueryCompositionCategory> Get()
         {
             return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
+        }
+    }
+
+    public class QueryCompositionAnonymousTypesController : ApiController
+    {
+        [Queryable]
+        public IQueryable Get()
+        {
+            return
+                Enumerable
+                .Range(1, 10)
+                .Select(i => new { Id = i })
+                .AsQueryable();
         }
     }
 

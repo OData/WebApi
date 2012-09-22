@@ -12,12 +12,14 @@ namespace System.Web.Http.OData.Builder
 {
     public abstract class StructuralTypeConfiguration : IStructuralTypeConfiguration
     {
+        private const string DefaultNamespace = "Default";
+
         protected StructuralTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
         {
             ClrType = clrType;
             ModelBuilder = modelBuilder;
             Name = ClrType.EdmName();
-            Namespace = ClrType.Namespace;
+            Namespace = ClrType.Namespace ?? DefaultNamespace;
             ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
             RemovedProperties = new List<PropertyInfo>();
         }

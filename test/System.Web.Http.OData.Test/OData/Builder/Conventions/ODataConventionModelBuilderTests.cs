@@ -160,7 +160,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
             product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTime, isNullable: true);
-            product.AssertHasComplexProperty(model, "Version", "System.Web.Http.OData.Builder.Conventions.ProductVersion", isNullable: true);
+            product.AssertHasComplexProperty(model, "Version", typeof(ProductVersion), isNullable: true);
             product.AssertHasNavigationProperty(model, "Category", typeof(Category), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
 
@@ -194,7 +194,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             product.AssertHasPrimitiveProperty(model, "IdOfProduct", EdmPrimitiveTypeKind.Int32, isNullable: false);
             product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTime, isNullable: true);
-            product.AssertHasComplexProperty(model, "Version", "System.Web.Http.OData.Builder.Conventions.ProductVersion", isNullable: true);
+            product.AssertHasComplexProperty(model, "Version", typeof(ProductVersion), isNullable: true);
             product.AssertHasNavigationProperty(model, "Category", typeof(CategoryWithKeyAttribute), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
 
@@ -891,6 +891,36 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.NotNull(collectionProperty);
             Assert.True(collectionProperty.Type.IsCollection());
             Assert.Equal(collectionProperty.Type.AsCollection().ElementType().FullName(), "System.Version");
+        }
+
+        [Fact]
+        public void CanBuildModelForAnonymousTypes()
+        {
+            Type entityType = new
+            {
+                ID = default(int),
+                ComplexCollection = new[] 
+                {
+                    new { ComplexProperty = default(string) }
+                },
+                NavigationCollection = new[]
+                {
+                    new { ID = default(int) }
+                }
+            }.GetType();
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntitySet("entityset", builder.AddEntity(entityType));
+
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityType entity = model.AssertHasEntitySet("entityset", entityType);
+            entity.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
+            entity.AssertHasCollectionProperty(model, "ComplexCollection", new { ComplexProperty = default(string) }.GetType(), isNullable: true);
+            entity.AssertHasNavigationProperty(model, "NavigationCollection", new { ID = default(int) }.GetType(), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            IEdmComplexType complexType = model.AssertHasComplexType(new { ComplexProperty = default(string) }.GetType());
+            complexType.AssertHasPrimitiveProperty(model, "ComplexProperty", EdmPrimitiveTypeKind.String, isNullable: true);
         }
     }
 

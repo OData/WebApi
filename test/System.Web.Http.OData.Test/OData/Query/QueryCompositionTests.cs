@@ -311,6 +311,22 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(0, response.Content.ReadAsAsync<List<QueryCompositionCategory>>().Result.Count());
         }
 
+        [Fact]
+        public void AnonymousTypes_Work_With_QueryableAttribute()
+        {
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionAnonymousTypesController", useCustomEdmModel: false));
+            HttpClient client = new HttpClient(server);
+
+            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionAnonymousTypes/?$filter=Id ge 5").Result;
+            response.EnsureSuccessStatusCode();
+
+            Type anon_type = new { Id = default(int) }.GetType();
+            dynamic result = response.Content.ReadAsAsync(anon_type.MakeArrayType()).Result;
+
+            Assert.Equal(5, result[0].Id);
+            Assert.Equal(6, result.Length);
+        }
+
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
             HttpConfiguration config = new HttpConfiguration();

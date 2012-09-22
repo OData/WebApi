@@ -6,7 +6,6 @@ using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
-
 namespace System.Web.Http.OData.Builder
 {
     public static class EdmModelAsserts
@@ -18,13 +17,9 @@ namespace System.Web.Http.OData.Builder
             var entitySet = model.EntityContainers().Single().EntitySets().Where(set => set.Name == entitySetName).Single();
             Assert.NotNull(entitySet);
             Assert.Equal(entitySet.Name, entitySetName);
-            Assert.Equal(entitySet.ElementType.FullName(), entityTypeName);
             Assert.True(model.GetEdmType(mappedEntityClrType).IsEquivalentTo(entitySet.ElementType));
 
-            var entityType = model.SchemaElements.OfType<IEdmEntityType>().Where(t => t.FullName() == entityTypeName).SingleOrDefault();
-            Assert.NotNull(entityType);
-            Assert.Equal(entityType, entitySet.ElementType);
-            return entityType;
+            return entitySet.ElementType;
         }
 
         public static IEdmNavigationTargetMapping AssertHasNavigationTarget(this IEdmEntitySet entitySet, IEdmNavigationProperty navigationProperty, string targetEntitySet)
@@ -46,9 +41,7 @@ namespace System.Web.Http.OData.Builder
 
         public static IEdmEntityType AssertHasEntityType(this IEdmModel model, Type mappedEntityClrType)
         {
-            string entityTypeName = mappedEntityClrType.FullName;
-
-            var entityType = model.SchemaElements.OfType<IEdmEntityType>().Where(t => t.FullName() == entityTypeName).SingleOrDefault();
+            var entityType = model.SchemaElements.OfType<IEdmEntityType>().Where(t => model.GetEdmType(mappedEntityClrType).IsEquivalentTo(t)).SingleOrDefault();
             Assert.NotNull(entityType);
             Assert.True(model.GetEdmType(mappedEntityClrType).IsEquivalentTo(entityType));
             return entityType;
@@ -56,9 +49,7 @@ namespace System.Web.Http.OData.Builder
 
         public static IEdmComplexType AssertHasComplexType(this IEdmModel model, Type mappedClrType)
         {
-            string complexTypeName = mappedClrType.FullName;
-
-            var complexType = model.SchemaElements.OfType<IEdmComplexType>().Where(t => t.FullName() == complexTypeName).SingleOrDefault();
+            var complexType = model.SchemaElements.OfType<IEdmComplexType>().Where(t => model.GetEdmType(mappedClrType).IsEquivalentTo(t)).SingleOrDefault();
             Assert.NotNull(complexType);
             Assert.True(model.GetEdmType(mappedClrType).IsEquivalentTo(complexType));
             return complexType;
@@ -73,20 +64,26 @@ namespace System.Web.Http.OData.Builder
 
         public static IEdmStructuralProperty AssertHasPrimitiveProperty(this IEdmStructuredType edmType, IEdmModel model, string propertyName, EdmPrimitiveTypeKind primitiveTypeKind, bool isNullable)
         {
-            return edmType.AssertHasProperty<IEdmStructuralProperty>(model, propertyName, EdmCoreModel.Instance.GetPrimitiveType(primitiveTypeKind).FullName(), isNullable);
+            Type primitiveType = EdmLibHelpers.GetClrType(new EdmPrimitiveTypeReference(EdmCoreModel.Instance.GetPrimitiveType(primitiveTypeKind), isNullable), model);
+            return edmType.AssertHasProperty<IEdmStructuralProperty>(model, propertyName, primitiveType, isNullable);
         }
 
-        public static IEdmStructuralProperty AssertHasComplexProperty(this IEdmStructuredType edmType, IEdmModel model, string propertyName, string propertyType, bool isNullable)
+        public static IEdmStructuralProperty AssertHasComplexProperty(this IEdmStructuredType edmType, IEdmModel model, string propertyName, Type propertyType, bool isNullable)
         {
             IEdmStructuralProperty complexProperty = edmType.AssertHasProperty<IEdmStructuralProperty>(model, propertyName, propertyType, isNullable);
             Assert.True(complexProperty.Type.IsComplex());
             return complexProperty;
         }
 
+        public static IEdmStructuralProperty AssertHasCollectionProperty(this IEdmStructuredType edmType, IEdmModel model, string propertyName, Type propertyType, bool isNullable)
+        {
+            IEdmStructuralProperty complexProperty = edmType.AssertHasProperty<IEdmStructuralProperty>(model, propertyName, propertyType, isNullable, isCollection: true);
+            Assert.True(complexProperty.Type.IsCollection());
+            return complexProperty;
+        }
+
         public static IEdmNavigationProperty AssertHasNavigationProperty(this IEdmStructuredType edmType, IEdmModel model, string propertyName, Type mappedPropertyClrType, bool isNullable, EdmMultiplicity multiplicity)
         {
-            string propertyType = mappedPropertyClrType.FullName;
-
             IEdmNavigationProperty navigationProperty = edmType.AssertHasProperty<IEdmNavigationProperty>(model, propertyName, propertyType: null, isNullable: isNullable);
 
             // Bug 468693: in EdmLib. remove when fixed.
@@ -95,11 +92,11 @@ namespace System.Web.Http.OData.Builder
                 Assert.Equal(multiplicity, navigationProperty.Multiplicity());
             }
 
-            Assert.True(navigationProperty.ToEntityType().IsEquivalentTo(model.FindType(propertyType)));
+            Assert.True(navigationProperty.ToEntityType().IsEquivalentTo(model.GetEdmType(mappedPropertyClrType)));
             return navigationProperty;
         }
 
-        public static TPropertyType AssertHasProperty<TPropertyType>(this IEdmStructuredType edmType, IEdmModel model, string propertyName, string propertyType, bool isNullable)
+        public static TPropertyType AssertHasProperty<TPropertyType>(this IEdmStructuredType edmType, IEdmModel model, string propertyName, Type propertyType, bool isNullable, bool isCollection = false)
             where TPropertyType : IEdmProperty
         {
             IEnumerable<TPropertyType> properties =
@@ -113,7 +110,14 @@ namespace System.Web.Http.OData.Builder
 
             if (propertyType != null)
             {
-                Assert.True(property.Type.Definition.IsEquivalentTo(model.FindType(propertyType)));
+                if (isCollection)
+                {
+                    Assert.True(property.Type.AsCollection().ElementType().Definition.IsEquivalentTo(model.GetEdmType(propertyType)));
+                }
+                else
+                {
+                    Assert.True(property.Type.Definition.IsEquivalentTo(model.GetEdmType(propertyType)));
+                }
             }
 
             Assert.Equal(isNullable, property.Type.IsNullable);

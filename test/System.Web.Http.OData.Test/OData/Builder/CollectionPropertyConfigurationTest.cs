@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Builder
             CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property);
             Assert.Same(property, configuration.PropertyInfo);
             Assert.Same(elementType, configuration.ElementType);
-            Assert.Same(property.Name, configuration.Name);          
+            Assert.Same(property.Name, configuration.Name);
         }
 
         internal class LotsOfCollectionProperties
@@ -98,7 +98,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         internal class RandomComplexType { }
-        
+
         internal class RandomList<T> : List<T> { }
-    }   
+    }
 }

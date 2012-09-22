@@ -102,6 +102,10 @@ namespace System.Web.Http.OData.Builder
             {
                 property.IsOptional();
             }
+            else
+            {
+                property.IsRequired();
+            }
 
             return property;
         }
@@ -113,6 +117,10 @@ namespace System.Web.Http.OData.Builder
             if (optional)
             {
                 property.IsOptional();
+            }
+            else
+            {
+                property.IsRequired();
             }
 
             return property;

@@ -100,6 +100,40 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
+        public void SimpleCollections_Are_NotNullable_ByDefault()
+        {
+            var builder = new ODataModelBuilder();
+
+            var property =
+                builder
+                .Entity<Customer>()
+                .CollectionProperty(c => c.Aliases);
+
+            var model = builder.GetEdmModel();
+
+            Assert.False(property.OptionalProperty);
+            var edmCustomer = model.AssertHasEntityType(typeof(Customer));
+            Assert.False(edmCustomer.FindProperty("Aliases").Type.IsNullable);
+        }
+
+        [Fact]
+        public void ComplexCollections_Are_NotNullable_ByDefault()
+        {
+            var builder = new ODataModelBuilder();
+
+            var property =
+                builder
+                .Entity<Customer>()
+                .CollectionProperty(c => c.Addresses);
+
+            var model = builder.GetEdmModel();
+
+            Assert.False(property.OptionalProperty);
+            var edmCustomer = model.AssertHasEntityType(typeof(Customer));
+            Assert.False(edmCustomer.FindProperty("Addresses").Type.IsNullable);
+        }
+
+        [Fact]
         public void CanCreateAbstractEntityType()
         {
             var builder = new ODataModelBuilder();

@@ -326,7 +326,8 @@ namespace System.Web.Http.OData.Formatter
                                                                         UrlHelper = urlHelper,
                                                                         RootProjectionNode = rootProjectionNode,
                                                                         CurrentProjectionNode = rootProjectionNode,
-                                                                        ServiceOperationName = operationName
+                                                                        ServiceOperationName = operationName,
+                                                                        Request = Request
                                                                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);

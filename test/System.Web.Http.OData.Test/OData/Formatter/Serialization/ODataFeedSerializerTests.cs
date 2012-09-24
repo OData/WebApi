@@ -128,5 +128,31 @@ namespace System.Web.Http.OData.Formatter.Serialization
             mockCustomerSerializer.Verify();
             mockWriter.Verify();
         }
+
+        [Fact]
+        public void WriteObjectInline_Writes_RequestNextPageLink()
+        {
+            // Arrange
+            var mockSerializerProvider = new Mock<ODataSerializerProvider>(_model);
+            var mockCustomerSerializer = new Mock<ODataSerializer>(ODataPayloadKind.Entry);
+            var mockWriter = new Mock<ODataWriter>();
+
+            Uri expectedNextLink = new Uri("http://nextlink.com");
+            _writeContext.Request = new HttpRequestMessage();
+            _writeContext.Request.Properties.Add("MS_NextPageLink", expectedNextLink);
+
+            mockSerializerProvider
+                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
+                .Returns(mockCustomerSerializer.Object);
+            mockWriter
+                .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
+                .Callback((ODataFeed feed) =>
+                {
+                    Assert.Equal(expectedNextLink, feed.NextPageLink);
+                });
+            _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
+
+            _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
+        }
     }
 }

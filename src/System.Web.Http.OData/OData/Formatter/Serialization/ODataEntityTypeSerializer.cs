@@ -144,6 +144,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         childWriteContext.RootProjectionNode = writeContext.RootProjectionNode;
                         childWriteContext.CurrentProjectionNode = expandNode;
                         childWriteContext.ServiceOperationName = writeContext.ServiceOperationName;
+                        childWriteContext.Request = writeContext.Request;
 
                         serializer.WriteObjectInline(propertyValue, writer, childWriteContext);
                         writer.WriteEnd();

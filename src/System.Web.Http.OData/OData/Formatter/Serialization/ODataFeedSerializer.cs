@@ -2,9 +2,11 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Atom;
@@ -91,6 +93,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 {
                     feed.Count = odataFeedAnnotations.Count;
                     feed.NextPageLink = odataFeedAnnotations.NextPageLink;
+                }
+                else
+                {
+                    object nextPageLinkPropertyValue;
+                    HttpRequestMessage request = writeContext.Request;
+                    if (request != null && request.Properties.TryGetValue(ODataQueryOptions.NextPageLinkPropertyKey, out nextPageLinkPropertyValue))
+                    {
+                        Uri nextPageLink = nextPageLinkPropertyValue as Uri;
+                        if (nextPageLink != null)
+                        {
+                            feed.NextPageLink = nextPageLink;
+                        }
+                    }
                 }
 
                 writer.WriteStart(feed);

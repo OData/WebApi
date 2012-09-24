@@ -22,6 +22,7 @@ namespace System.Web.Http
     public class QueryableAttribute : ActionFilterAttribute
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
+        private int? _resultLimit;
 
         /// <summary>
         /// Enables a controller action to support OData query parameters.
@@ -63,6 +64,28 @@ namespace System.Web.Http
             }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum number of query results to send back to clients.
+        /// </summary>
+        /// <value>
+        /// The maximum number of query results to send back to clients.
+        /// </value>
+        public int ResultLimit
+        {
+            get
+            {
+                return _resultLimit ?? default(int);
+            }
+            set
+            {
+                if (value <= 0)
+                {
+                    throw Error.Argument(SRResources.ResultLimitMustBePositive);
+                }
+                _resultLimit = value;
+            }
+        }
+
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext == null)
@@ -99,14 +122,13 @@ namespace System.Web.Http
             IQueryable queryable = null;
             if (response != null && response.IsSuccessStatusCode && response.TryGetContentValue(out query))
             {
-                if (request.RequestUri != null && !String.IsNullOrWhiteSpace(request.RequestUri.Query))
+                // Apply the query if there are any query options or if there is a result limit set
+                if (request.RequestUri != null && (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
                 {
                     ValidateQuery(request);
 
                     try
                     {
-                        ODataQueryContext queryContext;
-
                         Type originalQueryType = query.GetType();
                         Type entityClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
 
@@ -122,28 +144,7 @@ namespace System.Web.Http
                                 originalQueryType.FullName);
                         }
 
-                        // Primitive types do not construct an EDM model and deal only with the CLR Type
-                        if (TypeHelper.IsQueryPrimitiveType(entityClrType))
-                        {
-                            queryContext = new ODataQueryContext(entityClrType);
-                        }
-                        else
-                        {
-                            // Get model for the entire app
-                            IEdmModel model = configuration.GetEdmModel();
-
-                            if (model == null)
-                            {
-                                // user has not configured anything, now let's create one just for this type
-                                // and cache it in the action descriptor
-                                model = actionDescriptor.GetEdmModel(entityClrType);
-                                Contract.Assert(model != null);
-                            }
-
-                            // parses the query from request uri
-                            queryContext = new ODataQueryContext(model, entityClrType);
-                        }
-
+                        ODataQueryContext queryContext = CreateQueryContext(entityClrType, configuration, actionDescriptor);
                         ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
                         // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
@@ -167,13 +168,13 @@ namespace System.Web.Http
                         ODataQuerySettings querySettings = new ODataQuerySettings
                         {
                             EnsureStableOrdering = EnsureStableOrdering,
-                            HandleNullPropagation = HandleNullPropagation
+                            HandleNullPropagation = HandleNullPropagation,
+                            ResultLimit = _resultLimit
                         };
 
                         queryable = queryOptions.ApplyTo(queryable, querySettings);
 
                         Contract.Assert(queryable != null);
-
                         // we don't support shape changing query composition
                         ((ObjectContent)response.Content).Value = queryable;
                     }
@@ -186,6 +187,31 @@ namespace System.Web.Http
                         return;
                     }
                 }
+            }
+        }
+
+        private static ODataQueryContext CreateQueryContext(Type entityClrType, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
+        {
+            // Primitive types do not construct an EDM model and deal only with the CLR Type
+            if (TypeHelper.IsQueryPrimitiveType(entityClrType))
+            {
+                return new ODataQueryContext(entityClrType);
+            }
+            else
+            {
+                // Get model for the entire app
+                IEdmModel model = configuration.GetEdmModel();
+
+                if (model == null)
+                {
+                    // user has not configured anything, now let's create one just for this type
+                    // and cache it in the action descriptor
+                    model = actionDescriptor.GetEdmModel(entityClrType);
+                    Contract.Assert(model != null);
+                }
+
+                // parses the query from request uri
+                return new ODataQueryContext(model, entityClrType);
             }
         }
 

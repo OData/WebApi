@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -22,6 +26,9 @@ namespace System.Web.Http.OData.Query
         private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
         private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
         private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
+
+        internal const string NextPageLinkPropertyKey = "MS_NextPageLink";
+        private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
 
@@ -51,8 +58,9 @@ namespace System.Web.Http.OData.Query
             // fallback to the default assemblies resolver if none available.
             _assembliesResolver = _assembliesResolver ?? new DefaultAssembliesResolver();
 
-            // remember the context
+            // remember the context and request
             Context = context;
+            Request = request;
 
             // Parse the query from request Uri
             RawValues = new ODataRawQueryOptions();
@@ -104,6 +112,11 @@ namespace System.Web.Http.OData.Query
         ///  Gets the given <see cref="ODataQueryContext"/>
         /// </summary>
         public ODataQueryContext Context { get; private set; }
+
+        /// <summary>
+        /// Gets the request message associated with this instance.
+        /// </summary>
+        public HttpRequestMessage Request { get; private set; }
 
         /// <summary>
         /// Gets the raw string of all the OData query options
@@ -188,9 +201,11 @@ namespace System.Web.Http.OData.Query
             OrderByQueryOption orderBy = OrderBy;
 
             // $skip or $top require a stable sort for predictable results.
+            // Result limits require a stable sort to be able to generate a next page link.
             // If either is present in the query and we have permission,
             // generate an $orderby that will produce a stable sort.
-            if ((Skip != null || Top != null) && querySettings.EnsureStableOrdering && !Context.IsPrimitiveClrType)
+            if (querySettings.EnsureStableOrdering && !Context.IsPrimitiveClrType &&
+                (Skip != null || Top != null || querySettings.ResultLimit.HasValue))
             {
                 // If there is no OrderBy present, we manufacture a default.
                 // If an OrderBy is already present, we add any missing
@@ -215,6 +230,17 @@ namespace System.Web.Http.OData.Query
             if (Top != null)
             {
                 result = Top.ApplyTo(result);
+            }
+
+            if (querySettings.ResultLimit.HasValue)
+            {
+                bool resultsLimited;
+                result = LimitResults(result, querySettings.ResultLimit.Value, Context, out resultsLimited);
+                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri)
+                {
+                    Uri nextPageLink = GetNextPageLink(Request, querySettings.ResultLimit.Value);
+                    Request.Properties.Add(NextPageLinkPropertyKey, nextPageLink);
+                }
             }
 
             return result;
@@ -329,6 +355,112 @@ namespace System.Web.Http.OData.Query
             }
 
             return orderBy;
+        }
+
+        internal static IQueryable LimitResults(IQueryable queryable, int limit, ODataQueryContext context, out bool resultsLimited)
+        {
+            MethodInfo genericMethod = _limitResultsGenericMethod.MakeGenericMethod(context.EntityClrType);
+            object[] args = new object[] { queryable, limit, null };
+            IQueryable results = genericMethod.Invoke(null, args) as IQueryable;
+            resultsLimited = (bool)args[2];
+            return results;
+        }
+
+        /// <summary>
+        /// Limits the query results to a maximum number of results.
+        /// </summary>
+        /// <typeparam name="T">The entity CLR type</typeparam>
+        /// <param name="queryable">The queryable to limit.</param>
+        /// <param name="limit">The query result limit.</param>
+        /// <param name="resultsLimited"><c>true</c> if the query results were limited; <c>false</c> otherwise</param>
+        /// <returns>The limited query results.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invokation without security issues.")]
+        public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
+        {
+            List<T> list = new List<T>();
+            resultsLimited = false;
+            using (IEnumerator<T> enumerator = queryable.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    list.Add(enumerator.Current);
+                    if (list.Count == limit)
+                    {
+                        // If there are more results on the enumerator, we are limiting the results
+                        if (enumerator.MoveNext())
+                        {
+                            resultsLimited = true;
+                        }
+                        break;
+                    }
+                }
+            }
+            return list.AsQueryable();
+        }
+
+        internal static Uri GetNextPageLink(HttpRequestMessage request, int resultLimit)
+        {
+            Contract.Assert(request != null);
+            Contract.Assert(request.RequestUri != null);
+            Contract.Assert(request.RequestUri.IsAbsoluteUri);
+
+            StringBuilder queryBuilder = new StringBuilder();
+
+            int nextPageSkip = resultLimit;
+
+            IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
+            foreach (KeyValuePair<string, string> kvp in queryParameters)
+            {
+                string key = kvp.Key;
+                string value = kvp.Value;
+                switch (key)
+                {
+                    case "$top":
+                        int top;
+                        if (Int32.TryParse(value, out top))
+                        {
+                            // There is no next page if the $top query option's value is less than or equal to the result limit.
+                            Contract.Assert(top > resultLimit);
+                            // We decrease top by the resultLimit because that's the number of results we're returning in the current page
+                            value = (top - resultLimit).ToString(CultureInfo.InvariantCulture);
+                        }
+                        break;
+                    case "$skip":
+                        int skip;
+                        if (Int32.TryParse(value, out skip))
+                        {
+                            // We increase skip by the resultLimit because that's the number of results we're returning in the current page
+                            nextPageSkip += skip;
+                        }
+                        continue;
+                    default:
+                        break;
+                }
+
+                if (key.Length > 0 && key[0] == '$')
+                {
+                    // $ is a legal first character in query keys
+                    key = '$' + Uri.EscapeDataString(key.Substring(1));
+                }
+                else
+                {
+                    key = Uri.EscapeDataString(key);
+                }
+                value = Uri.EscapeDataString(value);
+
+                queryBuilder.Append(key);
+                queryBuilder.Append('=');
+                queryBuilder.Append(value);
+                queryBuilder.Append('&');
+            }
+
+            queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
+
+            UriBuilder uriBuilder = new UriBuilder(request.RequestUri)
+            {
+                Query = queryBuilder.ToString()
+            };
+            return uriBuilder.Uri;
         }
     }
 }

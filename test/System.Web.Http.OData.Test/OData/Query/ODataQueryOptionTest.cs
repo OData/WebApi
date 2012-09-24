@@ -650,6 +650,45 @@ namespace System.Web.Http.OData.Query
             // Arrange & Act & Assert
             Assert.False(ODataQueryOptions.IsSupported("$invalidqueryname"));
         }
+
+        [Theory]
+        [InlineData(1, true)]
+        [InlineData(2, true)]
+        [InlineData(4, false)]
+        [InlineData(8, false)]
+        public void LimitResults_LimitsResults(int limit, bool resultsLimitedExpected)
+        {
+            IQueryable<Customer> queryable = new List<Customer>() {
+                new Customer() { CustomerId = 0 }, 
+                new Customer() { CustomerId = 1 },
+                new Customer() { CustomerId = 2 },
+                new Customer() { CustomerId = 3 }
+            }.AsQueryable();
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+
+            bool resultsLimited;
+            IQueryable<Customer> result = ODataQueryOptions.LimitResults(queryable, limit, out resultsLimited);
+
+            Assert.Equal(Math.Min(limit, 4), result.Count());
+            Assert.Equal(resultsLimitedExpected, resultsLimited);
+        }
+
+        [Theory]
+        [InlineData("http://localhost/Customers", 10, "http://localhost/Customers?$skip=10")]
+        [InlineData("http://localhost/Customers?$filter=Name eq 'Steve'", 10, "http://localhost/Customers?$filter=Name eq 'Steve'&$skip=10")]
+        [InlineData("http://localhost/Customers?$top=20", 10, "http://localhost/Customers?$top=10&$skip=10")]
+        [InlineData("http://localhost/Customers?$skip=5&$top=10", 2, "http://localhost/Customers?$top=8&$skip=7")]
+        [InlineData("http://localhost/Customers?$filter=Name eq 'Steve'&$orderby=Age&$top=11&$skip=6", 10, "http://localhost/Customers?$filter=Name eq 'Steve'&$orderby=Age&$top=1&$skip=16")]
+        [InlineData("http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26", 10, "http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26&$skip=10")]
+        public void GetNextPageLink_GetsNextPageLink(string requestUri, int resultLimit, string nextPageUri)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            Uri nextPageLink = ODataQueryOptions.GetNextPageLink(request, resultLimit);
+
+            Assert.Equal(nextPageUri, nextPageLink.ToString());
+        }
     }
 
     public class ODataQueryOptionTest_ComplexModel

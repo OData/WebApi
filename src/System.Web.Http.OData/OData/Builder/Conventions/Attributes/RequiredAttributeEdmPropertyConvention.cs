@@ -7,10 +7,10 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Marks properties that have <see cref="RequiredAttribute"/> as non-optional on their edm type.
     /// </summary>
-    public class RequiredAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration, RequiredAttribute>
+    public class RequiredAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration>
     {
         public RequiredAttributeEdmPropertyConvention()
-            : base(allowMultiple: false)
+            : base(attribute => attribute.GetType() == typeof(RequiredAttribute), allowMultiple: false)
         {
         }
 
@@ -19,8 +19,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The edm property.</param>
         /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
-        /// <param name="attribute">The <see cref="RequiredAttribute"/> found.</param>
-        public override void Apply(StructuralPropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, RequiredAttribute attribute)
+        /// <param name="attribute">The <see cref="Attribute"/> found.</param>
+        public override void Apply(StructuralPropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (edmProperty == null)
             {

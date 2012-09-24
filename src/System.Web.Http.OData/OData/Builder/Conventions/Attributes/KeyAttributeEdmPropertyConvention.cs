@@ -8,10 +8,10 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures properties that have the <see cref="KeyAttribute"/> as keys in the <see cref="IEdmEntityType"/>.
     /// </summary>
-    public class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration, KeyAttribute>
+    public class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration>
     {
         public KeyAttributeEdmPropertyConvention()
-            : base(allowMultiple: false)
+            : base(attribute => attribute.GetType() == typeof(KeyAttribute), allowMultiple: false)
         {
         }
 
@@ -20,8 +20,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The key property.</param>
         /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
-        /// <param name="attribute">The <see cref="KeyAttribute"/> found on the property.</param>
-        public override void Apply(PrimitivePropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, KeyAttribute attribute)
+        /// <param name="attribute">The <see cref="Attribute"/> found on the property.</param>
+        public override void Apply(PrimitivePropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (edmProperty == null)
             {

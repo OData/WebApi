@@ -111,11 +111,9 @@
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionOfTPropertyConfiguration.cs" />
-    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionOfTPropertyConfigurationAndTAttribute.cs" />
-    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionOfTEdmTypeConfigurationAndTAttribute.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeEdmPropertyConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionOfTEdmTypeConfiguration.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\IgnoreDataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\RequiredAttributeEdmPropertyConvention.cs" />

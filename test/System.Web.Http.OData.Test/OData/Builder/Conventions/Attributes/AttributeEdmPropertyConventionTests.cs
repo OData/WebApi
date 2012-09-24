@@ -72,26 +72,4 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             return applyCalled;
         }
     }
-
-    public class AttributeEdmPropertyConventionOfTPropertyConfigurationAndTAttributeTests
-    {
-        [Theory]
-        [InlineData(typeof(KeyAttribute), typeof(KeyAttribute), true)]
-        [InlineData(typeof(Attribute), typeof(KeyAttribute), false)]
-        [InlineData(typeof(NotMappedAttribute), typeof(KeyAttribute), false)]
-        public void FilterMatchesSpecifiedAttributeType(Type conventionType, Type attributeType, bool expectedMatchResult)
-        {
-            MethodInfo createMethod = GetType().GetMethods(BindingFlags.Static | BindingFlags.Public).Single();
-            Func<Attribute, bool> filter = createMethod.MakeGenericMethod(conventionType).Invoke(null, null) as Func<Attribute, bool>;
-            Assert.Equal(expectedMatchResult, filter(Activator.CreateInstance(attributeType) as Attribute));
-        }
-
-        public static Func<Attribute, bool> GetFilter<TAttribute>()
-            where TAttribute : Attribute
-        {
-            AttributeEdmPropertyConvention<PropertyConfiguration, TAttribute> convention = new Mock<AttributeEdmPropertyConvention<PropertyConfiguration, TAttribute>>(MockBehavior.Loose, false) { CallBase = true }.Object;
-
-            return convention.AttributeFilter;
-        }
-    }
 }

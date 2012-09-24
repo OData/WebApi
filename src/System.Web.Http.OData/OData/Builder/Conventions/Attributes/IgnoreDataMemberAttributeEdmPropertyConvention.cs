@@ -8,10 +8,10 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Removes properties that have <see cref="IgnoreDataMemberAttribute"/> from their edm type.
     /// </summary>
-    public class IgnoreDataMemberAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration, IgnoreDataMemberAttribute>
+    public class IgnoreDataMemberAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
     {
         public IgnoreDataMemberAttributeEdmPropertyConvention()
-            : base(allowMultiple: false)
+            : base(attribute => attribute.GetType() == typeof(IgnoreDataMemberAttribute), allowMultiple: false)
         {
         }
 
@@ -20,8 +20,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The property being removed.</param>
         /// <param name="structuralTypeConfiguration">The edm type from which the property is being removed.</param>
-        /// <param name="attribute">The <see cref="IgnoreDataMemberAttribute"/> found on this type.</param>
-        public override void Apply(PropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, IgnoreDataMemberAttribute attribute)
+        /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
+        public override void Apply(PropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (structuralTypeConfiguration == null)
             {

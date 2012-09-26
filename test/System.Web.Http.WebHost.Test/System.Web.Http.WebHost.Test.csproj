@@ -69,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Routing\HttpContextBaseExtensionsTest.cs" />
     <Compile Include="Routing\HttpRequestMessageWrapperTest.cs" />
     <Compile Include="Routing\HostedHttpRouteCollectionTest.cs" />
     <Compile Include="WebHostBufferPolicySelectorTest.cs" />

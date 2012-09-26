@@ -44,21 +44,30 @@ namespace System.Web.Http.WebHost.Routing
             IHttpRouteConstraint httpRouteConstraint = constraint as IHttpRouteConstraint;
             if (httpRouteConstraint != null)
             {
-                HttpRequestMessage request = httpContext.GetHttpRequestMessage();
-                if (request == null)
-                {
-                    request = HttpControllerHandler.ConvertRequest(httpContext);
-                    httpContext.SetHttpRequestMessage(request);
-                }
-
+                HttpRequestMessage request = httpContext.GetOrCreateHttpRequestMessage();
                 return httpRouteConstraint.Match(request, HttpRoute, parameterName, values, ConvertRouteDirection(routeDirection));
             }
 
             return base.ProcessConstraint(httpContext, constraint, parameterName, values, routeDirection);
         }
 
-        public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
+        public override RouteData GetRouteData(HttpContextBase httpContext)
         {
+            if (HttpRoute is HostedHttpRoute)
+            {
+                return base.GetRouteData(httpContext);
+            }
+            else
+            {
+                // if user passed us a custom IHttpRoute, then we should invoke their function instead of the base
+                HttpRequestMessage request = httpContext.GetOrCreateHttpRequestMessage();
+                IHttpRouteData data = HttpRoute.GetRouteData(httpContext.Request.ApplicationPath, request);
+                return data == null ? null : data.ToRouteData();
+            }
+        }
+
+        public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
+        {   
             // Only perform URL generation if the "httproute" key was specified. This allows these
             // routes to be ignored when a regular MVC app tries to generate URLs. Without this special
             // key an HTTP route used for Web API would normally take over almost all the routes in a
@@ -70,7 +79,18 @@ namespace System.Web.Http.WebHost.Routing
             // Remove the value from the collection so that it doesn't affect the generated URL
             RouteValueDictionary newValues = GetRouteDictionaryWithoutHttpRouteKey(values);
 
-            return base.GetVirtualPath(requestContext, newValues);
+            if (HttpRoute is HostedHttpRoute)
+            {
+                return base.GetVirtualPath(requestContext, newValues);
+            }
+            else
+            {
+                // if user passed us a custom IHttpRoute, then we should invoke their function instead of the base
+                HttpRequestMessage request = requestContext.HttpContext.GetOrCreateHttpRequestMessage();
+                IHttpVirtualPathData virtualPathData = HttpRoute.GetVirtualPath(request, values);
+
+                return virtualPathData == null ? null : new VirtualPathData(this, virtualPathData.VirtualPath);
+            }
         }
 
         private static RouteValueDictionary GetRouteDictionaryWithoutHttpRouteKey(IDictionary<string, object> routeValues)

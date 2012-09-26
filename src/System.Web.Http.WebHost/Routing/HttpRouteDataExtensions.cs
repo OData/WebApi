@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Web.Http.Routing;
 using System.Web.Routing;
 
@@ -21,7 +22,12 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             Route route = httpRouteData.Route.ToRoute();
-            return new RouteData(route, HttpControllerRouteHandler.Instance);
+            RouteData result = new RouteData(route, HttpControllerRouteHandler.Instance);
+            foreach (KeyValuePair<string, object> pair in httpRouteData.Values)
+            {
+                result.Values.Add(pair.Key, pair.Value);
+            }
+            return result;
         }
     }
 }

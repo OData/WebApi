@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
+using System.Web.Hosting;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
@@ -235,6 +238,61 @@ namespace System.Web.Http.WebHost.Routing
             Assert.Throws<NotSupportedException>(() => _webApiRoutes.Remove(null), "This operation is not supported by 'HostedHttpRouteCollection'.");
         }
 
+        [Fact]
+        public void ConvertHttpRouteDataToRouteDataRunsCustomHttpRoute()
+        {
+            // Arrange
+            DomainHttpRoute route = new DomainHttpRoute("myDomain", "api/{controller}/{action}", new { controller = "Values", action = "GetTenant" });
+            HostedHttpRouteCollection collection = new HostedHttpRouteCollection(new RouteCollection());
+            collection.Add("domainRoute", route);
+            HttpRequestMessage request = CreateHttpRequestMessageWithContext();
+            IHttpRouteData httpRouteData = collection.GetRouteData(request);
+            
+            // Act
+            RouteData routeData = httpRouteData.ToRouteData();
+
+            // Assert
+            Assert.NotNull(routeData.Values);
+            Assert.Equal(3, routeData.Values.Count);
+            Assert.Equal("controllerName", routeData.Values["controller"]);
+            Assert.Equal("actionName", routeData.Values["action"]);
+            Assert.Equal("myDomain", routeData.Values["domain"]);
+        }
+
+        [Fact]
+        public void CustomHttpRouteGetVitualPathRunsCustomHttpRoute()
+        {
+            // Arrange
+            DomainHttpRoute route = new DomainHttpRoute("myDomain", "api/{controller}/{action}", new { controller = "SomeValue", action = "SomeAction" });
+            HostedHttpRouteCollection collection = new HostedHttpRouteCollection(new RouteCollection());
+            collection.Add("domainRoute", route);
+            HttpRequestMessage request = CreateHttpRequestMessageWithContext();
+            HttpRouteValueDictionary routeValues = new HttpRouteValueDictionary()
+                {
+                    {"controller", "controllerName"},
+                    {"action", "actionName"},
+                    {"httproute", true}
+                };
+
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route, routeValues);
+            
+            // Act
+            IHttpVirtualPathData httpvPathData = collection.GetVirtualPath(request, "domainRoute", routeValues);
+
+            // Assert
+            Assert.NotNull(httpvPathData);
+            Assert.Equal("/api/controllerName/actionNameFromDomain", httpvPathData.VirtualPath);
+        }
+
+        private static HttpRequestMessage CreateHttpRequestMessageWithContext()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/controllerName/actionName");
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            request.Properties[HttpControllerHandler.HttpContextBaseKey] = CreateHttpContext("~/api");
+
+            return request;
+        }
+
         private static HttpContextBase CreateHttpContext(string relativeUrl, string appPathModifierReturnValue = "")
         {
             var mockContext = new Mock<HttpContextBase>();
@@ -242,10 +300,23 @@ namespace System.Web.Http.WebHost.Routing
             mockContext.SetupGet(c => c.Request.ApplicationPath).Returns(String.Empty);
             mockContext.SetupGet(c => c.Request.AppRelativeCurrentExecutionFilePath).Returns(relativeUrl);
             mockContext.SetupGet(c => c.Request.PathInfo).Returns("");
+            mockContext.SetupGet(c => c.Items).Returns(new Dictionary<string, object>());
+            mockContext.SetupGet(c => c.Request.HttpMethod).Returns("GET");
+            mockContext.SetupGet(c => c.Request.InputStream).Returns(new MemoryStream());
+            mockContext.SetupGet(c => c.Request.Headers).Returns(new NameValueCollection());
+            mockContext.SetupGet(c => c.Request.ApplicationPath).Returns("/");
 
-            mockContext.Setup(c => c.Response.ApplyAppPathModifier(It.IsAny<string>()))
-                       .Returns(appPathModifierReturnValue);
-
+            if (appPathModifierReturnValue == string.Empty)
+            {
+                mockContext.Setup(c => c.Response.ApplyAppPathModifier(It.IsAny<string>()))
+                               .Returns((string s) => { return s; });
+            }
+            else
+            {
+                mockContext.Setup(c => c.Response.ApplyAppPathModifier(It.IsAny<string>()))
+                             .Returns(appPathModifierReturnValue);
+            }
+            
             return mockContext.Object;
         }
 
@@ -266,6 +337,33 @@ namespace System.Web.Http.WebHost.Routing
             public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
             {
                 return base.GetVirtualPath(requestContext, values);
+            }
+        }
+
+        public class DomainHttpRoute : HttpRoute
+        {
+            public DomainHttpRoute(string domain, string routeTemplate, object defaults, object constraints = null)
+                : base(routeTemplate, new HttpRouteValueDictionary(defaults), new HttpRouteValueDictionary(constraints))
+            {
+                Domain = domain;
+            }
+
+            public string Domain { get; set; }
+
+            public override IHttpRouteData GetRouteData(string virtualPathRoot, System.Net.Http.HttpRequestMessage request)
+            {
+                // Route data
+                IHttpRouteData data = base.GetRouteData(virtualPathRoot, request);
+                data.Values.Add("domain", Domain);
+                return data;
+            }
+
+            public override IHttpVirtualPathData GetVirtualPath(System.Net.Http.HttpRequestMessage request, IDictionary<string, object> values)
+            {
+                // customize the action token
+                values["action"] = "actionNameFromDomain";
+
+                return base.GetVirtualPath(request, values);
             }
         }
 

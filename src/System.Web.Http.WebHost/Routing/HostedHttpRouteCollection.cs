@@ -80,6 +80,11 @@ namespace System.Web.Http.WebHost.Routing
                 httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
             }
 
+            if (httpContextBase.GetHttpRequestMessage() == null)
+            {
+                httpContextBase.SetHttpRequestMessage(request);
+            }
+
             RouteData routeData = _routeCollection.GetRouteData(httpContextBase);
             if (routeData != null)
             {
@@ -101,6 +106,11 @@ namespace System.Web.Http.WebHost.Routing
             if (!request.Properties.TryGetValue(HttpControllerHandler.HttpContextBaseKey, out httpContextBase))
             {
                 httpContextBase = new HttpRequestMessageContextWrapper(VirtualPathRoot, request);
+            }
+
+            if (httpContextBase.GetHttpRequestMessage() == null)
+            {
+                httpContextBase.SetHttpRequestMessage(request);
             }
 
             IHttpRouteData routeData = request.GetRouteData();

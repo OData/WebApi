@@ -80,7 +80,10 @@ namespace System.Web.Http.Dispatcher
 
             RemoveOptionalRoutingParameters(routeData.Values);
 
-            var invoker = routeData.Route.Handler == null ? _defaultInvoker : new HttpMessageInvoker(routeData.Route.Handler, disposeHandler: false);
+            // routeData.Route could be null if user adds a custom route that derives from System.Web.Routing.Route explicitly 
+            // and add that to the RouteCollection in the web hosted case
+            var invoker = (routeData.Route == null || routeData.Route.Handler == null) ? 
+                _defaultInvoker : new HttpMessageInvoker(routeData.Route.Handler, disposeHandler: false);
             return invoker.SendAsync(request, cancellationToken);
         }
 

@@ -2,11 +2,14 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using System.Web.Routing;
 using Microsoft.TestCommon;
 using Moq;
+using Moq.Protected;
 
 namespace System.Web.Http.WebHost.Routing
 {
@@ -153,6 +156,26 @@ namespace System.Web.Http.WebHost.Routing
         }
 
         [Fact]
+        public void SendAsync_CallsDefaultHandlerWhenCustomASPNETRoute()
+        {
+            // Arrange
+            var mockHandler = new Mock<HttpMessageHandler>();
+            var config = new HttpConfiguration();
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/controllerName");
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpDomainRoute domainRoute = new HttpDomainRoute("test", new { controller = "Values", action = "GetTenant" });
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HostedHttpRouteData(domainRoute.GetRouteData(null));
+            var dispatcher = new HttpRoutingDispatcher(config, defaultHandler: mockHandler.Object);
+            var invoker = new HttpMessageInvoker(dispatcher);
+
+            // Act
+            invoker.SendAsync(request, CancellationToken.None);
+
+            // Assert
+            mockHandler.Protected().Verify("SendAsync", Times.Once(), request, CancellationToken.None);
+        }
+
+        [Fact]
         public void GetVirtualPath_GuardClauses()
         {
             Assert.ThrowsArgumentNull(() => _webApiRoutes.GetVirtualPath(request: null, name: null, values: null), "request");
@@ -225,5 +248,26 @@ namespace System.Web.Http.WebHost.Routing
 
             return mockContext.Object;
         }
+
+        public class HttpDomainRoute : Route
+        {
+            public HttpDomainRoute(string routeTemplate, object defaults, object constraints = null)
+                : base(routeTemplate, new RouteValueDictionary(defaults), new RouteValueDictionary(constraints), new RouteValueDictionary(), HttpControllerRouteHandler.Instance)
+            {
+            }
+
+            public override RouteData GetRouteData(HttpContextBase context)
+            {
+                RouteData data = new RouteData(this, RouteHandler);
+                data.Values.Add("domain", "customer");
+                return data;
+            }
+
+            public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary values)
+            {
+                return base.GetVirtualPath(requestContext, values);
+            }
+        }
+
     }
 }

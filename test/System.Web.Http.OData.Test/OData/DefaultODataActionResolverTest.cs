@@ -51,25 +51,23 @@ namespace System.Web.Http.OData
         [Fact]
         public void Throws_InvalidOperation_when_action_not_found()
         {
-            string invalidUrl = "http://server/service/MissingOperation";
             IODataActionResolver resolver = new DefaultODataActionResolver();
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(invalidUrl), Model = GetModel() };
+            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/MissingOperation"), Model = GetModel() };
             Assert.Throws<InvalidOperationException>(() =>
             {
                 IEdmFunctionImport action = resolver.Resolve(context);
-            }, "Action 'MissingOperation' not found.");
+            },  "Action 'MissingOperation' was not found for RequestUri 'http://server/service/MissingOperation'.");
         }
 
         [Fact]
         public void Throws_InvalidOperation_when_multiple_overloads_found()
         {
-            string invalidUrl = "http://server/service/Vehicles/Container.Car(8)/Park";
             IODataActionResolver resolver = new DefaultODataActionResolver();
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(invalidUrl), Model = GetModel() };
+            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/Vehicles/Container.Car(8)/Park"), Model = GetModel() };
             InvalidOperationException ioe = Assert.Throws<InvalidOperationException>(() =>
             {
                 IEdmFunctionImport action = resolver.Resolve(context);
-            }, "Ambiguous request. Multiple action overloads called 'Park' found.");
+            }, "Ambiguous request. Found multiple action overloads called 'Park' for RequestUri 'http://server/service/Vehicles/Container.Car(8)/Park'.");
         }
 
         [Fact]

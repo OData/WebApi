@@ -21,6 +21,10 @@ namespace System.Web.Http.OData.Formatter
         public ODataFormatterParameterBinding(HttpParameterDescriptor descriptor, ODataMediaTypeFormatter formatter)
             : base(descriptor)
         {
+            if (formatter == null)
+            {
+                throw Error.ArgumentNull("formatter");
+            }
             _formatter = formatter;
         }
 

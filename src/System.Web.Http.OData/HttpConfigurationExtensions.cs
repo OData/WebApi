@@ -134,13 +134,13 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets the <see cref="IODataActionResolver"/> on the configuration.
+        /// Gets the <see cref="IODataActionResolver"/> from the configuration.
         /// </summary>
         /// <remarks>
-        /// If not <see cref="IODataActionResolver"/> is configured this returns the <see cref="DefaultODataActionResolver"/> 
+        /// If an <see cref="IODataActionResolver"/> is not found, this method registers and returns a <see cref="DefaultODataActionResolver"/> 
         /// </remarks>
-        /// <param name="configuration">Configuration o check.</param>
-        /// <returns>Returns an <see cref="IODataActionResolver"/> for this configuration.</returns>
+        /// <param name="configuration">Configuration to check.</param>
+        /// <returns>Returns an <see cref="IODataActionResolver"/></returns>
         public static IODataActionResolver GetODataActionResolver(this HttpConfiguration configuration)
         {
             if (configuration == null)
@@ -149,7 +149,7 @@ namespace System.Web.Http
             }
 
             // returns one if user sets one, null otherwise
-            object result = configuration.Properties.GetOrAdd(ODataActionResolverKey, new DefaultODataActionResolver());
+            object result = configuration.Properties.GetOrAdd(ODataActionResolverKey, (key) => new DefaultODataActionResolver());
             return result as IODataActionResolver;
         }
 

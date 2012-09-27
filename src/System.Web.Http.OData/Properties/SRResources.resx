@@ -409,9 +409,15 @@
     <value>The OData formatter does not support writing client requests. This formatter instance must have an associated request.</value>
   </data>
   <data name="ActionNotFound" xml:space="preserve">
-    <value>Action '{0}' not found.</value>
+    <value>Action '{0}' was not found for RequestUri '{1}'.</value>
   </data>
   <data name="ActionResolutionFailed" xml:space="preserve">
-    <value>Ambiguous request. Multiple action overloads called '{0}' found.</value>
+    <value>Ambiguous request. Found multiple action overloads called '{0}' for RequestUri '{1}'.</value>
+  </data>
+  <data name="DefaultODataActionResolverRequirementsNotSatisfied" xml:space="preserve">
+    <value>DefaultODataActionResolver requires an ODataDeserializerContext with a non null Request and RequestUri.</value>
+  </data>
+  <data name="NoODataMediaTypeFormatterFound" xml:space="preserve">
+    <value>The ODataParameterBindingAttribute requires that an ODataMediaTypeFormatter be registered with the HttpConfiguration.</value>
   </data>
 </root>

@@ -16,8 +16,14 @@ namespace System.Web.Http.OData
     {
         public IEdmFunctionImport Resolve(ODataDeserializerContext context)
         {
-            Contract.Assert(context.Request != null);
-            Contract.Assert(context.Model != null);
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+            else if (context.Request == null || context.Request.RequestUri == null)
+            {
+                throw Error.InvalidOperation(SRResources.DefaultODataActionResolverRequirementsNotSatisfied);
+            }
 
             string actionName = null;
             string containerName = null;
@@ -26,7 +32,9 @@ namespace System.Web.Http.OData
             string lastSegment = context.Request.RequestUri.Segments.Last();
             string[] nameParts = lastSegment.Split('.');
 
-            IEnumerable<IEdmFunctionImport> matchingActionsQuery = context.Model.EntityContainers().Single().FunctionImports();
+            IEdmEntityContainer[] entityContainers = context.Model.EntityContainers().ToArray();
+            Contract.Assert(entityContainers.Length == 1);
+            IEnumerable<IEdmFunctionImport> matchingActionsQuery = entityContainers[0].FunctionImports();
 
             if (nameParts.Length == 1)
             {
@@ -51,11 +59,11 @@ namespace System.Web.Http.OData
 
             if (possibleMatches.Length == 0)
             {
-                throw Error.InvalidOperation(SRResources.ActionNotFound, actionName);
+                throw Error.InvalidOperation(SRResources.ActionNotFound, actionName, context.Request.RequestUri.AbsoluteUri);
             }
-            if (possibleMatches.Length > 1)
+            else if (possibleMatches.Length > 1)
             {
-                throw Error.InvalidOperation(SRResources.ActionResolutionFailed, actionName);
+                throw Error.InvalidOperation(SRResources.ActionResolutionFailed, actionName, context.Request.RequestUri.AbsoluteUri);
             }
             return possibleMatches[0];
         }

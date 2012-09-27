@@ -7,6 +7,12 @@
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
         <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
         <ExtensionsTestResultsDirectory>$(MSBuildThisFileDirectory)bin\Extensions\$(Configuration)\test\TestResults\</ExtensionsTestResultsDirectory>
+        <VS2012WindowsXamlInstallPath>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v11.0</VS2012WindowsXamlInstallPath>
+        <!-- Check for the Windows XAML msbuild extensions to determine VS version to use, if both 2010 and 2012 are installed -->
+        <ConfigurationSuffix/>
+        <ConfigurationSuffix Condition="!Exists($(VS2012WindowsXamlInstallPath))">VS2010</ConfigurationSuffix>
+        <VisualStudioVersion Condition=" '$(ConfigurationSuffix)' == '' ">11.0</VisualStudioVersion>
+        <VisualStudioVersion Condition=" '$(ConfigurationSuffix)' == 'VS10' ">10.0</VisualStudioVersion>
     </PropertyGroup>
     
     <ItemGroup>            
@@ -26,7 +32,7 @@
         <MSBuild
             Projects="@(SolutionsToBuild)"
             Targets="Clean"
-            Properties="Configuration=$(Configuration)" />
+            Properties="Configuration=$(Configuration)$(ConfigurationSuffix);VisualStudioVersion=$(VisualStudioVersion)" />
         <RemoveDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
     </Target>
 
@@ -58,7 +64,7 @@
             Projects="%(SolutionsToBuild.Identity)"
             BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
             Targets="Build"
-            Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled)" />
+            Properties="Configuration=$(Configuration)$(ConfigurationSuffix);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
     </Target>
 
     <Target Name="UnitTest" DependsOnTargets="Build">

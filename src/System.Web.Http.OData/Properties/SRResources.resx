@@ -270,9 +270,6 @@
   <data name="ItemMustBeOfType" xml:space="preserve">
     <value>The item must be of type '{0}'.</value>
   </data>
-  <data name="MultipleKeysFound" xml:space="preserve">
-    <value>Entity type '{0}' has multiple keys.</value>
-  </data>
   <data name="MustBeComplexProperty" xml:space="preserve">
     <value>The property '{0}' on type '{1}' must be a Complex property.</value>
   </data>
@@ -284,9 +281,6 @@
   </data>
   <data name="MustHaveMatchingMultiplicity" xml:space="preserve">
     <value>The multiplicity of the '{0}' property must be '{1}'.</value>
-  </data>
-  <data name="NoKeyFound" xml:space="preserve">
-    <value>Entity type '{0}' has no keys.</value>
   </data>
   <data name="MustBePrimitiveType" xml:space="preserve">
     <value>The type '{0}' must be a primitive type.</value>

@@ -592,15 +592,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Entity type &apos;{0}&apos; has multiple keys..
-        /// </summary>
-        internal static string MultipleKeysFound {
-            get {
-                return ResourceManager.GetString("MultipleKeysFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to More than one matching clr type found for the Edm type {0}.\nThe matching clr types are {1}..
         /// </summary>
         internal static string MultipleMatchingClrTypesForEdmType {
@@ -687,15 +678,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string NoEditLinkFactoryFound {
             get {
                 return ResourceManager.GetString("NoEditLinkFactoryFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Entity type &apos;{0}&apos; has no keys..
-        /// </summary>
-        internal static string NoKeyFound {
-            get {
-                return ResourceManager.GetString("NoKeyFound", resourceCulture);
             }
         }
         

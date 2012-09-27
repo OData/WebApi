@@ -89,25 +89,6 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.False(type.IsCollection());
         }
 
-        [Theory]
-        [InlineData(typeof(GetKeyProperty_validEntityType_TestClass_Id), "Id")]
-        [InlineData(typeof(GetKeyProperty_validEntityType_TestClass2_ClassName), "GetKeyProperty_validEntityType_TestClass2_ClassNameId")]
-        public void GetKeyProperty_ValidEntityType(Type type, string propertyName)
-        {
-            var key = ConventionsHelpers.GetKeyProperty(type, throwOnError: false);
-            Assert.NotNull(key);
-            Assert.Equal(key.Name, propertyName);
-        }
-
-        [Theory]
-        [InlineData(typeof(GetKeyProperty_InValidEntityType_NoId))]
-        [InlineData(typeof(GetKeyProperty_InValidEntityType_ComplexId))]
-        public void GetKeyProperty_InValidEntityType(Type type)
-        {
-            var key = ConventionsHelpers.GetKeyProperty(type, throwOnError: false);
-            Assert.Null(key);
-        }
-
         [Fact]
         public void GetProperties_ReturnsProperties_FromBaseAndDerived()
         {
@@ -316,7 +297,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         private class GetKeyProperty_InValidEntityType_ComplexId
         {
-            public Type Id { get; set; }
+            public GetProperties_Complex Id { get; set; }
         }
     }
 

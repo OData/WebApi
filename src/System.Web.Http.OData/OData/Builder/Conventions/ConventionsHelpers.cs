@@ -16,34 +16,6 @@ namespace System.Web.Http.OData.Builder.Conventions
     {
         private static HashSet<Type> _ignoredCollectionTypes = new HashSet<Type>(new Type[] { typeof(string) });
 
-        public static PropertyInfo GetKeyProperty(Type entityType, bool throwOnError = false)
-        {
-            IEnumerable<PropertyInfo> keys = entityType.GetProperties()
-                .Where(p => (p.Name.Equals(entityType.Name + "Id", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
-                && EdmLibHelpers.GetEdmPrimitiveTypeOrNull(p.PropertyType) != null);
-
-            if (keys.Count() == 0)
-            {
-                if (throwOnError)
-                {
-                    throw Error.InvalidOperation(SRResources.NoKeyFound, entityType.FullName);
-                }
-            }
-            else if (keys.Count() > 1)
-            {
-                if (throwOnError)
-                {
-                    throw Error.InvalidOperation(SRResources.MultipleKeysFound, entityType.FullName);
-                }
-            }
-            else
-            {
-                return keys.Single();
-            }
-
-            return null;
-        }
-
         public static string GetEntityKeyValue(EntityInstanceContext entityContext, IEntityTypeConfiguration entityTypeConfiguration)
         {
             // TODO: BUG 453795: reflection cleanup

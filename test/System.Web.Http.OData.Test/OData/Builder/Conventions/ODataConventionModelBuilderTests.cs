@@ -648,8 +648,8 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void ModelBuilder_DerivedTypeDeclaringKeyThrows()
         {
             MockType baseType =
-                new MockType("BaseType")
-                .Property(typeof(int), "ID");
+                  new MockType("BaseType")
+                  .Property(typeof(int), "ID");
 
             MockType derivedType =
                 new MockType("DerivedType")

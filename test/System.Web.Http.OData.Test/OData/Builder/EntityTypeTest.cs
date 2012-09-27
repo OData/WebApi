@@ -370,5 +370,60 @@ namespace System.Web.Http.OData.Builder
                 .DerivesFrom<Vehicle>(),
             "'System.Web.Http.OData.Builder.TestModels.Vehicle' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
         }
+
+        [Fact]
+        public void DerivesFrom_SetsBaseType()
+        {
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.Entity<Motorcycle>();
+
+            motorcycle.DerivesFrom<Vehicle>();
+
+            Assert.NotNull(motorcycle.BaseType);
+            Assert.Equal(typeof(Vehicle), motorcycle.BaseType.ClrType);
+        }
+
+        [Fact]
+        public void CanDeriveFromNull()
+        {
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.Entity<Motorcycle>();
+
+            motorcycle.DerivesFromNothing();
+            Assert.Null(motorcycle.BaseType);
+        }
+
+        [Fact]
+        public void BaseTypeConfigured_IsFalseByDefault()
+        {
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+
+            Assert.False(motorcycle.BaseTypeConfigured);
+        }
+
+        [Fact]
+        public void SettingBaseType_UpdatesBaseTypeConfigured()
+        {
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var vehicle = builder.AddEntity(typeof(Vehicle));
+
+            motorcycle.DerivesFrom(vehicle);
+
+            Assert.True(motorcycle.BaseTypeConfigured);
+        }
+
+        [Fact]
+        public void SettingBaseTypeToNull_AlsoUpdatesBaseTypeConfigured()
+        {
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var vehicle = builder.AddEntity(typeof(Vehicle));
+
+            motorcycle.DerivesFromNothing();
+
+            Assert.True(motorcycle.BaseTypeConfigured);
+        }
     }
 }

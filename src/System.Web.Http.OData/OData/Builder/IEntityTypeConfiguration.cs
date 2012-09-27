@@ -13,13 +13,19 @@ namespace System.Web.Http.OData.Builder
     {
         /// <summary>
         /// Gets or sets a value indicating whether this type is abstract.
+        /// If the property is not set the entity is assumed to be non-abstract.
         /// </summary>
-        bool IsAbstract { get; set; }
+        bool? IsAbstract { get; set; }
 
         /// <summary>
         /// Gets the base type of this entity type.
         /// </summary>
         IEntityTypeConfiguration BaseType { get; }
+
+        /// <summary>
+        /// Gets if the base type for this entity type was configured explicitly by the user.
+        /// </summary>
+        bool BaseTypeConfigured { get; }
 
         /// <summary>
         /// Gets the key properties of this entity type.
@@ -52,5 +58,12 @@ namespace System.Web.Http.OData.Builder
         /// <param name="baseType">The base entity type</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         IEntityTypeConfiguration DerivesFrom(IEntityTypeConfiguration baseType);
+
+        /// <summary>
+        /// Sets the base type of this entity type to <c>null</c> meaning that this entity type 
+        /// does not derive from anything.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        IEntityTypeConfiguration DerivesFromNothing();
     }
 }

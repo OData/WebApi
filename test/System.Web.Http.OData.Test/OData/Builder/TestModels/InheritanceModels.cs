@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace System.Web.Http.OData.Builder.TestModels
 {
@@ -24,6 +25,8 @@ namespace System.Web.Http.OData.Builder.TestModels
         }
 
         public int SeatingCapacity { get; set; }
+
+        public CarManufacturer Manufacturer { get; set; }
     }
 
     public class Motorcycle : Vehicle
@@ -36,11 +39,51 @@ namespace System.Web.Http.OData.Builder.TestModels
 
         public bool CanDoAWheelie { get; set; }
 
+        [NotMapped]
         public int ID { get; set; }
+
+        public MotorcycleManufacturer Manufacturer { get; set; }
     }
 
     public class SportBike : Motorcycle
     {
+        [NotMapped]
         public int SportBikeProperty_NotVisible { get; set; }
+    }
+
+    public abstract class Manufacturer
+    {
+        public string ID { get; set; }
+
+        public string Name { get; set; }
+
+        public ManufacturerAddress Address { get; set; }
+    }
+
+    public class MotorcycleManufacturer : Manufacturer
+    {
+    }
+
+    public class CarManufacturer : Manufacturer
+    {
+    }
+
+    public class ManufacturerAddress
+    {
+        public int HouseNumber { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string IgnoreThis { get; set; }
+    }
+
+    public class CarManufacturerAddress : ManufacturerAddress
+    {
+        [NotMapped]
+        public int ID { get; set; }
+    }
+
+    public class MotorcycleManufacturerAddress : ManufacturerAddress
+    {
     }
 }

@@ -61,7 +61,23 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
         }
 
-        public static PropertyInfo[] GetProperties(IStructuralTypeConfiguration type)
+        // Get properties of this entity type that are not already declared in the base entity type and are not already ignored.
+        public static IEnumerable<PropertyInfo> GetProperties(IEntityTypeConfiguration entity)
+        {
+            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as IStructuralTypeConfiguration);
+            if (entity.BaseType != null)
+            {
+                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as IStructuralTypeConfiguration);
+                return allProperties.Except(baseTypeProperties, PropertyEqualityComparer.Instance);
+            }
+            else
+            {
+                return allProperties;
+            }
+        }
+
+        // Get all properties of this type (that are not already ignored).
+        public static IEnumerable<PropertyInfo> GetAllProperties(IStructuralTypeConfiguration type)
         {
             if (type == null)
             {
@@ -86,7 +102,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             {
                 // non-public getters are not valid properties
                 MethodInfo publicGetter = propertyInfo.GetGetMethod();
-                if (publicGetter != null && !publicGetter.IsAbstract && propertyInfo.PropertyType.IsValidStructuralPropertyType())
+                if (publicGetter != null && propertyInfo.PropertyType.IsValidStructuralPropertyType())
                 {
                     return true;
                 }
@@ -149,6 +165,25 @@ namespace System.Web.Http.OData.Builder.Conventions
             Contract.Assert(entityInstance != null);
 
             return ODataUriBuilder.GetUriRepresentation(key.GetValue(entityInstance, null));
+        }
+
+        private class PropertyEqualityComparer : IEqualityComparer<PropertyInfo>
+        {
+            public static PropertyEqualityComparer Instance = new PropertyEqualityComparer();
+
+            public bool Equals(PropertyInfo x, PropertyInfo y)
+            {
+                Contract.Assert(x != null);
+                Contract.Assert(y != null);
+
+                return x.Name == y.Name;
+            }
+
+            public int GetHashCode(PropertyInfo obj)
+            {
+                Contract.Assert(obj != null);
+                return obj.Name.GetHashCode();
+            }
         }
     }
 }

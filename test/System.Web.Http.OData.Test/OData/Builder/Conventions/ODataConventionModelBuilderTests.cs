@@ -5,15 +5,145 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http.Dispatcher;
+using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
     public class ODataConventionModelBuilderTests
     {
+        private const int _totalExpectedSchemaTypesForVehiclesModel = 8;
+
+        [Fact]
+        public void Ctor_ThrowsForNullConfiguration()
+        {
+            Assert.ThrowsArgumentNull(
+                () => new ODataConventionModelBuilder(configuration: null),
+                "configuration");
+        }
+
+        [Fact]
+        public void Ignore_Should_AddToListOfIgnoredTypes()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.Ignore(typeof(object));
+
+            Assert.True(builder.IsIgnoredType(typeof(object)));
+        }
+
+        [Fact]
+        public void IgnoreOfT_Should_AddToListOfIgnoredTypes()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.Ignore<object>();
+
+            Assert.True(builder.IsIgnoredType(typeof(object)));
+        }
+
+        [Fact]
+        public void CanCallIgnore_MultipleTimes_WithDuplicates()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.Ignore<object>();
+            builder.Ignore<object>();
+            builder.Ignore(typeof(object), typeof(object), typeof(object));
+
+            Assert.True(builder.IsIgnoredType(typeof(object)));
+        }
+
+        [Fact]
+        public void DiscoverInheritanceRelationships_PatchesBaseType()
+        {
+            var mockType1 = new MockType("Foo");
+            var mockType2 = new MockType("Bar").BaseType(mockType1);
+            var mockAssembly = new MockAssembly(mockType1, mockType2);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            var entity1 = builder.AddEntity(mockType1);
+            var entity2 = builder.AddEntity(mockType2);
+
+            builder.DiscoverInheritanceRelationships();
+
+            Assert.Equal(entity1, entity2.BaseType);
+        }
+
+        [Fact]
+        public void DiscoverInheritanceRelationships_PatchesBaseType_EvenIfTheyAreSeperated()
+        {
+            var mockType1 = new MockType("Foo");
+            var mockType2 = new MockType("Bar").BaseType(mockType1);
+            var mockType3 = new MockType("FooBar").BaseType(mockType2);
+
+            var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            var entity1 = builder.AddEntity(mockType1);
+            var entity3 = builder.AddEntity(mockType3);
+
+            builder.DiscoverInheritanceRelationships();
+
+            Assert.Equal(entity1, entity3.BaseType);
+        }
+
+        [Fact]
+        public void RemoveBaseTypeProperties_RemovesAllBaseTypePropertiesFromDerivedTypes()
+        {
+            var mockType1 = new MockType("Foo").Property<int>("P1");
+            var mockType2 = new MockType("Bar").BaseType(mockType1).Property<int>("P1").Property<int>("P2");
+            var mockType3 = new MockType("FooBar").BaseType(mockType2).Property<int>("P1").Property<int>("P2");
+
+            var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            var entity1 = builder.AddEntity(mockType1);
+            entity1.AddProperty(mockType1.GetProperty("P1"));
+
+            var entity2 = builder.AddEntity(mockType2).DerivesFrom(entity1);
+            entity2.AddProperty(mockType2.GetProperty("P2"));
+
+            var entity3 = builder.AddEntity(mockType3);
+            entity3.AddProperty(mockType3.GetProperty("P1"));
+            entity3.AddProperty(mockType3.GetProperty("P2"));
+
+            builder.RemoveBaseTypeProperties(entity3, entity2);
+
+            Assert.Empty(entity3.Properties);
+        }
+
+        [Fact]
+        public void MapDerivedTypes_BringsAllDerivedTypes_InTheAssembly()
+        {
+            var mockType1 = new MockType("FooBar");
+            var mockType2 = new MockType("Foo").BaseType(mockType1);
+            var mockType3 = new MockType("Fo").BaseType(mockType2);
+            var mockType4 = new MockType("Bar").BaseType(mockType1);
+
+            var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3, mockType4);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            var entity1 = builder.AddEntity(mockType1);
+            builder.MapDerivedTypes(entity1);
+
+            Assert.Equal(
+                new[] { "FooBar", "Foo", "Fo", "Bar" }.OrderBy(name => name),
+                builder.StructuralTypes.Select(t => t.Name).OrderBy(name => name));
+        }
+
         [Fact]
         public void ModelBuilder_Products()
         {
@@ -89,16 +219,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void ModelBuilder_SupportsComplexCollectionWhenNotToldElementTypeIsComplex(Type complexCollectionPropertyType)
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "SampleType",
-                    Properties = 
-                    {
-                        new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                        new DynamicProperty { Name = "Property1", Type = complexCollectionPropertyType }
-                    }
-                });
+            Type entityType =
+                new MockType("SampleType")
+                .Property<int>("ID")
+                .Property(complexCollectionPropertyType, "Property1");
+
             modelBuilder.AddEntity(entityType);
             IEdmModel model = modelBuilder.GetEdmModel();
             IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
@@ -119,16 +244,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void ModelBuilder_SupportsComplexCollectionWhenToldElementTypeIsComplex(Type complexCollectionPropertyType)
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "SampleType",
-                    Properties = 
-                    {
-                        new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                        new DynamicProperty { Name = "Property1", Type = complexCollectionPropertyType }
-                    }
-                });
+            Type entityType =
+                new MockType("SampleType")
+                .Property<int>("ID")
+                .Property(complexCollectionPropertyType, "Property1");
+
             modelBuilder.AddEntity(entityType);
             modelBuilder.AddComplexType(typeof(Version));
             IEdmModel model = modelBuilder.GetEdmModel();
@@ -149,16 +269,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void ModelBuilder_SupportsPrimitiveCollection(Type primitiveCollectionPropertyType)
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "SampleType",
-                    Properties = 
-                    {
-                        new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                        new DynamicProperty { Name = "Property1", Type = primitiveCollectionPropertyType }
-                    }
-                });
+            Type entityType =
+                new MockType("SampleType")
+                .Property<int>("ID")
+                .Property(primitiveCollectionPropertyType, "Property1");
+
             modelBuilder.AddEntity(entityType);
             IEdmModel model = modelBuilder.GetEdmModel();
             IEdmEntityType entity = model.GetEdmType(entityType) as IEdmEntityType;
@@ -179,190 +294,411 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void ModelBuilder_DoesnotThrow_ForEntityCollection(Type collectionType)
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                    {
-                        TypeName = "SampleType",
-                        Properties = 
-                        {
-                            new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                            new DynamicProperty { Name = "Products", Type =collectionType }
-                        }
-                    });
+            Type entityType =
+                new MockType("SampleType")
+                .Property<int>("ID")
+                .Property(collectionType, "Products");
+
             modelBuilder.AddEntity(entityType);
 
             Assert.DoesNotThrow(
                () => modelBuilder.GetEdmModel());
         }
 
-        public static IEnumerable<object[]> AllLoadedTypes
+        [Fact]
+        public void ModelBuilder_CanBuild_ModelWithInheritance()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("Vehicles");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            Assert.Equal(1, model.EntityContainers().Single().EntitySets().Count());
+            model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
+
+            var vehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Equal(2, vehicle.Key().Count());
+            Assert.Equal(3, vehicle.Properties().Count());
+            vehicle.AssertHasKey(model, "Model", EdmPrimitiveTypeKind.Int32);
+            vehicle.AssertHasKey(model, "Name", EdmPrimitiveTypeKind.String);
+            vehicle.AssertHasPrimitiveProperty(model, "WheelCount", EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            Assert.Equal(vehicle, motorcycle.BaseEntityType());
+            Assert.Equal(2, motorcycle.Key().Count());
+            Assert.Equal(5, motorcycle.Properties().Count());
+            motorcycle.AssertHasPrimitiveProperty(model, "CanDoAWheelie", EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            var car = model.AssertHasEntityType(typeof(Car));
+            Assert.Equal(vehicle, car.BaseEntityType());
+            Assert.Equal(2, car.Key().Count());
+            Assert.Equal(5, car.Properties().Count());
+            car.AssertHasPrimitiveProperty(model, "SeatingCapacity", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            var sportbike = model.AssertHasEntityType(typeof(SportBike));
+            Assert.Equal(motorcycle, sportbike.BaseEntityType());
+            Assert.Equal(2, sportbike.Key().Count());
+            Assert.Equal(5, sportbike.Properties().Count());
+
+            model.AssertHasEntityType(typeof(MotorcycleManufacturer));
+            model.AssertHasEntityType(typeof(CarManufacturer));
+        }
+
+        [Fact]
+        public void ModelBuilder_CanAddEntitiesInAnyOrder()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<SportBike>();
+            builder.Entity<Car>();
+            builder.Entity<Vehicle>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+        }
+
+        [Fact]
+        public void ModelBuilder_Ignores_IgnoredTypeAndTheirDerivedTypes()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("Vehicles");
+            builder.Ignore<Motorcycle>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            // ignore motorcycle, sportbike and MotorcycleManufacturer
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel - 3, model.SchemaElements.Count());
+            Assert.Equal(1, model.EntityContainers().Single().EntitySets().Count());
+            model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
+
+            var vehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Equal(2, vehicle.Key().Count());
+            Assert.Equal(3, vehicle.Properties().Count());
+            vehicle.AssertHasKey(model, "Model", EdmPrimitiveTypeKind.Int32);
+            vehicle.AssertHasKey(model, "Name", EdmPrimitiveTypeKind.String);
+            vehicle.AssertHasPrimitiveProperty(model, "WheelCount", EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var car = model.AssertHasEntityType(typeof(Car));
+            Assert.Equal(vehicle, car.BaseEntityType());
+            Assert.Equal(2, car.Key().Count());
+            Assert.Equal(5, car.Properties().Count());
+            car.AssertHasPrimitiveProperty(model, "SeatingCapacity", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+        }
+
+        [Fact]
+        public void ModelBuilder_Can_Add_DerivedTypeOfAnIgnoredType()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("Vehicles");
+            builder.Ignore<Motorcycle>();
+            builder.Entity<SportBike>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel - 1, model.SchemaElements.Count());
+            Assert.Equal(1, model.EntityContainers().Single().EntitySets().Count());
+            model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
+
+            var vehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Equal(2, vehicle.Key().Count());
+            Assert.Equal(3, vehicle.Properties().Count());
+            vehicle.AssertHasKey(model, "Model", EdmPrimitiveTypeKind.Int32);
+            vehicle.AssertHasKey(model, "Name", EdmPrimitiveTypeKind.String);
+            vehicle.AssertHasPrimitiveProperty(model, "WheelCount", EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var car = model.AssertHasEntityType(typeof(Car));
+            Assert.Equal(vehicle, car.BaseEntityType());
+            Assert.Equal(2, car.Key().Count());
+            Assert.Equal(5, car.Properties().Count());
+            car.AssertHasPrimitiveProperty(model, "SeatingCapacity", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            var sportbike = model.AssertHasEntityType(typeof(SportBike));
+            Assert.Equal(vehicle, sportbike.BaseEntityType());
+            Assert.Equal(2, sportbike.Key().Count());
+            Assert.Equal(5, sportbike.Properties().Count());
+            sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+        }
+
+        [Fact]
+        public void ModelBuilder_Patches_BaseType_IfBaseTypeIsNotExplicitlySet()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<Vehicle>();
+            builder.Entity<Car>();
+            builder.Entity<Motorcycle>();
+            builder.Entity<SportBike>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+
+            var vehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Equal(null, vehicle.BaseEntityType());
+
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            Assert.Equal(vehicle, motorcycle.BaseEntityType());
+
+            var car = model.AssertHasEntityType(typeof(Car));
+            Assert.Equal(vehicle, car.BaseEntityType());
+
+            var sportbike = model.AssertHasEntityType(typeof(SportBike));
+            Assert.Equal(motorcycle, sportbike.BaseEntityType());
+
+            var motorcycleManufacturer = model.AssertHasEntityType(typeof(MotorcycleManufacturer));
+            Assert.Null(motorcycleManufacturer.BaseEntityType());
+
+            var carManufacturer = model.AssertHasEntityType(typeof(CarManufacturer));
+            Assert.Null(carManufacturer.BaseEntityType());
+        }
+
+        [Fact]
+        public void ModelBuilder_DoesnotPatch_BaseType_IfBaseTypeIsExplicitlySet()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<Vehicle>();
+            builder.Entity<Car>().DerivesFromNothing();
+            builder.Entity<Motorcycle>().DerivesFromNothing();
+            builder.Entity<SportBike>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+
+            var vehicle = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.Equal(null, vehicle.BaseEntityType());
+            Assert.Equal(2, vehicle.Key().Count());
+
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            Assert.Equal(null, motorcycle.BaseEntityType());
+            Assert.Equal(2, motorcycle.Key().Count());
+            Assert.Equal(5, motorcycle.Properties().Count());
+
+            var car = model.AssertHasEntityType(typeof(Car));
+            Assert.Equal(null, car.BaseEntityType());
+            Assert.Equal(2, car.Key().Count());
+            Assert.Equal(5, car.Properties().Count());
+
+            var sportbike = model.AssertHasEntityType(typeof(SportBike));
+            Assert.Equal(motorcycle, sportbike.BaseEntityType());
+            Assert.Equal(2, sportbike.Key().Count());
+            Assert.Equal(5, sportbike.Properties().Count());
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_AbstractnessOfEntityTypes()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<Vehicle>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            Assert.True(model.AssertHasEntityType(typeof(Vehicle)).IsAbstract);
+            Assert.False(model.AssertHasEntityType(typeof(Motorcycle)).IsAbstract);
+            Assert.False(model.AssertHasEntityType(typeof(Car)).IsAbstract);
+            Assert.False(model.AssertHasEntityType(typeof(SportBike)).IsAbstract);
+            Assert.False(model.AssertHasEntityType(typeof(CarManufacturer)).IsAbstract);
+            Assert.False(model.AssertHasEntityType(typeof(MotorcycleManufacturer)).IsAbstract);
+        }
+
+        [Fact]
+        public void ModelBuilder_Doesnot_Override_AbstractnessOfEntityTypes_IfSet()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<Vehicle>();
+            builder.Entity<Motorcycle>().Abstract();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            Assert.True(model.AssertHasEntityType(typeof(Motorcycle)).IsAbstract);
+            Assert.False(model.AssertHasEntityType(typeof(SportBike)).IsAbstract);
+        }
+
+        [Fact]
+        public void ModelBuilder_CanHaveAnAbstractDerivedTypeOfConcreteBaseType()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<Vehicle>();
+            builder.Entity<SportBike>().Abstract();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            Assert.False(model.AssertHasEntityType(typeof(Motorcycle)).IsAbstract);
+            Assert.True(model.AssertHasEntityType(typeof(SportBike)).IsAbstract);
+
+            Assert.Equal(model.AssertHasEntityType(typeof(SportBike)).BaseEntityType(), model.AssertHasEntityType(typeof(Motorcycle)));
+        }
+
+        [Fact]
+        public void ModelBuilder_TypesInInheritanceCanHaveComplexTypes()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("vehicles");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            model.AssertHasComplexType(typeof(ManufacturerAddress));
+        }
+
+        [Fact]
+        public void ModelBuilder_DerivedTypeDeclaringKeyThrows()
+        {
+            MockType baseType =
+                new MockType("BaseType")
+                .Property(typeof(int), "ID");
+
+            MockType derivedType =
+                new MockType("DerivedType")
+                .Property(typeof(int), "DerivedTypeId")
+                .BaseType(baseType);
+
+            MockAssembly assembly = new MockAssembly(baseType, derivedType);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            builder.AddEntitySet("bases", builder.AddEntity(baseType));
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetEdmModel(),
+            "Cannot define keys on type 'DefaultNamespace.DerivedType' deriving from 'DefaultNamespace.BaseType'. Only the root type in the entity inheritance hierarchy can contain keys.");
+        }
+
+        [Fact]
+        public void ModelBuilder_DerivedComplexTypeHavingKeys_Throws()
+        {
+            MockType baseComplexType = new MockType("BaseComplexType");
+
+            MockType derivedComplexType =
+                new MockType("DerivedComplexType")
+                .Property(typeof(int), "DerivedComplexTypeId")
+                .BaseType(baseComplexType);
+
+            MockType entityType =
+                new MockType("EntityType")
+                .Property(typeof(int), "ID")
+                .Property(baseComplexType.Object, "ComplexProperty");
+
+            MockAssembly assembly = new MockAssembly(baseComplexType, derivedComplexType, entityType);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            builder.AddEntitySet("entities", builder.AddEntity(entityType));
+
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetEdmModel(),
+                "Cannot define keys on type 'DefaultNamespace.DerivedComplexType' deriving from 'DefaultNamespace.BaseComplexType'. Only the root type in the entity inheritance hierarchy can contain keys.");
+        }
+
+        [Fact]
+        public void ModelBuilder_DerivedComplexTypeHavingKeys_SuccedsIfToldToBeComplex()
+        {
+            MockType baseComplexType = new MockType("BaseComplexType");
+
+            MockType derivedComplexType =
+                new MockType("DerivedComplexType")
+                .Property(typeof(int), "DerivedComplexTypeId")
+                .BaseType(baseComplexType);
+
+            MockType entityType =
+                new MockType("EntityType")
+                .Property(typeof(int), "ID")
+                .Property(baseComplexType.Object, "ComplexProperty");
+
+            MockAssembly assembly = new MockAssembly(baseComplexType, derivedComplexType, entityType);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            builder.AddEntitySet("entities", builder.AddEntity(entityType));
+            builder.AddComplexType(baseComplexType);
+
+            IEdmModel model = builder.GetEdmModel();
+            Assert.Equal(3, model.SchemaElements.Count());
+            Assert.NotNull(model.FindType("DefaultNamespace.EntityType"));
+            Assert.NotNull(model.FindType("DefaultNamespace.BaseComplexType"));
+        }
+
+        public static TheoryDataSet<MockType> ModelBuilder_PrunesUnReachableTypes_Data
         {
             get
             {
-                return AppDomain
-                    .CurrentDomain
-                    .GetAssemblies()
-                    .SelectMany(assembly =>
-                    {
-                        Type[] types;
-                        try
-                        {
-                            types = assembly.GetTypes();
-                        }
-                        catch (ReflectionTypeLoadException e)
-                        {
-                            types = e.Types;
-                        }
+                MockType ignoredType =
+                    new MockType("IgnoredType")
+                    .Property<int>("Property");
 
-                        return types ?? Enumerable.Empty<Type>();
-                    })
-                    .Where(t => t != null)
-                    .Where(t => t.IsPublic && t.IsClass && !t.IsGenericTypeDefinition)
-                    .Where(t => !(t.IsAbstract && t.IsSealed)) // static class
-                    .Select(t => new object[] { t });
-            }
-        }
-
-        [Theory]
-        [PropertyData("AllLoadedTypes")]
-        public void ModelBuilder_AnyType_QueryComposition(Type type)
-        {
-            var modelBuilder = new ODataConventionModelBuilder(isQueryCompositionMode: true);
-            modelBuilder.AddEntity(type);
-
-            IEdmModel model = modelBuilder.GetEdmModel();
-            Assert.True(model.SchemaElements.Count() > 0);
-            IEdmEntityType entityType = Assert.IsAssignableFrom<IEdmEntityType>(model.FindType(type.EdmFullName()));
-        }
-
-        public static TheoryDataSet<DynamicType> ModelBuilder_PrunesUnReachableTypes_Data
-        {
-            get
-            {
-                DynamicType ignoredType = new DynamicType
+                return new TheoryDataSet<MockType>
                 {
-                    TypeName = "IgnoredType",
-                    Properties = 
-                    { 
-                        new DynamicProperty { Name = "Property", Type = typeof(int)}
-                    }
-                };
+                    new MockType("SampleType")
+                    .Property<int>("ID")
+                    .Property(ignoredType, "IgnoredProperty", new NotMappedAttribute()),
 
-                return new TheoryDataSet<DynamicType>
-                {
-                    new DynamicType
-                    { 
-                        TypeName = "SampleType", 
-                        Properties = 
-                        { 
-                            new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                            new DynamicProperty { Name = "IgnoredProperty", Type = ignoredType, Attributes = new[] { new NotMappedAttribute() } }
-                        } 
-                    },
+                    new MockType("SampleType")
+                    .Property<int>("ID")
+                    .Property(
+                        new MockType("AnotherType")
+                        .Property(ignoredType, "IgnoredProperty"),
+                        "IgnoredProperty", new NotMappedAttribute()),
 
-                    new DynamicType
-                    { 
-                        TypeName = "SampleType", 
-                        Properties = 
-                        { 
-                            new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                            new DynamicProperty 
-                            { 
-                                Name = "IgnoredProperty", 
-                                Attributes = new[] { new NotMappedAttribute() },
-                                Type = new DynamicType
-                                {
-                                    TypeName = "AnotherType",
-                                    Properties = { new DynamicProperty { Name = "IgnoredProperty", Type = ignoredType } }
-                                }
-                            }
-                        } 
-                    },
-
-                    new DynamicType
-                    { 
-                        TypeName = "SampleType", 
-                        Properties = 
-                        { 
-                            new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                            new DynamicProperty 
-                            { 
-                                Name = "IgnoredProperty", 
-                                Type = new DynamicType
-                                {
-                                    TypeName = "AnotherType",
-                                    Properties = { new DynamicProperty { Name = "IgnoredProperty", Type = ignoredType, Attributes = new[] { new NotMappedAttribute() } } },
-                                }
-                            }
-                        } 
-                    }
+                    new MockType("SampleType")
+                    .Property<int>("ID")
+                    .Property(
+                        new MockType("AnotherType")
+                        .Property(ignoredType, "IgnoredProperty", new NotMappedAttribute()),
+                        "AnotherProperty")
                 };
             }
         }
 
         [Theory]
         [PropertyData("ModelBuilder_PrunesUnReachableTypes_Data")]
-        public void ModelBuilder_PrunesUnReachableTypes(DynamicType type)
+        public void ModelBuilder_PrunesUnReachableTypes(MockType type)
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            Type entityType = CreateDynamicType(type);
-            modelBuilder.AddEntity(entityType);
+            modelBuilder.AddEntity(type);
 
             var model = modelBuilder.GetEdmModel();
-            Assert.True(model.FindType("SampleNamespace.IgnoredType") == null);
+            Assert.True(model.FindType("DefaultNamespace.IgnoredType") == null);
         }
 
         [Fact]
         public void ModelBuilder_DeepChainOfComplexTypes()
         {
             var modelBuilder = new ODataConventionModelBuilder();
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                    {
-                        TypeName = "SampleType",
-                        Properties = 
-                        { 
-                            new DynamicProperty { Name = "ID", Type = typeof(int) }, 
-                            new DynamicProperty 
-                            { 
-                                Name = "Property", 
-                                Type = new DynamicType 
-                                {
-                                    TypeName = "ComplexType1",
-                                    Properties =
-                                    { 
-                                        new DynamicProperty
-                                        { 
-                                            Name ="Property", 
-                                            Type = new DynamicType
-                                            {
-                                                TypeName = "ComplexType2",
-                                                Properties = 
-                                                {
-                                                    new DynamicProperty
-                                                    { 
-                                                        Name ="Property", 
-                                                        Type = new DynamicType
-                                                        {
-                                                            TypeName = "ComplexType3",
-                                                            Properties = { new DynamicProperty { Name = "Property", Type = typeof(int) } }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
+
+            MockType entityType =
+                new MockType("SampleType")
+                .Property<int>("ID")
+                .Property(
+                    new MockType("ComplexType1")
+                    .Property(
+                        new MockType("ComplexType2")
+                        .Property(
+                            new MockType("ComplexType3")
+                            .Property<int>("Property"),
+                            "Property"),
+                        "Property"),
+                    "Property");
+
             modelBuilder.AddEntity(entityType);
 
             var model = modelBuilder.GetEdmModel();
-            Assert.NotNull(model.FindType("SampleNamespace.SampleType"));
-            Assert.NotNull(model.FindType("SampleNamespace.ComplexType1"));
-            Assert.NotNull(model.FindType("SampleNamespace.ComplexType2"));
-            Assert.NotNull(model.FindType("SampleNamespace.ComplexType3"));
+            Assert.NotNull(model.FindType("DefaultNamespace.SampleType") as IEdmEntityType);
+            Assert.NotNull(model.FindType("DefaultNamespace.ComplexType1") as IEdmComplexType);
+            Assert.NotNull(model.FindType("DefaultNamespace.ComplexType2") as IEdmComplexType);
+            Assert.NotNull(model.FindType("DefaultNamespace.ComplexType3") as IEdmComplexType);
         }
 
         [Fact]
@@ -378,25 +714,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void ComplexType_Containing_EntityCollection_Throws()
         {
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "EntityType"
-                });
+            MockType entityType = new MockType("EntityType");
 
-            Type complexType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "ComplexTypeWithEntityCollection",
-                    Properties =
-                    {
-                        new DynamicProperty
-                        {
-                            Name = "CollectionProperty",
-                            Type = CreateCollectionType(entityType)
-                        }
-                    }
-                });
+            MockType complexType =
+                new MockType("ComplexTypeWithEntityCollection")
+                .Property(entityType.AsCollection(), "CollectionProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.AddEntity(entityType);
@@ -404,25 +726,15 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             Assert.Throws<InvalidOperationException>(
                 () => modelBuilder.GetEdmModel(),
-                "The complex type 'SampleNamespace.ComplexTypeWithEntityCollection' refers to the entity type 'SampleNamespace.EntityType' through the property 'CollectionProperty'.");
+                "The complex type 'DefaultNamespace.ComplexTypeWithEntityCollection' refers to the entity type 'DefaultNamespace.EntityType' through the property 'CollectionProperty'.");
         }
 
         [Fact]
         public void ComplexType_Containing_ComplexCollection_works()
         {
-            Type complexType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "ComplexTypeWithComplexCollection",
-                    Properties =
-                    {
-                        new DynamicProperty
-                        {
-                            Name = "CollectionProperty",
-                            Type = typeof(Version[])
-                        }
-                    }
-                });
+            Type complexType =
+                new MockType("ComplexTypeWithComplexCollection")
+                .Property<Version[]>("CollectionProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.AddComplexType(complexType);
@@ -440,24 +752,10 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void EntityType_Containing_ComplexCollection_Works()
         {
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "EntityTypeWithComplexCollection",
-                    Properties =
-                    {
-                        new DynamicProperty
-                        {
-                            Name = "ID",
-                            Type = typeof(int)
-                        },
-                        new DynamicProperty
-                        {
-                            Name = "CollectionProperty",
-                            Type = typeof(Version[])
-                        }
-                    }
-                });
+            Type entityType =
+                new MockType("EntityTypeWithComplexCollection")
+                .Property<int>("ID")
+                .Property<Version[]>("CollectionProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.AddEntity(entityType);
@@ -475,38 +773,14 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void EntityType_Containing_ComplexTypeContainingComplexCollection_Works()
         {
-            Type complexTypeWithComplexCollection = CreateDynamicType(
-                new DynamicType
-                            {
-                                TypeName = "ComplexType",
-                                Properties = 
-                                {
-                                    new DynamicProperty
-                                    {
-                                        Name = "ComplexCollectionProperty",
-                                        Type = typeof(Version[])
-                                    }
-                                }
-                            });
+            Type complexTypeWithComplexCollection =
+                new MockType("ComplexType")
+                .Property<Version[]>("ComplexCollectionProperty");
 
-            Type entityType = CreateDynamicType(
-                new DynamicType
-                {
-                    TypeName = "EntityTypeWithComplexCollection",
-                    Properties =
-                    {
-                        new DynamicProperty
-                        {
-                            Name = "ID",
-                            Type = typeof(int)
-                        },
-                        new DynamicProperty
-                        {
-                            Name = "ComplexProperty",
-                            Type = complexTypeWithComplexCollection
-                        }
-                    }
-                });
+            Type entityType =
+                new MockType("EntityTypeWithComplexCollection")
+                .Property<int>("ID")
+                .Property(complexTypeWithComplexCollection, "ComplexProperty");
 
             var modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.AddEntity(entityType);
@@ -521,78 +795,6 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.NotNull(collectionProperty);
             Assert.True(collectionProperty.Type.IsCollection());
             Assert.Equal(collectionProperty.Type.AsCollection().ElementType().FullName(), "System.Version");
-        }
-
-        private static Type CreateCollectionType(Type type)
-        {
-            Mock<Type> collectionType = new Mock<Type>();
-            collectionType.Setup(t => t.Namespace).Returns("SampleNamespace");
-            collectionType.Setup(t => t.FullName).Returns("SampleNamespace." + "CollectionType");
-            collectionType.Setup(t => t.GetInterfaces()).Returns(new Type[] { typeof(IEnumerable<>).MakeGenericType(type) });
-            return collectionType.Object;
-        }
-
-        private static Type CreateDynamicType(DynamicType dynamicType)
-        {
-            Mock<Type> type = new Mock<Type>();
-            type.Setup(t => t.Name).Returns(dynamicType.TypeName);
-            type.Setup(t => t.Namespace).Returns("SampleNamespace");
-            type.Setup(t => t.FullName).Returns("SampleNamespace." + dynamicType.TypeName);
-            type
-                .Setup(t => t.GetProperties(It.IsAny<BindingFlags>()))
-                .Returns(dynamicType.Properties.Select(property => CreateProperty(property, type.Object)).Cast<PropertyInfo>().ToArray());
-            type.Setup(t => t.IsAssignableFrom(type.Object)).Returns(true);
-            type.Setup(t => t.GetHashCode()).Returns(type.GetHashCode());
-            type.Setup(t => t.Equals(It.IsAny<object>())).Returns((Type t) => Object.ReferenceEquals(type.Object, t));
-            return type.Object;
-        }
-
-        private static PropertyInfo CreateProperty(DynamicProperty property, Type reflectedType)
-        {
-            Mock<PropertyInfo> pi = new Mock<PropertyInfo>();
-            pi.Setup(p => p.Name).Returns(property.Name);
-
-            if (property.Type is DynamicType)
-            {
-                property.Type = CreateDynamicType(property.Type as DynamicType);
-            }
-
-            pi.Setup(p => p.PropertyType).Returns(property.Type as Type);
-            pi.Setup(p => p.ReflectedType).Returns(reflectedType);
-            pi.Setup(p => p.DeclaringType).Returns(reflectedType);
-            pi.Setup(p => p.CanRead).Returns(true);
-            pi.Setup(p => p.CanWrite).Returns(true);
-            pi.Setup(p => p.GetGetMethod(It.IsAny<bool>())).Returns(typeof(Product).GetProperty("ID").GetGetMethod());
-            pi.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(property.Attributes);
-            pi.Setup(p => p.GetHashCode()).Returns(pi.GetHashCode());
-            pi.Setup(p => p.Equals(It.IsAny<object>())).Returns((PropertyInfo p) => Object.ReferenceEquals(pi.Object, p));
-            return pi.Object;
-        }
-
-        public class DynamicType
-        {
-            public DynamicType()
-            {
-                Properties = new List<DynamicProperty>();
-            }
-
-            public string TypeName { get; set; }
-
-            public ICollection<DynamicProperty> Properties { get; set; }
-        }
-
-        public class DynamicProperty
-        {
-            public DynamicProperty()
-            {
-                Attributes = new Attribute[0];
-            }
-
-            public string Name { get; set; }
-
-            public object Type { get; set; }
-
-            public Attribute[] Attributes { get; set; }
         }
     }
 
@@ -668,5 +870,21 @@ namespace System.Web.Http.OData.Builder.Conventions
         public int ID { get; set; }
 
         public string[] Aliases { get; set; }
+    }
+
+    internal class TestAssemblyResolver : IAssembliesResolver
+    {
+        List<Assembly> _assemblies;
+
+        public TestAssemblyResolver(MockAssembly assembly)
+        {
+            _assemblies = new List<Assembly>();
+            _assemblies.Add(assembly);
+        }
+
+        public ICollection<Assembly> GetAssemblies()
+        {
+            return _assemblies;
+        }
     }
 }

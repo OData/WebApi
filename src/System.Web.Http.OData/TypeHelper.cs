@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter;
 
 namespace System.Web.Http
@@ -63,8 +66,8 @@ namespace System.Web.Http
         /// <returns></returns>
         internal static Type GetImplementedIEnumerableType(Type type)
         {
-            if (type.IsGenericType && type.IsInterface && 
-                (type.GetGenericTypeDefinition() == typeof(IEnumerable<>) || 
+            if (type.IsGenericType && type.IsInterface &&
+                (type.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
                  type.GetGenericTypeDefinition() == typeof(IQueryable<>)))
             {
                 // special case the IEnumerable<T>
@@ -76,7 +79,7 @@ namespace System.Web.Http
                 Type[] interfaces = type.GetInterfaces();
                 foreach (Type interfaceType in interfaces)
                 {
-                    if (interfaceType.IsGenericType && 
+                    if (interfaceType.IsGenericType &&
                         (interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
                          interfaceType.GetGenericTypeDefinition() == typeof(IQueryable<>)))
                     {
@@ -87,6 +90,45 @@ namespace System.Web.Http
             }
 
             return null;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching all exceptions in this case is the right to do.")]
+        // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
+        internal static IEnumerable<Type> GetLoadedTypes(IAssembliesResolver assembliesResolver)
+        {
+            List<Type> result = new List<Type>();
+
+            // Go through all assemblies referenced by the application and search for types matching a predicate
+            ICollection<Assembly> assemblies = assembliesResolver.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Type[] exportedTypes = null;
+                if (assembly == null || assembly.IsDynamic)
+                {
+                    // can't call GetExportedTypes on a dynamic assembly
+                    continue;
+                }
+
+                try
+                {
+                    exportedTypes = assembly.GetExportedTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    exportedTypes = ex.Types;
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (exportedTypes != null)
+                {
+                    result.AddRange(exportedTypes.Where(t => t != null));
+                }
+            }
+
+            return result;
         }
 
         private static Type GetInnerGenericType(Type interfaceType)

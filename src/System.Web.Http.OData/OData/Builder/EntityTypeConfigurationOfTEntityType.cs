@@ -40,6 +40,17 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Gets the base type of this entity type.
+        /// </summary>
+        public IEntityTypeConfiguration BaseType
+        {
+            get
+            {
+                return _configuration.BaseType;
+            }
+        }
+
+        /// <summary>
         /// Gets the collection of <see cref="NavigationPropertyConfiguration"/> of this entity type.
         /// </summary>
         public IEnumerable<NavigationPropertyConfiguration> NavigationProperties
@@ -63,6 +74,17 @@ namespace System.Web.Http.OData.Builder
         public EntityTypeConfiguration<TEntityType> Abstract()
         {
             _configuration.IsAbstract = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the base type of this entity type to <c>null</c> meaning that this entity type 
+        /// does not derive from anything.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public EntityTypeConfiguration<TEntityType> DerivesFromNothing()
+        {
+            _configuration.DerivesFromNothing();
             return this;
         }
 

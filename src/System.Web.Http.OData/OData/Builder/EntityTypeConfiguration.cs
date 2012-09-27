@@ -18,6 +18,7 @@ namespace System.Web.Http.OData.Builder
     {
         private List<PrimitivePropertyConfiguration> _keys = new List<PrimitivePropertyConfiguration>();
         private IEntityTypeConfiguration _baseType;
+        private bool _baseTypeConfigured;
 
         /// <summary>
         /// Initializes a new instance of <see cref="EntityTypeConfiguration"/>.
@@ -59,7 +60,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets or sets a value indicating whether this type is abstract.
         /// </summary>
-        public bool IsAbstract { get; set; }
+        public bool? IsAbstract { get; set; }
 
         /// <summary>
         /// Gets or sets the base type of this entity type.
@@ -74,6 +75,14 @@ namespace System.Web.Http.OData.Builder
             set
             {
                 DerivesFrom(value);
+            }
+        }
+
+        public bool BaseTypeConfigured
+        {
+            get
+            {
+                return _baseTypeConfigured;
             }
         }
 
@@ -113,6 +122,18 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Sets the base type of this entity type to <c>null</c> meaning that this entity type 
+        /// does not derive from anything.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public IEntityTypeConfiguration DerivesFromNothing()
+        {
+            _baseType = null;
+            _baseTypeConfigured = true;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the base type of this entity type.
         /// </summary>
         /// <param name="baseType">The base entity type.</param>
@@ -124,6 +145,9 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("baseType");
             }
 
+            _baseType = baseType;
+            _baseTypeConfigured = true;
+
             if (!baseType.ClrType.IsAssignableFrom(ClrType) || baseType.ClrType == ClrType)
             {
                 throw Error.InvalidOperation(SRResources.TypeDoesNotInheritFromBaseType, ClrType.FullName, baseType.ClrType.FullName);
@@ -133,8 +157,6 @@ namespace System.Web.Http.OData.Builder
             {
                 throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, baseType.FullName);
             }
-
-            _baseType = baseType;
 
             foreach (PropertyConfiguration property in Properties)
             {

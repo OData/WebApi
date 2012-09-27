@@ -27,6 +27,14 @@ namespace System.Web.Http.OData.Builder
             return entityType;
         }
 
+        public static IEdmNavigationTargetMapping AssertHasNavigationTarget(this IEdmEntitySet entitySet, IEdmNavigationProperty navigationProperty, string targetEntitySet)
+        {
+            IEdmNavigationTargetMapping navMapping = entitySet.NavigationTargets.Where(n => n.NavigationProperty == navigationProperty).SingleOrDefault();
+            Assert.NotNull(navMapping);
+            Assert.Equal(targetEntitySet, navMapping.TargetEntitySet.Name);
+            return navMapping;
+        }
+
         public static IEdmEntityType AssertHasEntityType(this IEdmModel model, Type mappedEntityClrType, Type mappedEntityBaseType)
         {
             IEdmEntityType entity = AssertHasEntityType(model, mappedEntityClrType);

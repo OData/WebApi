@@ -2,12 +2,10 @@
 
 using System.Collections.Generic;
 using System.Data.Linq;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Spatial;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -277,43 +275,9 @@ namespace System.Web.Http.OData.Formatter
             return matchesInterface(queryType) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching all exceptions in this case is the right to do.")]
-        // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
         private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssembliesResolver assembliesResolver)
         {
-            List<Type> result = new List<Type>();
-
-            // Go through all assemblies referenced by the application and search for types matching a predicate
-            ICollection<Assembly> assemblies = assembliesResolver.GetAssemblies();
-            foreach (Assembly assembly in assemblies)
-            {
-                Type[] exportedTypes = null;
-                if (assembly == null || assembly.IsDynamic)
-                {
-                    // can't call GetExportedTypes on a dynamic assembly
-                    continue;
-                }
-
-                try
-                {
-                    exportedTypes = assembly.GetExportedTypes();
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    exportedTypes = ex.Types;
-                }
-                catch
-                {
-                    continue;
-                }
-
-                if (exportedTypes != null)
-                {
-                    result.AddRange(exportedTypes.Where(t => t != null && t.IsPublic && t.EdmFullName() == edmFullName));
-                }
-            }
-
-            return result;
+            return TypeHelper.GetLoadedTypes(assembliesResolver).Where(t => t.IsPublic && t.EdmFullName() == edmFullName);
         }
 
         // TODO (workitem 336): Support nested types and anonymous types.

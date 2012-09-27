@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Builder
                         Contract.Assert(baseType != null);
                     }
 
-                    _types.Add(config.ClrType, new EdmEntityType(config.Namespace, config.Name, baseType, entity.IsAbstract, isOpen: false));
+                    _types.Add(config.ClrType, new EdmEntityType(config.Namespace, config.Name, baseType, entity.IsAbstract ?? false, isOpen: false));
                 }
             }
         }

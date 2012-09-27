@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
         private List<ProcedureConfiguration> _procedures = new List<ProcedureConfiguration>();
 
-        public ODataModelBuilder() 
+        public ODataModelBuilder()
         {
             Namespace = "Default";
             ContainerName = "Container";
@@ -47,7 +47,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// The collection of EDM types in the model to be built.
         /// </summary>
-        public IEnumerable<IStructuralTypeConfiguration> StructuralTypes
+        public virtual IEnumerable<IStructuralTypeConfiguration> StructuralTypes
         {
             get { return _structuralTypes.Values; }
         }
@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// The collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built
         /// </summary>
-        public IEnumerable<ProcedureConfiguration> Procedures
+        public virtual IEnumerable<ProcedureConfiguration> Procedures
         {
             get { return _procedures; }
         }
@@ -246,7 +246,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="name">The name of the procedure to be removed</param>
         /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
         public virtual bool RemoveProcedure(string name)
-        { 
+        {
             if (name == null)
             {
                 throw Error.ArgumentNull("name");

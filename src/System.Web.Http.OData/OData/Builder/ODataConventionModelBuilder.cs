@@ -20,32 +20,29 @@ namespace System.Web.Http.OData.Builder
     {
         private static readonly List<IConvention> _conventions = new List<IConvention>
         {
-            // IEdmTypeConvention's
-            new EntityKeyConvention(),
+            // type and property conventions (ordering is important here).
             new DataContractAttributeEdmTypeConvention(),
-            
-            // IEntitySetConvention's
-            new SelfLinksGenerationConvention(),
-            new NavigationLinksGenerationConvention(),
-
-            // IEdmPropertyConvention's
-            new NotMappedAttributeConvention(),
+            new NotMappedAttributeConvention(), // NotMappedAttributeConvention has to run before EntityKeyConvention
+            new EntityKeyConvention(),
             new RequiredAttributeEdmPropertyConvention(),
             new KeyAttributeEdmPropertyConvention(),
             new IgnoreDataMemberAttributeEdmPropertyConvention(),
+
+            // IEntitySetConvention's
+            new SelfLinksGenerationConvention(),
+            new NavigationLinksGenerationConvention(),
         };
 
         // These hashset's keep track of edmtypes/entitysets for which conventions
         // have been applied or being applied so that we don't run a convention twice on the
         // same type/set.
-        private HashSet<IStructuralTypeConfiguration> _configuredTypes;
+        private HashSet<IStructuralTypeConfiguration> _mappedTypes;
         private HashSet<IEntitySetConfiguration> _configuredEntitySets;
 
         private IEnumerable<IStructuralTypeConfiguration> _explicitlyAddedTypes;
 
         private bool _isModelBeingBuilt;
         private bool _isQueryCompositionMode;
-        private bool _conventionsBeingApplied;
 
         public ODataConventionModelBuilder()
             : this(isQueryCompositionMode: false)
@@ -56,7 +53,7 @@ namespace System.Web.Http.OData.Builder
         {
             _isQueryCompositionMode = isQueryCompositionMode;
             _configuredEntitySets = new HashSet<IEntitySetConfiguration>();
-            _configuredTypes = new HashSet<IStructuralTypeConfiguration>();
+            _mappedTypes = new HashSet<IStructuralTypeConfiguration>();
         }
 
         public override IEntityTypeConfiguration AddEntity(Type type)
@@ -64,15 +61,9 @@ namespace System.Web.Http.OData.Builder
             bool alreadyExists = (GetStructuralTypeOrNull(type) != null);
 
             IEntityTypeConfiguration entityTypeConfiguration = base.AddEntity(type);
-            if (_isModelBeingBuilt && !alreadyExists)
+            if (_isModelBeingBuilt)
             {
-                MapEntityType(entityTypeConfiguration);
-
-                if (_conventionsBeingApplied)
-                {
-                    ApplyTypeConventions(entityTypeConfiguration);
-                    ApplyPropertyConventions(entityTypeConfiguration);
-                }
+                MapType(entityTypeConfiguration);
             }
 
             return entityTypeConfiguration;
@@ -83,15 +74,9 @@ namespace System.Web.Http.OData.Builder
             bool alreadyExists = (GetStructuralTypeOrNull(type) != null);
 
             IComplexTypeConfiguration complexTypeConfiguration = base.AddComplexType(type);
-            if (_isModelBeingBuilt && !alreadyExists)
+            if (_isModelBeingBuilt)
             {
-                MapComplexType(complexTypeConfiguration);
-
-                if (_conventionsBeingApplied)
-                {
-                    ApplyTypeConventions(complexTypeConfiguration);
-                    ApplyPropertyConventions(complexTypeConfiguration);
-                }
+                MapType(complexTypeConfiguration);
             }
 
             return complexTypeConfiguration;
@@ -122,21 +107,11 @@ namespace System.Web.Http.OData.Builder
 
             MapTypes();
 
-            _conventionsBeingApplied = true;
-
             // Apply type conventions. Note the call to ToArray() is required as the StructuralTypes collection
             // could get modified during ApplyTypeConventions().
             foreach (IStructuralTypeConfiguration edmTypeConfiguration in StructuralTypes.ToArray())
             {
-                ApplyTypeConventions(edmTypeConfiguration);
-            }
-
-            // Apply property conventions. Note the call to ToArray() is required as the StructuralTypes collection
-            // could get modified during ApplyPropertyConventions(). Also, type conventions might have
-            // modified this. So, call ToArray() again.
-            foreach (IStructuralTypeConfiguration edmTypeConfiguration in StructuralTypes.ToArray())
-            {
-                ApplyPropertyConventions(edmTypeConfiguration);
+                ApplyTypeAndPropertyConventions(edmTypeConfiguration);
             }
 
             // Don't RediscoverComplexTypes() and treat everything as an entity type if buidling a model for QueryableAttribute.
@@ -183,7 +158,7 @@ namespace System.Web.Http.OData.Builder
                 RemoveStructuralType(misconfiguredEntityType.ClrType);
 
                 IComplexTypeConfiguration newComplexType = AddComplexType(misconfiguredEntityType.ClrType);
-                foreach (var ignoredProperty in misconfiguredEntityType.IgnoredProperties)
+                foreach (PropertyInfo ignoredProperty in misconfiguredEntityType.IgnoredProperties)
                 {
                     newComplexType.RemoveProperty(ignoredProperty);
                 }
@@ -215,6 +190,15 @@ namespace System.Web.Http.OData.Builder
         {
             foreach (IStructuralTypeConfiguration edmType in _explicitlyAddedTypes)
             {
+                MapType(edmType);
+            }
+        }
+
+        private void MapType(IStructuralTypeConfiguration edmType)
+        {
+            if (!_mappedTypes.Contains(edmType))
+            {
+                _mappedTypes.Add(edmType);
                 IEntityTypeConfiguration entity = edmType as IEntityTypeConfiguration;
                 if (entity != null)
                 {
@@ -229,7 +213,7 @@ namespace System.Web.Http.OData.Builder
 
         private void MapEntityType(IEntityTypeConfiguration entity)
         {
-            PropertyInfo[] properties = ConventionsHelpers.GetProperties(entity);
+            IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetProperties(entity);
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
@@ -253,11 +237,13 @@ namespace System.Web.Http.OData.Builder
                     }
                 }
             }
+
+            ApplyTypeAndPropertyConventions(entity);
         }
 
         private void MapComplexType(IComplexTypeConfiguration complexType)
         {
-            PropertyInfo[] properties = ConventionsHelpers.GetProperties(complexType);
+            IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetProperties(complexType);
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
@@ -295,6 +281,8 @@ namespace System.Web.Http.OData.Builder
                     }
                 }
             }
+
+            ApplyTypeAndPropertyConventions(complexType);
         }
 
         private void MapStructuralProperty(IStructuralTypeConfiguration type, PropertyInfo property, PropertyKind propertyKind, bool isCollection)
@@ -441,18 +429,20 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private void ApplyTypeConventions(IStructuralTypeConfiguration edmTypeConfiguration)
+        private void ApplyTypeAndPropertyConventions(IStructuralTypeConfiguration edmTypeConfiguration)
         {
-            if (!_configuredTypes.Contains(edmTypeConfiguration))
+            foreach (IConvention convention in _conventions)
             {
-                _configuredTypes.Add(edmTypeConfiguration);
-
-                foreach (IEdmTypeConvention convention in _conventions.OfType<IEdmTypeConvention>())
+                IEdmTypeConvention typeConvention = convention as IEdmTypeConvention;
+                if (typeConvention != null)
                 {
-                    if (convention != null)
-                    {
-                        convention.Apply(edmTypeConfiguration, this);
-                    }
+                    typeConvention.Apply(edmTypeConfiguration, this);
+                }
+
+                IEdmPropertyConvention propertyConvention = convention as IEdmPropertyConvention;
+                if (propertyConvention != null)
+                {
+                    ApplyPropertyConvention(propertyConvention, edmTypeConfiguration);
                 }
             }
         }
@@ -478,14 +468,14 @@ namespace System.Web.Http.OData.Builder
             return StructuralTypes.Where(edmType => edmType.ClrType == clrType).SingleOrDefault();
         }
 
-        private static void ApplyPropertyConventions(IStructuralTypeConfiguration edmTypeConfiguration)
+        private static void ApplyPropertyConvention(IEdmPropertyConvention propertyConvention, IStructuralTypeConfiguration edmTypeConfiguration)
         {
+            Contract.Assert(propertyConvention != null);
+            Contract.Assert(edmTypeConfiguration != null);
+
             foreach (PropertyConfiguration property in edmTypeConfiguration.Properties.ToArray())
             {
-                foreach (IEdmPropertyConvention propertyConvention in _conventions.OfType<IEdmPropertyConvention>())
-                {
-                    propertyConvention.Apply(property, edmTypeConfiguration);
-                }
+                propertyConvention.Apply(property, edmTypeConfiguration);
             }
         }
     }

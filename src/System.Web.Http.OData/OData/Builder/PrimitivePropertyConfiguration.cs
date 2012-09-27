@@ -10,8 +10,8 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public class PrimitivePropertyConfiguration : StructuralPropertyConfiguration
     {
-        public PrimitivePropertyConfiguration(PropertyInfo property)
-            : base(property)
+        public PrimitivePropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
+            : base(property, declaringType)
         {
         }
 

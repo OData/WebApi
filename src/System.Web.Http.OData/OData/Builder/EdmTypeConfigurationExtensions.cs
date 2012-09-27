@@ -84,5 +84,19 @@ namespace System.Web.Http.OData.Builder
                 }
             }
         }
+
+        public static bool IsAssignableFrom(this IEntityTypeConfiguration baseEntity, IEntityTypeConfiguration entity)
+        {
+            while (entity != null)
+            {
+                if (baseEntity == entity)
+                {
+                    return true;
+                }
+                entity = entity.BaseType;
+            }
+
+            return false;
+        }
     }
 }

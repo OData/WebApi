@@ -46,10 +46,11 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
         private static PropertyConfiguration CreateMockProperty(params Attribute[] attributes)
         {
+            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
             Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
             propertyInfo.Setup(p => p.PropertyType).Returns(typeof(int));
             propertyInfo.Setup(p => p.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(attributes);
-            return new PrimitivePropertyConfiguration(propertyInfo.Object);
+            return new PrimitivePropertyConfiguration(propertyInfo.Object, structuralType);
         }
     }
 }

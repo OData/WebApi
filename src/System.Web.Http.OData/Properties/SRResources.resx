@@ -432,4 +432,10 @@
   <data name="HasActionLinkRequiresBindToEntity" xml:space="preserve">
     <value>To register an action link factory, actions must be bindable to a single entity. Action '{0}' does not meet this requirement.</value>
   </data>
+  <data name="NavigationPropertyNotInHierarchy" xml:space="preserve">
+    <value>The declaring entity type '{0}' of the given navigation property is not a part of the entity type '{1}' hierarchy of the entity set '{2}'.</value>
+  </data>
+  <data name="TargetEntityTypeMissing" xml:space="preserve">
+    <value>Could not find the target entity type for the navigation property '{0}' on entity type '{1}'.</value>
+  </data>
 </root>

@@ -127,7 +127,7 @@ namespace System.Web.Http.OData.Builder
         /// <returns>A configuration object that can be used to further configure the relationship.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]
-        public NavigationPropertyConfiguration HasMany<TTargetEntity>(Expression<Func<TEntityType, ICollection<TTargetEntity>>> navigationPropertyExpression) where TTargetEntity : class
+        public NavigationPropertyConfiguration HasMany<TTargetEntity>(Expression<Func<TEntityType, IEnumerable<TTargetEntity>>> navigationPropertyExpression) where TTargetEntity : class
         {
             return GetOrCreateNavigationProperty(navigationPropertyExpression, EdmMultiplicity.Many);
         }

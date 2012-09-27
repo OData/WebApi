@@ -250,7 +250,7 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                navigationPropertyConfig = new NavigationPropertyConfiguration(navigationProperty, multiplicity);
+                navigationPropertyConfig = new NavigationPropertyConfiguration(navigationProperty, multiplicity, this);
                 ExplicitProperties[navigationProperty] = navigationPropertyConfig;
                 // make sure the related type is configured
                 ModelBuilder.AddEntity(navigationPropertyConfig.RelatedClrType);

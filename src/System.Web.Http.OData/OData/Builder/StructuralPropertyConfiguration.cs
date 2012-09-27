@@ -9,8 +9,8 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public abstract class StructuralPropertyConfiguration : PropertyConfiguration
     {
-        protected StructuralPropertyConfiguration(PropertyInfo property)
-            : base(property)
+        protected StructuralPropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
+            : base(property, declaringType)
         {
             OptionalProperty = IsNullable(property.PropertyType);
         }

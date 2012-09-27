@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Builder
         private Func<EntityInstanceContext, Uri> _editLinkFactory;
         private Func<EntityInstanceContext, Uri> _readLinkFactory;
         private Func<EntityInstanceContext, string> _idLinkFactory;
-        private readonly IDictionary<string, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilders;
+        private readonly IDictionary<NavigationPropertyConfiguration, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilders;
 
         internal EntitySetConfiguration(ODataModelBuilder modelBuilder, Type entityType, string name)
             : this(modelBuilder, new EntityTypeConfiguration(modelBuilder, entityType), name)
@@ -36,7 +36,7 @@ namespace System.Web.Http.OData.Builder
 
             _editLinkFactory = null;
             _readLinkFactory = null;
-            _navigationPropertyLinkBuilders = new Dictionary<string, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>();
+            _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>();
         }
 
         public IEnumerable<NavigationPropertyBinding> Bindings
@@ -97,7 +97,13 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("navigationLinkFactory");
             }
 
-            _navigationPropertyLinkBuilders.Add(navigationProperty.Name, navigationLinkFactory);
+            IEntityTypeConfiguration declaringEntityType = navigationProperty.DeclaringEntityType;
+            if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
+            {
+                throw Error.InvalidOperation(SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
+            }
+
+            _navigationPropertyLinkBuilders.Add(navigationProperty, navigationLinkFactory);
             return this;
         }
 
@@ -123,6 +129,22 @@ namespace System.Web.Http.OData.Builder
 
         public NavigationPropertyBinding AddBinding(NavigationPropertyConfiguration navigationConfiguration, IEntitySetConfiguration targetEntitySet)
         {
+            if (navigationConfiguration == null)
+            {
+                throw Error.ArgumentNull("navigationConfiguration");
+            }
+
+            if (targetEntitySet == null)
+            {
+                throw Error.ArgumentNull("targetEntitySet");
+            }
+
+            IEntityTypeConfiguration declaringEntityType = navigationConfiguration.DeclaringEntityType;
+            if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
+            {
+                throw Error.InvalidOperation(SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
+            }
+
             NavigationPropertyBinding navigationPropertyBinding = null;
             if (_entitySetBindings.ContainsKey(navigationConfiguration))
             {
@@ -211,15 +233,15 @@ namespace System.Web.Http.OData.Builder
             return _idLinkFactory;
         }
 
-        public Func<EntityInstanceContext, IEdmNavigationProperty, Uri> GetNavigationPropertyLink(string navigationPropertyName)
+        public Func<EntityInstanceContext, IEdmNavigationProperty, Uri> GetNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty)
         {
-            if (String.IsNullOrEmpty(navigationPropertyName))
+            if (navigationProperty == null)
             {
-                throw Error.ArgumentNullOrEmpty("navigationProperty");
+                throw Error.ArgumentNull("navigationProperty");
             }
 
             Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationPropertyLinkBuilder;
-            _navigationPropertyLinkBuilders.TryGetValue(navigationPropertyName, out navigationPropertyLinkBuilder);
+            _navigationPropertyLinkBuilders.TryGetValue(navigationProperty, out navigationPropertyLinkBuilder);
             return navigationPropertyLinkBuilder;
         }
 

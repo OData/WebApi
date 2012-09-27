@@ -655,6 +655,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The declaring entity type &apos;{0}&apos; of the given navigation property is not a part of the entity type &apos;{1}&apos; hierarchy of the entity set &apos;{2}&apos;..
+        /// </summary>
+        internal static string NavigationPropertyNotInHierarchy {
+            get {
+                return ResourceManager.GetString("NavigationPropertyNotInHierarchy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link generation for the &apos;{0}&apos; NavigationProperty failed. Check that you have the &apos;{1}&apos; route correctly registered..
         /// </summary>
         internal static string NavigationPropertyRouteMissingOrIncorrect {
@@ -894,6 +903,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string ResultLimitMustBePositive {
             get {
                 return ResourceManager.GetString("ResultLimitMustBePositive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find the target entity type for the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
+        /// </summary>
+        internal static string TargetEntityTypeMissing {
+            get {
+                return ResourceManager.GetString("TargetEntityTypeMissing", resourceCulture);
             }
         }
         

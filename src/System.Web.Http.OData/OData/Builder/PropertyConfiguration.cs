@@ -9,14 +9,20 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public abstract class PropertyConfiguration
     {
-        protected PropertyConfiguration(PropertyInfo property)
+        protected PropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
         {
             if (property == null)
             {
                 throw Error.ArgumentNull("property");
             }
 
+            if (declaringType == null)
+            {
+                throw Error.ArgumentNull("declaringType");
+            }
+
             PropertyInfo = property;
+            DeclaringType = declaringType;
         }
 
         /// <summary>
@@ -26,6 +32,8 @@ namespace System.Web.Http.OData.Builder
         {
             get { return PropertyInfo.Name; }
         }
+
+        public IStructuralTypeConfiguration DeclaringType { get; private set; }
 
         /// <summary>
         /// Gets the mapping CLR <see cref="PropertyInfo"/>.

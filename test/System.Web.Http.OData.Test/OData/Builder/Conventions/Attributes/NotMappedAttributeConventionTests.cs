@@ -24,8 +24,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new NotMappedAttribute() });
 
-            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object);
             Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>(MockBehavior.Strict);
+            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
             structuralType.Setup(e => e.RemoveProperty(property.Object)).Verifiable();
 
             // Act

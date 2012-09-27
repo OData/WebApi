@@ -44,8 +44,25 @@ namespace System.Web.Http.OData.Builder
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
+        public NavigationPropertyBinding HasManyBinding<TTargetType, TDerivedEntityType>(
+            Expression<Func<TDerivedEntityType, IEnumerable<TTargetType>>> navigationExpression, string entitySetName)
+            where TTargetType : class
+            where TDerivedEntityType : class, TEntityType
+        {
+            if (navigationExpression == null)
+            {
+                throw Error.ArgumentNull("navigationExpression");
+            }
+
+            EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
+                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+
+            return _configuration.AddBinding(derivedEntityType.HasMany(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         public NavigationPropertyBinding HasManyBinding<TTargetType>(
-            Expression<Func<TEntityType, ICollection<TTargetType>>> navigationExpression, string entitySetName)
+            Expression<Func<TEntityType, IEnumerable<TTargetType>>> navigationExpression, string entitySetName)
             where TTargetType : class
         {
             if (navigationExpression == null)
@@ -58,7 +75,7 @@ namespace System.Web.Http.OData.Builder
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         public NavigationPropertyBinding HasManyBinding<TTargetType>(
-            Expression<Func<TEntityType, ICollection<TTargetType>>> navigationExpression,
+            Expression<Func<TEntityType, IEnumerable<TTargetType>>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet) where TTargetType : class
         {
             if (navigationExpression == null)
@@ -75,6 +92,29 @@ namespace System.Web.Http.OData.Builder
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
+        public NavigationPropertyBinding HasManyBinding<TTargetType, TDerivedEntityType>(
+            Expression<Func<TDerivedEntityType, IEnumerable<TTargetType>>> navigationExpression,
+            EntitySetConfiguration<TTargetType> targetSet)
+            where TTargetType : class
+            where TDerivedEntityType : class, TEntityType
+        {
+            if (navigationExpression == null)
+            {
+                throw Error.ArgumentNull("navigationExpression");
+            }
+
+            if (targetSet == null)
+            {
+                throw Error.ArgumentNull("targetSet");
+            }
+
+            EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
+                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+
+            return _configuration.AddBinding(derivedEntityType.HasMany(navigationExpression), targetSet._configuration);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         public NavigationPropertyBinding HasRequiredBinding<TTargetType>(
             Expression<Func<TEntityType, TTargetType>> navigationExpression, string entitySetName)
             where TTargetType : class
@@ -85,6 +125,23 @@ namespace System.Web.Http.OData.Builder
             }
 
             return _configuration.AddBinding(EntityType.HasRequired(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
+        public NavigationPropertyBinding HasRequiredBinding<TTargetType, TDerivedEntityType>(
+            Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression, string entitySetName)
+            where TTargetType : class
+            where TDerivedEntityType : class, TEntityType
+        {
+            if (navigationExpression == null)
+            {
+                throw Error.ArgumentNull("navigationExpression");
+            }
+
+            EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
+                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+
+            return _configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
@@ -106,6 +163,29 @@ namespace System.Web.Http.OData.Builder
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
+        public NavigationPropertyBinding HasRequiredBinding<TTargetType, TDerivedEntityType>(
+            Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression,
+            EntitySetConfiguration<TTargetType> targetSet)
+            where TTargetType : class
+            where TDerivedEntityType : class, TEntityType
+        {
+            if (navigationExpression == null)
+            {
+                throw Error.ArgumentNull("navigationExpression");
+            }
+
+            if (targetSet == null)
+            {
+                throw Error.ArgumentNull("targetSet");
+            }
+
+            EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
+                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+
+            return _configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression), targetSet._configuration);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         public NavigationPropertyBinding HasOptionalBinding<TTargetType>(
             Expression<Func<TEntityType, TTargetType>> navigationExpression, string entitySetName)
             where TTargetType : class
@@ -116,6 +196,23 @@ namespace System.Web.Http.OData.Builder
             }
 
             return _configuration.AddBinding(EntityType.HasOptional(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
+        public NavigationPropertyBinding HasOptionalBinding<TTargetType, TDerivedEntityType>(
+            Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression, string entitySetName)
+            where TTargetType : class
+            where TDerivedEntityType : class, TEntityType
+        {
+            if (navigationExpression == null)
+            {
+                throw Error.ArgumentNull("navigationExpression");
+            }
+
+            EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
+                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+
+            return _configuration.AddBinding(derivedEntityType.HasOptional(navigationExpression), _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
@@ -134,6 +231,29 @@ namespace System.Web.Http.OData.Builder
             }
 
             return _configuration.AddBinding(EntityType.HasOptional(navigationExpression), targetSet._configuration);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
+        public NavigationPropertyBinding HasOptionalBinding<TTargetType, TDerivedEntityType>(
+            Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression,
+            EntitySetConfiguration<TTargetType> targetSet)
+            where TTargetType : class
+            where TDerivedEntityType : class, TEntityType
+        {
+            if (navigationExpression == null)
+            {
+                throw Error.ArgumentNull("navigationExpression");
+            }
+
+            if (targetSet == null)
+            {
+                throw Error.ArgumentNull("targetSet");
+            }
+
+            EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
+                _modelBuilder.Entity<TDerivedEntityType>().DerivesFrom<TEntityType>();
+
+            return _configuration.AddBinding(derivedEntityType.HasOptional(navigationExpression), targetSet._configuration);
         }
 
         /// <summary>

@@ -26,8 +26,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             Mock<Type> type = new Mock<Type>();
 
-            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object);
             Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>(MockBehavior.Strict);
+            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
             structuralType.Setup(e => e.RemoveProperty(property.Object)).Verifiable();
             structuralType.Setup(s => s.ClrType).Returns(type.Object);
 
@@ -51,8 +51,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<Type> type = new Mock<Type>();
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object);
             Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>(MockBehavior.Strict);
+            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
             structuralType.Setup(s => s.ClrType).Returns(type.Object);
 
             // Act

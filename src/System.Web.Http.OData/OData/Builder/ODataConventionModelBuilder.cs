@@ -34,12 +34,7 @@ namespace System.Web.Http.OData.Builder
             // IEntitySetConvention's
             new SelfLinksGenerationConvention(),
             new NavigationLinksGenerationConvention(),
-
-            // IEdmPropertyConvention's
-            new NotMappedAttributeConvention(),
-            new RequiredAttributeEdmPropertyConvention(),
-            new KeyAttributeEdmPropertyConvention(),
-            new IgnoreDataMemberAttributeEdmPropertyConvention(),
+            new AssociationSetDiscoveryConvention(),
 
             // IEdmFunctionImportConventions's
             new ActionLinkGenerationConvention(),

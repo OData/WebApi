@@ -105,6 +105,8 @@
     </Compile>
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
+    <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConventionTest.cs" />
+    <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConventionTest.cs" />
     <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />

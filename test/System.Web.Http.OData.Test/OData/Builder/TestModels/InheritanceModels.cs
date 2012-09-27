@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -43,6 +44,9 @@ namespace System.Web.Http.OData.Builder.TestModels
         public int ID { get; set; }
 
         public MotorcycleManufacturer Manufacturer { get; set; }
+
+        [NotMapped]
+        public IEnumerable<MotorcycleManufacturer> Manufacturers { get; set; }
     }
 
     public class SportBike : Motorcycle

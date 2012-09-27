@@ -13,14 +13,14 @@ namespace System.Web.Http.OData.Builder
         public void DerivedProperties_ReturnsAllDerivedProperties()
         {
             Mock<IEntityTypeConfiguration> entityA = new Mock<IEntityTypeConfiguration>();
-            entityA.Setup(e => e.Properties).Returns(new[] { MockProperty("A1"), MockProperty("A2") });
+            entityA.Setup(e => e.Properties).Returns(new[] { MockProperty("A1", entityA.Object), MockProperty("A2", entityA.Object) });
 
             Mock<IEntityTypeConfiguration> entityB = new Mock<IEntityTypeConfiguration>();
-            entityB.Setup(e => e.Properties).Returns(new[] { MockProperty("B1"), MockProperty("B2") });
+            entityB.Setup(e => e.Properties).Returns(new[] { MockProperty("B1", entityB.Object), MockProperty("B2", entityB.Object) });
             entityB.Setup(e => e.BaseType).Returns(entityA.Object);
 
             Mock<IEntityTypeConfiguration> entityC = new Mock<IEntityTypeConfiguration>();
-            entityC.Setup(e => e.Properties).Returns(new[] { MockProperty("C1"), MockProperty("C2") });
+            entityC.Setup(e => e.Properties).Returns(new[] { MockProperty("C1", entityC.Object), MockProperty("C2", entityC.Object) });
             entityC.Setup(e => e.BaseType).Returns(entityB.Object);
 
             Assert.Equal(
@@ -102,6 +102,50 @@ namespace System.Web.Http.OData.Builder
                 new[] { sportbike, motorcycle, car }.Select(e => e.Name).OrderBy(name => name));
         }
 
+        [Fact]
+        public void IsAssignableFrom_ReturnsTrueForDerivedType()
+        {
+            ODataModelBuilder builder = GetMockVehicleModel();
+            IEntityTypeConfiguration vehicle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "vehicle").Single();
+            IEntityTypeConfiguration car = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "car").Single();
+            IEntityTypeConfiguration motorcycle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "motorcycle").Single();
+            IEntityTypeConfiguration sportbike = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "sportbike").Single();
+
+            Assert.True(vehicle.IsAssignableFrom(vehicle));
+            Assert.True(vehicle.IsAssignableFrom(car));
+            Assert.True(vehicle.IsAssignableFrom(motorcycle));
+            Assert.True(vehicle.IsAssignableFrom(sportbike));
+        }
+
+        [Fact]
+        public void IsAssignableFrom_ReturnsFalseForBaseType()
+        {
+            ODataModelBuilder builder = GetMockVehicleModel();
+            IEntityTypeConfiguration vehicle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "vehicle").Single();
+            IEntityTypeConfiguration car = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "car").Single();
+            IEntityTypeConfiguration motorcycle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "motorcycle").Single();
+            IEntityTypeConfiguration sportbike = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "sportbike").Single();
+
+            Assert.False(car.IsAssignableFrom(vehicle));
+            Assert.False(motorcycle.IsAssignableFrom(vehicle));
+            Assert.False(sportbike.IsAssignableFrom(vehicle));
+        }
+
+        [Fact]
+        public void IsAssignableFrom_ReturnsFalseForUnRelatedTypes()
+        {
+            ODataModelBuilder builder = GetMockVehicleModel();
+            IEntityTypeConfiguration vehicle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "vehicle").Single();
+            IEntityTypeConfiguration car = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "car").Single();
+            IEntityTypeConfiguration motorcycle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "motorcycle").Single();
+            IEntityTypeConfiguration sportbike = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "sportbike").Single();
+
+            Assert.False(motorcycle.IsAssignableFrom(car));
+            Assert.False(car.IsAssignableFrom(motorcycle));
+            Assert.False(sportbike.IsAssignableFrom(car));
+            Assert.False(car.IsAssignableFrom(sportbike));
+        }
+
         private static ODataModelBuilder GetMockVehicleModel()
         {
             Mock<IEntityTypeConfiguration> vehicle = new Mock<IEntityTypeConfiguration>();
@@ -126,12 +170,12 @@ namespace System.Web.Http.OData.Builder
             return modelBuilder.Object;
         }
 
-        private static PropertyConfiguration MockProperty(string name)
+        private static PropertyConfiguration MockProperty(string name, IStructuralTypeConfiguration declaringType)
         {
             Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
             propertyInfo.Setup(p => p.Name).Returns(name);
 
-            Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyInfo.Object);
+            Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyInfo.Object, declaringType);
             return property.Object;
         }
     }

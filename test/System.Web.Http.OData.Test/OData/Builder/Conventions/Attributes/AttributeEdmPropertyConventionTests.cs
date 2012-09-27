@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Data.Edm;
@@ -43,7 +41,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Func<Attribute, bool> matchAllFilter = a => true;
 
             // build the type
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>(MockBehavior.Strict);
+            Mock<IEntityTypeConfiguration> structuralType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
 
             // build the property
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
@@ -55,11 +53,11 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<TProperty> propertyConfiguration;
             if (typeof(TProperty) == typeof(NavigationPropertyConfiguration))
             {
-                propertyConfiguration = new Mock<TProperty>(property.Object, EdmMultiplicity.ZeroOrOne);
+                propertyConfiguration = new Mock<TProperty>(property.Object, EdmMultiplicity.ZeroOrOne, structuralType.Object);
             }
             else
             {
-                propertyConfiguration = new Mock<TProperty>(property.Object);
+                propertyConfiguration = new Mock<TProperty>(property.Object, structuralType.Object);
             }
 
             // build the convention

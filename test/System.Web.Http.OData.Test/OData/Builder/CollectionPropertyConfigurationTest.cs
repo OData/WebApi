@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -44,12 +45,14 @@ namespace System.Web.Http.OData.Builder
         [PropertyData("GetValidPropertiesAndElementTypes")]
         public void HasCorrectKindPropertyInfoAndName(PropertyInfo property, Type elementType)
         {
-            CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property);
+            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property, structuralType.Object);
             Assert.Equal(PropertyKind.Collection, configuration.Kind);
             Assert.Equal(elementType, configuration.ElementType);
             Assert.Equal(elementType, configuration.RelatedClrType);
             Assert.Equal(property, configuration.PropertyInfo);
             Assert.Equal(property.Name, configuration.Name);
+            Assert.Equal(structuralType.Object, configuration.DeclaringType);
         }
 
         [Fact]
@@ -58,7 +61,8 @@ namespace System.Web.Http.OData.Builder
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
                 PropertyInfo nonCollectionProperty = typeof(LotsOfCollectionProperties).GetProperty("NonCollectionProperty");
-                CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(nonCollectionProperty);
+                Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+                CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(nonCollectionProperty, structuralType.Object);
             });
         }
 
@@ -66,7 +70,8 @@ namespace System.Web.Http.OData.Builder
         [PropertyData("GetValidPropertiesAndElementTypes")]
         public void CanCorrectlyDetectCollectionProperties(PropertyInfo property, Type elementType)
         {
-            CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property);
+            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property, structuralType.Object);
             Assert.Same(property, configuration.PropertyInfo);
             Assert.Same(elementType, configuration.ElementType);
             Assert.Same(property.Name, configuration.Name);

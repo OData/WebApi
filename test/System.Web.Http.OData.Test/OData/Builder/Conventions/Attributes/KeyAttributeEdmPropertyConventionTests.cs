@@ -25,8 +25,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new KeyAttribute() });
 
-            Mock<PrimitivePropertyConfiguration> primitiveProperty = new Mock<PrimitivePropertyConfiguration>(property.Object);
             Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
+            Mock<PrimitivePropertyConfiguration> primitiveProperty = new Mock<PrimitivePropertyConfiguration>(property.Object, entityType.Object);
             entityType.Setup(e => e.HasKey(property.Object)).Returns(entityType.Object).Verifiable();
 
             // Act
@@ -45,8 +45,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new KeyAttribute() });
 
-            Mock<PrimitivePropertyConfiguration> primitiveProperty = new Mock<PrimitivePropertyConfiguration>(property.Object);
             Mock<IComplexTypeConfiguration> complexType = new Mock<IComplexTypeConfiguration>(MockBehavior.Strict);
+            Mock<PrimitivePropertyConfiguration> primitiveProperty = new Mock<PrimitivePropertyConfiguration>(property.Object, complexType.Object);
 
             // Act
             new KeyAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, complexType.Object);
@@ -64,8 +64,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new KeyAttribute() });
 
-            Mock<ComplexPropertyConfiguration> complexProperty = new Mock<ComplexPropertyConfiguration>(property.Object);
             Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
+            Mock<ComplexPropertyConfiguration> complexProperty = new Mock<ComplexPropertyConfiguration>(property.Object, entityType.Object);
 
             // Act
             new KeyAttributeEdmPropertyConvention().Apply(complexProperty.Object, entityType.Object);
@@ -83,8 +83,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new KeyAttribute() });
 
-            Mock<NavigationPropertyConfiguration> navigationProperty = new Mock<NavigationPropertyConfiguration>(property.Object, EdmMultiplicity.ZeroOrOne);
             Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
+            Mock<NavigationPropertyConfiguration> navigationProperty = new Mock<NavigationPropertyConfiguration>(property.Object, EdmMultiplicity.ZeroOrOne, entityType.Object);
 
             // Act
             new KeyAttributeEdmPropertyConvention().Apply(navigationProperty.Object, entityType.Object);

@@ -15,30 +15,33 @@ namespace System.Web.Http.OData.Builder.Conventions
                 throw Error.ArgumentNull("configuration");
             }
 
-            foreach (NavigationPropertyConfiguration property in configuration.EntityType.NavigationProperties)
+            foreach (IEntityTypeConfiguration entity in model.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {
-                if (configuration.GetNavigationPropertyLink(property.Name) == null)
+                foreach (NavigationPropertyConfiguration property in entity.NavigationProperties)
                 {
-                    configuration.HasNavigationPropertyLink(
-                            property,
-                            (entityContext, navigationProperty) => 
-                            {                             
-                                string route = PropertyNavigationRouteName ?? ODataRouteNames.PropertyNavigation;
-                                string link = entityContext.UrlHelper.Link(
-                                    route,
-                                    new
-                                    {
-                                        Controller = configuration.Name,
-                                        ParentId = ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType),
-                                        NavigationProperty = navigationProperty.Name
-                                    });
-
-                                if (link == null)
+                    if (configuration.GetNavigationPropertyLink(property) == null)
+                    {
+                        configuration.HasNavigationPropertyLink(
+                                property,
+                                (entityContext, navigationProperty) =>
                                 {
-                                    throw Error.InvalidOperation(SRResources.NavigationPropertyRouteMissingOrIncorrect, navigationProperty.Name, ODataRouteNames.PropertyNavigation);
-                                }
-                                return new Uri(link);
-                            });
+                                    string route = PropertyNavigationRouteName ?? ODataRouteNames.PropertyNavigation;
+                                    string link = entityContext.UrlHelper.Link(
+                                        route,
+                                        new
+                                        {
+                                            Controller = configuration.Name,
+                                            ParentId = ConventionsHelpers.GetEntityKeyValue(entityContext, entity),
+                                            NavigationProperty = navigationProperty.Name
+                                        });
+
+                                    if (link == null)
+                                    {
+                                        throw Error.InvalidOperation(SRResources.NavigationPropertyRouteMissingOrIncorrect, navigationProperty.Name, ODataRouteNames.PropertyNavigation);
+                                    }
+                                    return new Uri(link);
+                                });
+                    }
                 }
             }
         }

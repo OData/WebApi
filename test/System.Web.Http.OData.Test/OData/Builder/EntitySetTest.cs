@@ -45,5 +45,187 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(customerOrders);
             Assert.Equal("Orders", customerOrders.TargetEntitySet.Name);
         }
+
+        [Fact]
+        public void CanAddBinding_For_DerivedNavigationProperty()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            var vehicle = builder.AddEntity(typeof(Vehicle));
+            var motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
+            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+            var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
+
+            var vehicles = builder.AddEntitySet("vehicles", vehicle);
+            vehicles.AddBinding(navProperty, manufacturers);
+
+            IEdmModel model = builder.GetEdmModel();
+            var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
+            var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            Assert.Equal(
+                "manufacturers",
+                model.EntityContainers().Single().FindEntitySet("vehicles").FindNavigationTarget(edmNavProperty).Name);
+        }
+
+        [Fact]
+        public void CanAddNavigationLink_For_DerivedNavigationProperty()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            var vehicle = builder.AddEntity(typeof(Vehicle));
+            var motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
+            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+            var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
+
+            var vehicles = builder.AddEntitySet("vehicles", vehicle);
+            var binding = vehicles.AddBinding(navProperty, manufacturers);
+            vehicles.HasNavigationPropertyLink(navProperty, (ctxt, property) => new Uri("http://works/"));
+
+            IEdmModel model = builder.GetEdmModel();
+            var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
+            var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+            var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
+
+            Assert.NotNull(model.GetEntitySetLinkBuilder(vehiclesEdmSet));
+            Assert.Equal(
+                "http://works/",
+                model.GetEntitySetLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty).AbsoluteUri);
+        }
+
+        [Fact]
+        public void AddBinding_For_NavigationPropertyInHierarchy_Throws()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            var vehicle = builder.AddEntity(typeof(Vehicle));
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+
+            var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
+
+            var vehicles = builder.AddEntitySet("vehicles", vehicle);
+
+            Assert.Throws<InvalidOperationException>(
+                () => vehicles.AddBinding(navProperty, manufacturers),
+                "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
+        }
+
+        [Fact]
+        public void AddNavigationLink_For_NavigationPropertyInHierarchy_Throws()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            var vehicle = builder.AddEntity(typeof(Vehicle));
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            var manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            var manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+
+            var navProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
+
+            var vehicles = builder.AddEntitySet("vehicles", vehicle);
+
+            Assert.Throws<InvalidOperationException>(
+                () => vehicles.HasNavigationPropertyLink(navProperty, (ctxt, property) => new Uri("http://works/")),
+                "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
+        }
+
+        [Fact]
+        public void CanConfigureOptionalBinding_For_NavigationPropertiesInDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder
+                .EntitySet<Vehicle>("vehicles")
+                .HasOptionalBinding((Motorcycle m) => m.Manufacturer, "manufacturers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            Assert.NotNull(vehicles);
+
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            var motorcycleManufacturerPropertyTargetSet = vehicles.FindNavigationTarget(motorcycleManufacturerProperty);
+            Assert.NotNull(motorcycleManufacturerPropertyTargetSet);
+            Assert.Equal("manufacturers", motorcycleManufacturerPropertyTargetSet.Name);
+        }
+
+        [Fact]
+        public void CanConfigureRequiredBinding_For_NavigationPropertiesInDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder
+                .EntitySet<Vehicle>("vehicles")
+                .HasRequiredBinding((Motorcycle m) => m.Manufacturer, "manufacturers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            Assert.NotNull(vehicles);
+
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            var motorcycleManufacturerPropertyTargetSet = vehicles.FindNavigationTarget(motorcycleManufacturerProperty);
+            Assert.NotNull(motorcycleManufacturerPropertyTargetSet);
+            Assert.Equal("manufacturers", motorcycleManufacturerPropertyTargetSet.Name);
+        }
+
+        [Fact]
+        public void CanConfigureManyBinding_For_NavigationPropertiesInDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder
+                .EntitySet<Vehicle>("vehicles")
+                .HasManyBinding((Motorcycle m) => m.Manufacturers, "manufacturers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            Assert.NotNull(vehicles);
+
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturers", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.Many);
+
+            var motorcycleManufacturerPropertyTargetSet = vehicles.FindNavigationTarget(motorcycleManufacturerProperty);
+            Assert.NotNull(motorcycleManufacturerPropertyTargetSet);
+            Assert.Equal("manufacturers", motorcycleManufacturerPropertyTargetSet.Name);
+        }
+
+        [Fact]
+        public void CanConfigureLinks_For_NavigationPropertiesInDerivedType()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            var vehiclesSet = builder.EntitySet<Vehicle>("vehicles");
+
+            vehiclesSet.HasNavigationPropertyLink(
+                vehiclesSet.HasOptionalBinding((Motorcycle m) => m.Manufacturer, "manufacturers").NavigationProperty,
+                (ctxt, property) => new Uri(String.Format("http://localhost/vehicles/{0}/{1}/{2}", ctxt.EntityInstance.Model, ctxt.EntityInstance.Name, property.Name)));
+
+            IEdmModel model = builder.GetEdmModel();
+            var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            Uri link = model.GetEntitySetLinkBuilder(vehicles).BuildNavigationLink(
+                new EntityInstanceContext { EntityInstance = new Motorcycle { Name = "Motorcycle1", Model = 2009 }, EdmModel = model, EntitySet = vehicles, EntityType = motorcycle },
+                motorcycleManufacturerProperty);
+
+            Assert.Equal("http://localhost/vehicles/2009/Motorcycle1/Manufacturer", link.AbsoluteUri);
+        }
     }
 }

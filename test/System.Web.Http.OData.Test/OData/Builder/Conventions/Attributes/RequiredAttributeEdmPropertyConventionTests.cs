@@ -24,8 +24,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(string));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new RequiredAttribute() });
 
-            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property.Object);
             Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property.Object, structuralType.Object);
 
             // Act
             new RequiredAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);

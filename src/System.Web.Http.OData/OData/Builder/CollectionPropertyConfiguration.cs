@@ -16,8 +16,8 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Constructs a CollectionPropertyConfiguration using the <paramref name="property">property</paramref> provided.
         /// </summary>
-        public CollectionPropertyConfiguration(PropertyInfo property)
-            : base(property)
+        public CollectionPropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
+            : base(property, declaringType)
         {
             if (!property.PropertyType.IsCollection(out _elementType))
             {

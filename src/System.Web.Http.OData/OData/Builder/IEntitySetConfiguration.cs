@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
         Func<EntityInstanceContext, string> GetIdLink();
 
-        Func<EntityInstanceContext, IEdmNavigationProperty, Uri> GetNavigationPropertyLink(string navigationPropertyName);
+        Func<EntityInstanceContext, IEdmNavigationProperty, Uri> GetNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty);
 
         /// <summary>
         /// Adds a self link to the feed.

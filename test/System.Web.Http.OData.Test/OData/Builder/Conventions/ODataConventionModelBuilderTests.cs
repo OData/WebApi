@@ -549,6 +549,102 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_Figures_Bindings_For_DerivedNavigationProperties()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("vehicles");
+            builder.EntitySet<Manufacturer>("manufacturers");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntitySet("vehicles", typeof(Vehicle));
+            IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+
+            IEdmEntityType car = model.AssertHasEntityType(typeof(Car));
+            IEdmEntityType motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            IEdmEntityType sportbike = model.AssertHasEntityType(typeof(SportBike));
+
+            Assert.Equal(2, vehicles.NavigationTargets.Count());
+            vehicles.AssertHasNavigationTarget(
+                car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
+                "manufacturers");
+            vehicles.AssertHasNavigationTarget(
+                motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
+                "manufacturers");
+            vehicles.AssertHasNavigationTarget(
+                sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
+                "manufacturers");
+        }
+
+        [Fact]
+        public void ModelBuilder_BindsToTheClosestEntitySet_ForNavigationProperties()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("vehicles");
+            builder.EntitySet<CarManufacturer>("car_manufacturers");
+            builder.EntitySet<MotorcycleManufacturer>("motorcycle_manufacturers");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntitySet("vehicles", typeof(Vehicle));
+            IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+
+            IEdmEntityType car = model.AssertHasEntityType(typeof(Car));
+            IEdmEntityType motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
+            IEdmEntityType sportbike = model.AssertHasEntityType(typeof(SportBike));
+
+            Assert.Equal(2, vehicles.NavigationTargets.Count());
+            vehicles.AssertHasNavigationTarget(
+                car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
+                "car_manufacturers");
+            vehicles.AssertHasNavigationTarget(
+                motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
+                "motorcycle_manufacturers");
+            vehicles.AssertHasNavigationTarget(
+                sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
+                "motorcycle_manufacturers");
+        }
+
+        [Fact]
+        public void ModelBuilder_BindsToAllEntitySets()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+            builder.EntitySet<Vehicle>("vehicles");
+            builder.EntitySet<Car>("cars");
+            builder.EntitySet<Motorcycle>("motorcycles");
+            builder.EntitySet<SportBike>("sportbikes");
+            builder.EntitySet<CarManufacturer>("car_manufacturers");
+            builder.EntitySet<MotorcycleManufacturer>("motorcycle_manufacturers");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            // one for motorcycle manufacturer and one for car manufacturer
+            IEdmEntitySet vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
+            Assert.Equal(2, vehicles.NavigationTargets.Count());
+
+            // one for car manufacturer
+            IEdmEntitySet cars = model.EntityContainers().Single().FindEntitySet("cars");
+            Assert.Equal(1, cars.NavigationTargets.Count());
+
+            // one for motorcycle manufacturer
+            IEdmEntitySet motorcycles = model.EntityContainers().Single().FindEntitySet("motorcycles");
+            Assert.Equal(1, motorcycles.NavigationTargets.Count());
+
+            // one for motorcycle manufacturer
+            IEdmEntitySet sportbikes = model.EntityContainers().Single().FindEntitySet("sportbikes");
+            Assert.Equal(1, sportbikes.NavigationTargets.Count());
+
+            // no navigations
+            IEdmEntitySet carManufacturers = model.EntityContainers().Single().FindEntitySet("car_manufacturers");
+            Assert.Equal(0, carManufacturers.NavigationTargets.Count());
+
+            //  no navigations
+            IEdmEntitySet motorcycleManufacturers = model.EntityContainers().Single().FindEntitySet("motorcycle_manufacturers");
+            Assert.Equal(0, motorcycleManufacturers.NavigationTargets.Count());
+        }
+
+        [Fact]
         public void ModelBuilder_DerivedTypeDeclaringKeyThrows()
         {
             MockType baseType =

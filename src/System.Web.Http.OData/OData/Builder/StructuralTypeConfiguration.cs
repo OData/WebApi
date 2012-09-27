@@ -88,7 +88,7 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                propertyConfiguration = new PrimitivePropertyConfiguration(propertyInfo);
+                propertyConfiguration = new PrimitivePropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
             }
 
@@ -130,7 +130,7 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                propertyConfiguration = new ComplexPropertyConfiguration(propertyInfo);
+                propertyConfiguration = new ComplexPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
                 // Make sure the complex type is in the model.
 
@@ -150,7 +150,7 @@ namespace System.Web.Http.OData.Builder
             if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
-            }            
+            }
 
             // Remove from the ignored properties
             if (IgnoredProperties.Contains(propertyInfo))
@@ -169,13 +169,13 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo);
+                propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
-                
+
                 // If the ElementType is the same as this type this is recursive complex type nesting
                 if (propertyConfiguration.ElementType == ClrType)
                 {
-                    throw Error.Argument("propertyInfo", 
+                    throw Error.Argument("propertyInfo",
                                          SRResources.RecursiveComplexTypesNotAllowed,
                                          ClrType.Name,
                                          propertyConfiguration.Name);

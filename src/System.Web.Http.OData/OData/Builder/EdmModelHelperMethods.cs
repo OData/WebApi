@@ -27,7 +27,7 @@ namespace System.Web.Http.OData.Builder
 
             // add types and sets, building an index on the way.
             Dictionary<string, IEdmStructuredType> edmTypeMap = model.AddTypes(builder.StructuralTypes);
-            Dictionary<string, EdmEntitySet> edmEntitySetMap = model.AddEntitySets(builder.EntitySets, container, edmTypeMap);
+            Dictionary<string, EdmEntitySet> edmEntitySetMap = model.AddEntitySets(builder, container, edmTypeMap);
 
             // add procedures
             model.AddProcedures(builder.Procedures, container, edmTypeMap, edmEntitySetMap);
@@ -52,8 +52,10 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, IEnumerable<IEntitySetConfiguration> configurations, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
+        private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, ODataModelBuilder builder, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
         {
+            IEnumerable<IEntitySetConfiguration> configurations = builder.EntitySets;
+
             // build the entitysets and their annotations
             IEnumerable<Tuple<EdmEntitySet, IEntitySetConfiguration>> entitySets = AddEntitySets(configurations, container, edmTypeMap);
             var entitySetAndAnnotations = entitySets.Select(e => new
@@ -78,20 +80,29 @@ namespace System.Web.Http.OData.Builder
                 model.SetAnnotationValue<EntitySetUrlAnnotation>(entitySet, iter.Annotations.Url);
                 model.SetAnnotationValue<IEntitySetLinkBuilder>(entitySet, iter.Annotations.LinkBuilder);
 
-                foreach (NavigationPropertyConfiguration navigation in configuration.EntityType.NavigationProperties)
+                AddNavigationBindings(iter.Configuration, iter.EntitySet, iter.Annotations.LinkBuilder, builder, edmTypeMap, edmEntitySetMap);
+            }
+            return edmEntitySetMap;
+        }
+
+        private static void AddNavigationBindings(IEntitySetConfiguration configuration, EdmEntitySet entitySet, EntitySetLinkBuilderAnnotation linkBuilder, ODataModelBuilder builder,
+            Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+                {
+            foreach (IEntityTypeConfiguration entity in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            {
+                foreach (NavigationPropertyConfiguration navigation in entity.NavigationProperties)
                 {
                     NavigationPropertyBinding binding = configuration.FindBinding(navigation);
                     if (binding != null)
                     {
-                        EdmEntityType edmEntityType = edmTypeMap[configuration.EntityType.FullName] as EdmEntityType;
+                        EdmEntityType edmEntityType = edmTypeMap[entity.FullName] as EdmEntityType;
                         IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties().Single(np => np.Name == navigation.Name);
 
                         entitySet.AddNavigationTarget(edmNavigationProperty, edmEntitySetMap[binding.EntitySet.Name]);
-                        iter.Annotations.LinkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, configuration.GetNavigationPropertyLink(edmNavigationProperty.Name));
+                        linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, configuration.GetNavigationPropertyLink(navigation));
                     }
                 }
             }
-            return edmEntitySetMap;
         }
 
         private static void AddProcedures(this IEdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
@@ -143,8 +154,10 @@ namespace System.Web.Http.OData.Builder
         private static Dictionary<string, IEdmStructuredType> AddTypes(this EdmModel model, IEnumerable<IStructuralTypeConfiguration> types)
         {
             IStructuralTypeConfiguration[] configTypes = types.ToArray();
+
             // build types
             IEdmStructuredType[] edmTypes = EdmTypeBuilder.GetTypes(configTypes).ToArray();
+
             // index types
             Dictionary<string, IEdmStructuredType> edmTypeMap = edmTypes.ToDictionary(t => (t as IEdmSchemaType).FullName());
 

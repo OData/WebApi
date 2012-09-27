@@ -11,8 +11,8 @@ namespace System.Web.Http.OData.Builder
     {
         private readonly Type _relatedType = null;
 
-        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity)
-            : base(property)
+        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, IEntityTypeConfiguration declaringType)
+            : base(property, declaringType)
         {
             if (property == null)
             {
@@ -31,6 +31,14 @@ namespace System.Web.Http.OData.Builder
                 }
 
                 _relatedType = elementType;
+            }
+        }
+
+        public IEntityTypeConfiguration DeclaringEntityType
+        {
+            get
+            {
+                return DeclaringType as IEntityTypeConfiguration;
             }
         }
 

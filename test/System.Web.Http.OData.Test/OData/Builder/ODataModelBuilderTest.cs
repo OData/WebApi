@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.Http.OData.TestCommon.Models;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -75,6 +76,27 @@ namespace System.Web.Http.OData.Builder
             {
                 builder.RemoveProcedure("Format");
             });
+        }
+
+        [Fact]
+        public void BuilderIncludesMapFromEntityTypeToBindableProcedures()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntitySet<Customer>("Customers").EntityType;
+            customer.HasKey(c => c.Id);
+            customer.Property(c => c.Name);
+            customer.Action("Reward");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
+
+            // Act
+            BindableProcedureFinder finder = model.GetAnnotationValue<BindableProcedureFinder>(model);
+
+            // Assert
+            Assert.NotNull(finder);
+            Assert.NotNull(finder.FindProcedures(customerType).SingleOrDefault());
+            Assert.Equal("Reward", finder.FindProcedures(customerType).SingleOrDefault().Name);
         }
     }
 }

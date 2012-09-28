@@ -82,6 +82,14 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// If the procedure IsBindable is it Always bindable.
+        /// </summary>
+        public virtual bool IsAlwaysBindable
+        {
+            get { return IsBindable; }
+        }
+
+        /// <summary>
         /// Does the procedure have side-effects.
         /// </summary>
         public virtual bool IsSideEffecting

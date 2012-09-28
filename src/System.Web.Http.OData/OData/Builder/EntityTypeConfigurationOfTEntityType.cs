@@ -166,7 +166,19 @@ namespace System.Web.Http.OData.Builder
         public ActionConfiguration Action(string name)
         {
             ActionConfiguration action = new ActionConfiguration(_configuration.ModelBuilder, name);
-            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration);
+            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: true);
+            return action;
+        }
+
+        /// <summary>
+        /// Create an Action that sometimes binds to this EntityType
+        /// </summary>
+        /// <param name="name">The name of the action.</param>
+        /// <returns>The ActionConfiguration to allow further configuration of the new 'transient' Action.</returns>
+        public ActionConfiguration TransientAction(string name)
+        {
+            ActionConfiguration action = new ActionConfiguration(_configuration.ModelBuilder, name);
+            action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: false);
             return action;
         }
 

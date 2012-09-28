@@ -41,5 +41,10 @@ namespace System.Web.Http
         /// Route name for the route used for addressing root level entity sets (with parentheses to support WCF dataservices client).
         /// </summary>
         public static readonly string DefaultWithParentheses = "OData.DefaultWithParentheses";
+
+        /// <summary>
+        /// Route name for the route used for addressing an action bound to an entity's editlink
+        /// </summary>
+        public static readonly string InvokeBoundAction = "OData.InvokeBoundAction";
     }
 }

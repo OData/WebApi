@@ -67,12 +67,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private void WriteEntry(object graph, IEnumerable<ODataProperty> propertyBag, ODataWriter writer, ODataSerializerContext writeContext)
         {
             IEdmEntityType entityType = _edmEntityTypeReference.EntityDefinition();
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(SerializerProvider.EdmModel, writeContext.EntitySet, entityType, writeContext.UrlHelper, graph);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(SerializerProvider.EdmModel, writeContext.EntitySet, entityType, writeContext.UrlHelper, graph, writeContext.SkipExpensiveAvailabilityChecks);
 
             ODataEntry entry = new ODataEntry
             {
                 TypeName = _edmEntityTypeReference.FullName(),
                 Properties = propertyBag,
+                Actions = CreateActions(entityInstanceContext)
             };
 
             if (writeContext.EntitySet != null)
@@ -186,6 +187,35 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             return properties;
+        }
+
+        private static IEnumerable<ODataAction> CreateActions(EntityInstanceContext context)
+        {
+            return context.EdmModel.GetAvailableProcedures(context.EntityType)
+                .Select(action => CreateODataAction(action, context))
+                .Where(action => action != null);
+        }
+
+        private static ODataAction CreateODataAction(IEdmFunctionImport action, EntityInstanceContext context)
+        {
+            ActionLinkBuilder builder = context.EdmModel.GetActionLinkBuilder(action);
+            if (builder != null)
+            {
+                Uri target = builder.BuildActionLink(context);
+                if (target != null)
+                {
+                    Uri baseUri = new Uri(context.UrlHelper.Link(ODataRouteNames.Metadata, null));
+                    Uri metadata = new Uri(baseUri, "#" + action.Container.Name + "." + action.Name);
+
+                    return new ODataAction
+                    {
+                        Metadata = metadata,
+                        Target = target,
+                        Title = action.Name
+                    };
+                }
+            }
+            return null;
         }
     }
 }

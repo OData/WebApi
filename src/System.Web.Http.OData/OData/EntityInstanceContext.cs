@@ -19,6 +19,11 @@ namespace System.Web.Http.OData
         }
 
         public EntityInstanceContext(IEdmModel model, IEdmEntitySet entitySet, IEdmEntityType entityType, UrlHelper urlHelper, object entityInstance)
+            : this(model, entitySet, entityType, urlHelper, entityInstance, skipExpensiveAvailabilityChecks: false)
+        {
+        }
+
+        public EntityInstanceContext(IEdmModel model, IEdmEntitySet entitySet, IEdmEntityType entityType, UrlHelper urlHelper, object entityInstance, bool skipExpensiveAvailabilityChecks)
         {
             if (model == null)
             {
@@ -40,6 +45,7 @@ namespace System.Web.Http.OData
             EntityType = entityType;
             EntityInstance = entityInstance;
             UrlHelper = urlHelper;
+            SkipExpensiveAvailabilityChecks = skipExpensiveAvailabilityChecks;
         }
 
         /// <summary>
@@ -77,5 +83,14 @@ namespace System.Web.Http.OData
         /// The setter is not intended to be used other than for unit testing purpose. 
         /// </summary>
         public UrlHelper UrlHelper { get; set; }
+
+        /// <summary>
+        /// Gets whether ActionAvailabilityChecks should be performed or not.
+        /// This is used to tell the formatter whether to check availability of an action before including a link to it.
+        /// When in a feed we skip this check.
+        /// 
+        /// The setter is not intended to be used other than for unit testing purposes.
+        /// </summary>
+        public bool SkipExpensiveAvailabilityChecks { get; set; }
     }
 }

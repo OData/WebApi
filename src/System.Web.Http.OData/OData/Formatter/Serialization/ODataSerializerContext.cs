@@ -42,5 +42,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// The HttpRequestMessage can then be used by ODataSerializers to learn more about the Request that triggered the serialization
         /// </summary>
         public HttpRequestMessage Request { get; set; }
+
+        /// <summary>
+        /// Get or sets whether expensive links should be calculated.
+        /// </summary>
+        public bool SkipExpensiveAvailabilityChecks { get; set; }
     }
 }

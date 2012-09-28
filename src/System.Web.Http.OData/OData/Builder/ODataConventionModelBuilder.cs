@@ -34,6 +34,15 @@ namespace System.Web.Http.OData.Builder
             // IEntitySetConvention's
             new SelfLinksGenerationConvention(),
             new NavigationLinksGenerationConvention(),
+
+            // IEdmPropertyConvention's
+            new NotMappedAttributeConvention(),
+            new RequiredAttributeEdmPropertyConvention(),
+            new KeyAttributeEdmPropertyConvention(),
+            new IgnoreDataMemberAttributeEdmPropertyConvention(),
+
+            // IEdmFunctionImportConventions's
+            new ActionLinkGenerationConvention(),
         };
 
         // These hashset's keep track of edmtypes/entitysets for which conventions
@@ -179,6 +188,11 @@ namespace System.Web.Http.OData.Builder
             foreach (IEntitySetConfiguration entitySet in explictlyConfiguredEntitySets)
             {
                 ApplyEntitySetConventions(entitySet);
+            }
+
+            foreach (ProcedureConfiguration procedure in Procedures)
+            {
+                ApplyProcedureConventions(procedure);
             }
 
             return base.GetEdmModel();
@@ -606,6 +620,14 @@ namespace System.Web.Http.OData.Builder
                         convention.Apply(entitySetConfiguration, this);
                     }
                 }
+            }
+        }
+
+        private void ApplyProcedureConventions(ProcedureConfiguration procedure)
+        {
+            foreach (IProcedureConvention convention in _conventions.OfType<IProcedureConvention>())
+            {
+                convention.Apply(procedure, this);
             }
         }
 

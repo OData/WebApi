@@ -306,13 +306,18 @@ namespace System.Web.Http.OData.Formatter
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
 
+                // TODO: Issue 483: http://aspnetwebstack.codeplex.com/workitem/483
+                // We need to set the MetadataDocumentUri when this property is added to ODataMessageWriterSettings as 
+                // part of the JSON Light work.
+                // This is required so ODataLib can coerce AbsoluteUri's into RelativeUri's when appropriate in JSON Light.
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
                     BaseUri = baseAddress,
                     Version = version,
                     Indent = true,
-                    DisableMessageStreamDisposal = true,
+                    DisableMessageStreamDisposal = true
                 };
+
                 if (contentHeaders != null && contentHeaders.ContentType != null)
                 {
                     writerSettings.SetContentType(contentHeaders.ContentType.ToString(), Encoding.UTF8.WebName);
@@ -327,6 +332,7 @@ namespace System.Web.Http.OData.Formatter
                                                                         RootProjectionNode = rootProjectionNode,
                                                                         CurrentProjectionNode = rootProjectionNode,
                                                                         ServiceOperationName = operationName,
+                                                                        SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                                                                         Request = Request
                                                                     };
 

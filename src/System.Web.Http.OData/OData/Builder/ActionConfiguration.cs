@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http.OData.Properties;
+using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -16,6 +18,7 @@ namespace System.Web.Http.OData.Builder
     {
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter = null;
+        private Func<EntityInstanceContext, Uri> _actionLinkFactory = null;
 
         /// <summary>
         /// Create a new ActionConfiguration
@@ -40,7 +43,7 @@ namespace System.Web.Http.OData.Builder
 
         public override IEnumerable<ParameterConfiguration> Parameters
         {
-            get 
+            get
             {
                 if (_bindingParameter != null)
                 {
@@ -67,6 +70,25 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Whether this action can always be bound.
+        /// <example>
+        /// For example imagine an Watch action that can be bound to a Movie, it might not always be possible to Watch a movie,
+        /// in which case IsAlwaysBindable would return false.
+        /// </example>
+        /// </summary>
+        public override bool IsAlwaysBindable
+        {
+            get
+            {
+                if (IsBindable)
+                {
+                    return _bindingParameter.AlwaysBindable;
+                }
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Sets the return type to a single EntityType instance.
         /// </summary>
         /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
@@ -77,7 +99,7 @@ namespace System.Web.Http.OData.Builder
             ModelBuilder.EntitySet<TEntityType>(entitySetName);
             EntitySet = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
-           
+
             return this;
         }
 
@@ -139,11 +161,11 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Specifies the bindingParameter name and type, use only if the Action "isBindable".
+        /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the Action "isBindable".
         /// </summary>
-        public ActionConfiguration SetBindingParameter(string name, IEdmTypeConfiguration bindingParameterType)
+        public ActionConfiguration SetBindingParameter(string name, IEdmTypeConfiguration bindingParameterType, bool alwaysBindable)
         {
-            _bindingParameter = new BindingParameterConfiguration(name, bindingParameterType);
+            _bindingParameter = new BindingParameterConfiguration(name, bindingParameterType, alwaysBindable);
             return this;
         }
 
@@ -188,6 +210,28 @@ namespace System.Web.Http.OData.Builder
             }
             ICollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
             return AddParameter(name, parameterType);
+        }
+
+        /// <summary>
+        /// Register a factory that creates actions links.
+        /// </summary>
+        public ActionConfiguration HasActionLink(Func<EntityInstanceContext, Uri> actionLinkFactory)
+        {
+            if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
+            {
+                throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
+            }
+            _actionLinkFactory = actionLinkFactory;
+            return this;
+        }
+
+        /// <summary>
+        /// Retrieves the currently registered action link factory.
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
+        public Func<EntityInstanceContext, Uri> GetActionLink()
+        {
+            return _actionLinkFactory;
         }
     }
 }

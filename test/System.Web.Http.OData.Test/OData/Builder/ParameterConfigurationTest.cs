@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Builder
             // Act & Assert
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
-                BindingParameterConfiguration configuration = new BindingParameterConfiguration("name", builder.GetTypeConfigurationOrNull(typeof(Address)));
+                BindingParameterConfiguration configuration = new BindingParameterConfiguration("name", builder.GetTypeConfigurationOrNull(typeof(Address)), true);
             });
             Assert.True(exception.Message.Contains(string.Format("'{0}'", typeof(Address).FullName)));
             Assert.Equal("parameterType", exception.ParamName);

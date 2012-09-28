@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -25,9 +26,9 @@ namespace System.Web.Http.OData.Formatter
             _configuration.Formatters.Clear();
             _configuration.SetODataFormatter(_formatter);
 
-            _configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "ODataActions" });
+            _configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata");
             _configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
+            _configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundAction, "{controller}({boundId})/{odataAction}");
 
             _server = new HttpServer(_configuration);
             _client = new HttpClient(_server);
@@ -36,7 +37,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void Can_dispatch_actionPayload_to_action()
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/DoSomething");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers(1)/DoSomething");
             request.Headers.Add("accept", "application/json;odata=verbose");
             string payload = @"{ 
                 ""p1"": 1, 
@@ -50,6 +51,31 @@ namespace System.Web.Http.OData.Formatter
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
+        }
+
+        [Fact]
+        public void Response_includes_action_link()
+        {
+            string editLink = "http://localhost/Customers(1)";
+            string expectedTarget = editLink + "/DoSomething";
+            string expectedMetadata = "http://localhost/$metadata#Container.DoSomething";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            dynamic result = JObject.Parse(responseString);
+            result = result.d.__metadata.actions;
+
+            JObject allActions = result as JObject;
+            JArray doSomethings = allActions[expectedMetadata] as JArray;
+            Assert.NotNull(doSomethings);
+            Assert.Equal(1, doSomethings.Count);
+            dynamic doSomething = doSomethings[0];
+            Assert.NotNull(doSomething);
+            Assert.Equal(expectedTarget, (string)doSomething.target);
+            Assert.Equal("DoSomething", (string)doSomething.title);
         }
 
         private IEdmModel GetModel()
@@ -81,11 +107,17 @@ namespace System.Web.Http.OData.Formatter
         }
     }
 
-    public class ODataActionsController : ApiController
+    public class CustomersController : ApiController
     {
-        [HttpPost]
-        public bool DoSomething(ODataActionParameters parameters)
+        public ODataActionTests.Customer GetById(int id)
         {
+            return new ODataActionTests.Customer { ID = id, Name = "Name" + id.ToString() };
+        }
+
+        [HttpPost]
+        public bool DoSomething(int boundId, ODataActionParameters parameters)
+        {
+            Assert.Equal(1, boundId);
             Assert.Equal(1, parameters["p1"]);
             ValidateAddress(parameters["p2"] as ODataActionTests.Address);
             ValidateNumbers(parameters["p3"] as IList<string>);

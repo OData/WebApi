@@ -457,6 +457,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To register an action link factory, actions must be bindable to a single entity. Action &apos;{0}&apos; does not meet this requirement..
+        /// </summary>
+        internal static string HasActionLinkRequiresBindToEntity {
+            get {
+                return ResourceManager.GetString("HasActionLinkRequiresBindToEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid bindingParameter type &apos;{0}&apos;. A bindingParameter must be either an EntityType or a Collection of EntityTypes..
         /// </summary>
         internal static string InvalidBindingParameterType {

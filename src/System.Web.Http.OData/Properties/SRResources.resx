@@ -429,4 +429,7 @@
   <data name="ModelBinderUtil_ModelMetadataCannotBeNull" xml:space="preserve">
     <value>The binding context cannot have a null ModelMetadata.</value>
   </data>
+  <data name="HasActionLinkRequiresBindToEntity" xml:space="preserve">
+    <value>To register an action link factory, actions must be bindable to a single entity. Action '{0}' does not meet this requirement.</value>
+  </data>
 </root>

@@ -20,7 +20,12 @@ namespace System.Web.Http.OData
         }
 
         public EntityInstanceContext(IEdmModel model, IEdmEntitySet entitySet, IEdmEntityType entityType, UrlHelper urlHelper, TEntityType entityInstance)
-            : base(model, entitySet, entityType, urlHelper, entityInstance)
+            : this(model, entitySet, entityType, urlHelper, entityInstance, skipExpensiveActionAvailabilityChecks: false)
+        {
+        }
+
+        public EntityInstanceContext(IEdmModel model, IEdmEntitySet entitySet, IEdmEntityType entityType, UrlHelper urlHelper, TEntityType entityInstance, bool skipExpensiveActionAvailabilityChecks)
+            : base(model, entitySet, entityType, urlHelper, entityInstance, skipExpensiveAvailabilityChecks: skipExpensiveActionAvailabilityChecks)
         {
         }
 

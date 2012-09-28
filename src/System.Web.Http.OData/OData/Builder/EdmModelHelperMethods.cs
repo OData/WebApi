@@ -9,6 +9,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Expressions;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.Edm.Library.Expressions;
+using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -27,12 +28,16 @@ namespace System.Web.Http.OData.Builder
             // add types and sets, building an index on the way.
             Dictionary<string, IEdmStructuredType> edmTypeMap = model.AddTypes(builder.StructuralTypes);
             Dictionary<string, EdmEntitySet> edmEntitySetMap = model.AddEntitySets(builder.EntitySets, container, edmTypeMap);
-            
+
             // add procedures
-            container.AddProcedures(builder.Procedures, edmTypeMap, edmEntitySetMap);
+            model.AddProcedures(builder.Procedures, container, edmTypeMap, edmEntitySetMap);
 
             // finish up
             model.AddElement(container);
+
+            // build the map from IEdmEntityType to IEdmFunctionImport
+            model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
+
             return model;
         }
 
@@ -89,7 +94,7 @@ namespace System.Web.Http.OData.Builder
             return edmEntitySetMap;
         }
 
-        private static void AddProcedures(this EdmEntityContainer container, IEnumerable<ProcedureConfiguration> configurations, Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
+        private static void AddProcedures(this IEdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
         {
             foreach (ProcedureConfiguration procedure in configurations)
             {
@@ -101,6 +106,19 @@ namespace System.Web.Http.OData.Builder
                         IEdmExpression expression = GetEdmEntitySetExpression(edmEntitySetMap, action);
 
                         EdmFunctionImport functionImport = new EdmFunctionImport(container, action.Name, returnReference, expression, action.IsSideEffecting, action.IsComposable, action.IsBindable);
+                        if (action.IsBindable)
+                        {
+                            model.SetIsAlwaysBindable(functionImport, action.IsAlwaysBindable);
+                            if (action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity)
+                            {
+                                Func<EntityInstanceContext, Uri> actionFactory = action.GetActionLink();
+                                if (actionFactory != null)
+                                {
+                                    model.SetAnnotationValue<ActionLinkBuilder>(functionImport, new ActionLinkBuilder(actionFactory));
+                                }
+                            }
+                        }
+
                         foreach (ParameterConfiguration parameter in action.Parameters)
                         {
                             // TODO: http://aspnetwebstack.codeplex.com/workitem/417
@@ -276,6 +294,45 @@ namespace System.Web.Http.OData.Builder
             {
                 return annotation.Url;
             }
+        }
+
+        internal static IEnumerable<IEdmFunctionImport> GetAvailableProcedures(this IEdmModel model, IEdmEntityType entityType)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
+            }
+
+            BindableProcedureFinder annotation = model.GetAnnotationValue<BindableProcedureFinder>(model);
+            if (annotation == null)
+            {
+                return Enumerable.Empty<IEdmFunctionImport>();
+            }
+            else
+            {
+                return annotation.FindProcedures(entityType);
+            }
+        }
+
+        internal static ActionLinkBuilder GetActionLinkBuilder(this IEdmModel model, IEdmFunctionImport action)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (action == null)
+            {
+                throw Error.ArgumentNull("action");
+            }
+
+            ActionLinkBuilder annotation = model.GetAnnotationValue<ActionLinkBuilder>(action);
+            return annotation;
         }
     }
 }

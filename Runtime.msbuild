@@ -12,7 +12,7 @@
         <ConfigurationSuffix/>
         <ConfigurationSuffix Condition="!Exists($(VS2012WindowsXamlInstallPath))">VS2010</ConfigurationSuffix>
         <VisualStudioVersion Condition=" '$(ConfigurationSuffix)' == '' ">11.0</VisualStudioVersion>
-        <VisualStudioVersion Condition=" '$(ConfigurationSuffix)' == 'VS10' ">10.0</VisualStudioVersion>
+        <VisualStudioVersion Condition=" '$(ConfigurationSuffix)' == 'VS2010' ">10.0</VisualStudioVersion>
     </PropertyGroup>
     
     <ItemGroup>            

@@ -3,11 +3,11 @@
 @using System.Threading
 @model Collection<ApiParameterDescription>
 
-<table>
-    <thead class="ui-widget-header">
+<table class="help-page-table">
+    <thead>
     <tr><th>Name</th><th>Description</th><th>Additional information</th></tr>
     </thead>
-    <tbody class="ui-widget-content">
+    <tbody>
     @foreach (ApiParameterDescription parameter in Model)
     {
         string parameterDocumentation = parameter.Documentation != null ?
@@ -18,9 +18,9 @@
         if (!typeof(CancellationToken).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType))
         {
             <tr>
-                <td><b>@parameter.Name</b></td>
-                <td><pre>@parameterDocumentation</pre></td>
-                <td>
+                <td class="parameter-name"><b>@parameter.Name</b></td>
+                <td class="parameter-documentation"><pre>@parameterDocumentation</pre></td>
+                <td class="parameter-source">
                     @switch (parameter.Source)
                     {
                         case ApiParameterSource.FromBody:

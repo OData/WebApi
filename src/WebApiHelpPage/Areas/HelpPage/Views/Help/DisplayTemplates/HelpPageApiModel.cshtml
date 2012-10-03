@@ -46,11 +46,8 @@
 {
     foreach (string errorMessage in Model.ErrorMessages)
     {
-        <div class="ui-state-highlight ui-corner-all warning-message-container"> 
-            <p>
-                <span class="ui-icon ui-icon-info warning-message-icon"></span>
-                @errorMessage
-            </p>
+        <div class="warning-message-container"> 
+            <p>@errorMessage</p>
         </div>
     }
 }

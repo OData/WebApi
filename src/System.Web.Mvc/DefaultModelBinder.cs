@@ -196,10 +196,17 @@ namespace System.Web.Mvc
 
         private void BindProperties(ControllerContext controllerContext, ModelBindingContext bindingContext)
         {
-            IEnumerable<PropertyDescriptor> properties = GetFilteredModelProperties(controllerContext, bindingContext);
-            foreach (PropertyDescriptor property in properties)
+            PropertyDescriptorCollection properties = GetModelProperties(controllerContext, bindingContext);
+            Predicate<string> propertyFilter = bindingContext.PropertyFilter;
+
+            // Loop is a performance sensitive codepath so avoid using enumerators.
+            for (int i = 0; i < properties.Count; i++)
             {
-                BindProperty(controllerContext, bindingContext, property);
+                PropertyDescriptor property = properties[i];
+                if (ShouldUpdateProperty(property, propertyFilter))
+                {
+                    BindProperty(controllerContext, bindingContext, property);
+                }
             }
         }
 
@@ -417,6 +424,7 @@ namespace System.Web.Mvc
 
         protected IEnumerable<PropertyDescriptor> GetFilteredModelProperties(ControllerContext controllerContext, ModelBindingContext bindingContext)
         {
+            // Performance note: Retain for compatibility only. Faster version inlined
             PropertyDescriptorCollection properties = GetModelProperties(controllerContext, bindingContext);
             Predicate<string> propertyFilter = bindingContext.PropertyFilter;
 

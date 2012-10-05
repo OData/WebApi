@@ -134,7 +134,7 @@ namespace System.Web.Mvc
         private static Predicate<string> GetPropertyFilter(ParameterDescriptor parameterDescriptor)
         {
             ParameterBindingInfo bindingInfo = parameterDescriptor.BindingInfo;
-            return propertyName => BindAttribute.IsPropertyAllowed(propertyName, bindingInfo.Include.ToArray(), bindingInfo.Exclude.ToArray());
+            return propertyName => BindAttribute.IsPropertyAllowed(propertyName, bindingInfo.Include, bindingInfo.Exclude);
         }
 
         public virtual bool InvokeAction(ControllerContext controllerContext, string actionName)

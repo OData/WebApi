@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 
 namespace System.Web.Mvc
@@ -34,12 +35,12 @@ namespace System.Web.Mvc
 
         public string Prefix { get; set; }
 
-        internal static bool IsPropertyAllowed(string propertyName, string[] includeProperties, string[] excludeProperties)
+        internal static bool IsPropertyAllowed(string propertyName, ICollection<string> includeProperties, ICollection<string> excludeProperties)
         {
             // We allow a property to be bound if its both in the include list AND not in the exclude list.
             // An empty include list implies all properties are allowed.
             // An empty exclude list implies no properties are disallowed.
-            bool includeProperty = (includeProperties == null) || (includeProperties.Length == 0) || includeProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
+            bool includeProperty = (includeProperties == null) || (includeProperties.Count == 0) || includeProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
             bool excludeProperty = (excludeProperties != null) && excludeProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
             return includeProperty && !excludeProperty;
         }

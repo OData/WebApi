@@ -11,7 +11,7 @@ namespace System.Web.Mvc
     {
         private static readonly Predicate<string> _defaultPropertyFilter = _ => true;
 
-        private string _modelName;
+        private string _modelName = String.Empty;
         private ModelStateDictionary _modelState;
         private Predicate<string> _propertyFilter;
         private Dictionary<string, ModelMetadata> _propertyMetadata;
@@ -47,13 +47,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                if (_modelName == null)
-                {
-                    _modelName = String.Empty;
-                }
                 return _modelName;
             }
-            set { _modelName = value; }
+            set 
+            {
+                _modelName = value ?? String.Empty;
+            }
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "The containing type is mutable.")]

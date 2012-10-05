@@ -378,6 +378,23 @@ namespace System.Web.Http.OData.Query.Expressions
         }
         #endregion
 
+        // Issue: 477
+        [Theory]
+        [InlineData("indexof('hello', StringProp) gt UIntProp")]
+        [InlineData("indexof('hello', StringProp) gt ULongProp")]
+        [InlineData("indexof('hello', StringProp) gt UShortProp")]
+        [InlineData("indexof('hello', StringProp) gt NullableUShortProp")]
+        [InlineData("indexof('hello', StringProp) gt NullableUIntProp")]
+        [InlineData("indexof('hello', StringProp) gt NullableULongProp")]
+        public void ComparisonsInvolvingCastsAndNullableValues(string filter)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter);
+
+            RunFilters(filters,
+              new DataTypes(),
+              new { WithNullPropagation = false, WithoutNullPropagation = typeof(ArgumentNullException) });
+        }
+
         [Theory]
         [PropertyData("LongInputs")]
         public void LongInputs_CauseRecursionLimitExceededException(string filter)

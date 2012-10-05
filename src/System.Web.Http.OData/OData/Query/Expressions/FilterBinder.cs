@@ -282,7 +282,21 @@ namespace System.Web.Http.OData.Query.Expressions
                 }
                 else
                 {
-                    return Expression.Convert(source, conversionType);
+                    // if a cast is from Nullable<T> to Non-Nullable<T> we need to check if source is null
+                    if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True
+                        && IsNullable(source.Type) && !IsNullable(conversionType))
+                    {
+                        // source == null ? null : source.Value
+                        return
+                            Expression.Condition(
+                            test: CheckForNull(source),
+                            ifTrue: Expression.Constant(null, ToNullable(conversionType)),
+                            ifFalse: Expression.Convert(ExtractValueFromNullableExpression(source), ToNullable(conversionType)));
+                    }
+                    else
+                    {
+                        return Expression.Convert(source, conversionType);
+                    }
                 }
             }
         }

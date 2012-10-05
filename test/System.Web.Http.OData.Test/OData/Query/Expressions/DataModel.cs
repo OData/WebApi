@@ -67,11 +67,16 @@ namespace System.Web.Http.OData.Query.Expressions
         public float FloatProp { get; set; }
         public long LongProp { get; set; }
         public int IntProp { get; set; }
+        public string StringProp { get; set; }
 
         public ushort UShortProp { get; set; }
         public uint UIntProp { get; set; }
         public ulong ULongProp { get; set; }
         public char CharProp { get; set; }
+
+        public short? NullableShortProp { get; set; }
+        public int? NullableIntProp { get; set; }
+        public long? NullableLongProp { get; set; }
 
         public ushort? NullableUShortProp { get; set; }
         public uint? NullableUIntProp { get; set; }

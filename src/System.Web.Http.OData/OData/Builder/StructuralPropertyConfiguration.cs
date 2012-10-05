@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace System.Web.Http.OData.Builder
 {
+    /// <summary>
+    /// Base class for all structural property configurations.
+    /// </summary>
     public abstract class StructuralPropertyConfiguration : PropertyConfiguration
     {
         protected StructuralPropertyConfiguration(PropertyInfo property)
@@ -12,6 +15,9 @@ namespace System.Web.Http.OData.Builder
             OptionalProperty = IsNullable(property.PropertyType);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this property is optional or required.
+        /// </summary>
         public bool OptionalProperty { get; set; }
 
         private static bool IsNullable(Type type)

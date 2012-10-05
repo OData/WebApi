@@ -4,18 +4,15 @@ using System.Reflection;
 
 namespace System.Web.Http.OData.Builder
 {
+    /// <summary>
+    /// Used to configure a primitive property of an entity type or complex type.
+    /// This configuration functionality is exposed by the model builder Fluent API, see <see cref="ODataModelBuilder"/>.
+    /// </summary>
     public class PrimitivePropertyConfiguration : StructuralPropertyConfiguration
     {
-        private bool? _concurrencyToken;
-
         public PrimitivePropertyConfiguration(PropertyInfo property)
             : base(property)
         {
-        }
-
-        public bool ConcurrencyToken
-        {
-            get { return (bool)_concurrencyToken; }
         }
 
         public override PropertyKind Kind
@@ -28,25 +25,21 @@ namespace System.Web.Http.OData.Builder
             get { return PropertyInfo.PropertyType; }
         }
 
-        public PrimitivePropertyConfiguration IsConcurrencyToken() 
-        {
-            _concurrencyToken = true;
-            return this;
-        }
-
-        public PrimitivePropertyConfiguration IsConcurrencyToken(bool? concurrencyToken)
-        {
-            _concurrencyToken = concurrencyToken;
-            return this;
-        }
-
-        public PrimitivePropertyConfiguration IsOptional() 
+        /// <summary>
+        /// Configures the property to be optional.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public PrimitivePropertyConfiguration IsOptional()
         {
             OptionalProperty = true;
             return this;
         }
 
-        public PrimitivePropertyConfiguration IsRequired() 
+        /// <summary>
+        /// Configures the property to be required.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public PrimitivePropertyConfiguration IsRequired()
         {
             OptionalProperty = false;
             return this;

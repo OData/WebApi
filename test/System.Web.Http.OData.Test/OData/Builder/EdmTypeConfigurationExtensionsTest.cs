@@ -146,6 +146,28 @@ namespace System.Web.Http.OData.Builder
             Assert.False(car.IsAssignableFrom(sportbike));
         }
 
+        [Fact]
+        public void ThisAndBaseTypes_ReturnsThisType()
+        {
+            ODataModelBuilder builder = GetMockVehicleModel();
+            IEntityTypeConfiguration sportbike = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "sportbike").Single();
+
+            Assert.Contains(sportbike, sportbike.ThisAndBaseTypes());
+        }
+
+        [Fact]
+        public void ThisAndBaseTypes_ReturnsAllTheBaseTypes()
+        {
+            ODataModelBuilder builder = GetMockVehicleModel();
+            IEntityTypeConfiguration vehicle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "vehicle").Single();
+            IEntityTypeConfiguration motorcycle = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "motorcycle").Single();
+            IEntityTypeConfiguration sportbike = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.Name == "sportbike").Single();
+
+            Assert.Contains(vehicle, sportbike.ThisAndBaseTypes());
+            Assert.Contains(motorcycle, sportbike.ThisAndBaseTypes());
+            Assert.Contains(sportbike, sportbike.ThisAndBaseTypes());
+        }
+
         private static ODataModelBuilder GetMockVehicleModel()
         {
             Mock<IEntityTypeConfiguration> vehicle = new Mock<IEntityTypeConfiguration>();

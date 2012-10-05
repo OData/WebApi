@@ -19,7 +19,6 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void DefaultCtor_DoesntThrow()
         {
             NavigationLinksGenerationConvention convention = new NavigationLinksGenerationConvention();
-            Assert.Null(convention.PropertyNavigationRouteName);
         }
 
         [Fact]
@@ -63,6 +62,34 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void NavigationLinksGenerationConvention_GeneratesLinksWithCast_ForDerivedProperties()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Vehicle>("vehicles");
+            builder.EntitySet<Manufacturer>("manufacturers");
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
+            IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigationWithCast, "{controller}({parentid})/{entitytype}/{navigationproperty}");
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+
+            IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+
+            Uri uri = linkBuilder.BuildNavigationLink(
+                new EntityInstanceContext(model, vehiclesEdmEntitySet, carType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                carManufacturerProperty);
+
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
+        }
+
+        [Fact]
         public void Apply_AddsLinkBuilder_ForAllNavigationProperties()
         {
             // Arrange
@@ -86,6 +113,62 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void NavigationLinksGenerationConvention_GeneratesLinksWithoutCast_ForDeclaredProperties()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Car>("vehicles");
+            builder.EntitySet<Manufacturer>("manufacturers");
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
+            IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentid})/{navigationproperty}");
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+
+            IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+
+            Uri uri = linkBuilder.BuildNavigationLink(
+                new EntityInstanceContext(model, vehiclesEdmEntitySet, carType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                carManufacturerProperty);
+
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/Manufacturer", uri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void NavigationLinksGenerationConvention_GeneratesLinksWithoutCast_ForBaseProperties()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<SportBike>("vehicles");
+            builder.EntitySet<Manufacturer>("manufacturers");
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntitySet vehiclesEdmEntitySet = model.EntityContainers().Single().FindEntitySet("vehicles");
+            IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
+            IEdmNavigationProperty motorcycleManufacturerProperty = sportbikeType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentid})/{navigationproperty}");
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+
+            IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+
+            Uri uri = linkBuilder.BuildNavigationLink(
+                new EntityInstanceContext(model, vehiclesEdmEntitySet, sportbikeType, request.GetUrlHelper(), new SportBike { Model = 2009, Name = "Ninja" }),
+                motorcycleManufacturerProperty);
+
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Ninja')/Manufacturer", uri.AbsoluteUri);
+        }
+
+        [Fact]
         public void GenerateNavigationLink_GeneratesLink()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -101,18 +184,18 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             Uri uri =
-                new NavigationLinksGenerationConvention()
-                .GenerateNavigationLink(
-                    new EntityInstanceContext
-                    {
-                        EdmModel = model,
-                        EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
-                        EntitySet = edmEntitySet,
-                        EntityType = edmEntitySet.ElementType,
-                        UrlHelper = request.GetUrlHelper()
-                    },
-                    edmEntitySet.ElementType.NavigationProperties().Single(),
-                    orders);
+                NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
+                new EntityInstanceContext
+                {
+                    EdmModel = model,
+                    EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
+                    EntitySet = edmEntitySet,
+                    EntityType = edmEntitySet.ElementType,
+                    UrlHelper = request.GetUrlHelper()
+                },
+                edmEntitySet.ElementType.NavigationProperties().Single(),
+                orders,
+                includeCast: false);
 
             Assert.Equal("http://localhost/Orders(100)/Customer", uri.AbsoluteUri);
         }
@@ -133,18 +216,18 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "Customers" }));
 
             Uri uri =
-                new NavigationLinksGenerationConvention()
-                .GenerateNavigationLink(
-                    new EntityInstanceContext
-                    {
-                        EdmModel = model,
-                        EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
-                        EntitySet = edmEntitySet,
-                        EntityType = edmEntitySet.ElementType,
-                        UrlHelper = request.GetUrlHelper()
-                    },
-                    edmEntitySet.ElementType.NavigationProperties().Single(),
-                    orders);
+                NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
+                new EntityInstanceContext
+                {
+                    EdmModel = model,
+                    EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
+                    EntitySet = edmEntitySet,
+                    EntityType = edmEntitySet.ElementType,
+                    UrlHelper = request.GetUrlHelper()
+                },
+                edmEntitySet.ElementType.NavigationProperties().Single(),
+                orders,
+                includeCast: false);
 
             Assert.Equal("http://localhost/Orders(100)/Customer", uri.AbsoluteUri);
         }

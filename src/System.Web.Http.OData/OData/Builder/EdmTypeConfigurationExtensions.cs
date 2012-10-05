@@ -36,6 +36,13 @@ namespace System.Web.Http.OData.Builder
             return entity.BaseType == null ? entity.Keys : Keys(entity.BaseType);
         }
 
+        // Returns the base types, this type.
+        public static IEnumerable<IEntityTypeConfiguration> ThisAndBaseTypes(this IEntityTypeConfiguration entity)
+        {
+            Contract.Assert(entity != null);
+            return entity.BaseTypes().Concat(new[] { entity });
+        }
+
         // Returns the base types, this type and all the derived types of this type.
         public static IEnumerable<IEntityTypeConfiguration> ThisAndBaseAndDerivedTypes(this ODataModelBuilder modelBuilder, IEntityTypeConfiguration entity)
         {

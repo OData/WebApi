@@ -15,7 +15,7 @@ namespace System.Web.Http.OData
             return mockType.Object;
         }
 
-        private readonly List<PropertyInfo> _propertyInfos = new List<PropertyInfo>();
+        private readonly List<MockPropertyInfo> _propertyInfos = new List<MockPropertyInfo>();
 
         public MockType()
             : this("T")
@@ -27,7 +27,7 @@ namespace System.Web.Http.OData
             SetupGet(t => t.Name).Returns(typeName);
             SetupGet(t => t.BaseType).Returns(typeof(Object));
             SetupGet(t => t.Assembly).Returns(typeof(object).Assembly);
-            Setup(t => t.GetProperties(It.IsAny<BindingFlags>())).Returns(() => _propertyInfos.ToArray());
+            Setup(t => t.GetProperties(It.IsAny<BindingFlags>())).Returns(() => _propertyInfos.Select(p => p.Object).ToArray());
             Setup(t => t.Equals(It.IsAny<object>())).Returns<Type>(t => ReferenceEquals(Object, t));
             Setup(t => t.ToString()).Returns(typeName);
             Setup(t => t.Namespace).Returns(@namespace);
@@ -87,9 +87,9 @@ namespace System.Web.Http.OData
             return this;
         }
 
-        public PropertyInfo GetProperty(string name)
+        public MockPropertyInfo GetProperty(string name)
         {
-            return _propertyInfos.Single(p => p.Name == name);
+            return _propertyInfos.Single(p => p.Object.Name == name);
         }
 
         public MockType AsCollection()
@@ -97,7 +97,6 @@ namespace System.Web.Http.OData
             var mockCollectionType = new MockType();
 
             mockCollectionType.Setup(t => t.GetInterfaces()).Returns(new Type[] { typeof(IEnumerable<>).MakeGenericType(this) });
-            //mockCollectionType.Setup(t => t.GetInterfaces()).Returns(new[] { typeof(ICollection<>).MakeGenericType(this) });
 
             return mockCollectionType;
         }

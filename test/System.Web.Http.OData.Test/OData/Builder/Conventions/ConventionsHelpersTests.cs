@@ -115,6 +115,16 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void GetAllProperties_Ignores_IndexerProperties()
+        {
+            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
+
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object).Select(p => p.Name);
+            Assert.DoesNotContain("Item", properties);
+        }
+
+        [Fact]
         public void GetEntityKeyValue_SingleKey()
         {
             // Arrange
@@ -331,6 +341,19 @@ namespace System.Web.Http.OData.Builder.Conventions
         public GetProperties_Complex Derived_Complex { get; set; }
 
         public int[] Collection { get; private set; }
+
+        public string this[string str]
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 
     class GetProperties_Complex

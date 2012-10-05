@@ -10,6 +10,7 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
@@ -891,6 +892,24 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.NotNull(collectionProperty);
             Assert.True(collectionProperty.Type.IsCollection());
             Assert.Equal(collectionProperty.Type.AsCollection().ElementType().FullName(), "System.Version");
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_IgnoresIndexerProperties()
+        {
+            MockType type =
+                new MockType("ComplexType")
+                .Property<int>("Item");
+
+            MockPropertyInfo pi = type.GetProperty("Item");
+            pi.Setup(p => p.GetIndexParameters()).Returns(new[] { new Mock<ParameterInfo>().Object }); // make it indexer
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddComplexType(type);
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexType complexType = model.AssertHasComplexType(type);
+            Assert.Empty(complexType.Properties());
         }
 
         [Fact]

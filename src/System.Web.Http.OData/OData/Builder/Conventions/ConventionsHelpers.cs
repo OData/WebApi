@@ -71,6 +71,12 @@ namespace System.Web.Http.OData.Builder.Conventions
                 throw Error.ArgumentNull("propertyInfo");
             }
 
+            // ignore any indexer properties.
+            if (propertyInfo.GetIndexParameters().Any())
+            {
+                return false;
+            }
+
             if (propertyInfo.CanRead)
             {
                 // non-public getters are not valid properties

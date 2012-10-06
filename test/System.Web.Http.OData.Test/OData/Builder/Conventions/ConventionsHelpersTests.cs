@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.Http.OData.Builder.Conventions
@@ -23,6 +24,42 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { false, "false" },
                     { true, "true" },
                     { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "guid'dddddddd-dddd-dddd-dddd-dddddddddddd'" }
+                };
+            }
+        }
+
+        public static TheoryDataSet<object, string> GetUriRepresentationForValue_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<object, string>()
+                {
+                    { (bool)true, "true" },
+                    { (char)'1', "'1'" },
+                    { (char?)'1', "'1'" },
+                    { (string)"123", "'123'" },
+                    { (char[])new char[] { '1', '2', '3' }, "'123'" },
+                    { (int)123, "123" },
+                    { (short)123, "123" },
+                    { (long)123, "123L" },
+                    { (ushort)123, "123" },
+                    { (uint)123, "123L" },
+                    { (ulong)123, "123L" },
+                    { (int?)123, "123" },
+                    { (short?)123, "123" },
+                    { (long?)123, "123L" },
+                    { (ushort?)123, "123" },
+                    { (uint?)123, "123L" },
+                    { (ulong?)123, "123L" },
+                    { (float)123.123, "123.12f" },
+                    { (double)123.123, "123.123" },
+                    { (decimal)123.123, "123.123M" },
+                    { Guid.Empty, "guid'00000000-0000-0000-0000-000000000000'" },
+                    { DateTime.FromBinary(0), "datetime'0001-01-01T00:00:00'" },
+                    { TimeSpan.FromSeconds(86456), "time'P1DT56S'" },
+                    { DateTimeOffset.FromFileTime(0), "datetimeoffset'1600-12-31T16:00:00-08:00'" },
+                    { SimpleEnum.First, "'First'" },
+                    { FlagsEnum.One | FlagsEnum.Two, "'One%2C%20Two'" },
                 };
             }
         }
@@ -160,6 +197,56 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             // Assert
             Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);
+        }
+
+        [Fact]
+        public void GetEntityKeyValue_ThrowsForNullKeys()
+        {
+            // Arrange
+            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            var entityInstance = new { Key = (string)null };
+            PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
+
+            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            entityType.Setup(e => e.Keys).Returns(keys);
+            entityType.Setup(e => e.FullName).Returns("FullName");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object),
+                "Key property 'Key' of type 'FullName' is null. Key properties cannot have null values.");
+        }
+
+        [Fact]
+        public void GetEntityKeyValue_ThrowsForNullKeys_WithMultipleKeys()
+        {
+            // Arrange
+            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            var entityInstance = new { Key1 = "abc", Key2 = "def", Key3 = (string)null };
+            PrimitivePropertyConfiguration[] keys = 
+            {
+                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key1"), structuralType),
+                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key2"), structuralType),
+                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), structuralType),
+            };
+
+            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            entityType.Setup(e => e.Keys).Returns(keys);
+            entityType.Setup(e => e.FullName).Returns("EntityType");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, entityType.Object),
+                "Key property 'Key3' of type 'EntityType' is null. Key properties cannot have null values.");
+        }
+
+        [Theory]
+        [PropertyData("GetUriRepresentationForValue_DataSet")]
+        public void GetUriRepresentationForValue_Works(object value, string result)
+        {
+            Assert.Equal(
+                result,
+                ConventionsHelpers.GetUriRepresentationForValue(value));
         }
 
         private sealed class IsCollection_with_Collections_TestClass : List<bool>

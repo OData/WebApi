@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.OData.Query;
 
@@ -48,7 +49,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             // TODO: BUG 453795: reflection cleanup
             if (entityTypeConfiguration.Keys.Count() == 1)
             {
-                return GetUriRepresentationForKeyValue(entityTypeConfiguration.Keys.First().PropertyInfo, entityContext.EntityInstance);
+                return GetUriRepresentationForKeyValue(entityTypeConfiguration.Keys.First().PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration);
             }
             else
             {
@@ -57,7 +58,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     entityTypeConfiguration
                         .Keys
                         .Select(
-                            key => String.Format(CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key.PropertyInfo, entityContext.EntityInstance))));
+                            key => String.Format(CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key.PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration))));
             }
         }
 
@@ -159,12 +160,30 @@ namespace System.Web.Http.OData.Builder.Conventions
             return false;
         }
 
-        private static string GetUriRepresentationForKeyValue(PropertyInfo key, object entityInstance)
+        // gets the primitive odata uri representation.
+        public static string GetUriRepresentationForValue(object value)
+        {
+            Contract.Assert(value != null);
+            Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(value.GetType()) != null);
+
+            value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
+            return ODataUriBuilder.GetUriRepresentation(value);
+        }
+
+        private static string GetUriRepresentationForKeyValue(PropertyInfo key, object entityInstance, IEntityTypeConfiguration entityType)
         {
             Contract.Assert(key != null);
             Contract.Assert(entityInstance != null);
+            Contract.Assert(entityType != null);
 
-            return ODataUriBuilder.GetUriRepresentation(key.GetValue(entityInstance, null));
+            object value = key.GetValue(entityInstance, null);
+
+            if (value == null)
+            {
+                throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, entityType.FullName);
+            }
+
+            return GetUriRepresentationForValue(value);
         }
 
         private class PropertyEqualityComparer : IEqualityComparer<PropertyInfo>

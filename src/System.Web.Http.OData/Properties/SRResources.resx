@@ -438,4 +438,7 @@
   <data name="TargetEntityTypeMissing" xml:space="preserve">
     <value>Could not find the target entity type for the navigation property '{0}' on entity type '{1}'.</value>
   </data>
+  <data name="KeyValueCannotBeNull" xml:space="preserve">
+    <value>Key property '{0}' of type '{1}' is null. Key properties cannot have null values.</value>
+  </data>
 </root>

@@ -502,6 +502,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Key property &apos;{0}&apos; of type &apos;{1}&apos; is null. Key properties cannot have null values..
+        /// </summary>
+        internal static string KeyValueCannotBeNull {
+            get {
+                return ResourceManager.GetString("KeyValueCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The LambdaExpression must have exactly one parameter..
         /// </summary>
         internal static string LambdaExpressionMustHaveExactlyOneParameter {

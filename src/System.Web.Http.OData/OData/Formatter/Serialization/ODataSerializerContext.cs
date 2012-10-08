@@ -17,16 +17,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public UrlHelper UrlHelper { get; set; }
 
         /// <summary>
-        /// Gets or sets the root projection node.
-        /// </summary>
-        public ODataQueryProjectionNode RootProjectionNode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the current projection node.
-        /// </summary>
-        public ODataQueryProjectionNode CurrentProjectionNode { get; set; }
-
-        /// <summary>
         /// Gets or sets the entity set.
         /// </summary>
         public IEdmEntitySet EntitySet { get; set; }

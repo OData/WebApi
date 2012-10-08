@@ -124,33 +124,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         Url = linkBuilder.BuildNavigationLink(context, navProperty)
                     };
 
-                    ODataQueryProjectionNode expandNode = null;
-                    if (writeContext.CurrentProjectionNode != null)
-                    {
-                        expandNode = writeContext.CurrentProjectionNode.Expands.FirstOrDefault(p => p.Name == navProperty.Name);
-                    }
-
-                    if (expandNode != null && propertyValue != null)
-                    {
-                        writer.WriteStart(navigationLink);
-                        ODataSerializer serializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
-                        if (serializer == null)
-                        {
-                            throw Error.NotSupported(SRResources.TypeCannotBeSerialized, navProperty.Type.FullName(), typeof(ODataMediaTypeFormatter).Name);
-                        }
-
-                        ODataSerializerContext childWriteContext = new ODataSerializerContext();
-                        childWriteContext.UrlHelper = writeContext.UrlHelper;
-                        childWriteContext.EntitySet = currentEntitySet;
-                        childWriteContext.RootProjectionNode = writeContext.RootProjectionNode;
-                        childWriteContext.CurrentProjectionNode = expandNode;
-                        childWriteContext.ServiceOperationName = writeContext.ServiceOperationName;
-                        childWriteContext.Request = writeContext.Request;
-
-                        serializer.WriteObjectInline(propertyValue, writer, childWriteContext);
-                        writer.WriteEnd();
-                    }
-
                     writer.WriteStart(navigationLink);
                     writer.WriteEnd();
                 }
@@ -159,21 +132,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private IEnumerable<ODataProperty> CreatePropertyBag(object graph, ODataSerializerContext writeContext)
         {
-            IEnumerable<IEdmStructuralProperty> selectProperties;
-            if (writeContext.CurrentProjectionNode != null && writeContext.CurrentProjectionNode.Selects.Any())
-            {
-                selectProperties = _edmEntityTypeReference
-                                    .StructuralProperties()
-                                    .Where(p => writeContext.CurrentProjectionNode.Selects.Any(node => node.Name == p.Name));
-            }
-            else
-            {
-                selectProperties = _edmEntityTypeReference.StructuralProperties();
-            }
+            IEnumerable<IEdmStructuralProperty> edmProperties = _edmEntityTypeReference.StructuralProperties();
 
             List<ODataProperty> properties = new List<ODataProperty>();
-
-            foreach (IEdmStructuralProperty property in selectProperties)
+            foreach (IEdmStructuralProperty property in edmProperties)
             {
                 ODataSerializer serializer = SerializerProvider.GetEdmTypeSerializer(property.Type);
                 if (serializer == null)

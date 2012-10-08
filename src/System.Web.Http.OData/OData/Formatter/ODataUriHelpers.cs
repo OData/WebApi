@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SyntacticAst;
@@ -12,54 +10,6 @@ namespace System.Web.Http.OData.Formatter
 {
     internal static class ODataUriHelpers
     {
-        // Build the projection tree given a select and expand and the entity set.
-        // TODO: Bug 467621: replace this with the ODataUriParser functionality
-        public static ODataQueryProjectionNode GetODataQueryProjectionNode(string selectQuery, string expandQuery, IEdmEntitySet entitySet)
-        {
-            IEnumerable<string> selects = (selectQuery ?? String.Empty).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
-            IEnumerable<string> expands = (expandQuery ?? String.Empty).Split(new[] { ',', }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
-
-            ODataQueryProjectionNode rootProjectionNode = new ODataQueryProjectionNode { Name = String.Empty, NodeType = entitySet.ElementType };
-
-            foreach (string expand in expands)
-            {
-                ODataQueryProjectionNode currentProjectionNode = rootProjectionNode;
-
-                IEnumerable<string> expandPath = expand.Split('/');
-                foreach (string property in expandPath)
-                {
-                    ODataQueryProjectionNode nextNode = currentProjectionNode.Expands.SingleOrDefault(node => node.Name == property);
-                    if (nextNode == null)
-                    {
-                        nextNode = new ODataQueryProjectionNode { Name = property, NodeType = (currentProjectionNode.NodeType as IEdmEntityType).Properties().SingleOrDefault(p => p.Name == property).Type.Definition };
-                        currentProjectionNode.Expands.Add(nextNode);
-                    }
-
-                    currentProjectionNode = nextNode;
-                }
-            }
-
-            foreach (string select in selects)
-            {
-                ODataQueryProjectionNode currentProjectionNode = rootProjectionNode;
-
-                IEnumerable<string> selectPath = select.Split('/');
-                foreach (string property in selectPath)
-                {
-                    ODataQueryProjectionNode nextNode = currentProjectionNode.Expands.SingleOrDefault(node => node.Name == property);
-                    if (nextNode == null)
-                    {
-                        nextNode = new ODataQueryProjectionNode { Name = property, NodeType = (currentProjectionNode.NodeType as IEdmEntityType).Properties().SingleOrDefault(p => p.Name == property).Type.Definition };
-                        currentProjectionNode.Selects.Add(nextNode);
-                    }
-
-                    currentProjectionNode = nextNode;
-                }
-            }
-
-            return rootProjectionNode;
-        }
-
         /// <summary>
         /// Tries to get entity set.
         /// </summary>

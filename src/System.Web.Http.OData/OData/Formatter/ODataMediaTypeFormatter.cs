@@ -287,13 +287,6 @@ namespace System.Web.Http.OData.Formatter
                 IEdmEntitySet targetEntitySet = null;
                 ODataUriHelpers.TryGetEntitySetAndEntityType(Request.RequestUri, Model, out targetEntitySet);
 
-                ODataQueryProjectionNode rootProjectionNode = null;
-                if (targetEntitySet != null)
-                {
-                    // TODO: Bug 467621: Move to ODataUriParser once it is done.
-                    rootProjectionNode = ODataUriHelpers.GetODataQueryProjectionNode(queryStringValues["$select"], queryStringValues["$expand"], targetEntitySet);
-                }
-
                 // serialize a response
                 Uri baseAddress = new Uri(Request.RequestUri, Request.GetConfiguration().VirtualPathRoot);
 
@@ -326,15 +319,13 @@ namespace System.Web.Http.OData.Formatter
                 using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, ODataDeserializerProvider.EdmModel))
                 {
                     ODataSerializerContext writeContext = new ODataSerializerContext()
-                                                                    {
-                                                                        EntitySet = targetEntitySet,
-                                                                        UrlHelper = urlHelper,
-                                                                        RootProjectionNode = rootProjectionNode,
-                                                                        CurrentProjectionNode = rootProjectionNode,
-                                                                        ServiceOperationName = operationName,
-                                                                        SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
-                                                                        Request = Request
-                                                                    };
+                    {
+                        EntitySet = targetEntitySet,
+                        UrlHelper = urlHelper,
+                        ServiceOperationName = operationName,
+                        SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
+                        Request = Request
+                    };
 
                     serializer.WriteObject(value, messageWriter, writeContext);
                 }

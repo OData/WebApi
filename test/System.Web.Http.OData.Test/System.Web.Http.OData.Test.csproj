@@ -232,6 +232,7 @@
     <Compile Include="TestCommon\ReferenceDepthContext.cs" />
     <Compile Include="TestCommon\SupportedTypes.cs" />
     <Compile Include="TestCommon\TypeInitializer.cs" />
+    <Compile Include="TypeHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BaselineResource.resx">

@@ -13,6 +13,53 @@ namespace System.Web.Http
 {
     internal static class TypeHelper
     {
+        // Gets the collection element type.
+        public static Type GetInnerElementType(this Type type)
+        {
+            Type elementType;
+            type.IsCollection(out elementType);
+            Contract.Assert(elementType != null);
+
+            return elementType;
+        }
+
+        public static bool IsCollection(this Type type)
+        {
+            Type elementType;
+            return type.IsCollection(out elementType);
+        }
+
+        public static bool IsCollection(this Type type, out Type elementType)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+
+            elementType = type;
+
+            // see if this type should be ignored.
+            if (type == typeof(string))
+            {
+                return false;
+            }
+
+            Type collectionInterface
+                = type.GetInterfaces()
+                    .Union(new[] { type })
+                    .FirstOrDefault(
+                        t => t.IsGenericType
+                             && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+            if (collectionInterface != null)
+            {
+                elementType = collectionInterface.GetGenericArguments().Single();
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Determines whether the given type is a primitive type or
         /// is a <see cref="string"/>, <see cref="DateTime"/>, <see cref="Decimal"/>,

@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
@@ -62,31 +60,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { FlagsEnum.One | FlagsEnum.Two, "'One%2C%20Two'" },
                 };
             }
-        }
-
-        [Theory]
-        [InlineData(typeof(ICollection<string>), typeof(string))]
-        [InlineData(typeof(IList<string>), typeof(string))]
-        [InlineData(typeof(List<int>), typeof(int))]
-        [InlineData(typeof(IsCollection_with_Collections_TestClass), typeof(bool))]
-        [InlineData(typeof(IEnumerable<int>), typeof(int))]
-        [InlineData(typeof(int[]), typeof(int))]
-        [InlineData(typeof(MyCustomCollection), typeof(int))]
-        public void IsCollection_with_Collections(Type collectionType, Type elementType)
-        {
-            Type type;
-            Assert.True(collectionType.IsCollection(out type));
-            Assert.Equal(elementType, type);
-        }
-
-        [Theory]
-        [InlineData(typeof(object))]
-        [InlineData(typeof(ICollection))]
-        [InlineData(typeof(IEnumerable))]
-        [InlineData(typeof(string))]
-        public void IsCollection_with_NonCollections(Type type)
-        {
-            Assert.False(type.IsCollection());
         }
 
         [Fact]
@@ -286,10 +259,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                 ConventionsHelpers.GetUriRepresentationForValue(value));
         }
 
-        private sealed class IsCollection_with_Collections_TestClass : List<bool>
-        {
-        }
-
         private class GetKeyProperty_validEntityType_TestClass_Id
         {
             public int Id { get; set; }
@@ -359,9 +328,5 @@ namespace System.Web.Http.OData.Builder.Conventions
     class GetProperties_Complex
     {
         public int A { get; set; }
-    }
-
-    class MyCustomCollection : List<int>
-    {
     }
 }

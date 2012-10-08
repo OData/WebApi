@@ -963,6 +963,46 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmComplexType complexType = model.AssertHasComplexType(new { ComplexProperty = default(string) }.GetType());
             complexType.AssertHasPrimitiveProperty(model, "ComplexProperty", EdmPrimitiveTypeKind.String, isNullable: true);
         }
+
+        [Theory]
+        [InlineData(typeof(object[]))]
+        [InlineData(typeof(IEnumerable<object>))]
+        [InlineData(typeof(List<object>))]
+        public void ObjectCollectionsAreIgnoredByDefault(Type propertyType)
+        {
+            MockType type =
+                new MockType("entity")
+                .Property<int>("ID")
+                .Property(propertyType, "Collection");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            var entityType = builder.AddEntity(type);
+            builder.AddEntitySet("entityset", entityType);
+
+            IEdmModel model = builder.GetEdmModel();
+            Assert.Equal(2, model.SchemaElements.Count());
+            var entityEdmType = model.AssertHasEntitySet("entityset", type);
+        }
+
+        [Fact]
+        public void CanMapObjectArrayAsAComplexProperty()
+        {
+            MockType type =
+                new MockType("entity")
+                .Property<int>("ID")
+                .Property<object[]>("Collection");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            var entityType = builder.AddEntity(type);
+            entityType.AddCollectionProperty(type.GetProperty("Collection"));
+            builder.AddEntitySet("entityset", entityType);
+
+            IEdmModel model = builder.GetEdmModel();
+            Assert.Equal(3, model.SchemaElements.Count());
+            var entityEdmType = model.AssertHasEntitySet("entityset", type);
+            model.AssertHasComplexType(typeof(object));
+            entityEdmType.AssertHasCollectionProperty(model, "Collection", typeof(object), isNullable: true);
+        }
     }
 
     public class Product

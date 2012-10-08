@@ -14,8 +14,6 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
-        private static HashSet<Type> _ignoredCollectionTypes = new HashSet<Type>(new Type[] { typeof(string) });
-
         public static string GetEntityKeyValue(EntityInstanceContext entityContext, IEntityTypeConfiguration entityTypeConfiguration)
         {
             // TODO: BUG 453795: reflection cleanup
@@ -96,46 +94,13 @@ namespace System.Web.Http.OData.Builder.Conventions
                 throw Error.ArgumentNull("type");
             }
 
+            Type elementType;
+
             return !(type.IsGenericTypeDefinition
                      || type.IsNested
                      || type.IsPointer
-                     || type == typeof(object));
-        }
-
-        public static bool IsCollection(this Type type)
-        {
-            return type.IsCollection(out type);
-        }
-
-        public static bool IsCollection(this Type type, out Type elementType)
-        {
-            if (type == null)
-            {
-                throw Error.ArgumentNull("type");
-            }
-
-            elementType = type;
-
-            // see if this type should be ignored.
-            if (_ignoredCollectionTypes.Contains(type))
-            {
-                return false;
-            }
-
-            Type collectionInterface
-                = type.GetInterfaces()
-                    .Union(new[] { type })
-                    .FirstOrDefault(
-                        t => t.IsGenericType
-                             && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-
-            if (collectionInterface != null)
-            {
-                elementType = collectionInterface.GetGenericArguments().Single();
-                return true;
-            }
-
-            return false;
+                     || type == typeof(object)
+                     || (type.IsCollection(out elementType) && elementType == typeof(object)));
         }
 
         // gets the primitive odata uri representation.

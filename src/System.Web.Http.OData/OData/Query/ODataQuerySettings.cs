@@ -54,7 +54,7 @@ namespace System.Web.Http.OData.Query
         /// Gets or sets the maximum number of query results to return.
         /// </summary>
         /// <value>
-        /// The maximum number of query results to to return, or <c>null</c> if there is no limit.
+        /// The maximum number of query results to return, or <c>null</c> if there is no limit.
         /// </value>
         public int? ResultLimit { get; set; }
     }

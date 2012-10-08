@@ -194,9 +194,37 @@ namespace System.Web.Http.OData.Formatter
 
                     XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
                     XElement[] links = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom")).ToArray();
-                    Assert.Equal(1, links.Length);
                     Assert.Equal("self", links.First().Attribute("rel").Value);
                     Assert.Equal(baseAddress + "People", links.First().Attribute("href").Value);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetFeedInODataAtomFormat_LimitsResults()
+        {
+            _config.Formatters.Insert(0, _serverFormatter);
+
+            using (HttpServer host = new HttpServer(_config))
+            {
+                _client = new HttpClient(host);
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri(baseAddress + "People?$orderby=Name"));
+                requestMessage.Headers.Accept.Add(_atomMediaType);
+                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                {
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
+                    XElement[] entries = xml.Elements(XName.Get("entry", "http://www.w3.org/2005/Atom")).ToArray();
+                    XElement nextPageLink = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom"))
+                        .Where(link => link.Attribute(XName.Get("rel")).Value == "next")
+                        .SingleOrDefault();
+
+                    // Assert the ResultLimit correctly limits three results to two
+                    Assert.Equal(2, entries.Length);
+                    // Assert there is a next page link
+                    Assert.NotNull(nextPageLink);
                 }
             }
         }

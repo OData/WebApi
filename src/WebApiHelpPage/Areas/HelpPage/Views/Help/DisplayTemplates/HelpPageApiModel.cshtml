@@ -30,7 +30,7 @@
         if (hasRequestSamples)
         {
             <h3>Request body formats</h3>
-            @Html.DisplayFor(apiModel => apiModel.SampleRequests, "Samples", new { sampleClass = "request" })
+            @Html.DisplayFor(apiModel => apiModel.SampleRequests, "Samples")
         }
     } 
        
@@ -38,16 +38,6 @@
     {      
         <h2>Response Information</h2> 
         <h3>Response body formats</h3>
-        @Html.DisplayFor(apiModel => apiModel.SampleResponses, "Samples", new { sampleClass = "response" })
+        @Html.DisplayFor(apiModel => apiModel.SampleResponses, "Samples")
     }
-</div>    
-<br />
-@if (HttpContext.Current.IsDebuggingEnabled && Model.ErrorMessages.Count > 0)
-{
-    foreach (string errorMessage in Model.ErrorMessages)
-    {
-        <div class="warning-message-container"> 
-            <p>@errorMessage</p>
-        </div>
-    }
-}
+</div>

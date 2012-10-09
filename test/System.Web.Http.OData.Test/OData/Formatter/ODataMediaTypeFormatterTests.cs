@@ -96,6 +96,23 @@ namespace System.Web.Http.OData.Formatter
             Assert.Equal(headervalues, new string[] { expectedDataServiceVersion + ";" });
         }
 
+        [Theory]
+        [InlineData("application/atom+xml")]
+        [InlineData("application/json")]
+        [InlineData("application/xml")]
+        public void SetDefaultContentHeaders_SetsRightContentTypeCharSet(string mediaType)
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpContentHeaders contentHeaders = new StringContent("").Headers;
+
+            new ODataMediaTypeFormatter()
+                .GetPerRequestFormatterInstance(typeof(int), request, MediaTypeHeaderValue.Parse(mediaType))
+                .SetDefaultContentHeaders(typeof(int), contentHeaders, MediaTypeHeaderValue.Parse(mediaType));
+
+            Assert.NotNull(contentHeaders.ContentType.CharSet);
+            Assert.Equal("utf-8", contentHeaders.ContentType.CharSet);
+        }
+
         [Fact]
         public void TryGetInnerTypeForDelta_ChangesRefToGenericParameter_ForDeltas()
         {

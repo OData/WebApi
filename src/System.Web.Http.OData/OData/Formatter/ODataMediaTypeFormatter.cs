@@ -140,6 +140,7 @@ namespace System.Web.Http.OData.Formatter
                 if (String.Equals("Content-Type", pair.Key, StringComparison.OrdinalIgnoreCase))
                 {
                     headers.ContentType = MediaTypeHeaderValue.Parse(pair.Value);
+                    headers.ContentType.CharSet = Encoding.UTF8.WebName;
                 }
                 else
                 {

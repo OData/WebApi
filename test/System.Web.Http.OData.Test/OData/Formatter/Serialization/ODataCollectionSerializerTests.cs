@@ -53,5 +53,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             Assert.Equal(elements, new int[] { 1, 2, 3 });
         }
+
+        [Fact]
+        public void CreateProperty_ReturnsODataProperty_ForNullValue()
+        {
+            var property = _serializer.CreateProperty(null, "TestCollection", new ODataSerializerContext());
+
+            Assert.NotNull(property);
+            Assert.Null(property.Value);
+        }
     }
 }

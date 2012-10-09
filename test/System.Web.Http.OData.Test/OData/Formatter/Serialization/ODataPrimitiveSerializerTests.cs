@@ -112,6 +112,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Equal(odataProperty.Value, 20);
         }
 
+        [Fact]
+        public void CreateProperty_ReturnsODataProperty_ForNullValue()
+        {
+            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string));
+            var serializer = new ODataPrimitiveSerializer(edmPrimitiveType);
+            var property = serializer.CreateProperty(null, "elementName", new ODataSerializerContext());
+
+            Assert.NotNull(property);
+            Assert.Null(property.Value);
+        }
+
         [Theory]
         [PropertyData("EdmPrimitiveData")]
         [PropertyData("NonEdmPrimitiveData")]

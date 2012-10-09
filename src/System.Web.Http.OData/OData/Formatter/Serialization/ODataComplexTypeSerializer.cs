@@ -47,11 +47,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            List<ODataProperty> propertyCollection = null;
-
-            if (graph != null)
+            if (graph == null)
             {
-                propertyCollection = new List<ODataProperty>();
+                return new ODataProperty() { Name = elementName, Value = null };
+            }
+            else
+            {
+                List<ODataProperty> propertyCollection = new List<ODataProperty>();
                 foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
                 {
                     IEdmTypeReference propertyType = property.Type;
@@ -66,10 +68,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                     propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
                 }
-            }
-
-            if (propertyCollection != null)
-            {
                 return new ODataProperty()
                 {
                     Name = elementName,
@@ -79,10 +77,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         TypeName = _edmComplexType.FullName()
                     }
                 };
-            }
-            else
-            {
-                return null;
             }
         }
     }

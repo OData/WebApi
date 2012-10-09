@@ -69,7 +69,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable != null)
+            if (enumerable == null)
+            {
+                return new ODataProperty() { Name = elementName, Value = null };
+            }
+            else
             {
                 ArrayList valueCollection = new ArrayList();
 
@@ -90,8 +94,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 // Also, note that TypeName is an optional property for ODataCollectionValue
                 return new ODataProperty() { Name = elementName, Value = new ODataCollectionValue { Items = valueCollection } };
             }
-
-            return null;
         }
     }
 }

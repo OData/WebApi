@@ -52,5 +52,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Tuple.Create("Country", "United States"),
                     Tuple.Create("ZipCode","98052") });
         }
+
+        [Fact]
+        public void CreateProperty_ReturnsODataProperty_ForNullValue()
+        {
+            var property = _serializer.CreateProperty(null, "ComplexElement", new ODataSerializerContext());
+
+            Assert.NotNull(property);
+            Assert.Null(property.Value);
+        }
     }
 }

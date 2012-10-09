@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -25,6 +26,9 @@ namespace System.Web.Http.OData
         private static MethodInfo _enumerableEmptyAnyMethod = GenericMethodOf(_ => Enumerable.Any<int>(default(IEnumerable<int>)));
         private static MethodInfo _enumerableNonEmptyAnyMethod = GenericMethodOf(_ => Enumerable.Any<int>(default(IEnumerable<int>), default(Func<int, bool>)));
         private static MethodInfo _enumerableAllMethod = GenericMethodOf(_ => Enumerable.All<int>(default(IEnumerable<int>), default(Func<int, bool>)));
+
+        private static MethodInfo _enumerableOfTypeMethod = GenericMethodOf(_ => Enumerable.OfType<int>(default(IEnumerable)));
+        private static MethodInfo _queryableOfTypeMethod = GenericMethodOf(_ => Queryable.OfType<int>(default(IQueryable)));
 
         public static MethodInfo QueryableOrderByGeneric
         {
@@ -89,6 +93,16 @@ namespace System.Web.Http.OData
         public static MethodInfo EnumerableAllGeneric
         {
             get { return _enumerableAllMethod; }
+        }
+
+        public static MethodInfo EnumerableOfType
+        {
+            get { return _enumerableOfTypeMethod; }
+        }
+
+        public static MethodInfo QueryableOfType
+        {
+            get { return _queryableOfTypeMethod; }
         }
 
         private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

@@ -136,6 +136,9 @@ namespace System.Web.Http.OData.Query.Expressions
                     case QueryNodeKind.CollectionPropertyAccess:
                         return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
 
+                    case QueryNodeKind.EntityCollectionCast:
+                        return BindEntityCollectionCastNode(node as EntityCollectionCastNode);
+
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -178,6 +181,9 @@ namespace System.Web.Http.OData.Query.Expressions
                     case QueryNodeKind.All:
                         return BindAllNode(node as AllNode);
 
+                    case QueryNodeKind.SingleEntityCast:
+                        return BindSingleEntityCastNode(node as SingleEntityCastNode);
+
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -185,6 +191,61 @@ namespace System.Web.Http.OData.Query.Expressions
             else
             {
                 throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        private Expression BindSingleEntityCastNode(SingleEntityCastNode node)
+        {
+            IEdmEntityTypeReference entity = node.EntityTypeReference;
+            Contract.Assert(entity != null, "NS casts can contain only entity types");
+
+            Type clrType = EdmLibHelpers.GetClrType(entity, _model);
+
+            Expression source;
+            if (node.Source == null)
+            {
+                source = _lambdaParameters[ODataItParameterName];
+            }
+            else
+            {
+                source = Bind(node.Source);
+            }
+
+            return Expression.TypeAs(source, clrType);
+        }
+
+        private Expression BindEntityCollectionCastNode(EntityCollectionCastNode node)
+        {
+            IEdmEntityTypeReference entity = node.EntityItemType;
+            Contract.Assert(entity != null, "NS casts can contain only entity types");
+
+            Type clrType = EdmLibHelpers.GetClrType(entity, _model);
+
+            Expression source;
+            if (node.Source == null)
+            {
+                source = _lambdaParameters[ODataItParameterName];
+            }
+            else
+            {
+                source = Bind(node.Source);
+            }
+
+            return OfType(source, clrType);
+        }
+
+        private static Expression OfType(Expression source, Type type)
+        {
+            Contract.Assert(source != null);
+            Contract.Assert(type != null);
+
+            if (IsIQueryable(source.Type))
+            {
+                return Expression.Call(null, ExpressionHelperMethods.QueryableOfType.MakeGenericMethod(type), source);
+            }
+            else
+            {
+                return Expression.Call(null, ExpressionHelperMethods.EnumerableOfType.MakeGenericMethod(type), source);
             }
         }
 

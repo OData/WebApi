@@ -93,4 +93,14 @@ namespace System.Web.Http.OData.Query.Expressions
 
         public string Inaccessible() { return String.Empty; }
     }
+
+    public class DerivedProduct : Product
+    {
+        public string DerivedProductName { get; set; }
+    }
+
+    public class DerivedCategory : Category
+    {
+        public string DerivedCategoryName { get; set; }
+    }
 }

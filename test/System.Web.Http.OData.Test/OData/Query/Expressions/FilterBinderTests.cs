@@ -1313,6 +1313,112 @@ namespace System.Web.Http.OData.Query.Expressions
 
         #endregion
 
+        #region Casts
+
+        [Fact]
+        public void NSCast_OnEnumerableEntityCollection_GeneratesExpression_WithOfTypeOnEnumerable()
+        {
+            var filters = VerifyQueryDeserialization(
+                "Category/EnumerableProducts/System.Web.Http.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
+                "$it => $it.Category.EnumerableProducts.OfType().Any(p => (p.ProductName == \"ProductName\"))",
+                NotTesting);
+
+            Assert.NotNull(filters.WithoutNullPropagation);
+        }
+
+        [Fact]
+        public void NSCast_OnQueryableEntityCollection_GeneratesExpression_WithOfTypeOnQueryable()
+        {
+            var filters = VerifyQueryDeserialization(
+                "Category/QueryableProducts/System.Web.Http.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
+                "$it => $it.Category.QueryableProducts.OfType().Any(p => (p.ProductName == \"ProductName\"))",
+                NotTesting);
+        }
+
+        [Fact]
+        public void NSCast_OnEntityCollection_CanAccessDerivedInstanceProperty()
+        {
+            var filters = VerifyQueryDeserialization(
+                "Category/Products/System.Web.Http.OData.Query.Expressions.DerivedProduct/any(p: p/DerivedProductName eq 'DerivedProductName')");
+
+            RunFilters(
+                filters,
+                new Product { Category = new Category { Products = new Product[] { new DerivedProduct { DerivedProductName = "DerivedProductName" } } } },
+                new { WithNullPropagation = true, WithoutNullPropagation = true });
+
+            RunFilters(
+                filters,
+                new Product { Category = new Category { Products = new Product[] { new DerivedProduct { DerivedProductName = "NotDerivedProductName" } } } },
+                new { WithNullPropagation = false, WithoutNullPropagation = false });
+        }
+
+        [Fact]
+        public void NSCast_OnSingleEntity_GeneratesExpression_WithAsOperator()
+        {
+            var filters = VerifyQueryDeserialization(
+                "System.Web.Http.OData.Query.Expressions.Product/ProductName eq 'ProductName'",
+                "$it => (($it As Product).ProductName == \"ProductName\")",
+                NotTesting);
+        }
+
+        [Theory]
+        [InlineData("System.Web.Http.OData.Query.Expressions.Product/ProductName eq 'ProductName'")]
+        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'DerivedProductName'")]
+        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
+        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/System.Web.Http.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
+        public void Inheritance_WithDerivedInstance(string filter)
+        {
+            var filters = VerifyQueryDeserialization<DerivedProduct>(filter);
+
+            RunFilters<DerivedProduct>(filters,
+              new DerivedProduct { Category = new DerivedCategory { CategoryID = 123 }, ProductName = "ProductName", DerivedProductName = "DerivedProductName" },
+              new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
+        [Theory]
+        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'ProductName'")]
+        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
+        [InlineData("System.Web.Http.OData.Query.Expressions.DerivedProduct/Category/System.Web.Http.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
+        public void Inheritance_WithBaseInstance(string filter)
+        {
+            var filters = VerifyQueryDeserialization<Product>(filter);
+
+            RunFilters<Product>(filters,
+              new Product(),
+              new { WithNullPropagation = false, WithoutNullPropagation = typeof(NullReferenceException) });
+        }
+
+        [Fact]
+        public void CastToNonDerivedType_Throws()
+        {
+            Assert.Throws<ODataException>(
+                () => VerifyQueryDeserialization<Product>("System.Web.Http.OData.Query.Expressions.DerivedCategory/CategoryID eq 123"),
+                "Encountered invalid type cast. 'System.Web.Http.OData.Query.Expressions.DerivedCategory' is not assignable from 'System.Web.Http.OData.Query.Expressions.Product'.");
+        }
+
+        [Theory]
+        [InlineData("Edm.Int32 eq 123", "Edm.Int32")]
+        [InlineData("ProductName/Edm.String eq 123", "Edm.String")]
+        public void CastToNonEntityType_Throws(string filter, string cast)
+        {
+            Assert.Throws<ODataException>(
+                () => VerifyQueryDeserialization<Product>(filter),
+                Error.Format("The child type '{0}' in a cast was not an entity type. Casts can only be performed on entity types.", cast));
+        }
+
+        [Theory]
+        [InlineData("Edm.NonExistentType eq 123")]
+        [InlineData("Category/Edm.NonExistentType eq 123")]
+        [InlineData("Category/Products/Edm.NonExistentType eq 123")]
+        public void CastToNonExistantType_Throws(string filter)
+        {
+            Assert.Throws<ODataException>(
+                () => VerifyQueryDeserialization<Product>(filter),
+                "The child type 'Edm.NonExistentType' in a cast was not an entity type. Casts can only be performed on entity types.");
+        }
+
+        #endregion
+
         [Theory]
         [InlineData("UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
         [InlineData("ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]

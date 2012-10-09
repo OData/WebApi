@@ -47,16 +47,16 @@ namespace System.Web.Http.OData.Builder.Conventions
         public static string GetEntityKeyValue(EntityInstanceContext entityContext, IEntityTypeConfiguration entityTypeConfiguration)
         {
             // TODO: BUG 453795: reflection cleanup
-            if (entityTypeConfiguration.Keys.Count() == 1)
+            if (entityTypeConfiguration.Keys().Count() == 1)
             {
-                return GetUriRepresentationForKeyValue(entityTypeConfiguration.Keys.First().PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration);
+                return GetUriRepresentationForKeyValue(entityTypeConfiguration.Keys().First().PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration);
             }
             else
             {
                 return String.Join(
                     ",",
                     entityTypeConfiguration
-                        .Keys
+                        .Keys()
                         .Select(
                             key => String.Format(CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key.PropertyInfo, entityContext.EntityInstance, entityTypeConfiguration))));
             }

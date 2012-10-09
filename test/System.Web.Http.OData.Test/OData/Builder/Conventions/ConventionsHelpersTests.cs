@@ -240,6 +240,52 @@ namespace System.Web.Http.OData.Builder.Conventions
                 "Key property 'Key3' of type 'EntityType' is null. Key properties cannot have null values.");
         }
 
+        [Fact]
+        public void GetEntityKeyValue_DerivedType()
+        {
+            // Arrange
+            var entityInstance = new { Key = "key" };
+
+            Mock<IEntityTypeConfiguration> baseEntityType = new Mock<IEntityTypeConfiguration>();
+            PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), baseEntityType.Object) };
+            baseEntityType.Setup(e => e.Keys).Returns(keys);
+
+            Mock<IEntityTypeConfiguration> derivedEntityType = new Mock<IEntityTypeConfiguration>();
+            derivedEntityType.Setup(e => e.BaseType).Returns(baseEntityType.Object);
+
+            // Act
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, derivedEntityType.Object);
+
+            // Assert
+            Assert.Equal("'key'", keyValue);
+        }
+
+        [Fact]
+        public void GetEntityKeyValue_MultipleKeys_DerivedType()
+        {
+            // Arrange
+            Mock<IEntityTypeConfiguration> baseEntityType = new Mock<IEntityTypeConfiguration>();
+
+            var entityInstance = new { Key1 = "key1", Key2 = 2, Key3 = true };
+            PrimitivePropertyConfiguration[] keys = 
+            {
+                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key1"), baseEntityType.Object),
+                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key2"), baseEntityType.Object),
+                new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), baseEntityType.Object),
+            };
+
+            baseEntityType.Setup(e => e.Keys).Returns(keys);
+
+            Mock<IEntityTypeConfiguration> derivedEntityType = new Mock<IEntityTypeConfiguration>();
+            derivedEntityType.Setup(e => e.BaseType).Returns(baseEntityType.Object);
+
+            // Act
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(new EntityInstanceContext { EntityInstance = entityInstance }, derivedEntityType.Object);
+
+            // Assert
+            Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);
+        }
+
         [Theory]
         [PropertyData("GetUriRepresentationForValue_DataSet")]
         public void GetUriRepresentationForValue_Works(object value, string result)

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http.OData.Properties;
+using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
@@ -23,27 +24,30 @@ namespace System.Web.Http.OData.Builder.Conventions
                     {
                         configuration.HasNavigationPropertyLink(
                                 property,
-                                (entityContext, navigationProperty) =>
-                                {
-                                    string route = PropertyNavigationRouteName ?? ODataRouteNames.PropertyNavigation;
-                                    string link = entityContext.UrlHelper.Link(
-                                        route,
-                                        new
-                                        {
-                                            Controller = configuration.Name,
-                                            ParentId = ConventionsHelpers.GetEntityKeyValue(entityContext, entity),
-                                            NavigationProperty = navigationProperty.Name
-                                        });
-
-                                    if (link == null)
-                                    {
-                                        throw Error.InvalidOperation(SRResources.NavigationPropertyRouteMissingOrIncorrect, navigationProperty.Name, ODataRouteNames.PropertyNavigation);
-                                    }
-                                    return new Uri(link);
-                                });
+                                (entityContext, navigationProperty) => GenerateNavigationLink(entityContext, navigationProperty, configuration));
                     }
                 }
             }
+        }
+
+        internal Uri GenerateNavigationLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, IEntitySetConfiguration configuration)
+        {
+            string route = PropertyNavigationRouteName ?? ODataRouteNames.PropertyNavigation;
+
+            string link = entityContext.UrlHelper.Link(
+                route,
+                new
+                {
+                    controller = configuration.Name,
+                    parentId = ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType),
+                    navigationProperty = navigationProperty.Name
+                });
+
+            if (link == null)
+            {
+                throw Error.InvalidOperation(SRResources.NavigationPropertyRouteMissingOrIncorrect, navigationProperty.Name, ODataRouteNames.PropertyNavigation);
+            }
+            return new Uri(link);
         }
     }
 }

@@ -33,9 +33,14 @@ namespace System.Web.Http.OData.Query.Expressions
         private const int MaxBindCount = 100;
         private int _currentBindCount = 0;
 
+        private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+
         private static readonly Expression _nullConstant = Expression.Constant(null);
+        private static readonly Expression _nullStringConstant = Expression.Constant(null, typeof(string));
         private static readonly Expression _falseConstant = Expression.Constant(false);
         private static readonly Expression _trueConstant = Expression.Constant(true);
+        private static readonly Expression _zeroConstant = Expression.Constant(0);
+        private static readonly Expression _ordinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
 
         private static Dictionary<BinaryOperatorKind, ExpressionType> _binaryOperatorMapping = new Dictionary<BinaryOperatorKind, ExpressionType>
         {
@@ -1007,6 +1012,27 @@ namespace System.Web.Http.OData.Query.Expressions
                 right = ToNullable(right);
             }
 
+            if (left.Type == typeof(string) || right.Type == typeof(string))
+            {
+                // convert nulls of type object to nulls of type string to make the String.Compare call work
+                left = ConvertNullsToString(left);
+                right = ConvertNullsToString(right);
+
+                // Use string.Compare instead of comparison for gt, ge, lt, le between two strings since direct comparisons are not supported
+                switch (binaryOperator)
+                {
+                    case BinaryOperatorKind.GreaterThan:
+                    case BinaryOperatorKind.GreaterThanOrEqual:
+                    case BinaryOperatorKind.LessThan:
+                    case BinaryOperatorKind.LessThanOrEqual:
+                        left = Expression.Call(_stringCompareMethodInfo, left, right, _ordinalStringComparisonConstant);
+                        right = _zeroConstant;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             if (_binaryOperatorMapping.TryGetValue(binaryOperator, out binaryExpressionType))
             {
                 return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: null);
@@ -1044,6 +1070,19 @@ namespace System.Web.Http.OData.Query.Expressions
             else
             {
                 throw Error.NotSupported(SRResources.ConvertToEnumFailed, enumType, expression.Type);
+            }
+        }
+
+        private static Expression ConvertNullsToString(Expression expression)
+        {
+            ConstantExpression constantExpression = expression as ConstantExpression;
+            if (constantExpression != null && constantExpression.Value == null)
+            {
+                return _nullStringConstant;
+            }
+            else
+            {
+                return expression;
             }
         }
 

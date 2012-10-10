@@ -327,6 +327,32 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(6, result.Length);
         }
 
+        [Theory]
+        [InlineData("Name gt 'Middle'", "3")]
+        [InlineData("Name ge 'Middle'", "22,3")]
+        [InlineData("Name lt 'Middle'", "11,33")]
+        [InlineData("Name le 'Middle'", "11,33,22")]
+        [InlineData("Name ge Name", "11,33,22,3")]
+        [InlineData("Name gt null", "11,33,22,3")]
+        [InlineData("null gt Name", "")]
+        [InlineData("'Middle' gt Name", "11,33")]
+        [InlineData("'a' lt 'b'", "11,33,22,3")]
+        [InlineData("Address/City gt 'san francisco'", "33")]
+        public void QueryableFilter_StringComparisons_Work(string filter, string customerIds)
+        {
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", false));
+            HttpClient client = new HttpClient(server);
+
+            HttpResponseMessage response = client.GetAsync(string.Format("http://localhost:8080/{0}/?$filter={1}", "QueryCompositionCustomer", filter)).Result;
+
+            // using low level api works fine
+            response.EnsureSuccessStatusCode();
+            List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
+            Assert.Equal(
+                customerIds,
+                String.Join(",", customers.Select(customer => customer.Id)));
+        }
+
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
             HttpConfiguration config = new HttpConfiguration();

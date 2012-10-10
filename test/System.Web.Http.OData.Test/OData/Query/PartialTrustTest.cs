@@ -7,10 +7,11 @@ namespace System.Web.Http.OData.Query
     [PartialTrustRunner]
     public class PartialTrustTest : QueryCompositionTests
     {
-        [Fact(Skip="Moq doesn't work in partial trust")]
+        [Fact]
         public override void QueryableUsesConfiguredAssembliesResolver()
         {
-            throw new NotImplementedException();
+            // NO-OP
+            // Moq doesn't work in partial trust
         }
     }
 }

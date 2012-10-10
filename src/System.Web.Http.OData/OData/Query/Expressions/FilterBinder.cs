@@ -36,7 +36,6 @@ namespace System.Web.Http.OData.Query.Expressions
         private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
         private static readonly Expression _nullConstant = Expression.Constant(null);
-        private static readonly Expression _nullStringConstant = Expression.Constant(null, typeof(string));
         private static readonly Expression _falseConstant = Expression.Constant(false);
         private static readonly Expression _trueConstant = Expression.Constant(true);
         private static readonly Expression _zeroConstant = Expression.Constant(0);
@@ -1015,8 +1014,8 @@ namespace System.Web.Http.OData.Query.Expressions
             if (left.Type == typeof(string) || right.Type == typeof(string))
             {
                 // convert nulls of type object to nulls of type string to make the String.Compare call work
-                left = ConvertNullsToString(left);
-                right = ConvertNullsToString(right);
+                left = ConvertNull(left, typeof(string));
+                right = ConvertNull(right, typeof(string));
 
                 // Use string.Compare instead of comparison for gt, ge, lt, le between two strings since direct comparisons are not supported
                 switch (binaryOperator)
@@ -1035,7 +1034,26 @@ namespace System.Web.Http.OData.Query.Expressions
 
             if (_binaryOperatorMapping.TryGetValue(binaryOperator, out binaryExpressionType))
             {
-                return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: null);
+                if (left.Type == typeof(byte[]) || right.Type == typeof(byte[]))
+                {
+                    left = ConvertNull(left, typeof(byte[]));
+                    right = ConvertNull(right, typeof(byte[]));
+
+                    switch (binaryExpressionType)
+                    {
+                        case ExpressionType.Equal:
+                            return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: Linq2ObjectsComparisonMethods.AreByteArraysEqualMethodInfo);
+                        case ExpressionType.NotEqual:
+                            return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: Linq2ObjectsComparisonMethods.AreByteArraysNotEqualMethodInfo);
+                        default:
+                            IEdmPrimitiveType binaryType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(byte[]));
+                            throw new ODataException(Error.Format(SRResources.BinaryOperatorNotSupported, binaryType.FullName(), binaryType.FullName(), binaryOperator));
+                    }
+                }
+                else
+                {
+                    return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: null);
+                }
             }
             else
             {
@@ -1070,19 +1088,6 @@ namespace System.Web.Http.OData.Query.Expressions
             else
             {
                 throw Error.NotSupported(SRResources.ConvertToEnumFailed, enumType, expression.Type);
-            }
-        }
-
-        private static Expression ConvertNullsToString(Expression expression)
-        {
-            ConstantExpression constantExpression = expression as ConstantExpression;
-            if (constantExpression != null && constantExpression.Value == null)
-            {
-                return _nullStringConstant;
-            }
-            else
-            {
-                return expression;
             }
         }
 
@@ -1242,6 +1247,19 @@ namespace System.Web.Http.OData.Query.Expressions
         private static bool IsType<T>(Type type) where T : struct
         {
             return type == typeof(T) || type == typeof(T?);
+        }
+
+        private static Expression ConvertNull(Expression expression, Type type)
+        {
+            ConstantExpression constantExpression = expression as ConstantExpression;
+            if (constantExpression != null && constantExpression.Value == null)
+            {
+                return Expression.Constant(null, type);
+            }
+            else
+            {
+                return expression;
+            }
         }
     }
 }

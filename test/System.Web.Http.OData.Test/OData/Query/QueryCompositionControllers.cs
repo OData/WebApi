@@ -22,7 +22,8 @@ namespace System.Web.Http.OData.Query
                     {
                         new QueryCompositionCustomer { Id = 111, Name = "Primary" },
                         new QueryCompositionCustomer { Id = 112, Name = "Secondary" },
-                    }
+                    },
+                    Image = new byte[] { 1, 2, 3 }
                 }, 
                 new QueryCompositionCustomer 
                 { 
@@ -184,6 +185,7 @@ namespace System.Web.Http.OData.Query
         public QueryCompositionCustomer RelationshipManager { get; set; }
         public IEnumerable<string> Tags { get; set; }
         public IEnumerable<QueryCompositionCustomer> Contacts { get; set; }
+        public byte[] Image { get; set; }
     }
 
     public class QueryCompositionAddress

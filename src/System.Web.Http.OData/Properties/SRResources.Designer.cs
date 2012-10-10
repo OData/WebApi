@@ -124,6 +124,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A binary operator with incompatible types was detected. Found operand types &apos;{0}&apos; and &apos;{1}&apos; for operator kind &apos;{2}&apos;..
+        /// </summary>
+        internal static string BinaryOperatorNotSupported {
+            get {
+                return ResourceManager.GetString("BinaryOperatorNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot autoCreate binding because there are two or more candidate EntitySets..
         /// </summary>
         internal static string CannotAutoCreateMultipleCandidates {

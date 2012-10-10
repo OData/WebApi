@@ -1166,8 +1166,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == Convert(12))")]
         [InlineData("CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
         [InlineData("CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
-        // [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))")] , 
-        // Issue 391: The above test doesn't work in linq2objects but works in linq2sql and EF.
+        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))")]
         [InlineData("XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
         public void NonstandardEdmPrimtives(string filter, string expression)
         {
@@ -1185,6 +1184,47 @@ namespace System.Web.Http.OData.Query.Expressions
                     XElementProp = new XElement("name")
                 },
                 new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
+        [Theory]
+        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))", true, true)]
+        [InlineData("BinaryProp ne binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() != value(System.Byte[]))", false, false)]
+        [InlineData("ByteArrayProp eq binary'23ABFF'", "$it => ($it.ByteArrayProp == value(System.Byte[]))", true, true)]
+        [InlineData("ByteArrayProp ne binary'23ABFF'", "$it => ($it.ByteArrayProp != value(System.Byte[]))", false, false)]
+        [InlineData("binary'23ABFF' eq binary'23ABFF'", "$it => (value(System.Byte[]) == value(System.Byte[]))", true, true)]
+        [InlineData("binary'23ABFF' ne binary'23ABFF'", "$it => (value(System.Byte[]) != value(System.Byte[]))", false, false)]
+        [InlineData("ByteArrayPropWithNullValue ne binary'23ABFF'", "$it => ($it.ByteArrayPropWithNullValue != value(System.Byte[]))", true, true)]
+        [InlineData("ByteArrayPropWithNullValue ne ByteArrayPropWithNullValue", "$it => ($it.ByteArrayPropWithNullValue != $it.ByteArrayPropWithNullValue)", false, false)]
+        [InlineData("ByteArrayPropWithNullValue ne null", "$it => ($it.ByteArrayPropWithNullValue != null)", false, false)]
+        [InlineData("ByteArrayPropWithNullValue eq null", "$it => ($it.ByteArrayPropWithNullValue == null)", true, true)]
+        [InlineData("null ne ByteArrayPropWithNullValue", "$it => (null != $it.ByteArrayPropWithNullValue)", false, false)]
+        [InlineData("null eq ByteArrayPropWithNullValue", "$it => (null == $it.ByteArrayPropWithNullValue)", true, true)]
+        public void ByteArrayComparisons(string filter, string expression, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter, expression, NotTesting);
+            RunFilters(filters,
+                new DataTypes
+                {
+                    BinaryProp = new Binary(new byte[] { 35, 171, 255 }),
+                    ByteArrayProp = new byte[] { 35, 171, 255 }
+                },
+                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData("binary'23ABFF' ge binary'23ABFF'", "GreaterThanOrEqual")]
+        [InlineData("binary'23ABFF' le binary'23ABFF'", "LessThanOrEqual")]
+        [InlineData("binary'23ABFF' lt binary'23ABFF'", "LessThan")]
+        [InlineData("binary'23ABFF' gt binary'23ABFF'", "GreaterThan")]
+        [InlineData("binary'23ABFF' add binary'23ABFF'", "Add")]
+        [InlineData("binary'23ABFF' sub binary'23ABFF'", "Subtract")]
+        [InlineData("binary'23ABFF' mul binary'23ABFF'", "Multiply")]
+        [InlineData("binary'23ABFF' div binary'23ABFF'", "Divide")]
+        public void DisAllowed_ByteArrayComparisons(string filter, string op)
+        {
+            Assert.Throws<ODataException>(
+                () => VerifyQueryDeserialization<DataTypes>(filter),
+                Error.Format("A binary operator with incompatible types was detected. Found operand types 'Edm.Binary' and 'Edm.Binary' for operator kind '{0}'.", op));
         }
 
         [Theory]

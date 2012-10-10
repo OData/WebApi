@@ -353,6 +353,21 @@ namespace System.Web.Http.OData.Query
                 String.Join(",", customers.Select(customer => customer.Id)));
         }
 
+        [Fact]
+        public void QueryableWorksWith_ByteArrayComparison()
+        {
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: false));
+            HttpClient client = new HttpClient(server);
+
+            // unsupported operator starting with $ - throws
+            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionCustomer/?$filter=Image eq binary'010203'").Result;
+
+            // using low level api works fine
+            response.EnsureSuccessStatusCode();
+            List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
+            Assert.Equal(new[] { 11 }, customers.Select(customer => customer.Id));
+        }
+
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
             HttpConfiguration config = new HttpConfiguration();

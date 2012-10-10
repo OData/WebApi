@@ -138,6 +138,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\EdmModelAsserts.cs" />
+    <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethodsTest.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOptionHelperTest.cs" />
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />

@@ -435,4 +435,7 @@
   <data name="KeyValueCannotBeNull" xml:space="preserve">
     <value>Key property '{0}' of type '{1}' is null. Key properties cannot have null values.</value>
   </data>
+  <data name="BinaryOperatorNotSupported" xml:space="preserve">
+    <value>A binary operator with incompatible types was detected. Found operand types '{0}' and '{1}' for operator kind '{2}'.</value>
+  </data>
 </root>

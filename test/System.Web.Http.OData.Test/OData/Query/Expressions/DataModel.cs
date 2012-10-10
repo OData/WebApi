@@ -61,6 +61,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public DateTime DateTimeProp { get; set; }
         public DateTimeOffset DateTimeOffsetProp { get; set; }
         public byte[] ByteArrayProp { get; set; }
+        public byte[] ByteArrayPropWithNullValue { get; set; }
         public TimeSpan TimeSpanProp { get; set; }
         public decimal DecimalProp { get; set; }
         public double DoubleProp { get; set; }

@@ -502,6 +502,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The action &apos;{0}&apos; on controller &apos;{1}&apos; with return type &apos;{2}&apos; cannot support querying. Ensure the type of the returned content is IEnumerable, IQueryable, or a generic form of either interface..
+        /// </summary>
+        internal static string InvalidReturnTypeForQuerying {
+            get {
+                return ResourceManager.GetString("InvalidReturnTypeForQuerying", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The item must be of type &apos;{0}&apos;..
         /// </summary>
         internal static string ItemMustBeOfType {

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
@@ -34,9 +35,7 @@ namespace System.Web.Http.OData
                 {
                     { "GetObject", new List<Customer>(CustomerList), false },
                     { "GetObject", new Collection<Customer>(CustomerList), false },
-                    { "GetObject", new CustomerCollection(), false },
-                    { "GetObject", new Customer(), true },
-                    { "GetObject", new TwoGenericsCollection(), true }
+                    { "GetObject", new CustomerCollection(), false }
                 };
             }
         }
@@ -124,7 +123,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -133,7 +132,7 @@ namespace System.Web.Http.OData
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            context.Response.Content = new ObjectContent(typeof(object), responseObject, new JsonMediaTypeFormatter());
+            context.Response.Content = new ObjectContent(typeof(IEnumerable<Customer>), responseObject, new JsonMediaTypeFormatter());
 
             // Act and Assert
             attribute.OnActionExecuted(context);
@@ -157,7 +156,7 @@ namespace System.Web.Http.OData
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            context.Response.Content = new ObjectContent(typeof(object), new List<Customer>(), new JsonMediaTypeFormatter());
+            context.Response.Content = new ObjectContent(typeof(IEnumerable<Customer>), new List<Customer>(), new JsonMediaTypeFormatter());
 
             // Act and Assert
             attribute.OnActionExecuted(context);
@@ -179,7 +178,7 @@ namespace System.Web.Http.OData
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            context.Response.Content = new ObjectContent(typeof(object), new List<Customer>(), new JsonMediaTypeFormatter());
+            context.Response.Content = new ObjectContent(typeof(IEnumerable<Customer>), new List<Customer>(), new JsonMediaTypeFormatter());
 
             // Act and Assert
             HttpResponseException errorResponse = Assert.Throws<HttpResponseException>(() =>
@@ -203,12 +202,46 @@ namespace System.Web.Http.OData
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            context.Response.Content = new ObjectContent(typeof(object), new NonGenericEnumerable(), new JsonMediaTypeFormatter());
+            context.Response.Content = new ObjectContent(typeof(IEnumerable), new NonGenericEnumerable(), new JsonMediaTypeFormatter());
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => attribute.OnActionExecuted(context),
                 "The 'QueryableAttribute' type cannot be used with action 'GetNonGenericEnumerable' on controller 'CustomerHighLevel' because the return type 'System.Web.Http.OData.TestCommon.Models.NonGenericEnumerable' does not specify the type of the collection.");
+        }
+
+        [Theory]
+        [InlineData("GetObject")]
+        [InlineData("GetCollectionOfCustomer")]
+        [InlineData("GetListOfCustomer")]
+        [InlineData("GetStronglyTypedCustomer")]
+        [InlineData("GetArrayOfCustomers")]
+        [InlineData("GetNonGenericEnumerable")]
+        public void InvalidActionReturnType_Throws(string actionName)
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
+            HttpConfiguration config = new HttpConfiguration();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod(actionName));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            Type returnType = actionDescriptor.ReturnType;
+            object instance = returnType.IsArray ? Array.CreateInstance(returnType.GetElementType(), 5) : Activator.CreateInstance(returnType);
+            context.Response.Content = new ObjectContent(returnType, instance, new JsonMediaTypeFormatter());
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => attribute.OnActionExecuted(context),
+                String.Format(
+                    "The action '{0}' on controller '{1}' with return type '{2}' cannot support querying. Ensure the type of the returned content is IEnumerable, IQueryable, or a generic form of either interface.",
+                    actionName,
+                    controllerDescriptor.ControllerName,
+                    actionDescriptor.ReturnType.FullName));
         }
 
         [Theory]
@@ -227,7 +260,7 @@ namespace System.Web.Http.OData
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent expectedResponse = new ObjectContent(typeof(object), new List<int>(), new JsonMediaTypeFormatter());
+            HttpContent expectedResponse = new ObjectContent(typeof(IEnumerable<int>), new List<int>(), new JsonMediaTypeFormatter());
             context.Response.Content = expectedResponse;
 
             // Act and Assert
@@ -254,11 +287,11 @@ namespace System.Web.Http.OData
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
             HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
             context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            context.Response.Content = new ObjectContent(typeof(object), new List<int>(), new JsonMediaTypeFormatter());
+            context.Response.Content = new ObjectContent(typeof(IEnumerable<int>), new List<int>(), new JsonMediaTypeFormatter());
 
             // Act and Assert
-            attribute.OnActionExecuted(context);
-            HttpResponseMessage response = context.Response;
+            HttpResponseException responseException = Assert.Throws<HttpResponseException>(() => attribute.OnActionExecuted(context));
+            HttpResponseMessage response = responseException.Response;
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.IsAssignableFrom(typeof(ObjectContent), response.Content);

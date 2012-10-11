@@ -2,9 +2,11 @@
 
 using System.ComponentModel;
 using System.Linq;
+using System.Web.Http.Filters;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http
@@ -169,6 +171,35 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("resolver");
             }
             configuration.Properties[ODataActionResolverKey] = resolver;
+        }
+
+        /// <summary>
+        /// Enables query support for actions with an <see cref="IQueryable"/> or <see cref="IQueryable{T}"/> return type.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        public static void EnableQuerySupport(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Services.Add(typeof(IFilterProvider), new QueryableFilterProvider());
+        }
+
+        /// <summary>
+        /// Enables query support for actions with an <see cref="IQueryable"/> or <see cref="IQueryable{T}"/> return type.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="resultLimit">The maximum number of results to return.</param>
+        public static void EnableQuerySupport(this HttpConfiguration configuration, int resultLimit)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Services.Add(typeof(IFilterProvider), new QueryableFilterProvider() { ResultLimit = resultLimit });
         }
     }
 }

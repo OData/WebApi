@@ -48,6 +48,12 @@ namespace System.Web.Http.OData.Query.Controllers
         }
 
         [Queryable]
+        public Customer[] GetArrayOfCustomers()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Queryable]
         public NonGenericEnumerable GetNonGenericEnumerable()
         {
             throw new NotImplementedException();

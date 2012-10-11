@@ -1,7 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Web.Http.Controllers;
+using System.Web.Http.Filters;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Query;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -122,6 +128,42 @@ namespace System.Web.Http.OData
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void AddQuerySupport_AddsQueryableFilterProvider()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+
+            configuration.EnableQuerySupport();
+
+            Assert.Equal(1, configuration.Services.GetFilterProviders().OfType<QueryableFilterProvider>().Count());
+        }
+
+        [Fact]
+        public void AddQuerySupport_AddsQueryableFilterProviderWithResultLimit()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+
+            configuration.EnableQuerySupport(100);
+
+            IEnumerable<QueryableFilterProvider> filterProviders = configuration.Services.GetFilterProviders().OfType<QueryableFilterProvider>();
+            Assert.Equal(1, filterProviders.Count());
+            Assert.Equal(100, filterProviders.First().ResultLimit);
+        }
+
+        [Fact]
+        public void AddQuerySupport_ActionFilters_TakePrecedence()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.EnableQuerySupport();
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod("GetQueryableWithFilterAttribute"));
+
+            Collection<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
+
+            Assert.Equal(1, filters.Count);
+            Assert.Equal(100, ((QueryableAttribute)filters[0].Instance).ResultLimit);
         }
     }
 }

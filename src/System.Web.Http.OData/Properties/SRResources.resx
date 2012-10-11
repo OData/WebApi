@@ -438,4 +438,7 @@
   <data name="BinaryOperatorNotSupported" xml:space="preserve">
     <value>A binary operator with incompatible types was detected. Found operand types '{0}' and '{1}' for operator kind '{2}'.</value>
   </data>
+  <data name="InvalidReturnTypeForQuerying" xml:space="preserve">
+    <value>The action '{0}' on controller '{1}' with return type '{2}' cannot support querying. Ensure the type of the returned content is IEnumerable, IQueryable, or a generic form of either interface.</value>
+  </data>
 </root>

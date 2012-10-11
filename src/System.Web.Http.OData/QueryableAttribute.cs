@@ -118,65 +118,23 @@ namespace System.Web.Http
 
             HttpResponseMessage response = actionExecutedContext.Response;
 
-            IEnumerable query;
-            IQueryable queryable = null;
-            if (response != null && response.IsSuccessStatusCode && response.TryGetContentValue(out query))
+            if (response != null && response.IsSuccessStatusCode)
             {
+                ObjectContent responseContent = response.Content as ObjectContent;
+                ValidateReturnType(responseContent.ObjectType, actionDescriptor);
+
                 // Apply the query if there are any query options or if there is a result limit set
-                if (request.RequestUri != null && (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
+                if (responseContent != null && responseContent.Value != null && request.RequestUri != null &&
+                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
                 {
                     ValidateQuery(request);
 
                     try
                     {
-                        Type originalQueryType = query.GetType();
-                        Type entityClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
-
-                        if (entityClrType == null)
-                        {
-                            // The element type cannot be determined because the type of the content
-                            // is not IEnumerable<T> or IQueryable<T>.
-                            throw Error.InvalidOperation(
-                                SRResources.FailedToRetrieveTypeToBuildEdmModel,
-                                this.GetType().Name,
-                                actionDescriptor.ActionName,
-                                actionDescriptor.ControllerDescriptor.ControllerName,
-                                originalQueryType.FullName);
-                        }
-
-                        ODataQueryContext queryContext = CreateQueryContext(entityClrType, configuration, actionDescriptor);
-                        ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
-
-                        // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
-                        if (queryContext.IsPrimitiveClrType && (queryOptions.Filter != null || queryOptions.OrderBy != null))
-                        {
-                            // An attempt to use a query option not allowed for primitive types
-                            // generates a BadRequest with a general message that avoids information disclosure.
-                            actionExecutedContext.Response = request.CreateErrorResponse(
-                                                                HttpStatusCode.BadRequest,
-                                                                SRResources.OnlySkipAndTopSupported);
-                            return;
-                        }
-
-                        // apply the query
-                        queryable = query as IQueryable;
-                        if (queryable == null)
-                        {
-                            queryable = query.AsQueryable();
-                        }
-
-                        ODataQuerySettings querySettings = new ODataQuerySettings
-                        {
-                            EnsureStableOrdering = EnsureStableOrdering,
-                            HandleNullPropagation = HandleNullPropagation,
-                            ResultLimit = _resultLimit
-                        };
-
-                        queryable = queryOptions.ApplyTo(queryable, querySettings);
-
-                        Contract.Assert(queryable != null);
-                        // we don't support shape changing query composition
-                        ((ObjectContent)response.Content).Value = queryable;
+                        IEnumerable query = responseContent.Value as IEnumerable;
+                        Contract.Assert(query != null, "ValidateResponseContent should have ensured the responseContent implements IEnumerable");
+                        IQueryable queryResults = ExecuteQuery(query, request, configuration, actionDescriptor);
+                        responseContent.Value = queryResults;
                     }
                     catch (ODataException e)
                     {
@@ -188,6 +146,87 @@ namespace System.Web.Http
                     }
                 }
             }
+        }
+
+        private static void ValidateReturnType(Type responseContentType, HttpActionDescriptor actionDescriptor)
+        {
+            if (!IsSupportedReturnType(responseContentType))
+            {
+                throw Error.InvalidOperation(
+                    SRResources.InvalidReturnTypeForQuerying,
+                    actionDescriptor.ActionName,
+                    actionDescriptor.ControllerDescriptor.ControllerName,
+                    responseContentType.FullName);
+            }
+        }
+
+        private static bool IsSupportedReturnType(Type objectType)
+        {
+            Contract.Assert(objectType != null);
+
+            if (objectType == typeof(IEnumerable) || objectType == typeof(IQueryable))
+            {
+                return true;
+            }
+
+            if (objectType.IsGenericType)
+            {
+                Type genericTypeDefinition = objectType.GetGenericTypeDefinition();
+                if (genericTypeDefinition == typeof(IEnumerable<>) || genericTypeDefinition == typeof(IQueryable<>))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
+        private IQueryable ExecuteQuery(IEnumerable query, HttpRequestMessage request, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
+        {
+            Type originalQueryType = query.GetType();
+            Type entityClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
+
+            if (entityClrType == null)
+            {
+                // The element type cannot be determined because the type of the content
+                // is not IEnumerable<T> or IQueryable<T>.
+                throw Error.InvalidOperation(
+                    SRResources.FailedToRetrieveTypeToBuildEdmModel,
+                    this.GetType().Name,
+                    actionDescriptor.ActionName,
+                    actionDescriptor.ControllerDescriptor.ControllerName,
+                    originalQueryType.FullName);
+            }
+
+            ODataQueryContext queryContext = CreateQueryContext(entityClrType, configuration, actionDescriptor);
+            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+
+            // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
+            if (queryContext.IsPrimitiveClrType && (queryOptions.Filter != null || queryOptions.OrderBy != null))
+            {
+                // An attempt to use a query option not allowed for primitive types
+                // generates a BadRequest with a general message that avoids information disclosure.
+                throw new HttpResponseException(request.CreateErrorResponse(
+                                                    HttpStatusCode.BadRequest,
+                                                    SRResources.OnlySkipAndTopSupported));
+            }
+
+            // apply the query
+            IQueryable queryable = query as IQueryable;
+            if (queryable == null)
+            {
+                queryable = query.AsQueryable();
+            }
+
+            ODataQuerySettings querySettings = new ODataQuerySettings
+            {
+                EnsureStableOrdering = EnsureStableOrdering,
+                HandleNullPropagation = HandleNullPropagation,
+                ResultLimit = _resultLimit
+            };
+
+            return queryOptions.ApplyTo(queryable, querySettings);
         }
 
         private static ODataQueryContext CreateQueryContext(Type entityClrType, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)

@@ -179,5 +179,82 @@ namespace System.Collections.Generic
                 return trimmedResult;
             }
         }
+
+        /// <summary>
+        /// Convert the array to a Dictionary using the keySelector to extract keys from values and the specified comparer. Optimized for array input.
+        /// </summary>
+        public static Dictionary<TKey, TValue> ToDictionaryFast<TKey, TValue>(this TValue[] array, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Contract.Assert(array != null);
+            Contract.Assert(keySelector != null);
+
+            Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>(array.Length, comparer);
+            for (int i = 0; i < array.Length; i++)
+            {
+                TValue value = array[i];
+                dictionary.Add(keySelector(value), value);
+            }
+            return dictionary;
+        }
+
+        /// <summary>
+        /// Convert the list to a Dictionary using the keySelector to extract keys from values and the specified comparer. Optimized for IList of T input with fast path for array.
+        /// </summary>
+        public static Dictionary<TKey, TValue> ToDictionaryFast<TKey, TValue>(this IList<TValue> list, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Contract.Assert(list != null);
+            Contract.Assert(keySelector != null);
+
+            TValue[] array = list as TValue[];
+            if (array != null)
+            {
+                return ToDictionaryFast(array, keySelector, comparer);
+            }
+            return ToDictionaryFastNoCheck(list, keySelector, comparer);
+        }
+
+        /// <summary>
+        /// Convert the enumerable to a Dictionary using the keySelector to extract keys from values and the specified comparer. Fast paths for array and IList of T.
+        /// </summary>
+        public static Dictionary<TKey, TValue> ToDictionaryFast<TKey, TValue>(this IEnumerable<TValue> enumerable, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Contract.Assert(enumerable != null);
+            Contract.Assert(keySelector != null);
+
+            TValue[] array = enumerable as TValue[];
+            if (array != null)
+            {
+                return ToDictionaryFast(array, keySelector, comparer);
+            }
+            IList<TValue> list = enumerable as IList<TValue>;
+            if (list != null)
+            {
+                return ToDictionaryFastNoCheck(list, keySelector, comparer);
+            }
+            Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>(comparer);
+            foreach (TValue value in enumerable)
+            {
+                dictionary.Add(keySelector(value), value);
+            }
+            return dictionary;
+        }
+
+        /// <summary>
+        /// Convert the list to a Dictionary using the keySelector to extract keys from values and the specified comparer. Optimized for IList of T input. No checking for other types.
+        /// </summary>
+        private static Dictionary<TKey, TValue> ToDictionaryFastNoCheck<TKey, TValue>(IList<TValue> list, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Contract.Assert(list != null);
+            Contract.Assert(keySelector != null);
+
+            int listCount = list.Count;
+            Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>(listCount, comparer);
+            for (int i = 0; i < listCount; i++)
+            {
+                TValue value = list[i];
+                dictionary.Add(keySelector(value), value);
+            }
+            return dictionary;
+        }
     }
 }

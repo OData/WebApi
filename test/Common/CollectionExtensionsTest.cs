@@ -241,5 +241,87 @@ namespace System.Collections.Generic
             Assert.Equal(hasNulls[0], hasNullsResult[0]);
             Assert.Equal(hasNulls[2], hasNullsResult[1]);
         }
+
+        [Fact] 
+        public void ToDictionaryFastArray2Element()
+        {
+            string[] input = new string[] {"AA", "BB"};
+            var expectedOutput = new Dictionary<string, string>() { { "A", "AA"}, {"B", "BB"}};
+            Func<string, string> keySelector = (string value) => value.Substring(1);
+
+            var result = input.ToDictionaryFast(keySelector, StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal(expectedOutput, result);
+            Assert.Equal(StringComparer.OrdinalIgnoreCase, result.Comparer);
+        }
+
+        [Fact] 
+        public void ToDictionaryFastIListList2Element()
+        {
+            string[] input = new string[] {"AA", "BB"};
+            var expectedOutput = new Dictionary<string, string>() { { "A", "AA"}, {"B", "BB"}};
+            Func<string, string> keySelector = (string value) => value.Substring(1);
+            List<string> listInput = new List<string>(input);
+
+            var listResult = listInput.ToDictionaryFast(keySelector, StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal(expectedOutput, listResult);
+            Assert.Equal(StringComparer.OrdinalIgnoreCase, listResult.Comparer);
+        }
+
+        [Fact]
+        public void ToDictionaryFastIListArray2Element()
+        {
+            string[] input = new string[] { "AA", "BB" };
+            var expectedOutput = new Dictionary<string, string>() { { "A", "AA" }, { "B", "BB" } };
+            Func<string, string> keySelector = (string value) => value.Substring(1);
+            IList<string> arrayAsList = input;
+
+            var arrayResult = arrayAsList.ToDictionaryFast(keySelector, StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal(expectedOutput, arrayResult);
+            Assert.Equal(StringComparer.OrdinalIgnoreCase, arrayResult.Comparer);
+        }
+
+        [Fact] 
+        public void ToDictionaryFastIEnumerableArray2Element()
+        {
+            string[] input = new string[] {"AA", "BB"};
+            var expectedOutput = new Dictionary<string, string>() { { "A", "AA"}, {"B", "BB"}};
+            Func<string, string> keySelector = (string value) => value.Substring(1);
+
+            var arrayResult = ((IEnumerable<string>)input).ToDictionaryFast(keySelector, StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal(expectedOutput, arrayResult);
+            Assert.Equal(StringComparer.OrdinalIgnoreCase, arrayResult.Comparer);
+        }
+
+        [Fact]
+        public void ToDictionaryFastIEnumerableList2Element()
+        {
+            string[] input = new string[] { "AA", "BB" };
+            var expectedOutput = new Dictionary<string, string>() { { "A", "AA" }, { "B", "BB" } };
+            Func<string, string> keySelector = (string value) => value.Substring(1);
+            List<string> listInput = new List<string>(input);
+
+            var listResult = ((IEnumerable<string>)listInput).ToDictionaryFast(keySelector, StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal(expectedOutput, listResult);
+            Assert.Equal(StringComparer.OrdinalIgnoreCase, listResult.Comparer);
+        }
+
+        [Fact]
+        public void ToDictionaryFastIEnumerableLinkedList2Element()
+        {
+            string[] input = new string[] { "AA", "BB" };
+            var expectedOutput = new Dictionary<string, string>() { { "A", "AA" }, { "B", "BB" } };
+            Func<string, string> keySelector = (string value) => value.Substring(1);
+            LinkedList<string> linkedListInput = new LinkedList<string>(input);
+
+            var enumerableResult = ((IEnumerable<string>)linkedListInput).ToDictionaryFast(keySelector, StringComparer.OrdinalIgnoreCase);
+
+            Assert.Equal(expectedOutput, enumerableResult);
+            Assert.Equal(StringComparer.OrdinalIgnoreCase, enumerableResult.Comparer);
+        }
     }
 }

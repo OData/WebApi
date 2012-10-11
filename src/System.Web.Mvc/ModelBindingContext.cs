@@ -95,7 +95,7 @@ namespace System.Web.Mvc
             {
                 if (_propertyMetadata == null)
                 {
-                    _propertyMetadata = ModelMetadata.Properties.ToDictionary(m => m.PropertyName, StringComparer.OrdinalIgnoreCase);
+                    _propertyMetadata = ModelMetadata.PropertiesAsArray.ToDictionaryFast(m => m.PropertyName, StringComparer.OrdinalIgnoreCase);
                 }
 
                 return _propertyMetadata;

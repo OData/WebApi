@@ -198,6 +198,10 @@ namespace System.Web.Http
             {
                 throw Error.ArgumentNull("configuration");
             }
+            if (resultLimit <= 0)
+            {
+                throw Error.Argument("resultLimit", SRResources.ResultLimitMustBePositive);
+            }
 
             configuration.Services.Add(typeof(IFilterProvider), new QueryableFilterProvider() { ResultLimit = resultLimit });
         }

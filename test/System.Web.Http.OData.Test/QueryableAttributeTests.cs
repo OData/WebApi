@@ -3,6 +3,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -210,6 +212,26 @@ namespace System.Web.Http.OData
                 "The 'QueryableAttribute' type cannot be used with action 'GetNonGenericEnumerable' on controller 'CustomerHighLevel' because the return type 'System.Web.Http.OData.TestCommon.Models.NonGenericEnumerable' does not specify the type of the collection.");
         }
 
+        [Fact]
+        public void NonObjectContentResponse_DoesNotThrow()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
+            HttpConfiguration config = new HttpConfiguration();
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("GetIEnumerableOfCustomer"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            context.Response.Content = new StreamContent(new MemoryStream());
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => attribute.OnActionExecuted(context));
+        }
+
         [Theory]
         [InlineData("GetObject")]
         [InlineData("GetCollectionOfCustomer")]
@@ -364,6 +386,21 @@ namespace System.Web.Http.OData
             // Act & Assert
             mockAttribute.Object.ValidateQuery(null);
             mockAttribute.Verify();
+        }
+
+
+        [Theory]
+        [InlineData(typeof(IEnumerable), true)]
+        [InlineData(typeof(IQueryable), true)]
+        [InlineData(typeof(IEnumerable<Customer>), true)]
+        [InlineData(typeof(IQueryable<Customer>), true)]
+        [InlineData(typeof(object), false)]
+        [InlineData(typeof(string), false)]
+        [InlineData(typeof(List<Customer>), false)]
+        [InlineData(typeof(Customer[]), false)]
+        public void IsSupportedReturnType_ReturnsWhetherReturnTypeIsIEnumerableOrIQueryable(Type returnType, bool isSupported)
+        {
+            Assert.Equal(isSupported, QueryableAttribute.IsSupportedReturnType(returnType));
         }
     }
 }

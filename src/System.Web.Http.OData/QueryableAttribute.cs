@@ -121,28 +121,31 @@ namespace System.Web.Http
             if (response != null && response.IsSuccessStatusCode)
             {
                 ObjectContent responseContent = response.Content as ObjectContent;
-                ValidateReturnType(responseContent.ObjectType, actionDescriptor);
-
-                // Apply the query if there are any query options or if there is a result limit set
-                if (responseContent != null && responseContent.Value != null && request.RequestUri != null &&
-                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
+                if (responseContent != null)
                 {
-                    ValidateQuery(request);
+                    ValidateReturnType(responseContent.ObjectType, actionDescriptor);
 
-                    try
+                    // Apply the query if there are any query options or if there is a result limit set
+                    if (responseContent.Value != null && request.RequestUri != null &&
+                        (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
                     {
-                        IEnumerable query = responseContent.Value as IEnumerable;
-                        Contract.Assert(query != null, "ValidateResponseContent should have ensured the responseContent implements IEnumerable");
-                        IQueryable queryResults = ExecuteQuery(query, request, configuration, actionDescriptor);
-                        responseContent.Value = queryResults;
-                    }
-                    catch (ODataException e)
-                    {
-                        actionExecutedContext.Response = request.CreateErrorResponse(
-                            HttpStatusCode.BadRequest,
-                            SRResources.UriQueryStringInvalid,
-                            e);
-                        return;
+                        ValidateQuery(request);
+
+                        try
+                        {
+                            IEnumerable query = responseContent.Value as IEnumerable;
+                            Contract.Assert(query != null, "ValidateResponseContent should have ensured the responseContent implements IEnumerable");
+                            IQueryable queryResults = ExecuteQuery(query, request, configuration, actionDescriptor);
+                            responseContent.Value = queryResults;
+                        }
+                        catch (ODataException e)
+                        {
+                            actionExecutedContext.Response = request.CreateErrorResponse(
+                                HttpStatusCode.BadRequest,
+                                SRResources.UriQueryStringInvalid,
+                                e);
+                            return;
+                        }
                     }
                 }
             }
@@ -160,7 +163,7 @@ namespace System.Web.Http
             }
         }
 
-        private static bool IsSupportedReturnType(Type objectType)
+        internal static bool IsSupportedReturnType(Type objectType)
         {
             Contract.Assert(objectType != null);
 

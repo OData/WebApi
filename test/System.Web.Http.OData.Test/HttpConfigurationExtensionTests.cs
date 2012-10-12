@@ -151,6 +151,17 @@ namespace System.Web.Http.OData
             Assert.Equal(1, filterProviders.Count());
             Assert.Equal(100, filterProviders.First().ResultLimit);
         }
+        
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(-100)]
+        public void AddQuerySupport_ThrowsForNonPositiveResultLimit(int resultLimit)
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+
+            Assert.Throws<ArgumentException>(() => configuration.EnableQuerySupport(resultLimit), "The result limit must be a positive number.\r\nParameter name: resultLimit");
+        }
 
         [Fact]
         public void AddQuerySupport_ActionFilters_TakePrecedence()

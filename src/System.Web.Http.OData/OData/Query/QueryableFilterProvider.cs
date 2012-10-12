@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Query
             // Actions with a bound parameter of type ODataQueryOptions do not support the [Queryable] attribute
             // The assumption is that the action will handle the querying within the action implementation
             if (actionDescriptor != null && IsIQueryable(actionDescriptor.ReturnType) &&
-                !actionDescriptor.GetParameters().Any(parameter => parameter.ParameterType == typeof(ODataQueryOptions)))
+                !actionDescriptor.GetParameters().Any(parameter => typeof(ODataQueryOptions).IsAssignableFrom(parameter.ParameterType)))
             {
                 QueryableAttribute filter = new QueryableAttribute();
                 if (ResultLimit.HasValue)
@@ -48,7 +48,7 @@ namespace System.Web.Http.OData.Query
             return Enumerable.Empty<FilterInfo>();
         }
 
-        private static bool IsIQueryable(Type type)
+        internal static bool IsIQueryable(Type type)
         {
             return type == typeof(IQueryable) ||
                 (type != null && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IQueryable<>));

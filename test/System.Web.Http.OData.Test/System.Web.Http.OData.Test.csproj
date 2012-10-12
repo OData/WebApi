@@ -222,7 +222,6 @@
     <Compile Include="TestCommon\Models\ComplexTypes\POCO\PhoneType.cs" />
     <Compile Include="TestCommon\DataSource.cs" />
     <Compile Include="TestCommon\Models\EntityTypes\Attributed\Employee.cs" />
-    <Compile Include="TestCommon\Models\EntityTypes\Attributed\MultipleKeyEmployee.cs" />
     <Compile Include="TestCommon\Models\EntityTypes\POCO\AddressEntity.cs" />
     <Compile Include="TestCommon\Models\EntityTypes\POCO\WorkItem.cs" />
     <Compile Include="TestCommon\ReferenceDepthContext.cs" />

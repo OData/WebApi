@@ -16,13 +16,13 @@ namespace System.Web.Http.OData.TestCommon.Models
         [DataMember(IsRequired = true)]
         public string FirstName { get; set; }
 
-        [DataMember(Name = "OtherNames")]
+        [DataMember]
         public string[] Alias { get; set; }
 
-        [DataMember(Name = "HomeAddress")]
+        [DataMember]
         public Address Address { get; set; }
 
-        [DataMember(EmitDefaultValue = true)]
+        [DataMember]
         public PhoneNumber HomeNumber { get; set; }
 
         public string UnserializableSSN { get; set; }
@@ -42,7 +42,7 @@ namespace System.Web.Http.OData.TestCommon.Models
             this.FavoriteHobby = new HobbyActivity("Xbox Gaming");
         }
 
-        [DataContract(Namespace = "", Name = "HobbyActivity")]
+        [DataContract]
         public class HobbyActivity : IActivity
         {
             public HobbyActivity(string hobbyName)

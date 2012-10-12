@@ -4,12 +4,12 @@ namespace System.Web.Http.OData.TestCommon.Models
 {
     public struct PhoneNumber
     {
-        public int CountryCode;
+        public int CountryCode { get; set; }
 
-        public int AreaCode;
+        public int AreaCode { get; set; }
 
-        public int Number;
+        public int Number { get; set; }
 
-        public PhoneType PhoneType;
+        public PhoneType PhoneType { get; set; }
     }
 }

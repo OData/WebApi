@@ -4,11 +4,11 @@ namespace System.Web.Http.OData.TestCommon.Models
 {
     public class Address
     {
-        public string StreetAddress;
+        public string StreetAddress { get; set; }
 
-        public string City;
+        public string City { get; set; }
 
-        public string State;
+        public string State { get; set; }
 
         public Address()
         {

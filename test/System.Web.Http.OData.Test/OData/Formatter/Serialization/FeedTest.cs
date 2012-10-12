@@ -3,18 +3,21 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using System.Web.Http.Hosting;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http.Routing;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class FeedTest
     {
-        [Fact(Skip = "Requires inheritance support in the odata formatter")]
-        [Trait("Description", "ODataMediaTypeFormatter serailizes a feed in valid ODataMessageFormat")]
+        [Fact]
         public void IEnumerableOfEntityTypeSerializesAsODataFeed()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
 
             IEnumerable<Employee> collectionOfPerson = new Collection<Employee>() 
             {
@@ -28,30 +31,48 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Xml.Equal(BaselineResource.TestFeedOfEmployee, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
         }
 
-        [Fact(Skip = "Requires inheritance support in the odata formatter")]
-        [Trait("Description", "ODataMediaTypeFormatter sets required headers for a feed when serialized as ATOM.")]
+        [Fact]
         public void ContentHeadersAreAddedForXmlMediaType()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
 
             ObjectContent<IEnumerable<Employee>> content = new ObjectContent<IEnumerable<Employee>>(new Employee[] { new Employee(0, new ReferenceDepthContext(7)) }, formatter);
             content.LoadIntoBufferAsync().Wait();
 
             Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Http.Contains(content.Headers, "Content-Type", "application/atom+xml; type=feed");
+            Assert.Http.Contains(content.Headers, "Content-Type", "application/atom+xml; type=feed; charset=utf-8");
         }
 
-        [Fact(Skip = "Requires inheritance support in the odata formatter")]
-        [Trait("Description", "ODataMediaTypeFormatter sets required headers for a feed when serialized as JSON.")]
+        [Fact]
         public void ContentHeadersAreAddedForJsonMediaType()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
 
             HttpContent content = new ObjectContent<IEnumerable<Employee>>(new Employee[] { new Employee(0, new ReferenceDepthContext(7)) }, formatter, "application/json");
             content.LoadIntoBufferAsync().Wait();
 
             Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Equal(content.Headers.ContentType.MediaType, "application/json");
+            Assert.Http.Contains(content.Headers, "Content-Type", "application/json; odata=verbose; charset=utf-8");
+        }
+
+        private static HttpRequestMessage GetSampleRequest()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
+            config.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
+            config.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentId})/{navigationProperty}");
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            return request;
+        }
+
+        private static IEdmModel GetSampleModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Employee>("employees");
+            builder.EntitySet<WorkItem>("workitems");
+            return builder.GetEdmModel();
         }
     }
 }

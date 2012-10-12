@@ -11,16 +11,16 @@ namespace System.Web.Http.OData.TestCommon.Models
     {
         [Key]
         [DataMember]
-        public long EmployeeId;
+        public long EmployeeId { get; set; }
 
         [DataMember]
-        public Person Manager;
+        public Employee Manager { get; set; }
 
         [DataMember]
-        public List<Employee> DirectReports;
+        public List<Employee> DirectReports { get; set; }
 
-        [DataMember(Name = "CurrentWorkItem")]
-        public WorkItem WorkItem;
+        [DataMember]
+        public WorkItem WorkItem { get; set; }
 
         public Employee(int index, ReferenceDepthContext context)
             : base(index, context)

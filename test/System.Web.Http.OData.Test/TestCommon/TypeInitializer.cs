@@ -31,10 +31,6 @@ namespace System.Web.Http.OData
             {
                 return new Employee(index, context);
             }
-            else if (type == SupportedTypes.MultipleKeyEmployee)
-            {
-                return new MultipleKeyEmployee(index, context);
-            }
             else if (type == SupportedTypes.Address)
             {
                 return new Address(index, context);

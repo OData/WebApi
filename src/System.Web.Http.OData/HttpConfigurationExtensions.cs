@@ -200,7 +200,7 @@ namespace System.Web.Http
             }
             if (resultLimit <= 0)
             {
-                throw Error.Argument("resultLimit", SRResources.ResultLimitMustBePositive);
+                throw Error.ArgumentMustBeGreaterThanOrEqualTo("resultLimit", resultLimit, 1);
             }
 
             configuration.Services.Add(typeof(IFilterProvider), new QueryableFilterProvider() { ResultLimit = resultLimit });

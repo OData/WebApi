@@ -414,9 +414,6 @@
   <data name="NoODataMediaTypeFormatterFound" xml:space="preserve">
     <value>The ODataParameterBindingAttribute requires that an ODataMediaTypeFormatter be registered with the HttpConfiguration.</value>
   </data>
-  <data name="ResultLimitMustBePositive" xml:space="preserve">
-    <value>The result limit must be a positive number.</value>
-  </data>
   <data name="ValueIsInvalid" xml:space="preserve">
     <value>The value '{0}' is invalid. {1}</value>
   </data>

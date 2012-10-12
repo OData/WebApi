@@ -916,15 +916,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The result limit must be a positive number..
-        /// </summary>
-        internal static string ResultLimitMustBePositive {
-            get {
-                return ResourceManager.GetString("ResultLimitMustBePositive", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Could not find the target entity type for the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
         /// </summary>
         internal static string TargetEntityTypeMissing {

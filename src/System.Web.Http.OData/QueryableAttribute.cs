@@ -80,7 +80,7 @@ namespace System.Web.Http
             {
                 if (value <= 0)
                 {
-                    throw Error.Argument(SRResources.ResultLimitMustBePositive);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
                 _resultLimit = value;
             }

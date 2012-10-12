@@ -160,7 +160,11 @@ namespace System.Web.Http.OData
         {
             HttpConfiguration configuration = new HttpConfiguration();
 
-            Assert.Throws<ArgumentException>(() => configuration.EnableQuerySupport(resultLimit), "The result limit must be a positive number.\r\nParameter name: resultLimit");
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => configuration.EnableQuerySupport(resultLimit),
+                String.Format(
+                    "Value must be greater than or equal to 1.\r\nParameter name: resultLimit\r\nActual value was {0}.",
+                    resultLimit));
         }
 
         [Fact]

@@ -53,6 +53,11 @@ namespace System.Web.WebPages
             get { return _startPage.Value; }
         }
 
+        internal static List<string> SupportedExtensions
+        {
+            get { return _supportedExtensions; }
+        }
+
         internal static void AddVersionHeader(HttpContextBase httpContext)
         {
             if (!DisableWebPagesResponseHeader)

@@ -35,7 +35,7 @@ namespace System.Web.WebPages
 
             // Parse incoming URL (we trim off the first two chars since they're always "~/")
             string requestPath = context.Request.AppRelativeCurrentExecutionFilePath.Substring(2) + context.Request.PathInfo;
-            var registeredExtensions = WebPageHttpHandler.GetRegisteredExtensions();
+            List<string> registeredExtensions = WebPageHttpHandler.SupportedExtensions;
 
             // Check if this request matches a file in the app
             WebPageMatch webpageRouteMatch = MatchRequest(requestPath, registeredExtensions, VirtualPathFactory, context, DisplayModeProvider.Instance);
@@ -84,10 +84,12 @@ namespace System.Web.WebPages
             return webPageMatch;
         }
 
-        private static string GetRouteLevelMatch(string pathValue, IEnumerable<string> supportedExtensions, IVirtualPathFactory virtualPathFactory, HttpContextBase context, DisplayModeProvider displayModeProvider)
+        private static string GetRouteLevelMatch(string pathValue, List<string> supportedExtensions, IVirtualPathFactory virtualPathFactory, HttpContextBase context, DisplayModeProvider displayModeProvider)
         {
-            foreach (string supportedExtension in supportedExtensions)
+            for (int i = 0; i < supportedExtensions.Count; i++)
             {
+                string supportedExtension = supportedExtensions[i];
+
                 string virtualPath = "~/" + pathValue;
 
                 // Only add the extension if it's not already there
@@ -122,7 +124,7 @@ namespace System.Web.WebPages
             return null;
         }
 
-        internal static WebPageMatch MatchRequest(string pathValue, IEnumerable<string> supportedExtensions, IVirtualPathFactory virtualPathFactory, HttpContextBase context, DisplayModeProvider displayModes)
+        internal static WebPageMatch MatchRequest(string pathValue, List<string> supportedExtensions, IVirtualPathFactory virtualPathFactory, HttpContextBase context, DisplayModeProvider displayModes)
         {
             string currentLevel = String.Empty;
             string currentPathInfo = pathValue;
@@ -135,8 +137,9 @@ namespace System.Web.WebPages
                 {
                     // TODO: Look into switching to RawURL to eliminate the need for this issue
                     bool foundSupportedExtension = false;
-                    foreach (string supportedExtension in supportedExtensions)
+                    for (int i = 0; i < supportedExtensions.Count; i++)
                     {
+                        string supportedExtension = supportedExtensions[i];
                         if (pathValue.EndsWith("." + supportedExtension, StringComparison.OrdinalIgnoreCase))
                         {
                             foundSupportedExtension = true;
@@ -184,7 +187,7 @@ namespace System.Web.WebPages
             return MatchDefaultFiles(pathValue, supportedExtensions, virtualPathFactory, context, displayModes, currentLevel);
         }
 
-        private static WebPageMatch MatchDefaultFiles(string pathValue, IEnumerable<string> supportedExtensions, IVirtualPathFactory virtualPathFactory, HttpContextBase context, DisplayModeProvider displayModes, string currentLevel)
+        private static WebPageMatch MatchDefaultFiles(string pathValue, List<string> supportedExtensions, IVirtualPathFactory virtualPathFactory, HttpContextBase context, DisplayModeProvider displayModes, string currentLevel)
         {
             // If we haven't found anything yet, now try looking for default.* or index.* at the current url
             currentLevel = pathValue;

@@ -844,6 +844,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Queries can not be applied to a response content of type &apos;{0}&apos;. The response content must be an ObjectContent..
+        /// </summary>
+        internal static string QueryingRequiresObjectContent {
+            get {
+                return ResourceManager.GetString("QueryingRequiresObjectContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Binding OData QueryNode of kind {0} is not supported by {1}..
         /// </summary>
         internal static string QueryNodeBindingNotSupported {

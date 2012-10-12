@@ -441,4 +441,7 @@
   <data name="InvalidReturnTypeForQuerying" xml:space="preserve">
     <value>The action '{0}' on controller '{1}' with return type '{2}' cannot support querying. Ensure the type of the returned content is IEnumerable, IQueryable, or a generic form of either interface.</value>
   </data>
+  <data name="QueryingRequiresObjectContent" xml:space="preserve">
+    <value>Queries can not be applied to a response content of type '{0}'. The response content must be an ObjectContent.</value>
+  </data>
 </root>

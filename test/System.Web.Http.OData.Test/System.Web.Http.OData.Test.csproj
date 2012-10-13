@@ -103,6 +103,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BaselineResource.resx</DependentUpon>
     </Compile>
+    <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConventionTest.cs" />

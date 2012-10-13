@@ -104,6 +104,7 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilder.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinder.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConvention.cs" />

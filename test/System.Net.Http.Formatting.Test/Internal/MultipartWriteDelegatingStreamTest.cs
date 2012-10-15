@@ -13,7 +13,7 @@ namespace System.Net.Http.Internal
     {
         private static readonly byte[] _testData = Encoding.UTF8.GetBytes("Hello World!");
 
-        [Fact(Skip = "This test fails on .NET 4 but passes on .NET 4.5")]
+        [Fact(Platforms = Platform.Net45, PlatformJustification = "This test fails on .NET 4 but passes on .NET 4.5")]
         public void MultipartWriteDelegatingStreamTest_CallsCallbackOnSuccess()
         {
             // Arrange
@@ -36,7 +36,7 @@ namespace System.Net.Http.Internal
             Assert.Same(expectedState, mockCallback.AsyncResult.AsyncState);
         }
 
-        [Fact(Skip = "This test fails on .NET 4 but passes on .NET 4.5")]
+        [Fact(Platforms = Platform.Net45, PlatformJustification = "This test fails on .NET 4 but passes on .NET 4.5")]
         public void MultipartWriteDelegatingStreamTest_CallsCallbackOnFailure()
         {
             // Arrange

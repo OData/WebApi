@@ -31,18 +31,18 @@ namespace System.Web.Mvc
 
         public virtual IEnumerable<Filter> GetFilters(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
         {
-            ControllerBase controller = controllerContext.Controller;
-            if (controller == null)
+            // Results are low in number in the common case so use yield return to avoid creating intermediate collections or nested enumerables
+            if (controllerContext.Controller != null)
             {
-                return Enumerable.Empty<Filter>();
-            }
-
-            var typeFilters = GetControllerAttributes(controllerContext, actionDescriptor)
-                .Select(attr => new Filter(attr, FilterScope.Controller, null));
-            var methodFilters = GetActionAttributes(controllerContext, actionDescriptor)
-                .Select(attr => new Filter(attr, FilterScope.Action, null));
-
-            return typeFilters.Concat(methodFilters).ToList();
+                foreach (FilterAttribute attr in GetControllerAttributes(controllerContext, actionDescriptor))
+                {
+                    yield return new Filter(attr, FilterScope.Controller, order: null);
+                }
+                foreach (FilterAttribute attr in GetActionAttributes(controllerContext, actionDescriptor))
+                {
+                    yield return new Filter(attr, FilterScope.Action, order: null);
+                }
+            }             
         }
     }
 }

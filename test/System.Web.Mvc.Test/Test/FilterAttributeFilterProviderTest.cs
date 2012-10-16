@@ -127,7 +127,7 @@ namespace System.Web.Mvc.Test
             actionDescriptorMock.Setup(ad => ad.ControllerDescriptor).Returns(controllerDescriptorMock.Object);
 
             // Act
-            var result = provider.GetFilters(context, actionDescriptorMock.Object);
+            var result = provider.GetFilters(context, actionDescriptorMock.Object).ToList();
 
             // Assert
             controllerDescriptorMock.Verify();
@@ -147,7 +147,7 @@ namespace System.Web.Mvc.Test
             actionDescriptorMock.Setup(ad => ad.ControllerDescriptor).Returns(controllerDescriptorMock.Object);
 
             // Act
-            var result = provider.GetFilters(context, actionDescriptorMock.Object);
+            var result = provider.GetFilters(context, actionDescriptorMock.Object).ToList();
 
             // Assert
             controllerDescriptorMock.Verify();

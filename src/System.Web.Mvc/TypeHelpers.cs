@@ -102,8 +102,12 @@ namespace System.Web.Mvc
 
         public static Type ExtractGenericInterface(Type queryType, Type interfaceType)
         {
-            Func<Type, bool> matchesInterface = t => t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType;
-            return (matchesInterface(queryType)) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
+            if (MatchesGenericType(queryType, interfaceType))
+            {
+                return queryType;
+            }
+            Type[] queryTypeInterfaces = queryType.GetInterfaces();
+            return MatchGenericTypeFirstOrDefault(queryTypeInterfaces, interfaceType);
         }
 
         public static object GetDefaultValue(Type type)
@@ -119,6 +123,24 @@ namespace System.Web.Mvc
         public static bool IsNullableValueType(Type type)
         {
             return Nullable.GetUnderlyingType(type) != null;
+        }
+
+        private static bool MatchesGenericType(Type type, Type matchType)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == matchType;
+        }
+
+        private static Type MatchGenericTypeFirstOrDefault(Type[] types, Type matchType)
+        {
+            for (int i = 0; i < types.Length; i++)
+            {
+                Type type = types[i];
+                if (MatchesGenericType(type, matchType))
+                {
+                    return type;
+                }
+            }
+            return null;
         }
 
         private static bool StrongTryGetValueImpl<TKey, TValue>(object dictionary, string key, out object value)

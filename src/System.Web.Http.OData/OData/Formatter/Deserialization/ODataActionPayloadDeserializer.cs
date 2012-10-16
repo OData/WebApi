@@ -96,7 +96,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmTypeReference elementType = collectionType.ElementType();
             Type clrElementType = EdmLibHelpers.GetClrType(elementType, readContext.Model);
             IList list = Activator.CreateInstance(typeof(List<>).MakeGenericType(clrElementType)) as IList;
-            ODataEntryDeserializer deserializer = _provider.GetODataDeserializer(elementType);
 
             while (reader.Read())
             {

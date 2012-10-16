@@ -262,16 +262,13 @@ namespace System.Web.Http.OData.Formatter
                 // Get the format and version to use from the ODataServiceVersion content header or if not available use the
                 // values configured for the specialized formatter instance.
                 ODataVersion version;
-                ODataFormat odataFormat;
                 if (contentHeaders == null)
                 {
                     version = _defaultODataVersion;
-                    odataFormat = ODataFormatterConstants.DefaultODataFormat;
                 }
                 else
                 {
                     version = GetODataVersion(contentHeaders, ODataFormatterConstants.ODataServiceVersion) ?? _defaultODataVersion;
-                    odataFormat = GetODataFormat(contentHeaders);
                 }
 
                 // get the most appropriate serializer given that we support inheritance.
@@ -283,7 +280,6 @@ namespace System.Web.Http.OData.Formatter
                 }
 
                 UrlHelper urlHelper = Request.GetUrlHelper();
-                NameValueCollection queryStringValues = Request.RequestUri.ParseQueryString();
 
                 IEdmEntitySet targetEntitySet = null;
                 ODataUriHelpers.TryGetEntitySetAndEntityType(Request.RequestUri, Model, out targetEntitySet);

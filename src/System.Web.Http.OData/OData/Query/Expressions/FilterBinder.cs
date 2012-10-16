@@ -616,7 +616,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 property = ClrCanonicalFunctions.DateTimeOffsetProperties[node.Name];
             }
 
-            return MakeFunctionCall(ClrCanonicalFunctions.DateProperties[node.Name], arguments);
+            return MakeFunctionCall(property, arguments);
         }
 
         private Expression BindTimeSpanProperty(SingleValueFunctionCallQueryNode node)

@@ -76,7 +76,6 @@ namespace System.Web.Http.OData.Builder
             foreach (var iter in entitySetAndAnnotations)
             {
                 EdmEntitySet entitySet = iter.EntitySet;
-                IEntitySetConfiguration configuration = iter.Configuration;
                 model.SetAnnotationValue<EntitySetUrlAnnotation>(entitySet, iter.Annotations.Url);
                 model.SetAnnotationValue<IEntitySetLinkBuilder>(entitySet, iter.Annotations.LinkBuilder);
 

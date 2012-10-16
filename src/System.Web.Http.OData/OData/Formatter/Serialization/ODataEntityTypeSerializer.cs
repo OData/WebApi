@@ -110,11 +110,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             foreach (IEdmNavigationProperty navProperty in _edmEntityTypeReference.NavigationProperties())
             {
                 IEdmTypeReference propertyType = navProperty.Type;
-                object propertyValue = context.EntityInstance.GetType().GetProperty(navProperty.Name).GetValue(context.EntityInstance, index: null);
 
                 if (writeContext.EntitySet != null)
                 {
-                    IEdmEntitySet currentEntitySet = writeContext.EntitySet.FindNavigationTarget(navProperty);
                     IEntitySetLinkBuilder linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
 
                     ODataNavigationLink navigationLink = new ODataNavigationLink

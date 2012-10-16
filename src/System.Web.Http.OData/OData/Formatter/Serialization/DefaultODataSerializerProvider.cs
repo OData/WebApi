@@ -71,7 +71,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 return new ODataEntityReferenceLinkSerializer();
             }
-            else if (type == typeof(ODataError))
+            else if (type == typeof(ODataError) || type == typeof(HttpError))
             {
                 return new ODataErrorSerializer();
             }

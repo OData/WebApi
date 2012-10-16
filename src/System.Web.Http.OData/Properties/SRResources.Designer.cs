@@ -124,20 +124,20 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot apply {0} of &apos;{1}&apos; to {2} of &apos;{3}&apos;..
-        /// </summary>
-        internal static string CannotApplyODataQueryOptionsOfT {
-            get {
-                return ResourceManager.GetString("CannotApplyODataQueryOptionsOfT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to A binary operator with incompatible types was detected. Found operand types &apos;{0}&apos; and &apos;{1}&apos; for operator kind &apos;{2}&apos;..
         /// </summary>
         internal static string BinaryOperatorNotSupported {
             get {
                 return ResourceManager.GetString("BinaryOperatorNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot apply {0} of &apos;{1}&apos; to {2} of &apos;{3}&apos;..
+        /// </summary>
+        internal static string CannotApplyODataQueryOptionsOfT {
+            get {
+                return ResourceManager.GetString("CannotApplyODataQueryOptionsOfT", resourceCulture);
             }
         }
         
@@ -421,11 +421,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not supported by the ODataErrorSerializer..
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError..
         /// </summary>
-        internal static string ErrorTypeMustBeODataError {
+        internal static string ErrorTypeMustBeODataErrorOrHttpError {
             get {
-                return ResourceManager.GetString("ErrorTypeMustBeODataError", resourceCulture);
+                return ResourceManager.GetString("ErrorTypeMustBeODataErrorOrHttpError", resourceCulture);
             }
         }
         

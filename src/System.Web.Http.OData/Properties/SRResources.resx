@@ -222,8 +222,8 @@
   <data name="OrderByDuplicateProperty" xml:space="preserve">
     <value>Duplicate property named '{0}' is not supported in the OrderByQueryNode.</value>
   </data>
-  <data name="ErrorTypeMustBeODataError" xml:space="preserve">
-    <value>The type '{0}' is not supported by the ODataErrorSerializer.</value>
+  <data name="ErrorTypeMustBeODataErrorOrHttpError" xml:space="preserve">
+    <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
   </data>
   <data name="CannotAutoCreateMultipleCandidates" xml:space="preserve">
     <value>Cannot autoCreate binding because there are two or more candidate EntitySets.</value>

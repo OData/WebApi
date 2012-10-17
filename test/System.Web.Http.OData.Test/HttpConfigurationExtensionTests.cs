@@ -140,35 +140,6 @@ namespace System.Web.Http.OData
             var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
             Assert.Equal(1, queryFilterProviders.Count());
             var queryAttribute = Assert.IsType<QueryableAttribute>(queryFilterProviders.First().QueryFilter);
-            Assert.Equal(0, queryAttribute.ResultLimit);
-        }
-
-        [Fact]
-        public void AddQuerySupport_AddsQueryableFilterProviderWithResultLimit()
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-
-            configuration.EnableQuerySupport(100);
-
-            var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
-            Assert.Equal(1, queryFilterProviders.Count());
-            var queryAttribute = Assert.IsType<QueryableAttribute>(queryFilterProviders.First().QueryFilter);
-            Assert.Equal(100, queryAttribute.ResultLimit);
-        }
-        
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        [InlineData(-100)]
-        public void AddQuerySupport_ThrowsForNonPositiveResultLimit(int resultLimit)
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => configuration.EnableQuerySupport(resultLimit),
-                String.Format(
-                    "Value must be greater than or equal to 1.\r\nParameter name: value\r\nActual value was {0}.",
-                    resultLimit));
         }
 
         [Fact]

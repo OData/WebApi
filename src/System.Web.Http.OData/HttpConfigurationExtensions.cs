@@ -183,16 +183,6 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T} "/> return type.
-        /// </summary>
-        /// <param name="configuration">The server configuration.</param>
-        /// <param name="resultLimit">The maximum number of results to return.</param>
-        public static void EnableQuerySupport(this HttpConfiguration configuration, int resultLimit)
-        {
-            configuration.EnableQuerySupport(new QueryableAttribute() { ResultLimit = resultLimit });
-        }
-
-        /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>

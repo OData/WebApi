@@ -255,5 +255,34 @@ namespace System.Web.Http.Dispatcher
                 allowNull: true,
                 roundTripTestValue: "HelloAgain");
         }
+
+        [Fact]
+        public void GetPropertyValue_GetsValue_IfTypeMatches()
+        {
+            HttpError error = new HttpError();
+            error["key"] = "x";
+
+            Assert.Equal("x", error.GetPropertyValue<string>("key"));
+            Assert.Equal("x", error.GetPropertyValue<object>("key"));
+        }
+
+        [Fact]
+        public void GetPropertyValue_GetsDefault_IfTypeDoesNotMatch()
+        {
+            HttpError error = new HttpError();
+            error["key"] = "x";
+
+            Assert.Null(error.GetPropertyValue<Uri>("key"));
+            Assert.Equal(0, error.GetPropertyValue<int>("key"));
+        }
+
+        [Fact]
+        public void GetPropertyValue_GetsDefault_IfPropertyMissing()
+        {
+            HttpError error = new HttpError();
+
+            Assert.Null(error.GetPropertyValue<string>("key"));
+            Assert.Equal(0, error.GetPropertyValue<int>("key"));
+        }
     }
 }

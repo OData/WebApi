@@ -229,7 +229,13 @@ namespace System.Web.Http
             get { return GetPropertyValue<HttpError>(InnerExceptionKey); }
         }
 
-        private TValue GetPropertyValue<TValue>(string key)
+        /// <summary>
+        /// Gets a particular property value from this error instance.
+        /// </summary>
+        /// <typeparam name="TValue">The type of the property.</typeparam>
+        /// <param name="key">The name of the error property.</param>
+        /// <returns>The value of the error property.</returns>
+        public TValue GetPropertyValue<TValue>(string key)
         {
             TValue value;
             if (this.TryGetValue(key, out value))

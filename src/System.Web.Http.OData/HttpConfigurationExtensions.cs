@@ -174,36 +174,37 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Enables query support for actions with an <see cref="IQueryable"/> or <see cref="IQueryable{T}"/> return type.
+        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
         public static void EnableQuerySupport(this HttpConfiguration configuration)
         {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            configuration.Services.Add(typeof(IFilterProvider), new QueryableFilterProvider());
+            configuration.EnableQuerySupport(new QueryableAttribute());
         }
 
         /// <summary>
-        /// Enables query support for actions with an <see cref="IQueryable"/> or <see cref="IQueryable{T}"/> return type.
+        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T} "/> return type.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
         /// <param name="resultLimit">The maximum number of results to return.</param>
         public static void EnableQuerySupport(this HttpConfiguration configuration, int resultLimit)
         {
+            configuration.EnableQuerySupport(new QueryableAttribute() { ResultLimit = resultLimit });
+        }
+
+        /// <summary>
+        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="queryFilter">The action filter that executes the query.</param>
+        public static void EnableQuerySupport(this HttpConfiguration configuration, IActionFilter queryFilter)
+        {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
-            if (resultLimit <= 0)
-            {
-                throw Error.ArgumentMustBeGreaterThanOrEqualTo("resultLimit", resultLimit, 1);
-            }
 
-            configuration.Services.Add(typeof(IFilterProvider), new QueryableFilterProvider() { ResultLimit = resultLimit });
+            configuration.Services.Add(typeof(IFilterProvider), new QueryFilterProvider(queryFilter));
         }
     }
 }

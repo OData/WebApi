@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Query
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod(actionName));
 
-            FilterInfo[] filters = new QueryableFilterProvider().GetFilters(config, actionDescriptor).ToArray();
+            FilterInfo[] filters = new QueryFilterProvider(new QueryableAttribute()).GetFilters(config, actionDescriptor).ToArray();
 
             Assert.Equal(1, filters.Length);
             Assert.Equal(FilterScope.Global, filters[0].Scope);
@@ -43,24 +43,9 @@ namespace System.Web.Http.OData.Query
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod(actionName));
 
-            FilterInfo[] filters = new QueryableFilterProvider().GetFilters(config, actionDescriptor).ToArray();
+            FilterInfo[] filters = new QueryFilterProvider(new QueryableAttribute()).GetFilters(config, actionDescriptor).ToArray();
 
             Assert.Empty(filters);
-        }
-
-        [Fact]
-        public void GetFilters_AppliesResultLimit()
-        {
-            HttpConfiguration config = new HttpConfiguration();
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
-            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod("GetQueryable"));
-
-            FilterInfo[] filters = new QueryableFilterProvider() { ResultLimit = 25 }.GetFilters(config, actionDescriptor).ToArray();
-
-            Assert.Equal(1, filters.Length);
-            Assert.Equal(FilterScope.Global, filters[0].Scope);
-            QueryableAttribute filter = Assert.IsType<QueryableAttribute>(filters[0].Instance);
-            Assert.Equal(25, filter.ResultLimit);
         }
 
         [Theory]
@@ -74,7 +59,7 @@ namespace System.Web.Http.OData.Query
         [InlineData(typeof(Customer[]), false)]
         public void IsIQueryable_ReturnsWhetherTypeIsIQueryable(Type type, bool isIQueryable)
         {
-            Assert.Equal(isIQueryable, QueryableFilterProvider.IsIQueryable(type));
+            Assert.Equal(isIQueryable, QueryFilterProvider.IsIQueryable(type));
         }
     }
 

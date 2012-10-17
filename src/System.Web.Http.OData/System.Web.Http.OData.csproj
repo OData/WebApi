@@ -202,7 +202,7 @@
     <Compile Include="OData\Query\ODataRawQueryOptions.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelper.cs" />
     <Compile Include="OData\ODataResult.cs" />
-    <Compile Include="OData\Query\QueryableFilterProvider.cs" />
+    <Compile Include="OData\Query\QueryFilterProvider.cs" />
     <Compile Include="OData\Query\TopQueryOption.cs" />
     <Compile Include="OData\Delta.cs" />
     <Compile Include="OData\ExpressionHelperMethods.cs" />

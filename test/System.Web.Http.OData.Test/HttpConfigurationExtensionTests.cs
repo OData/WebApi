@@ -137,7 +137,10 @@ namespace System.Web.Http.OData
 
             configuration.EnableQuerySupport();
 
-            Assert.Equal(1, configuration.Services.GetFilterProviders().OfType<QueryableFilterProvider>().Count());
+            var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
+            Assert.Equal(1, queryFilterProviders.Count());
+            var queryAttribute = Assert.IsType<QueryableAttribute>(queryFilterProviders.First().QueryFilter);
+            Assert.Equal(0, queryAttribute.ResultLimit);
         }
 
         [Fact]
@@ -147,9 +150,10 @@ namespace System.Web.Http.OData
 
             configuration.EnableQuerySupport(100);
 
-            IEnumerable<QueryableFilterProvider> filterProviders = configuration.Services.GetFilterProviders().OfType<QueryableFilterProvider>();
-            Assert.Equal(1, filterProviders.Count());
-            Assert.Equal(100, filterProviders.First().ResultLimit);
+            var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
+            Assert.Equal(1, queryFilterProviders.Count());
+            var queryAttribute = Assert.IsType<QueryableAttribute>(queryFilterProviders.First().QueryFilter);
+            Assert.Equal(100, queryAttribute.ResultLimit);
         }
         
         [Theory]
@@ -163,8 +167,21 @@ namespace System.Web.Http.OData
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => configuration.EnableQuerySupport(resultLimit),
                 String.Format(
-                    "Value must be greater than or equal to 1.\r\nParameter name: resultLimit\r\nActual value was {0}.",
+                    "Value must be greater than or equal to 1.\r\nParameter name: value\r\nActual value was {0}.",
                     resultLimit));
+        }
+
+        [Fact]
+        public void AddQuerySupport_AddsFilterProviderForQueryFilter()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+            Mock<IActionFilter> myQueryFilter = new Mock<IActionFilter>();
+
+            configuration.EnableQuerySupport(myQueryFilter.Object);
+
+            var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
+            Assert.Equal(1, queryFilterProviders.Count());
+            Assert.Same(myQueryFilter.Object, queryFilterProviders.First().QueryFilter);
         }
 
         [Fact]

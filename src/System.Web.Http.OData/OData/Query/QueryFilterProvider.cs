@@ -8,19 +8,30 @@ using System.Web.Http.Filters;
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// An implementation of <see cref="IFilterProvider"/> that applies the <see cref="QueryableAttribute"/> to
-    /// any action with an <see cref="IQueryable"/> or <see cref="IQueryable{T}"/> return type that doesn't bind
-    /// a parameter of type <see cref="ODataQueryOptions"/>.
+    /// An implementation of <see cref="IFilterProvider" /> that applies an action filter to
+    /// any action with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type
+    /// that doesn't bind a parameter of type <see cref="ODataQueryOptions" />.
     /// </summary>
-    public class QueryableFilterProvider : IFilterProvider
+    public class QueryFilterProvider : IFilterProvider
     {
         /// <summary>
-        /// Gets or sets the maximum number of query results to return.
+        /// Initializes a new instance of the <see cref="QueryFilterProvider" /> class.
         /// </summary>
-        /// <value>
-        /// The maximum number of query results to return, or <c>null</c> if there is no limit.
-        /// </value>
-        public int? ResultLimit { get; set; }
+        /// <param name="queryFilter">The action filter that executes the query.</param>
+        public QueryFilterProvider(IActionFilter queryFilter)
+        {
+            if (queryFilter == null)
+            {
+                throw Error.ArgumentNull("queryFilter");
+            }
+
+            QueryFilter = queryFilter;
+        }
+
+        /// <summary>
+        /// Gets the action filter that executes the query.
+        /// </summary>
+        public IActionFilter QueryFilter { get; private set; }
 
         /// <summary>
         /// Provides filters to apply to the specified action.
@@ -32,17 +43,12 @@ namespace System.Web.Http.OData.Query
         /// </returns>
         public IEnumerable<FilterInfo> GetFilters(HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
         {
-            // Actions with a bound parameter of type ODataQueryOptions do not support the [Queryable] attribute
+            // Actions with a bound parameter of type ODataQueryOptions do not support the query filter
             // The assumption is that the action will handle the querying within the action implementation
             if (actionDescriptor != null && IsIQueryable(actionDescriptor.ReturnType) &&
                 !actionDescriptor.GetParameters().Any(parameter => typeof(ODataQueryOptions).IsAssignableFrom(parameter.ParameterType)))
             {
-                QueryableAttribute filter = new QueryableAttribute();
-                if (ResultLimit.HasValue)
-                {
-                    filter.ResultLimit = ResultLimit.Value;
-                }
-                return new FilterInfo[] { new FilterInfo(filter, FilterScope.Global) };
+                return new FilterInfo[] { new FilterInfo(QueryFilter, FilterScope.Global) };
             }
 
             return Enumerable.Empty<FilterInfo>();

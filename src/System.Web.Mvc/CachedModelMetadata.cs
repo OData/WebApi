@@ -64,9 +64,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeConvertEmptyStringToNull,
-                                      ref _convertEmptyStringToNull,
-                                      ref _convertEmptyStringToNullComputed);
+                if (!_convertEmptyStringToNullComputed)
+                {
+                    _convertEmptyStringToNull = ComputeConvertEmptyStringToNull();
+                    _convertEmptyStringToNullComputed = true;
+                }
+                return _convertEmptyStringToNull;
             }
             set
             {
@@ -79,9 +82,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeDataTypeName,
-                                      ref _dataTypeName,
-                                      ref _dataTypeNameComputed);
+                if (!_dataTypeNameComputed)
+                {
+                    _dataTypeName = ComputeDataTypeName();
+                    _dataTypeNameComputed = true;
+                }
+                return _dataTypeName;
             }
             set
             {
@@ -94,9 +100,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeDescription,
-                                      ref _description,
-                                      ref _descriptionComputed);
+                if (!_descriptionComputed)
+                {
+                    _description = ComputeDescription();
+                    _descriptionComputed = true;
+                }
+                return _description;
             }
             set
             {
@@ -109,9 +118,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeDisplayFormatString,
-                                      ref _displayFormatString,
-                                      ref _displayFormatStringComputed);
+                if (!_displayFormatStringComputed)
+                {
+                    _displayFormatString = ComputeDisplayFormatString();
+                    _displayFormatStringComputed = true;
+                }
+                return _displayFormatString;
             }
             set
             {
@@ -124,9 +136,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeDisplayName,
-                                      ref _displayName,
-                                      ref _displayNameComputed);
+                if (!_displayNameComputed)
+                {
+                    _displayName = ComputeDisplayName();
+                    _displayNameComputed = true;
+                }
+                return _displayName;
             }
             set
             {
@@ -139,9 +154,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeEditFormatString,
-                                      ref _editFormatString,
-                                      ref _editFormatStringComputed);
+                if (!_editFormatStringComputed)
+                {
+                    _editFormatString = ComputeEditFormatString();
+                    _editFormatStringComputed = true;
+                }
+                return _editFormatString;
             }
             set
             {
@@ -154,9 +172,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeHideSurroundingHtml,
-                                      ref _hideSurroundingHtml,
-                                      ref _hideSurroundingHtmlComputed);
+                if (!_hideSurroundingHtmlComputed)
+                {
+                    _hideSurroundingHtml = ComputeHideSurroundingHtml();
+                    _hideSurroundingHtmlComputed = true;
+                }
+                return _hideSurroundingHtml;
             }
             set
             {
@@ -169,9 +190,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeIsReadOnly,
-                                      ref _isReadOnly,
-                                      ref _isReadOnlyComputed);
+                if (!_isReadOnlyComputed)
+                {
+                    _isReadOnly = ComputeIsReadOnly();
+                    _isReadOnlyComputed = true;
+                }
+                return _isReadOnly;
             }
             set
             {
@@ -184,9 +208,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeIsRequired,
-                                      ref _isRequired,
-                                      ref _isRequiredComputed);
+                if (!_isRequiredComputed)
+                {
+                    _isRequired = ComputeIsRequired();
+                    _isRequiredComputed = true;
+                }
+                return _isRequired;
             }
             set
             {
@@ -199,9 +226,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeNullDisplayText,
-                                      ref _nullDisplayText,
-                                      ref _nullDisplayTextComputed);
+                if (!_nullDisplayTextComputed)
+                {
+                    _nullDisplayText = ComputeNullDisplayText();
+                    _nullDisplayTextComputed = true;
+                }
+                return _nullDisplayText;
             }
             set
             {
@@ -214,9 +244,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeOrder,
-                                      ref _order,
-                                      ref _orderComputed);
+                if (!_orderComputed)
+                {
+                    _order = ComputeOrder();
+                    _orderComputed = true;
+                }
+                return _order;
             }
             set
             {
@@ -231,9 +264,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeShortDisplayName,
-                                      ref _shortDisplayName,
-                                      ref _shortDisplayNameComputed);
+                if (!_shortDisplayNameComputed)
+                {
+                    _shortDisplayName = ComputeShortDisplayName();
+                    _shortDisplayNameComputed = true;
+                }
+                return _shortDisplayName;
             }
             set
             {
@@ -246,9 +282,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeShowForDisplay,
-                                      ref _showForDisplay,
-                                      ref _showForDisplayComputed);
+                if (!_showForDisplayComputed)
+                {
+                    _showForDisplay = ComputeShowForDisplay();
+                    _showForDisplayComputed = true;
+                }
+                return _showForDisplay;
             }
             set
             {
@@ -261,9 +300,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeShowForEdit,
-                                      ref _showForEdit,
-                                      ref _showForEditComputed);
+                if (!_showForEditComputed)
+                {
+                    _showForEdit = ComputeShowForEdit();
+                    _showForEditComputed = true;
+                }
+                return _showForEdit;
             }
             set
             {
@@ -286,9 +328,12 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeTemplateHint,
-                                      ref _templateHint,
-                                      ref _templateHintComputed);
+                if (!_templateHintComputed)
+                {
+                    _templateHint = ComputeTemplateHint();
+                    _templateHintComputed = true;
+                }
+                return _templateHint;
             }
             set
             {
@@ -301,26 +346,18 @@ namespace System.Web.Mvc
         {
             get
             {
-                return CacheOrCompute(ComputeWatermark,
-                                      ref _watermark,
-                                      ref _watermarkComputed);
+                if (!_watermarkComputed)
+                {
+                    _watermark = ComputeWatermark();
+                    _watermarkComputed = true;
+                }
+                return _watermark;
             }
             set
             {
                 _watermark = value;
                 _watermarkComputed = true;
             }
-        }
-
-        private static TResult CacheOrCompute<TResult>(Func<TResult> computeThunk, ref TResult value, ref bool computed)
-        {
-            if (!computed)
-            {
-                value = computeThunk();
-                computed = true;
-            }
-
-            return value;
         }
 
         protected virtual bool ComputeConvertEmptyStringToNull()

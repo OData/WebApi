@@ -43,9 +43,12 @@ namespace System.Web.Http.Metadata.Providers
         {
             get
             {
-                return CacheOrCompute(ComputeConvertEmptyStringToNull,
-                                      ref _convertEmptyStringToNull,
-                                      ref _convertEmptyStringToNullComputed);
+                if (!_convertEmptyStringToNullComputed)
+                {
+                    _convertEmptyStringToNull = ComputeConvertEmptyStringToNull();
+                    _convertEmptyStringToNullComputed = true;
+                }
+                return _convertEmptyStringToNull;
             }
             set
             {
@@ -58,9 +61,12 @@ namespace System.Web.Http.Metadata.Providers
         {
             get
             {
-                return CacheOrCompute(ComputeDescription,
-                                      ref _description,
-                                      ref _descriptionComputed);
+                if (!_descriptionComputed)
+                {
+                    _description = ComputeDescription();
+                    _descriptionComputed = true;
+                }
+                return _description;
             }
             set
             {
@@ -73,9 +79,12 @@ namespace System.Web.Http.Metadata.Providers
         {
             get
             {
-                return CacheOrCompute(ComputeIsReadOnly,
-                                      ref _isReadOnly,
-                                      ref _isReadOnlyComputed);
+                if (!_isReadOnlyComputed)
+                {
+                    _isReadOnly = ComputeIsReadOnly();
+                    _isReadOnlyComputed = true;
+                }
+                return _isReadOnly;
             }
             set
             {
@@ -88,24 +97,16 @@ namespace System.Web.Http.Metadata.Providers
         {
             get
             {
-                return CacheOrCompute(ComputeIsComplexType,
-                                      ref _isComplexType,
-                                      ref _isComplexTypeComputed);
+                if (!_isComplexTypeComputed)
+                {
+                    _isComplexType = ComputeIsComplexType();
+                    _isComplexTypeComputed = true;
+                }
+                return _isComplexType;
             }
         }
 
         protected TPrototypeCache PrototypeCache { get; set; }
-
-        private static TResult CacheOrCompute<TResult>(Func<TResult> computeThunk, ref TResult value, ref bool computed)
-        {
-            if (!computed)
-            {
-                value = computeThunk();
-                computed = true;
-            }
-
-            return value;
-        }
 
         protected virtual bool ComputeConvertEmptyStringToNull()
         {

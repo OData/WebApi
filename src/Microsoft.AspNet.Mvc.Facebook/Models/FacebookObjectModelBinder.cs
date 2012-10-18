@@ -53,7 +53,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
                 return null;
             }
 
-            //TODO: (ErikPo) Total HACK but it will have to do for now. Not sure how to call a generic method with only the modelType
+            //TODO: (ErikPo) Figure out how to call a generic method with only the modelType
             var mi = facebookObjectStorageService.GetType().GetMethod("GetObjects");
             var objects = (FacebookObjectList<FacebookObject>)mi.Invoke(facebookObjectStorageService, new object[] { userFacebookId }); //facebookObjectStorageService.GetObjects(userFacebookId);
 

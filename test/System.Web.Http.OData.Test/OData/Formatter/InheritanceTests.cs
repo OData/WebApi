@@ -28,7 +28,7 @@ namespace System.Web.Http.OData.OData.Formatter
             _formatter = new ODataMediaTypeFormatter(GetEdmModel());
 
             _configuration.Formatters.Clear();
-            _configuration.SetODataFormatter(_formatter);
+            _configuration.Formatters.Add(_formatter);
 
             _configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
 

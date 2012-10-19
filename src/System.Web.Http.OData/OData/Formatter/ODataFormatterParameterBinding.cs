@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
@@ -16,9 +17,9 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataFormatterParameterBinding : HttpParameterBinding
     {
-        private ODataMediaTypeFormatter _formatter;
+        private MediaTypeFormatter _formatter;
 
-        public ODataFormatterParameterBinding(HttpParameterDescriptor descriptor, ODataMediaTypeFormatter formatter)
+        public ODataFormatterParameterBinding(HttpParameterDescriptor descriptor, MediaTypeFormatter formatter)
             : base(descriptor)
         {
             if (formatter == null)

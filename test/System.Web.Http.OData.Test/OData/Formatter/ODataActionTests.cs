@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter
             _model = GetModel();
             _formatter = new ODataMediaTypeFormatter(_model);
             _configuration.Formatters.Clear();
-            _configuration.SetODataFormatter(_formatter);
+            _configuration.Formatters.Insert(0, _formatter);
 
             _configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata");
             _configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");

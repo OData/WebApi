@@ -28,6 +28,7 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
+        internal const string EdmModelKey = "MS_EdmModel";
         private readonly ODataVersion _defaultODataVersion = ODataFormatterConstants.DefaultODataVersion;
 
         private PatchKeyMode _patchKeyMode;
@@ -114,6 +115,13 @@ namespace System.Web.Http.OData.Formatter
         {
             // call base to validate parameters
             base.GetPerRequestFormatterInstance(type, request, mediaType);
+
+            // Adds model information to allow callers to identyify the ODataMediaTypeFormatter through the tracing wrapper
+            // This is a workaround until tracing provides information about the wrapped inner formatter
+            if (type == typeof(IEdmModel))
+            {
+                request.Properties.Add(EdmModelKey, Model);
+            }
 
             ODataVersion version = GetResponseODataVersion(request);
             return new ODataMediaTypeFormatter(version, ODataDeserializerProvider, ODataSerializerProvider) { Request = request };

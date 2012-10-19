@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Web.Http.Filters;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using Microsoft.Data.Edm;
 
@@ -57,15 +59,6 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("model");
             }
 
-            if (configuration.GetODataFormatter() != null)
-            {
-                throw Error.NotSupported(
-                    SRResources.EdmModelMismatch,
-                    typeof(IEdmModel).Name,
-                    typeof(ODataMediaTypeFormatter).Name,
-                    "SetODataFormatter");
-            }
-
             configuration.Properties.AddOrUpdate(EdmModelKey, model, (a, b) =>
                 {
                     return model;
@@ -73,66 +66,60 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Retrieve the <see cref="ODataMediaTypeFormatter"/> from the configuration Properties collection. Null if user has not set it.
+        /// Retrieve the <see cref="MediaTypeFormatter" /> from the configuration. Null if user has not set it.
         /// </summary>
         /// <param name="configuration">Configuration to look into.</param>
-        /// <returns>Returns an <see cref="ODataMediaTypeFormatter"/> for this configuration.</returns>
-        public static ODataMediaTypeFormatter GetODataFormatter(this HttpConfiguration configuration)
+        /// <param name="edmModel">The EDM model.</param>
+        /// <returns>
+        /// Returns an <see cref="MediaTypeFormatter" /> for this configuration.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Calling the formatter only to identify the ODataFormatter; exceptions can be ignored")]
+        internal static MediaTypeFormatter GetODataFormatter(this HttpConfiguration configuration, out IEdmModel edmModel)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            // returns one if user sets one, else null.
-            object result;
-            if (configuration.Properties.TryGetValue(ODataFormatterKey, out result))
+            foreach (MediaTypeFormatter formatter in configuration.Formatters)
             {
-                return result as ODataMediaTypeFormatter;
+                ODataMediaTypeFormatter odataFormatter = formatter as ODataMediaTypeFormatter;
+                if (odataFormatter != null)
+                {
+                    edmModel = odataFormatter.Model;
+                    return odataFormatter;
+                }
             }
 
-            // Instead of trying to get the odata formatter from the formatter collection which works only if tracing is not enabled
-            // fail here so that the user doesn't have a surprise when he enables tracing.
+            // Detects ODataFormatters that are wrapped by tracing
+            // Creates a dummy request message and sees if the formatter adds a model to the request properties
+            // This is a workaround until tracing provides information about the wrapped inner formatter
+            foreach (MediaTypeFormatter formatter in configuration.Formatters)
+            {
+                using (HttpRequestMessage request = new HttpRequestMessage())
+                {
+                    try
+                    {
+                        formatter.GetPerRequestFormatterInstance(typeof(IEdmModel), request, mediaType: null);
+                        object model;
+                        if (request.Properties.TryGetValue(ODataMediaTypeFormatter.EdmModelKey, out model))
+                        {
+                            edmModel = model as IEdmModel;
+                            if (edmModel != null)
+                            {
+                                return formatter;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore exceptions - it isn't the OData formatter we're looking for
+                    }
+                }
+            }
+
+            edmModel = null;
             return null;
-        }
-
-        /// <summary>
-        /// Sets the given <see cref="ODataMediaTypeFormatter"/> on the configuration and adds it to the formatter collection.
-        /// </summary>
-        /// <param name="configuration">Configuration to be updated.</param>
-        /// <param name="formatter">The <see cref="ODataMediaTypeFormatter"/> to update.</param>
-        public static void SetODataFormatter(this HttpConfiguration configuration, ODataMediaTypeFormatter formatter)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            if (formatter == null)
-            {
-                throw Error.ArgumentNull("formatter");
-            }
-
-            if (configuration.GetODataFormatter() != null || configuration.Formatters.OfType<ODataMediaTypeFormatter>().Any())
-            {
-                throw Error.NotSupported(SRResources.ResetODataFormatterNotSupported, typeof(ODataMediaTypeFormatter).Name, typeof(HttpConfiguration).Name);
-            }
-            else if (configuration.GetEdmModel() != null && configuration.GetEdmModel() != formatter.Model)
-            {
-                throw Error.NotSupported(
-                    SRResources.EdmModelOnConfigurationMismatch,
-                    typeof(IEdmModel).Name,
-                    typeof(ODataMediaTypeFormatter).Name,
-                    "SetODataFormatter");
-            }
-            else
-            {
-                // This is a workaround for Bug 464640 where the formatter tracer wraps on to the formatter and there is no 
-                // easy way to retrieve the ODataFormatter from configuration afterwards.
-                configuration.SetEdmModel(formatter.Model);
-                configuration.Properties.TryAdd(ODataFormatterKey, formatter);
-                configuration.Formatters.Insert(0, formatter);
-            }
         }
 
         /// <summary>

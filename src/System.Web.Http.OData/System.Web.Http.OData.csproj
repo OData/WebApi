@@ -196,7 +196,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
     <Compile Include="OData\IDeltaOfTEntityType.cs" />
     <Compile Include="OData\IODataActionResolver.cs" />
-    <Compile Include="OData\ODataMetadataControllerConfigurationAttribute.cs" />
     <Compile Include="OData\ODataResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethods.cs" />

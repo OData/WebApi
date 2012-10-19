@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Builder
         {
             HttpServer server = new HttpServer();
             ODataMediaTypeFormatter odataFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-            server.Configuration.SetODataFormatter(odataFormatter);
+            server.Configuration.Formatters.Insert(0, odataFormatter);
             server.Configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata", new { Controller = "ODataMetadata", Action = "GetMetadata" });
 
             HttpClient client = new HttpClient(server);
@@ -35,15 +35,15 @@ namespace System.Web.Http.OData.Builder
             IEdmModel model = new EdmModel();
             ODataMediaTypeFormatter oDataFormatter = new ODataMediaTypeFormatter(model);
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetODataFormatter(oDataFormatter);
+            configuration.Formatters.Insert(0, oDataFormatter);
 
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
             controller.Request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
-            Assert.Equal(
-                model,
-                controller.GetMetadata());
+            IEdmModel responseModel;
+            Assert.True(controller.GetMetadata().TryGetContentValue<IEdmModel>(out responseModel));
+            Assert.Equal(model, responseModel);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace System.Web.Http.OData.Builder
 
             Assert.Throws<InvalidOperationException>(
                 () => controller.GetMetadata(),
-                "The configuration is missing 'IEdmModel'. Try calling 'SetODataFormatter' on 'HttpConfiguration'.");
+                "No OData formatter was found to write the OData metadata. Consider registering an appropriate ODataMediaTypeFormatter on the configuration's formatter collection.");
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace System.Web.Http.OData.Builder
         {
             HttpServer server = new HttpServer();
             ODataMediaTypeFormatter odataFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-            server.Configuration.SetODataFormatter(odataFormatter);
+            server.Configuration.Formatters.Insert(0, odataFormatter);
             server.Configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata", new { Controller = "ODataMetadata", Action = "GetMetadata" });
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
@@ -81,7 +81,7 @@ namespace System.Web.Http.OData.Builder
         {
             HttpServer server = new HttpServer();
             ODataMediaTypeFormatter odataFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-            server.Configuration.SetODataFormatter(odataFormatter);
+            server.Configuration.Formatters.Insert(0, odataFormatter);
             server.Configuration.Routes.MapHttpRoute(ODataRouteNames.ServiceDocument, "", new { Controller = "ODataMetadata", Action = "GetServiceDocument" });
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -37,9 +39,9 @@ namespace Microsoft.AspNet.Mvc.Facebook.Attributes
             // https://developers.facebook.com/docs/reference/dialogs/oauth/#parameters
 
             FacebookAuthorizationInfo authInfo;
-            if (!String.IsNullOrWhiteSpace(this.Permissions))
+            if (!String.IsNullOrWhiteSpace(Permissions))
             {
-                var permissions = this.Permissions.Split(',').Select((s) => s.Trim()).ToArray();
+                var permissions = Permissions.Split(',').Select(s => s.Trim()).ToArray();
                 authInfo = _facebookService.Authorize(filterContext.HttpContext, permissions);
             }
             else
@@ -64,13 +66,23 @@ namespace Microsoft.AspNet.Mvc.Facebook.Attributes
                 {
                     appPath = FacebookSettings.AppId;
                 }
-                var redirectUri = "https://apps.facebook.com/" + appPath + filterContext.HttpContext.Request.Url.PathAndQuery;
-                var loginUrl = client.GetLoginUrl(new
+
+                var redirectUri = String.Format(CultureInfo.InvariantCulture,
+                    "{0}/{1}{2}",
+                    FacebookSettings.FacebookAppUrl.TrimEnd('/'),
+                    appPath,
+                    filterContext.HttpContext.Request.Url.PathAndQuery);
+
+                Dictionary<string, object> loginUrlParameters = new Dictionary<string, object>();
+                loginUrlParameters["redirect_uri"] = redirectUri;
+                loginUrlParameters["client_id"] = FacebookSettings.AppId;
+                if (!String.IsNullOrWhiteSpace(Permissions))
                 {
-                    scope = this.Permissions,
-                    redirect_uri = redirectUri,
-                    client_id = FacebookSettings.AppId
-                });
+                    loginUrlParameters["scope"] = Permissions;
+                }
+
+                var loginUrl = client.GetLoginUrl(loginUrlParameters);
+
                 var facebookAuthResult = new ContentResult();
                 facebookAuthResult.ContentType = "text/html";
                 facebookAuthResult.Content = String.Format("<script>window.top.location = '{0}';</script>", loginUrl.AbsoluteUri);

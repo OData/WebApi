@@ -6,6 +6,8 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
 {
     public static class FacebookSettings
     {
+        private static string _facebookAppUrl = "https://apps.facebook.com";
+
         static FacebookSettings()
         {
             DefaultUserStorageService = DefaultFacebookUserStorageService.Instance;
@@ -21,6 +23,17 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
 
         public static IFacebookUserStorageService DefaultUserStorageService { get; set; }
         public static IFacebookObjectStorageService DefaultObjectStorageService { get; set; }
+        public static string FacebookAppUrl
+        {
+            get
+            {
+                return _facebookAppUrl;
+            }
+            set
+            {
+                _facebookAppUrl = value;
+            }
+        }
 
         public static void LoadFromConfig()
         {
@@ -28,6 +41,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
             AppSecret = ConfigurationManager.AppSettings["Facebook.AppSecret"];
             AppNamespace = ConfigurationManager.AppSettings["Facebook.AppNamespace"];
             RealtimeCallbackUrl = ConfigurationManager.AppSettings["Facebook.RealtimeCallbackUrl"];
+            FacebookAppUrl = ConfigurationManager.AppSettings["Facebook.FacebookAppUrl"] ?? _facebookAppUrl;
         }
     }
 }

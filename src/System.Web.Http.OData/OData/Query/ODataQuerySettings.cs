@@ -16,6 +16,7 @@ namespace System.Web.Http.OData.Query
         public ODataQuerySettings()
         {
             EnsureStableOrdering = true;
+            LambdaNestingLimit = 1;
         }
 
         /// <summary>
@@ -49,6 +50,17 @@ namespace System.Web.Http.OData.Query
                 _handleNullPropagationOption = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the maximum depth of the Any or All elements nested inside the query.
+        /// </summary>
+        /// <remarks>
+        /// This limit helps prevent Denial of Service attacks. The default value is 1.
+        /// </remarks>
+        /// <value>
+        /// The maxiumum depth of the Any or All elements nested inside the query.
+        /// </value>
+        public int LambdaNestingLimit { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of query results to return.

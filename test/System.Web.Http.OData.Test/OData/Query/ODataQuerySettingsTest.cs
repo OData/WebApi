@@ -21,6 +21,7 @@ namespace System.Web.Http.OData.Query
             // Assert
             Assert.Equal(HandleNullPropagationOption.Default, querySettings.HandleNullPropagation);
             Assert.True(querySettings.EnsureStableOrdering);
+            Assert.Equal(1, querySettings.LambdaNestingLimit);
         }
 
         [Fact]
@@ -41,6 +42,20 @@ namespace System.Web.Http.OData.Query
                 new ODataQuerySettings(),
                 o => o.EnsureStableOrdering,
                 true);
+        }
+
+        [Fact]
+        public void LambdaNestingLimit_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<ODataQuerySettings, int>(
+                new ODataQuerySettings(),
+                o => o.LambdaNestingLimit,
+                1,
+                null,
+                null,
+                null,
+                null,
+                2);
         }
     }
 }

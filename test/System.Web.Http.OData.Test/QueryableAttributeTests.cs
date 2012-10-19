@@ -86,6 +86,20 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
+        public void LambdaNestingLimit_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
+                new QueryableAttribute(),
+                o => o.LambdaNestingLimit,
+                1,
+                null,
+                null,
+                null,
+                null,
+                2);
+        }
+
+        [Fact]
         public void OnActionExecuted_Throws_Null_Context()
         {
             Assert.ThrowsArgumentNull(() => new QueryableAttribute().OnActionExecuted(null), "actionExecutedContext");

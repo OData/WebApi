@@ -447,4 +447,7 @@
   <data name="QueryingRequiresObjectContent" xml:space="preserve">
     <value>Queries can not be applied to a response content of type '{0}'. The response content must be an ObjectContent.</value>
   </data>
+  <data name="LambdaNestingLimitExceeded" xml:space="preserve">
+    <value>The Any/All nesting limit has been exceeded.</value>
+  </data>
 </root>

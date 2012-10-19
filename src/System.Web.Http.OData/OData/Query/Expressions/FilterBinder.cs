@@ -32,6 +32,7 @@ namespace System.Web.Http.OData.Query.Expressions
         /// </summary>
         private const int MaxBindCount = 100;
         private int _currentBindCount = 0;
+        private int _currentLambdaNestingCount;
 
         private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
@@ -803,6 +804,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression BindAllQueryNode(AllQueryNode allQueryNode)
         {
+            EnterLambda();
+
             ParameterExpression allIt = HandleLambdaParameters(allQueryNode.Parameters);
 
             Expression source;
@@ -817,24 +820,31 @@ namespace System.Web.Http.OData.Query.Expressions
             body = Expression.Lambda(body, allIt);
 
             Expression all = All(source, body);
+            Expression returnValue;
 
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
                 // IFF(source == null) null; else Any(body);
                 all = ToNullable(all);
-                return Expression.Condition(
+                returnValue = Expression.Condition(
                     test: Expression.Equal(source, _nullConstant),
                     ifTrue: Expression.Constant(null, all.Type),
                     ifFalse: all);
             }
             else
             {
-                return all;
+                returnValue = all;
             }
+
+            ExitLambda();
+
+            return returnValue;
         }
 
         private Expression BindAnyQueryNode(AnyQueryNode anyQueryNode)
         {
+            EnterLambda();
+
             ParameterExpression anyIt = HandleLambdaParameters(anyQueryNode.Parameters);
 
             Expression source;
@@ -851,20 +861,25 @@ namespace System.Web.Http.OData.Query.Expressions
             }
 
             Expression any = Any(source, body);
+            Expression returnValue;
 
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
                 // IFF(source == null) null; else Any(body);
                 any = ToNullable(any);
-                return Expression.Condition(
+                returnValue = Expression.Condition(
                     test: Expression.Equal(source, _nullConstant),
                     ifTrue: Expression.Constant(null, any.Type),
                     ifFalse: any);
             }
             else
             {
-                return any;
+                returnValue = any;
             }
+
+            ExitLambda();
+
+            return returnValue;
         }
 
         private ParameterExpression HandleLambdaParameters(IEnumerable<ParameterQueryNode> parameters)
@@ -911,6 +926,22 @@ namespace System.Web.Http.OData.Query.Expressions
             {
                 throw new ODataException(SRResources.RecursionLimitExceeded);
             }
+        }
+
+        private void EnterLambda()
+        {
+            if (_currentLambdaNestingCount >= _querySettings.LambdaNestingLimit)
+            {
+                throw new ODataException(SRResources.LambdaNestingLimitExceeded);
+            }
+
+            ++_currentLambdaNestingCount;
+        }
+
+        private void ExitLambda()
+        {
+            Contract.Assert(_currentLambdaNestingCount > 0);
+            --_currentLambdaNestingCount;
         }
 
         // If the expression is of non-standard edm primitive type (like uint), convert the expression to its standard edm type.

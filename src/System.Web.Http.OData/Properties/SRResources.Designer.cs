@@ -556,6 +556,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Any/All nesting limit has been exceeded..
+        /// </summary>
+        internal static string LambdaNestingLimitExceeded {
+            get {
+                return ResourceManager.GetString("LambdaNestingLimitExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; on the type &apos;{1}&apos; is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections..
         /// </summary>
         internal static string ManyToManyNavigationPropertyMustReturnCollection {

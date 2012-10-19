@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
@@ -399,15 +401,27 @@ namespace System.Web.Http.OData.Query.Expressions
         [PropertyData("LongInputs")]
         public void LongInputs_CauseRecursionLimitExceededException(string filter)
         {
-            Assert.Throws<ODataException>(() => VerifyQueryDeserialization(filter), "The recursion limit has been exceeded.");
+            ODataQuerySettings settings = new ODataQuerySettings
+            {
+                HandleNullPropagation = HandleNullPropagationOption.True,
+                LambdaNestingLimit = int.MaxValue
+            };
+
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The recursion limit has been exceeded.");
         }
 
         [Theory]
         [PropertyData("CloseToLongInputs")]
         public void AlmostLongInputs_DonotCauseRecursionLimitExceededExceptionOrTimeoutDuringCompilation(string filter)
         {
-            var filters = VerifyQueryDeserialization(filter);
-            RunFilter(filters.WithNullPropagation, new Product());
+            ODataQuerySettings settings = new ODataQuerySettings
+            {
+                HandleNullPropagation = HandleNullPropagationOption.True,
+                LambdaNestingLimit = int.MaxValue
+            };
+
+            Expression<Func<Product, bool>> expression = Bind(filter, settings);
+            RunFilter(expression, new Product());
         }
 
         [Theory]
@@ -648,9 +662,78 @@ namespace System.Web.Http.OData.Query.Expressions
         [Fact]
         public void RecursiveAllAny()
         {
-            var filter = VerifyQueryDeserialization(
+            Action<ODataQuerySettings> customizeSettings = (settings) => settings.LambdaNestingLimit = 2;
+
+            VerifyQueryDeserialization(
                "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
                "$it => $it.Category.QueryableProducts.All(P => P.Category.EnumerableProducts.Any(PP => (PP.ProductName == \"Snacks\")))",
+               NotTesting,
+               customizeSettings);
+        }
+
+        [Fact]
+        public void AnyAnyNestedBeyondLimit()
+        {
+            // Arrange
+            var filter = "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))";
+            ODataQuerySettings settings = CreateSettings();
+            settings.LambdaNestingLimit = 1;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit has been exceeded.");
+        }
+
+        [Fact]
+        public void AllAllNestedBeyondLimit()
+        {
+            // Arrange
+            var filter = "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))";
+            ODataQuerySettings settings = CreateSettings();
+            settings.LambdaNestingLimit = 1;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit has been exceeded.");
+        }
+
+        [Fact]
+        public void AnyAllNestedBeyondLimit()
+        {
+            // Arrange
+            var filter = "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))";
+            ODataQuerySettings settings = CreateSettings();
+            settings.LambdaNestingLimit = 1;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit has been exceeded.");
+        }
+
+        [Fact]
+        public void AllAnyNestedBeyondLimit()
+        {
+            // Arrange
+            var filter = "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))";
+            ODataQuerySettings settings = CreateSettings();
+            settings.LambdaNestingLimit = 1;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit has been exceeded.");
+        }
+
+        [Fact]
+        public void AnyInSequenceNotNested()
+        {
+            VerifyQueryDeserialization(
+               "Category/QueryableProducts/any(P: P/ProductName eq 'Snacks') or Category/QueryableProducts/any(P2: P2/ProductName eq 'Snacks')",
+               "$it => ($it.Category.QueryableProducts.Any(P => (P.ProductName == \"Snacks\")) OrElse $it.Category.QueryableProducts.Any(P2 => (P2.ProductName == \"Snacks\")))",
+               NotTesting);
+        }
+
+        [Fact]
+        public void AllInSequenceNotNested()
+        {
+            VerifyQueryDeserialization(
+               "Category/QueryableProducts/all(P: P/ProductName eq 'Snacks') or Category/QueryableProducts/all(P2: P2/ProductName eq 'Snacks')",
+               "$it => ($it.Category.QueryableProducts.All(P => (P.ProductName == \"Snacks\")) OrElse $it.Category.QueryableProducts.All(P2 => (P2.ProductName == \"Snacks\")))",
                NotTesting);
         }
 
@@ -1223,7 +1306,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DisAllowed_ByteArrayComparisons(string filter, string op)
         {
             Assert.Throws<ODataException>(
-                () => VerifyQueryDeserialization<DataTypes>(filter),
+                () => Bind<DataTypes>(filter),
                 Error.Format("A binary operator with incompatible types was detected. Found operand types 'Edm.Binary' and 'Edm.Binary' for operator kind '{0}'.", op));
         }
 
@@ -1246,13 +1329,53 @@ namespace System.Web.Http.OData.Query.Expressions
         [Fact]
         public void TypeMismatchInComparison()
         {
-            Assert.Throws<ODataException>(() =>
-                VerifyQueryDeserialization(
-                "length(123) eq 12",
-                ""));
+            Assert.Throws<ODataException>(() => Bind("length(123) eq 12"));
         }
 
         #endregion
+
+        private Expression<Func<Product, bool>> Bind(string filter, ODataQuerySettings querySettings = null)
+        {
+            return Bind<Product>(filter, querySettings);
+        }
+
+        private Expression<Func<T, bool>> Bind<T>(string filter, ODataQuerySettings querySettings = null) where T : class
+        {
+            IEdmModel model = GetModel<T>();
+            FilterQueryNode filterNode = CreateFilterNode(filter, model);
+
+            if (querySettings == null)
+            {
+                querySettings = CreateSettings();
+            }
+
+            return Bind<T>(filterNode, model, CreateFakeAssembliesResolver(), querySettings);
+        }
+
+        private static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        {
+            return FilterBinder.Bind<TEntityType>(filterNode, model, assembliesResolver, querySettings);
+        }
+
+        private IAssembliesResolver CreateFakeAssembliesResolver()
+        {
+            return new NoAssembliesResolver();
+        }
+
+        private FilterQueryNode CreateFilterNode(string filter, IEdmModel model)
+        {
+            var queryUri = new Uri(_serviceBaseUri, string.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
+            SemanticTree semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
+            return semanticTree.Query as FilterQueryNode;
+        }
+
+        private static ODataQuerySettings CreateSettings()
+        {
+            return new ODataQuerySettings
+            {
+                HandleNullPropagation = HandleNullPropagationOption.False // A value other than Default is required for calls to Bind.
+            };
+        }
 
         private static TheoryDataSet<string> GetLongInputsTestData(int maxCount)
         {
@@ -1296,22 +1419,32 @@ namespace System.Web.Http.OData.Query.Expressions
             return filter.Compile().Invoke(instance);
         }
 
-        private dynamic VerifyQueryDeserialization(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null)
+        private dynamic VerifyQueryDeserialization(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null)
         {
-            return VerifyQueryDeserialization<Product>(filter, expectedResult, expectedResultWithNullPropagation);
+            return VerifyQueryDeserialization<Product>(filter, expectedResult, expectedResultWithNullPropagation, settingsCustomizer);
         }
 
-        private dynamic VerifyQueryDeserialization<T>(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null) where T : class
+        private dynamic VerifyQueryDeserialization<T>(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null) where T : class
         {
             IEdmModel model = GetModel<T>();
-            var queryUri = new Uri(_serviceBaseUri, string.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
+            FilterQueryNode filterNode = CreateFilterNode(filter, model);
+            IAssembliesResolver assembliesResolver = CreateFakeAssembliesResolver();
 
-            var semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
+            Func<ODataQuerySettings, ODataQuerySettings> customizeSettings = (settings) =>
+            {
+                if (settingsCustomizer != null)
+                {
+                    settingsCustomizer.Invoke(settings);
+                }
 
-            var filterExpr = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode,
-                                                    model,
-                                                    new DefaultAssembliesResolver(),
-                                                    new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
+                return settings;
+            };
+
+            var filterExpr = Bind<T>(
+                filterNode,
+                model,
+                assembliesResolver,
+                customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }));
 
             if (!String.IsNullOrEmpty(expectedResult))
             {
@@ -1320,10 +1453,11 @@ namespace System.Web.Http.OData.Query.Expressions
 
             expectedResultWithNullPropagation = expectedResultWithNullPropagation ?? expectedResult;
 
-            var filterExprWithNullPropagation = FilterBinder.Bind<T>(semanticTree.Query as FilterQueryNode,
-                                                                     model,
-                                                                     new DefaultAssembliesResolver(),
-                                                                     new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+            var filterExprWithNullPropagation = Bind<T>(
+                filterNode,
+                model,
+                assembliesResolver,
+                customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }));
 
             if (!String.IsNullOrEmpty(expectedResultWithNullPropagation))
             {
@@ -1364,6 +1498,14 @@ namespace System.Web.Http.OData.Query.Expressions
         private T? ToNullable<T>(object value) where T : struct
         {
             return value == null ? null : (T?)Convert.ChangeType(value, typeof(T));
+        }
+
+        private class NoAssembliesResolver : IAssembliesResolver
+        {
+            public ICollection<Assembly> GetAssemblies()
+            {
+                return new Assembly[0];
+            }
         }
     }
 }

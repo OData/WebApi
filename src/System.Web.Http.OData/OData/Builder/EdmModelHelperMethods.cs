@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -132,7 +133,8 @@ namespace System.Web.Http.OData.Builder
                         foreach (ParameterConfiguration parameter in action.Parameters)
                         {
                             // TODO: http://aspnetwebstack.codeplex.com/workitem/417
-                            IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: true);
+                            bool isParameterOptional = EdmLibHelpers.IsNullable(parameter.TypeConfiguration.ClrType);
+                            IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterOptional);
                             EdmFunctionParameter functionParameter = new EdmFunctionParameter(functionImport, parameter.Name, parameterTypeReference, EdmFunctionParameterMode.In);
                             functionImport.AddParameter(functionParameter);
                         }

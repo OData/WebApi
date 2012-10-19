@@ -264,9 +264,9 @@ namespace System.Web.Http.OData.Formatter
             return _coreModel.GetPrimitiveType(primitiveKind);
         }
 
-        private static bool IsNullable(Type type)
+        public static bool IsNullable(Type type)
         {
-            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
+using System.Web.Http.OData.Formatter;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -14,7 +15,7 @@ namespace System.Web.Http.OData.Builder
         protected StructuralPropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
-            _optionalProperty = IsNullable(property.PropertyType);
+            _optionalProperty = EdmLibHelpers.IsNullable(property.PropertyType);
         }
 
         public bool OptionalProperty
@@ -32,10 +33,5 @@ namespace System.Web.Http.OData.Builder
         }
 
         internal bool IsOptionalPropertyExplicitlySet { get; set; }
-
-        private static bool IsNullable(Type type)
-        {
-            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
-        }
     }
 }

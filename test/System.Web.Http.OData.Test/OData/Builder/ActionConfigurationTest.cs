@@ -363,6 +363,30 @@ namespace System.Web.Http.OData.Builder
             Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
         }
 
+        [Fact]
+        public void GetEdmModel_SetsNullableIffParameterTypeIsNullable()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            var actionBuilder = movie.Action("Watch");
+            actionBuilder.Parameter<int>("int");
+            actionBuilder.Parameter<Nullable<int>>("nullableOfInt");
+            actionBuilder.Parameter<DateTime>("dateTime");
+            actionBuilder.Parameter<string>("string");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
+            IEdmFunctionImport action = container.FindFunctionImports("Watch").Single();
+            Assert.False(action.FindParameter("int").Type.IsNullable);
+            Assert.True(action.FindParameter("nullableOfInt").Type.IsNullable);
+            Assert.False(action.FindParameter("dateTime").Type.IsNullable);
+            Assert.True(action.FindParameter("string").Type.IsNullable);
+        }
+
         public class Movie
         {
             public int ID { get; set; }

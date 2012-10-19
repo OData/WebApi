@@ -94,6 +94,19 @@ namespace System.Web.Http.OData.Formatter
             Assert.Null(model.GetEdmType(typeof(TypeNotInModel)));
         }
 
+        [Theory]
+        [InlineData(typeof(string), true)]
+        [InlineData(typeof(List<int>), true)]
+        [InlineData(typeof(int[]), true)]
+        [InlineData(typeof(object), true)]
+        [InlineData(typeof(Nullable<int>), true)]
+        [InlineData(typeof(int), false)]
+        [InlineData(typeof(char), false)]
+        public void IsNullable_RecognizesClassesAndNullableOfTs(Type type, bool isNullable)
+        {
+            Assert.Equal(isNullable, EdmLibHelpers.IsNullable(type));
+        }
+
         private static IEdmModel GetEdmModel()
         {
             ODataModelBuilder modelBuilder = new ODataModelBuilder();

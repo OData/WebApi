@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
             //TODO: (ErikPo) Fill in the other half of this condition
             if (user == null/* or this is the first time the app has started */)
             {
-                object userFields = client.Get("me" + (!string.IsNullOrEmpty(fields) ? "?fields=" + fields.Replace(" ", "") : facebookService.GetFields(modelType)));
+                object userFields = client.Get("me" + (!String.IsNullOrEmpty(fields) ? "?fields=" + fields.Replace(" ", String.Empty) : facebookService.GetFields(modelType)));
 
                 if (modelType == typeof(FacebookUser))
                 {
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
 
                 var facebookFields = GetUserFields(modelType);
                 PropertyInfo userProperty;
-                string fbFieldName;
+                string facebookFieldName;
                 object fieldValue;
                 foreach (var field in facebookFields)
                 {
@@ -81,10 +81,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
                         continue;
                     }
                     userProperty = field.Key;
-                    fbFieldName = field.Value != null ? field.Value.JsonField : "";
-                    if (!string.IsNullOrEmpty(fbFieldName))
+                    facebookFieldName = field.Value != null ? field.Value.JsonField : String.Empty;
+                    if (!String.IsNullOrEmpty(facebookFieldName))
                     {
-                        fieldValue = GetFBFieldValue(userFields, fbFieldName.Split('.'));
+                        fieldValue = GetFBFieldValue(userFields, facebookFieldName.Split('.'));
                     }
                     else
                     {
@@ -126,7 +126,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
             dynamic subFacebookObject;
             try
             {
-                subFacebookObject = facebookObject[fieldNameParts.ElementAt(0).ToLower()];
+                subFacebookObject = facebookObject[fieldNameParts.ElementAt(0).ToLowerInvariant()];
             }
             catch
             {

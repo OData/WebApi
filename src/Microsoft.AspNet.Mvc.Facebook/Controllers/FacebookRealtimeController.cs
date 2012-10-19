@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Controllers
             this.facebookUserStorageService = facebookUserStorageService;
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Handled by the infrastructure")]
         public HttpResponseMessage Get([FromUri(Name = "hub")] SubscriptionVerification subscriptionVerification)
         {
             if (subscriptionVerification.Mode == "subscribe" && subscriptionVerification.Verify_Token == facebookService.VerificationToken)

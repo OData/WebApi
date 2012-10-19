@@ -9,23 +9,18 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
     {
         private readonly SortedList<string, FacebookUser> users;
         private readonly SortedList<string, string[]> permissions;
-        private static DefaultFacebookUserStorageService instance;
+        private static DefaultFacebookUserStorageService instance = new DefaultFacebookUserStorageService();
 
         public DefaultFacebookUserStorageService()
         {
-            users = new SortedList<string, FacebookUser>(100);
-            permissions = new SortedList<string, string[]>(100);
+            users = new SortedList<string, FacebookUser>();
+            permissions = new SortedList<string, string[]>();
         }
 
         public static DefaultFacebookUserStorageService Instance
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new DefaultFacebookUserStorageService();
-                }
-
                 return instance;
             }
         }

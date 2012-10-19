@@ -9,22 +9,17 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
     public class DefaultFacebookObjectStorageService : IFacebookObjectStorageService
     {
         private readonly SortedList<string, FacebookObjectList<FacebookObject>> objects;
-        private static DefaultFacebookObjectStorageService instance;
+        private static DefaultFacebookObjectStorageService instance = new DefaultFacebookObjectStorageService();
 
         public DefaultFacebookObjectStorageService()
         {
-            objects = new SortedList<string, FacebookObjectList<FacebookObject>>(100);
+            objects = new SortedList<string, FacebookObjectList<FacebookObject>>();
         }
 
         public static DefaultFacebookObjectStorageService Instance
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new DefaultFacebookObjectStorageService();
-                }
-
                 return instance;
             }
         }
@@ -36,7 +31,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                 return objects[userFacebookId];
             }
 
-            return null;
+            return new FacebookObjectList<FacebookObject>();
         }
 
         public void AddObject(FacebookObject obj)

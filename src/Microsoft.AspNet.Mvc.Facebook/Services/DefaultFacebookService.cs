@@ -16,7 +16,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
     public class DefaultFacebookService : IFacebookService
     {
         private readonly IFacebookUserStorageService facebookUserStorageService;
-        private static DefaultFacebookService instance;
+        private static DefaultFacebookService instance = new DefaultFacebookService();
+        private string verificationToken;
+        private static bool isRealtimeInitialized;
+        private static string _accessTokenUrl = "https://graph.facebook.com/oauth/access_token?client_id={0}&client_secret={1}&grant_type=client_credentials";
 
         public DefaultFacebookService()
             : this(FacebookSettings.DefaultUserStorageService)
@@ -32,11 +35,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new DefaultFacebookService();
-                }
-
                 return instance;
             }
         }
@@ -49,8 +47,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
             }
         }
 
-        //TODO: (ErikPo) Confirm if this being app instance specific is ok or not
-        private static string verificationToken;
         public string VerificationToken
         {
             get
@@ -69,11 +65,11 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
         }
 
         //TODO: (ErikPo) Cache this for a while
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Should be auto-disposed")]
         public string GetAppAccessToken()
         {
             var client = new WebClient();
-            var value = client.DownloadString(string.Format("https://graph.facebook.com/oauth/access_token?client_id={0}&client_secret={1}&grant_type=client_credentials", FacebookSettings.AppId, FacebookSettings.AppSecret));
+            var value = client.DownloadString(String.Format(_accessTokenUrl, FacebookSettings.AppId, FacebookSettings.AppSecret));
             if (value.StartsWith("access_token="))
             {
                 return value.Substring("access_token=".Length);
@@ -92,7 +88,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                 return user;
             }
 
-            var userFieldsQuery = userFields.Count() > 0 ? "?fields=" + string.Join(",", userFields) : "";
+            var userFieldsQuery = userFields.Count() > 0 ? "?fields=" + String.Join(",", userFields) : String.Empty;
             var client = CreateClient(accessToken);
 
             if (user == null)
@@ -301,7 +297,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
 
             if (!String.IsNullOrWhiteSpace(accessToken) && !String.IsNullOrWhiteSpace(facebookId))
             {
-
                 // Get permissions from storage service and check if user has all required permissions
                 currentPermissions = this.facebookUserStorageService.GetPermissions(facebookId);
                 isAuthorized = HasRequiredPermissions(currentPermissions, permissions);
@@ -322,7 +317,9 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                             {
                                 var permsData = data[0] as IDictionary<string, object>;
                                 if (permsData == null)
+                                {
                                     currentPermissions = new string[0];
+                                }
                                 else
                                 {
                                     currentPermissions = (from perm in permsData
@@ -335,7 +332,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                         // Since the permissions have been retrieved from Graph API request
                         // update the storage service with the most current permissions.
                         this.facebookUserStorageService.SetPermissions(facebookId, currentPermissions);
-
                     }
                     catch (FacebookOAuthException)
                     {
@@ -358,7 +354,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
         public void RefreshUserFields(FacebookUser user, params string[] fields)
         {
             var client = CreateClient();
-            dynamic facebookUserFields = client.Get(user.FacebookId + (fields != null && fields.Length > 0 ? "?fields=" + string.Join(",", fields) : ""));
+            dynamic facebookUserFields = client.Get(user.FacebookId + (fields != null && fields.Length > 0 ? "?fields=" + String.Join(",", fields) : String.Empty));
 
             RefreshUserFields(user, facebookUserFields, fields);
 #if Debug
@@ -370,15 +366,15 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
         {
             var facebookFields = GetActualFields(user.GetType());
             PropertyInfo userProperty;
-            string fbFieldName;
+            string facebookFieldName;
             object fieldValue;
             foreach (var facebookField in facebookFields)
             {
                 userProperty = facebookField.Key;
-                fbFieldName = facebookField.Value != null ? facebookField.Value.JsonField : "";
-                if (!string.IsNullOrEmpty(fbFieldName))
+                facebookFieldName = facebookField.Value != null ? facebookField.Value.JsonField : String.Empty;
+                if (!String.IsNullOrEmpty(facebookFieldName))
                 {
-                    fieldValue = GetFBFieldValue(userFields, fbFieldName.Split('.'));
+                    fieldValue = GetFBFieldValue(userFields, facebookFieldName.Split('.'));
                 }
                 else
                 {
@@ -401,17 +397,17 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                 {
                     if (facebookField.Value == null)
                     {
-                        userFields.Add(facebookField.Key.Name.ToLower());
+                        userFields.Add(facebookField.Key.Name.ToLowerInvariant());
                     }
-                    else if (!facebookField.Value.Ignore && !string.IsNullOrEmpty(facebookField.Value.FieldName))
+                    else if (!facebookField.Value.Ignore && !String.IsNullOrEmpty(facebookField.Value.FieldName))
                     {
                         userFields.Add(facebookField.Value.FieldName);
                     }
                 }
-                return "?fields=" + string.Join(",", userFields);
+                return "?fields=" + String.Join(",", userFields);
             }
 
-            return "";
+            return String.Empty;
         }
 
         private IDictionary<PropertyInfo, FacebookFieldAttribute> GetActualFields(Type modelType)
@@ -473,7 +469,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
 
             var client = new FacebookClient();
             client.AppId = FacebookSettings.AppId;
-            if (!string.IsNullOrEmpty(accessToken))
+            if (!String.IsNullOrEmpty(accessToken))
             {
                 client.AccessToken = accessToken;
             }
@@ -484,7 +480,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
         {
             if (userType == null || userType == typeof(FacebookUser) || userType == typeof(object))
             {
-                return "";
+                return String.Empty;
             }
 
             var fields = new List<string>();
@@ -496,7 +492,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                 if (fbf != null && fbf.Length > 0 && fbf[0] is FacebookFieldAttribute)
                 {
                     var field = ((FacebookFieldAttribute)fbf[0]);
-                    if (!(field.Ignore || string.Equals(field.FieldName, "id", StringComparison.OrdinalIgnoreCase)))
+                    if (!(field.Ignore || String.Equals(field.FieldName, "id", StringComparison.OrdinalIgnoreCase)))
                     {
                         fields.Add(field.FieldName);
                     }
@@ -507,14 +503,14 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                 }
                 else
                 {
-                    if (!string.Equals(property.Name, "id", StringComparison.OrdinalIgnoreCase))
+                    if (!String.Equals(property.Name, "id", StringComparison.OrdinalIgnoreCase))
                     {
-                        fields.Add(property.Name.ToLower());
+                        fields.Add(property.Name.ToLowerInvariant());
                     }
                 }
             }
 
-            return string.Join(",", fields);
+            return String.Join(",", fields);
         }
 
         private object GetSignedRequest(HttpContextBase httpContext)
@@ -533,18 +529,17 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
             return null;
         }
 
-        private static bool isRealtimeInitialized;
         //TODO: (ErikPo) Make this async
         public void InitializeRealtime(Type userType = null, string callbackUrl = null)
         {
             if (!isRealtimeInitialized)
             {
-                if (string.IsNullOrEmpty(callbackUrl))
+                if (String.IsNullOrEmpty(callbackUrl))
                 {
                     callbackUrl = FacebookSettings.RealtimeCallbackUrl;
                 }
 
-                if (callbackUrl.ToLower().Contains("//localhost/") || callbackUrl.ToLower().Contains("//localhost:"))
+                if (callbackUrl.ToLowerInvariant().Contains("//localhost/") || callbackUrl.ToLowerInvariant().Contains("//localhost:"))
                 {
                     isRealtimeInitialized = true;
                     return;
@@ -552,12 +547,12 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
 
                 //TODO: (ErikPo) Replace all of this with something cleaner (HttpClient?) and make it async
                 var appRealtimeFields = GetRealtimeFields(userType);
-                var request = WebRequest.Create(string.Format("https://graph.facebook.com/{0}/subscriptions?access_token={1}", FacebookSettings.AppId, GetAppAccessToken()));
+                var request = WebRequest.Create(String.Format("https://graph.facebook.com/{0}/subscriptions?access_token={1}", FacebookSettings.AppId, GetAppAccessToken()));
                 request.ContentType = "application/x-www-form-urlencoded";
                 request.Method = "POST";
                 using (var requestStream = request.GetRequestStream())
                 {
-                    var contentValue = "object=user" + (!string.IsNullOrEmpty(appRealtimeFields) ? "&fields=" + HttpUtility.UrlEncode(appRealtimeFields) : "") + "&callback_url=" + HttpUtility.UrlEncode(callbackUrl) + "&verify_token=" + VerificationToken;
+                    var contentValue = "object=user" + (!String.IsNullOrEmpty(appRealtimeFields) ? "&fields=" + HttpUtility.UrlEncode(appRealtimeFields) : String.Empty) + "&callback_url=" + HttpUtility.UrlEncode(callbackUrl) + "&verify_token=" + VerificationToken;
 #if Debug
                     Utilities.Log(contentValue);
 #endif
@@ -570,7 +565,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
                     var response = request.GetResponse();
                     isRealtimeInitialized = true;
                 }
-                catch { }
+                catch
+                {
+                    //TODO: decide what to do with the exception
+                }
             }
         }
 

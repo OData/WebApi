@@ -48,14 +48,12 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
         private object GetObjects(Type modelType, string userFacebookId, global::Facebook.FacebookClient client)
         {
             var typeName = GetTypeName(modelType);
-            if (string.IsNullOrEmpty(typeName))
+            if (String.IsNullOrEmpty(typeName))
             {
                 return null;
             }
 
-            //TODO: (ErikPo) Figure out how to call a generic method with only the modelType
-            var mi = facebookObjectStorageService.GetType().GetMethod("GetObjects");
-            var objects = (FacebookObjectList<FacebookObject>)mi.Invoke(facebookObjectStorageService, new object[] { userFacebookId }); //facebookObjectStorageService.GetObjects(userFacebookId);
+            var objects = facebookObjectStorageService.GetObjects(userFacebookId);
 
             if (objects == null || objects.Count == 0/* || Some other time period has been met and we should sync again */)
             {
@@ -102,15 +100,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
 
         private object LoadObjects(global::Facebook.FacebookClient client, Type modelType, string userFacebookId, string query)
         {
-            //var lastUpdated = user.GetType().GetProperties().FirstOrDefault(pi => pi.PropertyType == typeof(DateTime?) && pi.Name == "FriendsLastUpdated");
-            //if (lastUpdated != null) {
-            //    var lastUpdatedValue = (DateTime?)lastUpdated.GetValue(user, null);
-            //    //TODO: (ErikPo) Decide if this should be configurable
-            //    if (lastUpdatedValue.HasValue && lastUpdatedValue.Value.AddHours(1) < DateTime.UtcNow) {
-            //        return false;
-            //    }
-            //}
-
             dynamic objects = Activator.CreateInstance(modelType);
             dynamic objectList = client.Get(query);
             var genericType = GetGenericType(modelType);
@@ -172,8 +161,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
                 }
             }
 
-            //lastUpdated.SetValue(user, DateTime.UtcNow, null);
-
             return objects;
         }
 
@@ -193,7 +180,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
         {
             var facebookFields = GetObjectFields(obj.GetType());
             PropertyInfo userProperty;
-            string fbFieldName;
+            string fieldName;
             object fieldValue;
             foreach (var field in facebookFields)
             {
@@ -202,14 +189,14 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
                     continue;
                 }
                 userProperty = field.Key;
-                fbFieldName = field.Value != null ? field.Value.JsonField : "";
-                if (!string.IsNullOrEmpty(fbFieldName))
+                fieldName = field.Value != null ? field.Value.JsonField : String.Empty;
+                if (!String.IsNullOrEmpty(fieldName))
                 {
-                    fieldValue = GetFBFieldValue(values, fbFieldName.Split('.'));
+                    fieldValue = GetFacebookFieldValue(values, fieldName.Split('.'));
                 }
                 else
                 {
-                    fieldValue = GetFBFieldValue(values, new[] { userProperty.Name });
+                    fieldValue = GetFacebookFieldValue(values, new[] { userProperty.Name });
                 }
                 if (fieldValue != null)
                 {
@@ -237,12 +224,12 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
             return fields;
         }
 
-        private object GetFBFieldValue(dynamic facebookObject, IEnumerable<string> fieldNameParts)
+        private object GetFacebookFieldValue(dynamic facebookObject, IEnumerable<string> fieldNameParts)
         {
             dynamic subFacebookObject;
             try
             {
-                subFacebookObject = facebookObject[fieldNameParts.ElementAt(0).ToLower()];
+                subFacebookObject = facebookObject[fieldNameParts.ElementAt(0).ToLowerInvariant()];
             }
             catch
             {
@@ -256,7 +243,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
             {
                 return subFacebookObject;
             }
-            return GetFBFieldValue(subFacebookObject, fieldNameParts.Skip(1));
+            return GetFacebookFieldValue(subFacebookObject, fieldNameParts.Skip(1));
         }
     }
 }

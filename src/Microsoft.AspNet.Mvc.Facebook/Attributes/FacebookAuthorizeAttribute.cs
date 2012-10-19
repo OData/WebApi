@@ -27,7 +27,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Attributes
 
         public void OnAuthorization(AuthorizationContext filterContext)
         {
-
             // TODO: (ntotten) - Handle scenario where user denies authorization
             // https://www.facebook.com/dialog/oauth?perms=email&redirect_uri=https://apps.facebook.com/mvctetmsadsf/Home/Test?error_reason=user_denied&error=access_denied&error_description=The+user+denied+your+request.&client_id=202821839850333
 
@@ -72,10 +71,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Attributes
                     redirect_uri = redirectUri,
                     client_id = FacebookSettings.AppId
                 });
-                var fbAuthResult = new ContentResult();
-                fbAuthResult.ContentType = "text/html";
-                fbAuthResult.Content = String.Format("<script>window.top.location = '{0}';</script>", loginUrl.AbsoluteUri);
-                filterContext.Result = fbAuthResult;
+                var facebookAuthResult = new ContentResult();
+                facebookAuthResult.ContentType = "text/html";
+                facebookAuthResult.Content = String.Format("<script>window.top.location = '{0}';</script>", loginUrl.AbsoluteUri);
+                filterContext.Result = facebookAuthResult;
             }
         }
 
@@ -111,10 +110,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Attributes
                FacebookSettings.AppNamespace,
                url);
 
-            var fbAuthResult = new ContentResult();
-            fbAuthResult.ContentType = "text/html";
-            fbAuthResult.Content = String.Format("<script>window.top.location = '{0}';</script>", url);
-            return fbAuthResult;
+            var facebookAuthResult = new ContentResult();
+            facebookAuthResult.ContentType = "text/html";
+            facebookAuthResult.Content = String.Format("<script>window.top.location = '{0}';</script>", url);
+            return facebookAuthResult;
         }
     }
 }

@@ -9,7 +9,9 @@ namespace Microsoft.AspNet.Mvc.Facebook.Attributes
     [AttributeUsage(AttributeTargets.Parameter, Inherited = true)]
     public class FacebookUserFieldsAttribute : CustomModelBinderAttribute
     {
-        public FacebookUserFieldsAttribute() { }
+        public FacebookUserFieldsAttribute()
+        {
+        }
 
         public FacebookUserFieldsAttribute(string fields)
         {

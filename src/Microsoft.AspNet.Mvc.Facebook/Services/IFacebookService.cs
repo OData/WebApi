@@ -9,8 +9,9 @@ namespace Microsoft.AspNet.Mvc.Facebook.Services
 {
     public interface IFacebookService
     {
-        TUser LoadUser<TUser>(HttpContextBase httpContext) where TUser : FacebookUser, new();
         string VerificationToken { get; set; }
+
+        TUser LoadUser<TUser>(HttpContextBase httpContext) where TUser : FacebookUser, new();
         string GetAppAccessToken();
         string GetFields(Type modelType);
         void RefreshUserFields(FacebookUser user, params string[] fields);

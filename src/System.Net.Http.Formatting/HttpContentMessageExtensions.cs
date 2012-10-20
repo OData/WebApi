@@ -187,6 +187,10 @@ namespace System.Net.Http
                     {
                         throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
                     }
+                    else if (bytesRead == 0)
+                    {
+                        throw new IOException(Properties.Resources.ReadAsHttpMessageUnexpectedTermination);
+                    }
                 }
             });
         }
@@ -277,6 +281,10 @@ namespace System.Net.Http
                     else if (parseStatus != ParserState.NeedMoreData)
                     {
                         throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
+                    }
+                    else if (bytesRead == 0)
+                    {
+                        throw new IOException(Properties.Resources.ReadAsHttpMessageUnexpectedTermination);
                     }
                 }
             });

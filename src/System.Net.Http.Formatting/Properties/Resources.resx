@@ -288,4 +288,7 @@
   <data name="DelegatingHandlerArrayHasNonNullInnerHandler" xml:space="preserve">
     <value>The '{0}' list is invalid because the property '{1}' of '{2}' is not null.</value>
   </data>
+  <data name="ReadAsHttpMessageUnexpectedTermination" xml:space="preserve">
+    <value>Unexpected end of HTTP message stream. HTTP message is not complete.</value>
+  </data>
 </root>

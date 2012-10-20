@@ -492,6 +492,38 @@ namespace System.Net.Http
         }
 
         [Theory]
+        [InlineData("")]
+        [InlineData("HTTP/1.1")]
+        [InlineData("HTTP/1.1 200 OK")]
+        [InlineData("HTTP/1.1 200 OK\r\n")]
+        [InlineData("HTTP/1.1 200 OK\r\nServer:")]
+        [InlineData("HTTP/1.1 200 OK\r\nServer: server")]
+        [InlineData("HTTP/1.1 200 OK\r\nServer: server\r\n")]
+        [InlineData("HTTP/1.1 200 OK\r\nServer: server\r\n\r")]
+        public void ReadAsHttpResponseMessageAsync_IncompleteResponse(string incompleteResponse)
+        {
+            StringContent content = new StringContent(incompleteResponse);
+            content.Headers.ContentType = ParserData.HttpResponseMediaType;
+            Assert.Throws<IOException>(() => content.ReadAsHttpResponseMessageAsync().Result);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("GET")]
+        [InlineData("GET / HTTP/1.0")]
+        [InlineData("GET / HTTP/1.0\r\n")]
+        [InlineData("GET / HTTP/1.0\r\nHost:")]
+        [InlineData("GET / HTTP/1.0\r\nHost: localhost")]
+        [InlineData("GET / HTTP/1.0\r\nHost: localhost\r\n")]
+        [InlineData("GET / HTTP/1.0\r\nHost: localhost\r\n\r")]
+        public void ReadAsHttpRequestMessageAsync_IncompleteRequest(string incompleteRequest)
+        {
+            StringContent content = new StringContent(incompleteRequest);
+            content.Headers.ContentType = ParserData.HttpRequestMediaType;
+            Assert.Throws<IOException>(() => content.ReadAsHttpRequestMessageAsync().Result);
+        }
+
+        [Theory]
         [PropertyData("ClientRoundTripData")]
         public void RoundtripClientRequest(IEnumerable<string> message)
         {

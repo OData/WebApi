@@ -25,6 +25,15 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void EnsureStableOrdering_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty<ODataQuerySettings>(
+                new ODataQuerySettings(),
+                o => o.EnsureStableOrdering,
+                true);
+        }
+
+        [Fact]
         public void HandleNullPropagation_Property_RoundTrips()
         {
             Assert.Reflection.EnumProperty<ODataQuerySettings, HandleNullPropagationOption>(
@@ -36,26 +45,31 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void EnsureStableOrdering_Property_RoundTrips()
-        {
-            Assert.Reflection.BooleanProperty<ODataQuerySettings>(
-                new ODataQuerySettings(),
-                o => o.EnsureStableOrdering,
-                true);
-        }
-
-        [Fact]
         public void LambdaNestingLimit_Property_RoundTrips()
         {
             Assert.Reflection.IntegerProperty<ODataQuerySettings, int>(
                 new ODataQuerySettings(),
                 o => o.LambdaNestingLimit,
-                1,
-                null,
-                null,
-                null,
-                null,
-                2);
+                expectedDefaultValue: 1,
+                minLegalValue: 1,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                roundTripTestValue: 2);
+        }
+
+        [Fact]
+        public void ResultLimit_Property_RoundTrips()
+        {
+            Assert.Reflection.NullableIntegerProperty<ODataQuerySettings, int>(
+                new ODataQuerySettings(),
+                o => o.ResultLimit,
+                expectedDefaultValue: null,
+                minLegalValue: 1,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                roundTripTestValue: 2);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace System.Web.Http.OData.Query
     public class ODataQuerySettings
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
+        private int _lambdaNestingLimit = 1;
+        private int? _resultLimit;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataQuerySettings"/> class
@@ -16,7 +18,6 @@ namespace System.Web.Http.OData.Query
         public ODataQuerySettings()
         {
             EnsureStableOrdering = true;
-            LambdaNestingLimit = 1;
         }
 
         /// <summary>
@@ -60,7 +61,22 @@ namespace System.Web.Http.OData.Query
         /// <value>
         /// The maxiumum depth of the Any or All elements nested inside the query.
         /// </value>
-        public int LambdaNestingLimit { get; set; }
+        public int LambdaNestingLimit
+        {
+            get
+            {
+                return _lambdaNestingLimit;
+            }
+            set
+            {
+                if (value <= 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                }
+
+                _lambdaNestingLimit = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the maximum number of query results to return.
@@ -68,6 +84,21 @@ namespace System.Web.Http.OData.Query
         /// <value>
         /// The maximum number of query results to return, or <c>null</c> if there is no limit.
         /// </value>
-        public int? ResultLimit { get; set; }
+        public int? ResultLimit
+        {
+            get
+            {
+                return _resultLimit;
+            }
+            set
+            {
+                if (value.HasValue && value <= 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                }
+
+                _resultLimit = value;
+            }
+        }
     }
 }

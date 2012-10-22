@@ -439,7 +439,7 @@
     <value>Queries can not be applied to a response content of type '{0}'. The response content must be an ObjectContent.</value>
   </data>
   <data name="LambdaNestingLimitExceeded" xml:space="preserve">
-    <value>The Any/All nesting limit has been exceeded.</value>
+    <value>The Any/All nesting limit of {0} has been exceeded. LambdaNestingLimit can be configured on ODataQuerySettings or QueryableAttribute.</value>
   </data>
   <data name="NoODataFormatterForMetadata" xml:space="preserve">
     <value>No OData formatter was found to write the OData metadata. Consider registering an appropriate ODataMediaTypeFormatter on the configuration's formatter collection.</value>

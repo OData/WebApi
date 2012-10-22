@@ -556,7 +556,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Any/All nesting limit has been exceeded..
+        ///   Looks up a localized string similar to The Any/All nesting limit of {0} has been exceeded. LambdaNestingLimit can be configured on ODataQuerySettings or QueryableAttribute..
         /// </summary>
         internal static string LambdaNestingLimitExceeded {
             get {

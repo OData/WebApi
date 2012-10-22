@@ -91,12 +91,26 @@ namespace System.Web.Http.OData
             Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
                 new QueryableAttribute(),
                 o => o.LambdaNestingLimit,
-                1,
-                null,
-                null,
-                null,
-                null,
-                2);
+                expectedDefaultValue: 1,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                maxLegalValue: int.MaxValue,
+                roundTripTestValue: 2);
+        }
+
+        [Fact]
+        public void ResultLimit_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
+                new QueryableAttribute(),
+                o => o.ResultLimit,
+                expectedDefaultValue: 0,
+                minLegalValue: 1,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                maxLegalValue: int.MaxValue,
+                roundTripTestValue: 2);
         }
 
         [Fact]

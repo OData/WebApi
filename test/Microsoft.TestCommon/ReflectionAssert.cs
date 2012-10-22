@@ -96,6 +96,42 @@ namespace Microsoft.TestCommon
             TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
         }
 
+        public void NullableIntegerProperty<T, TResult>(T instance, Expression<Func<T, TResult?>> propertyGetter, TResult? expectedDefaultValue,
+            TResult? minLegalValue, TResult? illegalLowerValue,
+            TResult? maxLegalValue, TResult? illegalUpperValue,
+            TResult roundTripTestValue) where TResult : struct
+        {
+            PropertyInfo property = GetPropertyInfo(propertyGetter);
+            Func<T, TResult?> getFunc = (obj) => (TResult?)property.GetValue(obj, index: null);
+            Action<T, TResult?> setFunc = (obj, value) => property.SetValue(obj, value, index: null);
+
+            Assert.Equal(expectedDefaultValue, getFunc(instance));
+
+            TestPropertyValue(instance, getFunc, setFunc, null);
+
+            if (minLegalValue.HasValue)
+            {
+                TestPropertyValue(instance, getFunc, setFunc, minLegalValue.Value);
+            }
+
+            if (maxLegalValue.HasValue)
+            {
+                TestPropertyValue(instance, getFunc, setFunc, maxLegalValue.Value);
+            }
+
+            if (illegalLowerValue.HasValue)
+            {
+                Assert.ThrowsArgumentGreaterThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", minLegalValue.Value.ToString(), illegalLowerValue.Value);
+            }
+
+            if (illegalUpperValue.HasValue)
+            {
+                Assert.ThrowsArgumentLessThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", maxLegalValue.Value.ToString(), illegalUpperValue.Value);
+            }
+
+            TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
+        }
+
         public void BooleanProperty<T>(T instance, Expression<Func<T, bool>> propertyGetter, bool expectedDefaultValue)
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);

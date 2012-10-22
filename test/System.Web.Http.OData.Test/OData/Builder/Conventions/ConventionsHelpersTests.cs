@@ -98,6 +98,18 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void GetAllProperties_Returns_PropertiesOfNestedTypes()
+        {
+            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_NestParent.Nest));
+
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object).Select(p => p.Name);
+
+            Assert.Equal(1, properties.Count());
+            Assert.Equal("NestProperty", properties.First());
+        }
+
+        [Fact]
         public void GetEntityKeyValue_SingleKey()
         {
             // Arrange
@@ -328,5 +340,17 @@ namespace System.Web.Http.OData.Builder.Conventions
     class GetProperties_Complex
     {
         public int A { get; set; }
+    }
+
+    public class GetProperties_NestParent
+    {
+        public class Nest
+        {
+            public NestPropertyType NestProperty { get; set; }
+        }
+
+        public class NestPropertyType
+        {
+        }
     }
 }

@@ -97,7 +97,6 @@ namespace System.Web.Http.OData.Builder.Conventions
             Type elementType;
 
             return !(type.IsGenericTypeDefinition
-                     || type.IsNested
                      || type.IsPointer
                      || type == typeof(object)
                      || (type.IsCollection(out elementType) && elementType == typeof(object)));

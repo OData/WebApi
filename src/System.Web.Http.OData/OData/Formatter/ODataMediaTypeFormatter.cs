@@ -116,7 +116,7 @@ namespace System.Web.Http.OData.Formatter
             // call base to validate parameters
             base.GetPerRequestFormatterInstance(type, request, mediaType);
 
-            // Adds model information to allow callers to identyify the ODataMediaTypeFormatter through the tracing wrapper
+            // Adds model information to allow callers to identify the ODataMediaTypeFormatter through the tracing wrapper
             // This is a workaround until tracing provides information about the wrapped inner formatter
             if (type == typeof(IEdmModel))
             {

@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Models
 
             if (objects == null || objects.Count == 0/* || Some other time period has been met and we should sync again */)
             {
-                return LoadObjects(client, modelType, userFacebookId, "me/friends" + facebookService.GetFields(modelType));
+                return LoadObjects(client, modelType, userFacebookId, "me/" + typeName + facebookService.GetFields(modelType));
             }
 
             var castedObjects = (IList)Activator.CreateInstance(modelType);

@@ -949,7 +949,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 throw new ODataException(Error.Format(SRResources.LambdaNestingLimitExceeded, _querySettings.LambdaNestingLimit));
             }
 
-            _currentBindCount++;
+            _currentLambdaNestingCount++;
         }
 
         private void ExitLambda()

@@ -2,6 +2,7 @@
 
 using System.Net;
 using System.Net.Http;
+using System.ServiceModel;
 using System.Web.Http.SelfHost;
 using Microsoft.TestCommon;
 
@@ -39,6 +40,7 @@ namespace System.Web.Http
         {
             // Arrange
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(BaseAddress);
+            config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}" + routeSuffix, new { controller = controllerName });
             config.UserNamePasswordValidator = new CustomUsernamePasswordValidator();
             config.MessageHandlers.Add(new CustomMessageHandler());

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using Microsoft.TestCommon;
 
@@ -27,6 +28,7 @@ namespace System.Web.Http.SelfHost
             baseAddress = String.Format("http://localhost:{0}/", HttpSelfHostServerTest.TestPort);
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
+            config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "NullResponse" });
 
             messageHandler = new NullResponseMessageHandler();

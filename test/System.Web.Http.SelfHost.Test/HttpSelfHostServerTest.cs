@@ -242,6 +242,7 @@ namespace System.Web.Http.SelfHost
         private static HttpSelfHostServer CreateServer(TransferMode transferMode)
         {
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(BaseUri(transferMode));
+            config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
             config.TransferMode = transferMode;
 

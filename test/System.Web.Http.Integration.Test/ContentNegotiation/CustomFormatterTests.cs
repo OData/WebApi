@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Web.Http.SelfHost;
 using System.Web.Http.Util;
@@ -111,7 +112,10 @@ namespace System.Web.Http.ContentNegotiation
         private void SetupHost()
         {
             baseAddress = "http://localhost/";
-            config = new HttpSelfHostConfiguration(baseAddress);
+            config = new HttpSelfHostConfiguration(baseAddress)
+            {
+                HostNameComparisonMode = HostNameComparisonMode.Exact
+            };
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "CustomFormatterTests", action = "EchoOrder" });
             config.MessageHandlers.Add(new ConvertToStreamMessageHandler());
             config.Formatters.Add(new PlainTextFormatterWithVersionInfo());

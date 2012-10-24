@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.ServiceModel;
 using System.Web.Http.SelfHost;
 using System.Web.Http.Util;
 using Microsoft.TestCommon;
@@ -80,6 +81,7 @@ namespace System.Web.Http.ContentNegotiation
             baseAddress = "http://localhost/";
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
+            config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "HttpResponseReturn" });
             config.MessageHandlers.Add(new ConvertToStreamMessageHandler());
 

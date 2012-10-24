@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.ServiceModel;
 using System.Text;
 using System.Xml.Linq;
 using Microsoft.TestCommon;
@@ -27,6 +28,7 @@ namespace System.Web.Http.SelfHost
             baseAddress = String.Format("http://localhost/");
 
             HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(baseAddress);
+            config.HostNameComparisonMode = HostNameComparisonMode.Exact;
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "DeepNestedType" });
 
             server = new HttpSelfHostServer(config);

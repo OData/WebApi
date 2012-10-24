@@ -404,7 +404,7 @@ namespace System.Web.Http.OData.Query.Expressions
             ODataQuerySettings settings = new ODataQuerySettings
             {
                 HandleNullPropagation = HandleNullPropagationOption.True,
-                LambdaNestingLimit = int.MaxValue
+                LambdaNestingLimit = Int32.MaxValue
             };
 
             Assert.Throws<ODataException>(() => Bind(filter, settings), "The recursion limit has been exceeded.");
@@ -417,7 +417,7 @@ namespace System.Web.Http.OData.Query.Expressions
             ODataQuerySettings settings = new ODataQuerySettings
             {
                 HandleNullPropagation = HandleNullPropagationOption.True,
-                LambdaNestingLimit = int.MaxValue
+                LambdaNestingLimit = Int32.MaxValue
             };
 
             Expression<Func<Product, bool>> expression = Bind(filter, settings);
@@ -750,7 +750,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("Abcd", 5, "", true, typeof(ArgumentOutOfRangeException))]
         public void StringSubstringStart(string productName, int startIndex, string compareString, bool withNullPropagation, object withoutNullPropagation)
         {
-            string filter = string.Format("substring(ProductName, {0}) eq '{1}'", startIndex, compareString);
+            string filter = String.Format("substring(ProductName, {0}) eq '{1}'", startIndex, compareString);
             var filters = VerifyQueryDeserialization(filter);
 
             RunFilters(filters,
@@ -774,7 +774,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("Abcd", 5, -1, "", true, typeof(ArgumentOutOfRangeException))]
         public void StringSubstringStartAndLength(string productName, int startIndex, int length, string compareString, bool withNullPropagation, object withoutNullPropagation)
         {
-            string filter = string.Format("substring(ProductName, {0}, {1}) eq '{2}'", startIndex, length, compareString);
+            string filter = String.Format("substring(ProductName, {0}, {1}) eq '{2}'", startIndex, length, compareString);
             var filters = VerifyQueryDeserialization(filter);
 
             RunFilters(filters,
@@ -789,7 +789,7 @@ namespace System.Web.Http.OData.Query.Expressions
         public void StringSubstringOf(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             // In OData, the order of parameters is actually reversed in the resulting
-            // string.Contains expression
+            // String.Contains expression
 
             var filters = VerifyQueryDeserialization(
                 "substringof('Abc', ProductName)",
@@ -1364,7 +1364,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private FilterQueryNode CreateFilterNode(string filter, IEdmModel model)
         {
-            var queryUri = new Uri(_serviceBaseUri, string.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
+            var queryUri = new Uri(_serviceBaseUri, String.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
             SemanticTree semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
             return semanticTree.Query as FilterQueryNode;
         }

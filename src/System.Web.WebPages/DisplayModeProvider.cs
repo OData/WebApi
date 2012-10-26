@@ -46,18 +46,35 @@ namespace System.Web.WebPages
             get { return _displayModes; }
         }
 
+        private int FindFirstAvailableDisplayMode(IDisplayMode currentDisplayMode, bool requireConsistentDisplayMode)
+        {
+            if (requireConsistentDisplayMode && currentDisplayMode != null)
+            {
+                int first = _displayModes.IndexOf(currentDisplayMode);
+                return (first >= 0) ? first : _displayModes.Count;
+            }
+            return 0;
+        }
+
         /// <summary>
         /// Returns any IDisplayMode that can handle the given request.
         /// </summary>
         public IEnumerable<IDisplayMode> GetAvailableDisplayModesForContext(HttpContextBase httpContext, IDisplayMode currentDisplayMode)
         {
-            return GetAvailableDisplayModesForContext(httpContext, currentDisplayMode, RequireConsistentDisplayMode).ToList();
+            return GetAvailableDisplayModesForContext(httpContext, currentDisplayMode, RequireConsistentDisplayMode);
         }
 
         internal IEnumerable<IDisplayMode> GetAvailableDisplayModesForContext(HttpContextBase httpContext, IDisplayMode currentDisplayMode, bool requireConsistentDisplayMode)
         {
-            IEnumerable<IDisplayMode> possibleDisplayModes = (requireConsistentDisplayMode && currentDisplayMode != null) ? Modes.SkipWhile(mode => mode != currentDisplayMode) : Modes;
-            return possibleDisplayModes.Where(mode => mode.CanHandleContext(httpContext));
+            int first = FindFirstAvailableDisplayMode(currentDisplayMode, requireConsistentDisplayMode);
+            for (int i = first; i < _displayModes.Count; i++)
+            {
+                IDisplayMode mode = _displayModes[i];
+                if (mode.CanHandleContext(httpContext))
+                {
+                    yield return mode;
+                }
+            }
         }
 
         /// <summary>
@@ -73,9 +90,21 @@ namespace System.Web.WebPages
         internal DisplayInfo GetDisplayInfoForVirtualPath(string virtualPath, HttpContextBase httpContext, Func<string, bool> virtualPathExists, IDisplayMode currentDisplayMode,
                                                           bool requireConsistentDisplayMode)
         {
-            IEnumerable<IDisplayMode> possibleDisplayModes = GetAvailableDisplayModesForContext(httpContext, currentDisplayMode, requireConsistentDisplayMode);
-            return possibleDisplayModes.Select(mode => mode.GetDisplayInfo(httpContext, virtualPath, virtualPathExists))
-                .FirstOrDefault(info => info != null);
+            // Performance sensitive
+            int first = FindFirstAvailableDisplayMode(currentDisplayMode, requireConsistentDisplayMode);
+            for (int i = first; i < _displayModes.Count; i++)
+            {
+                IDisplayMode mode = _displayModes[i];
+                if (mode.CanHandleContext(httpContext))
+                {
+                    DisplayInfo info = mode.GetDisplayInfo(httpContext, virtualPath, virtualPathExists);
+                    if (info != null)
+                    {
+                        return info;
+                    }
+                }
+            }
+            return null;
         }
 
         internal static IDisplayMode GetDisplayMode(HttpContextBase context)

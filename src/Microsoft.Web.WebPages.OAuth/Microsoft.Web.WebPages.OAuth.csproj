@@ -120,7 +120,7 @@
     <EmbeddedResource Include="..\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CommonResources1.Designer.cs</LastGenOutput>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\WebResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

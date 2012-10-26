@@ -40,7 +40,15 @@ namespace System.Web.WebPages
 
         public bool Exists(string virtualPath)
         {
-            return _virtualPathFactories.Any(factory => factory.Exists(virtualPath));
+            // Performance sensitive so avoid Linq and delegates
+            foreach (IVirtualPathFactory factory in _virtualPathFactories)
+            {
+                if (factory.Exists(virtualPath))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public object CreateInstance(string virtualPath)

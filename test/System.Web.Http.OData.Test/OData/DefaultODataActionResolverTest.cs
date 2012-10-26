@@ -37,15 +37,25 @@ namespace System.Web.Http.OData
             Assert.Equal(actionName, action.Name);
         }
 
-        [Fact(Skip = "Requires improvements in Uri Parser so it can establish type of path segment prior to ActionName")]
+        [Fact]
         public void Can_find_action_overload_using_bindingparameter_type()
         {
             string url = "http://server/service/Vehicles(8)/Container.Car/Wash";
             IODataActionResolver resolver = new DefaultODataActionResolver();
             ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(url), Model = GetModel() };
-            IEdmFunctionImport action = resolver.Resolve(context);
-            Assert.NotNull(action);
-            Assert.Equal("Car", action.Parameters.First().Name);
+
+            // TODO: Requires improvements in Uri Parser so it can establish type of path segment prior to ActionName
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
+
+            Assert.Throws<InvalidOperationException>(() => resolver.Resolve(context));
+
+            // TODO: DateTimeOffsets are not handled well in the uri parser
+            // The following calls show the behavior without the bug, and should be enabled once the bug is fixed.
+            //IEdmFunctionImport action = resolver.Resolve(context);
+            //Assert.NotNull(action);
+            //Assert.Equal("Car", action.Parameters.First().Name);
         }
 
         [Fact]

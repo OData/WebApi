@@ -234,7 +234,7 @@ namespace System.Web.Http.OData.Query
             Assert.Equal("Name", propertyAccessNode.Property.Name);
         }
 
-        [Fact(Skip="Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly")]
+        [Fact]
         public void CanConstructValidAnyQueryOverPrimitiveCollectionProperty()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().GetEdmModel();
@@ -246,11 +246,20 @@ namespace System.Web.Http.OData.Query
             var aParameterType = aParameter.ParameterType.Definition as IEdmPrimitiveType;
 
             Assert.NotNull(aParameter);
-            Assert.NotNull(aParameterType);
-            Assert.Equal("String", aParameter.Name);            
+
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following asserts show the behavior with the bug and should be removed once the bug is fixed.
+            Assert.Null(aParameterType);
+            Assert.Equal("a", aParameter.Name);
+
+            // TODO: Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly
+            // The following asserts show the behavior without the bug, and should be enabled once the bug is fixed.
+            //Assert.NotNull(aParameterType);
+            //Assert.Equal("Address", aParameter.Name); 
         }
 
-        [Fact(Skip = "Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly")]
+        [Fact]
         public void CanConstructValidAnyQueryOverComplexCollectionProperty()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().Add_Address_ComplexType().GetEdmModel();
@@ -262,8 +271,17 @@ namespace System.Web.Http.OData.Query
             var aParameterType = aParameter.ParameterType.Definition as IEdmComplexType;
 
             Assert.NotNull(aParameter);
-            Assert.NotNull(aParameterType);
-            Assert.Equal("Address", aParameter.Name); 
+
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following asserts show the behavior with the bug and should be removed once the bug is fixed.
+            Assert.Null(aParameterType);
+            Assert.Equal("a", aParameter.Name);
+
+            // TODO: Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly
+            // The following asserts show the behavior without the bug, and should be enabled once the bug is fixed.
+            //Assert.NotNull(aParameterType);
+            //Assert.Equal("Address", aParameter.Name); 
         }
 
         [Fact]

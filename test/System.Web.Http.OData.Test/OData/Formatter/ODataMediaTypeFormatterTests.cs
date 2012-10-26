@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
@@ -137,21 +138,41 @@ namespace System.Web.Http.OData.Formatter
             Assert.False(success);
         }
 
-        [Fact(Skip = "OData formatter doesn't support writing nulls")]
+        [Fact]
         public override Task WriteToStreamAsync_WhenObjectIsNull_WritesDataButDoesNotCloseStream()
         {
-            throw new NotImplementedException();
+            // Arrange
+            ODataMediaTypeFormatter formatter = CreateFormatter();
+            Mock<Stream> mockStream = new Mock<Stream>();
+            mockStream.Setup(s => s.CanWrite).Returns(true);
+            HttpContent content = new StringContent(String.Empty);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/atom+xml");
+
+            // Act 
+            return formatter.WriteToStreamAsync(typeof(SampleType), null, mockStream.Object, content, null).ContinueWith(
+                writeTask =>
+                {
+                    // Assert (OData formatter doesn't support writing nulls)
+                    Assert.Equal(TaskStatus.Faulted, writeTask.Status);
+                    Assert.Throws<SerializationException>(() => writeTask.ThrowIfFaulted(), "Cannot serialize a null 'entry'.");
+                    mockStream.Verify(s => s.Close(), Times.Never());
+                    mockStream.Verify(s => s.BeginWrite(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AsyncCallback>(), It.IsAny<object>()), Times.Never());
+                });
         }
 
-        [Fact(Skip = "Tracked by Issue #339, Needs an implementation")]
+        // TODO: Uncomment the attribute below once the test exists.
+        //[Fact]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
+            // TODO: Tracked by Issue #339, Needs an implementation
             throw new NotImplementedException();
         }
 
-        [Fact(Skip = "Tracked by Issue #339, Needs an implementation")]
+        // TODO: Uncomment the attribute below once the test exists.
+        //[Fact]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
+            // TODO: Tracked by Issue #339, Needs an implementation
             throw new NotImplementedException();
         }
 

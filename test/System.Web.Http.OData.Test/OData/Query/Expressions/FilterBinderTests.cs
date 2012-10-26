@@ -160,16 +160,21 @@ namespace System.Web.Http.OData.Query.Expressions
                 NotTesting);
         }
 
-        [Theory(Skip = "Enable once ODataUriParser handles DateTimeOffsets")]
+        [Theory]
         [InlineData("DateTimeOffsetProp eq DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp == $it.DateTimeOffsetProp)")]
         [InlineData("DateTimeOffsetProp ne DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp != $it.DateTimeOffsetProp)")]
         [InlineData("DateTimeOffsetProp ge DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp >= $it.DateTimeOffsetProp)")]
         [InlineData("DateTimeOffsetProp le DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp <= $it.DateTimeOffsetProp)")]
         public void DateTimeOffsetInEqualities(string clause, string expectedExpression)
         {
-            VerifyQueryDeserialization<DataTypes>(
-                "" + clause,
-                expectedExpression);
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
+            Assert.Throws<ODataException>(() => Bind("" + clause));
+
+            // TODO: Enable once ODataUriParser handles DateTimeOffsets
+            // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
+            //VerifyQueryDeserialization<DataTypes>("" + clause, expectedExpression);
         }
 
         [Theory]
@@ -1035,7 +1040,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 NotTesting);
         }
 
-        [Theory(Skip = "DateTimeOffsets are not handled well in the uri parser")]
+        [Theory]
         [InlineData("year(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Year == 100")]
         [InlineData("month(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Month == 100")]
         [InlineData("day(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Day == 100")]
@@ -1044,12 +1049,17 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("second(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Second == 100")]
         public void DateTimeOffsetFunctions(string filter, string expression)
         {
-            VerifyQueryDeserialization(
-                filter,
-                expression);
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
+            Assert.Throws<ODataException>(() => Bind(filter));
+
+            // TODO: DateTimeOffsets are not handled well in the uri parser
+            // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
+            //VerifyQueryDeserialization(filter, expression);
         }
 
-        [Theory(Skip = "Timespans are not handled well in the uri parser")]
+        [Theory]
         [InlineData("years(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Years == 100")]
         [InlineData("months(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Months == 100")]
         [InlineData("days(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Days == 100")]
@@ -1058,9 +1068,14 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("seconds(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Seconds == 100")]
         public void TimespanFunctions(string filter, string expression)
         {
-            VerifyQueryDeserialization(
-                filter,
-                expression);
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
+            Assert.Throws<ODataException>(() => Bind(filter));
+
+            // TODO: Timespans are not handled well in the uri parser
+            // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
+            //VerifyQueryDeserialization(filter, expression);
         }
 
         #endregion
@@ -1141,7 +1156,7 @@ namespace System.Web.Http.OData.Query.Expressions
                 Error.Format(expectedExpression, dateTime));
         }
 
-        [Theory(Skip = "No DateTimeOffset parsing in ODataUriParser")]
+        [Theory]
         [InlineData("DateTimeOffsetProp eq datetimeoffset'2002-10-10T17:00:00Z'", "$it => ($it.DateTimeOffsetProp == {0})", 0)]
         [InlineData("DateTimeOffsetProp ge datetimeoffset'2002-10-10T17:00:00Z'", "$it => ($it.DateTimeOffsetProp >= {0})", 0)]
         [InlineData("DateTimeOffsetProp le datetimeoffset'2002-10-10T17:00:00-07:00'", "$it => ($it.DateTimeOffsetProp <= {0})", -7)]
@@ -1152,9 +1167,17 @@ namespace System.Web.Http.OData.Query.Expressions
         public void DateTimeOffsetExpression(string clause, string expectedExpression, double offsetHours)
         {
             var dateTimeOffset = new DateTimeOffset(2002, 10, 10, 17, 0, 0, TimeSpan.FromHours(offsetHours));
-            VerifyQueryDeserialization<DataTypes>(
-                "" + clause,
-                Error.Format(expectedExpression, dateTimeOffset));
+
+            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
+            // the test once the bug is fixed).
+            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
+            Assert.Throws<ODataException>(() => Bind("" + clause));
+
+            // TODO: No DateTimeOffset parsing in ODataUriParser
+            // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
+            //VerifyQueryDeserialization<DataTypes>(
+            //    "" + clause,
+            //    Error.Format(expectedExpression, dateTimeOffset));
         }
 
         [Fact]

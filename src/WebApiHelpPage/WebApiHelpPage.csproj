@@ -26,7 +26,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Extensions\Debug</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>
     </DocumentationFile>
@@ -35,14 +35,14 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Extensions\Release</OutputPath>
-    <DefineConstants>TRACE;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\..\bin\Extensions\CodeCoverage</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_COVERAGE;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;CODE_COVERAGE;ASPNETMVC</DefineConstants>
     <DebugType>full</DebugType>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>

@@ -24,7 +24,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\extensions\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASPNETMVC</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\extensions\Release\</OutputPath>
-    <DefineConstants>TRACE;ASPNETMVC</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
@@ -44,7 +44,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeCoverage|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\..\bin\extensions\CodeCoverage\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASPNETMVC</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <DebugType>full</DebugType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -52,7 +52,7 @@
   <PropertyGroup Condition="'$(UseNcrunch)' == 'TRUE'">
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
-    <DefineConstants>TRACE;DEBUG;ASPNETMVC;NCRUNCH</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;ASPNETMVC;NCRUNCH</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Data.Edm, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">

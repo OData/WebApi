@@ -21,7 +21,7 @@
     <Optimize>false</Optimize>
     <OutputPath>$(WebStackRootPath)\bin\Extensions\Debug\Test\</OutputPath>
     <DocumentationFile>$(WebStackRootPath)\bin\Extensions\Debug\Test\WebApiHelpPage.Test.XML</DocumentationFile>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -32,7 +32,7 @@
     <Optimize>true</Optimize>
     <OutputPath>$(WebStackRootPath)\bin\Extensions\Release\Test\</OutputPath>
     <DocumentationFile>$(WebStackRootPath)\bin\Extensions\Release\Test\WebApiHelpPage.Test.XML</DocumentationFile>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -44,7 +44,7 @@
     <Optimize>false</Optimize>
     <OutputPath>$(WebStackRootPath)\bin\Extensions\CodeCoverage\Test\</OutputPath>
     <DocumentationFile>$(WebStackRootPath)\bin\Extensions\CodeCoverage\Test\WebApiHelpPage.Test.XML</DocumentationFile>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>

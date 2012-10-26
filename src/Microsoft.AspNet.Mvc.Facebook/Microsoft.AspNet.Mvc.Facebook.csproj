@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Extensions\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -28,7 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Extensions\Release\</OutputPath>
-    <DefineConstants>TRACE;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS;ASPNETMVC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>

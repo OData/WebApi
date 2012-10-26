@@ -28,12 +28,12 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;CODE_ANALYSIS;NETFX_CORE;ASPNETMVC</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE;NETFX_CORE;ASPNETMVC;$(DefineConstants)</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS;NETFX_CORE;ASPNETMVC</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

@@ -73,12 +73,17 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("modelType");
             }
 
-            var modelBinders = from providers in CombinedItems
-                               let modelBinder = providers.GetBinder(modelType)
-                               where modelBinder != null
-                               select modelBinder;
-
-            return modelBinders.FirstOrDefault();
+            // Performance sensitive.
+            IModelBinderProvider[] providers = CombinedItems;
+            for (int i = 0; i < providers.Length; i++)
+            {
+                IModelBinder binder = providers[i].GetBinder(modelType);
+                if (binder != null)
+                {
+                    return binder;
+                }
+            }
+            return null;
         }
     }
 }

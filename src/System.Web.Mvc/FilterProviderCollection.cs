@@ -63,27 +63,44 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("actionDescriptor");
             }
 
-            IEnumerable<Filter> combinedFilters =
-                CombinedItems.SelectMany(fp => fp.GetFilters(controllerContext, actionDescriptor))
-                    .OrderBy(filter => filter, _filterComparer);
+            IFilterProvider[] providers = CombinedItems;
+            List<Filter> filters = new List<Filter>();
+            for (int i = 0; i < providers.Length; i++)
+            {
+                IFilterProvider provider = providers[i];
+                foreach (Filter filter in provider.GetFilters(controllerContext, actionDescriptor))
+                {
+                    filters.Add(filter);
+                }
+            }
 
-            // Remove duplicates from the back forward
-            return RemoveDuplicates(combinedFilters.Reverse()).Reverse();
+            filters.Sort(_filterComparer);
+
+            if (filters.Count > 1)
+            {
+                RemoveDuplicates(filters);
+            }
+            return filters;
         }
 
-        private IEnumerable<Filter> RemoveDuplicates(IEnumerable<Filter> filters)
+        private static void RemoveDuplicates(List<Filter> filters)
         {
             HashSet<Type> visitedTypes = new HashSet<Type>();
 
-            foreach (Filter filter in filters)
+            // Remove duplicates from the back forward
+            for (int i = filters.Count - 1; i >= 0; i--)
             {
+                Filter filter = filters[i];
                 object filterInstance = filter.Instance;
                 Type filterInstanceType = filterInstance.GetType();
 
                 if (!visitedTypes.Contains(filterInstanceType) || AllowMultiple(filterInstance))
                 {
-                    yield return filter;
                     visitedTypes.Add(filterInstanceType);
+                }
+                else
+                {
+                    filters.RemoveAt(i);                        
                 }
             }
         }

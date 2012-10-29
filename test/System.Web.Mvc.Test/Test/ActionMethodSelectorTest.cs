@@ -70,6 +70,48 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void FindActionMethodReturnsMethodWithoutAttributeWhenOthersOptOut()
+        {
+            // Arrange
+            Type controllerType = typeof(ControllerMatchMiddleNoAttribute);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // Act
+            MethodInfo matchedMethod = selector.FindActionMethod(null, "MiddleMatch");
+
+            // Assert
+            Assert.Equal("MiddleMatch", matchedMethod.Name);
+        }
+
+        [Fact]
+        public void FindActionMethodReturnsMethodWithAttributeWhenOthersOptOutAndNoAttribute()
+        {
+            // Arrange
+            Type controllerType = typeof(ControllerMatchMiddleWithAttribute);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // Act
+            MethodInfo matchedMethod = selector.FindActionMethod(null, "MiddleMatch");
+
+            // Assert
+            Assert.Equal("MiddleMatch", matchedMethod.Name);
+        }
+
+        [Fact]
+        public void FindActionMethodReturnsMethodMultipleMatchesOverOneOptOut()
+        {
+            // Arrange
+            Type controllerType = typeof(ControllerMatchMultipleAttributes);
+            ActionMethodSelector selector = new ActionMethodSelector(controllerType);
+
+            // Act
+            MethodInfo matchedMethod = selector.FindActionMethod(null, "Match");
+
+            // Assert
+            Assert.Equal("Match", matchedMethod.Name);
+        }
+
+        [Fact]
         public void FindActionMethodReturnsNullIfNoMethodMatches()
         {
             // Arrange
@@ -164,6 +206,76 @@ namespace System.Web.Mvc.Test
 #pragma warning restore 0067
         }
 
+        private class ControllerMatchMiddleNoAttribute : Controller
+        {
+            [Match(false)]
+            [ActionName("MiddleMatch")]
+            public void SkipMatchBefore()
+            {
+            }
+
+            public void MiddleMatch()
+            {
+            }
+
+            [Match(false)]
+            [ActionName("MiddleMatch")]
+            public void SkipMatchAfter()
+            {
+            }
+        }
+
+        private class ControllerMatchMultipleAttributes : Controller
+        {
+            [Match(false)]
+            [Match(true)]
+            [ActionName("Match")]
+            public void SkipMatchBeforeOneOptOut()
+            {
+            }
+
+            [Match(true)]
+            [Match(true)]
+            public void Match()
+            {
+            }
+
+            [ActionName("Match")]
+            public void SkipMatchAfterNoAttribute()
+            {
+            }
+        }
+
+        private class ControllerMatchMiddleWithAttribute : Controller
+        {
+            [Match(false)]
+            [ActionName("MiddleMatch")]
+            public void SkipMatchBeforeNonMatch()
+            {
+            }
+
+            [ActionName("MiddleMatch")]
+            public void SkipMatchBeforeNoSelection()
+            {
+            }
+
+            [Match(true)]
+            public void MiddleMatch()
+            {
+            }
+
+            [ActionName("MiddleMatch")]
+            public void SkipMatchAfterNoSelection()
+            {
+            }
+
+            [Match(false)]
+            [ActionName("MiddleMatch")]
+            public void SkipMatchAfterNonMatch()
+            {
+            }
+        }
+
         private class SelectionAttributeController : Controller
         {
             [Match(false)]
@@ -193,20 +305,21 @@ namespace System.Web.Mvc.Test
             public void MethodDoesNotHaveSelectionAttribute1()
             {
             }
+        }
 
-            private class MatchAttribute : ActionMethodSelectorAttribute
+        [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+        private class MatchAttribute : ActionMethodSelectorAttribute
+        {
+            private bool _match;
+
+            public MatchAttribute(bool match)
             {
-                private bool _match;
+                _match = match;
+            }
 
-                public MatchAttribute(bool match)
-                {
-                    _match = match;
-                }
-
-                public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
-                {
-                    return _match;
-                }
+            public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+            {
+                return _match;
             }
         }
     }

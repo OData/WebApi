@@ -61,9 +61,7 @@ namespace System.Web.Mvc.Async
 
         public ActionDescriptorCreator FindAction(ControllerContext controllerContext, string actionName)
         {
-            List<MethodInfo> methodsMatchingName = GetMatchingAliasedMethods(controllerContext, actionName);
-            methodsMatchingName.AddRange(NonAliasedMethods[actionName]);
-            List<MethodInfo> finalMethods = RunSelectionFilters(controllerContext, methodsMatchingName);
+            List<MethodInfo> finalMethods = ActionMethodSelector.FindActionMethods(controllerContext, actionName, AliasedMethods, NonAliasedMethods);
 
             switch (finalMethods.Count)
             {
@@ -112,18 +110,6 @@ namespace System.Web.Mvc.Async
             return (IsAsyncSuffixedMethod(methodInfo))
                        ? methodName.Substring(0, methodName.Length - "Async".Length)
                        : methodName;
-        }
-
-        internal List<MethodInfo> GetMatchingAliasedMethods(ControllerContext controllerContext, string actionName)
-        {
-            // find all aliased methods which are opting in to this request
-            // to opt in, all attributes defined on the method must return true
-
-            var methods = from methodInfo in AliasedMethods
-                          let attrs = ReflectedAttributeCache.GetActionNameSelectorAttributes(methodInfo)
-                          where attrs.All(attr => attr.IsValidName(controllerContext, actionName, methodInfo))
-                          select methodInfo;
-            return methods.ToList();
         }
 
         private bool IsAsyncSuffixedMethod(MethodInfo methodInfo)
@@ -198,32 +184,6 @@ namespace System.Web.Mvc.Async
 
             AliasedMethods = Array.FindAll(actionMethods, IsMethodDecoratedWithAliasingAttribute);
             NonAliasedMethods = actionMethods.Except(AliasedMethods).ToLookup(GetCanonicalMethodName, StringComparer.OrdinalIgnoreCase);
-        }
-
-        private static List<MethodInfo> RunSelectionFilters(ControllerContext controllerContext, List<MethodInfo> methodInfos)
-        {
-            // remove all methods which are opting out of this request
-            // to opt out, at least one attribute defined on the method must return false
-
-            List<MethodInfo> matchesWithSelectionAttributes = new List<MethodInfo>();
-            List<MethodInfo> matchesWithoutSelectionAttributes = new List<MethodInfo>();
-
-            foreach (MethodInfo methodInfo in methodInfos)
-            {
-                ICollection<ActionMethodSelectorAttribute> attrs = ReflectedAttributeCache.GetActionMethodSelectorAttributes(methodInfo);
-                if (attrs.Count == 0)
-                {
-                    matchesWithoutSelectionAttributes.Add(methodInfo);
-                }
-                else if (attrs.All(attr => attr.IsValidForRequest(controllerContext, methodInfo)))
-                {
-                    matchesWithSelectionAttributes.Add(methodInfo);
-                }
-            }
-
-            // if a matching action method had a selection attribute, consider it more specific than a matching action method
-            // without a selection attribute
-            return (matchesWithSelectionAttributes.Count > 0) ? matchesWithSelectionAttributes : matchesWithoutSelectionAttributes;
         }
     }
 }

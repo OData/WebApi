@@ -141,7 +141,34 @@ namespace System.Collections.Generic
         }
 
         [Fact]
-        public void SingleDefaultOrErrorIListEmptyReturnsNull()
+        void RemoveFromTwoElementsAtEnd_NoChange()
+        {
+            List<object> list = new List<object>() { new object(), new object() };
+            List<object> listExpected = new List<object>(list);
+            list.RemoveFrom(2);
+            Assert.Equal(listExpected, list);
+        }
+
+        [Fact]
+        void RemoveFromTwoElementsMiddle_ToOne()
+        {
+            List<object> list = new List<object>() { new object(), new object() };
+            List<object> listExpected = new List<object>() { list[0] };
+            list.RemoveFrom(1);
+            Assert.Equal(listExpected, list);
+        }
+
+        [Fact]
+        void RemoveFromTwoElementsStart_ToEmpty()
+        {
+            List<object> list = new List<object>() { new object(), new object() };
+            List<object> listExpected = new List<object>();
+            list.RemoveFrom(0);
+            Assert.Equal(listExpected, list);
+        }
+
+        [Fact]
+        void SingleDefaultOrErrorIListEmptyReturnsNull()
         {
             IList<object> empty = new List<object>();
             object errorArgument = new object();

@@ -100,6 +100,17 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
+        /// Remove values from the list starting at the index start.
+        /// </summary>
+        public static void RemoveFrom<T>(this List<T> list, int start)
+        {
+            Contract.Assert(list != null);
+            Contract.Assert(start >= 0 && start <= list.Count);
+
+            list.RemoveRange(start, list.Count - start);
+        }
+
+        /// <summary>
         /// Return the only value from list, the type's default value if empty, or call the errorAction for 2 or more.
         /// </summary>
         public static T SingleDefaultOrError<T, TArg1>(this IList<T> list, Action<TArg1> errorAction, TArg1 errorArg1)

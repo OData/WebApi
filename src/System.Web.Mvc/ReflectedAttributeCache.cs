@@ -16,22 +16,22 @@ namespace System.Web.Mvc
 
         private static readonly ConcurrentDictionary<Type, ReadOnlyCollection<FilterAttribute>> _typeFilterAttributeCache = new ConcurrentDictionary<Type, ReadOnlyCollection<FilterAttribute>>();
 
-        public static ICollection<FilterAttribute> GetTypeFilterAttributes(Type type)
+        public static ReadOnlyCollection<FilterAttribute> GetTypeFilterAttributes(Type type)
         {
             return GetAttributes(_typeFilterAttributeCache, type);
         }
 
-        public static ICollection<FilterAttribute> GetMethodFilterAttributes(MethodInfo methodInfo)
+        public static ReadOnlyCollection<FilterAttribute> GetMethodFilterAttributes(MethodInfo methodInfo)
         {
             return GetAttributes(_methodFilterAttributeCache, methodInfo);
         }
 
-        public static ICollection<ActionMethodSelectorAttribute> GetActionMethodSelectorAttributes(MethodInfo methodInfo)
+        public static ReadOnlyCollection<ActionMethodSelectorAttribute> GetActionMethodSelectorAttributesCollection(MethodInfo methodInfo)
         {
             return GetAttributes(_actionMethodSelectorAttributeCache, methodInfo);
         }
 
-        public static ICollection<ActionNameSelectorAttribute> GetActionNameSelectorAttributes(MethodInfo methodInfo)
+        public static ReadOnlyCollection<ActionNameSelectorAttribute> GetActionNameSelectorAttributes(MethodInfo methodInfo)
         {
             return GetAttributes(_actionNameSelectorAttributeCache, methodInfo);
         }

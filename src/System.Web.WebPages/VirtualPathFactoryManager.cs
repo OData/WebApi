@@ -10,6 +10,7 @@ namespace System.Web.WebPages
     public class VirtualPathFactoryManager : IVirtualPathFactory
     {
         private static readonly Lazy<VirtualPathFactoryManager> _instance = new Lazy<VirtualPathFactoryManager>(() => new VirtualPathFactoryManager(new BuildManagerWrapper()));
+        private static Func<string, bool> _instancePathExists;
         private readonly LinkedList<IVirtualPathFactory> _virtualPathFactories = new LinkedList<IVirtualPathFactory>();
 
         internal VirtualPathFactoryManager(IVirtualPathFactory defaultFactory)
@@ -21,6 +22,18 @@ namespace System.Web.WebPages
         internal static VirtualPathFactoryManager Instance
         {
             get { return _instance.Value; }
+        }
+
+        internal static Func<string, bool> InstancePathExists
+        {
+            get 
+            {
+                if (_instancePathExists == null)
+                {
+                    _instancePathExists = Instance.Exists;
+                }
+                return _instancePathExists;
+            }
         }
 
         internal IEnumerable<IVirtualPathFactory> RegisteredFactories

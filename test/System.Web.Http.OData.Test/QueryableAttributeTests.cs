@@ -11,6 +11,7 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.TestCommon.Models;
@@ -357,9 +358,21 @@ namespace System.Web.Http.OData
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), new HttpRequestMessage());
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null), "request");
+            Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null, options), "request");
+        }
+
+        [Fact]
+        public void ValidateQuery_Throws_WithNullQueryOptions()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(new HttpRequestMessage(), null), "queryOptions");
         }
 
         [Theory]
@@ -368,10 +381,12 @@ namespace System.Web.Http.OData
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName + "=x");
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
 
             // Act & Assert
-            attribute.ValidateQuery(request);
+            attribute.ValidateQuery(request, options);
         }
 
         [Theory]
@@ -381,10 +396,12 @@ namespace System.Web.Http.OData
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName);
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
 
             // Act & Assert
             HttpResponseException responseException = Assert.Throws<HttpResponseException>(
-                                                                () => attribute.ValidateQuery(request));
+                                                                () => attribute.ValidateQuery(request, options));
 
             Assert.Equal(HttpStatusCode.BadRequest, responseException.Response.StatusCode);
         }
@@ -395,10 +412,12 @@ namespace System.Web.Http.OData
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
 
             // Act & Assert
             HttpResponseException responseException = Assert.Throws<HttpResponseException>(
-                                                                () => attribute.ValidateQuery(request));
+                                                                () => attribute.ValidateQuery(request, options));
 
             Assert.Equal(HttpStatusCode.BadRequest, responseException.Response.StatusCode);
         }
@@ -408,13 +427,10 @@ namespace System.Web.Http.OData
         {
             // Arrange
             Mock<QueryableAttribute> mockAttribute = new Mock<QueryableAttribute>();
-            mockAttribute.Setup(m => m.ValidateQuery(It.IsAny<HttpRequestMessage>())).Callback(() => { }).Verifiable();
-
-            QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
+            mockAttribute.Setup(m => m.ValidateQuery(It.IsAny<HttpRequestMessage>(), It.IsAny<ODataQueryOptions>())).Callback(() => { }).Verifiable();
 
             // Act & Assert
-            mockAttribute.Object.ValidateQuery(null);
+            mockAttribute.Object.ValidateQuery(null, null);
             mockAttribute.Verify();
         }
 

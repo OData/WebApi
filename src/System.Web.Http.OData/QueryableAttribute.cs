@@ -158,8 +158,6 @@ namespace System.Web.Http
                 if (responseContent.Value != null && request.RequestUri != null &&
                     (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
                 {
-                    ValidateQuery(request);
-
                     try
                     {
                         IEnumerable query = responseContent.Value as IEnumerable;
@@ -232,16 +230,7 @@ namespace System.Web.Http
 
             ODataQueryContext queryContext = CreateQueryContext(entityClrType, configuration, actionDescriptor);
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
-
-            // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
-            if (queryContext.IsPrimitiveClrType && (queryOptions.Filter != null || queryOptions.OrderBy != null))
-            {
-                // An attempt to use a query option not allowed for primitive types
-                // generates a BadRequest with a general message that avoids information disclosure.
-                throw new HttpResponseException(request.CreateErrorResponse(
-                                                    HttpStatusCode.BadRequest,
-                                                    SRResources.OnlySkipAndTopSupported));
-            }
+            ValidateQuery(request, queryOptions);
 
             // apply the query
             IQueryable queryable = query as IQueryable;
@@ -287,20 +276,25 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Validates that the OData query parameters of the incoming request are supported.
+        /// Validates that the OData query of the incoming request is supported.
         /// </summary>
-        /// <remarks>
-        /// Override this method to add support for new OData query parameters
-        /// Throw <see cref="HttpResponseException"/> for unsupported query parameters.
-        /// </remarks>
         /// <param name="request">The incoming request</param>
-        /// <exception cref="HttpResponseException">The request contains unsupported OData query parameters.</exception>
+        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.</param>
+        /// <remarks>
+        /// Override this method to perform additional validation of the query. By default, the implementation
+        /// throws an exception if the query contains unsupported query parameters.
+        /// </remarks>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
-        public virtual void ValidateQuery(HttpRequestMessage request)
+        public virtual void ValidateQuery(HttpRequestMessage request, ODataQueryOptions queryOptions)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
+            }
+
+            if (queryOptions == null)
+            {
+                throw Error.ArgumentNull("queryOptions");
             }
 
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
@@ -313,6 +307,16 @@ namespace System.Web.Http
                     throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         Error.Format(SRResources.QueryParameterNotSupported, kvp.Key)));
                 }
+            }
+
+            // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
+            if (queryOptions.Context.IsPrimitiveClrType && (queryOptions.Filter != null || queryOptions.OrderBy != null))
+            {
+                // An attempt to use a query option not allowed for primitive types
+                // generates a BadRequest with a general message that avoids information disclosure.
+                throw new HttpResponseException(request.CreateErrorResponse(
+                                                    HttpStatusCode.BadRequest,
+                                                    SRResources.OnlySkipAndTopSupported));
             }
         }
     }

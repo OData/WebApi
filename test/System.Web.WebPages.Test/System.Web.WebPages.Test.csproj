@@ -38,6 +38,9 @@
     <Compile Include="..\Common\CollectionExtensionsTest.cs">
       <Link>Common\CollectionExtensionsTest.cs</Link>
     </Compile>
+    <Compile Include="..\Common\PathHelpersTest.cs">
+      <Link>Common\PathHelpersTest.cs</Link>
+    </Compile>
     <Compile Include="ApplicationParts\ApplicationPartTest.cs" />
     <Compile Include="ApplicationParts\ApplicationPartRegistryTest.cs" />
     <Compile Include="ApplicationParts\MimeMappingTest.cs" />

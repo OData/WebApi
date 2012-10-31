@@ -83,12 +83,16 @@ namespace System.Web.WebPages
             {
                 string supportedExtension = supportedExtensions[i];
 
-                string virtualPath = "~/" + pathValue;
-
+                // For performance, avoid multiple calls to String.Concat
+                string virtualPath;
                 // Only add the extension if it's not already there
-                if (!virtualPath.EndsWith("." + supportedExtension, StringComparison.OrdinalIgnoreCase))
+                if (!PathHelpers.EndsWithExtension(pathValue, supportedExtension))
                 {
-                    virtualPath += "." + supportedExtension;
+                    virtualPath = "~/" + pathValue + "." + supportedExtension;
+                }
+                else
+                {
+                    virtualPath = "~/" + pathValue;
                 }
                 DisplayInfo virtualPathDisplayInfo = displayModeProvider.GetDisplayInfoForVirtualPath(virtualPath, context, virtualPathExists, currentDisplayMode: null);
 
@@ -133,7 +137,7 @@ namespace System.Web.WebPages
                     for (int i = 0; i < supportedExtensions.Length; i++)
                     {
                         string supportedExtension = supportedExtensions[i];
-                        if (pathValue.EndsWith("." + supportedExtension, StringComparison.OrdinalIgnoreCase))
+                        if (PathHelpers.EndsWithExtension(pathValue, supportedExtension))
                         {
                             foundSupportedExtension = true;
                             break;

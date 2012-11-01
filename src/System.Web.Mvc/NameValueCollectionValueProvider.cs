@@ -80,23 +80,43 @@ namespace System.Web.Mvc
         // ValueProviderResult for a given key.
         private sealed class ValueProviderResultPlaceholder
         {
-            private readonly Lazy<ValueProviderResult> _validatedResultPlaceholder;
-            private readonly Lazy<ValueProviderResult> _unvalidatedResultPlaceholder;
+            private ValueProviderResult _validatedResult;
+            private ValueProviderResult _unvalidatedResult;
+            private string _key;
+            private NameValueCollection _validatedCollection;
+            private NameValueCollection _unvalidatedCollection;
+            private CultureInfo _culture;
 
             public ValueProviderResultPlaceholder(string key, NameValueCollection validatedCollection, NameValueCollection unvalidatedCollection, CultureInfo culture)
             {
-                _validatedResultPlaceholder = new Lazy<ValueProviderResult>(() => GetResultFromCollection(key, validatedCollection, culture), LazyThreadSafetyMode.None);
-                _unvalidatedResultPlaceholder = new Lazy<ValueProviderResult>(() => GetResultFromCollection(key, unvalidatedCollection, culture), LazyThreadSafetyMode.None);
+                _key = key;
+                _validatedCollection = validatedCollection;
+                _unvalidatedCollection = unvalidatedCollection;
+                _culture = culture;
             }
 
             public ValueProviderResult ValidatedResult
             {
-                get { return _validatedResultPlaceholder.Value; }
+                get 
+                {
+                    if (_validatedResult == null)
+                    {
+                        _validatedResult = GetResultFromCollection(_key, _validatedCollection, _culture);
+                    }
+                    return _validatedResult;
+                }
             }
 
             public ValueProviderResult UnvalidatedResult
             {
-                get { return _unvalidatedResultPlaceholder.Value; }
+                get 
+                {
+                    if (_unvalidatedResult == null)
+                    {
+                        _unvalidatedResult = GetResultFromCollection(_key, _unvalidatedCollection, _culture);
+                    }
+                    return _unvalidatedResult;
+                }
             }
 
             private static ValueProviderResult GetResultFromCollection(string key, NameValueCollection collection, CultureInfo culture)

@@ -65,6 +65,32 @@ namespace System.Web.Http.OData.Query
                 top.ApplyTo(ODataQueryOptionTest.Customers));
         }
 
+        [Theory]
+        [InlineData("-1", -1)]
+        [InlineData("0", 0)]
+        [InlineData("100", 100)]
+        public void Value_Returns_ParsedTopValue(string topValue, int expectedValue)
+        {
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var top = new TopQueryOption(topValue, context);
+
+            Assert.Equal(expectedValue, top.Value);
+        }
+
+        [Theory]
+        [InlineData("NotANumber")]
+        [InlineData("''")]
+        [InlineData(" ")]
+        public void Value_ThrowsODataException_ForInvalidValues(string skipValue)
+        {
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var top = new TopQueryOption(skipValue, context);
+
+            Assert.Throws<ODataException>(() => top.Value);
+        }
+
         [Fact]
         public void CanApplyTop()
         {

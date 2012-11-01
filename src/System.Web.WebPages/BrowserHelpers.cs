@@ -43,9 +43,12 @@ namespace System.Web.WebPages
         /// </summary>
         public static HttpBrowserCapabilitiesBase GetOverriddenBrowser(this HttpContextBase httpContext)
         {
-            return GetOverriddenBrowser(httpContext, CreateOverriddenBrowser);
+            return GetOverriddenBrowser(httpContext, createBrowser: null);
         }
 
+        /// <summary>
+        /// Internal GetOverriddenBrowser overload to allow the browser creation function to changed. Defaults to CreateOverridenBrowser if createBrowser is null.
+        /// </summary>
         internal static HttpBrowserCapabilitiesBase GetOverriddenBrowser(this HttpContextBase httpContext, Func<string, HttpBrowserCapabilitiesBase> createBrowser)
         {
             HttpBrowserCapabilitiesBase overriddenBrowser = (HttpBrowserCapabilitiesBase)httpContext.Items[_browserOverrideKey];
@@ -56,7 +59,14 @@ namespace System.Web.WebPages
 
                 if (!String.Equals(overriddenUserAgent, httpContext.Request.UserAgent))
                 {
-                    overriddenBrowser = createBrowser(overriddenUserAgent);
+                    if (createBrowser != null)
+                    {
+                        overriddenBrowser = createBrowser(overriddenUserAgent);
+                    }
+                    else
+                    {
+                        overriddenBrowser = CreateOverriddenBrowser(overriddenUserAgent);
+                    }
                 }
                 else
                 {
@@ -96,12 +106,7 @@ namespace System.Web.WebPages
         /// </summary>
         public static string GetVaryByCustomStringForOverriddenBrowser(this HttpContextBase httpContext)
         {
-            return GetVaryByCustomStringForOverriddenBrowser(httpContext, userAgent => CreateOverriddenBrowser(userAgent));
-        }
-
-        internal static string GetVaryByCustomStringForOverriddenBrowser(this HttpContextBase httpContext, Func<string, HttpBrowserCapabilitiesBase> generateBrowser)
-        {
-            return GetOverriddenBrowser(httpContext, generateBrowser).Type;
+            return GetOverriddenBrowser(httpContext, createBrowser: null).Type;
         }
 
         /// <summary>

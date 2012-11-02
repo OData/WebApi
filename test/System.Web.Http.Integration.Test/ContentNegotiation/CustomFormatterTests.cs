@@ -112,10 +112,7 @@ namespace System.Web.Http.ContentNegotiation
         private void SetupHost()
         {
             baseAddress = "http://localhost/";
-            config = new HttpSelfHostConfiguration(baseAddress)
-            {
-                HostNameComparisonMode = HostNameComparisonMode.Exact
-            };
+            config = new HttpSelfHostConfiguration(baseAddress);
             config.Routes.MapHttpRoute("Default", "{controller}/{action}", new { controller = "CustomFormatterTests", action = "EchoOrder" });
             config.MessageHandlers.Add(new ConvertToStreamMessageHandler());
             config.Formatters.Add(new PlainTextFormatterWithVersionInfo());

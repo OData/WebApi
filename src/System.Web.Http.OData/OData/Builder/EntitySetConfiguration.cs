@@ -204,7 +204,11 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                throw Error.NotSupported(SRResources.CannotAutoCreateMultipleCandidates);
+                throw Error.NotSupported(
+                    SRResources.CannotAutoCreateMultipleCandidates,
+                    navigationConfiguration.Name,
+                    navigationConfiguration.DeclaringEntityType.FullName,
+                    String.Join(", ", matchingSets.Select(entitySet => entitySet.Name)));
             }
         }
 

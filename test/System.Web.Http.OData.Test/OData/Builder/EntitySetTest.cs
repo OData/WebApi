@@ -227,5 +227,20 @@ namespace System.Web.Http.OData.Builder
 
             Assert.Equal("http://localhost/vehicles/2009/Motorcycle1/Manufacturer", link.AbsoluteUri);
         }
+
+        [Fact]
+        public void CannotBindNavigationPropertyAutmatically_WhenMultipleEntitySetsOfPropertyType_Exist()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntitySet<Motorcycle>("motorcycles");
+            builder.EntitySet<MotorcycleManufacturer>("NorthWestMotorcycleManufacturers");
+            builder.EntitySet<MotorcycleManufacturer>("SouthWestMotorcycleManufacturers");
+            builder.Entity<Motorcycle>().HasRequired(m => m.Manufacturer);
+
+            Assert.Throws<NotSupportedException>(
+            () => builder.GetEdmModel(),
+            "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' because there are two or more candidate entity sets. " +
+            "The matching entity sets are NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
+        }
     }
 }

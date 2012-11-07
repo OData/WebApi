@@ -1,7 +1,8 @@
 <Project DefaultTargets="UnitTest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' and '$(Desktop)' == 'true' ">CodeAnalysis</Configuration>
         <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-        <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' ">true</CodeAnalysis>
+        <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(Configuration)' != 'Release' ">true</CodeAnalysis>
         <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
@@ -59,8 +60,9 @@
 
     <Target Name="Build" DependsOnTargets="Prereq">
         <!-- we need to batch the solution files since they both build Microsoft.TestCommon -->
-        <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
-        <MSBuild
+      <Error Condition=" '$(CodeAnalysis)' == 'true' and '$(Configuration)' == 'Release' " Text="Unable to run code analysis in Release configuration. Release assemblies do not include SuppressMessage attributes (so code analysis would always fail with the errors that are normally suppressed)." />
+      <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
+      <MSBuild
             Projects="%(SolutionsToBuild.Identity)"
             BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
             Targets="Build"

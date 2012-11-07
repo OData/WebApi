@@ -226,7 +226,7 @@
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
   </data>
   <data name="CannotAutoCreateMultipleCandidates" xml:space="preserve">
-    <value>Cannot automatically bind the navigation property '{0}' on entity type '{1}' because there are two or more candidate entity sets. The matching entity sets are {2}.</value>
+    <value>Cannot automatically bind the navigation property '{0}' on entity type '{1}' for the source entity set '{2}' because there are two or more matching target entity sets. The matching entity sets are {3}.</value>
   </data>
   <data name="EntitySetHasNoBuildLinkAnnotation" xml:space="preserve">
     <value>The entity set '{0}' is missing link generation configuration. Check that the self and edit links are configured during model building.</value>

@@ -208,6 +208,7 @@ namespace System.Web.Http.OData.Builder
                     SRResources.CannotAutoCreateMultipleCandidates,
                     navigationConfiguration.Name,
                     navigationConfiguration.DeclaringEntityType.FullName,
+                    Name,
                     String.Join(", ", matchingSets.Select(entitySet => entitySet.Name)));
             }
         }

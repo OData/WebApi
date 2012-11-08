@@ -26,9 +26,9 @@ namespace System.Web.Http.OData.Builder
             new AbstractEntityTypeDiscoveryConvention(),
             new DataContractAttributeEdmTypeConvention(),
             new NotMappedAttributeConvention(), // NotMappedAttributeConvention has to run before EntityKeyConvention
-            new EntityKeyConvention(),
             new DataMemberAttributeEdmPropertyConvention(),
             new RequiredAttributeEdmPropertyConvention(),
+            new EntityKeyConvention(),
             new KeyAttributeEdmPropertyConvention(),
             new IgnoreDataMemberAttributeEdmPropertyConvention(),
 
@@ -406,14 +406,17 @@ namespace System.Web.Http.OData.Builder
                     // don't add this property if the user has already added it.
                     if (!entity.NavigationProperties.Where(p => p.Name == property.Name).Any())
                     {
+                        NavigationPropertyConfiguration addedNavigationProperty;
                         if (!isCollection)
                         {
-                            entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
+                            addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
                         }
                         else
                         {
-                            entity.AddNavigationProperty(property, EdmMultiplicity.Many);
+                            addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.Many);
                         }
+
+                        addedNavigationProperty.AddedExplicitly = false;
                     }
                 }
             }
@@ -469,15 +472,22 @@ namespace System.Web.Http.OData.Builder
             Contract.Assert(property != null);
             Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive);
 
+            bool addedExplicitly = false;
+            if (type.Properties.Where(p => p.Name == property.Name).Any())
+            {
+                addedExplicitly = true;
+            }
+
+            PropertyConfiguration addedEdmProperty;
             if (!isCollection)
             {
                 if (propertyKind == PropertyKind.Primitive)
                 {
-                    type.AddProperty(property);
+                    addedEdmProperty = type.AddProperty(property);
                 }
                 else
                 {
-                    type.AddComplexProperty(property);
+                    addedEdmProperty = type.AddComplexProperty(property);
                 }
             }
             else
@@ -487,8 +497,10 @@ namespace System.Web.Http.OData.Builder
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
 
-                type.AddCollectionProperty(property);
+                addedEdmProperty = type.AddCollectionProperty(property);
             }
+
+            addedEdmProperty.AddedExplicitly = addedExplicitly;
         }
 
         // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type

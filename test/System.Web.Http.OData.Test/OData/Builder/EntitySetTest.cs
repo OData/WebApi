@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Builder
 
             IEdmModel model = builder.GetEdmModel();
             var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
-            var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+            var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.One);
 
             Assert.Equal(
                 "manufacturers",
@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Builder
 
             IEdmModel model = builder.GetEdmModel();
             var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
-            var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+            var edmNavProperty = motorcycleEdmType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.One);
             var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
 
             Assert.NotNull(model.GetEntitySetLinkBuilder(vehiclesEdmSet));
@@ -177,7 +177,7 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(vehicles);
 
             var motorcycle = model.AssertHasEntityType(typeof(Motorcycle));
-            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+            var motorcycleManufacturerProperty = motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: false, multiplicity: EdmMultiplicity.One);
 
             var motorcycleManufacturerPropertyTargetSet = vehicles.FindNavigationTarget(motorcycleManufacturerProperty);
             Assert.NotNull(motorcycleManufacturerPropertyTargetSet);

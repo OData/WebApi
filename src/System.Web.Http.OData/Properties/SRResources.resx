@@ -565,4 +565,7 @@
   <data name="LocationHeaderMissingODataPath" xml:space="preserve">
     <value>A Location header could not be generated because the request does not have an associated OData path.</value>
   </data>
+  <data name="ManyNavigationPropertiesCannotBeChanged" xml:space="preserve">
+    <value>Cannot change multiplicity of the collection navigation property '{0}'.</value>
+  </data>
 </root>

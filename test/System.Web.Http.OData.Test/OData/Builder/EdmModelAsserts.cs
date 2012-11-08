@@ -86,11 +86,7 @@ namespace System.Web.Http.OData.Builder
         {
             IEdmNavigationProperty navigationProperty = edmType.AssertHasProperty<IEdmNavigationProperty>(model, propertyName, propertyType: null, isNullable: isNullable);
 
-            // Bug 468693: in EdmLib. remove when fixed.
-            if (multiplicity != EdmMultiplicity.Many)
-            {
-                Assert.Equal(multiplicity, navigationProperty.Multiplicity());
-            }
+            Assert.Equal(multiplicity, navigationProperty.Partner.Multiplicity());
 
             Assert.True(navigationProperty.ToEntityType().IsEquivalentTo(model.GetEdmType(mappedPropertyClrType)));
             return navigationProperty;

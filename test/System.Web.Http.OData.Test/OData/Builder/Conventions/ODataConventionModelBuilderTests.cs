@@ -945,8 +945,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type2);
 
-            // bug in edmlib causing this to ZeroOrOne.
-            entity.AssertHasNavigationProperty(model, "Relation", type1, isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+            entity.AssertHasNavigationProperty(model, "Relation", type1, isNullable: false, multiplicity: EdmMultiplicity.One);
         }
 
         [Fact]
@@ -986,7 +985,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             IEdmEntityType entity = model.AssertHasEntitySet("entityset", entityType);
             entity.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
-            entity.AssertHasNavigationProperty(model, "NavigationCollection", new { ID = default(int) }.GetType(), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
+            entity.AssertHasNavigationProperty(model, "NavigationCollection", new { ID = default(int) }.GetType(), isNullable: false, multiplicity: EdmMultiplicity.Many);
         }
 
         [Theory]
@@ -1119,6 +1118,61 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.DoesNotContain("BaseTypeProperty", baseEntityType.Properties().Select(p => p.Name));
             IEdmEntityType derivedEntityType = model.AssertHasEntityType(derivedType);
             Assert.DoesNotContain("BaseTypeProperty", derivedEntityType.Properties().Select(p => p.Name));
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_Sets_IsAddedExplicitly_Appropriately()
+        {
+            // Arrange
+            MockType relatedEntity =
+                new MockType("RelatedEntity")
+                .Property<int>("ID");
+            MockType relatedComplexType =
+                new MockType("RelatedComplexType");
+            MockType type =
+                new MockType()
+                .Property<int>("ID")
+                .Property<int>("ExplicitlyAddedPrimitive")
+                .Property<int>("InferredPrimitive")
+                .Property<int[]>("ExplicitlyAddedPrimitiveCollection")
+                .Property<int[]>("InferredAddedPrimitiveCollection")
+                .Property(relatedComplexType, "ExplicitlyAddedComplex")
+                .Property(relatedComplexType, "InferredComplex")
+                .Property(relatedComplexType.AsCollection(), "ExplicitlyAddedComplexCollection")
+                .Property(relatedComplexType.AsCollection(), "InferredComplexCollection")
+                .Property(relatedEntity, "ExplicitlyAddedNavigation")
+                .Property(relatedEntity, "InferredNavigation")
+                .Property(relatedEntity.AsCollection(), "ExplicitlyAddedNavigationCollection")
+                .Property(relatedEntity.AsCollection(), "InferredNavigationCollection");
+
+            var builder = new ODataConventionModelBuilder();
+            var entity = builder.AddEntity(type);
+            entity.AddProperty(type.GetProperty("ExplicitlyAddedPrimitive"));
+            entity.AddCollectionProperty(type.GetProperty("ExplicitlyAddedPrimitiveCollection"));
+            entity.AddComplexProperty(type.GetProperty("ExplicitlyAddedComplex"));
+            entity.AddCollectionProperty(type.GetProperty("ExplicitlyAddedComplexCollection"));
+            entity.AddNavigationProperty(type.GetProperty("ExplicitlyAddedNavigation"), EdmMultiplicity.ZeroOrOne);
+            entity.AddNavigationProperty(type.GetProperty("ExplicitlyAddedNavigationCollection"), EdmMultiplicity.Many);
+
+            builder.OnModelCreating = (b) =>
+                {
+                    var explicitlyAddedProperties = entity.Properties.Where(p => p.Name.Contains("ExplicitlyAdded"));
+                    var inferredProperties = entity.Properties.Where(p => p.Name.Contains("Inferred"));
+
+                    Assert.Equal(13, entity.Properties.Count());
+                    Assert.Equal(6, explicitlyAddedProperties.Count());
+                    Assert.Equal(6, inferredProperties.Count());
+                    foreach (var explicitlyAddedProperty in explicitlyAddedProperties)
+                    {
+                        Assert.True(explicitlyAddedProperty.AddedExplicitly);
+    }
+                    foreach (var inferredProperty in inferredProperties)
+                    {
+                        Assert.False(inferredProperty.AddedExplicitly);
+                    }
+                };
+
+            Assert.DoesNotThrow(() => builder.GetEdmModel());
         }
     }
 

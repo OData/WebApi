@@ -700,6 +700,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot change multiplicity of the collection navigation property &apos;{0}&apos;..
+        /// </summary>
+        internal static string ManyNavigationPropertiesCannotBeChanged {
+            get {
+                return ResourceManager.GetString("ManyNavigationPropertiesCannotBeChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; on the type &apos;{1}&apos; is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections..
         /// </summary>
         internal static string ManyToManyNavigationPropertyMustReturnCollection {

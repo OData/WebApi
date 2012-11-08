@@ -36,10 +36,7 @@ namespace System.Web.Http.OData.Builder
             set
             {
                 _optionalProperty = value;
-                IsOptionalPropertyExplicitlySet = true;
             }
         }
-
-        internal bool IsOptionalPropertyExplicitlySet { get; set; }
     }
 }

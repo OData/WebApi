@@ -27,6 +27,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property.Object, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
 
             // Act
             new RequiredAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object);
@@ -52,6 +53,26 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         }
 
         [Fact]
+        public void RequiredAttributeEdmPropertyConvention_ConfiguresRequiredNavigationPropertyAsRequired()
+        {
+            MockType anotherType =
+                new MockType("RelatedEntity")
+                .Property<int>("ID");
+
+            MockType type =
+                new MockType("Entity")
+                .Property(typeof(int), "ID")
+                .Property(anotherType, "RelatedEntity", new RequiredAttribute());
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type);
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType entity = model.AssertHasEntityType(type);
+            entity.AssertHasNavigationProperty(model, "RelatedEntity", anotherType, isNullable: false, multiplicity: EdmMultiplicity.One);
+        }
+
+        [Fact]
         public void RequiredAttributeEdmPropertyConvention_DoesnotOverwriteExistingConfiguration()
         {
             MockType type =
@@ -65,6 +86,26 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entity = model.AssertHasEntityType(type);
             entity.AssertHasPrimitiveProperty(model, "Count", EdmPrimitiveTypeKind.Int32, isNullable: true);
+        }
+
+        [Fact]
+        public void RequiredAttributeEdmPropertyConvention_DoesnotOverwriteExistingConfigurationForNavigationProperties()
+        {
+            MockType anotherType =
+                new MockType("RelatedEntity")
+                .Property<int>("ID");
+
+            MockType type =
+                new MockType("Entity")
+                .Property(typeof(int), "ID")
+                .Property(anotherType, "RelatedEntity", new RequiredAttribute());
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type).AddNavigationProperty(type.GetProperty("RelatedEntity"), EdmMultiplicity.ZeroOrOne);
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType entity = model.AssertHasEntityType(type);
+            entity.AssertHasNavigationProperty(model, "RelatedEntity", anotherType, isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
         }
     }
 }

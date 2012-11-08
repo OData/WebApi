@@ -74,5 +74,33 @@ namespace System.Web.Http.OData.Builder
         {
             get { return PropertyKind.Navigation; }
         }
+
+        /// <summary>
+        /// Marks the navigation property as optional.
+        /// </summary>
+        public NavigationPropertyConfiguration Optional()
+        {
+            if (Multiplicity == EdmMultiplicity.Many)
+            {
+                throw Error.InvalidOperation(SRResources.ManyNavigationPropertiesCannotBeChanged, Name);
+            }
+
+            Multiplicity = EdmMultiplicity.ZeroOrOne;
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the navigation property as required.
+        /// </summary>
+        public NavigationPropertyConfiguration Required()
+        {
+            if (Multiplicity == EdmMultiplicity.Many)
+            {
+                throw Error.InvalidOperation(SRResources.ManyNavigationPropertiesCannotBeChanged, Name);
+            }
+
+            Multiplicity = EdmMultiplicity.One;
+            return this;
+        }
     }
 }

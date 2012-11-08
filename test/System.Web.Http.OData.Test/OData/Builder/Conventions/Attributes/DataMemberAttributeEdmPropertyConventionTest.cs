@@ -28,6 +28,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
             // Act
@@ -49,6 +50,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
             // Act
@@ -70,6 +72,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             PropertyInfo property = type.GetProperty("Property");
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
+            structuralProperty.Object.AddedExplicitly = false;
             structuralType.Setup(t => t.ClrType).Returns(type);
 
             // Act
@@ -95,6 +98,29 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             IEdmEntityType entity = model.AssertHasEntityType(type);
             entity.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
             entity.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: false);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void DataMemberAttributeEdmPropertyConvention_ConfiguresNavigationDataMembers(bool isRequired)
+        {
+            MockType relatedType =
+                new MockType("RelatedEntity")
+                .Property<int>("ID");
+            MockType type =
+                new MockType("Entity")
+                .Property(typeof(int), "ID")
+                .Property(relatedType, "RelatedEntity", new DataMemberAttribute { IsRequired = isRequired });
+            type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type);
+
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType entity = model.AssertHasEntityType(type);
+            entity.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
+            entity.AssertHasNavigationProperty(model, "RelatedEntity", relatedType, isNullable: !isRequired, multiplicity: isRequired ? EdmMultiplicity.One : EdmMultiplicity.ZeroOrOne);
         }
 
         [Fact]

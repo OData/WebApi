@@ -28,6 +28,7 @@ namespace System.Web.Http.OData.Builder
 
             PropertyInfo = property;
             DeclaringType = declaringType;
+            AddedExplicitly = true;
         }
 
         /// <summary>
@@ -57,5 +58,11 @@ namespace System.Web.Http.OData.Builder
         /// Gets the <see cref="PropertyKind"/> of the property.
         /// </summary>
         public abstract PropertyKind Kind { get; }
+
+        /// <summary>
+        /// Gets or sets a value that is <see langword="true"/> if the property was added by the user; <see langword="false"/> if it was inferred through conventions.
+        /// </summary>
+        /// <remarks>The default value is <see langword="true"/></remarks>
+        public bool AddedExplicitly { get; set; }
     }
 }

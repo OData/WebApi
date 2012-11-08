@@ -87,7 +87,7 @@ namespace System.Web.Http.OData.Builder
 
         private static void AddNavigationBindings(IEntitySetConfiguration configuration, EdmEntitySet entitySet, EntitySetLinkBuilderAnnotation linkBuilder, ODataModelBuilder builder,
             Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
-                {
+        {
             foreach (IEntityTypeConfiguration entity in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {
                 foreach (NavigationPropertyConfiguration navigation in entity.NavigationProperties)
@@ -99,7 +99,12 @@ namespace System.Web.Http.OData.Builder
                         IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties().Single(np => np.Name == navigation.Name);
 
                         entitySet.AddNavigationTarget(edmNavigationProperty, edmEntitySetMap[binding.EntitySet.Name]);
-                        linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, configuration.GetNavigationPropertyLink(navigation));
+
+                        Func<EntityInstanceContext, IEdmNavigationProperty, Uri> linkBuilderFunc = configuration.GetNavigationPropertyLink(navigation);
+                        if (linkBuilderFunc != null)
+                        {
+                            linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
+                        }
                     }
                 }
             }

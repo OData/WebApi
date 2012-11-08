@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
@@ -118,10 +119,11 @@ namespace System.Web.Http.OData.Builder
             Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkBuilderFunc;
             if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilderFunc))
             {
-                throw Error.InvalidOperation(SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, _entitySet.Name);
+                throw Error.InvalidOperation(SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySet.Name);
             }
 
-            return _navigationPropertyLinkBuilderLookup[navigationProperty](context, navigationProperty);
+            Contract.Assert(navigationLinkBuilderFunc != null);
+            return navigationLinkBuilderFunc(context, navigationProperty);
         }
     }
 }

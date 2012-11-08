@@ -736,7 +736,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No NavigationLink factory was found for the property &apos;{0}&apos; on entity set &apos;{1}&apos;. Try calling HasNavigationPropertyLink on the EntitySetConfiguration..
+        ///   Looks up a localized string similar to No NavigationLink factory was found for the navigation property &apos;{0}&apos; from entity type &apos;{1}&apos; on entity set &apos;{2}&apos;. Try calling HasNavigationPropertyLink on the EntitySetConfiguration..
         /// </summary>
         internal static string NoNavigationLinkFactoryFound {
             get {

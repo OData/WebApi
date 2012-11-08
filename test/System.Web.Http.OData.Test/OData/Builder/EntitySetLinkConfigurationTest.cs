@@ -111,6 +111,25 @@ namespace System.Web.Http.OData.Builder
             Assert.Null(actor.GetIdLink());
         }
 
+        [Fact]
+        public void FailingToConfigureNavigationLinks_Results_In_InvalidOperationException_When_BuildingNavigationLink()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntitySet<EntitySetLinkConfigurationTest_Product>("Products").HasManyBinding(p => p.Orders, "Orders");
+            var model = builder.GetEdmModel();
+
+            IEdmEntitySet products = model.EntityContainers().Single().EntitySets().Single(s => s.Name == "Products");
+            IEdmNavigationProperty ordersProperty = products.ElementType.DeclaredNavigationProperties().Single();
+            var linkBuilder = model.GetEntitySetLinkBuilder(products);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty),
+                "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.Http.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set 'Products'. " +
+                "Try calling HasNavigationPropertyLink on the EntitySetConfiguration.");
+        }
+
         private ODataModelBuilder GetCommonModel()
         {
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -120,6 +139,7 @@ namespace System.Web.Http.OData.Builder
             product.Property(p => p.Name);
             product.Property(p => p.Price);
             product.Property(p => p.Cost);
+
             return builder;
         }
 
@@ -129,6 +149,13 @@ namespace System.Web.Http.OData.Builder
             public string Name { get; set; }
             public Decimal Price { get; set; }
             public Decimal Cost { get; set; }
+
+            public EntitySetLinkConfigurationTest_Order[] Orders { get; set; }
+        }
+
+        class EntitySetLinkConfigurationTest_Order
+        {
+            public string ID { get; set; }
         }
     }
 }

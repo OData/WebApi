@@ -292,7 +292,7 @@
     <value>The recursion limit has been exceeded.</value>
   </data>
   <data name="NoNavigationLinkFactoryFound" xml:space="preserve">
-    <value>No NavigationLink factory was found for the property '{0}' on entity set '{1}'. Try calling HasNavigationPropertyLink on the EntitySetConfiguration.</value>
+    <value>No NavigationLink factory was found for the navigation property '{0}' from entity type '{1}' on entity set '{2}'. Try calling HasNavigationPropertyLink on the EntitySetConfiguration.</value>
   </data>
   <data name="NavigationPropertyRouteMissingOrIncorrect" xml:space="preserve">
     <value>Link generation for the '{0}' NavigationProperty failed. Check that you have the '{1}' route correctly registered.</value>

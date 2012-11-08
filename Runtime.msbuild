@@ -1,5 +1,6 @@
 <Project DefaultTargets="UnitTest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
+        <!-- build.cmd sets /p:Desktop=true. The CI server does not; instead, it does an additional step with /p:Configuration=CodeAnalysis. -->
         <Configuration Condition=" '$(Configuration)' == '' and '$(Desktop)' == 'true' ">CodeAnalysis</Configuration>
         <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
         <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(Configuration)' != 'Release' ">true</CodeAnalysis>

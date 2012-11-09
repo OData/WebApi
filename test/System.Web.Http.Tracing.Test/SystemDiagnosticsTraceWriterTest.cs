@@ -1040,7 +1040,7 @@ namespace System.Web.Http.Tracing.Diagnostics.Test
             Assert.Equal(TraceLevel.Warn, traceRecord.Level);
             Assert.Equal(string.Empty, traceRecord.Message);
         }
-
+        
         private static void AssertContainsExactly(string trace, IDictionary<string, string> expected)
         {
             IDictionary<string, string> actual = ParseTrace(trace);

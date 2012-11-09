@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HttpConfigurationTracingExtensionsTest.cs" />
     <Compile Include="SystemDiagnosticsTraceWriterTest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -22,3 +22,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Web.Http.Error.#Argument(System.String,System.String,System.Object[])", Justification = "Error imported from main project")]
 [assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Web.Http.Error.#Argument(System.String,System.Object[])", Justification = "Error imported from main project")]
 [assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Web.Http.Error.#ArgumentUriNotAbsolute(System.String,System.Uri)", Justification = "Error imported from main project")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "System.Web.Http", Justification = "Small extension project, distinct namespace")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "System.Web.Http.Tracing", Justification = "Small extension project, distinct namespace")]

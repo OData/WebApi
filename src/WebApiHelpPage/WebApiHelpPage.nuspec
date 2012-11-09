@@ -19,7 +19,7 @@
     <tags>Microsoft AspNet WebApi AspNetWebApi HelpPage</tags>
   </metadata>
   <files>
-    <file src="Areas\HelpPageAreaRegistration.cs.pp" target="content\Areas" />  
+    <file src="Areas\HelpPage\HelpPageAreaRegistration.cs.pp" target="content\Areas\HelpPage" />  
     <file src="Areas\HelpPage\ApiDescriptionExtensions.cs.pp" target="content\Areas\HelpPage" />
     <file src="Areas\HelpPage\HelpPage.css.pp" target="content\Areas\HelpPage" />
     <file src="Areas\HelpPage\HelpPageConfigurationExtensions.cs.pp" target="content\Areas\HelpPage" />

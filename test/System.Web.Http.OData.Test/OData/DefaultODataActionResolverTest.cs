@@ -77,7 +77,7 @@ namespace System.Web.Http.OData
             InvalidOperationException ioe = Assert.Throws<InvalidOperationException>(() =>
             {
                 IEdmFunctionImport action = resolver.Resolve(context);
-            }, "Ambiguous request. Found multiple action overloads called 'Park' for RequestUri 'http://server/service/Vehicles/Container.Car(8)/Park'.");
+            }, "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
         }
 
         [Fact]

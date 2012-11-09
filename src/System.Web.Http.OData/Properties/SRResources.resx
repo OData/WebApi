@@ -397,7 +397,7 @@
     <value>Action '{0}' was not found for RequestUri '{1}'.</value>
   </data>
   <data name="ActionResolutionFailed" xml:space="preserve">
-    <value>Ambiguous request. Found multiple action overloads called '{0}' for RequestUri '{1}'.</value>
+    <value>Action resolution failed. Multiple actions matching the action identifier '{0}' were found. The matching actions are: {1}.</value>
   </data>
   <data name="DefaultODataActionResolverRequirementsNotSatisfied" xml:space="preserve">
     <value>DefaultODataActionResolver requires an ODataDeserializerContext with a non null Request and RequestUri.</value>
@@ -452,5 +452,41 @@
   </data>
   <data name="GetOnlyCollectionCannotBeArray" xml:space="preserve">
     <value>The value of the property '{0}' on type '{1}' is an array. Consider adding a setter for the property.</value>
+  </data>
+  <data name="PreviousSegmentEdmTypeCannotBeNull" xml:space="preserve">
+    <value>The previous path segment cannot have a null value as its EdmType.</value>
+  </data>
+  <data name="PreviousTypeForKeyMustBeCollection" xml:space="preserve">
+    <value>The previous segment's EDM type '{0}' must be a collection type. Key segments can only be applied if the previous segment's type is a collection.</value>
+  </data>
+  <data name="InvalidPathSegment" xml:space="preserve">
+    <value>The URI segment '{0}' is invalid after the segment '{1}'.</value>
+  </data>
+  <data name="NoActionFoundForCollection" xml:space="preserve">
+    <value>Invalid action detected. '{0}' is not an action that can bind to 'Collection({1})'.</value>
+  </data>
+  <data name="ParserModelMustHaveOneContainer" xml:space="preserve">
+    <value>The parser requires an EDM model with exactly 1 entity container. {0} entity containers were found.</value>
+  </data>
+  <data name="PreviousSegmentMustBeCollectionType" xml:space="preserve">
+    <value>The previous segment's EDM type '{0}' must be a collection type.</value>
+  </data>
+  <data name="PreviousSegmentMustBeComplexType" xml:space="preserve">
+    <value>The previous segment's EDM type '{0}' must be a complex type.</value>
+  </data>
+  <data name="PreviousSegmentMustBeEntityCollectionType" xml:space="preserve">
+    <value>The previous segment's EDM type '{0}' must be an entity collection type.</value>
+  </data>
+  <data name="PreviousSegmentMustBeEntityType" xml:space="preserve">
+    <value>The previous segment's EDM type '{0}' must be an entity type.</value>
+  </data>
+  <data name="InvalidCastInPath" xml:space="preserve">
+    <value>Invalid cast encountered. Cast type '{0}' must be the same as or derive from the previous segment's type '{1}'.</value>
+  </data>
+  <data name="PreviousSegmentMustHaveEntitySet" xml:space="preserve">
+    <value>The previous path segment must have a defined EntitySet.</value>
+  </data>
+  <data name="SegmentNullOrEmpty" xml:space="preserve">
+    <value>The segment value must not be null or empty.</value>
   </data>
 </root>

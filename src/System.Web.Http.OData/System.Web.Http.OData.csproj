@@ -139,6 +139,21 @@
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\LinkGenerationConstants.cs" />
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
+    <Compile Include="OData\Routing\ActionPathSegment.cs" />
+    <Compile Include="OData\Routing\CastPathSegment.cs" />
+    <Compile Include="OData\Routing\BatchPathSegment.cs" />
+    <Compile Include="OData\Routing\IODataPathParser.cs" />
+    <Compile Include="OData\Routing\ODataPath.cs" />
+    <Compile Include="OData\Routing\ODataSegmentKinds.cs" />
+    <Compile Include="OData\Routing\ServiceBasePathSegment.cs" />
+    <Compile Include="OData\Routing\KeyValuePathSegment.cs" />
+    <Compile Include="OData\Routing\LinksPathSegment.cs" />
+    <Compile Include="OData\Routing\UnresolvedPathSegment.cs" />
+    <Compile Include="OData\Routing\ValuePathSegment.cs" />
+    <Compile Include="OData\Routing\PropertyAccessPathSegment.cs" />
+    <Compile Include="OData\Routing\NavigationPathSegment.cs" />
+    <Compile Include="OData\Routing\EntitySetPathSegment.cs" />
+    <Compile Include="OData\Routing\MetadataPathSegment.cs" />
     <Compile Include="OData\ODataActionParameters.cs" />
     <Compile Include="OData\Builder\ActionConfiguration.cs" />
     <Compile Include="OData\Builder\BindingParameterConfiguration.cs" />
@@ -264,6 +279,8 @@
     <Compile Include="OData\Formatter\Serialization\ODataEntrySerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataQueryProjectionNode.cs" />
     <Compile Include="HttpActionDescriptorExtensions.cs" />
+    <Compile Include="OData\Routing\ODataPathParser.cs" />
+    <Compile Include="OData\Routing\ODataPathSegment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\SRResources.Designer.cs">
       <AutoGen>True</AutoGen>

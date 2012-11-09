@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ambiguous request. Found multiple action overloads called &apos;{0}&apos; for RequestUri &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Action resolution failed. Multiple actions matching the action identifier &apos;{0}&apos; were found. The matching actions are: {1}..
         /// </summary>
         internal static string ActionResolutionFailed {
             get {
@@ -502,6 +502,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid cast encountered. Cast type &apos;{0}&apos; must be the same as or derive from the previous segment&apos;s type &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidCastInPath {
+            get {
+                return ResourceManager.GetString("InvalidCastInPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid entity set name..
         /// </summary>
         internal static string InvalidEntitySetName {
@@ -516,6 +525,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string InvalidParameterType {
             get {
                 return ResourceManager.GetString("InvalidParameterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The URI segment &apos;{0}&apos; is invalid after the segment &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidPathSegment {
+            get {
+                return ResourceManager.GetString("InvalidPathSegment", resourceCulture);
             }
         }
         
@@ -718,6 +736,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid action detected. &apos;{0}&apos; is not an action that can bind to &apos;Collection({1})&apos;..
+        /// </summary>
+        internal static string NoActionFoundForCollection {
+            get {
+                return ResourceManager.GetString("NoActionFoundForCollection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No EditLink factory was found. Try calling HasEditLink on the EntitySetConfiguration for &apos;{0}&apos;..
         /// </summary>
         internal static string NoEditLinkFactoryFound {
@@ -804,6 +831,78 @@ namespace System.Web.Http.OData.Properties {
         internal static string OrderByPropertyNotFound {
             get {
                 return ResourceManager.GetString("OrderByPropertyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parser requires an EDM model with exactly 1 entity container. {0} entity containers were found..
+        /// </summary>
+        internal static string ParserModelMustHaveOneContainer {
+            get {
+                return ResourceManager.GetString("ParserModelMustHaveOneContainer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous path segment cannot have a null value as its EdmType..
+        /// </summary>
+        internal static string PreviousSegmentEdmTypeCannotBeNull {
+            get {
+                return ResourceManager.GetString("PreviousSegmentEdmTypeCannotBeNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous segment&apos;s EDM type &apos;{0}&apos; must be a collection type..
+        /// </summary>
+        internal static string PreviousSegmentMustBeCollectionType {
+            get {
+                return ResourceManager.GetString("PreviousSegmentMustBeCollectionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous segment&apos;s EDM type &apos;{0}&apos; must be a complex type..
+        /// </summary>
+        internal static string PreviousSegmentMustBeComplexType {
+            get {
+                return ResourceManager.GetString("PreviousSegmentMustBeComplexType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous segment&apos;s EDM type &apos;{0}&apos; must be an entity collection type..
+        /// </summary>
+        internal static string PreviousSegmentMustBeEntityCollectionType {
+            get {
+                return ResourceManager.GetString("PreviousSegmentMustBeEntityCollectionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous segment&apos;s EDM type &apos;{0}&apos; must be an entity type..
+        /// </summary>
+        internal static string PreviousSegmentMustBeEntityType {
+            get {
+                return ResourceManager.GetString("PreviousSegmentMustBeEntityType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous path segment must have a defined EntitySet..
+        /// </summary>
+        internal static string PreviousSegmentMustHaveEntitySet {
+            get {
+                return ResourceManager.GetString("PreviousSegmentMustHaveEntitySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The previous segment&apos;s EDM type &apos;{0}&apos; must be a collection type. Key segments can only be applied if the previous segment&apos;s type is a collection..
+        /// </summary>
+        internal static string PreviousTypeForKeyMustBeCollection {
+            get {
+                return ResourceManager.GetString("PreviousTypeForKeyMustBeCollection", resourceCulture);
             }
         }
         
@@ -948,6 +1047,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestMustContainConfiguration {
             get {
                 return ResourceManager.GetString("RequestMustContainConfiguration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The segment value must not be null or empty..
+        /// </summary>
+        internal static string SegmentNullOrEmpty {
+            get {
+                return ResourceManager.GetString("SegmentNullOrEmpty", resourceCulture);
             }
         }
         

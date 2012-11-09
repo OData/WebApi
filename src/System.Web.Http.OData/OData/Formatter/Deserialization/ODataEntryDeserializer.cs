@@ -298,8 +298,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmCollectionTypeReference collectionType = propertyType as IEdmCollectionTypeReference;
             Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");
 
-            IEdmTypeReference itemType = collectionType.ElementType();
-
             ODataEntryDeserializer deserializer = deserializerProvider.GetODataDeserializer(collectionType);
             return deserializer.ReadInline(collection, readContext);
         }

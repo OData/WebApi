@@ -167,6 +167,187 @@ namespace System.Web.Http.OData.Formatter
             return null;
         }
 
+        public static IEdmCollectionType GetCollection(this IEdmEntityType entityType)
+        {
+            return new EdmCollectionType(new EdmEntityTypeReference(entityType, isNullable: false));
+        }
+
+        public static bool CanBindTo(this IEdmFunctionImport function, IEdmEntityType entity)
+        {
+            if (function == null)
+            {
+                throw Error.ArgumentNull("function");
+            }
+            if (entity == null)
+            {
+                throw Error.ArgumentNull("entity");
+            }
+            if (!function.IsBindable)
+            {
+                return false;
+            }
+
+            // The binding parameter is the first parameter by convention
+            IEdmFunctionParameter bindingParameter = function.Parameters.FirstOrDefault();
+            if (bindingParameter == null)
+            {
+                return false;
+            }
+
+            IEdmEntityType bindingParameterType = bindingParameter.Type.Definition as IEdmEntityType;
+            if (bindingParameterType == null)
+            {
+                return false;
+            }
+
+            return entity.IsOrInheritsFrom(bindingParameterType);
+        }
+
+        public static bool CanBindTo(this IEdmFunctionImport function, IEdmCollectionType collection)
+        {
+            if (function == null)
+            {
+                throw Error.ArgumentNull("function");
+            }
+            if (collection == null)
+            {
+                throw Error.ArgumentNull("collection");
+            }
+            if (!function.IsBindable)
+            {
+                return false;
+            }
+
+            // The binding parameter is the first parameter by convention
+            IEdmFunctionParameter bindingParameter = function.Parameters.FirstOrDefault();
+            if (bindingParameter == null)
+            {
+                return false;
+            }
+
+            IEdmCollectionType bindingParameterType = bindingParameter.Type.Definition as IEdmCollectionType;
+            if (bindingParameterType == null)
+            {
+                return false;
+            }
+
+            IEdmEntityType bindingParameterElementType = bindingParameterType.ElementType.Definition as IEdmEntityType;
+            IEdmEntityType entity = collection.ElementType.Definition as IEdmEntityType;
+            if (bindingParameterElementType == null || entity == null)
+            {
+                return false;
+            }
+
+            return entity.IsOrInheritsFrom(bindingParameterElementType);
+        }
+
+        public static IEnumerable<IEdmFunctionImport> GetMatchingActions(this IEnumerable<IEdmFunctionImport> functions, string actionIdentifier)
+        {
+            if (functions == null)
+            {
+                throw Error.ArgumentNull("functions");
+            }
+            if (actionIdentifier == null)
+            {
+                throw Error.ArgumentNull("actionIdentifier");
+            }
+
+            string[] nameParts = actionIdentifier.Split('.');
+            Contract.Assert(nameParts.Length != 0);
+
+            if (nameParts.Length == 1)
+            {
+                // Name
+                string name = nameParts[0];
+                return functions.Where(f => f.IsSideEffecting && f.Name == name);
+            }
+            else if (nameParts.Length == 2)
+            {
+                // Container.Name
+                string name = nameParts[nameParts.Length - 1];
+                string container = nameParts[nameParts.Length - 2];
+                return functions.Where(f => f.IsSideEffecting && f.Name == name && f.Container.Name == container);
+            }
+            else
+            {
+                // Namespace.Container.Name
+                string name = nameParts[nameParts.Length - 1];
+                string container = nameParts[nameParts.Length - 2];
+                string nspace = String.Join(".", nameParts.Take(nameParts.Length - 2));
+                return functions.Where(f => f.IsSideEffecting && f.Name == name && f.Container.Name == container && f.Container.Namespace == nspace);
+            }
+        }
+
+        public static IEdmFunctionImport FindBindableAction(this IEnumerable<IEdmFunctionImport> functions, IEdmEntityType entityType, string actionIdentifier)
+        {
+            if (functions == null)
+            {
+                throw Error.ArgumentNull("functions");
+            }
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
+            }
+            if (actionIdentifier == null)
+            {
+                throw Error.ArgumentNull("actionIdentifier");
+            }
+
+            IEdmFunctionImport[] matches = functions.GetMatchingActions(actionIdentifier).Where(fi => fi.CanBindTo(entityType)).ToArray();
+
+            if (matches.Length > 1)
+            {
+                throw Error.InvalidOperation(
+                    SRResources.ActionResolutionFailed,
+                    actionIdentifier,
+                    String.Join(", ", matches.Select(match => match.Container.FullName() + "." + match.Name)));
+            }
+            else if (matches.Length == 1)
+            {
+                return matches[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static IEdmFunctionImport FindBindableAction(this IEnumerable<IEdmFunctionImport> functions, IEdmCollectionType collectionType, string actionIdentifier)
+        {
+            if (functions == null)
+            {
+                throw Error.ArgumentNull("functions");
+            }
+            if (collectionType == null)
+            {
+                throw Error.ArgumentNull("collectionType");
+            }
+            if (actionIdentifier == null)
+            {
+                throw Error.ArgumentNull("actionIdentifier");
+            }
+
+            IEdmFunctionImport[] matches = functions.GetMatchingActions(actionIdentifier).Where(fi => fi.CanBindTo(collectionType)).ToArray();
+
+            if (matches.Length > 1)
+            {
+                IEdmEntityType elementType = collectionType.ElementType as IEdmEntityType;
+                Contract.Assert(elementType != null);
+                throw Error.InvalidOperation(
+                    SRResources.ActionResolutionFailed,
+                    actionIdentifier,
+                    String.Join(", ", matches.Select(match => match.Container.FullName() + "." + match.Name)));
+            }
+            else if (matches.Length == 1)
+            {
+                return matches[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
         {
             return GetClrType(edmTypeReference, edmModel, _defaultAssemblyResolver);

@@ -55,10 +55,10 @@ namespace System.Web.Http.OData.Builder
 
         private static Dictionary<string, EdmEntitySet> AddEntitySets(this EdmModel model, ODataModelBuilder builder, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
         {
-            IEnumerable<IEntitySetConfiguration> configurations = builder.EntitySets;
+            IEnumerable<EntitySetConfiguration> configurations = builder.EntitySets;
 
             // build the entitysets and their annotations
-            IEnumerable<Tuple<EdmEntitySet, IEntitySetConfiguration>> entitySets = AddEntitySets(configurations, container, edmTypeMap);
+            IEnumerable<Tuple<EdmEntitySet, EntitySetConfiguration>> entitySets = AddEntitySets(configurations, container, edmTypeMap);
             var entitySetAndAnnotations = entitySets.Select(e => new
             {
                 EntitySet = e.Item1,
@@ -85,10 +85,10 @@ namespace System.Web.Http.OData.Builder
             return edmEntitySetMap;
         }
 
-        private static void AddNavigationBindings(IEntitySetConfiguration configuration, EdmEntitySet entitySet, EntitySetLinkBuilderAnnotation linkBuilder, ODataModelBuilder builder,
+        private static void AddNavigationBindings(EntitySetConfiguration configuration, EdmEntitySet entitySet, EntitySetLinkBuilderAnnotation linkBuilder, ODataModelBuilder builder,
             Dictionary<string, IEdmStructuredType> edmTypeMap, Dictionary<string, EdmEntitySet> edmEntitySetMap)
         {
-            foreach (IEntityTypeConfiguration entity in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            foreach (EntityTypeConfiguration entity in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {
                 foreach (NavigationPropertyConfiguration navigation in entity.NavigationProperties)
                 {
@@ -157,9 +157,9 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private static Dictionary<string, IEdmStructuredType> AddTypes(this EdmModel model, IEnumerable<IStructuralTypeConfiguration> types)
+        private static Dictionary<string, IEdmStructuredType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types)
         {
-            IStructuralTypeConfiguration[] configTypes = types.ToArray();
+            StructuralTypeConfiguration[] configTypes = types.ToArray();
 
             // build types
             IEdmStructuredType[] edmTypes = EdmTypeBuilder.GetTypes(configTypes).ToArray();
@@ -173,7 +173,7 @@ namespace System.Web.Http.OData.Builder
             return edmTypeMap;
         }
 
-        private static Dictionary<IEdmStructuredType, Type> GenerateEdmToClrMap(IEnumerable<IStructuralTypeConfiguration> configTypes, Dictionary<string, IEdmStructuredType> edmTypeMap)
+        private static Dictionary<IEdmStructuredType, Type> GenerateEdmToClrMap(IEnumerable<StructuralTypeConfiguration> configTypes, Dictionary<string, IEdmStructuredType> edmTypeMap)
         {
             return configTypes.ToDictionary(c => edmTypeMap[c.FullName], c => c.ClrType);
         }
@@ -194,12 +194,12 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private static EdmEntitySet AddEntitySet(this EdmEntityContainer container, IEntitySetConfiguration entitySet, IDictionary<string, IEdmStructuredType> edmTypeMap)
+        private static EdmEntitySet AddEntitySet(this EdmEntityContainer container, EntitySetConfiguration entitySet, IDictionary<string, IEdmStructuredType> edmTypeMap)
         {
             return container.AddEntitySet(entitySet.Name, (IEdmEntityType)edmTypeMap[entitySet.EntityType.FullName]);
         }
 
-        private static IEnumerable<Tuple<EdmEntitySet, IEntitySetConfiguration>> AddEntitySets(IEnumerable<IEntitySetConfiguration> entitySets, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
+        private static IEnumerable<Tuple<EdmEntitySet, EntitySetConfiguration>> AddEntitySets(IEnumerable<EntitySetConfiguration> entitySets, EdmEntityContainer container, Dictionary<string, IEdmStructuredType> edmTypeMap)
         {
             return entitySets.Select(es => Tuple.Create(container.AddEntitySet(es, edmTypeMap), es));
         }
@@ -245,7 +245,7 @@ namespace System.Web.Http.OData.Builder
             EdmTypeKind kind = configuration.Kind;
             if (kind == EdmTypeKind.Collection)
             {
-                ICollectionTypeConfiguration collectionType = configuration as ICollectionTypeConfiguration;
+                CollectionTypeConfiguration collectionType = configuration as CollectionTypeConfiguration;
                 EdmCollectionType edmCollectionType = new EdmCollectionType(GetEdmTypeReference(availableTypes, collectionType.ElementType, false));
                 return new EdmCollectionTypeReference(edmCollectionType, nullable);
             }

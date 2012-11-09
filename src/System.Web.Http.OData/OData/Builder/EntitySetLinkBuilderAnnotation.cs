@@ -14,7 +14,7 @@ namespace System.Web.Http.OData.Builder
         private readonly Func<EntityInstanceContext, Uri> _editLinkBuilder;
         private readonly Func<EntityInstanceContext, Uri> _readLinkBuilder;
         private readonly IDictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilderLookup;
-        private readonly IEntitySetConfiguration _entitySet;
+        private readonly EntitySetConfiguration _entitySet;
 
         /// <summary>
         /// This constructor is used for unit testing purposes only
@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
-        public EntitySetLinkBuilderAnnotation(IEntitySetConfiguration entitySet)
+        public EntitySetLinkBuilderAnnotation(EntitySetConfiguration entitySet)
         {
             if (entitySet == null)
             {

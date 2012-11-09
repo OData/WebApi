@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void Apply_Calls_HasKey_OnEdmType(string propertyName)
         {
             // Arrange
-            Mock<IEntityTypeConfiguration> mockEntityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>();
             Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName), mockEntityType.Object);
 
             mockEntityType.Setup(e => e.Properties).Returns(new[] { property.Object });

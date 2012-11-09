@@ -7,7 +7,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// </summary>
     /// <typeparam name="TEdmTypeConfiguration">The kind of Edm type that this convention must be applied to.</typeparam>
     public abstract class AttributeEdmTypeConvention<TEdmTypeConfiguration> : AttributeConvention, IEdmTypeConvention
-        where TEdmTypeConfiguration : class, IStructuralTypeConfiguration
+        where TEdmTypeConfiguration : StructuralTypeConfiguration
     {
         protected AttributeEdmTypeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
             : base(attributeFilter, allowMultiple)

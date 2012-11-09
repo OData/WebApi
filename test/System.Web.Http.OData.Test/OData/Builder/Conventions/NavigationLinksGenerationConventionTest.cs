@@ -27,32 +27,32 @@ namespace System.Web.Http.OData.Builder.Conventions
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            IEntityTypeConfiguration vehicle = builder.AddEntity(typeof(Vehicle));
+            EntityTypeConfiguration vehicle = builder.AddEntity(typeof(Vehicle));
 
-            IEntityTypeConfiguration car = builder.AddEntity(typeof(Car)).DerivesFrom(vehicle);
+            EntityTypeConfiguration car = builder.AddEntity(typeof(Car)).DerivesFrom(vehicle);
             NavigationPropertyConfiguration carNavigationProperty = car.AddNavigationProperty(typeof(Car).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
-            IEntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
+            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
             NavigationPropertyConfiguration motorcycleNavigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
-            IEntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
-            IEntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
-            IEntityTypeConfiguration carManufacturer = builder.AddEntity(typeof(CarManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
+            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration carManufacturer = builder.AddEntity(typeof(CarManufacturer)).DerivesFrom(manufacturer);
 
-            IEntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+            EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
 
-            Mock<IEntitySetConfiguration> entitySet = new Mock<IEntitySetConfiguration>(MockBehavior.Strict);
+            Mock<EntitySetConfiguration> entitySet = new Mock<EntitySetConfiguration>(MockBehavior.Strict);
             entitySet.Setup(v => v.EntityType).Returns(vehicle);
             entitySet.Setup(v => v.GetNavigationPropertyLink(motorcycleNavigationProperty)).Returns<NavigationPropertyConfiguration>(null);
             entitySet.Setup(v => v.GetNavigationPropertyLink(carNavigationProperty)).Returns<NavigationPropertyConfiguration>(null);
 
             entitySet
                 .Setup(v => v.HasNavigationPropertyLink(motorcycleNavigationProperty, It.IsAny<Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>()))
-                .Returns<IEntitySetConfiguration>(null);
+                .Returns<EntitySetConfiguration>(null);
             entitySet
                 .Setup(v => v.HasNavigationPropertyLink(carNavigationProperty, It.IsAny<Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>()))
-                .Returns<IEntitySetConfiguration>(null);
+                .Returns<EntitySetConfiguration>(null);
 
             // Act
             _convention.Apply(entitySet.Object, builder);
@@ -93,11 +93,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void Apply_AddsLinkBuilder_ForAllNavigationProperties()
         {
             // Arrange
-            Mock<IEntityTypeConfiguration> entity = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entity = new Mock<EntityTypeConfiguration>();
             NavigationPropertyConfiguration navigationProperty = new NavigationPropertyConfiguration(new MockPropertyInfo(typeof(Motorcycle), "Motorcycle"), EdmMultiplicity.One, entity.Object);
             entity.Setup(e => e.NavigationProperties).Returns(new[] { navigationProperty });
 
-            var mockEntitySet = new Mock<IEntitySetConfiguration>();
+            var mockEntitySet = new Mock<EntitySetConfiguration>();
             mockEntitySet.Setup(e => e.EntityType).Returns(entity.Object);
             mockEntitySet
                 .Setup(e => e.HasNavigationPropertyLink(navigationProperty, It.IsAny<Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>()))

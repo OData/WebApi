@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Builder
     public class ODataModelBuilder
     {
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
-        private Dictionary<string, IEntitySetConfiguration> _entitySets = new Dictionary<string, IEntitySetConfiguration>();
+        private Dictionary<string, EntitySetConfiguration> _entitySets = new Dictionary<string, EntitySetConfiguration>();
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
         private List<ProcedureConfiguration> _procedures = new List<ProcedureConfiguration>();
 
@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// The collection of EDM entity sets in the model to be built.
         /// </summary>
-        public virtual IEnumerable<IEntitySetConfiguration> EntitySets
+        public virtual IEnumerable<EntitySetConfiguration> EntitySets
         {
             get { return _entitySets.Values; }
         }
@@ -47,7 +47,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// The collection of EDM types in the model to be built.
         /// </summary>
-        public virtual IEnumerable<IStructuralTypeConfiguration> StructuralTypes
+        public virtual IEnumerable<StructuralTypeConfiguration> StructuralTypes
         {
             get { return _structuralTypes.Values; }
         }
@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Builder
         /// <returns>The configuration object for the specified entity set.</returns>
         public EntitySetConfiguration<TEntityType> EntitySet<TEntityType>(string name) where TEntityType : class
         {
-            IEntityTypeConfiguration entity = AddEntity(typeof(TEntityType));
+            EntityTypeConfiguration entity = AddEntity(typeof(TEntityType));
             return new EntitySetConfiguration<TEntityType>(this, AddEntitySet(name, entity));
         }
 
@@ -101,7 +101,7 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="type">The type to be registered or configured.</param>
         /// <returns>The configuration object for the specified entity type.</returns>
-        public virtual IEntityTypeConfiguration AddEntity(Type type)
+        public virtual EntityTypeConfiguration AddEntity(Type type)
         {
             if (type == null)
             {
@@ -132,7 +132,7 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="type">The type to be registered or configured.</param>
         /// <returns>The configuration object for the specified complex type.</returns>
-        public virtual IComplexTypeConfiguration AddComplexType(Type type)
+        public virtual ComplexTypeConfiguration AddComplexType(Type type)
         {
             if (type == null)
             {
@@ -172,7 +172,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="name">The name of the entity set.</param>
         /// <param name="entityType">The type to be registered or configured.</param>
         /// <returns>The configuration object for the specified entity set.</returns>
-        public virtual IEntitySetConfiguration AddEntitySet(string name, IEntityTypeConfiguration entityType)
+        public virtual EntitySetConfiguration AddEntitySet(string name, EntityTypeConfiguration entityType)
         {
             if (String.IsNullOrWhiteSpace(name))
             {

@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         {
         }
 
-        public override void Apply(PropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (edmProperty == null)
             {

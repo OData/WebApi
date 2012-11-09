@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Builder
             EdmTypeKind kind = parameterType.Kind;
             if (kind == EdmTypeKind.Collection)
             {
-                kind = (parameterType as ICollectionTypeConfiguration).ElementType.Kind;
+                kind = (parameterType as CollectionTypeConfiguration).ElementType.Kind;
             }
             if (kind == EdmTypeKind.Entity)
             {

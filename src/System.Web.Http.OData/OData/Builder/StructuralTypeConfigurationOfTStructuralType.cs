@@ -10,9 +10,9 @@ namespace System.Web.Http.OData.Builder
 {
     public abstract class StructuralTypeConfiguration<TStructuralType> where TStructuralType : class
     {
-        private IStructuralTypeConfiguration _configuration;
+        private StructuralTypeConfiguration _configuration;
 
-        protected StructuralTypeConfiguration(IStructuralTypeConfiguration configuration)
+        protected StructuralTypeConfiguration(StructuralTypeConfiguration configuration)
         {
             if (configuration == null)
             {

@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The property being configured.</param>
         /// <param name="structuralTypeConfiguration">The type being configured.</param>
-        public void Apply(PropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration)
+        public void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration)
         {
             if (edmProperty == null)
             {
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// </summary>
         /// <param name="edmProperty">The property being configured.</param>
         /// <param name="structuralTypeConfiguration">The type being configured.</param>
-        public void Apply(TPropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration)
+        public void Apply(TPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration)
         {
             if (edmProperty == null)
             {
@@ -67,6 +67,6 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The property being configured.</param>
         /// <param name="structuralTypeConfiguration">The type being configured.</param>
         /// <param name="attribute">The attribute to be used during configuration.</param>
-        public abstract void Apply(TPropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute);
+        public abstract void Apply(TPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute);
     }
 }

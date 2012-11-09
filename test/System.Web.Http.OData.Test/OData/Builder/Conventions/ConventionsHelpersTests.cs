@@ -65,7 +65,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void GetProperties_ReturnsProperties_FromBaseAndDerived()
         {
-            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
 
             var properties = ConventionsHelpers.GetAllProperties(edmType.Object);
@@ -77,7 +77,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void GetProperties_Ignores_IgnoredProperties()
         {
-            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
             edmType.Setup(t => t.IgnoredProperties).Returns(typeof(GetProperties_Derived).GetProperties().Where(p => new string[] { "Base_I", "Derived_I" }.Contains(p.Name)));
 
@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void GetAllProperties_Ignores_IndexerProperties()
         {
-            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
 
             var properties = ConventionsHelpers.GetAllProperties(edmType.Object).Select(p => p.Name);
@@ -100,7 +100,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void GetAllProperties_Returns_PropertiesOfNestedTypes()
         {
-            Mock<IStructuralTypeConfiguration> edmType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_NestParent.Nest));
 
             var properties = ConventionsHelpers.GetAllProperties(edmType.Object).Select(p => p.Name);
@@ -113,11 +113,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_SingleKey()
         {
             // Arrange
-            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key = "key" };
             PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
 
-            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
             entityType
                 .Setup(e => e.Keys)
                 .Returns(keys);
@@ -134,11 +134,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_SingleKey_DifferentDataTypes(object value, object expectedValue)
         {
             // Arrange
-            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key = value };
             PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
 
-            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
             entityType
                 .Setup(e => e.Keys)
                 .Returns(keys);
@@ -154,7 +154,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_MultipleKeys()
         {
             // Arrange
-            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key1 = "key1", Key2 = 2, Key3 = true };
             PrimitivePropertyConfiguration[] keys = 
             {
@@ -163,7 +163,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), structuralType),
             };
 
-            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
             entityType
                 .Setup(e => e.Keys)
                 .Returns(keys);
@@ -179,11 +179,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_ThrowsForNullKeys()
         {
             // Arrange
-            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key = (string)null };
             PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), structuralType) };
 
-            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
             entityType.Setup(e => e.Keys).Returns(keys);
             entityType.Setup(e => e.FullName).Returns("FullName");
 
@@ -197,7 +197,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_ThrowsForNullKeys_WithMultipleKeys()
         {
             // Arrange
-            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             var entityInstance = new { Key1 = "abc", Key2 = "def", Key3 = (string)null };
             PrimitivePropertyConfiguration[] keys = 
             {
@@ -206,7 +206,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key3"), structuralType),
             };
 
-            Mock<IEntityTypeConfiguration> entityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>();
             entityType.Setup(e => e.Keys).Returns(keys);
             entityType.Setup(e => e.FullName).Returns("EntityType");
 
@@ -222,11 +222,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             // Arrange
             var entityInstance = new { Key = "key" };
 
-            Mock<IEntityTypeConfiguration> baseEntityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> baseEntityType = new Mock<EntityTypeConfiguration>();
             PrimitivePropertyConfiguration[] keys = { new PrimitivePropertyConfiguration(entityInstance.GetType().GetProperty("Key"), baseEntityType.Object) };
             baseEntityType.Setup(e => e.Keys).Returns(keys);
 
-            Mock<IEntityTypeConfiguration> derivedEntityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> derivedEntityType = new Mock<EntityTypeConfiguration>();
             derivedEntityType.Setup(e => e.BaseType).Returns(baseEntityType.Object);
 
             // Act
@@ -240,7 +240,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void GetEntityKeyValue_MultipleKeys_DerivedType()
         {
             // Arrange
-            Mock<IEntityTypeConfiguration> baseEntityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> baseEntityType = new Mock<EntityTypeConfiguration>();
 
             var entityInstance = new { Key1 = "key1", Key2 = 2, Key3 = true };
             PrimitivePropertyConfiguration[] keys = 
@@ -252,7 +252,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             baseEntityType.Setup(e => e.Keys).Returns(keys);
 
-            Mock<IEntityTypeConfiguration> derivedEntityType = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> derivedEntityType = new Mock<EntityTypeConfiguration>();
             derivedEntityType.Setup(e => e.BaseType).Returns(baseEntityType.Object);
 
             // Act

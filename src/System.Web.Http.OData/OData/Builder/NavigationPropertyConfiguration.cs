@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
-using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
@@ -11,7 +10,7 @@ namespace System.Web.Http.OData.Builder
     {
         private readonly Type _relatedType = null;
 
-        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, IEntityTypeConfiguration declaringType)
+        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, EntityTypeConfiguration declaringType)
             : base(property, declaringType)
         {
             if (property == null)
@@ -34,11 +33,11 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        public IEntityTypeConfiguration DeclaringEntityType
+        public EntityTypeConfiguration DeclaringEntityType
         {
             get
             {
-                return DeclaringType as IEntityTypeConfiguration;
+                return DeclaringType as EntityTypeConfiguration;
             }
         }
 

@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Builder
     /// <typeparam name="TEntityType">The backing CLR type for this <see cref="IEdmEntityType"/>.</typeparam>
     public class EntityTypeConfiguration<TEntityType> : StructuralTypeConfiguration<TEntityType> where TEntityType : class
     {
-        private IEntityTypeConfiguration _configuration;
+        private EntityTypeConfiguration _configuration;
         private EntityCollectionConfiguration<TEntityType> _collection;
         private ODataModelBuilder _modelBuilder;
 
@@ -28,7 +28,7 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
-        internal EntityTypeConfiguration(ODataModelBuilder modelBuilder, IEntityTypeConfiguration configuration)
+        internal EntityTypeConfiguration(ODataModelBuilder modelBuilder, EntityTypeConfiguration configuration)
             : base(configuration)
         {
             Contract.Assert(modelBuilder != null);
@@ -42,7 +42,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets the base type of this entity type.
         /// </summary>
-        public IEntityTypeConfiguration BaseType
+        public EntityTypeConfiguration BaseType
         {
             get
             {

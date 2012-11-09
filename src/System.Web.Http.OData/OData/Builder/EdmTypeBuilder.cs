@@ -11,14 +11,14 @@ using Microsoft.Data.Edm.Library;
 namespace System.Web.Http.OData.Builder
 {
     /// <summary>
-    /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref=" IStructuralTypeConfiguration"/>'s.
+    /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref=" StructuralTypeConfiguration"/>'s.
     /// </summary>
     public class EdmTypeBuilder
     {
-        private readonly List<IStructuralTypeConfiguration> _configurations;
+        private readonly List<StructuralTypeConfiguration> _configurations;
         private readonly Dictionary<Type, IEdmStructuredType> _types = new Dictionary<Type, IEdmStructuredType>();
 
-        internal EdmTypeBuilder(IEnumerable<IStructuralTypeConfiguration> configurations)
+        internal EdmTypeBuilder(IEnumerable<StructuralTypeConfiguration> configurations)
         {
             _configurations = configurations.ToList();
         }
@@ -29,23 +29,23 @@ namespace System.Web.Http.OData.Builder
             _types.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
-            foreach (IStructuralTypeConfiguration config in _configurations)
+            foreach (StructuralTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeHeader(config);
             }
 
-            foreach (IStructuralTypeConfiguration config in _configurations)
+            foreach (StructuralTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeBody(config);
             }
 
-            foreach (IStructuralTypeConfiguration config in _configurations)
+            foreach (StructuralTypeConfiguration config in _configurations)
             {
                 yield return _types[config.ClrType];
             }
         }
 
-        private void CreateEdmTypeHeader(IStructuralTypeConfiguration config)
+        private void CreateEdmTypeHeader(StructuralTypeConfiguration config)
         {
             if (!_types.ContainsKey(config.ClrType))
             {
@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Builder
                 }
                 else
                 {
-                    IEntityTypeConfiguration entity = config as IEntityTypeConfiguration;
+                    EntityTypeConfiguration entity = config as EntityTypeConfiguration;
                     Contract.Assert(entity != null);
 
                     IEdmEntityType baseType = null;
@@ -73,24 +73,24 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private void CreateEdmTypeBody(IStructuralTypeConfiguration config)
+        private void CreateEdmTypeBody(StructuralTypeConfiguration config)
         {
             IEdmType edmType = _types[config.ClrType];
 
             if (edmType.TypeKind == EdmTypeKind.Complex)
             {
-                CreateComplexTypeBody(edmType as EdmComplexType, config as IComplexTypeConfiguration);
+                CreateComplexTypeBody(edmType as EdmComplexType, config as ComplexTypeConfiguration);
             }
             else
             {
                 if (edmType.TypeKind == EdmTypeKind.Entity)
                 {
-                    CreateEntityTypeBody(edmType as EdmEntityType, config as IEntityTypeConfiguration);
+                    CreateEntityTypeBody(edmType as EdmEntityType, config as EntityTypeConfiguration);
                 }
             }
         }
 
-        private void CreateStructuralTypeBody(EdmStructuredType type, IStructuralTypeConfiguration config)
+        private void CreateStructuralTypeBody(EdmStructuredType type, StructuralTypeConfiguration config)
         {
             foreach (PropertyConfiguration property in config.Properties)
             {
@@ -138,12 +138,12 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private void CreateComplexTypeBody(EdmComplexType type, IComplexTypeConfiguration config)
+        private void CreateComplexTypeBody(EdmComplexType type, ComplexTypeConfiguration config)
         {
             CreateStructuralTypeBody(type, config);
         }
 
-        private void CreateEntityTypeBody(EdmEntityType type, IEntityTypeConfiguration config)
+        private void CreateEntityTypeBody(EdmEntityType type, EntityTypeConfiguration config)
         {
             CreateStructuralTypeBody(type, config);
             IEdmStructuralProperty[] keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.PropertyInfo.Name)).ToArray();
@@ -164,9 +164,9 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Builds <see cref="IEdmType"/>'s from <paramref name="configurations"/>
         /// </summary>
-        /// <param name="configurations">A collection of <see cref="IStructuralTypeConfiguration"/>'s</param>
+        /// <param name="configurations">A collection of <see cref="StructuralTypeConfiguration"/>'s</param>
         /// <returns>The built collection of <see cref="IEdmType"/></returns>
-        public static IEnumerable<IEdmStructuredType> GetTypes(IEnumerable<IStructuralTypeConfiguration> configurations)
+        public static IEnumerable<IEdmStructuredType> GetTypes(IEnumerable<StructuralTypeConfiguration> configurations)
         {
             if (configurations == null)
             {

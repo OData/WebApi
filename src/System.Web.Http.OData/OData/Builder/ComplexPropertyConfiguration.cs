@@ -6,7 +6,7 @@ namespace System.Web.Http.OData.Builder
 {
     public class ComplexPropertyConfiguration : StructuralPropertyConfiguration
     {
-        public ComplexPropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
+        public ComplexPropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
         }

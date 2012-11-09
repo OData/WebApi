@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Builder
     /// <typeparam name="TEntityType">The EntityType that is the ElementType of the EntityCollection</typeparam>
     public class EntityCollectionConfiguration<TEntityType> : CollectionTypeConfiguration
     {
-        internal EntityCollectionConfiguration(IEntityTypeConfiguration elementType)
+        internal EntityCollectionConfiguration(EntityTypeConfiguration elementType)
             : base(elementType, typeof(IEnumerable<TEntityType>))
         {
         }

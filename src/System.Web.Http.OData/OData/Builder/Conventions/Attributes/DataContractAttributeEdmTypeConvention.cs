@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures classes that have the <see cref="DataContractAttribute"/> to follow DataContract serialization/deserialization rules.
     /// </summary>
-    public class DataContractAttributeEdmTypeConvention : AttributeEdmTypeConvention<IStructuralTypeConfiguration>
+    public class DataContractAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
     {
         public DataContractAttributeEdmTypeConvention()
             : base(attribute => attribute.GetType() == typeof(DataContractAttribute), allowMultiple: false)
@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// <param name="edmTypeConfiguration">The edm type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(IStructuralTypeConfiguration edmTypeConfiguration, ODataModelBuilder model, Attribute attribute)
+        public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataModelBuilder model, Attribute attribute)
         {
             if (edmTypeConfiguration == null)
             {

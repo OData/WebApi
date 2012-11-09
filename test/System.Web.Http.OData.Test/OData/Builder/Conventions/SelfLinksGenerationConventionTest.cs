@@ -17,8 +17,8 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void Apply_AddsFeedSelfLink()
         {
             // Arrange
-            var mockEntityType = new Mock<IEntityTypeConfiguration>();
-            var mockEntitySet = new Mock<IEntitySetConfiguration>();
+            var mockEntityType = new Mock<EntityTypeConfiguration>();
+            var mockEntitySet = new Mock<EntitySetConfiguration>();
             mockEntitySet.Setup(entitySet => entitySet.GetFeedSelfLink()).Returns((Func<FeedContext, Uri>)null).Verifiable();
             mockEntitySet.Setup(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<FeedContext, Uri>>())).Returns(mockEntitySet.Object).Verifiable();
             mockEntitySet.Setup(entitySet => entitySet.EntityType).Returns(mockEntityType.Object);
@@ -37,8 +37,8 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             Func<FeedContext, Uri> feedSelfLink = null;
-            var mockEntityType = new Mock<IEntityTypeConfiguration>();
-            var mockEntitySet = new Mock<IEntitySetConfiguration>();
+            var mockEntityType = new Mock<EntityTypeConfiguration>();
+            var mockEntitySet = new Mock<EntitySetConfiguration>();
             mockEntitySet.Setup(entitySet => entitySet.EntityType).Returns(mockEntityType.Object);
             mockEntitySet.Setup(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<FeedContext, Uri>>()))
                 .Returns(mockEntitySet.Object)
@@ -64,8 +64,8 @@ namespace System.Web.Http.OData.Builder.Conventions
         public void Apply_DoesNotAddFeedSelfLink_IfOneIsPresent()
         {
             // Arrange
-            var mockEntitySet = new Mock<IEntitySetConfiguration>();
-            var mockEntityType = new Mock<IEntityTypeConfiguration>();
+            var mockEntitySet = new Mock<EntitySetConfiguration>();
+            var mockEntityType = new Mock<EntityTypeConfiguration>();
             mockEntitySet.Setup(entitySet => entitySet.GetFeedSelfLink()).Returns(feedContext => new Uri("http://www.cool.com")).Verifiable();
             mockEntitySet.Setup(entitySet => entitySet.EntityType).Returns(mockEntityType.Object);
 

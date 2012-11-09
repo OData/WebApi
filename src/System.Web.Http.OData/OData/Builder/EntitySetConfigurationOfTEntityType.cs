@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Builder
 {
     public class EntitySetConfiguration<TEntityType> where TEntityType : class
     {
-        private IEntitySetConfiguration _configuration;
+        private EntitySetConfiguration _configuration;
         private EntityTypeConfiguration<TEntityType> _entityType;
         private ODataModelBuilder _modelBuilder;
 
@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
-        public EntitySetConfiguration(ODataModelBuilder modelBuilder, IEntitySetConfiguration configuration)
+        public EntitySetConfiguration(ODataModelBuilder modelBuilder, EntitySetConfiguration configuration)
         {
             if (modelBuilder == null)
             {

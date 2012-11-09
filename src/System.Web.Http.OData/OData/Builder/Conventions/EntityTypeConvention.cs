@@ -3,7 +3,7 @@
 namespace System.Web.Http.OData.Builder.Conventions
 {
     /// <summary>
-    /// An <see cref="EntityTypeConvention"/> is used to configure an <see cref="IEntityTypeConfiguration"/> in the 
+    /// An <see cref="EntityTypeConvention"/> is used to configure an <see cref="EntityTypeConfiguration"/> in the 
     /// <see cref="ODataConventionModelBuilder"/>.
     /// </summary>
     public abstract class EntityTypeConvention : IEdmTypeConvention
@@ -14,7 +14,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         public void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model)
         {
-            IEntityTypeConfiguration entity = edmTypeConfiguration as IEntityTypeConfiguration;
+            EntityTypeConfiguration entity = edmTypeConfiguration as EntityTypeConfiguration;
             if (entity != null)
             {
                 Apply(entity, model);
@@ -24,8 +24,8 @@ namespace System.Web.Http.OData.Builder.Conventions
         /// <summary>
         /// Applies the convention.
         /// </summary>
-        /// <param name="entity">The <see cref="IEntityTypeConfiguration"/> to apply the convention on.</param>
+        /// <param name="entity">The <see cref="EntityTypeConfiguration"/> to apply the convention on.</param>
         /// <param name="model">The <see cref="ODataModelBuilder"/> instance.</param>
-        public abstract void Apply(IEntityTypeConfiguration entity, ODataModelBuilder model);
+        public abstract void Apply(EntityTypeConfiguration entity, ODataModelBuilder model);
     }
 }

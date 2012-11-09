@@ -4,7 +4,7 @@ namespace System.Web.Http.OData.Builder
 {
     public class ComplexTypeConfiguration<TComplexType> : StructuralTypeConfiguration<TComplexType> where TComplexType : class
     {
-        internal ComplexTypeConfiguration(IComplexTypeConfiguration configuration)
+        internal ComplexTypeConfiguration(ComplexTypeConfiguration configuration)
             : base(configuration)
         {
         }

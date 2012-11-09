@@ -14,7 +14,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
-        public static string GetEntityKeyValue(EntityInstanceContext entityContext, IEntityTypeConfiguration entityTypeConfiguration)
+        public static string GetEntityKeyValue(EntityInstanceContext entityContext, EntityTypeConfiguration entityTypeConfiguration)
         {
             // TODO: BUG 453795: reflection cleanup
             if (entityTypeConfiguration.Keys().Count() == 1)
@@ -33,12 +33,12 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         // Get properties of this entity type that are not already declared in the base entity type and are not already ignored.
-        public static IEnumerable<PropertyInfo> GetProperties(IEntityTypeConfiguration entity)
+        public static IEnumerable<PropertyInfo> GetProperties(EntityTypeConfiguration entity)
         {
-            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as IStructuralTypeConfiguration);
+            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as StructuralTypeConfiguration);
             if (entity.BaseType != null)
             {
-                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as IStructuralTypeConfiguration);
+                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as StructuralTypeConfiguration);
                 return allProperties.Except(baseTypeProperties, PropertyEqualityComparer.Instance);
             }
             else
@@ -48,7 +48,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         // Get all properties of this type (that are not already ignored).
-        public static IEnumerable<PropertyInfo> GetAllProperties(IStructuralTypeConfiguration type)
+        public static IEnumerable<PropertyInfo> GetAllProperties(StructuralTypeConfiguration type)
         {
             if (type == null)
             {
@@ -112,7 +112,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             return ODataUriBuilder.GetUriRepresentation(value);
         }
 
-        private static string GetUriRepresentationForKeyValue(PropertyInfo key, object entityInstance, IEntityTypeConfiguration entityType)
+        private static string GetUriRepresentationForKeyValue(PropertyInfo key, object entityInstance, EntityTypeConfiguration entityType)
         {
             Contract.Assert(key != null);
             Contract.Assert(entityInstance != null);

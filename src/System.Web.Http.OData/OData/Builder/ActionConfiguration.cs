@@ -208,7 +208,7 @@ namespace System.Web.Http.OData.Builder
                 ModelBuilder.AddComplexType(elementType);
                 elementTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(elementType);
             }
-            ICollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
+            CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
             return AddParameter(name, parameterType);
         }
 

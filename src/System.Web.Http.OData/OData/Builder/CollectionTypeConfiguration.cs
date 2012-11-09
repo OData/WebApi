@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Builder
     /// Collection(Namespace.Customer) or Collection(Namespace.Address)
     /// </example>
     /// </summary>
-    public class CollectionTypeConfiguration : ICollectionTypeConfiguration
+    public class CollectionTypeConfiguration : IEdmTypeConfiguration
     {
         private IEdmTypeConfiguration _elementType;
         private Type _clrType;

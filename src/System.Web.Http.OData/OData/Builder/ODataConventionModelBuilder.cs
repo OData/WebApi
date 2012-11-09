@@ -44,11 +44,11 @@ namespace System.Web.Http.OData.Builder
         // These hashset's keep track of edmtypes/entitysets for which conventions
         // have been applied or being applied so that we don't run a convention twice on the
         // same type/set.
-        private HashSet<IStructuralTypeConfiguration> _mappedTypes;
-        private HashSet<IEntitySetConfiguration> _configuredEntitySets;
+        private HashSet<StructuralTypeConfiguration> _mappedTypes;
+        private HashSet<EntitySetConfiguration> _configuredEntitySets;
         private HashSet<Type> _ignoredTypes;
 
-        private IEnumerable<IStructuralTypeConfiguration> _explicitlyAddedTypes;
+        private IEnumerable<StructuralTypeConfiguration> _explicitlyAddedTypes;
 
         private bool _isModelBeingBuilt;
         private bool _isQueryCompositionMode;
@@ -86,8 +86,8 @@ namespace System.Web.Http.OData.Builder
         internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
-            _configuredEntitySets = new HashSet<IEntitySetConfiguration>();
-            _mappedTypes = new HashSet<IStructuralTypeConfiguration>();
+            _configuredEntitySets = new HashSet<EntitySetConfiguration>();
+            _mappedTypes = new HashSet<StructuralTypeConfiguration>();
             _ignoredTypes = new HashSet<Type>();
             _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
                 () => BuildDerivedTypesMapping(assembliesResolver),
@@ -121,9 +121,9 @@ namespace System.Web.Http.OData.Builder
             return this;
         }
 
-        public override IEntityTypeConfiguration AddEntity(Type type)
+        public override EntityTypeConfiguration AddEntity(Type type)
         {
-            IEntityTypeConfiguration entityTypeConfiguration = base.AddEntity(type);
+            EntityTypeConfiguration entityTypeConfiguration = base.AddEntity(type);
             if (_isModelBeingBuilt)
             {
                 MapType(entityTypeConfiguration);
@@ -132,9 +132,9 @@ namespace System.Web.Http.OData.Builder
             return entityTypeConfiguration;
         }
 
-        public override IComplexTypeConfiguration AddComplexType(Type type)
+        public override ComplexTypeConfiguration AddComplexType(Type type)
         {
-            IComplexTypeConfiguration complexTypeConfiguration = base.AddComplexType(type);
+            ComplexTypeConfiguration complexTypeConfiguration = base.AddComplexType(type);
             if (_isModelBeingBuilt)
             {
                 MapType(complexTypeConfiguration);
@@ -143,9 +143,9 @@ namespace System.Web.Http.OData.Builder
             return complexTypeConfiguration;
         }
 
-        public override IEntitySetConfiguration AddEntitySet(string name, IEntityTypeConfiguration entityType)
+        public override EntitySetConfiguration AddEntitySet(string name, EntityTypeConfiguration entityType)
         {
-            IEntitySetConfiguration entitySetConfiguration = base.AddEntitySet(name, entityType);
+            EntitySetConfiguration entitySetConfiguration = base.AddEntitySet(name, entityType);
             if (_isModelBeingBuilt)
             {
                 ApplyEntitySetConventions(entitySetConfiguration);
@@ -162,7 +162,7 @@ namespace System.Web.Http.OData.Builder
             }
 
             // before we begin, get the set of types the user had added explicitly.
-            _explicitlyAddedTypes = new List<IStructuralTypeConfiguration>(StructuralTypes);
+            _explicitlyAddedTypes = new List<StructuralTypeConfiguration>(StructuralTypes);
 
             _isModelBeingBuilt = true;
 
@@ -180,8 +180,8 @@ namespace System.Web.Http.OData.Builder
             PruneUnreachableTypes();
 
             // Apply entity set conventions.
-            IEnumerable<IEntitySetConfiguration> explictlyConfiguredEntitySets = new List<IEntitySetConfiguration>(EntitySets);
-            foreach (IEntitySetConfiguration entitySet in explictlyConfiguredEntitySets)
+            IEnumerable<EntitySetConfiguration> explictlyConfiguredEntitySets = new List<EntitySetConfiguration>(EntitySets);
+            foreach (EntitySetConfiguration entitySet in explictlyConfiguredEntitySets)
             {
                 ApplyEntitySetConventions(entitySet);
             }
@@ -204,15 +204,15 @@ namespace System.Web.Http.OData.Builder
         // patch up the base type for all entities that don't have any yet.
         internal void DiscoverInheritanceRelationships()
         {
-            Dictionary<Type, IEntityTypeConfiguration> entityMap = StructuralTypes.OfType<IEntityTypeConfiguration>().ToDictionary(e => e.ClrType);
+            Dictionary<Type, EntityTypeConfiguration> entityMap = StructuralTypes.OfType<EntityTypeConfiguration>().ToDictionary(e => e.ClrType);
 
-            foreach (IEntityTypeConfiguration entity in StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured).ToArray())
+            foreach (EntityTypeConfiguration entity in StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured).ToArray())
             {
                 Type baseClrType = entity.ClrType.BaseType;
                 while (baseClrType != null)
                 {
                     // see if we there is an entity that we know mapping to this clr types base type.
-                    IEntityTypeConfiguration baseEntityType;
+                    EntityTypeConfiguration baseEntityType;
                     if (entityMap.TryGetValue(baseClrType, out baseEntityType))
                     {
                         RemoveBaseTypeProperties(entity, baseEntityType);
@@ -225,17 +225,17 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        internal void MapDerivedTypes(IEntityTypeConfiguration entity)
+        internal void MapDerivedTypes(EntityTypeConfiguration entity)
         {
             HashSet<Type> visitedEntities = new HashSet<Type>();
 
-            Queue<IEntityTypeConfiguration> entitiesToBeVisited = new Queue<IEntityTypeConfiguration>();
+            Queue<EntityTypeConfiguration> entitiesToBeVisited = new Queue<EntityTypeConfiguration>();
             entitiesToBeVisited.Enqueue(entity);
 
             // populate all the derived types
             while (entitiesToBeVisited.Count != 0)
             {
-                IEntityTypeConfiguration baseEntity = entitiesToBeVisited.Dequeue();
+                EntityTypeConfiguration baseEntity = entitiesToBeVisited.Dequeue();
                 visitedEntities.Add(baseEntity.ClrType);
 
                 List<Type> derivedTypes;
@@ -245,7 +245,7 @@ namespace System.Web.Http.OData.Builder
                     {
                         if (!visitedEntities.Contains(derivedType) && !IsIgnoredType(derivedType))
                         {
-                            IEntityTypeConfiguration derivedEntity = AddEntity(derivedType);
+                            EntityTypeConfiguration derivedEntity = AddEntity(derivedType);
                             entitiesToBeVisited.Enqueue(derivedEntity);
                         }
                     }
@@ -254,13 +254,13 @@ namespace System.Web.Http.OData.Builder
         }
 
         // remove base type properties from the derived types.
-        internal void RemoveBaseTypeProperties(IEntityTypeConfiguration derivedEntity, IEntityTypeConfiguration baseEntity)
+        internal void RemoveBaseTypeProperties(EntityTypeConfiguration derivedEntity, EntityTypeConfiguration baseEntity)
         {
-            IEnumerable<IEntityTypeConfiguration> typesToLift = new[] { derivedEntity }.Concat(this.DerivedTypes(derivedEntity));
+            IEnumerable<EntityTypeConfiguration> typesToLift = new[] { derivedEntity }.Concat(this.DerivedTypes(derivedEntity));
 
             foreach (PropertyConfiguration property in baseEntity.Properties.Concat(baseEntity.DerivedProperties()))
             {
-                foreach (IEntityTypeConfiguration entity in typesToLift)
+                foreach (EntityTypeConfiguration entity in typesToLift)
                 {
                     PropertyConfiguration derivedPropertyToRemove = entity.Properties.Where(p => p.Name == property.Name).SingleOrDefault();
                     if (derivedPropertyToRemove != null)
@@ -275,33 +275,33 @@ namespace System.Web.Http.OData.Builder
         {
             Contract.Assert(_explicitlyAddedTypes != null);
 
-            IEnumerable<IEntityTypeConfiguration> misconfiguredEntityTypes = StructuralTypes
+            IEnumerable<EntityTypeConfiguration> misconfiguredEntityTypes = StructuralTypes
                                                                             .Except(_explicitlyAddedTypes)
-                                                                            .OfType<IEntityTypeConfiguration>()
+                                                                            .OfType<EntityTypeConfiguration>()
                                                                             .Where(entity => !entity.Keys().Any())
                                                                             .ToArray();
 
             ReconfigureEntityTypesAsComplexType(misconfiguredEntityTypes);
         }
 
-        private void ReconfigureEntityTypesAsComplexType(IEnumerable<IEntityTypeConfiguration> misconfiguredEntityTypes)
+        private void ReconfigureEntityTypesAsComplexType(IEnumerable<EntityTypeConfiguration> misconfiguredEntityTypes)
         {
-            IEnumerable<IEntityTypeConfiguration> actualEntityTypes = StructuralTypes
+            IEnumerable<EntityTypeConfiguration> actualEntityTypes = StructuralTypes
                                                                             .Except(misconfiguredEntityTypes)
-                                                                            .OfType<IEntityTypeConfiguration>()
+                                                                            .OfType<EntityTypeConfiguration>()
                                                                             .ToArray();
 
-            foreach (IEntityTypeConfiguration misconfiguredEntityType in misconfiguredEntityTypes)
+            foreach (EntityTypeConfiguration misconfiguredEntityType in misconfiguredEntityTypes)
             {
                 RemoveStructuralType(misconfiguredEntityType.ClrType);
 
-                IComplexTypeConfiguration newComplexType = AddComplexType(misconfiguredEntityType.ClrType);
+                ComplexTypeConfiguration newComplexType = AddComplexType(misconfiguredEntityType.ClrType);
                 foreach (PropertyInfo ignoredProperty in misconfiguredEntityType.IgnoredProperties)
                 {
                     newComplexType.RemoveProperty(ignoredProperty);
                 }
 
-                foreach (IEntityTypeConfiguration entityToBePatched in actualEntityTypes)
+                foreach (EntityTypeConfiguration entityToBePatched in actualEntityTypes)
                 {
                     NavigationPropertyConfiguration[] propertiesToBeRemoved = entityToBePatched
                                                                             .NavigationProperties
@@ -326,38 +326,38 @@ namespace System.Web.Http.OData.Builder
 
         private void MapTypes()
         {
-            foreach (IStructuralTypeConfiguration edmType in _explicitlyAddedTypes)
+            foreach (StructuralTypeConfiguration edmType in _explicitlyAddedTypes)
             {
                 MapType(edmType);
             }
         }
 
-        private void MapType(IStructuralTypeConfiguration edmType)
+        private void MapType(StructuralTypeConfiguration edmType)
         {
             if (!_mappedTypes.Contains(edmType))
             {
                 _mappedTypes.Add(edmType);
-                IEntityTypeConfiguration entity = edmType as IEntityTypeConfiguration;
+                EntityTypeConfiguration entity = edmType as EntityTypeConfiguration;
                 if (entity != null)
                 {
                     MapEntityType(entity);
                 }
                 else
                 {
-                    MapComplexType(edmType as IComplexTypeConfiguration);
+                    MapComplexType(edmType as ComplexTypeConfiguration);
                 }
 
                 ApplyTypeAndPropertyConventions(edmType);
             }
         }
 
-        private void MapEntityType(IEntityTypeConfiguration entity)
+        private void MapEntityType(EntityTypeConfiguration entity)
         {
             IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetProperties(entity);
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
-                IStructuralTypeConfiguration mappedType;
+                StructuralTypeConfiguration mappedType;
 
                 PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
 
@@ -385,13 +385,13 @@ namespace System.Web.Http.OData.Builder
             MapDerivedTypes(entity);
         }
 
-        private void MapComplexType(IComplexTypeConfiguration complexType)
+        private void MapComplexType(ComplexTypeConfiguration complexType)
         {
             IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetAllProperties(complexType);
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
-                IStructuralTypeConfiguration mappedType;
+                StructuralTypeConfiguration mappedType;
 
                 PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
 
@@ -416,10 +416,10 @@ namespace System.Web.Http.OData.Builder
                     else
                     {
                         // we tried to be over-smart earlier and made the bad choice. so patch up now.
-                        IEntityTypeConfiguration mappedTypeAsEntity = mappedType as IEntityTypeConfiguration;
+                        EntityTypeConfiguration mappedTypeAsEntity = mappedType as EntityTypeConfiguration;
                         Contract.Assert(mappedTypeAsEntity != null);
 
-                        ReconfigureEntityTypesAsComplexType(new IEntityTypeConfiguration[] { mappedTypeAsEntity });
+                        ReconfigureEntityTypesAsComplexType(new EntityTypeConfiguration[] { mappedTypeAsEntity });
 
                         MapStructuralProperty(complexType, property, PropertyKind.Complex, isCollection);
                     }
@@ -427,7 +427,7 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private void MapStructuralProperty(IStructuralTypeConfiguration type, PropertyInfo property, PropertyKind propertyKind, bool isCollection)
+        private void MapStructuralProperty(StructuralTypeConfiguration type, PropertyInfo property, PropertyKind propertyKind, bool isCollection)
         {
             Contract.Assert(type != null);
             Contract.Assert(property != null);
@@ -457,7 +457,7 @@ namespace System.Web.Http.OData.Builder
 
         // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type
         // earlier or the user told us about it.
-        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IStructuralTypeConfiguration mappedType)
+        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out StructuralTypeConfiguration mappedType)
         {
             Contract.Assert(property != null);
 
@@ -474,7 +474,7 @@ namespace System.Web.Http.OData.Builder
                 {
                     isCollection = false;
 
-                    if (mappedType is IComplexTypeConfiguration)
+                    if (mappedType is ComplexTypeConfiguration)
                     {
                         return PropertyKind.Complex;
                     }
@@ -498,7 +498,7 @@ namespace System.Web.Http.OData.Builder
                         else
                         {
                             mappedType = GetStructuralTypeOrNull(elementType);
-                            if (mappedType != null && mappedType is IComplexTypeConfiguration)
+                            if (mappedType != null && mappedType is ComplexTypeConfiguration)
                             {
                                 return PropertyKind.Complex;
                             }
@@ -528,12 +528,12 @@ namespace System.Web.Http.OData.Builder
             Contract.Assert(_explicitlyAddedTypes != null);
 
             // Do a BFS starting with the types the user has explicitly added to find out the unreachable nodes.
-            Queue<IStructuralTypeConfiguration> reachableTypes = new Queue<IStructuralTypeConfiguration>(_explicitlyAddedTypes);
-            HashSet<IStructuralTypeConfiguration> visitedTypes = new HashSet<IStructuralTypeConfiguration>();
+            Queue<StructuralTypeConfiguration> reachableTypes = new Queue<StructuralTypeConfiguration>(_explicitlyAddedTypes);
+            HashSet<StructuralTypeConfiguration> visitedTypes = new HashSet<StructuralTypeConfiguration>();
 
             while (reachableTypes.Count != 0)
             {
-                IStructuralTypeConfiguration currentType = reachableTypes.Dequeue();
+                StructuralTypeConfiguration currentType = reachableTypes.Dequeue();
 
                 // go visit other end of each of this node's edges.
                 foreach (PropertyConfiguration property in currentType.Properties.Where(property => property.Kind != PropertyKind.Primitive))
@@ -548,7 +548,7 @@ namespace System.Web.Http.OData.Builder
                         }
                     }
 
-                    IStructuralTypeConfiguration propertyType = GetStructuralTypeOrNull(property.RelatedClrType);
+                    StructuralTypeConfiguration propertyType = GetStructuralTypeOrNull(property.RelatedClrType);
                     Contract.Assert(propertyType != null, "we should already have seen this type");
 
                     if (!visitedTypes.Contains(propertyType))
@@ -558,7 +558,7 @@ namespace System.Web.Http.OData.Builder
                 }
 
                 // all derived types and the base type are also reachable
-                IEntityTypeConfiguration currentEntityType = currentType as IEntityTypeConfiguration;
+                EntityTypeConfiguration currentEntityType = currentType as EntityTypeConfiguration;
                 if (currentEntityType != null)
                 {
                     if (currentEntityType.BaseType != null && !visitedTypes.Contains(currentEntityType.BaseType))
@@ -566,7 +566,7 @@ namespace System.Web.Http.OData.Builder
                         reachableTypes.Enqueue(currentEntityType.BaseType);
                     }
 
-                    foreach (IEntityTypeConfiguration derivedType in this.DerivedTypes(currentEntityType))
+                    foreach (EntityTypeConfiguration derivedType in this.DerivedTypes(currentEntityType))
                     {
                         if (!visitedTypes.Contains(derivedType))
                         {
@@ -578,8 +578,8 @@ namespace System.Web.Http.OData.Builder
                 visitedTypes.Add(currentType);
             }
 
-            IStructuralTypeConfiguration[] allConfiguredTypes = StructuralTypes.ToArray();
-            foreach (IStructuralTypeConfiguration type in allConfiguredTypes)
+            StructuralTypeConfiguration[] allConfiguredTypes = StructuralTypes.ToArray();
+            foreach (StructuralTypeConfiguration type in allConfiguredTypes)
             {
                 if (!visitedTypes.Contains(type))
                 {
@@ -589,7 +589,7 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private void ApplyTypeAndPropertyConventions(IStructuralTypeConfiguration edmTypeConfiguration)
+        private void ApplyTypeAndPropertyConventions(StructuralTypeConfiguration edmTypeConfiguration)
         {
             foreach (IConvention convention in _conventions)
             {
@@ -607,7 +607,7 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private void ApplyEntitySetConventions(IEntitySetConfiguration entitySetConfiguration)
+        private void ApplyEntitySetConventions(EntitySetConfiguration entitySetConfiguration)
         {
             if (!_configuredEntitySets.Contains(entitySetConfiguration))
             {
@@ -631,12 +631,12 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private IStructuralTypeConfiguration GetStructuralTypeOrNull(Type clrType)
+        private StructuralTypeConfiguration GetStructuralTypeOrNull(Type clrType)
         {
             return StructuralTypes.Where(edmType => edmType.ClrType == clrType).SingleOrDefault();
         }
 
-        private static void ApplyPropertyConvention(IEdmPropertyConvention propertyConvention, IStructuralTypeConfiguration edmTypeConfiguration)
+        private static void ApplyPropertyConvention(IEdmPropertyConvention propertyConvention, StructuralTypeConfiguration edmTypeConfiguration)
         {
             Contract.Assert(propertyConvention != null);
             Contract.Assert(edmTypeConfiguration != null);

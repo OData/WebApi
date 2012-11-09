@@ -99,15 +99,15 @@ namespace System.Web.Http.OData.Builder
             createAddresses.ReturnsCollection<Address>();
 
             // Assert
-            IComplexTypeConfiguration address = createAddress.ReturnType as IComplexTypeConfiguration;
+            ComplexTypeConfiguration address = createAddress.ReturnType as ComplexTypeConfiguration;
             Assert.NotNull(address);
             Assert.Equal(typeof(Address).FullName, address.FullName);
             Assert.Null(createAddress.EntitySet);
 
-            ICollectionTypeConfiguration addresses = createAddresses.ReturnType as ICollectionTypeConfiguration;
+            CollectionTypeConfiguration addresses = createAddresses.ReturnType as CollectionTypeConfiguration;
             Assert.NotNull(addresses);
             Assert.Equal(string.Format("Collection({0})", typeof(Address).FullName), addresses.FullName);
-            address = addresses.ElementType as IComplexTypeConfiguration;
+            address = addresses.ElementType as ComplexTypeConfiguration;
             Assert.NotNull(address);
             Assert.Equal(typeof(Address).FullName, address.FullName);
             Assert.Null(createAddresses.EntitySet);
@@ -127,18 +127,18 @@ namespace System.Web.Http.OData.Builder
             createBadCustomers.ReturnsCollectionFromEntitySet<Customer>("BadCustomers");
 
             // Assert
-            IEntityTypeConfiguration customer = createGoodCustomer.ReturnType as IEntityTypeConfiguration;
+            EntityTypeConfiguration customer = createGoodCustomer.ReturnType as EntityTypeConfiguration;
             Assert.NotNull(customer);
             Assert.Equal(typeof(Customer).FullName, customer.FullName);
-            IEntitySetConfiguration goodCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "GoodCustomers");
+            EntitySetConfiguration goodCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "GoodCustomers");
             Assert.NotNull(goodCustomers);
             Assert.Same(createGoodCustomer.EntitySet, goodCustomers);
 
-            ICollectionTypeConfiguration customers = createBadCustomers.ReturnType as ICollectionTypeConfiguration;
+            CollectionTypeConfiguration customers = createBadCustomers.ReturnType as CollectionTypeConfiguration;
             Assert.NotNull(customers);
-            customer = customers.ElementType as IEntityTypeConfiguration;
+            customer = customers.ElementType as EntityTypeConfiguration;
             Assert.NotNull(customer);
-            IEntitySetConfiguration badCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "BadCustomers");
+            EntitySetConfiguration badCustomers = builder.EntitySets.SingleOrDefault(s => s.Name == "BadCustomers");
             Assert.NotNull(badCustomers);
             Assert.Same(createBadCustomers.EntitySet, badCustomers);
         }

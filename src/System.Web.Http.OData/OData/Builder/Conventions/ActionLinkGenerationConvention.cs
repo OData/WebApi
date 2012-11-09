@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         internal static Uri GenerateActionLink(EntityInstanceContext entityContext, ActionConfiguration action)
         {
             // the entity type the action is bound to.
-            IEntityTypeConfiguration actionEntityType = action.BindingParameter.TypeConfiguration as IEntityTypeConfiguration;
+            EntityTypeConfiguration actionEntityType = action.BindingParameter.TypeConfiguration as EntityTypeConfiguration;
             Contract.Assert(actionEntityType != null, "we have already verified that binding paramter type is entity");
 
             Dictionary<string, object> routeValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);

@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The edm property.</param>
         /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found.</param>
-        public override void Apply(StructuralPropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(StructuralPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (edmProperty == null)
             {

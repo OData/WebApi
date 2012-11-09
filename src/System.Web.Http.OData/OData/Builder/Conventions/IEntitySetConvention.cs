@@ -4,6 +4,6 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     public interface IEntitySetConvention : IConvention
     {
-        void Apply(IEntitySetConfiguration configuration, ODataModelBuilder model);
+        void Apply(EntitySetConfiguration configuration, ODataModelBuilder model);
     }
 }

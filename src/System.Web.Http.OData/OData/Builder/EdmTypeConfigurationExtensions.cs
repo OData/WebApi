@@ -9,14 +9,14 @@ namespace System.Web.Http.OData.Builder
     internal static class EdmTypeConfigurationExtensions
     {
         // returns all the properties declared in the base types of this type.
-        public static IEnumerable<PropertyConfiguration> DerivedProperties(this IEntityTypeConfiguration entity)
+        public static IEnumerable<PropertyConfiguration> DerivedProperties(this EntityTypeConfiguration entity)
         {
             if (entity == null)
             {
                 throw Error.ArgumentNull("entity");
             }
 
-            IEntityTypeConfiguration baseType = entity.BaseType;
+            EntityTypeConfiguration baseType = entity.BaseType;
 
             while (baseType != null)
             {
@@ -30,21 +30,21 @@ namespace System.Web.Http.OData.Builder
         }
 
         // returns the keys declared or inherited for this entity 
-        public static IEnumerable<PropertyConfiguration> Keys(this IEntityTypeConfiguration entity)
+        public static IEnumerable<PropertyConfiguration> Keys(this EntityTypeConfiguration entity)
         {
             Contract.Assert(entity != null);
             return entity.BaseType == null ? entity.Keys : Keys(entity.BaseType);
         }
 
         // Returns the base types, this type.
-        public static IEnumerable<IEntityTypeConfiguration> ThisAndBaseTypes(this IEntityTypeConfiguration entity)
+        public static IEnumerable<EntityTypeConfiguration> ThisAndBaseTypes(this EntityTypeConfiguration entity)
         {
             Contract.Assert(entity != null);
             return entity.BaseTypes().Concat(new[] { entity });
         }
 
         // Returns the base types, this type and all the derived types of this type.
-        public static IEnumerable<IEntityTypeConfiguration> ThisAndBaseAndDerivedTypes(this ODataModelBuilder modelBuilder, IEntityTypeConfiguration entity)
+        public static IEnumerable<EntityTypeConfiguration> ThisAndBaseAndDerivedTypes(this ODataModelBuilder modelBuilder, EntityTypeConfiguration entity)
         {
             Contract.Assert(modelBuilder != null);
             Contract.Assert(entity != null);
@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         // Returns the base types for this type.
-        public static IEnumerable<IEntityTypeConfiguration> BaseTypes(this IEntityTypeConfiguration entity)
+        public static IEnumerable<EntityTypeConfiguration> BaseTypes(this EntityTypeConfiguration entity)
         {
             Contract.Assert(entity != null);
 
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         // Returns all the derived types of this type.
-        public static IEnumerable<IEntityTypeConfiguration> DerivedTypes(this ODataModelBuilder modelBuilder, IEntityTypeConfiguration entity)
+        public static IEnumerable<EntityTypeConfiguration> DerivedTypes(this ODataModelBuilder modelBuilder, EntityTypeConfiguration entity)
         {
             if (modelBuilder == null)
             {
@@ -80,19 +80,19 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("entity");
             }
 
-            IEnumerable<IEntityTypeConfiguration> derivedEntities = modelBuilder.StructuralTypes.OfType<IEntityTypeConfiguration>().Where(e => e.BaseType == entity);
+            IEnumerable<EntityTypeConfiguration> derivedEntities = modelBuilder.StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => e.BaseType == entity);
 
-            foreach (IEntityTypeConfiguration derivedEntity in derivedEntities)
+            foreach (EntityTypeConfiguration derivedEntity in derivedEntities)
             {
                 yield return derivedEntity;
-                foreach (IEntityTypeConfiguration derivedDerivedEntity in modelBuilder.DerivedTypes(derivedEntity))
+                foreach (EntityTypeConfiguration derivedDerivedEntity in modelBuilder.DerivedTypes(derivedEntity))
                 {
                     yield return derivedDerivedEntity;
                 }
             }
         }
 
-        public static bool IsAssignableFrom(this IEntityTypeConfiguration baseEntity, IEntityTypeConfiguration entity)
+        public static bool IsAssignableFrom(this EntityTypeConfiguration baseEntity, EntityTypeConfiguration entity)
         {
             while (entity != null)
             {

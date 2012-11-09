@@ -184,11 +184,6 @@
     <Compile Include="OData\Builder\EntitySetConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\EntityTypeConfiguration.cs" />
     <Compile Include="OData\Builder\EntityTypeConfigurationOfTEntityType.cs" />
-    <Compile Include="OData\Builder\IComplexTypeConfiguration.cs" />
-    <Compile Include="OData\Builder\ICollectionTypeConfiguration.cs" />
-    <Compile Include="OData\Builder\IEntitySetConfiguration.cs" />
-    <Compile Include="OData\Builder\IEntityTypeConfiguration.cs" />
-    <Compile Include="OData\Builder\IStructuralTypeConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationPropertyBinding.cs" />
     <Compile Include="OData\Builder\NavigationPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\NonBindingParameterConfiguration.cs" />

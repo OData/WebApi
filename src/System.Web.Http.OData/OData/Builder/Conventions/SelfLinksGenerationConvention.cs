@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     public class SelfLinksGenerationConvention : IEntitySetConvention
     {
-        public void Apply(IEntitySetConfiguration configuration, ODataModelBuilder model)
+        public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
         }
 
-        internal static Uri GenerateSelfLink(IEntitySetConfiguration configuration, EntityInstanceContext entityContext, bool includeCast)
+        internal static Uri GenerateSelfLink(EntitySetConfiguration configuration, EntityInstanceContext entityContext, bool includeCast)
         {
             string routeName;
 

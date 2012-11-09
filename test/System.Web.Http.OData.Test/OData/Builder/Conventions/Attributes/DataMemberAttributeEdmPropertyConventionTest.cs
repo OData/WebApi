@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             PropertyInfo property = type.GetProperty("Property");
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(type);
 
@@ -47,7 +47,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
             PropertyInfo property = type.GetProperty("Property");
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(type);
 
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new object[0]);
 
             PropertyInfo property = type.GetProperty("Property");
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(type);
 
@@ -145,7 +145,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
                 .BaseType(baseType);
 
             PropertyInfo property = derivedType.GetProperty("Property");
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(derivedType);
 
@@ -169,7 +169,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
                 .BaseType(baseType);
 
             PropertyInfo property = derivedType.GetProperty("Property");
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             Mock<StructuralPropertyConfiguration> structuralProperty = new Mock<StructuralPropertyConfiguration>(property, structuralType.Object);
             structuralType.Setup(t => t.ClrType).Returns(derivedType);
 

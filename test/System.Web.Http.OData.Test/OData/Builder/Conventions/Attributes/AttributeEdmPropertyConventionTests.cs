@@ -41,7 +41,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Func<Attribute, bool> matchAllFilter = a => true;
 
             // build the type
-            Mock<IEntityTypeConfiguration> structuralType = new Mock<IEntityTypeConfiguration>(MockBehavior.Strict);
+            Mock<EntityTypeConfiguration> structuralType = new Mock<EntityTypeConfiguration>(MockBehavior.Strict);
 
             // build the property
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
@@ -62,7 +62,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             // build the convention
             Mock<AttributeEdmPropertyConvention<TPropertyConfiguration>> convention = new Mock<AttributeEdmPropertyConvention<TPropertyConfiguration>>(matchAllFilter, false);
-            convention.Setup(c => c.Apply(It.IsAny<TPropertyConfiguration>(), It.IsAny<IStructuralTypeConfiguration>(), It.IsAny<Attribute>())).Callback(() => { applyCalled = true; });
+            convention.Setup(c => c.Apply(It.IsAny<TPropertyConfiguration>(), It.IsAny<StructuralTypeConfiguration>(), It.IsAny<Attribute>())).Callback(() => { applyCalled = true; });
 
             // Apply
             (convention.Object as IEdmPropertyConvention).Apply(propertyConfiguration.Object, structuralType.Object);

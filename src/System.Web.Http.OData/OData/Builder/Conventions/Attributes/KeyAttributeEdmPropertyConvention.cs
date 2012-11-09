@@ -21,14 +21,14 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The key property.</param>
         /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on the property.</param>
-        public override void Apply(PrimitivePropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(PrimitivePropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (edmProperty == null)
             {
                 throw Error.ArgumentNull("edmProperty");
             }
 
-            IEntityTypeConfiguration entity = structuralTypeConfiguration as IEntityTypeConfiguration;
+            EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
             if (entity != null)
             {
                 entity.HasKey(edmProperty.PropertyInfo);

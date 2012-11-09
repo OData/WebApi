@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Builder
     {
         private bool _optionalProperty;
 
-        protected StructuralPropertyConfiguration(PropertyInfo property, IStructuralTypeConfiguration declaringType)
+        protected StructuralPropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
             _optionalProperty = EdmLibHelpers.IsNullable(property.PropertyType);

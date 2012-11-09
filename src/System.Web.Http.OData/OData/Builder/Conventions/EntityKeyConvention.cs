@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         /// </summary>
         /// <param name="entity">The entity type being configured.</param>
         /// <param name="model">The <see cref="ODataModelBuilder"/>.</param>
-        public override void Apply(IEntityTypeConfiguration entity, ODataModelBuilder model)
+        public override void Apply(EntityTypeConfiguration entity, ODataModelBuilder model)
         {
             if (entity == null)
             {
@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
         }
 
-        private static PropertyConfiguration GetKeyProperty(IEntityTypeConfiguration entityType)
+        private static PropertyConfiguration GetKeyProperty(EntityTypeConfiguration entityType)
         {
             IEnumerable<PropertyConfiguration> keys =
                 entityType.Properties

@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         {
         }
 
-        public override void Apply(StructuralPropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(StructuralPropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (structuralTypeConfiguration == null)
             {

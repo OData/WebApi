@@ -15,13 +15,13 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// </summary>
     public class AssociationSetDiscoveryConvention : IEntitySetConvention
     {
-        public void Apply(IEntitySetConfiguration configuration, ODataModelBuilder model)
+        public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
         {
-            foreach (IEntityTypeConfiguration entity in model.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            foreach (EntityTypeConfiguration entity in model.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {
                 foreach (NavigationPropertyConfiguration navigationProperty in entity.NavigationProperties)
                 {
-                    IEntitySetConfiguration targetEntitySet = GetTargetEntitySet(navigationProperty, model);
+                    EntitySetConfiguration targetEntitySet = GetTargetEntitySet(navigationProperty, model);
                     if (targetEntitySet != null)
                     {
                         configuration.AddBinding(navigationProperty, targetEntitySet);
@@ -31,12 +31,12 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         // Get the default target entity set for this navigation property.
-        internal static IEntitySetConfiguration GetTargetEntitySet(NavigationPropertyConfiguration navigationProperty, ODataModelBuilder model)
+        internal static EntitySetConfiguration GetTargetEntitySet(NavigationPropertyConfiguration navigationProperty, ODataModelBuilder model)
         {
-            IEntityTypeConfiguration targetEntityType =
+            EntityTypeConfiguration targetEntityType =
                 model
                 .StructuralTypes
-                .OfType<IEntityTypeConfiguration>()
+                .OfType<EntityTypeConfiguration>()
                 .Where(e => e.ClrType == navigationProperty.RelatedClrType).SingleOrDefault();
 
             if (targetEntityType == null)
@@ -47,14 +47,14 @@ namespace System.Web.Http.OData.Builder.Conventions
             return GetDefaultEntitySet(targetEntityType, model);
         }
 
-        private static IEntitySetConfiguration GetDefaultEntitySet(IEntityTypeConfiguration targetEntityType, ODataModelBuilder model)
+        private static EntitySetConfiguration GetDefaultEntitySet(EntityTypeConfiguration targetEntityType, ODataModelBuilder model)
         {
             if (targetEntityType == null)
             {
                 return null;
             }
 
-            IEnumerable<IEntitySetConfiguration> matchingEntitySets = model.EntitySets.Where(e => e.EntityType == targetEntityType);
+            IEnumerable<EntitySetConfiguration> matchingEntitySets = model.EntitySets.Where(e => e.EntityType == targetEntityType);
 
             if (matchingEntitySets.Count() > 1)
             {

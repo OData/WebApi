@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Builder
     {
         private Func<EntityInstanceContext, string> _linkFactory;
 
-        public NavigationPropertyBinding(NavigationPropertyConfiguration navigationProperty, IEntitySetConfiguration entitySet) 
+        public NavigationPropertyBinding(NavigationPropertyConfiguration navigationProperty, EntitySetConfiguration entitySet) 
         {
             NavigationProperty = navigationProperty;
             EntitySet = entitySet;
@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Builder
 
         public NavigationPropertyConfiguration NavigationProperty { get; private set; } 
         
-        public IEntitySetConfiguration EntitySet { get; private set; }
+        public EntitySetConfiguration EntitySet { get; private set; }
        
         public void HasLinkFactory(Func<EntityInstanceContext, string> linkFactoryParameter)
         {

@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            Mock<IStructuralTypeConfiguration> type = new Mock<IStructuralTypeConfiguration>(MockBehavior.Strict);
+            Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             type.Setup(t => t.ClrType).Returns(clrType.Object);
 
             PropertyConfiguration[] mockProperties = new PropertyConfiguration[] 
@@ -46,7 +46,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
         private static PropertyConfiguration CreateMockProperty(params Attribute[] attributes)
         {
-            IStructuralTypeConfiguration structuralType = new Mock<IStructuralTypeConfiguration>().Object;
+            StructuralTypeConfiguration structuralType = new Mock<StructuralTypeConfiguration>().Object;
             Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
             propertyInfo.Setup(p => p.PropertyType).Returns(typeof(int));
             propertyInfo.Setup(p => p.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(attributes);

@@ -28,7 +28,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// The EntitySet that entities are returned from.
         /// </summary>
-        public IEntitySetConfiguration EntitySet { get; set; }
+        public EntitySetConfiguration EntitySet { get; set; }
 
         /// <summary>
         /// The Kind of procedure, which can be either Action, Function or ServiceOperation

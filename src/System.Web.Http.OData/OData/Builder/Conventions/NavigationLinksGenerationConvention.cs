@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     public class NavigationLinksGenerationConvention : IEntitySetConvention
     {
-        public void Apply(IEntitySetConfiguration configuration, ODataModelBuilder model)
+        public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {
@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
 
             // generate links without cast for declared and inherited navigation properties
-            foreach (IEntityTypeConfiguration entity in configuration.EntityType.ThisAndBaseTypes())
+            foreach (EntityTypeConfiguration entity in configuration.EntityType.ThisAndBaseTypes())
             {
                 foreach (NavigationPropertyConfiguration property in entity.NavigationProperties)
                 {
@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
 
             // generate links with cast for navigation properties in derived types.
-            foreach (IEntityTypeConfiguration entity in model.DerivedTypes(configuration.EntityType))
+            foreach (EntityTypeConfiguration entity in model.DerivedTypes(configuration.EntityType))
             {
                 foreach (NavigationPropertyConfiguration property in entity.NavigationProperties)
                 {
@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             }
         }
 
-        internal static Uri GenerateNavigationPropertyLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, IEntitySetConfiguration configuration, bool includeCast)
+        internal static Uri GenerateNavigationPropertyLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, EntitySetConfiguration configuration, bool includeCast)
         {
             string routeName;
 

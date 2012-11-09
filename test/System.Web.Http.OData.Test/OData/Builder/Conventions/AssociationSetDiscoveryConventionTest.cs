@@ -18,22 +18,22 @@ namespace System.Web.Http.OData.Builder.Conventions
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            IEntityTypeConfiguration vehicle = builder.AddEntity(typeof(Vehicle));
+            EntityTypeConfiguration vehicle = builder.AddEntity(typeof(Vehicle));
 
-            IEntityTypeConfiguration car = builder.AddEntity(typeof(Car)).DerivesFrom(vehicle);
+            EntityTypeConfiguration car = builder.AddEntity(typeof(Car)).DerivesFrom(vehicle);
             NavigationPropertyConfiguration carNavigationProperty = car.AddNavigationProperty(typeof(Car).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
-            IEntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
+            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle)).DerivesFrom(vehicle);
             NavigationPropertyConfiguration motorcycleNavigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
-            IEntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
-            IEntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
-            IEntityTypeConfiguration carManufacturer = builder.AddEntity(typeof(CarManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
+            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration carManufacturer = builder.AddEntity(typeof(CarManufacturer)).DerivesFrom(manufacturer);
 
-            IEntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+            EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
 
-            Mock<IEntitySetConfiguration> entitySet = new Mock<IEntitySetConfiguration>(MockBehavior.Strict);
+            Mock<EntitySetConfiguration> entitySet = new Mock<EntitySetConfiguration>(MockBehavior.Strict);
             entitySet.Setup(v => v.EntityType).Returns(vehicle);
             entitySet.Setup(v => v.AddBinding(motorcycleNavigationProperty, manufacturers)).Returns<NavigationPropertyConfiguration>(null);
             entitySet.Setup(v => v.AddBinding(carNavigationProperty, manufacturers)).Returns<NavigationPropertyConfiguration>(null);
@@ -54,7 +54,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             property.Setup(p => p.ReflectedType).Returns(typeof(AssociationSetDiscoveryConventionTest));
             property.Setup(p => p.Name).Returns("SamplePropertyName");
 
-            Mock<IEntityTypeConfiguration> entityTypeConfiguration = new Mock<IEntityTypeConfiguration>();
+            Mock<EntityTypeConfiguration> entityTypeConfiguration = new Mock<EntityTypeConfiguration>();
             NavigationPropertyConfiguration config = new NavigationPropertyConfiguration(property.Object, EdmMultiplicity.ZeroOrOne, entityTypeConfiguration.Object);
 
             Mock<ODataModelBuilder> modelBuilder = new Mock<ODataModelBuilder>();
@@ -70,11 +70,11 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            IEntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
+            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
             // Act
-            IEntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
 
             // Assert
             Assert.Null(targetEntitySet);
@@ -85,13 +85,13 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            IEntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
-            IEntityTypeConfiguration manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
+            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
-            IEntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+            EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
             // Act
-            IEntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
 
             // Assert
             Assert.Equal(manufacturers, targetEntitySet);
@@ -102,14 +102,14 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            IEntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
-            IEntityTypeConfiguration manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
+            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
+            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(MotorcycleManufacturer));
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
-            IEntitySetConfiguration manufacturers1 = builder.AddEntitySet("manufacturers1", manufacturer);
-            IEntitySetConfiguration manufacturers2 = builder.AddEntitySet("manufacturers2", manufacturer);
+            EntitySetConfiguration manufacturers1 = builder.AddEntitySet("manufacturers1", manufacturer);
+            EntitySetConfiguration manufacturers2 = builder.AddEntitySet("manufacturers2", manufacturer);
 
             // Act
-            IEntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
 
             // Assert
             Assert.Null(targetEntitySet);
@@ -120,15 +120,15 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            IEntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
-            IEntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
-            IEntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
+            EntityTypeConfiguration motorcycle = builder.AddEntity(typeof(Motorcycle));
+            EntityTypeConfiguration manufacturer = builder.AddEntity(typeof(Manufacturer));
+            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntity(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
 
             NavigationPropertyConfiguration navigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
-            IEntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
+            EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
             // Act
-            IEntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
+            EntitySetConfiguration targetEntitySet = AssociationSetDiscoveryConvention.GetTargetEntitySet(navigationProperty, builder);
 
             // Assert
             Assert.Equal(manufacturers, targetEntitySet);

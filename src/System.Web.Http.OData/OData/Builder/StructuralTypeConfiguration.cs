@@ -10,12 +10,34 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
-    public abstract class StructuralTypeConfiguration : IStructuralTypeConfiguration
+    /// <summary>
+    /// Represents an <see cref="IEdmStructuredType"/> that can be built using <see cref="ODataModelBuilder"/>.
+    /// </summary>
+    public abstract class StructuralTypeConfiguration : IEdmTypeConfiguration
     {
         private const string DefaultNamespace = "Default";
 
+        /// <summary>
+        /// Initializes an instance of <see cref="StructuralTypeConfiguration"/>.
+        /// </summary>
+        /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
+        protected StructuralTypeConfiguration()
+        {
+        }
+
+        [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "The virtual property setters are only to support mocking frameworks, in which case this constructor shouldn't be called anyway.")]
         protected StructuralTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
         {
+            if (modelBuilder == null)
+            {
+                throw Error.ArgumentNull("modelBuilder");
+            }
+
+            if (clrType == null)
+            {
+                throw Error.ArgumentNull("clrType");
+            }
+
             ClrType = clrType;
             ModelBuilder = modelBuilder;
             Name = ClrType.EdmName();
@@ -24,43 +46,73 @@ namespace System.Web.Http.OData.Builder
             RemovedProperties = new List<PropertyInfo>();
         }
 
+        /// <summary>
+        /// Gets the <see cref="EdmTypeKind"/> of this edm type.
+        /// </summary>
         public abstract EdmTypeKind Kind { get; }
 
-        public Type ClrType { get; private set; }
+        /// <summary>
+        /// Gets the backing CLR <see cref="Type"/>.
+        /// </summary>
+        public virtual Type ClrType { get; private set; }
 
-        public string FullName
+        /// <summary>
+        /// Gets the full name of this edm type.
+        /// </summary>
+        public virtual string FullName
         {
-            get { return Namespace + "." + Name; }
+            get
+            {
+                return Namespace + "." + Name;
+            }
         }
 
-        public string Namespace
+        /// <summary>
+        /// Gets the namespace of this edm type.
+        /// </summary>
+        public virtual string Namespace { get; protected set; }
+
+        /// <summary>
+        /// Gets the name of this edm type.
+        /// </summary>
+        public virtual string Name { get; protected set; }
+
+        /// <summary>
+        /// Gets the declared properties on this edm type.
+        /// </summary>
+        public virtual IEnumerable<PropertyConfiguration> Properties
         {
-            get;
-            protected set;
+            get
+            {
+                return ExplicitProperties.Values;
+            }
         }
 
-        public string Name
+        /// <summary>
+        /// Gets the properties from the backing CLR type that are to be ignored on this edm type.
+        /// </summary>
+        public virtual IEnumerable<PropertyInfo> IgnoredProperties
         {
-            get;
-            protected set;
+            get
+            {
+                return RemovedProperties;
+            }
         }
 
-        public IEnumerable<PropertyConfiguration> Properties
-        {
-            get { return ExplicitProperties.Values; }
-        }
+        /// <summary>
+        /// The <see cref="ODataModelBuilder"/>.
+        /// </summary>
+        public virtual ODataModelBuilder ModelBuilder { get; private set; }
 
-        public IEnumerable<PropertyInfo> IgnoredProperties
-        {
-            get { return RemovedProperties; }
-        }
+        protected virtual ICollection<PropertyInfo> RemovedProperties { get; private set; }
 
-        public ODataModelBuilder ModelBuilder { get; private set; }
+        protected virtual Dictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
 
-        protected ICollection<PropertyInfo> RemovedProperties { get; private set; }
-
-        protected Dictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
-
+        /// <summary>
+        /// Adds a primitive property to this edm type.
+        /// </summary>
+        /// <param name="propertyInfo">The property being added.</param>
+        /// <returns>The <see cref="PrimitivePropertyConfiguration"/> so that the property can be configured further.</returns>
         public virtual PrimitivePropertyConfiguration AddProperty(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
@@ -97,6 +149,11 @@ namespace System.Web.Http.OData.Builder
             return propertyConfiguration;
         }
 
+        /// <summary>
+        /// Adds a complex property to this edm type.
+        /// </summary>
+        /// <param name="propertyInfo">The property being added.</param>
+        /// <returns>The <see cref="ComplexPropertyConfiguration"/> so that the property can be configured further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Helper validates non null propertyInfo")]
         public virtual ComplexPropertyConfiguration AddComplexProperty(PropertyInfo propertyInfo)
         {
@@ -142,6 +199,11 @@ namespace System.Web.Http.OData.Builder
             return propertyConfiguration;
         }
 
+        /// <summary>
+        /// Adds a collection property to this edm type.
+        /// </summary>
+        /// <param name="propertyInfo">The property being added.</param>
+        /// <returns>The <see cref="CollectionPropertyConfiguration"/> so that the property can be configured further.</returns>
         public virtual CollectionPropertyConfiguration AddCollectionProperty(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
@@ -194,6 +256,10 @@ namespace System.Web.Http.OData.Builder
             return propertyConfiguration;
         }
 
+        /// <summary>
+        /// Removes the given property.
+        /// </summary>
+        /// <param name="propertyInfo">The property being removed.</param>
         public virtual void RemoveProperty(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)

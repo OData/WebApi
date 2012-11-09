@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Builder
             movie.HasKey(m => m.ID);
             movie.HasKey(m => m.Name);
             EntityTypeConfiguration<Blockbuster> blockBuster = builder.Entity<Blockbuster>().DerivesFrom<Movie>();
-            IEntityTypeConfiguration movieConfiguration = builder.StructuralTypes.OfType<IEntityTypeConfiguration>().Single(t => t.Name == "Movie");
+            EntityTypeConfiguration movieConfiguration = builder.StructuralTypes.OfType<EntityTypeConfiguration>().Single(t => t.Name == "Movie");
 
             // build actions that are bindable to a single entity
             customer.Action("InCache1_CustomerAction");

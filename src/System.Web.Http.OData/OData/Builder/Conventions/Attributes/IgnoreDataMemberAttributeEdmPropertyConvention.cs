@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         /// <param name="edmProperty">The property being removed.</param>
         /// <param name="structuralTypeConfiguration">The edm type from which the property is being removed.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(PropertyConfiguration edmProperty, IStructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+        public override void Apply(PropertyConfiguration edmProperty, StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
         {
             if (structuralTypeConfiguration == null)
             {

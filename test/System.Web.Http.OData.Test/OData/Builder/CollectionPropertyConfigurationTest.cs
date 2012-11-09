@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Builder
         [PropertyData("GetValidPropertiesAndElementTypes")]
         public void HasCorrectKindPropertyInfoAndName(PropertyInfo property, Type elementType)
         {
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property, structuralType.Object);
             Assert.Equal(PropertyKind.Collection, configuration.Kind);
             Assert.Equal(elementType, configuration.ElementType);
@@ -61,7 +61,7 @@ namespace System.Web.Http.OData.Builder
             ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             {
                 PropertyInfo nonCollectionProperty = typeof(LotsOfCollectionProperties).GetProperty("NonCollectionProperty");
-                Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+                Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
                 CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(nonCollectionProperty, structuralType.Object);
             });
         }
@@ -70,7 +70,7 @@ namespace System.Web.Http.OData.Builder
         [PropertyData("GetValidPropertiesAndElementTypes")]
         public void CanCorrectlyDetectCollectionProperties(PropertyInfo property, Type elementType)
         {
-            Mock<IStructuralTypeConfiguration> structuralType = new Mock<IStructuralTypeConfiguration>();
+            Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property, structuralType.Object);
             Assert.Same(property, configuration.PropertyInfo);
             Assert.Same(elementType, configuration.ElementType);

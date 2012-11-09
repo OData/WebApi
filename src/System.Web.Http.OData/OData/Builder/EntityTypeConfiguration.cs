@@ -14,11 +14,19 @@ namespace System.Web.Http.OData.Builder
     /// <summary>
     /// Represents an <see cref="IEdmEntityType"/> that can be built using <see cref="ODataModelBuilder"/>.
     /// </summary>
-    public class EntityTypeConfiguration : StructuralTypeConfiguration, IEntityTypeConfiguration
+    public class EntityTypeConfiguration : StructuralTypeConfiguration
     {
         private List<PrimitivePropertyConfiguration> _keys = new List<PrimitivePropertyConfiguration>();
-        private IEntityTypeConfiguration _baseType;
+        private EntityTypeConfiguration _baseType;
         private bool _baseTypeConfigured;
+
+        /// <summary>
+        /// Initializes an instance of <see cref="EntityTypeConfiguration"/>.
+        /// </summary>
+        /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
+        public EntityTypeConfiguration()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="EntityTypeConfiguration"/>.
@@ -41,15 +49,18 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets the collection of <see cref="NavigationPropertyConfiguration"/> of this entity type.
         /// </summary>
-        public IEnumerable<NavigationPropertyConfiguration> NavigationProperties
+        public virtual IEnumerable<NavigationPropertyConfiguration> NavigationProperties
         {
-            get { return ExplicitProperties.Values.OfType<NavigationPropertyConfiguration>(); }
+            get
+            {
+                return ExplicitProperties.Values.OfType<NavigationPropertyConfiguration>();
+            }
         }
 
         /// <summary>
         /// Gets the collection of keys for this entity type.
         /// </summary>
-        public IEnumerable<PrimitivePropertyConfiguration> Keys
+        public virtual IEnumerable<PrimitivePropertyConfiguration> Keys
         {
             get
             {
@@ -60,12 +71,12 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets or sets a value indicating whether this type is abstract.
         /// </summary>
-        public bool? IsAbstract { get; set; }
+        public virtual bool? IsAbstract { get; set; }
 
         /// <summary>
         /// Gets or sets the base type of this entity type.
         /// </summary>
-        public IEntityTypeConfiguration BaseType
+        public virtual EntityTypeConfiguration BaseType
         {
             get
             {
@@ -78,7 +89,7 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        public bool BaseTypeConfigured
+        public virtual bool BaseTypeConfigured
         {
             get
             {
@@ -90,7 +101,7 @@ namespace System.Web.Http.OData.Builder
         /// Marks this entity type as abstract.
         /// </summary>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public IEntityTypeConfiguration Abstract()
+        public virtual EntityTypeConfiguration Abstract()
         {
             IsAbstract = true;
             return this;
@@ -101,7 +112,7 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="keyProperty">The property to be added to the key properties of this entity type.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public IEntityTypeConfiguration HasKey(PropertyInfo keyProperty)
+        public virtual EntityTypeConfiguration HasKey(PropertyInfo keyProperty)
         {
             if (BaseType != null)
             {
@@ -126,7 +137,7 @@ namespace System.Web.Http.OData.Builder
         /// does not derive from anything.
         /// </summary>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public IEntityTypeConfiguration DerivesFromNothing()
+        public virtual EntityTypeConfiguration DerivesFromNothing()
         {
             _baseType = null;
             _baseTypeConfigured = true;
@@ -138,7 +149,7 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="baseType">The base entity type.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public IEntityTypeConfiguration DerivesFrom(IEntityTypeConfiguration baseType)
+        public virtual EntityTypeConfiguration DerivesFrom(EntityTypeConfiguration baseType)
         {
             if (baseType == null)
             {
@@ -216,7 +227,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="navigationProperty">The backing CLR property.</param>
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
-        public NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
+        public virtual NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
             if (navigationProperty == null)
             {
@@ -275,7 +286,7 @@ namespace System.Web.Http.OData.Builder
 
         private void ValidatePropertyNotAlreadyDefinedInDerivedTypes(PropertyInfo propertyInfo)
         {
-            foreach (IEntityTypeConfiguration derivedEntity in ModelBuilder.DerivedTypes(this))
+            foreach (EntityTypeConfiguration derivedEntity in ModelBuilder.DerivedTypes(this))
             {
                 PropertyConfiguration propertyInDerivedType = derivedEntity.Properties.Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
                 if (propertyInDerivedType != null)

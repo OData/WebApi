@@ -240,7 +240,7 @@ namespace System.Web.Http.OData.Builder
             Assert.Throws<NotSupportedException>(
             () => builder.GetEdmModel(),
             "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' for the source entity set 'motorcycles2' because there are two or more matching target entity sets. " +
-            "The matching entity sets are NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
+            "The matching entity sets are: NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
         }
     }
 }

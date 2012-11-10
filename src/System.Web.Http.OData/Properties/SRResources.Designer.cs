@@ -142,7 +142,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot automatically bind the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos; for the source entity set &apos;{2}&apos; because there are two or more matching target entity sets. The matching entity sets are {3}..
+        ///   Looks up a localized string similar to Cannot automatically bind the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos; for the source entity set &apos;{2}&apos; because there are two or more matching target entity sets. The matching entity sets are: {3}..
         /// </summary>
         internal static string CannotAutoCreateMultipleCandidates {
             get {

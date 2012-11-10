@@ -201,16 +201,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Type clrType = EdmLibHelpers.GetClrType(entity, _model);
 
-            Expression source;
-            if (node.Source == null)
-            {
-                source = _lambdaParameters[ODataItParameterName];
-            }
-            else
-            {
-                source = Bind(node.Source);
-            }
-
+            Expression source = BindCastSourceNode(node.Source);
             return Expression.TypeAs(source, clrType);
         }
 
@@ -221,31 +212,39 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Type clrType = EdmLibHelpers.GetClrType(entity, _model);
 
+            Expression source = BindCastSourceNode(node.Source);
+            return OfType(source, clrType);
+        }
+
+        private Expression BindCastSourceNode(QueryNode sourceNode)
+        {
             Expression source;
-            if (node.Source == null)
+            if (sourceNode == null)
             {
+                // if the cast is on the root i.e $it (~/Products?$filter=NS.PopularProducts/.....), 
+                // source would be null. So bind null to '$it'.
                 source = _lambdaParameters[ODataItParameterName];
             }
             else
             {
-                source = Bind(node.Source);
+                source = Bind(sourceNode);
             }
 
-            return OfType(source, clrType);
+            return source;
         }
 
-        private static Expression OfType(Expression source, Type type)
+        private static Expression OfType(Expression source, Type elementType)
         {
             Contract.Assert(source != null);
-            Contract.Assert(type != null);
+            Contract.Assert(elementType != null);
 
             if (IsIQueryable(source.Type))
             {
-                return Expression.Call(null, ExpressionHelperMethods.QueryableOfType.MakeGenericMethod(type), source);
+                return Expression.Call(null, ExpressionHelperMethods.QueryableOfType.MakeGenericMethod(elementType), source);
             }
             else
             {
-                return Expression.Call(null, ExpressionHelperMethods.EnumerableOfType.MakeGenericMethod(type), source);
+                return Expression.Call(null, ExpressionHelperMethods.EnumerableOfType.MakeGenericMethod(elementType), source);
             }
         }
 

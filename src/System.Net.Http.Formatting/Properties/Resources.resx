@@ -291,4 +291,28 @@
   <data name="ReadAsHttpMessageUnexpectedTermination" xml:space="preserve">
     <value>Unexpected end of HTTP message stream. HTTP message is not complete.</value>
   </data>
+  <data name="ByteRangeStreamContentNotBytesRange" xml:space="preserve">
+    <value>The range unit '{0}' is not valid. The range must have a unit of '{1}'.</value>
+  </data>
+  <data name="ByteRangeStreamInvalidFrom" xml:space="preserve">
+    <value>The 'From' value of the range must be less than or equal to {0}.</value>
+  </data>
+  <data name="ByteRangeStreamNoneOverlap" xml:space="preserve">
+    <value>None of the requested ranges ({0}) overlap with the current extent of the selected resource.</value>
+  </data>
+  <data name="ByteRangeStreamNoOverlap" xml:space="preserve">
+    <value>The requested range ({0}) does not overlap with the current extent of the selected resource.</value>
+  </data>
+  <data name="ByteRangeStreamNotSeekable" xml:space="preserve">
+    <value>The stream over which '{0}' provides a range view must be seekable.</value>
+  </data>
+  <data name="ByteRangeStreamReadOnly" xml:space="preserve">
+    <value>This is a read-only stream.</value>
+  </data>
+  <data name="ByteRangeStreamContentNoRanges" xml:space="preserve">
+    <value>Found zero byte ranges. There must be at least one byte range provided.</value>
+  </data>
+  <data name="ByteRangeStreamEmpty" xml:space="preserve">
+    <value>The stream over which '{0}' provides a range view must have a length greater than or equal to 1.</value>
+  </data>
 </root>

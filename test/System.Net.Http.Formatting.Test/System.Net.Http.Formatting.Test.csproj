@@ -90,6 +90,8 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ByteRangeStreamContentTest.cs" />
+    <Compile Include="InvalidByteRangeExceptionTest.cs" />
     <Compile Include="Formatting\FormUrlEncodedFromContentTests.cs" />
     <Compile Include="Formatting\FormUrlEncodedFromUriQueryTests.cs" />
     <Compile Include="Formatting\JsonNetSerializationTest.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Formatting\JTokenCreatorSurrogate.cs" />
     <Compile Include="Formatting\JTokenRoundTripComparer.cs" />
     <Compile Include="Formatting\MediaTypeMappingTests.cs" />
+    <Compile Include="Internal\ByteRangeStreamTest.cs" />
     <Compile Include="Internal\MultipartWriteDelegatingStreamTest.cs" />
     <Compile Include="Internal\ReadOnlyStreamWithEncodingPreambleTest.cs" />
     <Compile Include="MimeBodyPartTest.cs" />

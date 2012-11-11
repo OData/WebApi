@@ -10,6 +10,7 @@ namespace System.Net.Http.Internal
 {
     public class DelegatingStreamTest
     {
+        [Fact]
         public void DelegatingStream_CtorThrowsOnNull()
         {
             Assert.ThrowsArgumentNull(() => new MockDelegatingStream(null), "innerStream");

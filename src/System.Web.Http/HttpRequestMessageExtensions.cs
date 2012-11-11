@@ -139,6 +139,30 @@ namespace System.Net.Http
         }
 
         /// <summary>
+        /// Helper method for creating an <see cref="HttpResponseMessage"/> message with a "416 (Requested Range Not Satisfiable)" status code.
+        /// This response can be used in combination with the <see cref="ByteRangeStreamContent"/> to indicate that the requested range or
+        /// ranges do not overlap with the current resource. The response contains a "Content-Range" header indicating the valid upper and lower
+        /// bounds for requested ranges.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="invalidByteRangeException">An <see cref="InvalidByteRangeException"/> instance, typically thrown by a 
+        /// <see cref="ByteRangeStreamContent"/> instance.</param>
+        /// <returns>An 416 (Requested Range Not Satisfiable) error response with a Content-Range header indicating the valid range.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Satisfiable", Justification = "Word is correctly spelled.")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
+        public static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, InvalidByteRangeException invalidByteRangeException)
+        {
+            if (invalidByteRangeException == null)
+            {
+                throw Error.ArgumentNull("invalidByteRangeException");
+            }
+
+            HttpResponseMessage rangeNotSatisfiableResponse = request.CreateErrorResponse(HttpStatusCode.RequestedRangeNotSatisfiable, invalidByteRangeException);
+            rangeNotSatisfiableResponse.Content.Headers.ContentRange = invalidByteRangeException.ContentRange;
+            return rangeNotSatisfiableResponse;
+        }
+
+        /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with message <paramref name="message"/>.
         /// If no formatter is found, this method returns a response with status 406 NotAcceptable.

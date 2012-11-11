@@ -461,5 +461,28 @@ namespace System.Net.Http
             Assert.NotNull(urlHelper);
             Assert.Same(request, urlHelper.Request);
         }
+
+        [Fact]
+        public void CreateErrorResponseRangeNotSatisfiable_ThrowsOnNullException()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            Assert.ThrowsArgumentNull(() => request.CreateErrorResponse(invalidByteRangeException: null), "invalidByteRangeException");
+        }
+
+        [Fact]
+        public void CreateErrorResponseRangeNotSatisfiable_SetsCorrectStatusCodeAndContentRangeHeader()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            ContentRangeHeaderValue expectedContentRange = new ContentRangeHeaderValue(length: 128);
+            InvalidByteRangeException invalidByteRangeException = new InvalidByteRangeException(expectedContentRange);
+
+            // Act
+            HttpResponseMessage response = request.CreateErrorResponse(invalidByteRangeException);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, response.StatusCode);
+            Assert.Same(expectedContentRange, response.Content.Headers.ContentRange);
+        }
     }
 }

@@ -11,7 +11,7 @@
 namespace System.Net.Http.Properties {
     using System;
     using System.Reflection;
-
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -98,6 +98,78 @@ namespace System.Net.Http.Properties {
         internal static string AsyncResult_ResultMismatch {
             get {
                 return ResourceManager.GetString("AsyncResult_ResultMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found zero byte ranges. There must be at least one byte range provided..
+        /// </summary>
+        internal static string ByteRangeStreamContentNoRanges {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamContentNoRanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The range unit &apos;{0}&apos; is not valid. The range must have a unit of &apos;{1}&apos;..
+        /// </summary>
+        internal static string ByteRangeStreamContentNotBytesRange {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamContentNotBytesRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The stream over which &apos;{0}&apos; provides a range view must have a length greater than or equal to 1..
+        /// </summary>
+        internal static string ByteRangeStreamEmpty {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;From&apos; value of the range must be less than or equal to {0}..
+        /// </summary>
+        internal static string ByteRangeStreamInvalidFrom {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamInvalidFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None of the requested ranges ({0}) overlap with the current extent of the selected resource..
+        /// </summary>
+        internal static string ByteRangeStreamNoneOverlap {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamNoneOverlap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The requested range ({0}) does not overlap with the current extent of the selected resource..
+        /// </summary>
+        internal static string ByteRangeStreamNoOverlap {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamNoOverlap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The stream over which &apos;{0}&apos; provides a range view must be seekable..
+        /// </summary>
+        internal static string ByteRangeStreamNotSeekable {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamNotSeekable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is a read-only stream..
+        /// </summary>
+        internal static string ByteRangeStreamReadOnly {
+            get {
+                return ResourceManager.GetString("ByteRangeStreamReadOnly", resourceCulture);
             }
         }
         

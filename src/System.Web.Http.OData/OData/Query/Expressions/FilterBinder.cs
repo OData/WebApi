@@ -8,7 +8,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Xml.Linq;
@@ -20,7 +19,7 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query.Expressions
 {
     /// <summary>
-    /// Translates an OData $filter parse tree represented by <see cref="FilterQueryNode"/> to 
+    /// Translates an OData $filter parse tree represented by <see cref="FilterClause"/> to 
     /// an <see cref="Expression"/> and applies it to an <see cref="IQueryable"/>.
     /// </summary>
     internal class FilterBinder
@@ -80,14 +79,14 @@ namespace System.Web.Http.OData.Query.Expressions
             _assembliesResolver = assembliesResolver;
         }
 
-        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterClause, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
-            return Bind(filterNode, typeof(TEntityType), model, assembliesResolver, querySettings) as Expression<Func<TEntityType, bool>>;
+            return Bind(filterClause, typeof(TEntityType), model, assembliesResolver, querySettings) as Expression<Func<TEntityType, bool>>;
         }
 
-        public static Expression Bind(FilterQueryNode filterNode, Type filterType, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        public static Expression Bind(FilterClause filterClause, Type filterType, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
-            if (filterNode == null)
+            if (filterClause == null)
             {
                 throw Error.ArgumentNull("filterNode");
             }
@@ -108,7 +107,7 @@ namespace System.Web.Http.OData.Query.Expressions
             }
 
             FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings);
-            Expression filter = binder.BindFilterQueryNode(filterNode);
+            Expression filter = binder.BindFilterClause(filterClause);
 
             Type expectedFilterType = typeof(Func<,>).MakeGenericType(filterType, typeof(bool));
             if (filter.Type != expectedFilterType)
@@ -121,8 +120,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression Bind(QueryNode node)
         {
-            CollectionQueryNode collectionNode = node as CollectionQueryNode;
-            SingleValueQueryNode singleValueNode = node as SingleValueQueryNode;
+            CollectionNode collectionNode = node as CollectionNode;
+            SingleValueNode singleValueNode = node as SingleValueNode;
 
             IncrementBindCount();
 
@@ -130,12 +129,12 @@ namespace System.Web.Http.OData.Query.Expressions
             {
                 switch (node.Kind)
                 {
-                    case QueryNodeKind.Filter:
-                        return BindFilterQueryNode(node as FilterQueryNode);
-
-                    case QueryNodeKind.Segment:
+                    case QueryNodeKind.CollectionNavigationNode:
                         CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
-                        return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty());
+                        return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
+
+                    case QueryNodeKind.CollectionPropertyAccess:
+                        return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
 
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
@@ -146,35 +145,38 @@ namespace System.Web.Http.OData.Query.Expressions
                 switch (node.Kind)
                 {
                     case QueryNodeKind.BinaryOperator:
-                        return BindBinaryOperatorQueryNode(node as BinaryOperatorQueryNode);
+                        return BindBinaryOperatorNode(node as BinaryOperatorNode);
 
                     case QueryNodeKind.Constant:
-                        return BindConstantQueryNode(node as ConstantQueryNode);
+                        return BindConstantNode(node as ConstantNode);
 
                     case QueryNodeKind.Convert:
-                        return BindConvertQueryNode(node as ConvertQueryNode);
+                        return BindConvertNode(node as ConvertNode);
 
-                    case QueryNodeKind.Parameter:
-                        return BindParameterQueryNode(node as ParameterQueryNode);
+                    case QueryNodeKind.EntityRangeVariableReference:
+                        return BindRangeVariable((node as EntityRangeVariableReferenceNode).RangeVariable);
 
-                    case QueryNodeKind.PropertyAccess:
-                        return BindPropertyAccessQueryNode(node as PropertyAccessQueryNode);
+                    case QueryNodeKind.NonentityRangeVariableReference:
+                        return BindRangeVariable((node as NonentityRangeVariableReferenceNode).RangeVariable);
+
+                    case QueryNodeKind.SingleValuePropertyAccess:
+                        return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
 
                     case QueryNodeKind.UnaryOperator:
-                        return BindUnaryOperatorQueryNode(node as UnaryOperatorQueryNode);
+                        return BindUnaryOperatorNode(node as UnaryOperatorNode);
 
                     case QueryNodeKind.SingleValueFunctionCall:
-                        return BindSingleValueFunctionCallQueryNode(node as SingleValueFunctionCallQueryNode);
+                        return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
 
-                    case QueryNodeKind.Segment:
-                        SingletonNavigationNode navigationNode = node as SingletonNavigationNode;
+                    case QueryNodeKind.SingleNavigationNode:
+                        SingleNavigationNode navigationNode = node as SingleNavigationNode;
                         return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
 
                     case QueryNodeKind.Any:
-                        return BindAnyQueryNode(node as AnyQueryNode);
+                        return BindAnyNode(node as AnyNode);
 
                     case QueryNodeKind.All:
-                        return BindAllQueryNode(node as AllQueryNode);
+                        return BindAllNode(node as AllNode);
 
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
@@ -203,7 +205,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return CreatePropertyAccessExpression(source, navigationProperty.Name);
         }
 
-        private Expression BindBinaryOperatorQueryNode(BinaryOperatorQueryNode binaryOperatorNode)
+        private Expression BindBinaryOperatorNode(BinaryOperatorNode binaryOperatorNode)
         {
             Expression left = Bind(binaryOperatorNode.Left);
             Expression right = Bind(binaryOperatorNode.Right);
@@ -247,7 +249,7 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private Expression BindConstantQueryNode(ConstantQueryNode constantNode)
+        private Expression BindConstantNode(ConstantNode constantNode)
         {
             Contract.Assert(constantNode != null);
 
@@ -259,14 +261,14 @@ namespace System.Web.Http.OData.Query.Expressions
             return Expression.Constant(constantNode.Value, EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver));
         }
 
-        private Expression BindConvertQueryNode(ConvertQueryNode convertQueryNode)
+        private Expression BindConvertNode(ConvertNode convertNode)
         {
-            Contract.Assert(convertQueryNode != null);
-            Contract.Assert(convertQueryNode.TypeReference != null);
+            Contract.Assert(convertNode != null);
+            Contract.Assert(convertNode.TypeReference != null);
 
-            Expression source = Bind(convertQueryNode.Source);
+            Expression source = Bind(convertNode.Source);
 
-            Type conversionType = EdmLibHelpers.GetClrType(convertQueryNode.TypeReference, _model, _assembliesResolver);
+            Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, _model, _assembliesResolver);
 
             if (conversionType == typeof(bool?) && source.Type == typeof(bool))
             {
@@ -306,14 +308,14 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private Expression BindFilterQueryNode(FilterQueryNode filterNode)
+        private Expression BindFilterClause(FilterClause filterClause)
         {
-            Type filterType = EdmLibHelpers.GetClrType(filterNode.ItemType, _model, _assembliesResolver);
-            ParameterExpression filterParameter = Expression.Parameter(filterType, filterNode.Parameter.Name);
+            Type filterType = EdmLibHelpers.GetClrType(filterClause.ItemType, _model, _assembliesResolver);
+            ParameterExpression filterParameter = Expression.Parameter(filterType, filterClause.RangeVariable.Name);
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
-            _lambdaParameters.Add(filterNode.Parameter.Name, filterParameter);
+            _lambdaParameters.Add(filterClause.RangeVariable.Name, filterParameter);
 
-            Expression body = Bind(filterNode.Expression);
+            Expression body = Bind(filterClause.Expression);
 
             body = ApplyNullPropagationForFilterBody(body);
 
@@ -349,12 +351,18 @@ namespace System.Web.Http.OData.Query.Expressions
             return body;
         }
 
-        private Expression BindParameterQueryNode(ParameterQueryNode parameterNode)
+        private Expression BindRangeVariable(RangeVariable rangeVariable)
         {
-            return _lambdaParameters[parameterNode.Name];
+            return _lambdaParameters[rangeVariable.Name];
         }
 
-        private Expression BindPropertyAccessQueryNode(PropertyAccessQueryNode propertyAccessNode)
+        private Expression BindCollectionPropertyAccessNode(CollectionPropertyAccessNode propertyAccessNode)
+        {
+            Expression source = Bind(propertyAccessNode.Source);
+            return CreatePropertyAccessExpression(source, propertyAccessNode.Property.Name);
+        }
+
+        private Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property.Name);
@@ -382,13 +390,13 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private Expression BindUnaryOperatorQueryNode(UnaryOperatorQueryNode unaryOperatorQueryNode)
+        private Expression BindUnaryOperatorNode(UnaryOperatorNode unaryOperatorNode)
         {
             // No need to handle null-propagation here as CLR already handles it.
             // !(null) = null
             // -(null) = null
-            Expression inner = Bind(unaryOperatorQueryNode.Operand);
-            switch (unaryOperatorQueryNode.OperatorKind)
+            Expression inner = Bind(unaryOperatorNode.Operand);
+            switch (unaryOperatorNode.OperatorKind)
             {
                 case UnaryOperatorKind.Negate:
                     return Expression.Negate(inner);
@@ -397,11 +405,11 @@ namespace System.Web.Http.OData.Query.Expressions
                     return Expression.Not(inner);
 
                 default:
-                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, unaryOperatorQueryNode.Kind, typeof(FilterBinder).Name);
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, unaryOperatorNode.Kind, typeof(FilterBinder).Name);
             }
         }
 
-        private Expression BindSingleValueFunctionCallQueryNode(SingleValueFunctionCallQueryNode node)
+        private Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
             switch (node.Name)
             {
@@ -566,7 +574,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return CreateFunctionCallWithNullPropagation(functionCall, arguments);
         }
 
-        private Expression BindCeiling(SingleValueFunctionCallQueryNode node)
+        private Expression BindCeiling(SingleValueFunctionCallNode node)
         {
             Contract.Assert("ceiling" == node.Name);
 
@@ -577,7 +585,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Ceiling, arguments);
         }
 
-        private Expression BindFloor(SingleValueFunctionCallQueryNode node)
+        private Expression BindFloor(SingleValueFunctionCallNode node)
         {
             Contract.Assert("floor" == node.Name);
 
@@ -588,7 +596,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Floor, arguments);
         }
 
-        private Expression BindRound(SingleValueFunctionCallQueryNode node)
+        private Expression BindRound(SingleValueFunctionCallNode node)
         {
             Contract.Assert("round" == node.Name);
 
@@ -599,7 +607,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Round, arguments);
         }
 
-        private Expression BindDateOrDateTimeOffsetProperty(SingleValueFunctionCallQueryNode node)
+        private Expression BindDateOrDateTimeOffsetProperty(SingleValueFunctionCallNode node)
         {
             Expression[] arguments = BindArguments(node.Arguments);
 
@@ -620,7 +628,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(property, arguments);
         }
 
-        private Expression BindTimeSpanProperty(SingleValueFunctionCallQueryNode node)
+        private Expression BindTimeSpanProperty(SingleValueFunctionCallNode node)
         {
             Expression[] arguments = BindArguments(node.Arguments);
 
@@ -630,7 +638,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.TimeSpanProperties[node.Name], arguments);
         }
 
-        private Expression BindConcat(SingleValueFunctionCallQueryNode node)
+        private Expression BindConcat(SingleValueFunctionCallNode node)
         {
             Contract.Assert("concat" == node.Name);
 
@@ -642,7 +650,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Concat, arguments);
         }
 
-        private Expression BindTrim(SingleValueFunctionCallQueryNode node)
+        private Expression BindTrim(SingleValueFunctionCallNode node)
         {
             Contract.Assert("trim" == node.Name);
 
@@ -654,7 +662,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Trim, arguments);
         }
 
-        private Expression BindToUpper(SingleValueFunctionCallQueryNode node)
+        private Expression BindToUpper(SingleValueFunctionCallNode node)
         {
             Contract.Assert("toupper" == node.Name);
 
@@ -666,7 +674,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.ToUpper, arguments);
         }
 
-        private Expression BindToLower(SingleValueFunctionCallQueryNode node)
+        private Expression BindToLower(SingleValueFunctionCallNode node)
         {
             Contract.Assert("tolower" == node.Name);
 
@@ -678,7 +686,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.ToLower, arguments);
         }
 
-        private Expression BindIndexOf(SingleValueFunctionCallQueryNode node)
+        private Expression BindIndexOf(SingleValueFunctionCallNode node)
         {
             Contract.Assert("indexof" == node.Name);
 
@@ -690,7 +698,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.IndexOf, arguments);
         }
 
-        private Expression BindSubstring(SingleValueFunctionCallQueryNode node)
+        private Expression BindSubstring(SingleValueFunctionCallNode node)
         {
             Contract.Assert("substring" == node.Name);
 
@@ -740,7 +748,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return functionCall;
         }
 
-        private Expression BindLength(SingleValueFunctionCallQueryNode node)
+        private Expression BindLength(SingleValueFunctionCallNode node)
         {
             Contract.Assert("length" == node.Name);
 
@@ -752,7 +760,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Length, arguments);
         }
 
-        private Expression BindSubstringOf(SingleValueFunctionCallQueryNode node)
+        private Expression BindSubstringOf(SingleValueFunctionCallNode node)
         {
             Contract.Assert("substringof" == node.Name);
 
@@ -765,7 +773,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.Contains, arguments[1], arguments[0]);
         }
 
-        private Expression BindStartsWith(SingleValueFunctionCallQueryNode node)
+        private Expression BindStartsWith(SingleValueFunctionCallNode node)
         {
             Contract.Assert("startswith" == node.Name);
 
@@ -777,7 +785,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.StartsWith, arguments);
         }
 
-        private Expression BindEndsWith(SingleValueFunctionCallQueryNode node)
+        private Expression BindEndsWith(SingleValueFunctionCallNode node)
         {
             Contract.Assert("endswith" == node.Name);
 
@@ -791,7 +799,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)
         {
-            return nodes.OfType<SingleValueQueryNode>().Select(n => Bind(n)).ToArray();
+            return nodes.OfType<SingleValueNode>().Select(n => Bind(n)).ToArray();
         }
 
         private static void ValidateAllStringArguments(string functionName, Expression[] arguments)
@@ -802,7 +810,7 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private Expression BindAllQueryNode(AllQueryNode allQueryNode)
+        private Expression BindAllNode(AllNode allNode)
         {
             EnterLambda();
 
@@ -810,16 +818,16 @@ namespace System.Web.Http.OData.Query.Expressions
 
             try
             {
-                ParameterExpression allIt = HandleLambdaParameters(allQueryNode.Parameters);
+                ParameterExpression allIt = HandleLambdaParameters(allNode.RangeVariables);
 
                 Expression source;
-                Contract.Assert(allQueryNode.Source != null);
-                source = Bind(allQueryNode.Source);
+                Contract.Assert(allNode.Source != null);
+                source = Bind(allNode.Source);
 
                 Expression body = source;
-                Contract.Assert(allQueryNode.Body != null);
+                Contract.Assert(allNode.Body != null);
 
-                body = Bind(allQueryNode.Body);
+                body = Bind(allNode.Body);
                 body = ApplyNullPropagationForFilterBody(body);
                 body = Expression.Lambda(body, allIt);
 
@@ -847,7 +855,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return returnValue;
         }
 
-        private Expression BindAnyQueryNode(AnyQueryNode anyQueryNode)
+        private Expression BindAnyNode(AnyNode anyNode)
         {
             EnterLambda();
 
@@ -855,17 +863,17 @@ namespace System.Web.Http.OData.Query.Expressions
 
             try
             {
-                ParameterExpression anyIt = HandleLambdaParameters(anyQueryNode.Parameters);
+                ParameterExpression anyIt = HandleLambdaParameters(anyNode.RangeVariables);
 
                 Expression source;
-                Contract.Assert(anyQueryNode.Source != null);
-                source = Bind(anyQueryNode.Source);
+                Contract.Assert(anyNode.Source != null);
+                source = Bind(anyNode.Source);
 
                 Expression body = null;
                 // uri parser places an Constant node with value true for empty any() body
-                if (anyQueryNode.Body != null && anyQueryNode.Body.Kind != QueryNodeKind.Constant)
+                if (anyNode.Body != null && anyNode.Body.Kind != QueryNodeKind.Constant)
                 {
-                    body = Bind(anyQueryNode.Body);
+                    body = Bind(anyNode.Body);
                     body = ApplyNullPropagationForFilterBody(body);
                     body = Expression.Lambda(body, anyIt);
                 }
@@ -894,7 +902,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return returnValue;
         }
 
-        private ParameterExpression HandleLambdaParameters(IEnumerable<ParameterQueryNode> parameters)
+        private ParameterExpression HandleLambdaParameters(IEnumerable<RangeVariable> rangeVariables)
         {
             ParameterExpression lambdaIt = null;
 
@@ -902,15 +910,15 @@ namespace System.Web.Http.OData.Query.Expressions
             _parametersStack.Push(_lambdaParameters);
 
             Dictionary<string, ParameterExpression> newParameters = new Dictionary<string, ParameterExpression>();
-            foreach (ParameterQueryNode parameterNode in parameters)
+            foreach (RangeVariable rangeVariable in rangeVariables)
             {
                 ParameterExpression parameter;
-                if (!_lambdaParameters.TryGetValue(parameterNode.Name, out parameter))
+                if (!_lambdaParameters.TryGetValue(rangeVariable.Name, out parameter))
                 {
                     // Work-around issue 481323 where UriParser yields a collection parameter type
                     // for primitive collections rather than the inner element type of the collection.
                     // Remove this block of code when 481323 is resolved.
-                    IEdmTypeReference edmTypeReference = parameterNode.ParameterType;
+                    IEdmTypeReference edmTypeReference = rangeVariable.TypeReference;
                     IEdmCollectionTypeReference collectionTypeReference = edmTypeReference as IEdmCollectionTypeReference;
                     if (collectionTypeReference != null)
                     {
@@ -921,11 +929,11 @@ namespace System.Web.Http.OData.Query.Expressions
                         }
                     }
 
-                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(edmTypeReference, _model, _assembliesResolver), parameterNode.Name);
+                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(edmTypeReference, _model, _assembliesResolver), rangeVariable.Name);
                     Contract.Assert(lambdaIt == null, "There can be only one parameter in an Any/All lambda");
                     lambdaIt = parameter;
                 }
-                newParameters.Add(parameterNode.Name, parameter);
+                newParameters.Add(rangeVariable.Name, parameter);
             }
 
             _lambdaParameters = newParameters;

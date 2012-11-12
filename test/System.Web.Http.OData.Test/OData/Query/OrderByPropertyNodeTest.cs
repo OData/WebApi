@@ -3,9 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
@@ -39,48 +37,33 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void CreateCollection_From_OrderByQueryNode_Succeeds()
+        public void CreateCollection_From_OrderByNode_Succeeds()
         {
             // Arrange
-            Mock<IEdmTypeReference> mockTypeReference1 = new Mock<IEdmTypeReference>();
-            Mock<IEdmTypeReference> mockTypeReference2 = new Mock<IEdmTypeReference>();
-            Mock<IEdmProperty> mockProperty1 = new Mock<IEdmProperty>();
-            mockProperty1.SetupGet<IEdmTypeReference>(p => p.Type).Returns(mockTypeReference1.Object);
-            Mock<IEdmProperty> mockProperty2 = new Mock<IEdmProperty>();
-            mockProperty1.SetupGet<IEdmTypeReference>(p => p.Type).Returns(mockTypeReference2.Object);
-            PropertyAccessQueryNode propertyAccessQueryNode1 = new PropertyAccessQueryNode()
-            {
-                Property = mockProperty1.Object,
-            };
-            PropertyAccessQueryNode propertyAccessQueryNode2 = new PropertyAccessQueryNode()
-            {
-                Property = mockProperty2.Object,
-            };
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<SampleClass>("entityset");
 
-            OrderByQueryNode queryNode1 = new OrderByQueryNode()
-            {
-                Direction = OrderByDirection.Descending,
-                Collection = null,
-                Expression = propertyAccessQueryNode1
-            };
-
-            OrderByQueryNode queryNode2 = new OrderByQueryNode()
-            {
-                Direction = OrderByDirection.Ascending,
-                Collection = queryNode1,
-                Expression = propertyAccessQueryNode2
-            };
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType sampleClassEntityType = model.SchemaElements.Single(t => t.Name == "SampleClass") as IEdmEntityType;
+            OrderByClause orderbyNode = ODataUriParser.ParseOrderBy("Property1 desc, Property2 asc", model, sampleClassEntityType);
 
             // Act
-            ICollection<OrderByPropertyNode> nodes = OrderByPropertyNode.CreateCollection(queryNode2);
+            ICollection<OrderByPropertyNode> nodes = OrderByPropertyNode.CreateCollection(orderbyNode);
 
             // Assert
             Assert.Equal(2, nodes.Count);
-            Assert.ReferenceEquals(mockProperty1.Object, nodes.First().Property);
+            Assert.Equal("Property1", nodes.First().Property.Name);
             Assert.Equal(OrderByDirection.Descending, nodes.First().Direction);
 
-            Assert.ReferenceEquals(mockProperty2.Object, nodes.Last().Property);
+            Assert.ReferenceEquals("Property2", nodes.Last().Property.Name);
             Assert.Equal(OrderByDirection.Ascending, nodes.Last().Direction);
+        }
+
+        private class SampleClass
+        {
+            public string Property1 { get; set; }
+
+            public string Property2 { get; set; }
         }
     }
 }

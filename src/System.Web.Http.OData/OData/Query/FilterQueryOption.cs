@@ -2,7 +2,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http.Dispatcher;
@@ -20,7 +19,7 @@ namespace System.Web.Http.OData.Query
     public class FilterQueryOption
     {
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
-        private FilterQueryNode _queryNode;
+        private FilterClause _filterClause;
         private FilterQueryValidator _validator;
 
         /// <summary>
@@ -72,26 +71,18 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets the <see cref="FilterQueryNode"/> for this query option.
+        /// Gets the parsed <see cref="FilterClause"/> for this query option.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification = "TODO: remove this when implement TODO below")]
-        public FilterQueryNode QueryNode
+        public FilterClause FilterClause
         {
             get
             {
-                if (_queryNode == null)
+                if (_filterClause == null)
                 {
-                    // TODO: Bug 462293: 
-                    //  -   we should be using the real uri
-                    //  -   we should be parsing the whole URL once (including all query options) and using what we get from that
-                    //      but the UriParser need to change from a linked list style tree (semantic ordering of operations pre-applied) to 
-                    //      a flower style tree first. So for now we are rebuilding the just part of the Uri that is important for parsing $filter.
-                    Uri fakeServiceRootUri = new Uri("http://server/");
-                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, String.Format(CultureInfo.InvariantCulture, "{0}/?$filter={1}", Context.EntitySet.Name, Uri.EscapeDataString(RawValue)));
-                    SemanticTree semanticTree = SemanticTree.ParseUri(fakeQueryOptionsUri, fakeServiceRootUri, Context.Model);
-                    _queryNode = semanticTree.Query as FilterQueryNode;
+                    _filterClause = ODataUriParser.ParseFilter(RawValue, Context.Model, Context.EntitySet.ElementType);
                 }
-                return _queryNode;
+
+                return _filterClause;
             }
         }
 
@@ -143,10 +134,10 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("assembliesResolver");
             }
 
-            FilterQueryNode node = QueryNode;
-            Contract.Assert(node != null);
+            FilterClause filterClause = FilterClause;
+            Contract.Assert(filterClause != null);
 
-            Expression filter = FilterBinder.Bind(node, Context.EntityClrType, Context.Model, assembliesResolver, querySettings);
+            Expression filter = FilterBinder.Bind(filterClause, Context.EntityClrType, Context.Model, assembliesResolver, querySettings);
             query = ExpressionHelpers.Where(query, filter, Context.EntityClrType);
             return query;
         }

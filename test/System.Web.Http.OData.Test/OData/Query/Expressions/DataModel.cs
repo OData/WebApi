@@ -32,6 +32,9 @@ namespace System.Web.Http.OData.Query.Expressions
         public Category Category { get; set; }
 
         public Address SupplierAddress { get; set; }
+
+        public int[] AlternateIDs { get; set; }
+        public Address[] AlternateAddresses { get; set; }
     }
 
     public class Category

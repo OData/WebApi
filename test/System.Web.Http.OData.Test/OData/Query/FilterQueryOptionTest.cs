@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.Edm;
@@ -50,11 +49,11 @@ namespace System.Web.Http.OData.Query
             {
                 List<Customer> customerList = new List<Customer>();
 
-                Customer c = new Customer 
-                { 
-                    CustomerId = 1, 
-                    Name = "Lowest", 
-                    Address = new Address { City = "redmond" }, 
+                Customer c = new Customer
+                {
+                    CustomerId = 1,
+                    Name = "Lowest",
+                    Address = new Address { City = "redmond" },
                 };
                 c.Orders = new List<Order>
                 {
@@ -63,29 +62,29 @@ namespace System.Web.Http.OData.Query
                 };
                 customerList.Add(c);
 
-                c = new Customer 
-                { 
-                    CustomerId = 2, 
-                    Name = "Highest", 
+                c = new Customer
+                {
+                    CustomerId = 2,
+                    Name = "Highest",
                     Address = new Address { City = "seattle" },
-                    Aliases = new List<string> {"alias2", "alias2"} 
+                    Aliases = new List<string> { "alias2", "alias2" }
                 };
                 customerList.Add(c);
 
-                c = new Customer 
-                { 
-                    CustomerId = 3, 
+                c = new Customer
+                {
+                    CustomerId = 3,
                     Name = "Middle",
                     Address = new Address { City = "hobart" },
-                    Aliases = new List<string> {"alias2", "alias34", "alias31"} 
+                    Aliases = new List<string> { "alias2", "alias34", "alias31" }
                 };
                 customerList.Add(c);
 
-                c = new Customer 
-                { 
-                    CustomerId = 4, 
-                    Name = "NewLow", 
-                    Aliases = new List<string> {"alias34", "alias4"} 
+                c = new Customer
+                {
+                    CustomerId = 4,
+                    Name = "NewLow",
+                    Aliases = new List<string> { "alias34", "alias4" }
                 };
                 customerList.Add(c);
 
@@ -222,15 +221,15 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer), "Customers");
             var filter = new FilterQueryOption("Name eq 'MSFT'", context);
-            var node = filter.QueryNode;
+            var node = filter.FilterClause;
 
             Assert.Equal(QueryNodeKind.BinaryOperator, node.Expression.Kind);
-            var binaryNode = node.Expression as BinaryOperatorQueryNode;
+            var binaryNode = node.Expression as BinaryOperatorNode;
             Assert.Equal(BinaryOperatorKind.Equal, binaryNode.OperatorKind);
             Assert.Equal(QueryNodeKind.Constant, binaryNode.Right.Kind);
-            Assert.Equal("MSFT", ((ConstantQueryNode)binaryNode.Right).Value);
-            Assert.Equal(QueryNodeKind.PropertyAccess, binaryNode.Left.Kind);
-            var propertyAccessNode = binaryNode.Left as PropertyAccessQueryNode;
+            Assert.Equal("MSFT", ((ConstantNode)binaryNode.Right).Value);
+            Assert.Equal(QueryNodeKind.SingleValuePropertyAccess, binaryNode.Left.Kind);
+            var propertyAccessNode = binaryNode.Left as SingleValuePropertyAccessNode;
             Assert.Equal("Name", propertyAccessNode.Property.Name);
         }
 
@@ -240,23 +239,15 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer), "Customers");
             var filter = new FilterQueryOption("Aliases/any(a: a eq 'alias')", context);
-            var node = filter.QueryNode;
-            var anyNode = node.Expression as AnyQueryNode;
-            var aParameter = anyNode.Parameters.SingleOrDefault(p => p.Name == "a");
-            var aParameterType = aParameter.ParameterType.Definition as IEdmPrimitiveType;
+            var node = filter.FilterClause;
+            var anyNode = node.Expression as AnyNode;
+            var aParameter = anyNode.RangeVariables.SingleOrDefault(p => p.Name == "a");
+            var aParameterType = aParameter.TypeReference.Definition as IEdmPrimitiveType;
 
             Assert.NotNull(aParameter);
 
-            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
-            // the test once the bug is fixed).
-            // The following asserts show the behavior with the bug and should be removed once the bug is fixed.
-            Assert.Null(aParameterType);
+            Assert.NotNull(aParameterType);
             Assert.Equal("a", aParameter.Name);
-
-            // TODO: Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly
-            // The following asserts show the behavior without the bug, and should be enabled once the bug is fixed.
-            //Assert.NotNull(aParameterType);
-            //Assert.Equal("Address", aParameter.Name); 
         }
 
         [Fact]
@@ -265,23 +256,15 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().Add_Address_ComplexType().GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer), "Customers");
             var filter = new FilterQueryOption("Addresses/any(a: a/HouseNumber eq 1)", context);
-            var node = filter.QueryNode;
-            var anyNode = node.Expression as AnyQueryNode;
-            var aParameter = anyNode.Parameters.SingleOrDefault(p => p.Name == "a");
-            var aParameterType = aParameter.ParameterType.Definition as IEdmComplexType;
+            var node = filter.FilterClause;
+            var anyNode = node.Expression as AnyNode;
+            var aParameter = anyNode.RangeVariables.SingleOrDefault(p => p.Name == "a");
+            var aParameterType = aParameter.TypeReference.Definition as IEdmComplexType;
 
             Assert.NotNull(aParameter);
 
-            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
-            // the test once the bug is fixed).
-            // The following asserts show the behavior with the bug and should be removed once the bug is fixed.
-            Assert.Null(aParameterType);
+            Assert.NotNull(aParameterType);
             Assert.Equal("a", aParameter.Name);
-
-            // TODO: Enable once Uri Parser sets parameters of Any/All bound to CollectionProperty correctly
-            // The following asserts show the behavior without the bug, and should be enabled once the bug is fixed.
-            //Assert.NotNull(aParameterType);
-            //Assert.Equal("Address", aParameter.Name); 
         }
 
         [Fact]
@@ -355,7 +338,7 @@ namespace System.Web.Http.OData.Query
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<EnumModel>("EnumModels");
             var model = builder.GetEdmModel();
-            
+
             var context = new ODataQueryContext(model, typeof(EnumModel), "EnumModels");
             var filterOption = new FilterQueryOption(filter, context);
             IEnumerable<EnumModel> enumModels = EnumModelTestData;

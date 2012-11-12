@@ -5,8 +5,6 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
@@ -161,6 +159,7 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(3, results[1].CustomerId);
             Assert.Equal(1, results[2].CustomerId);
         }
+
         [Fact]
         [Trait("Description", "Can apply a OrderByDescending followed by ThenBy")]
         public void CanApplyOrderByDescThenBy()

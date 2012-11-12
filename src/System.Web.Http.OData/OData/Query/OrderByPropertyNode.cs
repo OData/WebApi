@@ -10,8 +10,7 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// Class describing the <see cref="IEdmProperty"/> and 
-    /// <see cref="OrderByDirection"/> for a single property
+    /// Class describing the <see cref="IEdmProperty"/> and <see cref="OrderByDirection"/> for a single property
     /// in an OrderBy expression.
     /// </summary>
     public class OrderByPropertyNode
@@ -43,30 +42,22 @@ namespace System.Web.Http.OData.Query
         public OrderByDirection Direction { get; private set; }
 
         /// <summary>
-        /// Creates a collection of <see cref="OrderByPropertyNode"/>
-        /// instances from a linked list of <see cref="OrderByQueryNode"/>
-        /// instances.
+        /// Creates a collection of <see cref="OrderByPropertyNode"/> instances from a linked list of <see cref="OrderByClause"/> instances.
         /// </summary>
-        /// <remarks>The order of the items in the <see cref="OrderByQueryNode"/>
-        /// linked list will be reversed in the <see cref="OrderByPropertyNode"/>
-        /// collection.</remarks>
-        /// <param name="node">The head of the <see cref="OrderByQueryNode"/>
-        /// linked list.</param>
+        /// <param name="orderByClause">The head of the <see cref="OrderByClause"/> linked list.</param>
         /// <returns>The collection of new <see cref="OrderByPropertyNode"/> instances.</returns>
-        public static ICollection<OrderByPropertyNode> CreateCollection(OrderByQueryNode node)
+        public static ICollection<OrderByPropertyNode> CreateCollection(OrderByClause orderByClause)
         {
             LinkedList<OrderByPropertyNode> result = new LinkedList<OrderByPropertyNode>();
-            for (OrderByQueryNode currentNode = node; 
-                 currentNode != null; 
-                 currentNode = currentNode.Collection as OrderByQueryNode)
+            for (OrderByClause clause = orderByClause; clause != null; clause = clause.ThenBy)
             {
-                PropertyAccessQueryNode property = currentNode.Expression as PropertyAccessQueryNode;
+                SingleValuePropertyAccessNode property = clause.Expression as SingleValuePropertyAccessNode;
 
                 if (property == null)
                 {
                     throw new ODataException(SRResources.OrderByPropertyNotFound);
                 }
-                result.AddFirst(new OrderByPropertyNode(property.Property, currentNode.Direction));
+                result.AddLast(new OrderByPropertyNode(property.Property, clause.Direction));
             }
 
             return result;

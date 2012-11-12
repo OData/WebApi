@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query.Validators;
@@ -17,7 +16,7 @@ namespace System.Web.Http.OData.Query
     /// </summary>
     public class OrderByQueryOption
     {
-        private OrderByQueryNode _queryNode;
+        private OrderByClause _orderByClause;
         private ICollection<OrderByPropertyNode> _propertyNodes;
         private OrderByQueryValidator _validator;
 
@@ -46,7 +45,7 @@ namespace System.Web.Http.OData.Query
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>.
-        /// </summary>        
+        /// </summary>
         public ODataQueryContext Context { get; private set; }
 
         /// <summary>
@@ -62,7 +61,7 @@ namespace System.Web.Http.OData.Query
             {
                 if (_propertyNodes == null)
                 {
-                    _propertyNodes = OrderByPropertyNode.CreateCollection(QueryNode);
+                    _propertyNodes = OrderByPropertyNode.CreateCollection(OrderByClause);
                 }
                 return _propertyNodes;
             }
@@ -94,22 +93,17 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets the <see cref="OrderByQueryNode"/> for this query option.
+        /// Gets the parsed <see cref="OrderByClause"/> for this query option.
         /// </summary>
-        private OrderByQueryNode QueryNode
+        private OrderByClause OrderByClause
         {
             get
             {
-                if (_queryNode == null)
+                if (_orderByClause == null)
                 {
-                    // TODO: Bug 462293: Review this code with Alex!
-                    // 1. Do I need to create this fake uri?
-                    Uri fakeServiceRootUri = new Uri("http://server/");
-                    Uri fakeQueryOptionsUri = new Uri(fakeServiceRootUri, String.Format(CultureInfo.InvariantCulture, "{0}/?$orderby={1}", Context.EntitySet.Name, Uri.EscapeDataString(RawValue)));
-                    SemanticTree semanticTree = SemanticTree.ParseUri(fakeQueryOptionsUri, fakeServiceRootUri, Context.Model);
-                    _queryNode = semanticTree.Query as OrderByQueryNode;
+                    _orderByClause = ODataUriParser.ParseOrderBy(RawValue, Context.Model, Context.EntitySet.ElementType);
                 }
-                return _queryNode;
+                return _orderByClause;
             }
         }
 

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
+using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 
 namespace System.Web.Http.OData.Builder.Conventions
@@ -109,7 +110,8 @@ namespace System.Web.Http.OData.Builder.Conventions
             Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(value.GetType()) != null);
 
             value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
-            return ODataUriBuilder.GetUriRepresentation(value);
+
+            return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V3);
         }
 
         private static string GetUriRepresentationForKeyValue(PropertyInfo key, object entityInstance, EntityTypeConfiguration entityType)

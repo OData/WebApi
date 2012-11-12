@@ -193,7 +193,7 @@
     <value>The EntityClrType '{0}' does not match with the given entitySet '{1}'.</value>
   </data>
   <data name="OrderByPropertyNotFound" xml:space="preserve">
-    <value>It is unsupported that the OrderByQueryNode.Expression is not an instance of PropertyAccessQueryNode type.</value>
+    <value>It is unsupported that the OrderByNode.Expression is not an instance of PropertyAccessQueryNode type.</value>
   </data>
   <data name="CanNotParseInteger" xml:space="preserve">
     <value>Failed to convert '{0}' to an integer.</value>
@@ -220,7 +220,7 @@
     <value>Binding OData QueryNode of kind {0} is not supported by {1}.</value>
   </data>
   <data name="OrderByDuplicateProperty" xml:space="preserve">
-    <value>Duplicate property named '{0}' is not supported in the OrderByQueryNode.</value>
+    <value>Duplicate property named '{0}' is not supported in the OrderByNode.</value>
   </data>
   <data name="ErrorTypeMustBeODataErrorOrHttpError" xml:space="preserve">
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>

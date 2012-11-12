@@ -10,12 +10,12 @@ using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Query.Validators
-{   
+{
     /// <summary>
     /// Define a validator class used to validate a FilterQueryOption based on the settings
     /// </summary>
     public class FilterQueryValidator
-    {  
+    {
         /// <summary>
         /// The entry point of this validator class. Use this method to validate the FilterQueryOption
         /// </summary>
@@ -31,19 +31,19 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            ValidateQueryNode(filterQueryOption.QueryNode.Expression, settings);
+            ValidateQueryNode(filterQueryOption.FilterClause.Expression, settings);
         }
-       
+
         /// <summary>
         /// Override this method to restrict the 'all' query inside the filter query
         /// </summary>
-        /// <param name="allQueryNode"></param>
+        /// <param name="allNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateAllQueryNode(AllQueryNode allQueryNode, ODataValidationSettings settings)
+        public virtual void ValidateAllNode(AllNode allNode, ODataValidationSettings settings)
         {
-            if (allQueryNode == null)
+            if (allNode == null)
             {
-                throw Error.ArgumentNull("allQueryNode");
+                throw Error.ArgumentNull("allNode");
             }
 
             if (settings == null)
@@ -51,21 +51,21 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            ValidateQueryNode(allQueryNode.Source, settings);
+            ValidateQueryNode(allNode.Source, settings);
 
-            ValidateQueryNode(allQueryNode.Body, settings);
+            ValidateQueryNode(allNode.Body, settings);
         }
 
         /// <summary>
         /// Override this method to restrict the 'any' query inside the filter query
         /// </summary>
-        /// <param name="anyQueryNode"></param>
+        /// <param name="anyNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateAnyQueryNode(AnyQueryNode anyQueryNode, ODataValidationSettings settings)
+        public virtual void ValidateAnyNode(AnyNode anyNode, ODataValidationSettings settings)
         {
-            if (anyQueryNode == null)
+            if (anyNode == null)
             {
-                throw Error.ArgumentNull("anyQueryNode");
+                throw Error.ArgumentNull("anyNode");
             }
 
             if (settings == null)
@@ -73,11 +73,11 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            ValidateQueryNode(anyQueryNode.Source, settings);
+            ValidateQueryNode(anyNode.Source, settings);
 
-            if (anyQueryNode.Body != null && anyQueryNode.Body.Kind != QueryNodeKind.Constant)
+            if (anyNode.Body != null && anyNode.Body.Kind != QueryNodeKind.Constant)
             {
-                ValidateQueryNode(anyQueryNode.Body, settings);
+                ValidateQueryNode(anyNode.Body, settings);
             }
         }
 
@@ -86,7 +86,7 @@ namespace System.Web.Http.OData.Query.Validators
         /// </summary>
         /// <param name="binaryOperatorNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateBinaryOperatorQueryNode(BinaryOperatorQueryNode binaryOperatorNode, ODataValidationSettings settings)
+        public virtual void ValidateBinaryOperatorNode(BinaryOperatorNode binaryOperatorNode, ODataValidationSettings settings)
         {
             if (binaryOperatorNode == null)
             {
@@ -115,18 +115,18 @@ namespace System.Web.Http.OData.Query.Validators
                 default:
                     // math operators
                     ValidateArithmeticOperator(binaryOperatorNode, settings);
-               break;
+                    break;
             }
         }
 
         /// <summary>
         /// Override this method to validate the LogicalOperators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or'.
         /// 
-        /// Please note that 'not' is not included here. Please override ValidateUnaryOperatorQueryNode to customize 'not'.
+        /// Please note that 'not' is not included here. Please override ValidateUnaryOperatorNode to customize 'not'.
         /// </summary>
         /// <param name="binaryNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateLogicalOperator(BinaryOperatorQueryNode binaryNode, ODataValidationSettings settings)
+        public virtual void ValidateLogicalOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)
         {
             if (binaryNode == null)
             {
@@ -156,7 +156,7 @@ namespace System.Web.Http.OData.Query.Validators
         /// </summary>
         /// <param name="binaryNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateArithmeticOperator(BinaryOperatorQueryNode binaryNode, ODataValidationSettings settings)
+        public virtual void ValidateArithmeticOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)
         {
             if (binaryNode == null)
             {
@@ -186,7 +186,7 @@ namespace System.Web.Http.OData.Query.Validators
         /// </summary>
         /// <param name="constantNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateConstantQueryNode(ConstantQueryNode constantNode, ODataValidationSettings settings)
+        public virtual void ValidateConstantNode(ConstantNode constantNode, ODataValidationSettings settings)
         {
             if (constantNode == null)
             {
@@ -198,19 +198,19 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-           // no default validation logic here
+            // no default validation logic here
         }
 
         /// <summary>
         /// Override this method to restrict the 'cast' inside the filter query.
         /// </summary>
-        /// <param name="convertQueryNode"></param>
+        /// <param name="convertNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateConvertQueryNode(ConvertQueryNode convertQueryNode, ODataValidationSettings settings)
+        public virtual void ValidateConvertNode(ConvertNode convertNode, ODataValidationSettings settings)
         {
-            if (convertQueryNode == null)
+            if (convertNode == null)
             {
-                throw Error.ArgumentNull("convertQueryNode");
+                throw Error.ArgumentNull("convertNode");
             }
 
             if (settings == null)
@@ -219,7 +219,7 @@ namespace System.Web.Http.OData.Query.Validators
             }
 
             // no default validation logic here
-            ValidateQueryNode(convertQueryNode.Source, settings);
+            ValidateQueryNode(convertNode.Source, settings);
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace System.Web.Http.OData.Query.Validators
         /// <param name="navigationProperty"></param>
         /// <param name="settings"></param>
         public virtual void ValidateNavigationPropertyNode(QueryNode sourceNode, IEdmNavigationProperty navigationProperty, ODataValidationSettings settings)
-        {  
+        {
             if (settings == null)
             {
                 throw Error.ArgumentNull("settings");
@@ -247,13 +247,13 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate the parameter used in the filter query
         /// </summary>
-        /// <param name="parameterQueryNode"></param>
+        /// <param name="rangeVariable"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateParameterQueryNode(ParameterQueryNode parameterQueryNode, ODataValidationSettings settings)
+        public virtual void ValidateRangeVariable(RangeVariable rangeVariable, ODataValidationSettings settings)
         {
-            if (parameterQueryNode == null)
+            if (rangeVariable == null)
             {
-                throw Error.ArgumentNull("parameterQueryNode");
+                throw Error.ArgumentNull("rangeVariable");
             }
 
             if (settings == null)
@@ -265,11 +265,32 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate property accesser
+        /// Override this method to validate property accessor
         /// </summary>
         /// <param name="propertyAccessNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidatePropertyAccessQueryNode(PropertyAccessQueryNode propertyAccessNode, ODataValidationSettings settings)
+        public virtual void ValidateSingleValuePropertyAccessNode(SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
+        {
+            if (propertyAccessNode == null)
+            {
+                throw Error.ArgumentNull("propertyAccessNode");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+
+            // no default validation logic here 
+            ValidateQueryNode(propertyAccessNode.Source, settings);
+        }
+
+        /// <summary>
+        /// Override this method to validate collection property accessor
+        /// </summary>
+        /// <param name="propertyAccessNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateCollectionPropertyAccessNode(CollectionPropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
         {
             if (propertyAccessNode == null)
             {
@@ -290,7 +311,7 @@ namespace System.Web.Http.OData.Query.Validators
         /// </summary>
         /// <param name="node"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateSingleValueFunctionCallQueryNode(SingleValueFunctionCallQueryNode node, ODataValidationSettings settings)
+        public virtual void ValidateSingleValueFunctionCallNode(SingleValueFunctionCallNode node, ODataValidationSettings settings)
         {
             if (node == null)
             {
@@ -313,19 +334,19 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate the Not operator
         /// </summary>
-        /// <param name="unaryOperatorQueryNode"></param>
+        /// <param name="unaryOperatorNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateUnaryOperatorQueryNode(UnaryOperatorQueryNode unaryOperatorQueryNode, ODataValidationSettings settings)
+        public virtual void ValidateUnaryOperatorNode(UnaryOperatorNode unaryOperatorNode, ODataValidationSettings settings)
         {
-            ValidateQueryNode(unaryOperatorQueryNode.Operand, settings);
+            ValidateQueryNode(unaryOperatorNode.Operand, settings);
 
-            switch (unaryOperatorQueryNode.OperatorKind)
+            switch (unaryOperatorNode.OperatorKind)
             {
                 case UnaryOperatorKind.Negate:
                 case UnaryOperatorKind.Not:
                     if ((settings.AllowedLogicalOperators & AllowedLogicalOperators.Not) != AllowedLogicalOperators.Not)
                     {
-                        throw new ODataException(Error.Format(SRResources.NotAllowedLogicalOperator, unaryOperatorQueryNode.OperatorKind, "AllowedLogicalOperators"));
+                        throw new ODataException(Error.Format(SRResources.NotAllowedLogicalOperator, unaryOperatorNode.OperatorKind, "AllowedLogicalOperators"));
                     }
                     break;
             }
@@ -338,83 +359,87 @@ namespace System.Web.Http.OData.Query.Validators
         /// <param name="settings"></param>
         public virtual void ValidateQueryNode(QueryNode node, ODataValidationSettings settings)
         {
-            SingleValueQueryNode singleNode = node as SingleValueQueryNode;
-            CollectionQueryNode collectionNode = node as CollectionQueryNode;
+            SingleValueNode singleNode = node as SingleValueNode;
+            CollectionNode collectionNode = node as CollectionNode;
 
             if (singleNode != null)
             {
-                ValidateSingleValueQueryNode(singleNode, settings);
+                ValidateSingleValueNode(singleNode, settings);
             }
             else if (collectionNode != null)
             {
-                ValidateCollectionQueryNode(collectionNode, settings);
+                ValidateCollectionNode(collectionNode, settings);
             }
         }
 
-        private void ValidateCollectionQueryNode(CollectionQueryNode node, ODataValidationSettings settings)
+        private void ValidateCollectionNode(CollectionNode node, ODataValidationSettings settings)
         {
             switch (node.Kind)
             {
-                case QueryNodeKind.Filter:
-                    FilterQueryNode filterNode = node as FilterQueryNode;
-                    ValidateSingleValueQueryNode(filterNode.Expression, settings);
+                case QueryNodeKind.CollectionPropertyAccess:
+                    CollectionPropertyAccessNode propertyAccessNode = node as CollectionPropertyAccessNode;
+                    ValidateCollectionPropertyAccessNode(propertyAccessNode, settings);
                     break;
 
-                case QueryNodeKind.Segment:
+                case QueryNodeKind.CollectionNavigationNode:
                     CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
-                    ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty(), settings);
+                    ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
                     break;
             }
         }
 
         /// <summary>
-        /// The recursive method that validate most of the query node type is of SingleValueQueryNode type.
+        /// The recursive method that validate most of the query node type is of SingleValueNode type.
         /// </summary>
         /// <param name="node"></param>
         /// <param name="settings"></param>
-        private void ValidateSingleValueQueryNode(SingleValueQueryNode node, ODataValidationSettings settings)
+        private void ValidateSingleValueNode(SingleValueNode node, ODataValidationSettings settings)
         {
             switch (node.Kind)
             {
                 case QueryNodeKind.BinaryOperator:
-                    ValidateBinaryOperatorQueryNode(node as BinaryOperatorQueryNode, settings);
+                    ValidateBinaryOperatorNode(node as BinaryOperatorNode, settings);
                     break;
 
                 case QueryNodeKind.Constant:
-                    ValidateConstantQueryNode(node as ConstantQueryNode, settings);
+                    ValidateConstantNode(node as ConstantNode, settings);
                     break;
 
                 case QueryNodeKind.Convert:
-                    ValidateConvertQueryNode(node as ConvertQueryNode, settings);
+                    ValidateConvertNode(node as ConvertNode, settings);
                     break;
 
-                case QueryNodeKind.Parameter:
-                    ValidateParameterQueryNode(node as ParameterQueryNode, settings);
+                case QueryNodeKind.EntityRangeVariableReference:
+                    ValidateRangeVariable((node as EntityRangeVariableReferenceNode).RangeVariable, settings);
                     break;
 
-                case QueryNodeKind.PropertyAccess:
-                    ValidatePropertyAccessQueryNode(node as PropertyAccessQueryNode, settings);
+                case QueryNodeKind.NonentityRangeVariableReference:
+                    ValidateRangeVariable((node as NonentityRangeVariableReferenceNode).RangeVariable, settings);
+                    break;
+
+                case QueryNodeKind.SingleValuePropertyAccess:
+                    ValidateSingleValuePropertyAccessNode(node as SingleValuePropertyAccessNode, settings);
                     break;
 
                 case QueryNodeKind.UnaryOperator:
-                    ValidateUnaryOperatorQueryNode(node as UnaryOperatorQueryNode, settings);
+                    ValidateUnaryOperatorNode(node as UnaryOperatorNode, settings);
                     break;
 
                 case QueryNodeKind.SingleValueFunctionCall:
-                    ValidateSingleValueFunctionCallQueryNode(node as SingleValueFunctionCallQueryNode, settings);
+                    ValidateSingleValueFunctionCallNode(node as SingleValueFunctionCallNode, settings);
                     break;
 
-                case QueryNodeKind.Segment:
-                    SingletonNavigationNode navigationNode = node as SingletonNavigationNode;
+                case QueryNodeKind.SingleNavigationNode:
+                    SingleNavigationNode navigationNode = node as SingleNavigationNode;
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
                     break;
 
                 case QueryNodeKind.Any:
-                    ValidateAnyQueryNode(node as AnyQueryNode, settings);
+                    ValidateAnyNode(node as AnyNode, settings);
                     break;
 
                 case QueryNodeKind.All:
-                    ValidateAllQueryNode(node as AllQueryNode, settings);
+                    ValidateAllNode(node as AllNode, settings);
                     break;
 
                 default:
@@ -535,7 +560,7 @@ namespace System.Web.Http.OData.Query.Validators
             return result;
         }
 
-        private static AllowedLogicalOperators ToLogicalOperator(BinaryOperatorQueryNode binaryNode)
+        private static AllowedLogicalOperators ToLogicalOperator(BinaryOperatorNode binaryNode)
         {
             AllowedLogicalOperators result = AllowedLogicalOperators.None;
 
@@ -574,7 +599,7 @@ namespace System.Web.Http.OData.Query.Validators
                     break;
 
                 default:
-                      // should never be here
+                    // should never be here
                     Contract.Assert(false, "ToLogicalOperator should never be here.");
                     break;
             }
@@ -582,7 +607,7 @@ namespace System.Web.Http.OData.Query.Validators
             return result;
         }
 
-        private static AllowedArithmeticOperators ToArithmeticOperator(BinaryOperatorQueryNode binaryNode)
+        private static AllowedArithmeticOperators ToArithmeticOperator(BinaryOperatorNode binaryNode)
         {
             AllowedArithmeticOperators result = AllowedArithmeticOperators.None;
 

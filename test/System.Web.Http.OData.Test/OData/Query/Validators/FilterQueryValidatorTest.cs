@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 
@@ -15,7 +16,7 @@ namespace System.Web.Http.OData.Query.Validators
         private IEdmModel _model;
         private ODataValidationSettings _settings;
         private ODataQueryContext _context;
-           
+
         public FilterQueryValidatorTest()
         {
             _validator = new MyFilterValidator();
@@ -55,7 +56,7 @@ namespace System.Web.Http.OData.Query.Validators
             Assert.Equal(1, _validator.Times["Validate"]); // entry
             Assert.Equal(1, _validator.Times["ValidateAllQueryNode"]); // all
             Assert.Equal(1, _validator.Times["ValidateLogicalOperator"]); // eq
-            Assert.Equal(1, _validator.Times["ValidatePropertyAccessQueryNode"]); // Tags
+            Assert.Equal(1, _validator.Times["ValidateCollectionPropertyAccessNode"]); // Tags
             Assert.Equal(1, _validator.Times["ValidateConstantQueryNode"]); // 42
             Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // eq
             Assert.Equal(2, _validator.Times["ValidateParameterQueryNode"]); // $it, t
@@ -75,7 +76,7 @@ namespace System.Web.Http.OData.Query.Validators
             Assert.Equal(1, _validator.Times["Validate"]); // entry
             Assert.Equal(1, _validator.Times["ValidateAnyQueryNode"]); // all
             Assert.Equal(1, _validator.Times["ValidateLogicalOperator"]); // eq
-            Assert.Equal(1, _validator.Times["ValidatePropertyAccessQueryNode"]); // Tags
+            Assert.Equal(1, _validator.Times["ValidateCollectionPropertyAccessNode"]); // Tags
             Assert.Equal(1, _validator.Times["ValidateConstantQueryNode"]); // 42
             Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // eq
             Assert.Equal(2, _validator.Times["ValidateParameterQueryNode"]); // $it, t
@@ -93,7 +94,7 @@ namespace System.Web.Http.OData.Query.Validators
             // Assert
             Assert.Equal(6, _validator.Times.Keys.Count);
             Assert.Equal(1, _validator.Times["Validate"]); // entry
-            Assert.Equal(1, _validator.Times["ValidatePropertyAccessQueryNode"]); // Id
+            Assert.Equal(1, _validator.Times["ValidateSingleValuePropertyAccessNode"]); // Id
             Assert.Equal(1, _validator.Times["ValidateLogicalOperator"]); // eq
             Assert.Equal(1, _validator.Times["ValidateConstantQueryNode"]); // 1
             Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // eq
@@ -118,43 +119,43 @@ namespace System.Web.Http.OData.Query.Validators
                 base.Validate(filterQueryOption, settings);
             }
 
-            public override void ValidateAllQueryNode(AllQueryNode allQueryNode, ODataValidationSettings settings)
+            public override void ValidateAllNode(AllNode allQueryNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateAllQueryNode");
-                base.ValidateAllQueryNode(allQueryNode, settings);
+                base.ValidateAllNode(allQueryNode, settings);
             }
 
-            public override void ValidateAnyQueryNode(AnyQueryNode anyQueryNode, ODataValidationSettings settings)
+            public override void ValidateAnyNode(AnyNode anyQueryNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateAnyQueryNode");
-                base.ValidateAnyQueryNode(anyQueryNode, settings);
+                base.ValidateAnyNode(anyQueryNode, settings);
             }
 
-            public override void ValidateArithmeticOperator(BinaryOperatorQueryNode binaryNode, ODataValidationSettings settings)
+            public override void ValidateArithmeticOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateArithmeticOperator");
                 base.ValidateArithmeticOperator(binaryNode, settings);
             }
 
-            public override void ValidateBinaryOperatorQueryNode(BinaryOperatorQueryNode binaryOperatorNode, ODataValidationSettings settings)
+            public override void ValidateBinaryOperatorNode(BinaryOperatorNode binaryOperatorNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateBinaryOperatorQueryNode");
-                base.ValidateBinaryOperatorQueryNode(binaryOperatorNode, settings);
+                base.ValidateBinaryOperatorNode(binaryOperatorNode, settings);
             }
 
-            public override void ValidateConstantQueryNode(ConstantQueryNode constantNode, ODataValidationSettings settings)
+            public override void ValidateConstantNode(ConstantNode constantNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateConstantQueryNode");
-                base.ValidateConstantQueryNode(constantNode, settings);
+                base.ValidateConstantNode(constantNode, settings);
             }
 
-            public override void ValidateConvertQueryNode(ConvertQueryNode convertQueryNode, ODataValidationSettings settings)
+            public override void ValidateConvertNode(ConvertNode convertQueryNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateConvertQueryNode");
-                base.ValidateConvertQueryNode(convertQueryNode, settings);
+                base.ValidateConvertNode(convertQueryNode, settings);
             }
 
-            public override void ValidateLogicalOperator(BinaryOperatorQueryNode binaryNode, ODataValidationSettings settings)
+            public override void ValidateLogicalOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateLogicalOperator");
                 base.ValidateLogicalOperator(binaryNode, settings);
@@ -166,28 +167,34 @@ namespace System.Web.Http.OData.Query.Validators
                 base.ValidateNavigationPropertyNode(sourceNode, navigationProperty, settings);
             }
 
-            public override void ValidateParameterQueryNode(ParameterQueryNode parameterQueryNode, ODataValidationSettings settings)
+            public override void ValidateRangeVariable(RangeVariable rangeVariable, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateParameterQueryNode");
-                base.ValidateParameterQueryNode(parameterQueryNode, settings);
+                base.ValidateRangeVariable(rangeVariable, settings);
             }
 
-            public override void ValidatePropertyAccessQueryNode(PropertyAccessQueryNode propertyAccessNode, ODataValidationSettings settings)
+            public override void ValidateSingleValuePropertyAccessNode(SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
             {
-                IncrementCount("ValidatePropertyAccessQueryNode");
-                base.ValidatePropertyAccessQueryNode(propertyAccessNode, settings);
+                IncrementCount("ValidateSingleValuePropertyAccessNode");
+                base.ValidateSingleValuePropertyAccessNode(propertyAccessNode, settings);
             }
 
-            public override void ValidateSingleValueFunctionCallQueryNode(Microsoft.Data.OData.Query.SingleValueFunctionCallQueryNode node, ODataValidationSettings settings)
+            public override void ValidateCollectionPropertyAccessNode(CollectionPropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
+            {
+                IncrementCount("ValidateCollectionPropertyAccessNode");
+                base.ValidateCollectionPropertyAccessNode(propertyAccessNode, settings);
+            }
+
+            public override void ValidateSingleValueFunctionCallNode(SingleValueFunctionCallNode node, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateSingleValueFunctionCallQueryNode");
-                base.ValidateSingleValueFunctionCallQueryNode(node, settings);
+                base.ValidateSingleValueFunctionCallNode(node, settings);
             }
 
-            public override void ValidateUnaryOperatorQueryNode(UnaryOperatorQueryNode unaryOperatorQueryNode, ODataValidationSettings settings)
+            public override void ValidateUnaryOperatorNode(UnaryOperatorNode unaryOperatorQueryNode, ODataValidationSettings settings)
             {
                 IncrementCount("ValidateUnaryOperatorQueryNode");
-                base.ValidateUnaryOperatorQueryNode(unaryOperatorQueryNode, settings);
+                base.ValidateUnaryOperatorNode(unaryOperatorQueryNode, settings);
             }
 
             private void IncrementCount(string functionName)

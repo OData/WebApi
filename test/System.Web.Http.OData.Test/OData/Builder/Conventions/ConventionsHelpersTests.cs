@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { 1, "1" },
                     { "1", "'1'" },
                     { new DateTime(2012,12,31),"datetime'2012-12-31T00:00:00'" },
-                    { new byte[] { 1,2 }, "binary'0102'" },
+                    { new byte[] { 1,2 }, "X'0102'" },
                     { false, "false" },
                     { true, "true" },
                     { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "guid'dddddddd-dddd-dddd-dddd-dddddddddddd'" }
@@ -49,15 +49,15 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { (ushort?)123, "123" },
                     { (uint?)123, "123L" },
                     { (ulong?)123, "123L" },
-                    { (float)123.123, "123.12f" },
-                    { (double)123.123, "123.123" },
+                    { (float)123.123, "123.123f" },
+                    { (double)123.123, "123.123D" },
                     { (decimal)123.123, "123.123M" },
                     { Guid.Empty, "guid'00000000-0000-0000-0000-000000000000'" },
                     { DateTime.FromBinary(0), "datetime'0001-01-01T00:00:00'" },
                     { TimeSpan.FromSeconds(86456), "time'P1DT56S'" },
                     { DateTimeOffset.FromFileTime(0), "datetimeoffset'1600-12-31T16:00:00-08:00'" },
                     { SimpleEnum.First, "'First'" },
-                    { FlagsEnum.One | FlagsEnum.Two, "'One%2C%20Two'" },
+                    { FlagsEnum.One | FlagsEnum.Two, "'One, Two'" },
                 };
             }
         }

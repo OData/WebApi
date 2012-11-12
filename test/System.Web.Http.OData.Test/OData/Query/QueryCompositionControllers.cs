@@ -138,7 +138,7 @@ namespace System.Web.Http.OData.Query
 
     public class MyFilterQueryValidator : FilterQueryValidator
     {
-        public override void ValidateConstantQueryNode(ConstantQueryNode constantNode, ODataValidationSettings settings)
+        public override void ValidateConstantNode(ConstantNode constantNode, ODataValidationSettings settings)
         {
             // Validate that client did not send a big constant in the query
             if (Convert.ToInt32(constantNode.Value) > 100)
@@ -146,7 +146,7 @@ namespace System.Web.Http.OData.Query
                 throw new ODataException("Any constant that is more than 100 is not allowed.");
             }
 
-            base.ValidateConstantQueryNode(constantNode, settings);
+            base.ValidateConstantNode(constantNode, settings);
         }
     }
 

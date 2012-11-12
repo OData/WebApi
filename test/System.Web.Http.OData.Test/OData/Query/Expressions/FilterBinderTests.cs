@@ -9,7 +9,6 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
@@ -742,6 +741,61 @@ namespace System.Web.Http.OData.Query.Expressions
                NotTesting);
         }
 
+        [Fact]
+        public void AnyOnPrimitiveCollection()
+        {
+            var filters = VerifyQueryDeserialization(
+               "AlternateIDs/any(id: id eq 42)",
+               "$it => $it.AlternateIDs.Any(id => (id == 42))",
+               NotTesting);
+
+            RunFilters(
+                filters,
+                new Product { AlternateIDs = new[] { 1, 2, 42 } },
+                new { WithNullPropagation = true, WithoutNullPropagation = true });
+
+            RunFilters(
+                filters,
+                new Product { AlternateIDs = new[] { 1, 2 } },
+                new { WithNullPropagation = false, WithoutNullPropagation = false });
+        }
+
+        [Fact]
+        public void AllOnPrimitiveCollection()
+        {
+            VerifyQueryDeserialization(
+               "AlternateIDs/all(id: id eq 42)",
+               "$it => $it.AlternateIDs.All(id => (id == 42))",
+               NotTesting);
+        }
+
+        [Fact]
+        public void AnyOnComplexCollection()
+        {
+            var filters = VerifyQueryDeserialization(
+               "AlternateAddresses/any(address: address/City eq 'Redmond')",
+               "$it => $it.AlternateAddresses.Any(address => (address.City == \"Redmond\"))",
+               NotTesting);
+
+            RunFilters(
+                filters,
+                new Product { AlternateAddresses = new[] { new Address { City = "Redmond" } } },
+                new { WithNullPropagation = true, WithoutNullPropagation = true });
+
+            RunFilters(
+                filters,
+                new Product(),
+                new { WithNullPropagation = false, WithoutNullPropagation = typeof(ArgumentNullException) });
+        }
+
+        [Fact]
+        public void AllOnComplexCollection()
+        {
+            VerifyQueryDeserialization(
+               "AlternateAddresses/all(address: address/City eq 'Redmond')",
+               "$it => $it.AlternateAddresses.All(address => (address.City == \"Redmond\"))",
+               NotTesting);
+        }
         #endregion
 
         #region String Functions
@@ -1041,22 +1095,15 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("year(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Year == 100")]
-        [InlineData("month(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Month == 100")]
-        [InlineData("day(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Day == 100")]
-        [InlineData("hour(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Hour == 100")]
-        [InlineData("minute(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Minute == 100")]
-        [InlineData("second(DiscontinuedOffset) eq 100", "$it => $it.DiscontinuedOffset.Second == 100")]
+        [InlineData("year(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Year == 100)")]
+        [InlineData("month(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Month == 100)")]
+        [InlineData("day(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Day == 100)")]
+        [InlineData("hour(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Hour == 100)")]
+        [InlineData("minute(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Minute == 100)")]
+        [InlineData("second(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Second == 100)")]
         public void DateTimeOffsetFunctions(string filter, string expression)
         {
-            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
-            // the test once the bug is fixed).
-            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
-            Assert.Throws<ODataException>(() => Bind(filter));
-
-            // TODO: DateTimeOffsets are not handled well in the uri parser
-            // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
-            //VerifyQueryDeserialization(filter, expression);
+            VerifyQueryDeserialization(filter, expression);
         }
 
         [Theory]
@@ -1365,7 +1412,7 @@ namespace System.Web.Http.OData.Query.Expressions
         private Expression<Func<T, bool>> Bind<T>(string filter, ODataQuerySettings querySettings = null) where T : class
         {
             IEdmModel model = GetModel<T>();
-            FilterQueryNode filterNode = CreateFilterNode(filter, model);
+            FilterClause filterNode = CreateFilterNode(filter, model, typeof(T));
 
             if (querySettings == null)
             {
@@ -1375,7 +1422,7 @@ namespace System.Web.Http.OData.Query.Expressions
             return Bind<T>(filterNode, model, CreateFakeAssembliesResolver(), querySettings);
         }
 
-        private static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterQueryNode filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        private static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             return FilterBinder.Bind<TEntityType>(filterNode, model, assembliesResolver, querySettings);
         }
@@ -1385,11 +1432,11 @@ namespace System.Web.Http.OData.Query.Expressions
             return new NoAssembliesResolver();
         }
 
-        private FilterQueryNode CreateFilterNode(string filter, IEdmModel model)
+        private FilterClause CreateFilterNode(string filter, IEdmModel model, Type entityType)
         {
             var queryUri = new Uri(_serviceBaseUri, String.Format("Products?$filter={0}", Uri.EscapeDataString(filter)));
-            SemanticTree semanticTree = SemanticTree.ParseUri(queryUri, _serviceBaseUri, model);
-            return semanticTree.Query as FilterQueryNode;
+            IEdmEntityType productType = model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == entityType.Name);
+            return ODataUriParser.ParseFilter(filter, model, productType);
         }
 
         private static ODataQuerySettings CreateSettings()
@@ -1450,7 +1497,7 @@ namespace System.Web.Http.OData.Query.Expressions
         private dynamic VerifyQueryDeserialization<T>(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null) where T : class
         {
             IEdmModel model = GetModel<T>();
-            FilterQueryNode filterNode = CreateFilterNode(filter, model);
+            FilterClause filterNode = CreateFilterNode(filter, model, typeof(T));
             IAssembliesResolver assembliesResolver = CreateFakeAssembliesResolver();
 
             Func<ODataQuerySettings, ODataQuerySettings> customizeSettings = (settings) =>

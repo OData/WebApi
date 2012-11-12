@@ -1042,7 +1042,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Duplicate property named &apos;{0}&apos; is not supported in the OrderByQueryNode..
+        ///   Looks up a localized string similar to Duplicate property named &apos;{0}&apos; is not supported in the OrderByNode..
         /// </summary>
         internal static string OrderByDuplicateProperty {
             get {
@@ -1051,7 +1051,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to It is unsupported that the OrderByQueryNode.Expression is not an instance of PropertyAccessQueryNode type..
+        ///   Looks up a localized string similar to It is unsupported that the OrderByNode.Expression is not an instance of PropertyAccessQueryNode type..
         /// </summary>
         internal static string OrderByPropertyNotFound {
             get {

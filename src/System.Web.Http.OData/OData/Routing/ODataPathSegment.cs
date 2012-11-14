@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Routing
     public abstract class ODataPathSegment
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataPathSegment" /> class.
+        /// Initializes a new instance of the <see cref="ODataPathSegment" /> class for a segment at the root of the path.
         /// </summary>
         protected ODataPathSegment()
         {

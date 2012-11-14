@@ -4,6 +4,9 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 using System.Web.Http.Hosting;
+using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 
 namespace System.Net.Http
@@ -14,6 +17,8 @@ namespace System.Net.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpRequestMessageExtensions
     {
+        private const string ODataPathKey = "MS_ODataPath";
+
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping <paramref name="oDataError"/> as the content. If no formatter 
@@ -92,6 +97,47 @@ namespace System.Net.Http
                 default:
                     return false;
             }
+        }
+
+        internal static ODataPath GetODataPath(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+            }
+
+            object path;
+            if (!request.Properties.TryGetValue(ODataPathKey, out path))
+            {
+                IODataPathParser parser = configuration.GetODataPathParser();
+                IHttpRouteData routeData = request.GetRouteData();
+                if (routeData == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RequestMustContainRouteData);
+                }
+
+                object odataRouteValue;
+                if (!routeData.Values.TryGetValue(ODataRouteVariables.ODataPath, out odataRouteValue))
+                {
+                    throw Error.InvalidOperation(SRResources.RouteDataMustContainODataPath, ODataRouteVariables.ODataPath);
+                }
+
+                string odataPath = odataRouteValue as string;
+                if (odataPath == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RouteDataMustContainODataPath, ODataRouteVariables.ODataPath);
+                }
+
+                path = parser.Parse(odataPath);
+                request.Properties[ODataPathKey] = path;
+            }
+            return path as ODataPath;
         }
     }
 }

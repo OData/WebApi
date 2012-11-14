@@ -7,9 +7,11 @@ using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -31,7 +33,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/EntitySet(key)/" + actionName;
+            string url = "http://server/service/Customers(10)/" + actionName;
             HttpRequestMessage request = GetPostRequest(url);
 
             ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
@@ -57,7 +59,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/EntitySet(key)/" + actionName;
+            string url = "http://server/service/Customers(10)/" + actionName;
             HttpRequestMessage request = GetPostRequest(url);
             ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -87,7 +89,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/EntitySet(key)/" + actionName;
+            string url = "http://server/service/Customers(10)/" + actionName;
             HttpRequestMessage request = GetPostRequest(url);
             ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -113,7 +115,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/EntitySet(key)/" + actionName;
+            string url = "http://server/service/Customers(10)/" + actionName;
             HttpRequestMessage request = GetPostRequest(url);
             ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -144,7 +146,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/EntitySet(key)/Primitive";
+            string url = "http://server/service/Customers(10)/Primitive";
             HttpRequestMessage request = GetPostRequest(url);
             ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
             Assert.Throws<ODataException>(() =>
@@ -183,11 +185,34 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return _model;
         }
 
-        private static HttpRequestMessage GetPostRequest(string url)
+        private HttpRequestMessage GetPostRequest(string url)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            HttpConfiguration config = new HttpConfiguration();
+            config.SetEdmModel(GetModel());
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            IHttpRoute route = new Mock<IHttpRoute>().Object;
+            IHttpRouteData routeData = new HttpRouteData(route);
+            routeData.Values["odataPath"] = GetODataPath(url);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
             return request;
+        }
+
+        private static string GetODataPath(string url)
+        {
+            string serverServiceBaseUri = "http://server/service/";
+            string serverBaseUri = "http://server/";
+            if (url.StartsWith(serverServiceBaseUri))
+            {
+                return url.Substring(serverServiceBaseUri.Length);
+            }
+
+            if (url.StartsWith(serverBaseUri))
+            {
+                return url.Substring(serverBaseUri.Length);
+            }
+
+            return null;
         }
 
         private static Stream GetStringAsStream(string body)

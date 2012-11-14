@@ -393,14 +393,11 @@
   <data name="WriteToStreamAsyncMustHaveRequest" xml:space="preserve">
     <value>The OData formatter does not support writing client requests. This formatter instance must have an associated request.</value>
   </data>
-  <data name="ActionNotFound" xml:space="preserve">
-    <value>Action '{0}' was not found for RequestUri '{1}'.</value>
-  </data>
   <data name="ActionResolutionFailed" xml:space="preserve">
     <value>Action resolution failed. Multiple actions matching the action identifier '{0}' were found. The matching actions are: {1}.</value>
   </data>
-  <data name="DefaultODataActionResolverRequirementsNotSatisfied" xml:space="preserve">
-    <value>DefaultODataActionResolver requires an ODataDeserializerContext with a non null Request and RequestUri.</value>
+  <data name="DeserializerContextRequirementsNotSatisfied" xml:space="preserve">
+    <value>The ODataDeserializerContext must have a non null Request and RequestUri.</value>
   </data>
   <data name="NoODataMediaTypeFormatterFound" xml:space="preserve">
     <value>The ODataParameterBindingAttribute requires that an ODataMediaTypeFormatter be registered with the HttpConfiguration.</value>
@@ -488,5 +485,20 @@
   </data>
   <data name="SegmentNullOrEmpty" xml:space="preserve">
     <value>The segment value must not be null or empty.</value>
+  </data>
+  <data name="ConfigurationMustHaveEdmModel" xml:space="preserve">
+    <value>The configuration must have an EDM model registered to enable parsing request URIs as OData paths. Consider registering a model using the HttpConfiguration.SetEdmModel extension method.</value>
+  </data>
+  <data name="RequestMustContainRouteData" xml:space="preserve">
+    <value>Request message does not contain route data information.</value>
+  </data>
+  <data name="RequestNotActionInvocation" xml:space="preserve">
+    <value>The last segment of the request URI '{0}' was not recognized as an OData action.</value>
+  </data>
+  <data name="RequestNotODataPath" xml:space="preserve">
+    <value>The request URI '{0}' was not recognized as an OData path.</value>
+  </data>
+  <data name="RouteDataMustContainODataPath" xml:space="preserve">
+    <value>The route data must contain a value with key '{0}'.</value>
   </data>
 </root>

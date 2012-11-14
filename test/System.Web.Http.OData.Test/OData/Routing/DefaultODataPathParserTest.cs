@@ -10,9 +10,9 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing
 {
-    public class ODataPathParserTest
+    public class DefaultODataPathParserTest
     {
-        private static ODataPathParser _parser = new ODataPathParser(GetModel());
+        private static DefaultODataPathParser _parser = new DefaultODataPathParser(GetModel());
 
         public static TheoryDataSet<string, string[]> ParseSegmentsData
         {
@@ -45,24 +45,11 @@ namespace System.Web.Http.OData.Routing
         }
 
         [Fact]
-        public void Parse_RespectsRelativeBaseAddresses()
-        {
-            Uri uri = new Uri("http://myservice/api/Customers");
-            Uri baseUri = new Uri("http://myservice/api");
-
-            ODataPath path = _parser.Parse(uri, baseUri);
-
-            Assert.NotNull(path);
-            Assert.Equal("~/entityset", path.PathTemplate);
-        }
-
-        [Fact]
         public void Parse_WorksOnEncodedCharacters()
         {
-            Uri uri = new Uri("http://myservice/üCategories");
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "üCategories";
 
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             Assert.NotNull(path);
@@ -73,43 +60,41 @@ namespace System.Web.Http.OData.Routing
         [Fact]
         public void Parse_ForInvalidCast_ThrowsODataException()
         {
-            Uri uri = new Uri("http://myservice/Customers/System.Web.Http.OData.Routing.Product");
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "Customers/System.Web.Http.OData.Routing.Product";
 
             Assert.Throws<ODataException>(
-                () => _parser.Parse(uri, baseUri),
+                () => _parser.Parse(odataPath),
                 "Invalid cast encountered. Cast type 'System.Web.Http.OData.Routing.Product' must be the same as or derive from the previous segment's type 'System.Web.Http.OData.Routing.Customer'.");
         }
 
         [Fact]
         public void Parse_ForSegmentAfterMetadata_ThrowsODataException()
         {
-            Uri uri = new Uri("http://myservice/$metadata/foo");
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "$metadata/foo";
 
             Assert.Throws<ODataException>(
-                () => _parser.Parse(uri, baseUri),
+                () => _parser.Parse(odataPath),
                 "The URI segment 'foo' is invalid after the segment '$metadata'.");
         }
 
         [Theory]
-        [InlineData("http://myservice/", "~")]
-        [InlineData("http://myservice/$metadata", "~/$metadata")]
-        [InlineData("http://myservice/$batch", "~/$batch")]
-        [InlineData("http://myservice/Customers(112)", "~/entityset/key")]
-        [InlineData("http://myservice/Customers/System.Web.Http.OData.Routing.VIP", "~/entityset/cast")]
-        [InlineData("http://myservice/Customers(100)/Products", "~/entityset/key/navigation")]
-        [InlineData("http://myservice/Customers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation")]
-        [InlineData("http://myservice/GetCustomerById()", "~/action")]
-        [InlineData("http://myservice/Customers(112)/Address/Street", "~/entityset/key/property/property")]
-        [InlineData("http://myservice/Customers(1)/Name/$value", "~/entityset/key/property/$value")]
-        [InlineData("http://myservice/Customers(1)/$links/Products", "~/entityset/key/$links/navigation")]
-        [InlineData("http://myservice/Customers(112)/GetRelatedCustomers", "~/entityset/key/action")]
-        [InlineData("http://myservice/Customers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
-        [InlineData("http://myservice/Products(1)/Customers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
-        public void Parse_ReturnsPath_WithCorrectTemplate(string uri, string template)
+        [InlineData("", "~")]
+        [InlineData("$metadata", "~/$metadata")]
+        [InlineData("$batch", "~/$batch")]
+        [InlineData("Customers(112)", "~/entityset/key")]
+        [InlineData("Customers/System.Web.Http.OData.Routing.VIP", "~/entityset/cast")]
+        [InlineData("Customers(100)/Products", "~/entityset/key/navigation")]
+        [InlineData("Customers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation")]
+        [InlineData("GetCustomerById()", "~/action")]
+        [InlineData("Customers(112)/Address/Street", "~/entityset/key/property/property")]
+        [InlineData("Customers(1)/Name/$value", "~/entityset/key/property/$value")]
+        [InlineData("Customers(1)/$links/Products", "~/entityset/key/$links/navigation")]
+        [InlineData("Customers(112)/GetRelatedCustomers", "~/entityset/key/action")]
+        [InlineData("Customers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "~/entityset/cast/action")]
+        [InlineData("Products(1)/Customers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
+        public void Parse_ReturnsPath_WithCorrectTemplate(string odataPath, string template)
         {
-            ODataPath path = _parser.Parse(new Uri(uri), new Uri("http://myservice/"));
+            ODataPath path = _parser.Parse(odataPath);
 
             Assert.NotNull(path);
             Assert.Equal(template, path.PathTemplate);
@@ -119,11 +104,10 @@ namespace System.Web.Http.OData.Routing
         public void CanParseUrlWithNoModelElements()
         {
             // Arrange
-            Uri uri = new Uri("http://myservice/1/2()/3/4()/5");
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "1/2()/3/4()/5";
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
 
             // Assert
             Assert.Null(path);
@@ -132,11 +116,9 @@ namespace System.Web.Http.OData.Routing
         [Fact]
         public void CanParseMetadataUrl()
         {
-            string testUrl = "http://myservice/$metadata";
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "$metadata";
 
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -144,20 +126,17 @@ namespace System.Web.Http.OData.Routing
             Assert.Null(path.EntitySet);
             Assert.Null(path.EdmType);
             Assert.Equal("$metadata", segment.ToString());
-            Assert.NotNull(segment.Previous);
-            Assert.Equal("http://myservice/", segment.Previous.ToString());
+            Assert.Null(segment.Previous);
         }
 
         [Fact]
         public void CanParseBatchUrl()
         {
             // Arrange
-            string testUrl = "http://myservice/$batch";
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "$batch";
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -166,28 +145,25 @@ namespace System.Web.Http.OData.Routing
             Assert.Null(path.EntitySet);
             Assert.Null(path.EdmType);
             Assert.Equal("$batch", segment.ToString());
-            Assert.NotNull(segment.Previous);
-            Assert.Equal("http://myservice/", segment.Previous.ToString());
+            Assert.Null(segment.Previous);
         }
 
         [Fact]
         public void CanParseEntitySetUrl()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers";
+            string odataPath = "Customers";
             string expectedText = "Customers";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Customers");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
             Assert.NotNull(path);
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
+            Assert.Null(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
             Assert.Same(expectedSet, segment.EntitySet);
             Assert.Same(expectedSet.ElementType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
@@ -197,14 +173,12 @@ namespace System.Web.Http.OData.Routing
         public void CanParseKeyUrl()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(112)";
+            string odataPath = "Customers(112)";
             string expectedText = "112";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Customers");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -220,15 +194,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParseCastCollectionSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers/System.Web.Http.OData.Routing.VIP";
+            string odataPath = "Customers/System.Web.Http.OData.Routing.VIP";
             string expectedText = "System.Web.Http.OData.Routing.VIP";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Customers");
             IEdmEntityType expectedType = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -243,15 +215,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParseCastEntitySegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(100)/System.Web.Http.OData.Routing.VIP";
+            string odataPath = "Customers(100)/System.Web.Http.OData.Routing.VIP";
             string expectedText = "System.Web.Http.OData.Routing.VIP";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Customers");
             IEdmEntityType expectedType = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -266,15 +236,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParseNavigateToCollectionSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(100)/Products";
+            string odataPath = "Customers(100)/Products";
             string expectedText = "Products";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
             IEdmNavigationProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "Customer").NavigationProperties().SingleOrDefault(n => n.Name == "Products");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -291,15 +259,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParseNavigateToSingleSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager";
+            string odataPath = "Customers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager";
             string expectedText = "RelationshipManager";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "SalesPeople");
             IEdmNavigationProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP").NavigationProperties().SingleOrDefault(n => n.Name == "RelationshipManager");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -316,20 +282,18 @@ namespace System.Web.Http.OData.Routing
         public void CanParseRootProcedureSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/GetCustomerById()";
+            string odataPath = "GetCustomerById()";
             string expectedText = "Default.Container.GetCustomerById";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Customers");
             IEdmFunctionImport expectedEdmElement = _parser.Model.EntityContainers().First().FunctionImports().SingleOrDefault(s => s.Name == "GetCustomerById");
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
+            Assert.Null(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
             Assert.Same(expectedSet, segment.EntitySet);
             Assert.Equal(expectedSet.ElementType, segment.EdmType);
@@ -341,15 +305,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParsePropertySegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(112)/Name";
+            string odataPath = "Customers(112)/Name";
             string expectedText = "Name";
             IEdmProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(e => e.Name == "Customer").Properties().SingleOrDefault(p => p.Name == "Name");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -365,15 +327,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParseComplexPropertySegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(112)/Address";
+            string odataPath = "Customers(112)/Address";
             string expectedText = "Address";
             IEdmProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(e => e.Name == "Customer").Properties().SingleOrDefault(p => p.Name == "Address");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -390,15 +350,13 @@ namespace System.Web.Http.OData.Routing
         public void CanParsePropertyOfComplexSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(112)/Address/Street";
+            string odataPath = "Customers(112)/Address/Street";
             string expectedText = "Street";
             IEdmProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(e => e.Name == "Address").Properties().SingleOrDefault(p => p.Name == "Street");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -415,12 +373,10 @@ namespace System.Web.Http.OData.Routing
         public void CanParsePropertyValueSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(1)/Name/$value";
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "Customers(1)/Name/$value";
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -435,14 +391,12 @@ namespace System.Web.Http.OData.Routing
         public void CanParseEntityLinksSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(1)/$links/Products";
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
+            string odataPath = "Customers(1)/$links/Products";
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
             IEdmEntityType expectedType = expectedSet.ElementType;
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -456,16 +410,14 @@ namespace System.Web.Http.OData.Routing
         public void CanParseActionBoundToEntitySegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers(112)/GetRelatedCustomers";
+            string odataPath = "Customers(112)/GetRelatedCustomers";
             string expectedText = "Default.Container.GetRelatedCustomers";
             IEdmFunctionImport expectedEdmElement = _parser.Model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetRelatedCustomers");
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "Customers");
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -482,16 +434,14 @@ namespace System.Web.Http.OData.Routing
         public void CanParseActionBoundToCollectionSegment()
         {
             // Arrange
-            string testUrl = "http://myservice/Customers/System.Web.Http.OData.Routing.VIP/GetMostProfitable";
+            string odataPath = "Customers/System.Web.Http.OData.Routing.VIP/GetMostProfitable";
             string expectedText = "Default.Container.GetMostProfitable";
             IEdmFunctionImport expectedEdmElement = _parser.Model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetMostProfitable");
             IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "Customers");
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -505,22 +455,20 @@ namespace System.Web.Http.OData.Routing
         }
 
         [Theory]
-        [InlineData("http://myservice/Customers", "Customers", "Customer", true)]
-        [InlineData("http://myservice/Customers/", "Customers", "Customer", true)]
-        [InlineData("http://myservice/Products", "Products", "Product", true)]
-        [InlineData("http://myservice/Products/", "Products", "Product", true)]
-        [InlineData("http://myservice/SalesPeople", "SalesPeople", "SalesPerson", true)]
-        public void CanResolveSetAndTypeViaSimpleEntitySetSegment(string testUrl, string expectedSetName, string expectedTypeName, bool isCollection)
+        [InlineData("Customers", "Customers", "Customer", true)]
+        [InlineData("Customers/", "Customers", "Customer", true)]
+        [InlineData("Products", "Products", "Product", true)]
+        [InlineData("Products/", "Products", "Product", true)]
+        [InlineData("SalesPeople", "SalesPeople", "SalesPerson", true)]
+        public void CanResolveSetAndTypeViaSimpleEntitySetSegment(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
             // Arrange
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
             var model = _parser.Model;
             var expectedSet = model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
             var expectedType = model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert
@@ -540,84 +488,82 @@ namespace System.Web.Http.OData.Routing
         }
 
         [Theory]
-        [InlineData("http://myservice/Customers(1)", "Customers", "Customer", false)]
-        [InlineData("http://myservice/Customers(1)/", "Customers", "Customer", false)]
-        [InlineData("http://myservice/Products(1)", "Products", "Product", false)]
-        [InlineData("http://myservice/Products(1)/", "Products", "Product", false)]
-        [InlineData("http://myservice/Products(1)", "Products", "Product", false)]
-        public void CanResolveSetAndTypeViaKeySegment(string testUrl, string expectedSetName, string expectedTypeName, bool isCollection)
+        [InlineData("Customers(1)", "Customers", "Customer", false)]
+        [InlineData("Customers(1)/", "Customers", "Customer", false)]
+        [InlineData("Products(1)", "Products", "Product", false)]
+        [InlineData("Products(1)/", "Products", "Product", false)]
+        [InlineData("Products(1)", "Products", "Product", false)]
+        public void CanResolveSetAndTypeViaKeySegment(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
-            AssertTypeMatchesExpectedType(testUrl, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("http://myservice/Customers(1)/Products", "Products", "Product", true)]
-        [InlineData("http://myservice/Customers(1)/Products(1)", "Products", "Product", false)]
-        [InlineData("http://myservice/Customers(1)/Products/", "Products", "Product", true)]
-        [InlineData("http://myservice/Customers(1)/Products", "Products", "Product", true)]
-        [InlineData("http://myservice/Products(1)/Customers", "Customers", "Customer", true)]
-        [InlineData("http://myservice/Products(1)/Customers(1)", "Customers", "Customer", false)]
-        [InlineData("http://myservice/Products(1)/Customers/", "Customers", "Customer", true)]
-        public void CanResolveSetAndTypeViaNavigationPropertySegment(string testUrl, string expectedSetName, string expectedTypeName, bool isCollection)
+        [InlineData("Customers(1)/Products", "Products", "Product", true)]
+        [InlineData("Customers(1)/Products(1)", "Products", "Product", false)]
+        [InlineData("Customers(1)/Products/", "Products", "Product", true)]
+        [InlineData("Customers(1)/Products", "Products", "Product", true)]
+        [InlineData("Products(1)/Customers", "Customers", "Customer", true)]
+        [InlineData("Products(1)/Customers(1)", "Customers", "Customer", false)]
+        [InlineData("Products(1)/Customers/", "Customers", "Customer", true)]
+        public void CanResolveSetAndTypeViaNavigationPropertySegment(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
-            AssertTypeMatchesExpectedType(testUrl, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("http://myservice/Customers/System.Web.Http.OData.Routing.VIP", "VIP", "Customers", true)]
-        [InlineData("http://myservice/Customers(1)/System.Web.Http.OData.Routing.VIP", "VIP", "Customers", false)]
-        [InlineData("http://myservice/Products(1)/System.Web.Http.OData.Routing.ImportantProduct", "ImportantProduct", "Products", false)]
-        [InlineData("http://myservice/Products(1)/Customers/System.Web.Http.OData.Routing.VIP", "VIP", "Customers", true)]
-        [InlineData("http://myservice/SalesPeople(1)/ManagedCustomers", "VIP", "Customers", true)]
-        [InlineData("http://myservice/Customers(1)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
-        [InlineData("http://myservice/Products/System.Web.Http.OData.Routing.ImportantProduct(1)/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
-        [InlineData("http://myservice/Products(1)/Customers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
-        public void CanResolveSetAndTypeViaCastSegment(string testUrl, string expectedTypeName, string expectedSetName, bool isCollection)
+        [InlineData("Customers/System.Web.Http.OData.Routing.VIP", "VIP", "Customers", true)]
+        [InlineData("Customers(1)/System.Web.Http.OData.Routing.VIP", "VIP", "Customers", false)]
+        [InlineData("Products(1)/System.Web.Http.OData.Routing.ImportantProduct", "ImportantProduct", "Products", false)]
+        [InlineData("Products(1)/Customers/System.Web.Http.OData.Routing.VIP", "VIP", "Customers", true)]
+        [InlineData("SalesPeople(1)/ManagedCustomers", "VIP", "Customers", true)]
+        [InlineData("Customers(1)/System.Web.Http.OData.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products/System.Web.Http.OData.Routing.ImportantProduct(1)/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products(1)/Customers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
+        public void CanResolveSetAndTypeViaCastSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
-            AssertTypeMatchesExpectedType(testUrl, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("http://myservice/GetCustomerById", "Customer", "Customers", false)]
-        [InlineData("http://myservice/GetSalesPersonById", "SalesPerson", "SalesPeople", false)]
-        [InlineData("http://myservice/GetAllVIPs", "VIP", "Customers", true)]
-        public void CanResolveSetAndTypeViaRootProcedureSegment(string testUrl, string expectedTypeName, string expectedSetName, bool isCollection)
+        [InlineData("GetCustomerById", "Customer", "Customers", false)]
+        [InlineData("GetSalesPersonById", "SalesPerson", "SalesPeople", false)]
+        [InlineData("GetAllVIPs", "VIP", "Customers", true)]
+        public void CanResolveSetAndTypeViaRootProcedureSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
-            AssertTypeMatchesExpectedType(testUrl, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("http://myservice/Customers(1)/GetRelatedCustomers", "Customer", "Customers", true)]
-        [InlineData("http://myservice/Customers(1)/GetBestRelatedCustomer", "VIP", "Customers", false)]
-        [InlineData("http://myservice/Customers(1)/System.Web.Http.OData.Routing.VIP/GetSalesPerson", "SalesPerson", "SalesPeople", false)]
-        [InlineData("http://myservice/SalesPeople(1)/GetVIPCustomers", "VIP", "Customers", true)]
-        public void CanResolveSetAndTypeViaEntityActionSegment(string testUrl, string expectedTypeName, string expectedSetName, bool isCollection)
+        [InlineData("Customers(1)/GetRelatedCustomers", "Customer", "Customers", true)]
+        [InlineData("Customers(1)/GetBestRelatedCustomer", "VIP", "Customers", false)]
+        [InlineData("Customers(1)/System.Web.Http.OData.Routing.VIP/GetSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("SalesPeople(1)/GetVIPCustomers", "VIP", "Customers", true)]
+        public void CanResolveSetAndTypeViaEntityActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
-            AssertTypeMatchesExpectedType(testUrl, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
         [Theory]
-        [InlineData("http://myservice/Customers/GetVIPs", "VIP", "Customers", true)]
-        [InlineData("http://myservice/Customers/GetProducts", "Product", "Products", true)]
-        [InlineData("http://myservice/Products(1)/Customers/System.Web.Http.OData.Routing.VIP/GetSalesPeople", "SalesPerson", "SalesPeople", true)]
-        [InlineData("http://myservice/SalesPeople/GetVIPCustomers", "VIP", "Customers", true)]
-        [InlineData("http://myservice/Customers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "VIP", "Customers", false)]
-        public void CanResolveSetAndTypeViaCollectionActionSegment(string testUrl, string expectedTypeName, string expectedSetName, bool isCollection)
+        [InlineData("Customers/GetVIPs", "VIP", "Customers", true)]
+        [InlineData("Customers/GetProducts", "Product", "Products", true)]
+        [InlineData("Products(1)/Customers/System.Web.Http.OData.Routing.VIP/GetSalesPeople", "SalesPerson", "SalesPeople", true)]
+        [InlineData("SalesPeople/GetVIPCustomers", "VIP", "Customers", true)]
+        [InlineData("Customers/System.Web.Http.OData.Routing.VIP/GetMostProfitable", "VIP", "Customers", false)]
+        public void CanResolveSetAndTypeViaCollectionActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
-            AssertTypeMatchesExpectedType(testUrl, expectedSetName, expectedTypeName, isCollection);
+            AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }
 
-        private static void AssertTypeMatchesExpectedType(string testUrl, string expectedSetName, string expectedTypeName, bool isCollection)
+        private static void AssertTypeMatchesExpectedType(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
             // Arrange
-            Uri uri = new Uri(testUrl);
-            Uri baseUri = new Uri("http://myservice/");
             var model = _parser.Model;
             var expectedSet = model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
             var expectedType = model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
-            ODataPath path = _parser.Parse(uri, baseUri);
+            ODataPath path = _parser.Parse(odataPath);
             ODataPathSegment segment = path.Segments.Last.Value;
 
             // Assert

@@ -5,17 +5,16 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
-    /// Exposes the ability to parse an OData URI as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
+    /// Exposes the ability to parse an OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
     /// </summary>
     public interface IODataPathParser
     {
         /// <summary>
-        /// Parses the specified OData URI as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
+        /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
         /// </summary>
-        /// <param name="uri">The OData URI to parse.</param>
-        /// <param name="baseUri">The base URI of the service.</param>
+        /// <param name="odataPath">The OData path to parse.</param>
         /// <returns>A parsed representation of the URI, or <c>null</c> if the URI does not match the model.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "Implementations shouldn't need to subclass ODataPath")]
-        ODataPath Parse(Uri uri, Uri baseUri);
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
+        ODataPath Parse(string odataPath);
     }
 }

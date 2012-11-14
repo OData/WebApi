@@ -6,12 +6,14 @@ using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData
 {
-    public class DefaultODataActionResolverTest
+    public class ODataActionParametersTest
     {
         private IEdmModel _model;
 
@@ -22,17 +24,16 @@ namespace System.Web.Http.OData
         [InlineData("Drive", "http://server/service/Vehicles(6)/Drive")]
         [InlineData("Drive", "http://server/service/Vehicles(6)/Container.Drive")]
         [InlineData("Drive", "http://server/service/Vehicles(6)/org.odata.Container.Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/Container.Car/Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/Container.Car/Container.Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/Container.Car/org.odata.Container.Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles/Container.Car(6)/Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles/Container.Car(6)/Container.Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles/Container.Car(6)/org.odata.Container.Drive")]
+        [InlineData("Drive", "http://server/Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("Drive", "http://server/Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Container.Drive")]
+        [InlineData("Drive", "http://server/Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Container.Drive")]
+        [InlineData("Drive", "http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(6)/Drive")]
+        [InlineData("Drive", "http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(6)/Container.Drive")]
+        [InlineData("Drive", "http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(6)/org.odata.Container.Drive")]
         public void Can_find_action(string actionName, string url)
         {
-            IODataActionResolver resolver = new DefaultODataActionResolver();
             ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(url), Model = GetModel() };
-            IEdmFunctionImport action = resolver.Resolve(context);
+            IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
         }
@@ -40,52 +41,34 @@ namespace System.Web.Http.OData
         [Fact]
         public void Can_find_action_overload_using_bindingparameter_type()
         {
-            string url = "http://server/service/Vehicles(8)/Container.Car/Wash";
-            IODataActionResolver resolver = new DefaultODataActionResolver();
+            string url = "http://server/service/Vehicles(8)/System.Web.Http.OData.Builder.TestModels.Car/Wash";
             ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(url), Model = GetModel() };
 
-            // TODO: Requires improvements in Uri Parser so it can establish type of path segment prior to ActionName
-            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
-            // the test once the bug is fixed).
-            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
+            IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
 
-            Assert.Throws<InvalidOperationException>(() => resolver.Resolve(context));
+            Assert.NotNull(action);
+            Assert.Equal("Wash", action.Name);
 
-            // TODO: DateTimeOffsets are not handled well in the uri parser
-            // The following calls show the behavior without the bug, and should be enabled once the bug is fixed.
-            //IEdmFunctionImport action = resolver.Resolve(context);
-            //Assert.NotNull(action);
-            //Assert.Equal("Car", action.Parameters.First().Name);
         }
 
         [Fact]
         public void Throws_InvalidOperation_when_action_not_found()
         {
-            IODataActionResolver resolver = new DefaultODataActionResolver();
             ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/MissingOperation"), Model = GetModel() };
             Assert.Throws<InvalidOperationException>(() =>
             {
-                IEdmFunctionImport action = resolver.Resolve(context);
-            },  "Action 'MissingOperation' was not found for RequestUri 'http://server/service/MissingOperation'.");
+                IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
+            }, "The request URI 'http://server/service/MissingOperation' was not recognized as an OData path.");
         }
 
         [Fact]
         public void Throws_InvalidOperation_when_multiple_overloads_found()
         {
-            IODataActionResolver resolver = new DefaultODataActionResolver();
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/Vehicles/Container.Car(8)/Park"), Model = GetModel() };
+            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park"), Model = GetModel() };
             InvalidOperationException ioe = Assert.Throws<InvalidOperationException>(() =>
             {
-                IEdmFunctionImport action = resolver.Resolve(context);
+                IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
             }, "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
-        }
-
-        [Fact]
-        public void Is_Auto_Registered()
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-            DefaultODataActionResolver resolver = configuration.GetODataActionResolver() as DefaultODataActionResolver;
-            Assert.NotNull(resolver);
         }
 
         private IEdmModel GetModel()
@@ -108,11 +91,34 @@ namespace System.Web.Http.OData
             return _model;
         }
 
-        private static HttpRequestMessage GetPostRequest(string url)
+        private HttpRequestMessage GetPostRequest(string url)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = new HttpConfiguration();
+            HttpConfiguration config = new HttpConfiguration();
+            config.SetEdmModel(GetModel());
+            IHttpRoute route = new Mock<IHttpRoute>().Object;
+            IHttpRouteData routeData = new HttpRouteData(route);
+            routeData.Values["odataPath"] = GetODataPath(url);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             return request;
+        }
+
+        private static string GetODataPath(string url)
+        {
+            string serverServiceBaseUri = "http://server/service/";
+            string serverBaseUri = "http://server/";
+            if (url.StartsWith(serverServiceBaseUri))
+            {
+                return url.Substring(serverServiceBaseUri.Length);
+            }
+
+            if (url.StartsWith(serverBaseUri))
+            {
+                return url.Substring(serverBaseUri.Length);
+            }
+
+            return null;
         }
     }
 }

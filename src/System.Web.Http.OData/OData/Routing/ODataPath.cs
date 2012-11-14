@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Routing
@@ -43,7 +44,13 @@ namespace System.Web.Http.OData.Routing
         {
             get
             {
-                return String.Join("/", Segments.Select(segment => segment.SegmentKind));
+                StringBuilder sb = new StringBuilder("~");
+                foreach (ODataPathSegment segment in Segments)
+                {
+                    sb.Append("/");
+                    sb.Append(segment.SegmentKind);
+                }
+                return sb.ToString();
             }
         }
 

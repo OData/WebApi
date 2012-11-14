@@ -8,7 +8,9 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Filters;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
+using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http
@@ -18,7 +20,7 @@ namespace System.Web.Http
     {
         private const string EdmModelKey = "MS_EdmModel";
         private const string ODataFormatterKey = "MS_ODataFormatter";
-        private const string ODataActionResolverKey = "MS_ODataActionResolver";
+        private const string ODataPathParserKey = "MS_ODataPathParser";
 
         /// <summary>
         /// Retrieve the EdmModel from the configuration Properties collection. Null if user has not set it.
@@ -123,41 +125,48 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets the <see cref="IODataActionResolver"/> from the configuration.
+        /// Gets the <see cref="IODataPathParser"/> from the configuration.
         /// </summary>
-        /// <remarks>
-        /// If an <see cref="IODataActionResolver"/> is not found, this method registers and returns a <see cref="DefaultODataActionResolver"/> 
-        /// </remarks>
-        /// <param name="configuration">Configuration to check.</param>
-        /// <returns>Returns an <see cref="IODataActionResolver"/></returns>
-        public static IODataActionResolver GetODataActionResolver(this HttpConfiguration configuration)
+        /// <param name="configuration">The server's configuration.</param>
+        /// <returns>The <see cref="IODataPathParser"/> for the configuration.</returns>
+        public static IODataPathParser GetODataPathParser(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            // returns one if user sets one, null otherwise
-            object result = configuration.Properties.GetOrAdd(ODataActionResolverKey, (key) => new DefaultODataActionResolver());
-            return result as IODataActionResolver;
+            object pathParser;
+            if (!configuration.Properties.TryGetValue(ODataPathParserKey, out pathParser))
+            {
+                IEdmModel model = configuration.GetEdmModel();
+                if (model == null)
+                {
+                    throw Error.InvalidOperation(SRResources.ConfigurationMustHaveEdmModel);
+                }
+                pathParser = new DefaultODataPathParser(model);
+                configuration.Properties.TryAdd(ODataPathParserKey, pathParser);
+            }
+            return pathParser as IODataPathParser;
         }
 
         /// <summary>
-        /// Sets the <see cref="IODataActionResolver"/> on the configuration
+        /// Sets the <see cref="IODataPathParser"/> on the configuration.
         /// </summary>
-        /// <param name="configuration">Configuration to be updated.</param>
-        /// <param name="resolver">The <see cref="IODataActionResolver"/> this configuration should use.</param>
-        public static void SetODataActionResolver(this HttpConfiguration configuration, IODataActionResolver resolver)
+        /// <param name="configuration">The server's configuration.</param>
+        /// <param name="parser">The <see cref="IODataPathParser"/> this configuration should use.</param>
+        public static void SetODataPathParser(this HttpConfiguration configuration, IODataPathParser parser)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
-            if (resolver == null)
+            if (parser == null)
             {
-                throw Error.ArgumentNull("resolver");
+                throw Error.ArgumentNull("parser");
             }
-            configuration.Properties[ODataActionResolverKey] = resolver;
+
+            configuration.Properties[ODataPathParserKey] = parser;
         }
 
         /// <summary>

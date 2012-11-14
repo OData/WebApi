@@ -12,15 +12,15 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
-    /// Parses an OData URI as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
+    /// Parses an OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
     /// </summary>
-    public class ODataPathParser : IODataPathParser
+    public class DefaultODataPathParser : IODataPathParser
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataPathParser" /> class.
+        /// Initializes a new instance of the <see cref="DefaultODataPathParser" /> class.
         /// </summary>
         /// <param name="model">The model to use for segment parsing.</param>
-        public ODataPathParser(IEdmModel model)
+        public DefaultODataPathParser(IEdmModel model)
         {
             if (model == null)
             {
@@ -56,35 +56,20 @@ namespace System.Web.Http.OData.Routing
         }
 
         /// <summary>
-        /// Parses the specified OData URI as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
+        /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
         /// </summary>
-        /// <param name="uri">The OData URI to parse.</param>
-        /// <param name="baseUri">The base URI of the service.</param>
-        /// <returns>A parsed representation of the URI, or <c>null</c> if the URI does not match the model.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "Implementations shouldn't need to subclass ODataPath")]
-        public virtual ODataPath Parse(Uri uri, Uri baseUri)
+        /// <param name="odataPath">The OData path to parse.</param>
+        /// <returns>A parsed representation of the path, or <c>null</c> if the path does not match the model.</returns>
+        public virtual ODataPath Parse(string odataPath)
         {
-            if (uri == null)
+            if (odataPath == null)
             {
-                throw Error.ArgumentNull("uri");
+                throw Error.ArgumentNull("odataPath");
             }
-            if (baseUri == null)
-            {
-                throw Error.ArgumentNull("baseUri");
-            }
-
-            string uriPath = uri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-            string basePath = baseUri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-            if (!uriPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
-            {
-                return null;
-            }
-            string relativePath = uriPath.Substring(basePath.Length);
 
             ODataPath path = new ODataPath();
-            ODataPathSegment pathSegment = new ServiceBasePathSegment(baseUri);
-            path.Segments.AddLast(pathSegment);
-            foreach (string segment in ParseSegments(relativePath))
+            ODataPathSegment pathSegment = null;
+            foreach (string segment in ParseSegments(odataPath))
             {
                 pathSegment = ParseNextSegment(pathSegment, segment);
 
@@ -102,16 +87,17 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the OData path into segments.
         /// </summary>
-        /// <param name="relativePath">The path relative to the service base URI to parse.</param>
-        /// <returns>The segments of the OData URI.</returns>
-        protected internal virtual IEnumerable<string> ParseSegments(string relativePath)
+        /// <param name="odataPath">The OData path.</param>
+        /// <returns>The segments of the OData path.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
+        protected internal virtual IEnumerable<string> ParseSegments(string odataPath)
         {
-            if (relativePath == null)
+            if (odataPath == null)
             {
-                throw Error.ArgumentNull("relativePath");
+                throw Error.ArgumentNull("odataPath");
             }
 
-            string[] segments = relativePath.Split('/');
+            string[] segments = odataPath.Split('/');
 
             foreach (string segment in segments)
             {
@@ -160,19 +146,15 @@ namespace System.Web.Http.OData.Routing
         /// <returns>A parsed representation of the segment.</returns>
         protected virtual ODataPathSegment ParseNextSegment(ODataPathSegment previous, string segment)
         {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
             if (String.IsNullOrEmpty(segment))
             {
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
             }
 
-            if (previous is ServiceBasePathSegment)
+            if (previous == null)
             {
                 // Parse entry node
-                return ParseEntrySegment(previous, segment);
+                return ParseEntrySegment(segment);
             }
             else
             {
@@ -205,15 +187,10 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the first OData segment following the service base URI.
         /// </summary>
-        /// <param name="root">The service base path segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseEntrySegment(ODataPathSegment root, string segment)
+        protected virtual ODataPathSegment ParseEntrySegment(string segment)
         {
-            if (root == null)
-            {
-                throw Error.ArgumentNull("root");
-            }
             if (String.IsNullOrEmpty(segment))
             {
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
@@ -221,23 +198,23 @@ namespace System.Web.Http.OData.Routing
 
             if (segment == ODataSegmentKinds.Metadata)
             {
-                return new MetadataPathSegment(root);
+                return new MetadataPathSegment();
             }
             if (segment == ODataSegmentKinds.Batch)
             {
-                return new BatchPathSegment(root);
+                return new BatchPathSegment();
             }
 
             IEdmEntitySet entitySet = Container.FindEntitySet(segment);
             if (entitySet != null)
             {
-                return new EntitySetPathSegment(root, entitySet);
+                return new EntitySetPathSegment(entitySet);
             }
 
             IEdmFunctionImport function = Container.FunctionImports().SingleOrDefault(fi => fi.Name == segment && fi.IsBindable == false);
             if (function != null)
             {
-                return new ActionPathSegment(root, function);
+                return new ActionPathSegment(function);
             }
 
             // segment does not match the model

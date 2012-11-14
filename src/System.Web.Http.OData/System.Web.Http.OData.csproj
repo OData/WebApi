@@ -128,6 +128,7 @@
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>
+    <Compile Include="ODataRouteVariables.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpErrorExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
@@ -145,7 +146,6 @@
     <Compile Include="OData\Routing\IODataPathParser.cs" />
     <Compile Include="OData\Routing\ODataPath.cs" />
     <Compile Include="OData\Routing\ODataSegmentKinds.cs" />
-    <Compile Include="OData\Routing\ServiceBasePathSegment.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegment.cs" />
     <Compile Include="OData\Routing\LinksPathSegment.cs" />
     <Compile Include="OData\Routing\UnresolvedPathSegment.cs" />
@@ -205,7 +205,6 @@
     <Compile Include="OData\Builder\Conventions\EntityTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationOfTComplexType.cs" />
-    <Compile Include="OData\DefaultODataActionResolver.cs" />
     <Compile Include="OData\EntityInstanceContextOfTEntityType.cs" />
     <Compile Include="OData\EntityInstanceContext.cs" />
     <Compile Include="OData\CompiledPropertyAccessor.cs" />
@@ -228,7 +227,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
     <Compile Include="OData\IDeltaOfTEntityType.cs" />
-    <Compile Include="OData\IODataActionResolver.cs" />
     <Compile Include="OData\ODataResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethods.cs" />
@@ -274,7 +272,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataEntrySerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataQueryProjectionNode.cs" />
     <Compile Include="HttpActionDescriptorExtensions.cs" />
-    <Compile Include="OData\Routing\ODataPathParser.cs" />
+    <Compile Include="OData\Routing\DefaultODataPathParser.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\SRResources.Designer.cs">

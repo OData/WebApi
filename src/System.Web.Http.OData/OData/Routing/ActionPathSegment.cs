@@ -10,6 +10,20 @@ namespace System.Web.Http.OData.Routing
     public class ActionPathSegment : ODataPathSegment
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="ActionPathSegment" /> class for actions at the root of the path.
+        /// </summary>
+        /// <param name="action">The action being invoked.</param>
+        public ActionPathSegment(IEdmFunctionImport action)
+        {
+            if (action == null)
+            {
+                throw Error.ArgumentNull("action");
+            }
+
+            Initialize(action);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ActionPathSegment" /> class.
         /// </summary>
         /// <param name="previous">The previous segment in the path.</param>
@@ -22,15 +36,7 @@ namespace System.Web.Http.OData.Routing
                 throw Error.ArgumentNull("action");
             }
 
-            IEdmTypeReference returnType = action.ReturnType;
-            EdmType = returnType == null ? null : returnType.Definition;
-
-            IEdmEntitySet functionEntitySet = null;
-            if (action.TryGetStaticEntitySet(out functionEntitySet))
-            {
-                EntitySet = functionEntitySet;
-            }
-            Action = action;
+            Initialize(action);
         }
 
         /// <summary>
@@ -51,6 +57,19 @@ namespace System.Web.Http.OData.Routing
         {
             get;
             private set;
+        }
+
+        private void Initialize(IEdmFunctionImport action)
+        {
+            IEdmTypeReference returnType = action.ReturnType;
+            EdmType = returnType == null ? null : returnType.Definition;
+
+            IEdmEntitySet functionEntitySet = null;
+            if (action.TryGetStaticEntitySet(out functionEntitySet))
+            {
+                EntitySet = functionEntitySet;
+            }
+            Action = action;
         }
 
         /// <summary>

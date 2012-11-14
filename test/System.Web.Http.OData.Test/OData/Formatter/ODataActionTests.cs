@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -25,10 +26,12 @@ namespace System.Web.Http.OData.Formatter
             _formatter = new ODataMediaTypeFormatter(_model);
             _configuration.Formatters.Clear();
             _configuration.Formatters.Insert(0, _formatter);
+            _configuration.SetEdmModel(_model);
 
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata");
+            _configuration.Routes.MapHttpRoute("OData", "{*odataPath}", new { controller = "Customers", boundId = "1", id = "1" });
             _configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
             _configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundAction, "{controller}({boundId})/{odataAction}");
+            _configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata");
 
             _server = new HttpServer(_configuration);
             _client = new HttpClient(_server);
@@ -50,6 +53,7 @@ namespace System.Web.Http.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
+
             response.EnsureSuccessStatusCode();
         }
 
@@ -109,6 +113,7 @@ namespace System.Web.Http.OData.Formatter
 
     public class CustomersController : ApiController
     {
+        [HttpGet]
         public ODataActionTests.Customer GetById(int id)
         {
             return new ODataActionTests.Customer { ID = id, Name = "Name" + id.ToString() };

@@ -97,15 +97,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Action &apos;{0}&apos; was not found for RequestUri &apos;{1}&apos;..
-        /// </summary>
-        internal static string ActionNotFound {
-            get {
-                return ResourceManager.GetString("ActionNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Action resolution failed. Multiple actions matching the action identifier &apos;{0}&apos; were found. The matching actions are: {1}..
         /// </summary>
         internal static string ActionResolutionFailed {
@@ -259,6 +250,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The configuration must have an EDM model registered to enable parsing request URIs as OData paths. Consider registering a model using the HttpConfiguration.SetEdmModel extension method..
+        /// </summary>
+        internal static string ConfigurationMustHaveEdmModel {
+            get {
+                return ResourceManager.GetString("ConfigurationMustHaveEdmModel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot compare an enum of type &apos;{0}&apos; to an expression of type &apos;{1}&apos;..
         /// </summary>
         internal static string ConvertToEnumFailed {
@@ -286,20 +286,20 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DefaultODataActionResolver requires an ODataDeserializerContext with a non null Request and RequestUri..
-        /// </summary>
-        internal static string DefaultODataActionResolverRequirementsNotSatisfied {
-            get {
-                return ResourceManager.GetString("DefaultODataActionResolverRequirementsNotSatisfied", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The feed self link could not be generated for the route named &apos;{0}&apos;..
         /// </summary>
         internal static string DefaultRouteMissingOrIncorrect {
             get {
                 return ResourceManager.GetString("DefaultRouteMissingOrIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The ODataDeserializerContext must have a non null Request and RequestUri..
+        /// </summary>
+        internal static string DeserializerContextRequirementsNotSatisfied {
+            get {
+                return ResourceManager.GetString("DeserializerContextRequirementsNotSatisfied", resourceCulture);
             }
         }
         
@@ -1047,6 +1047,42 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestMustContainConfiguration {
             get {
                 return ResourceManager.GetString("RequestMustContainConfiguration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request message does not contain route data information..
+        /// </summary>
+        internal static string RequestMustContainRouteData {
+            get {
+                return ResourceManager.GetString("RequestMustContainRouteData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The last segment of the request URI &apos;{0}&apos; was not recognized as an OData action..
+        /// </summary>
+        internal static string RequestNotActionInvocation {
+            get {
+                return ResourceManager.GetString("RequestNotActionInvocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request URI &apos;{0}&apos; was not recognized as an OData path..
+        /// </summary>
+        internal static string RequestNotODataPath {
+            get {
+                return ResourceManager.GetString("RequestNotODataPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The route data must contain a value with key &apos;{0}&apos;..
+        /// </summary>
+        internal static string RouteDataMustContainODataPath {
+            get {
+                return ResourceManager.GetString("RouteDataMustContainODataPath", resourceCulture);
             }
         }
         

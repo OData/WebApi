@@ -9,6 +9,7 @@ using System.Web.Http.Filters;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Query;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -42,6 +43,34 @@ namespace System.Web.Http.OData
 
             // Assert
             Assert.Same(model, newModel);
+        }
+
+        [Fact]
+        public void GetODataPathParserReturnsDefaultPathParserByDefault()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
+            IEdmModel model = modelBuilder.GetEdmModel();
+            config.SetEdmModel(model);
+
+            IODataPathParser parser = config.GetODataPathParser();
+
+            DefaultODataPathParser defaultParser = Assert.IsType<DefaultODataPathParser>(parser);
+            Assert.Same(model, defaultParser.Model);
+        }
+
+        [Fact]
+        public void SetODataPathParserThenGetReturnsWhatYouSet()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            IODataPathParser parser = new Mock<IODataPathParser>().Object;
+
+            // Act
+            config.SetODataPathParser(parser);
+
+            // Assert
+            Assert.Same(parser, config.GetODataPathParser());
         }
 
         [Fact]

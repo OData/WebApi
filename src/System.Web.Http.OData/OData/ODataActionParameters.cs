@@ -2,11 +2,11 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData
@@ -25,14 +25,27 @@ namespace System.Web.Http.OData
         /// </summary>
         public virtual IEdmFunctionImport GetFunctionImport(ODataDeserializerContext context)
         {
-            HttpConfiguration configuration = context.Request.GetConfiguration();
-            if (configuration == null)
+            if (context == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+                throw Error.ArgumentNull("context");
             }
-            IODataActionResolver resolver = configuration.GetODataActionResolver();
-            Contract.Assert(resolver != null);
-            return resolver.Resolve(context);
+            if (context.Request == null || context.Request.RequestUri == null)
+            {
+                throw Error.InvalidOperation(SRResources.DeserializerContextRequirementsNotSatisfied);
+            }
+
+            ODataPath path = context.Request.GetODataPath();
+            if (path == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestNotODataPath, context.Request.RequestUri);
+            }
+
+            ActionPathSegment lastSegment = path.Segments.Last.Value as ActionPathSegment;
+            if (lastSegment == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, context.Request.RequestUri);
+            }
+            return lastSegment.Action;
         }
     }
 }

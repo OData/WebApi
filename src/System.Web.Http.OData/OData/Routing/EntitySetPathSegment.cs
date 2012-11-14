@@ -13,10 +13,8 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitySetPathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
         /// <param name="entitySet">The entity set being accessed.</param>
-        public EntitySetPathSegment(ODataPathSegment previous, IEdmEntitySet entitySet)
-            : base(previous)
+        public EntitySetPathSegment(IEdmEntitySet entitySet)
         {
             if (entitySet == null)
             {

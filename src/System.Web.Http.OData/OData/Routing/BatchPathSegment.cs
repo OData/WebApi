@@ -8,15 +8,6 @@ namespace System.Web.Http.OData.Routing
     public class BatchPathSegment : ODataPathSegment
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BatchPathSegment" /> class.
-        /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
-        public BatchPathSegment(ODataPathSegment previous)
-            : base(previous)
-        {
-        }
-
-        /// <summary>
         /// Gets the segment kind for the current segment.
         /// </summary>
         public override string SegmentKind

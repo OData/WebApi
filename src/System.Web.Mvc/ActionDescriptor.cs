@@ -15,12 +15,11 @@ namespace System.Web.Mvc
         private static readonly ActionMethodDispatcherCache _staticDispatcherCache = new ActionMethodDispatcherCache();
 
         private static readonly ActionSelector[] _emptySelectors = new ActionSelector[0];
-        private readonly Lazy<string> _uniqueId;
+        private string _uniqueId;
         private ActionMethodDispatcherCache _instanceDispatcherCache;
 
         protected ActionDescriptor()
         {
-            _uniqueId = new Lazy<string>(CreateUniqueId);
         }
 
         public abstract string ActionName { get; }
@@ -43,7 +42,14 @@ namespace System.Web.Mvc
         [SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces", Justification = "This is overridden elsewhere in System.Web.Mvc")]
         public virtual string UniqueId
         {
-            get { return _uniqueId.Value; }
+            get 
+            {
+                if (_uniqueId == null)
+                {
+                    _uniqueId = CreateUniqueId();
+                }
+                return _uniqueId; 
+            }
         }
 
         private string CreateUniqueId()

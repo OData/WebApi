@@ -11,7 +11,7 @@ namespace System.Web.Mvc
     {
         private readonly string _actionName;
         private readonly ControllerDescriptor _controllerDescriptor;
-        private readonly Lazy<string> _uniqueId;
+        private string _uniqueId;
         private ParameterDescriptor[] _parametersCache;
 
         public ReflectedActionDescriptor(MethodInfo methodInfo, string actionName, ControllerDescriptor controllerDescriptor)
@@ -46,7 +46,6 @@ namespace System.Web.Mvc
             MethodInfo = methodInfo;
             _actionName = actionName;
             _controllerDescriptor = controllerDescriptor;
-            _uniqueId = new Lazy<string>(CreateUniqueId);
         }
 
         public override string ActionName
@@ -63,7 +62,14 @@ namespace System.Web.Mvc
 
         public override string UniqueId
         {
-            get { return _uniqueId.Value; }
+            get 
+            {
+                if (_uniqueId == null)
+                {
+                    _uniqueId = CreateUniqueId();
+                }
+                return _uniqueId; 
+            }
         }
 
         private string CreateUniqueId()

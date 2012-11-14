@@ -39,7 +39,7 @@ namespace System.Web.WebPages
             _vpp = vpp;
             _virtualPathUtility = virtualPathUtility;
             _isPrecompiled = IsNonUpdatablePrecompiledApp();
-            if (!_isPrecompiled)
+            if (!_isPrecompiled && vpp != null)
             {
                 _vppCache = new FileExistenceCache(vpp);
             }

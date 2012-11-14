@@ -14,8 +14,7 @@ namespace System.Web.WebPages.Test
         public void ConstructorTest()
         {
             var ms = 1000;
-            var cache = new FileExistenceCache(null);
-            Assert.Null(cache.VirtualPathProvider);
+            FileExistenceCache cache;
 
             var vpp = new Mock<VirtualPathProvider>().Object;
             cache = new FileExistenceCache(vpp);

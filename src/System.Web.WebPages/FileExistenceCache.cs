@@ -2,7 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Web.Hosting;
 
@@ -21,13 +21,16 @@ namespace System.Web.WebPages
     {
         private const int TicksPerMillisecond = 10000;
         private readonly VirtualPathProvider _virtualPathProvider;
+        private readonly Func<string, bool> _virtualPathFileExists;
         private ConcurrentDictionary<string, bool> _cache;
         private long _creationTick;
         private int _ticksBeforeReset;
 
         public FileExistenceCache(VirtualPathProvider virtualPathProvider, int milliSecondsBeforeReset = 1000)
         {
+            Contract.Assert(virtualPathProvider != null);
             _virtualPathProvider = virtualPathProvider;
+            _virtualPathFileExists = virtualPathProvider.FileExists;
             _ticksBeforeReset = milliSecondsBeforeReset * TicksPerMillisecond;
             Reset();
         }
@@ -70,10 +73,7 @@ namespace System.Web.WebPages
             {
                 Reset();
             }
-            // The right way to do this is to verify in the constructor that the VirtualPathProvider argument is not null.
-            // However when unit testing this, we often new up instances when not running under Asp.Net when HostingEnvironment.VirtualPathProvider is null.
-            Debug.Assert(_virtualPathProvider != null);
-            return _cache.GetOrAdd(virtualPath, _virtualPathProvider.FileExists);
+            return _cache.GetOrAdd(virtualPath, _virtualPathFileExists);
         }
     }
 }

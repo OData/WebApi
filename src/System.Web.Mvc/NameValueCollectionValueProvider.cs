@@ -3,13 +3,13 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Threading;
 
 namespace System.Web.Mvc
 {
     public class NameValueCollectionValueProvider : IValueProvider, IUnvalidatedValueProvider, IEnumerableValueProvider
     {
-        private readonly Lazy<PrefixContainer> _prefixContainer;
+        // The class could be read from multiple threads, so mark volatile to ensure the lazy initialization works on all memory models
+        private volatile PrefixContainer _prefixContainer;
         private readonly Dictionary<string, ValueProviderResultPlaceholder> _values = new Dictionary<string, ValueProviderResultPlaceholder>(StringComparer.OrdinalIgnoreCase);
 
         public NameValueCollectionValueProvider(NameValueCollection collection, CultureInfo culture)
@@ -30,8 +30,6 @@ namespace System.Web.Mvc
             // and validated entries at the time the key or value is looked at. For example, GetKey() will throw if the
             // value fails request validation, even though the value's not being looked at (M.W.I can't tell the difference).
 
-            _prefixContainer = new Lazy<PrefixContainer>(() => new PrefixContainer(unvalidatedCollection.AllKeys), isThreadSafe: true);
-
             foreach (string key in unvalidatedCollection)
             {
                 if (key != null)
@@ -42,9 +40,30 @@ namespace System.Web.Mvc
             }
         }
 
+        private PrefixContainer PrefixContainer
+        {
+            get
+            {
+                // The class could be read from multiple threads, which could result in a race condition where this is created more than once.
+                // Ensure that:
+                //     - The input data and object remain read-only
+                //     - There is no dependency on the identity
+                //     - The object is not modified after assignment
+                //     - The field remains declared as volatile
+                //     - Use a local to minimize volatile operations on the common code path
+                PrefixContainer prefixContainer = _prefixContainer;
+                if (prefixContainer == null)
+                {
+                    prefixContainer = new PrefixContainer(_values.Keys);
+                    _prefixContainer = prefixContainer;
+                }
+                return prefixContainer;
+            }
+        }
+
         public virtual bool ContainsPrefix(string prefix)
         {
-            return _prefixContainer.Value.ContainsPrefix(prefix);
+            return PrefixContainer.ContainsPrefix(prefix);
         }
 
         public virtual ValueProviderResult GetValue(string key)
@@ -73,7 +92,7 @@ namespace System.Web.Mvc
 
         public virtual IDictionary<string, string> GetKeysFromPrefix(string prefix)
         {
-            return _prefixContainer.Value.GetKeysFromPrefix(prefix);
+            return PrefixContainer.GetKeysFromPrefix(prefix);
         }
 
         // Placeholder that can store a validated (in relation to request validation) or unvalidated

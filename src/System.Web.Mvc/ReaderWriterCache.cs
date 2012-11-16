@@ -29,6 +29,12 @@ namespace System.Web.Mvc
 
         protected TValue FetchOrCreateItem(TKey key, Func<TValue> creator)
         {
+            // Passing the delegate as an argument allows the inline delegate to be static
+            return FetchOrCreateItem(key, (Func<TValue> innerCreator) => innerCreator(), creator);
+        }
+
+        protected TValue FetchOrCreateItem<TArgument>(TKey key, Func<TArgument, TValue> creator, TArgument state)
+        {
             // first, see if the item already exists in the cache
             _readerWriterLock.EnterReadLock();
             try
@@ -45,7 +51,7 @@ namespace System.Web.Mvc
             }
 
             // insert the new item into the cache
-            TValue newEntry = creator();
+            TValue newEntry = creator(state);
             _readerWriterLock.EnterWriteLock();
             try
             {

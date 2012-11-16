@@ -12,7 +12,8 @@ namespace System.Web.Mvc
 
         public ActionMethodDispatcher GetDispatcher(MethodInfo methodInfo)
         {
-            return FetchOrCreateItem(methodInfo, () => new ActionMethodDispatcher(methodInfo));
+            // Frequently called, so ensure delegate remains static
+            return FetchOrCreateItem(methodInfo, (MethodInfo methodInfoInner) => new ActionMethodDispatcher(methodInfoInner), methodInfo);
         }
     }
 }

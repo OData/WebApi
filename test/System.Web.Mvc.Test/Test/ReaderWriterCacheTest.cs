@@ -62,6 +62,21 @@ namespace System.Web.Mvc.Test
             Assert.Equal("original", secondItem);
         }
 
+        [Fact]
+        public void PublicFetchOrCreateItemPassesArgument()
+        {
+            // Arrange
+            ReaderWriterCacheHelper<int, string> helper = new ReaderWriterCacheHelper<int, string>();
+            Dictionary<int, string> cache = helper.PublicCache;
+
+            // Act
+            string item = helper.PublicFetchOrCreateItem(42, (string argument) => argument, "new");
+
+            // Assert
+            Assert.Equal("new", cache[42]);
+            Assert.Equal("new", item);
+        }
+
         private class ReaderWriterCacheHelper<TKey, TValue> : ReaderWriterCache<TKey, TValue>
         {
             public Dictionary<TKey, TValue> PublicCache
@@ -72,6 +87,11 @@ namespace System.Web.Mvc.Test
             public TValue PublicFetchOrCreateItem(TKey key, Func<TValue> creator)
             {
                 return FetchOrCreateItem(key, creator);
+            }
+
+            public TValue PublicFetchOrCreateItem<TArgument>(TKey key, Func<TArgument, TValue> creator, TArgument state)
+            {
+                return FetchOrCreateItem(key, creator, state);
             }
         }
     }

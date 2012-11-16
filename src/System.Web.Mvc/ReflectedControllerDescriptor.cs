@@ -92,10 +92,11 @@ namespace System.Web.Mvc
 
         private ActionDescriptor[] LazilyFetchCanonicalActionsCollection()
         {
-            return DescriptorUtil.LazilyFetchOrCreateDescriptors<MethodInfo, ActionDescriptor>(
-                ref _canonicalActionsCache /* cacheLocation */,
-                GetAllActionMethodsFromSelector /* initializer */,
-                methodInfo => ReflectedActionDescriptor.TryCreateDescriptor(methodInfo, methodInfo.Name, this) /* converter */);
+            return DescriptorUtil.LazilyFetchOrCreateDescriptors(
+                cacheLocation: ref _canonicalActionsCache,
+                initializer: (ReflectedControllerDescriptor state) => state.GetAllActionMethodsFromSelector(),
+                converter: (MethodInfo methodInfo, ReflectedControllerDescriptor state) => ReflectedActionDescriptor.TryCreateDescriptor(methodInfo, methodInfo.Name, state),
+                state: this);
         }
     }
 }

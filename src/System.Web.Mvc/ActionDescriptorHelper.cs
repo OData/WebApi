@@ -39,10 +39,19 @@ namespace System.Web.Mvc
 
         private static ParameterDescriptor[] LazilyFetchParametersCollection(ActionDescriptor actionDescriptor, MethodInfo methodInfo, ref ParameterDescriptor[] parametersCache)
         {
-            return DescriptorUtil.LazilyFetchOrCreateDescriptors<ParameterInfo, ParameterDescriptor>(
+            // Frequently called, so ensure the delegates remain static
+            return DescriptorUtil.LazilyFetchOrCreateDescriptors(
                 cacheLocation: ref parametersCache,
-                initializer: methodInfo.GetParameters,
-                converter: parameterInfo => new ReflectedParameterDescriptor(parameterInfo, actionDescriptor));
+                initializer: (CreateDescriptorState state) => state.MethodInfo.GetParameters(),
+                converter: (ParameterInfo parameterInfo, CreateDescriptorState state) => new ReflectedParameterDescriptor(parameterInfo, state.ActionDescriptor),
+                state: new CreateDescriptorState() { ActionDescriptor = actionDescriptor, MethodInfo = methodInfo });
+        }
+
+        // Used to pass generic arguments to frequently called delegates, so keep as a struct to prevent heap allocation
+        private struct CreateDescriptorState
+        {
+            internal ActionDescriptor ActionDescriptor;
+            internal MethodInfo MethodInfo;
         }
     }
 }

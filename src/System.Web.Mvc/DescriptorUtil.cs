@@ -57,7 +57,11 @@ namespace System.Web.Mvc
             return builder.ToString();
         }
 
-        public static TDescriptor[] LazilyFetchOrCreateDescriptors<TReflection, TDescriptor>(ref TDescriptor[] cacheLocation, Func<TReflection[]> initializer, Func<TReflection, TDescriptor> converter)
+        public static TDescriptor[] LazilyFetchOrCreateDescriptors<TReflection, TDescriptor, TArgument>(
+            ref TDescriptor[] cacheLocation,
+            Func<TArgument, TReflection[]> initializer,
+            Func<TReflection, TArgument, TDescriptor> converter,
+            TArgument state)
         {
             // did we already calculate this once?
             TDescriptor[] existingCache = Interlocked.CompareExchange(ref cacheLocation, null, null);
@@ -69,11 +73,11 @@ namespace System.Web.Mvc
             // Note: since this code operates on arrays it is more efficient to call simple array operations
             // instead of LINQ-y extension methods such as Select and Where. DO NOT attempt to simplify this
             // without testing the performance impact.
-            TReflection[] memberInfos = initializer();
+            TReflection[] memberInfos = initializer(state);
             List<TDescriptor> descriptorsList = new List<TDescriptor>(memberInfos.Length);
             for (int i = 0; i < memberInfos.Length; i++)
             {
-                TDescriptor descriptor = converter(memberInfos[i]);
+                TDescriptor descriptor = converter(memberInfos[i], state);
                 if (descriptor != null)
                 {
                     descriptorsList.Add(descriptor);

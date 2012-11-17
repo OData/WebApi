@@ -132,22 +132,28 @@ namespace System.Web.Mvc
         {
             private readonly ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
             private readonly ConcurrentDictionary<Type, IEnumerable<object>> _cacheMultiple = new ConcurrentDictionary<Type, IEnumerable<object>>();
+            private readonly Func<Type, object> _getServiceDelegate;
+            private readonly Func<Type, IEnumerable<object>> _getServicesDelegate;
 
             private readonly IDependencyResolver _resolver;
 
             public CacheDependencyResolver(IDependencyResolver resolver)
             {
                 _resolver = resolver;
+                _getServiceDelegate = _resolver.GetService;
+                _getServicesDelegate = _resolver.GetServices;
             }
 
             public object GetService(Type serviceType)
             {
-                return _cache.GetOrAdd(serviceType, _resolver.GetService);
+                // Use a saved delegate to prevent per-call delegate allocation
+                return _cache.GetOrAdd(serviceType, _getServiceDelegate);
             }
 
             public IEnumerable<object> GetServices(Type serviceType)
             {
-                return _cacheMultiple.GetOrAdd(serviceType, _resolver.GetServices);
+                // Use a saved delegate to prevent per-call delegate allocation
+                return _cacheMultiple.GetOrAdd(serviceType, _getServicesDelegate);
             }
         }
 

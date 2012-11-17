@@ -42,7 +42,21 @@ namespace System.Web.Mvc
         {
             Debug.Assert(memberInfo != null);
             Debug.Assert(lookup != null);
-            return lookup.GetOrAdd(memberInfo, mi => new ReadOnlyCollection<TAttribute>((TAttribute[])memberInfo.GetCustomAttributes(typeof(TAttribute), inherit: true)));
+            // Frequently called, so use a static delegate
+            // An inline delegate cannot be used because the C# compiler does not cache inline delegates that reference generic method arguments
+            return lookup.GetOrAdd(
+                memberInfo,
+                CachedDelegates<TMemberInfo, TAttribute>.GetCustomAttributes);
+        }
+
+        private static class CachedDelegates<TMemberInfo, TAttribute>
+            where TAttribute : Attribute
+            where TMemberInfo : MemberInfo
+        {
+            internal static Func<TMemberInfo, ReadOnlyCollection<TAttribute>> GetCustomAttributes = (TMemberInfo memberInfo) =>
+            {
+                return new ReadOnlyCollection<TAttribute>((TAttribute[])memberInfo.GetCustomAttributes(typeof(TAttribute), inherit: true));
+            };
         }
     }
 }

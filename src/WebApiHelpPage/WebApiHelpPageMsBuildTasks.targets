@@ -14,8 +14,8 @@
             string relativeDirectory = sourceFile.GetMetadata("RelativeDir");
             string fileName = sourceFile.GetMetadata("Filename");
             string extension = sourceFile.GetMetadata("Extension");
-            string destinationDirectory = OutputPath + relativeDirectory;
-            string destinationFilePath = destinationDirectory + fileName + extension;
+            string destinationDirectory = Path.Combine(OutputPath, relativeDirectory);
+            string destinationFilePath = Path.Combine(destinationDirectory, fileName + extension);
             
             DirectoryInfo dir = new DirectoryInfo(destinationDirectory);
             if (!dir.Exists)
@@ -26,7 +26,7 @@
             string content = File.ReadAllText(sourceFilePath);
             
             // Do the transformation for source code only
-            if (extension.StartsWith(".cs"))
+            if (extension.StartsWith(".cs") || extension.StartsWith(".vb"))
             {
               destinationFilePath += ".pp";
               content = content.Replace(OriginalNamespaceToken, ReplacementNamespaceToken);

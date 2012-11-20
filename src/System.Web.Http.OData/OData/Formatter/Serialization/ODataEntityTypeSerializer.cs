@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -67,7 +69,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private void WriteEntry(object graph, IEnumerable<ODataProperty> propertyBag, ODataWriter writer, ODataSerializerContext writeContext)
         {
             IEdmEntityType entityType = _edmEntityTypeReference.EntityDefinition();
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(SerializerProvider.EdmModel, writeContext.EntitySet, entityType, writeContext.UrlHelper, graph, writeContext.SkipExpensiveAvailabilityChecks);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext
+            {
+                EdmModel = SerializerProvider.EdmModel,
+                EntitySet = writeContext.EntitySet,
+                EntityType = entityType,
+                UrlHelper = writeContext.UrlHelper,
+                PathHandler = writeContext.PathHandler,
+                EntityInstance = graph,
+                SkipExpensiveAvailabilityChecks = writeContext.SkipExpensiveAvailabilityChecks
+            };
 
             ODataEntry entry = new ODataEntry
             {
@@ -164,7 +175,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 Uri target = builder.BuildActionLink(context);
                 if (target != null)
                 {
-                    Uri baseUri = new Uri(context.UrlHelper.Link(ODataRouteNames.Metadata, null));
+                    Uri baseUri = new Uri(context.UrlHelper.ODataLink(context.PathHandler, new MetadataPathSegment()));
                     Uri metadata = new Uri(baseUri, "#" + action.Container.Name + "." + action.Name);
 
                     return new ODataAction

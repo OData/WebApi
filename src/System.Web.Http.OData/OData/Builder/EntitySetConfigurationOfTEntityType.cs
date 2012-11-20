@@ -388,7 +388,15 @@ namespace System.Web.Http.OData.Builder
 
         private static EntityInstanceContext<TEntityType> UpCastEntityInstanceContext(EntityInstanceContext context)
         {
-            return new EntityInstanceContext<TEntityType>(context.EdmModel, context.EntitySet, context.EntityType, context.UrlHelper, context.EntityInstance as TEntityType);
+            return new EntityInstanceContext<TEntityType>
+            {
+                EdmModel = context.EdmModel,
+                EntitySet = context.EntitySet,
+                EntityType = context.EntityType,
+                UrlHelper = context.UrlHelper,
+                PathHandler = context.PathHandler,
+                EntityInstance = context.EntityInstance as TEntityType
+            };
         }
     }
 }

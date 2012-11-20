@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;

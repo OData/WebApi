@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -47,14 +48,16 @@ namespace System.Web.Http.OData.Formatter
             string expected = BaselineResource.ResourceManager.GetString(typeString);
             Assert.NotNull(expected);
 
-            ODataConventionModelBuilder model = new ODataConventionModelBuilder();
-            model.EntitySet<WorkItem>("WorkItems");
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<WorkItem>("WorkItems");
+            IEdmModel model = modelBuilder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)/ID");
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
 
             Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
 

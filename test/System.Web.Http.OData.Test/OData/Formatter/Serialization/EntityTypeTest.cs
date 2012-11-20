@@ -3,6 +3,7 @@
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -13,6 +14,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class EntityTypeTest
     {
+        private IEdmModel _model = GetSampleModel();
+
         [Fact]
         public void EntityTypeSerializesAsODataEntry()
         {
@@ -46,19 +49,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Http.Contains(content.Headers, "Content-Type", "application/json; odata=verbose; charset=utf-8");
         }
 
-        private static ODataMediaTypeFormatter CreateFormatter()
+        private ODataMediaTypeFormatter CreateFormatter()
         {
-            return new ODataMediaTypeFormatter(GetSampleModel(), GetSampleRequest());
+            return new ODataMediaTypeFormatter(_model, GetSampleRequest());
         }
 
-        private static HttpRequestMessage GetSampleRequest()
+        private HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            config.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentId})/{navigationProperty}");
+            config.EnableOData(_model);
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(_model).Parse("employees");
             return request;
         }
 

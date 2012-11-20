@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -40,7 +41,7 @@ namespace System.Web.Http.OData
                 throw Error.InvalidOperation(SRResources.RequestNotODataPath, context.Request.RequestUri);
             }
 
-            ActionPathSegment lastSegment = path.Segments.Last.Value as ActionPathSegment;
+            ActionPathSegment lastSegment = path.Segments.Last() as ActionPathSegment;
             if (lastSegment == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, context.Request.RequestUri);

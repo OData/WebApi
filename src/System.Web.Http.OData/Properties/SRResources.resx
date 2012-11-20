@@ -294,12 +294,6 @@
   <data name="NoNavigationLinkFactoryFound" xml:space="preserve">
     <value>No NavigationLink factory was found for the navigation property '{0}' from entity type '{1}' on entity set '{2}'. Try calling HasNavigationPropertyLink on the EntitySetConfiguration.</value>
   </data>
-  <data name="NavigationPropertyRouteMissingOrIncorrect" xml:space="preserve">
-    <value>Link generation for the '{0}' NavigationProperty failed. Check that you have the '{1}' route correctly registered.</value>
-  </data>
-  <data name="GetByIdRouteMissingOrIncorrect" xml:space="preserve">
-    <value>EditLink generation failed. Check that you have the '{0}' route correctly registered.</value>
-  </data>
   <data name="InvalidEntitySetName" xml:space="preserve">
     <value>'{0}' is not a valid entity set name.</value>
   </data>
@@ -341,9 +335,6 @@
   </data>
   <data name="ArgumentMustBeOfType" xml:space="preserve">
     <value>The argument must be of type '{0}'.</value>
-  </data>
-  <data name="DefaultRouteMissingOrIncorrect" xml:space="preserve">
-    <value>The feed self link could not be generated for the route named '{0}'.</value>
   </data>
   <data name="CollectionShouldHaveAddMethod" xml:space="preserve">
     <value>The type '{0}' of the property '{1}' on type '{2}' does not have an Add method. Consider using a collection type that does have an Add method - for example IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
@@ -450,9 +441,6 @@
   <data name="PreviousSegmentEdmTypeCannotBeNull" xml:space="preserve">
     <value>The previous path segment cannot have a null value as its EdmType.</value>
   </data>
-  <data name="PreviousTypeForKeyMustBeCollection" xml:space="preserve">
-    <value>The previous segment's EDM type '{0}' must be a collection type. Key segments can only be applied if the previous segment's type is a collection.</value>
-  </data>
   <data name="InvalidPathSegment" xml:space="preserve">
     <value>The URI segment '{0}' is invalid after the segment '{1}'.</value>
   </data>
@@ -477,17 +465,8 @@
   <data name="InvalidCastInPath" xml:space="preserve">
     <value>Invalid cast encountered. Cast type '{0}' must be the same as or derive from the previous segment's type '{1}'.</value>
   </data>
-  <data name="PreviousSegmentMustHaveEntitySet" xml:space="preserve">
-    <value>The previous path segment must have a defined EntitySet.</value>
-  </data>
   <data name="SegmentNullOrEmpty" xml:space="preserve">
     <value>The segment value must not be null or empty.</value>
-  </data>
-  <data name="ConfigurationMustHaveEdmModel" xml:space="preserve">
-    <value>The configuration must have an EDM model registered to enable parsing request URIs as OData paths. Consider registering a model using the HttpConfiguration.SetEdmModel extension method.</value>
-  </data>
-  <data name="RequestMustContainRouteData" xml:space="preserve">
-    <value>Request message does not contain route data information.</value>
   </data>
   <data name="RequestNotActionInvocation" xml:space="preserve">
     <value>The last segment of the request URI '{0}' was not recognized as an OData action.</value>
@@ -495,7 +474,13 @@
   <data name="RequestNotODataPath" xml:space="preserve">
     <value>The request URI '{0}' was not recognized as an OData path.</value>
   </data>
-  <data name="RouteDataMustContainODataPath" xml:space="preserve">
-    <value>The route data must contain a value with key '{0}'.</value>
+  <data name="NoMatchingResource" xml:space="preserve">
+    <value>No HTTP resource was found that matches the request URI '{0}'.</value>
+  </data>
+  <data name="NoRoutingHandlerToSelectAction" xml:space="preserve">
+    <value>No routing convention was found to select an action for the OData path with template '{0}'.</value>
+  </data>
+  <data name="NoRoutingHandlerToSelectController" xml:space="preserve">
+    <value>No routing convention was found to select a controller for the OData path with template '{0}'.</value>
   </data>
 </root>

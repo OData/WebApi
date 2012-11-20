@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,42 @@ namespace System.Web.Http.OData.Routing
     /// <summary>
     /// Provides an object representation for an OData path with additional information about the EDM type and entity set for the path.
     /// </summary>
+    [ODataPathParameterBinding]
     public class ODataPath
     {
-        private LinkedList<ODataPathSegment> _segments = new LinkedList<ODataPathSegment>();
+        private ReadOnlyCollection<ODataPathSegment> _segments;
+        private IEdmType _edmType;
+        private IEdmEntitySet _entitySet;
+        private string _pathTemplate;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataPath" /> class.
+        /// </summary>
+        /// <param name="segments">The path segments for the path.</param>
+        public ODataPath(params ODataPathSegment[] segments)
+            : this(segments as IList<ODataPathSegment>)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataPath" /> class.
+        /// </summary>
+        /// <param name="segments">The path segments for the path.</param>
+        public ODataPath(IList<ODataPathSegment> segments)
+        {
+            if (segments == null)
+            {
+                throw Error.ArgumentNull("segments");
+            }
+
+            foreach (ODataPathSegment segment in segments)
+            {
+                _edmType = segment.GetEdmType(_edmType);
+                _entitySet = segment.GetEntitySet(_entitySet);
+            }
+
+            _segments = new ReadOnlyCollection<ODataPathSegment>(segments);
+        }
 
         /// <summary>
         /// Gets or sets the EDM type of the path.
@@ -22,7 +56,7 @@ namespace System.Web.Http.OData.Routing
         {
             get
             {
-                return Segments.Last.Value.EdmType;
+                return _edmType;
             }
         }
 
@@ -33,7 +67,7 @@ namespace System.Web.Http.OData.Routing
         {
             get
             {
-                return Segments.Last.Value.EntitySet;
+                return _entitySet;
             }
         }
 
@@ -44,20 +78,24 @@ namespace System.Web.Http.OData.Routing
         {
             get
             {
-                StringBuilder sb = new StringBuilder("~");
-                foreach (ODataPathSegment segment in Segments)
+                if (_pathTemplate == null)
                 {
-                    sb.Append("/");
-                    sb.Append(segment.SegmentKind);
+                    StringBuilder sb = new StringBuilder("~");
+                    foreach (ODataPathSegment segment in Segments)
+                    {
+                        sb.Append("/");
+                        sb.Append(segment.SegmentKind);
+                    }
+                    _pathTemplate = sb.ToString();
                 }
-                return sb.ToString();
+                return _pathTemplate;
             }
         }
 
         /// <summary>
         /// Gets the path segments for the OData path.
         /// </summary>
-        public LinkedList<ODataPathSegment> Segments
+        public ReadOnlyCollection<ODataPathSegment> Segments
         {
             get
             {

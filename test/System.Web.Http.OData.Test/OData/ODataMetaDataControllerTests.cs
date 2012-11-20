@@ -18,9 +18,7 @@ namespace System.Web.Http.OData.Builder
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
             HttpServer server = new HttpServer();
-            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
-            server.Configuration.Formatters.InsertRange(0, odataFormatters);
-            server.Configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata", new { Controller = "ODataMetadata", Action = "GetMetadata" });
+            server.Configuration.EnableOData(ODataTestUtil.GetEdmModel());
 
             HttpClient client = new HttpClient(server);
             var response = client.GetAsync("http://localhost/$metadata").Result;
@@ -64,9 +62,7 @@ namespace System.Web.Http.OData.Builder
         public void DollarMetaDataWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
-            server.Configuration.Formatters.InsertRange(0, odataFormatters);
-            server.Configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata", new { Controller = "ODataMetadata", Action = "GetMetadata" });
+            server.Configuration.EnableOData(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -81,9 +77,7 @@ namespace System.Web.Http.OData.Builder
         public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
-            server.Configuration.Formatters.InsertRange(0, odataFormatters);
-            server.Configuration.Routes.MapHttpRoute(ODataRouteNames.ServiceDocument, "", new { Controller = "ODataMetadata", Action = "GetServiceDocument" });
+            server.Configuration.EnableOData(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);

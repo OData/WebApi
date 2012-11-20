@@ -27,11 +27,8 @@ namespace System.Web.Http.OData.OData.Formatter
             IEdmModel model = builder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentId})/{navigationProperty}");
-            configuration.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
             configuration.Formatters.Clear();
-            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create(model));
+            configuration.EnableOData(model);
 
             HttpServer server = new HttpServer(configuration);
             _client = new HttpClient(server);

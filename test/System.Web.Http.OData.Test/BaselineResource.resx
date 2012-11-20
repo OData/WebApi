@@ -527,26 +527,26 @@
   </data>
   <data name="TestArrayOfBools" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;property xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
   &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
   &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
   &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
   &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
-&lt;/property&gt;</value>
+&lt;/root&gt;</value>
   </data>
   <data name="TestArrayOfInts" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;property xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
   &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;10&lt;/element&gt;
   &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;20&lt;/element&gt;
   &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;30&lt;/element&gt;
   &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;40&lt;/element&gt;
   &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;50&lt;/element&gt;
-&lt;/property&gt;</value>
+&lt;/root&gt;</value>
   </data>
   <data name="TestCollectionOfPerson" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;property xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
   &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
     &lt;Age m:type="Edm.Int32"&gt;20&lt;/Age&gt;
     &lt;Gender&gt;Male&lt;/Gender&gt;
@@ -616,11 +616,11 @@
       &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
     &lt;/FavoriteHobby&gt;
   &lt;/element&gt;
-&lt;/property&gt;</value>
+&lt;/root&gt;</value>
   </data>
   <data name="TestComplexTypePerson" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:property xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
+&lt;d:root xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
   &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
   &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
   &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
@@ -642,7 +642,7 @@
   &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
     &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
   &lt;/d:FavoriteHobby&gt;
-&lt;/d:property&gt;</value>
+&lt;/d:root&gt;</value>
   </data>
   <data name="TestDictionary" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -807,7 +807,7 @@
   &lt;/author&gt;
   &lt;content type="application/xml"&gt;
     &lt;m:properties&gt;
-      &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
+      &lt;d:ID m:type="Edm.Int32"&gt;25&lt;/d:ID&gt;
       &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
       &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
       &lt;d:NumberOfHours m:type="Edm.Single"&gt;100&lt;/d:NumberOfHours&gt;
@@ -927,12 +927,12 @@
   </data>
   <data name="TestListOfStrings" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;property xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
   &lt;element&gt;Frank&lt;/element&gt;
   &lt;element&gt;Steve&lt;/element&gt;
   &lt;element&gt;Tom&lt;/element&gt;
   &lt;element&gt;Chandler&lt;/element&gt;
-&lt;/property&gt;</value>
+&lt;/root&gt;</value>
   </data>
   <data name="TimeSpan" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;

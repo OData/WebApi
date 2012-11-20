@@ -77,7 +77,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 if (writeContext.EntitySet != null)
                 {
                     IEntitySetLinkBuilder linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
-                    Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(new FeedContext(writeContext.EntitySet, writeContext.UrlHelper, graph));
+                    FeedContext feedContext = new FeedContext
+                    {
+                        EntitySet = writeContext.EntitySet,
+                        UrlHelper = writeContext.UrlHelper,
+                        PathHandler = writeContext.PathHandler,
+                        FeedInstance = graph
+                    };
+
+                    Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(feedContext);
                     if (feedSelfLink != null)
                     {
                         feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = SelfLinkRelation, Href = feedSelfLink } });

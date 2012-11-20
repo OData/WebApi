@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.Conventions;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
@@ -78,10 +79,30 @@ namespace System.Web.Http.OData.Formatter
                 ODataModelBuilder model = new ODataModelBuilder();
 
                 var people = model.EntitySet<FormatterPerson>("People");
-                people.HasFeedSelfLink(context => new Uri(context.UrlHelper.Link(ODataRouteNames.Default, new { })));
-                people.HasIdLink(context => context.UrlHelper.Link(ODataRouteNames.GetById, new { Id = (context.EntityInstance as FormatterPerson).PerId }));
-                people.HasEditLink(context => new Uri(context.UrlHelper.Link(ODataRouteNames.GetById, new { Id = (context.EntityInstance as FormatterPerson).PerId })));
-                people.HasReadLink(context => new Uri(context.UrlHelper.Link(ODataRouteNames.GetById, new { Id = (context.EntityInstance as FormatterPerson).PerId })));
+                people.HasFeedSelfLink(context => new Uri(context.UrlHelper.Link(ODataRouteConstants.RouteName, new { })));
+                people.HasIdLink(context => 
+                    {
+                        string selfLink = context.EntitySet.Name + "(" + (context.EntityInstance as FormatterPerson).PerId.ToString() + ")";
+                        return context.UrlHelper.Link(
+                            ODataRouteConstants.RouteName,
+                            new HttpRouteValueDictionary() { { "odataPath", selfLink } });
+                    });
+
+                people.HasEditLink(context =>
+                {
+                    string selfLink = context.EntitySet.Name + "(" + (context.EntityInstance as FormatterPerson).PerId.ToString() + ")";
+                    return context.UrlHelper.Link(
+                        ODataRouteConstants.RouteName,
+                        new HttpRouteValueDictionary() { { "odataPath", selfLink } });
+                });
+
+                people.HasReadLink(context => 
+                    {
+                        string selfLink = context.EntitySet.Name + "(" + (context.EntityInstance as FormatterPerson).PerId.ToString() + ")";
+                        return context.UrlHelper.Link(
+                            ODataRouteConstants.RouteName,
+                            new HttpRouteValueDictionary() { { "odataPath", selfLink } });
+                    });
 
                 var person = people.EntityType;
                 person.HasKey(p => p.PerId);

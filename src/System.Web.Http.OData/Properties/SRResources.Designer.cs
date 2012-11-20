@@ -241,15 +241,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The configuration must have an EDM model registered to enable parsing request URIs as OData paths. Consider registering a model using the HttpConfiguration.SetEdmModel extension method..
-        /// </summary>
-        internal static string ConfigurationMustHaveEdmModel {
-            get {
-                return ResourceManager.GetString("ConfigurationMustHaveEdmModel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot compare an enum of type &apos;{0}&apos; to an expression of type &apos;{1}&apos;..
         /// </summary>
         internal static string ConvertToEnumFailed {
@@ -273,15 +264,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string CreatingLinksByConventionNotSupported {
             get {
                 return ResourceManager.GetString("CreatingLinksByConventionNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The feed self link could not be generated for the route named &apos;{0}&apos;..
-        /// </summary>
-        internal static string DefaultRouteMissingOrIncorrect {
-            get {
-                return ResourceManager.GetString("DefaultRouteMissingOrIncorrect", resourceCulture);
             }
         }
         
@@ -444,15 +426,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string FunctionNotSupportedOnEnum {
             get {
                 return ResourceManager.GetString("FunctionNotSupportedOnEnum", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to EditLink generation failed. Check that you have the &apos;{0}&apos; route correctly registered..
-        /// </summary>
-        internal static string GetByIdRouteMissingOrIncorrect {
-            get {
-                return ResourceManager.GetString("GetByIdRouteMissingOrIncorrect", resourceCulture);
             }
         }
         
@@ -718,15 +691,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Link generation for the &apos;{0}&apos; NavigationProperty failed. Check that you have the &apos;{1}&apos; route correctly registered..
-        /// </summary>
-        internal static string NavigationPropertyRouteMissingOrIncorrect {
-            get {
-                return ResourceManager.GetString("NavigationPropertyRouteMissingOrIncorrect", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid action detected. &apos;{0}&apos; is not an action that can bind to &apos;Collection({1})&apos;..
         /// </summary>
         internal static string NoActionFoundForCollection {
@@ -754,6 +718,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No HTTP resource was found that matches the request URI &apos;{0}&apos;..
+        /// </summary>
+        internal static string NoMatchingResource {
+            get {
+                return ResourceManager.GetString("NoMatchingResource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No NavigationLink factory was found for the navigation property &apos;{0}&apos; from entity type &apos;{1}&apos; on entity set &apos;{2}&apos;. Try calling HasNavigationPropertyLink on the EntitySetConfiguration..
         /// </summary>
         internal static string NoNavigationLinkFactoryFound {
@@ -777,6 +750,24 @@ namespace System.Web.Http.OData.Properties {
         internal static string NoODataMediaTypeFormatterFound {
             get {
                 return ResourceManager.GetString("NoODataMediaTypeFormatterFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No routing convention was found to select an action for the OData path with template &apos;{0}&apos;..
+        /// </summary>
+        internal static string NoRoutingHandlerToSelectAction {
+            get {
+                return ResourceManager.GetString("NoRoutingHandlerToSelectAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No routing convention was found to select a controller for the OData path with template &apos;{0}&apos;..
+        /// </summary>
+        internal static string NoRoutingHandlerToSelectController {
+            get {
+                return ResourceManager.GetString("NoRoutingHandlerToSelectController", resourceCulture);
             }
         }
         
@@ -876,24 +867,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string PreviousSegmentMustBeEntityType {
             get {
                 return ResourceManager.GetString("PreviousSegmentMustBeEntityType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The previous path segment must have a defined EntitySet..
-        /// </summary>
-        internal static string PreviousSegmentMustHaveEntitySet {
-            get {
-                return ResourceManager.GetString("PreviousSegmentMustHaveEntitySet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The previous segment&apos;s EDM type &apos;{0}&apos; must be a collection type. Key segments can only be applied if the previous segment&apos;s type is a collection..
-        /// </summary>
-        internal static string PreviousTypeForKeyMustBeCollection {
-            get {
-                return ResourceManager.GetString("PreviousTypeForKeyMustBeCollection", resourceCulture);
             }
         }
         
@@ -1042,15 +1015,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Request message does not contain route data information..
-        /// </summary>
-        internal static string RequestMustContainRouteData {
-            get {
-                return ResourceManager.GetString("RequestMustContainRouteData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The last segment of the request URI &apos;{0}&apos; was not recognized as an OData action..
         /// </summary>
         internal static string RequestNotActionInvocation {
@@ -1065,15 +1029,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestNotODataPath {
             get {
                 return ResourceManager.GetString("RequestNotODataPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The route data must contain a value with key &apos;{0}&apos;..
-        /// </summary>
-        internal static string RouteDataMustContainODataPath {
-            get {
-                return ResourceManager.GetString("RouteDataMustContainODataPath", resourceCulture);
             }
         }
         

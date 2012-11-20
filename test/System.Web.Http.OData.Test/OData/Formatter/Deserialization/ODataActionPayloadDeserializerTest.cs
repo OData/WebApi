@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -189,12 +190,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
             HttpConfiguration config = new HttpConfiguration();
-            config.SetEdmModel(GetModel());
+            IEdmModel model = GetModel();
+            config.SetEdmModel(model);
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             IHttpRoute route = new Mock<IHttpRoute>().Object;
-            IHttpRouteData routeData = new HttpRouteData(route);
-            routeData.Values["odataPath"] = GetODataPath(url);
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse(GetODataPath(url));
             return request;
         }
 

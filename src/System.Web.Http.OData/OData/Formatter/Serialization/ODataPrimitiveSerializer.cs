@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             messageWriter.WriteProperty(
-                CreateProperty(graph, writeContext.ServiceOperationName, writeContext));
+                CreateProperty(graph, writeContext.RootElementName, writeContext));
         }
 
         public override ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)

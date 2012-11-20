@@ -2,13 +2,15 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
     /// <summary>
     /// The ActionLinkGenerationConvention calls action.HasActionLink(..) for all actions that bind to a single entity if they have not previously been configured.
-    /// The convention uses the <see cref="ODataRouteNames"/>.InvokeBoundAction route to build a link that invokes the action.
+    /// The convention uses the <see cref="ODataRouteConstants"/>.InvokeBoundAction route to build a link that invokes the action.
     /// </summary>
     public class ActionLinkGenerationConvention : IProcedureConvention
     {
@@ -29,34 +31,26 @@ namespace System.Web.Http.OData.Builder.Conventions
             EntityTypeConfiguration actionEntityType = action.BindingParameter.TypeConfiguration as EntityTypeConfiguration;
             Contract.Assert(actionEntityType != null, "we have already verified that binding paramter type is entity");
 
-            Dictionary<string, object> routeValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            routeValues.Add(LinkGenerationConstants.Controller, entityContext.EntitySet.Name);
-            routeValues.Add(LinkGenerationConstants.BoundId, ConventionsHelpers.GetEntityKeyValue(entityContext, actionEntityType));
-            routeValues.Add(LinkGenerationConstants.ODataAction, action.Name);
+            List<ODataPathSegment> actionPathSegments = new List<ODataPathSegment>();
+            actionPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
+            actionPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, actionEntityType)));
 
-            string routeName;
-
-            // generate link without cast if the entityset type matches the entity type the action is bound to.
-            if (entityContext.EntitySet.ElementType.IsOrInheritsFrom(entityContext.EdmModel.FindDeclaredType(actionEntityType.FullName)))
+            // generate link with cast if the entityset type doesn't match the entity type the action is bound to.
+            if (!entityContext.EntitySet.ElementType.IsOrInheritsFrom(entityContext.EdmModel.FindDeclaredType(actionEntityType.FullName)))
             {
-                routeName = ODataRouteNames.InvokeBoundAction;
-            }
-            else
-            {
-                routeName = ODataRouteNames.InvokeBoundActionWithCast;
-                routeValues.Add(LinkGenerationConstants.Entitytype, entityContext.EntityType.FullName());
+                actionPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string actionLink = entityContext.UrlHelper.Link(routeName, routeValues);
+            actionPathSegments.Add(new ActionPathSegment(action.Name));
+
+            string actionLink = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, actionPathSegments);
 
             if (actionLink == null)
             {
                 return null;
             }
-            else
-            {
-                return new Uri(actionLink);
-            }
+
+            return new Uri(actionLink);
         }
     }
 }

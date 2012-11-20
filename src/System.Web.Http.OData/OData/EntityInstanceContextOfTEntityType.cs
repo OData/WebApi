@@ -12,26 +12,16 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntityType">The entity type</typeparam>
     public class EntityInstanceContext<TEntityType> : EntityInstanceContext
     {
-        /// <summary>
-        /// Parameterless constructor to be used only for unit testing.
-        /// </summary>
-        public EntityInstanceContext()
-        {
-        }
-
-        public EntityInstanceContext(IEdmModel model, IEdmEntitySet entitySet, IEdmEntityType entityType, UrlHelper urlHelper, TEntityType entityInstance)
-            : this(model, entitySet, entityType, urlHelper, entityInstance, skipExpensiveActionAvailabilityChecks: false)
-        {
-        }
-
-        public EntityInstanceContext(IEdmModel model, IEdmEntitySet entitySet, IEdmEntityType entityType, UrlHelper urlHelper, TEntityType entityInstance, bool skipExpensiveActionAvailabilityChecks)
-            : base(model, entitySet, entityType, urlHelper, entityInstance, skipExpensiveAvailabilityChecks: skipExpensiveActionAvailabilityChecks)
-        {
-        }
-
         public new TEntityType EntityInstance
         {
-            get { return (TEntityType)base.EntityInstance; }
+            get
+            {
+                return (TEntityType)base.EntityInstance;
+            }
+            set
+            {
+                base.EntityInstance = value;
+            }
         }
     }
 }

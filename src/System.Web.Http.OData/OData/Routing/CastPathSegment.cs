@@ -14,33 +14,30 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="CastPathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
         /// <param name="castType">The type of the cast.</param>
-        public CastPathSegment(ODataPathSegment previous, IEdmEntityType castType)
-            : base(previous)
+        public CastPathSegment(IEdmEntityType castType)
         {
             if (castType == null)
             {
-                throw Error.ArgumentNull("cast");
+                throw Error.ArgumentNull("castType");
             }
 
-            IEdmType previousEdmType = previous.EdmType;
-
-            if (previousEdmType == null)
-            {
-                throw Error.InvalidOperation(SRResources.PreviousSegmentEdmTypeCannotBeNull);
-            }
-
-            if (previousEdmType.TypeKind == EdmTypeKind.Collection)
-            {
-                EdmType = castType.GetCollection();
-            }
-            else
-            {
-                EdmType = castType;
-            }
-            EntitySet = previous.EntitySet;
             CastType = castType;
+            CastTypeName = castType.FullName();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CastPathSegment" /> class.
+        /// </summary>
+        /// <param name="castTypeName">Name of the cast type.</param>
+        public CastPathSegment(string castTypeName)
+        {
+            if (castTypeName == null)
+            {
+                throw Error.ArgumentNull("castTypeName");
+            }
+
+            CastTypeName = castTypeName;
         }
 
         /// <summary>
@@ -64,6 +61,50 @@ namespace System.Web.Http.OData.Routing
         }
 
         /// <summary>
+        /// Gets the name of the cast type.
+        /// </summary>
+        public string CastTypeName
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            if (CastType != null && previousEdmType != null)
+            {
+                if (previousEdmType.TypeKind == EdmTypeKind.Collection)
+                {
+                    return CastType.GetCollection();
+                }
+                else
+                {
+                    return CastType;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            return previousEntitySet;
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
@@ -71,7 +112,7 @@ namespace System.Web.Http.OData.Routing
         /// </returns>
         public override string ToString()
         {
-            return CastType.FullName();
+            return CastTypeName;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Text;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -12,15 +13,15 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
-    /// Parses an OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
+    /// Parses an OData path as an <see cref="ODataPath"/> and converts an <see cref="ODataPath"/> into an OData link.
     /// </summary>
-    public class DefaultODataPathParser : IODataPathParser
+    public class DefaultODataPathHandler : IODataPathHandler
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultODataPathParser" /> class.
+        /// Initializes a new instance of the <see cref="DefaultODataPathHandler" /> class.
         /// </summary>
         /// <param name="model">The model to use for segment parsing.</param>
-        public DefaultODataPathParser(IEdmModel model)
+        public DefaultODataPathHandler(IEdmModel model)
         {
             if (model == null)
             {
@@ -67,11 +68,12 @@ namespace System.Web.Http.OData.Routing
                 throw Error.ArgumentNull("odataPath");
             }
 
-            ODataPath path = new ODataPath();
+            List<ODataPathSegment> pathSegments = new List<ODataPathSegment>();
             ODataPathSegment pathSegment = null;
+            IEdmType previousEdmType = null;
             foreach (string segment in ParseSegments(odataPath))
             {
-                pathSegment = ParseNextSegment(pathSegment, segment);
+                pathSegment = ParseNextSegment(pathSegment, previousEdmType, segment);
 
                 // If the Uri stops matching the model at any point, return null
                 if (pathSegment == null)
@@ -79,9 +81,10 @@ namespace System.Web.Http.OData.Routing
                     return null;
                 }
 
-                path.Segments.AddLast(pathSegment);
+                pathSegments.Add(pathSegment);
+                previousEdmType = pathSegment.GetEdmType(previousEdmType);
             }
-            return path;
+            return new ODataPath(pathSegments);
         }
 
         /// <summary>
@@ -142,9 +145,10 @@ namespace System.Web.Http.OData.Routing
         /// Parses the next OData path segment.
         /// </summary>
         /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseNextSegment(ODataPathSegment previous, string segment)
+        protected virtual ODataPathSegment ParseNextSegment(ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (String.IsNullOrEmpty(segment))
             {
@@ -159,24 +163,24 @@ namespace System.Web.Http.OData.Routing
             else
             {
                 // Parse non-entry node
-                if (previous.EdmType == null)
+                if (previousEdmType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
                 }
 
-                switch (previous.EdmType.TypeKind)
+                switch (previousEdmType.TypeKind)
                 {
                     case EdmTypeKind.Collection:
-                        return ParseAtCollection(previous, segment);
+                        return ParseAtCollection(previous, previousEdmType, segment);
 
                     case EdmTypeKind.Entity:
-                        return ParseAtEntity(previous, segment);
+                        return ParseAtEntity(previous, previousEdmType, segment);
 
                     case EdmTypeKind.Complex:
-                        return ParseAtComplex(previous, segment);
+                        return ParseAtComplex(previous, previousEdmType, segment);
 
                     case EdmTypeKind.Primitive:
-                        return ParseAtPrimitiveProperty(previous, segment);
+                        return ParseAtPrimitiveProperty(previous, previousEdmType, segment);
 
                     default:
                         throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
@@ -225,9 +229,10 @@ namespace System.Web.Http.OData.Routing
         /// Parses the next OData path segment following a collection.
         /// </summary>
         /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtCollection(ODataPathSegment previous, string segment)
+        protected virtual ODataPathSegment ParseAtCollection(ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -238,21 +243,21 @@ namespace System.Web.Http.OData.Routing
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
             }
 
-            if (previous.EdmType == null)
+            if (previousEdmType == null)
             {
                 throw Error.InvalidOperation(SRResources.PreviousSegmentEdmTypeCannotBeNull);
             }
 
-            IEdmCollectionType collection = previous.EdmType as IEdmCollectionType;
+            IEdmCollectionType collection = previousEdmType as IEdmCollectionType;
             if (collection == null)
             {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeCollectionType, previous.EdmType);
+                throw Error.Argument(SRResources.PreviousSegmentMustBeCollectionType, previousEdmType);
             }
 
             switch (collection.ElementType.Definition.TypeKind)
             {
                 case EdmTypeKind.Entity:
-                    return ParseAtEntityCollection(previous, segment);
+                    return ParseAtEntityCollection(previous, previousEdmType, segment);
 
                 default:
                     throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
@@ -263,9 +268,10 @@ namespace System.Web.Http.OData.Routing
         /// Parses the next OData path segment following a complex-typed segment.
         /// </summary>
         /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtComplex(ODataPathSegment previous, string segment)
+        protected virtual ODataPathSegment ParseAtComplex(ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -276,30 +282,31 @@ namespace System.Web.Http.OData.Routing
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
             }
 
-            IEdmComplexType previousType = previous.EdmType as IEdmComplexType;
+            IEdmComplexType previousType = previousEdmType as IEdmComplexType;
             if (previousType == null)
             {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeComplexType, previous.EdmType);
+                throw Error.Argument(SRResources.PreviousSegmentMustBeComplexType, previousEdmType);
             }
 
             // look for properties
             IEdmProperty property = previousType.Properties().SingleOrDefault(p => p.Name == segment);
             if (property != null)
             {
-                return new PropertyAccessPathSegment(previous, property);
+                return new PropertyAccessPathSegment(property);
             }
 
             // Treating as an open property
-            return new UnresolvedPathSegment(previous, segment);
+            return new UnresolvedPathSegment(segment);
         }
 
         /// <summary>
         /// Parses the next OData path segment following an entity collection.
         /// </summary>
         /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEntityCollection(ODataPathSegment previous, string segment)
+        protected virtual ODataPathSegment ParseAtEntityCollection(ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -310,19 +317,19 @@ namespace System.Web.Http.OData.Routing
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
             }
 
-            if (previous.EdmType == null)
+            if (previousEdmType == null)
             {
                 throw Error.InvalidOperation(SRResources.PreviousSegmentEdmTypeCannotBeNull);
             }
-            IEdmCollectionType collectionType = previous.EdmType as IEdmCollectionType;
+            IEdmCollectionType collectionType = previousEdmType as IEdmCollectionType;
             if (collectionType == null)
             {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityCollectionType, previous.EdmType);
+                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityCollectionType, previousEdmType);
             }
             IEdmEntityType elementType = collectionType.ElementType.Definition as IEdmEntityType;
             if (elementType == null)
             {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityCollectionType, previous.EdmType);
+                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityCollectionType, previousEdmType);
             }
 
             // look for keys first.
@@ -330,7 +337,7 @@ namespace System.Web.Http.OData.Routing
             {
                 Contract.Assert(segment.Length >= 2);
                 string value = segment.Substring(1, segment.Length - 2);
-                return new KeyValuePathSegment(previous, value);
+                return new KeyValuePathSegment(value);
             }
 
             // next look for casts
@@ -342,14 +349,14 @@ namespace System.Web.Http.OData.Routing
                 {
                     throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousElementType));
                 }
-                return new CastPathSegment(previous, castType);
+                return new CastPathSegment(castType);
             }
 
             // now look for bindable actions
             IEdmFunctionImport procedure = Container.FunctionImports().FindBindableAction(collectionType, segment);
             if (procedure != null)
             {
-                return new ActionPathSegment(previous, procedure);
+                return new ActionPathSegment(procedure);
             }
 
             throw new ODataException(Error.Format(SRResources.NoActionFoundForCollection, segment, collectionType.ElementType));
@@ -359,9 +366,10 @@ namespace System.Web.Http.OData.Routing
         /// Parses the next OData path segment following a primitive property.
         /// </summary>
         /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtPrimitiveProperty(ODataPathSegment previous, string segment)
+        protected virtual ODataPathSegment ParseAtPrimitiveProperty(ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -374,7 +382,7 @@ namespace System.Web.Http.OData.Routing
 
             if (segment == ODataSegmentKinds.Value)
             {
-                return new ValuePathSegment(previous);
+                return new ValuePathSegment();
             }
 
             throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
@@ -384,9 +392,10 @@ namespace System.Web.Http.OData.Routing
         /// Parses the next OData path segment following an entity.
         /// </summary>
         /// <param name="previous">The previous path segment.</param>
+        /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEntity(ODataPathSegment previous, string segment)
+        protected virtual ODataPathSegment ParseAtEntity(ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -396,29 +405,29 @@ namespace System.Web.Http.OData.Routing
             {
                 throw Error.Argument(SRResources.SegmentNullOrEmpty);
             }
-            IEdmEntityType previousType = previous.EdmType as IEdmEntityType;
+            IEdmEntityType previousType = previousEdmType as IEdmEntityType;
             if (previousType == null)
             {
-                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityType, previous.EdmType);
+                throw Error.Argument(SRResources.PreviousSegmentMustBeEntityType, previousEdmType);
             }
 
             if (segment == ODataSegmentKinds.Links)
             {
-                return new LinksPathSegment(previous);
+                return new LinksPathSegment();
             }
 
             // first look for navigation properties
             IEdmNavigationProperty navigation = previousType.NavigationProperties().SingleOrDefault(np => np.Name == segment);
             if (navigation != null)
             {
-                return new NavigationPathSegment(previous, navigation);
+                return new NavigationPathSegment(navigation);
             }
 
             // next look for properties
             IEdmProperty property = previousType.Properties().SingleOrDefault(p => p.Name == segment);
             if (property != null)
             {
-                return new PropertyAccessPathSegment(previous, property);
+                return new PropertyAccessPathSegment(property);
             }
 
             // next look for type casts
@@ -429,18 +438,54 @@ namespace System.Web.Http.OData.Routing
                 {
                     throw new ODataException(Error.Format(SRResources.InvalidCastInPath, castType, previousType));
                 }
-                return new CastPathSegment(previous, castType);
+                return new CastPathSegment(castType);
             }
 
             // finally look for bindable procedures
             IEdmFunctionImport procedure = Container.FunctionImports().FindBindableAction(previousType, segment);
             if (procedure != null)
             {
-                return new ActionPathSegment(previous, procedure);
+                return new ActionPathSegment(procedure);
             }
 
             // Treating as an open property
-            return new UnresolvedPathSegment(previous, segment);
+            return new UnresolvedPathSegment(segment);
+        }
+
+        /// <summary>
+        /// Converts an instance of <see cref="ODataPath" /> into an OData link.
+        /// </summary>
+        /// <param name="path">The OData path to convert into a link.</param>
+        /// <returns>
+        /// The generated OData link.
+        /// </returns>
+        public virtual string Link(ODataPath path)
+        {
+            bool firstSegment = true;
+            StringBuilder sb = new StringBuilder();
+            foreach (ODataPathSegment segment in path.Segments)
+            {
+                KeyValuePathSegment keyValueSegment = segment as KeyValuePathSegment;
+                if (keyValueSegment == null)
+                {
+                    if (firstSegment)
+                    {
+                        firstSegment = false;
+                    }
+                    else
+                    {
+                        sb.Append('/');
+                    }
+                    sb.Append(segment);
+                }
+                else
+                {
+                    sb.Append('(');
+                    sb.Append(keyValueSegment);
+                    sb.Append(')');
+                }
+            }
+            return sb.ToString();
         }
     }
 }

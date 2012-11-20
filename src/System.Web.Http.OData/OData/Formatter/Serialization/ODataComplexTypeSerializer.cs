@@ -31,7 +31,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            ODataProperty property = CreateProperty(graph, writeContext.ServiceOperationName, writeContext);
+            ODataProperty property = CreateProperty(graph, writeContext.RootElementName, writeContext);
             messageWriter.WriteProperty(property);
         }
 

@@ -17,9 +17,7 @@ namespace System.Web.Http.OData.Formatter
         public void PostEntry_InODataAtomFormat()
         {
             var _config = new HttpConfiguration();
-            _config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            _config.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
-            _config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel()));
+            _config.EnableOData(ODataTestUtil.GetEdmModel());
 
             using (HttpServer host = new HttpServer(_config))
             {
@@ -41,9 +39,7 @@ namespace System.Web.Http.OData.Formatter
         public void PostEntry_InODataJsonFormat()
         {
             var _config = new HttpConfiguration();
-            _config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            _config.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
-            _config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel()));
+            _config.EnableOData(ODataTestUtil.GetEdmModel());
 
             using (HttpServer host = new HttpServer(_config))
             {

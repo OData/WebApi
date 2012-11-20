@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -26,6 +27,7 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
+        private const string ElementNameDefault = "root";
         internal const string EdmModelKey = "MS_EdmModel";
 
         private readonly ODataVersion _defaultODataVersion;
@@ -257,18 +259,12 @@ namespace System.Web.Http.OData.Formatter
 
                 UrlHelper urlHelper = _request.GetUrlHelper();
 
-                IEdmEntitySet targetEntitySet = null;
-                ODataUriHelpers.TryGetEntitySetAndEntityType(_request.RequestUri, _model, out targetEntitySet);
+                ODataPath path = _request.GetODataPath();
+                IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
 
                 // serialize a response
-                Uri baseAddress = new Uri(_request.RequestUri, _request.GetConfiguration().VirtualPathRoot);
-
-                // TODO: Bug 467617: figure out the story for the operation name on the client side and server side.
-                // This is clearly a workaround. We are assuming that the operation name is the last segment in the request uri 
-                // which works for most cases and fall back to the type name of the object being written.
-                // We should rather use uri parser semantic tree to figure out the operation name from the request url.
-                string operationName = ODataUriHelpers.GetOperationName(_request.RequestUri, baseAddress);
-                operationName = operationName ?? type.Name;
+                HttpConfiguration configuration = _request.GetConfiguration();
+                Uri baseAddress = new Uri(_request.RequestUri, configuration.VirtualPathRoot);
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
 
@@ -295,7 +291,8 @@ namespace System.Web.Http.OData.Formatter
                     {
                         EntitySet = targetEntitySet,
                         UrlHelper = urlHelper,
-                        ServiceOperationName = operationName,
+                        PathHandler = configuration.GetODataPathHandler() ?? new DefaultODataPathHandler(Model),
+                        RootElementName = GetRootElementName(path) ?? ElementNameDefault,
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                         Request = _request
                     };
@@ -384,6 +381,29 @@ namespace System.Web.Http.OData.Formatter
                 }
             }
 
+            return null;
+        }
+
+        private static string GetRootElementName(ODataPath path)
+        {
+            if (path != null)
+            {
+                ODataPathSegment lastSegment = path.Segments.LastOrDefault();
+                if (lastSegment != null)
+                {
+                    ActionPathSegment actionSegment = lastSegment as ActionPathSegment;
+                    if (actionSegment != null)
+                    {
+                        return actionSegment.Action.Name;
+                    }
+
+                    PropertyAccessPathSegment propertyAccessSegment = lastSegment as PropertyAccessPathSegment;
+                    if (propertyAccessSegment != null)
+                    {
+                        return propertyAccessSegment.Property.Name;
+                    }
+                }
+            }
             return null;
         }
 

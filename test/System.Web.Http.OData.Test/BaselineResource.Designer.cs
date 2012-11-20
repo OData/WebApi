@@ -354,11 +354,11 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;property xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
         ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
         ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;false&lt;/element&gt;
         ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xm [rest of string was truncated]&quot;;.
+        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns: [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TestArrayOfBools {
             get {
@@ -368,11 +368,11 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;property xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
         ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;10&lt;/element&gt;
         ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;20&lt;/element&gt;
         ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;30&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://s [rest of string was truncated]&quot;;.
+        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schem [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TestArrayOfInts {
             get {
@@ -382,13 +382,13 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;property xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
         ///  &lt;element m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
         ///    &lt;Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/Age&gt;
         ///    &lt;Gender&gt;Male&lt;/Gender&gt;
         ///    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
         ///    &lt;Alias m:type=&quot;Collection(Edm.String)&quot;&gt;
-        ///      &lt;d:element xmlns:d=&quot;htt [rest of string was truncated]&quot;;.
+        ///      &lt;d:element xmlns:d=&quot;http:// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TestCollectionOfPerson {
             get {
@@ -398,12 +398,13 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:property xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
+        ///&lt;d:root xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
         ///  &lt;d:Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/d:Age&gt;
         ///  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
         ///  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
         ///  &lt;d:Alias m:type=&quot;Collection(Edm.String)&quot;&gt;
-        ///    &lt;d:element&gt;Alias0&lt;/d:element [rest of string was truncated]&quot;;.
+        ///    &lt;d:element&gt;Alias0&lt;/d:element&gt;
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TestComplexTypePerson {
             get {
@@ -491,12 +492,12 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;property xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
         ///  &lt;element&gt;Frank&lt;/element&gt;
         ///  &lt;element&gt;Steve&lt;/element&gt;
         ///  &lt;element&gt;Tom&lt;/element&gt;
         ///  &lt;element&gt;Chandler&lt;/element&gt;
-        ///&lt;/property&gt;.
+        ///&lt;/root&gt;.
         /// </summary>
         internal static string TestListOfStrings {
             get {

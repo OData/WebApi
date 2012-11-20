@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
 
-            serializer.WriteObject(addresses, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { ServiceOperationName = "Property" });
+            serializer.WriteObject(addresses, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { RootElementName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
             IEnumerable readAddresses = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
 
@@ -55,7 +55,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
 
-            serializer.WriteObject(numbers, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { ServiceOperationName = "Property" });
+            serializer.WriteObject(numbers, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { RootElementName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
             IEnumerable readnumbers = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
 

@@ -18,6 +18,7 @@ namespace System.Net.Http
     public static class HttpRequestMessageExtensions
     {
         private const string ODataPathKey = "MS_ODataPath";
+        private const string MessageDetailKey = "MessageDetail";
 
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
@@ -51,6 +52,17 @@ namespace System.Net.Http
                         MessageLanguage = oDataError.MessageLanguage
                     });
             }
+        }
+
+        internal static HttpResponseMessage CreateErrorResponse(this HttpRequestMessage request, HttpStatusCode statusCode, string message, string messageDetail)
+        {
+            HttpError error = new HttpError(message);
+            HttpConfiguration config = request.GetConfiguration();
+            if (config != null && ShouldIncludeErrorDetail(config, request))
+            {
+                error.Add(MessageDetailKey, messageDetail);
+            }
+            return request.CreateErrorResponse(statusCode, error);
         }
 
         // IMPORTANT: This is a slightly modified version of HttpConfiguration.ShouldIncludeErrorDetail
@@ -99,45 +111,40 @@ namespace System.Net.Http
             }
         }
 
-        internal static ODataPath GetODataPath(this HttpRequestMessage request)
+        /// <summary>
+        /// Gets the OData path of the request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The OData path of the request</returns>
+        public static ODataPath GetODataPath(this HttpRequestMessage request)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
             }
 
-            HttpConfiguration configuration = request.GetConfiguration();
-            if (configuration == null)
-            {
-                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
-            }
-
             object path;
-            if (!request.Properties.TryGetValue(ODataPathKey, out path))
+            if (request.Properties.TryGetValue(ODataPathKey, out path))
             {
-                IODataPathParser parser = configuration.GetODataPathParser();
-                IHttpRouteData routeData = request.GetRouteData();
-                if (routeData == null)
-                {
-                    throw Error.InvalidOperation(SRResources.RequestMustContainRouteData);
-                }
-
-                object odataRouteValue;
-                if (!routeData.Values.TryGetValue(ODataRouteVariables.ODataPath, out odataRouteValue))
-                {
-                    throw Error.InvalidOperation(SRResources.RouteDataMustContainODataPath, ODataRouteVariables.ODataPath);
-                }
-
-                string odataPath = odataRouteValue as string;
-                if (odataPath == null)
-                {
-                    throw Error.InvalidOperation(SRResources.RouteDataMustContainODataPath, ODataRouteVariables.ODataPath);
-                }
-
-                path = parser.Parse(odataPath);
-                request.Properties[ODataPathKey] = path;
+                return path as ODataPath;
             }
-            return path as ODataPath;
+            return null;
+        }
+
+        /// <summary>
+        /// Sets the OData path for the request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="odataPath">The OData path of the request.</param>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
+        public static void SetODataPath(this HttpRequestMessage request, ODataPath odataPath)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            request.Properties[ODataPathKey] = odataPath;
         }
     }
 }

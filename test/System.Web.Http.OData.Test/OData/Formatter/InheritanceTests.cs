@@ -31,9 +31,6 @@ namespace System.Web.Http.OData.OData.Formatter
 
             _configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
 
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
-
             _server = new HttpServer(_configuration);
             _client = new HttpClient(_server);
         }

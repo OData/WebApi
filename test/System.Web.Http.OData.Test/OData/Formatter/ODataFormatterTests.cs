@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Formatter
     {
         const string baseAddress = "http://localhost:8081/";
 
-        private IEnumerable<ODataMediaTypeFormatter> _serverFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
+        private IEnumerable<ODataMediaTypeFormatter> _serverFormatters;
 
         private static readonly MediaTypeWithQualityHeaderValue _atomMediaType = ODataTestUtil.ApplicationAtomMediaTypeWithQuality;
         private static readonly MediaTypeWithQualityHeaderValue _jsonMediaType = ODataTestUtil.ApplicationJsonMediaTypeWithQuality;
@@ -26,16 +26,14 @@ namespace System.Web.Http.OData.Formatter
         public ODataFormatterTests()
         {
             _config = new HttpConfiguration();
-            _config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            _config.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
+            _config.EnableOData(ODataTestUtil.GetEdmModel());
+            _serverFormatters = _config.Formatters.OfType<ODataMediaTypeFormatter>();
         }
 
         [Fact]
         [Trait("Description", "Demonstrates how to get the response from an Http GET in OData atom format when the accept header is application/atom+xml")]
         public void Get_Entry_In_OData_Atom_Format()
         {
-            _config.Formatters.InsertRange(0, _serverFormatters);
-
             using (HttpServer host = new HttpServer(_config))
             {
                 _client = new HttpClient(host);
@@ -59,8 +57,6 @@ namespace System.Web.Http.OData.Formatter
         [Trait("Description", "Demonstrates how to get the response from an Http GET in OData atom format when the accept header is application/json")]
         public void Get_Entry_In_OData_Json_Format()
         {
-            _config.Formatters.InsertRange(0, _serverFormatters);
-
             using (HttpServer host = new HttpServer(_config))
             {
                 _client = new HttpClient(host);
@@ -90,8 +86,6 @@ namespace System.Web.Http.OData.Formatter
             {
                 odataFormatter.SupportedMediaTypes.Remove(ODataTestUtil.ApplicationJsonMediaType);
             }
-
-            _config.Formatters.InsertRange(0, _serverFormatters);
 
             using (HttpServer host = new HttpServer(_config))
             {
@@ -139,8 +133,6 @@ namespace System.Web.Http.OData.Formatter
                 odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationJsonMediaTypeWithQuality));
             }
 
-            _config.Formatters.InsertRange(0, _serverFormatters);
-
             using (HttpServer host = new HttpServer(_config))
             {
                 _client = new HttpClient(host);
@@ -186,8 +178,6 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void GetFeedInODataAtomFormat_HasSelfLink()
         {
-            _config.Formatters.InsertRange(0, _serverFormatters);
-
             using (HttpServer host = new HttpServer(_config))
             {
                 _client = new HttpClient(host);
@@ -209,8 +199,6 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void GetFeedInODataAtomFormat_LimitsResults()
         {
-            _config.Formatters.InsertRange(0, _serverFormatters);
-
             using (HttpServer host = new HttpServer(_config))
             {
                 _client = new HttpClient(host);
@@ -238,7 +226,6 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void HttpErrorInODataFormat_GetsSerializedCorrectly()
         {
-            _config.Formatters.InsertRange(0, _serverFormatters);
             _config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             using (HttpServer host = new HttpServer(_config))

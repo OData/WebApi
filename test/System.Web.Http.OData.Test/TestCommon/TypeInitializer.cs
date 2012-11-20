@@ -37,7 +37,7 @@ namespace System.Web.Http.OData
             }
             else if (type == SupportedTypes.WorkItem)
             {
-                return new WorkItem() { EmployeeID = index, IsCompleted = false, NumberOfHours = 100, WorkItemID = 25 };
+                return new WorkItem() { EmployeeID = index, IsCompleted = false, NumberOfHours = 100, ID = 25 };
             }
 
             context.DecrementCounter();

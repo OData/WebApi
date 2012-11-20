@@ -60,7 +60,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             serializer.WriteObject(
                 obj,
                 new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), EdmCoreModel.Instance),
-                new ODataSerializerContext { ServiceOperationName = "Property" });
+                new ODataSerializerContext { RootElementName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
             Assert.Equal(
                 obj,
@@ -85,7 +85,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             serializer.WriteObject(
                 obj,
                 new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), EdmCoreModel.Instance),
-                new ODataSerializerContext { ServiceOperationName = "Property" });
+                new ODataSerializerContext { RootElementName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
 
             // Act && Assert

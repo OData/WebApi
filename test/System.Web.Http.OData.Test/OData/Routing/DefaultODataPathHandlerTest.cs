@@ -10,9 +10,9 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing
 {
-    public class DefaultODataPathParserTest
+    public class DefaultODataPathHandlerTest
     {
-        private static DefaultODataPathParser _parser = new DefaultODataPathParser(GetModel());
+        private static DefaultODataPathHandler _parser = new DefaultODataPathHandler(GetModel());
 
         public static TheoryDataSet<string, string[]> ParseSegmentsData
         {
@@ -50,11 +50,11 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "üCategories";
 
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             Assert.NotNull(path);
             Assert.Equal("~/entityset", path.PathTemplate);
-            Assert.Equal("üCategories", path.Segments.Last.Value.ToString());
+            Assert.Equal("üCategories", segment.ToString());
         }
 
         [Fact]
@@ -119,14 +119,13 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "$metadata";
 
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(path);
             Assert.Null(path.EntitySet);
             Assert.Null(path.EdmType);
             Assert.Equal("$metadata", segment.ToString());
-            Assert.Null(segment.Previous);
         }
 
         [Fact]
@@ -137,7 +136,7 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(path);
@@ -145,7 +144,6 @@ namespace System.Web.Http.OData.Routing
             Assert.Null(path.EntitySet);
             Assert.Null(path.EdmType);
             Assert.Equal("$batch", segment.ToString());
-            Assert.Null(segment.Previous);
         }
 
         [Fact]
@@ -158,15 +156,14 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(path);
             Assert.NotNull(segment);
-            Assert.Null(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Same(expectedSet.ElementType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Same(expectedSet.ElementType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
         }
 
         [Fact]
@@ -179,15 +176,14 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
             Assert.IsType<KeyValuePathSegment>(segment);
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Same(expectedSet.ElementType, segment.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Same(expectedSet.ElementType, path.EdmType);
         }
 
         [Fact]
@@ -201,14 +197,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Equal(expectedType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Equal(expectedType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
         }
 
         [Fact]
@@ -222,14 +217,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Equal(expectedType, segment.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Equal(expectedType, path.EdmType);
         }
 
         [Fact]
@@ -243,14 +237,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Equal(expectedSet.ElementType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Equal(expectedSet.ElementType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
             NavigationPathSegment navigation = Assert.IsType<NavigationPathSegment>(segment);
             Assert.Same(expectedEdmElement, navigation.NavigationProperty);
         }
@@ -266,14 +259,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Equal(expectedSet.ElementType, segment.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Equal(expectedSet.ElementType, path.EdmType);
             NavigationPathSegment navigation = Assert.IsType<NavigationPathSegment>(segment);
             Assert.Same(expectedEdmElement, navigation.NavigationProperty);
         }
@@ -289,14 +281,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.Null(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Equal(expectedSet.ElementType, segment.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Equal(expectedSet.ElementType, path.EdmType);
             ActionPathSegment action = Assert.IsType<ActionPathSegment>(segment);
             Assert.Same(expectedEdmElement, action.Action);
         }
@@ -312,13 +303,12 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Null(segment.EntitySet);
+            Assert.Null(path.EntitySet);
             PropertyAccessPathSegment propertyAccess = Assert.IsType<PropertyAccessPathSegment>(segment);
             Assert.Same(expectedEdmElement, propertyAccess.Property);
         }
@@ -334,14 +324,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Null(segment.EntitySet);
-            Assert.Same(expectedType, segment.EdmType);
+            Assert.Null(path.EntitySet);
+            Assert.Same(expectedType, path.EdmType);
             PropertyAccessPathSegment propertyAccess = Assert.IsType<PropertyAccessPathSegment>(segment);
             Assert.Same(expectedEdmElement, propertyAccess.Property);
         }
@@ -357,14 +346,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Null(segment.EntitySet);
-            Assert.Same(expectedType, segment.EdmType);
+            Assert.Null(path.EntitySet);
+            Assert.Same(expectedType, path.EdmType);
             PropertyAccessPathSegment propertyAccess = Assert.IsType<PropertyAccessPathSegment>(segment);
             Assert.Same(expectedEdmElement, propertyAccess.Property);
         }
@@ -377,14 +365,14 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
             Assert.Equal("$value", segment.ToString());
-            Assert.Null(segment.EntitySet);
-            Assert.NotNull(segment.EdmType);
-            Assert.Equal("Edm.String", (segment.EdmType as IEdmPrimitiveType).FullName());
+            Assert.Null(path.EntitySet);
+            Assert.NotNull(path.EdmType);
+            Assert.Equal("Edm.String", (path.EdmType as IEdmPrimitiveType).FullName());
         }
 
         [Fact]
@@ -397,13 +385,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.Same(expectedType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Same("$links", segment.Previous.ToString());
+            Assert.Same(expectedType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Same("$links", path.Segments[2].ToString());
         }
 
         [Fact]
@@ -418,14 +406,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Same(expectedType, segment.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Same(expectedType, path.EdmType);
             ActionPathSegment action = Assert.IsType<ActionPathSegment>(segment);
             Assert.Same(expectedEdmElement, action.Action);
         }
@@ -442,14 +429,13 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.Previous);
             Assert.Equal(expectedText, segment.ToString());
-            Assert.Same(expectedSet, segment.EntitySet);
-            Assert.Same(expectedType, segment.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
+            Assert.Same(expectedType, path.EdmType);
             ActionPathSegment action = Assert.IsType<ActionPathSegment>(segment);
             Assert.Same(expectedEdmElement, action.Action);
         }
@@ -469,21 +455,21 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.EntitySet);
-            Assert.NotNull(segment.EdmType);
-            Assert.Same(expectedSet, segment.EntitySet);
+            Assert.NotNull(path.EntitySet);
+            Assert.NotNull(path.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
             if (isCollection)
             {
-                Assert.Equal(EdmTypeKind.Collection, segment.EdmType.TypeKind);
-                Assert.Same(expectedType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
+                Assert.Equal(EdmTypeKind.Collection, path.EdmType.TypeKind);
+                Assert.Same(expectedType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
             }
             else
             {
-                Assert.Same(expectedType, segment.EdmType);
+                Assert.Same(expectedType, path.EdmType);
             }
         }
 
@@ -564,21 +550,21 @@ namespace System.Web.Http.OData.Routing
 
             // Act
             ODataPath path = _parser.Parse(odataPath);
-            ODataPathSegment segment = path.Segments.Last.Value;
+            ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
-            Assert.NotNull(segment.EntitySet);
-            Assert.NotNull(segment.EdmType);
-            Assert.Same(expectedSet, segment.EntitySet);
+            Assert.NotNull(path.EntitySet);
+            Assert.NotNull(path.EdmType);
+            Assert.Same(expectedSet, path.EntitySet);
             if (isCollection)
             {
-                Assert.Equal(EdmTypeKind.Collection, segment.EdmType.TypeKind);
-                Assert.Same(expectedType, (segment.EdmType as IEdmCollectionType).ElementType.Definition);
+                Assert.Equal(EdmTypeKind.Collection, path.EdmType.TypeKind);
+                Assert.Same(expectedType, (path.EdmType as IEdmCollectionType).ElementType.Definition);
             }
             else
             {
-                Assert.Same(expectedType, segment.EdmType);
+                Assert.Same(expectedType, path.EdmType);
             }
         }
 

@@ -12,18 +12,30 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyAccessPathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
         /// <param name="property">The property being accessed by this segment.</param>
-        public PropertyAccessPathSegment(ODataPathSegment previous, IEdmProperty property)
-            : base(previous)
+        public PropertyAccessPathSegment(IEdmProperty property)
         {
             if (property == null)
             {
                 throw Error.ArgumentNull("property");
             }
 
-            EdmType = property.Type.Definition;
             Property = property;
+            PropertyName = property.Name;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PropertyAccessPathSegment" /> class.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        public PropertyAccessPathSegment(string propertyName)
+        {
+            if (propertyName == null)
+            {
+                throw Error.ArgumentNull("propertyName");
+            }
+
+            PropertyName = propertyName;
         }
 
         /// <summary>
@@ -47,6 +59,43 @@ namespace System.Web.Http.OData.Routing
         }
 
         /// <summary>
+        /// Gets the name of the property.
+        /// </summary>
+        public string PropertyName
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            if (Property != null)
+            {
+                return Property.Type.Definition;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
@@ -54,7 +103,7 @@ namespace System.Web.Http.OData.Routing
         /// </returns>
         public override string ToString()
         {
-            return Property.Name;
+            return PropertyName;
         }
     }
 }

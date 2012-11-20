@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using Microsoft.Data.Edm;
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
@@ -10,10 +11,8 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="UnresolvedPathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The property being accessed by this segment.</param>
         /// <param name="segmentValue">The unresolved segment value.</param>
-        public UnresolvedPathSegment(ODataPathSegment previous, string segmentValue)
-            : base(previous)
+        public UnresolvedPathSegment(string segmentValue)
         {
             if (segmentValue == null)
             {
@@ -41,6 +40,30 @@ namespace System.Web.Http.OData.Routing
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            return null;
         }
 
         /// <summary>

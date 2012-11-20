@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using Microsoft.Data.Edm;
+
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
@@ -16,6 +18,30 @@ namespace System.Web.Http.OData.Routing
             {
                 return ODataSegmentKinds.Batch;
             }
+        }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            return null;
         }
 
         /// <summary>

@@ -129,7 +129,7 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
-    <Compile Include="ODataRouteVariables.cs" />
+    <Compile Include="ODataRouteConstants.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpErrorExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
@@ -139,14 +139,25 @@
     <Compile Include="OData\Builder\Conventions\IProcedureConvention.cs" />
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\LinkGenerationConstants.cs" />
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatters.cs" />
     <Compile Include="OData\Routing\ActionPathSegment.cs" />
     <Compile Include="OData\Routing\CastPathSegment.cs" />
     <Compile Include="OData\Routing\BatchPathSegment.cs" />
-    <Compile Include="OData\Routing\IODataPathParser.cs" />
+    <Compile Include="OData\Routing\Conventions\ActionRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\LinksRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\NavigationRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\UnmappedRequestRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\MetadataRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\EntityRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\EntitySetRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\IODataRoutingConvention.cs" />
+    <Compile Include="OData\Routing\ODataActionSelector.cs" />
+    <Compile Include="OData\Routing\ODataControllerSelector.cs" />
+    <Compile Include="OData\Routing\IODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPath.cs" />
+    <Compile Include="OData\Routing\ODataPathRouteConstraint.cs" />
+    <Compile Include="OData\Routing\ODataPathParameterBindingAttribute.cs" />
     <Compile Include="OData\Routing\ODataSegmentKinds.cs" />
     <Compile Include="OData\Routing\KeyValuePathSegment.cs" />
     <Compile Include="OData\Routing\LinksPathSegment.cs" />
@@ -177,7 +188,6 @@
     <Compile Include="OData\Builder\Conventions\IEntitySetConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConvention.cs" />
-    <Compile Include="ODataRouteNames.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConvention.cs" />
     <Compile Include="OData\Builder\EdmTypeBuilder.cs" />
     <Compile Include="OData\Builder\EntityCollectionConfigurationOfTEntityType.cs" />
@@ -257,7 +267,6 @@
     <Compile Include="OData\Builder\EntitySetUrlAnnotation.cs" />
     <Compile Include="OData\Builder\IEntitySetLinkBuilder.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapper.cs" />
-    <Compile Include="OData\Formatter\ODataUriHelpers.cs" />
     <Compile Include="OData\Formatter\Deserialization\ClrTypeAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializer.cs" />
@@ -272,7 +281,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataEntrySerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataQueryProjectionNode.cs" />
     <Compile Include="HttpActionDescriptorExtensions.cs" />
-    <Compile Include="OData\Routing\DefaultODataPathParser.cs" />
+    <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\SRResources.Designer.cs">
@@ -294,6 +303,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializer.cs" />
     <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
+    <Compile Include="Routing\UrlHelperExtensions.cs" />
     <Compile Include="TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinder.cs" />

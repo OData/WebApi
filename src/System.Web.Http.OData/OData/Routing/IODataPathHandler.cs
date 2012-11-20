@@ -5,9 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Web.Http.OData.Routing
 {
     /// <summary>
-    /// Exposes the ability to parse an OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
+    /// Exposes the ability to parse an OData path as an <see cref="ODataPath"/> and convert an <see cref="ODataPath"/> into an OData link.
     /// </summary>
-    public interface IODataPathParser
+    public interface IODataPathHandler
     {
         /// <summary>
         /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
@@ -16,5 +16,12 @@ namespace System.Web.Http.OData.Routing
         /// <returns>A parsed representation of the URI, or <c>null</c> if the URI does not match the model.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
         ODataPath Parse(string odataPath);
+
+        /// <summary>
+        /// Converts an instance of <see cref="ODataPath"/> into an OData link.
+        /// </summary>
+        /// <param name="path">The OData path to convert into a link.</param>
+        /// <returns>The generated OData link.</returns>
+        string Link(ODataPath path);
     }
 }

@@ -6,6 +6,7 @@ using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -62,12 +63,11 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void Throws_InvalidOperation_when_multiple_overloads_found()
+        public void ParserThrows_InvalidOperation_when_multiple_overloads_found()
         {
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park"), Model = GetModel() };
             InvalidOperationException ioe = Assert.Throws<InvalidOperationException>(() =>
             {
-                IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
+                new DefaultODataPathHandler(GetModel()).Parse("Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
             }, "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
         }
 
@@ -95,12 +95,8 @@ namespace System.Web.Http.OData
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
             HttpConfiguration config = new HttpConfiguration();
-            config.SetEdmModel(GetModel());
-            IHttpRoute route = new Mock<IHttpRoute>().Object;
-            IHttpRouteData routeData = new HttpRouteData(route);
-            routeData.Values["odataPath"] = GetODataPath(url);
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(GetModel()).Parse(GetODataPath(url));
             return request;
         }
 

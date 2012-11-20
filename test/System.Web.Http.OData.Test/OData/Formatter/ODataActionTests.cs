@@ -22,15 +22,8 @@ namespace System.Web.Http.OData.Formatter
         {
             _configuration = new HttpConfiguration();
             _model = GetModel();
-            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create(_model);
             _configuration.Formatters.Clear();
-            _configuration.Formatters.AddRange(formatters);
-            _configuration.SetEdmModel(_model);
-
-            _configuration.Routes.MapHttpRoute("OData", "{*odataPath}", new { controller = "Customers", boundId = "1", id = "1" });
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundAction, "{controller}({boundId})/{odataAction}");
-            _configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata");
+            _configuration.EnableOData(_model);
 
             _server = new HttpServer(_configuration);
             _client = new HttpClient(_server);
@@ -113,15 +106,15 @@ namespace System.Web.Http.OData.Formatter
     public class CustomersController : ApiController
     {
         [HttpGet]
-        public ODataActionTests.Customer GetById(int id)
+        public ODataActionTests.Customer Get(int key)
         {
-            return new ODataActionTests.Customer { ID = id, Name = "Name" + id.ToString() };
+            return new ODataActionTests.Customer { ID = key, Name = "Name" + key.ToString() };
         }
 
         [HttpPost]
-        public bool DoSomething(int boundId, ODataActionParameters parameters)
+        public bool DoSomething(int key, ODataActionParameters parameters)
         {
-            Assert.Equal(1, boundId);
+            Assert.Equal(1, key);
             Assert.Equal(1, parameters["p1"]);
             ValidateAddress(parameters["p2"] as ODataActionTests.Address);
             ValidateNumbers(parameters["p3"] as IList<string>);

@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
@@ -46,28 +48,22 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         internal static Uri GenerateNavigationPropertyLink(EntityInstanceContext entityContext, IEdmNavigationProperty navigationProperty, EntitySetConfiguration configuration, bool includeCast)
         {
-            string routeName;
-
-            Dictionary<string, object> routeValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            routeValues.Add(LinkGenerationConstants.Controller, configuration.Name);
-            routeValues.Add(LinkGenerationConstants.ParentId, ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType));
-            routeValues.Add(LinkGenerationConstants.NavigationProperty, navigationProperty.Name);
+            List<ODataPathSegment> navigationPathSegments = new List<ODataPathSegment>();
+            navigationPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
+            navigationPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)));
 
             if (includeCast)
             {
-                routeName = ODataRouteNames.PropertyNavigationWithCast;
-                routeValues.Add(LinkGenerationConstants.Entitytype, entityContext.EntityType.FullName());
-            }
-            else
-            {
-                routeName = ODataRouteNames.PropertyNavigation;
+                navigationPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string link = entityContext.UrlHelper.Link(routeName, routeValues);
+            navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
+
+            string link = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, navigationPathSegments);
 
             if (link == null)
             {
-                throw Error.InvalidOperation(SRResources.NavigationPropertyRouteMissingOrIncorrect, navigationProperty.Name, ODataRouteNames.PropertyNavigation);
+                return null;
             }
 
             return new Uri(link);

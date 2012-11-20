@@ -169,7 +169,7 @@
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />
     <Compile Include="OData\Query\PartialTrustTest.cs" />
-    <Compile Include="OData\Routing\DefaultODataPathParserTest.cs" />
+    <Compile Include="OData\Routing\DefaultODataPathHandlerTest.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />
     <Compile Include="TestCommon\MockType.cs" />
@@ -230,7 +230,6 @@
     <Compile Include="OData\Query\ODataQueryParameterBindingAttributeTests.cs" />
     <Compile Include="OData\Query\Expressions\DataModel.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinderTests.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataUriHelperTest.cs" />
     <Compile Include="OData\Builder\PropertySelectorVisitorTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\HttpRequestODataMessage.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatterTests.cs" />

@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.TestCommon.Models
             : base(index, context)
         {
             this.EmployeeId = index;
-            this.WorkItem = new WorkItem() { EmployeeID = index, IsCompleted = false, NumberOfHours = ((index + 100) / 6), WorkItemID = index + 25 };
+            this.WorkItem = new WorkItem() { EmployeeID = index, IsCompleted = false, NumberOfHours = ((index + 100) / 6), ID = index + 25 };
             this.Manager = (Employee)TypeInitializer.InternalGetInstance(SupportedTypes.Employee, (index + 1) % (DataSource.MaxIndex + 1), context);
 
             this.DirectReports = new System.Collections.Generic.List<Employee>();

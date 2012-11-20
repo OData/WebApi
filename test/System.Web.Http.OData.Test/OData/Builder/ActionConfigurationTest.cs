@@ -2,8 +2,10 @@
 
 using System.Linq;
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Expressions;
@@ -322,7 +324,12 @@ namespace System.Web.Http.OData.Builder
             reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, (ctx.EntityInstance as Customer).CustomerId)));
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
-            EntityInstanceContext<Customer> context = new EntityInstanceContext<Customer>(model, null, customerType, null, new Customer { CustomerId = 1 });
+            EntityInstanceContext<Customer> context = new EntityInstanceContext<Customer>()
+            {
+                EdmModel = model,
+                EntityType = customerType,
+                EntityInstance = new Customer { CustomerId = 1 }
+            };
             IEdmFunctionImport rewardAction = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault().FunctionImports().SingleOrDefault();
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction);
 
@@ -340,21 +347,31 @@ namespace System.Web.Http.OData.Builder
             Uri expectedUri = new Uri(string.Format(uriTemplate, 1));
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            ActionConfiguration watch = movie.Action("Watch");
+            IEdmModel model = builder.GetEdmModel();
+
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundAction, "{controller}({boundId})/{odataAction}");
+            configuration.EnableOData(model);
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             UrlHelper urlHelper = new UrlHelper(request);
 
             // Act
-            ActionConfiguration watch = movie.Action("Watch");
-            IEdmModel model = builder.GetEdmModel();
             IEdmEntityType movieType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
             IEdmFunctionImport watchAction = container.FunctionImports().SingleOrDefault();
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
-            EntityInstanceContext<Movie> context = new EntityInstanceContext<Movie>(model, entitySet, movieType, urlHelper, new Movie { ID = 1, Name = "Avatar" }, false);
+            EntityInstanceContext<Movie> context = new EntityInstanceContext<Movie>()
+            {
+                EdmModel = model,
+                EntitySet = entitySet,
+                EntityType = movieType,
+                UrlHelper = urlHelper,
+                PathHandler = new DefaultODataPathHandler(model),
+                EntityInstance = new Movie { ID = 1, Name = "Avatar" },
+                SkipExpensiveAvailabilityChecks = false
+            };
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
 
             //Assert

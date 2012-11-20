@@ -47,7 +47,7 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void GetODataPathParserReturnsDefaultPathParserByDefault()
+        public void GetODataPathHandlerReturnsNullByDefault()
         {
             HttpConfiguration config = new HttpConfiguration();
             ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -55,23 +55,20 @@ namespace System.Web.Http.OData
             IEdmModel model = modelBuilder.GetEdmModel();
             config.SetEdmModel(model);
 
-            IODataPathParser parser = config.GetODataPathParser();
-
-            DefaultODataPathParser defaultParser = Assert.IsType<DefaultODataPathParser>(parser);
-            Assert.Same(model, defaultParser.Model);
+            Assert.Null(config.GetODataPathHandler());
         }
 
         [Fact]
-        public void SetODataPathParserThenGetReturnsWhatYouSet()
+        public void SetODataPathHandlerThenGetReturnsWhatYouSet()
         {
             HttpConfiguration config = new HttpConfiguration();
-            IODataPathParser parser = new Mock<IODataPathParser>().Object;
+            IODataPathHandler parser = new Mock<IODataPathHandler>().Object;
 
             // Act
-            config.SetODataPathParser(parser);
+            config.SetODataPathHandler(parser);
 
             // Assert
-            Assert.Same(parser, config.GetODataPathParser());
+            Assert.Same(parser, config.GetODataPathHandler());
         }
 
         [Fact]

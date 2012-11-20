@@ -5,7 +5,7 @@ namespace System.Web.Http.OData.TestCommon.Models
     public class WorkItem
     {
         //Automatically is made Key
-        public int WorkItemID { get; set; }
+        public int ID { get; set; }
 
         public int EmployeeID { get; set; }
 

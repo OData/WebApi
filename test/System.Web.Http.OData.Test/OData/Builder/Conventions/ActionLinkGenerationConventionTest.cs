@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -25,14 +26,21 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carsEdmSet = model.EntityContainers().Single().FindEntitySet("cars");
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundAction, "{controller}({boundId})/{odataAction}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext(model, carsEdmSet, carsEdmSet.ElementType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                new EntityInstanceContext() {
+                    EdmModel = model,
+                    EntitySet = carsEdmSet,
+                    EntityType = carsEdmSet.ElementType,
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model),
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
+                },
                 paintAction);
 
             Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/Paint", link.AbsoluteUri);
@@ -49,14 +57,22 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carsEdmSet = model.EntityContainers().Single().FindEntitySet("cars");
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundAction, "{controller}({boundId})/{odataAction}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext(model, carsEdmSet, carsEdmSet.ElementType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                new EntityInstanceContext()
+                {
+                    EdmModel = model,
+                    EntitySet = carsEdmSet,
+                    EntityType = carsEdmSet.ElementType,
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model),
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
+                },
                 paintAction);
 
             Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/Paint", link.AbsoluteUri);
@@ -75,14 +91,22 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carEdmType = model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType;
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.InvokeBoundActionWithCast, "{controller}({boundId})/{entityType}/{odataAction}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext(model, vehiclesEdmSet, carEdmType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                new EntityInstanceContext()
+                {
+                    EdmModel = model,
+                    EntitySet = vehiclesEdmSet,
+                    EntityType = carEdmType,
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model),
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
+                },
                 paintAction);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car/Paint", link.AbsoluteUri);
@@ -105,6 +129,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var paintEdmAction = model.GetAvailableProcedures(model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType).Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -112,7 +137,15 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(paintEdmAction);
 
-            Uri link = actionLinkBuilder.BuildActionLink(new EntityInstanceContext(model, vehiclesEdmSet, carEdmType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }));
+            Uri link = actionLinkBuilder.BuildActionLink(new EntityInstanceContext()
+            {
+                EdmModel = model,
+                EntitySet = vehiclesEdmSet,
+                EntityType = carEdmType,
+                UrlHelper = request.GetUrlHelper(),
+                PathHandler = new DefaultODataPathHandler(model),
+                EntityInstance = new Car { Model = 2009, Name = "Accord" }
+            });
             Assert.Equal(
                 "http://localhost/ActionTestWorks",
                 link.AbsoluteUri);

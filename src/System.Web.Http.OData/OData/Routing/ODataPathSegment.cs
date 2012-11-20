@@ -10,51 +10,10 @@ namespace System.Web.Http.OData.Routing
     public abstract class ODataPathSegment
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataPathSegment" /> class for a segment at the root of the path.
+        /// Initializes a new instance of the <see cref="ODataPathSegment" /> class.
         /// </summary>
         protected ODataPathSegment()
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataPathSegment" /> class.
-        /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
-        protected ODataPathSegment(ODataPathSegment previous)
-        {
-            if (previous == null)
-            {
-                throw Error.ArgumentNull("previous");
-            }
-
-            Previous = previous;
-        }
-
-        /// <summary>
-        /// Gets or sets the EDM type of the path up to the current segment.
-        /// </summary>
-        public IEdmType EdmType
-        {
-            get;
-            protected set;
-        }
-
-        /// <summary>
-        /// Gets or sets the entity set of the path up to the current segment.
-        /// </summary>
-        public IEdmEntitySet EntitySet
-        {
-            get;
-            protected set;
-        }
-
-        /// <summary>
-        /// Gets the previous segment in the path.
-        /// </summary>
-        public ODataPathSegment Previous
-        {
-            get;
-            private set;
         }
 
         /// <summary>
@@ -64,5 +23,19 @@ namespace System.Web.Http.OData.Routing
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>The EDM type for this segment.</returns>
+        public abstract IEdmType GetEdmType(IEdmType previousEdmType);
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>The entity set for this segment.</returns>
+        public abstract IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet);
     }
 }

@@ -14,26 +14,30 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationPathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The property being accessed by this segment.</param>
         /// <param name="navigationProperty">The navigation property being accessed by this segment.</param>
-        public NavigationPathSegment(ODataPathSegment previous, IEdmNavigationProperty navigationProperty)
-            : base(previous)
+        public NavigationPathSegment(IEdmNavigationProperty navigationProperty)
         {
             if (navigationProperty == null)
             {
                 throw Error.ArgumentNull("navigation");
             }
 
-            if (previous.EntitySet == null)
+            NavigationProperty = navigationProperty;
+            NavigationPropertyName = navigationProperty.Name;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NavigationPathSegment" /> class.
+        /// </summary>
+        /// <param name="navigationPropertyName">Name of the navigation property.</param>
+        public NavigationPathSegment(string navigationPropertyName)
+        {
+            if (navigationPropertyName == null)
             {
-                throw Error.Argument(SRResources.PreviousSegmentMustHaveEntitySet);
+                throw Error.ArgumentNull("navigationPropertyName");
             }
 
-            EdmType = navigationProperty.Partner.Multiplicity() == EdmMultiplicity.Many ?
-                (IEdmType)navigationProperty.ToEntityType().GetCollection() :
-                (IEdmType)navigationProperty.ToEntityType();
-            EntitySet = previous.EntitySet.FindNavigationTarget(navigationProperty);
-            NavigationProperty = navigationProperty;
+            NavigationPropertyName = navigationPropertyName;
         }
 
         /// <summary>
@@ -57,6 +61,49 @@ namespace System.Web.Http.OData.Routing
         }
 
         /// <summary>
+        /// Gets the name of the navigation property.
+        /// </summary>
+        public string NavigationPropertyName
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            if (NavigationProperty != null)
+            {
+                return NavigationProperty.Partner.Multiplicity() == EdmMultiplicity.Many ?
+                    (IEdmType)NavigationProperty.ToEntityType().GetCollection() :
+                    (IEdmType)NavigationProperty.ToEntityType();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            if (NavigationProperty != null && previousEntitySet != null)
+            {
+                return previousEntitySet.FindNavigationTarget(NavigationProperty);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
@@ -64,7 +111,7 @@ namespace System.Web.Http.OData.Routing
         /// </returns>
         public override string ToString()
         {
-            return NavigationProperty.Name;
+            return NavigationPropertyName;
         }
     }
 }

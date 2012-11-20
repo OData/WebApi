@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
@@ -21,16 +23,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             {
                 configuration.HasFeedSelfLink(entitySetContext =>
                 {
-                    string routeName = ODataRouteNames.Default;
-                    string selfLink = entitySetContext.UrlHelper.Link(
-                        routeName,
-                        new
-                        {
-                            controller = configuration.Name
-                        });
+                    string selfLink = entitySetContext.UrlHelper.ODataLink(entitySetContext.PathHandler, new EntitySetPathSegment(entitySetContext.EntitySet));
+
                     if (selfLink == null)
                     {
-                        throw Error.InvalidOperation(SRResources.DefaultRouteMissingOrIncorrect, routeName);
+                        return null;
                     }
                     return new Uri(selfLink);
                 });
@@ -55,26 +52,21 @@ namespace System.Web.Http.OData.Builder.Conventions
 
         internal static Uri GenerateSelfLink(EntitySetConfiguration configuration, EntityInstanceContext entityContext, bool includeCast)
         {
-            string routeName;
+            List<ODataPathSegment> editLinkPathSegments = new List<ODataPathSegment>();
 
-            Dictionary<string, object> routeValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            routeValues.Add(LinkGenerationConstants.Controller, configuration.Name);
-            routeValues.Add(LinkGenerationConstants.Id, ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType));
+            editLinkPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
+            editLinkPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)));
 
             if (includeCast)
             {
-                routeName = ODataRouteNames.GetByIdWithCast;
-                routeValues.Add(LinkGenerationConstants.Entitytype, entityContext.EntityType.FullName());
-            }
-            else
-            {
-                routeName = ODataRouteNames.GetById;
+                editLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string editLink = entityContext.UrlHelper.Link(routeName, routeValues);
+            string editLink = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, editLinkPathSegments);
+
             if (editLink == null)
             {
-                throw Error.InvalidOperation(SRResources.GetByIdRouteMissingOrIncorrect, routeName);
+                return null;
             }
 
             return new Uri(editLink);

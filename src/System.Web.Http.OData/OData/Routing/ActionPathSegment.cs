@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Routing
     public class ActionPathSegment : ODataPathSegment
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ActionPathSegment" /> class for actions at the root of the path.
+        /// Initializes a new instance of the <see cref="ActionPathSegment" /> class.
         /// </summary>
         /// <param name="action">The action being invoked.</param>
         public ActionPathSegment(IEdmFunctionImport action)
@@ -20,23 +20,22 @@ namespace System.Web.Http.OData.Routing
                 throw Error.ArgumentNull("action");
             }
 
-            Initialize(action);
+            Action = action;
+            ActionName = Action.Container.FullName() + "." + Action.Name;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ActionPathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
-        /// <param name="action">The action being invoked.</param>
-        public ActionPathSegment(ODataPathSegment previous, IEdmFunctionImport action)
-            : base(previous)
+        /// <param name="actionName">Name of the action.</param>
+        public ActionPathSegment(string actionName)
         {
-            if (action == null)
+            if (actionName == null)
             {
-                throw Error.ArgumentNull("action");
+                throw Error.ArgumentNull("actionName");
             }
 
-            Initialize(action);
+            ActionName = actionName;
         }
 
         /// <summary>
@@ -59,17 +58,53 @@ namespace System.Web.Http.OData.Routing
             private set;
         }
 
-        private void Initialize(IEdmFunctionImport action)
+        /// <summary>
+        /// Gets the name of the action.
+        /// </summary>
+        public string ActionName
         {
-            IEdmTypeReference returnType = action.ReturnType;
-            EdmType = returnType == null ? null : returnType.Definition;
+            get;
+            private set;
+        }
 
-            IEdmEntitySet functionEntitySet = null;
-            if (action.TryGetStaticEntitySet(out functionEntitySet))
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            if (Action != null)
             {
-                EntitySet = functionEntitySet;
+                IEdmTypeReference returnType = Action.ReturnType;
+                if (returnType != null)
+                {
+                    return returnType.Definition;
+                }
             }
-            Action = action;
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            if (Action != null)
+            {
+                IEdmEntitySet functionEntitySet = null;
+                if (Action.TryGetStaticEntitySet(out functionEntitySet))
+                {
+                    return functionEntitySet;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -80,7 +115,7 @@ namespace System.Web.Http.OData.Routing
         /// </returns>
         public override string ToString()
         {
-            return Action.Container.FullName() + "." + Action.Name;
+            return ActionName;
         }
     }
 }

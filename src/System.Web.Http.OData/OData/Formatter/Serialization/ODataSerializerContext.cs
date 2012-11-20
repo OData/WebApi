@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
@@ -17,15 +18,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public UrlHelper UrlHelper { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="IODataPathHandler"/> to use for generating OData paths.
+        /// </summary>
+        public IODataPathHandler PathHandler { get; set; }
+
+        /// <summary>
         /// Gets or sets the entity set.
         /// </summary>
         public IEdmEntitySet EntitySet { get; set; }
 
         /// <summary>
-        /// Gets or sets the ServiceOperationName which is used when writing primitive types
+        /// Gets or sets the root element name which is used when writing primitive types
         /// and complex types.
         /// </summary>
-        public string ServiceOperationName { get; set; }
+        public string RootElementName { get; set; }
 
         /// <summary>
         /// Gets or sets the HttpRequestMessage. 

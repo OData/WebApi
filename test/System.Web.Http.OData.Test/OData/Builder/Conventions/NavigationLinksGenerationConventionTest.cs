@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -74,7 +75,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigationWithCast, "{controller}({parentid})/{entitytype}/{navigationproperty}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -83,7 +84,15 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
             Uri uri = linkBuilder.BuildNavigationLink(
-                new EntityInstanceContext(model, vehiclesEdmEntitySet, carType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                new EntityInstanceContext()
+                {
+                    EdmModel = model,
+                    EntitySet = vehiclesEdmEntitySet,
+                    EntityType = carType,
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model),
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }                    
+                },
                 carManufacturerProperty);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
@@ -125,7 +134,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentid})/{navigationproperty}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -134,7 +143,15 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
             Uri uri = linkBuilder.BuildNavigationLink(
-                new EntityInstanceContext(model, vehiclesEdmEntitySet, carType, request.GetUrlHelper(), new Car { Model = 2009, Name = "Accord" }),
+                new EntityInstanceContext()
+                {
+                    EdmModel = model,
+                    EntitySet = vehiclesEdmEntitySet,
+                    EntityType = carType,
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model),
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }                    
+                },
                 carManufacturerProperty);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/Manufacturer", uri.AbsoluteUri);
@@ -153,7 +170,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty motorcycleManufacturerProperty = sportbikeType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentid})/{navigationproperty}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -162,7 +179,15 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
             Uri uri = linkBuilder.BuildNavigationLink(
-                new EntityInstanceContext(model, vehiclesEdmEntitySet, sportbikeType, request.GetUrlHelper(), new SportBike { Model = 2009, Name = "Ninja" }),
+                new EntityInstanceContext()
+                {
+                    EdmModel = model,
+                    EntitySet = vehiclesEdmEntitySet,
+                    EntityType = sportbikeType,
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model),
+                    EntityInstance = new Car { Model = 2009, Name = "Ninja" }
+                },
                 motorcycleManufacturerProperty);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Ninja')/Manufacturer", uri.AbsoluteUri);
@@ -178,7 +203,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            var route = configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentId})/{navigationProperty}");
+            configuration.EnableOData(model);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
@@ -191,7 +216,8 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
                     EntitySet = edmEntitySet,
                     EntityType = edmEntitySet.ElementType,
-                    UrlHelper = request.GetUrlHelper()
+                    UrlHelper = request.GetUrlHelper(),
+                    PathHandler = new DefaultODataPathHandler(model)
                 },
                 edmEntitySet.ElementType.NavigationProperties().Single(),
                 orders,
@@ -210,10 +236,10 @@ namespace System.Web.Http.OData.Builder.Conventions
             var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            var route = configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentId})/{navigationProperty}");
+            configuration.EnableOData(model);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route, new HttpRouteValueDictionary(new { controller = "Customers" }));
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute(), new HttpRouteValueDictionary(new { controller = "Customers" }));
 
             Uri uri =
                 NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
@@ -223,6 +249,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
                     EntitySet = edmEntitySet,
                     EntityType = edmEntitySet.ElementType,
+                    PathHandler = new DefaultODataPathHandler(model),
                     UrlHelper = request.GetUrlHelper()
                 },
                 edmEntitySet.ElementType.NavigationProperties().Single(),

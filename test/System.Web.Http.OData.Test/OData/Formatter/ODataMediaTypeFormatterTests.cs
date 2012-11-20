@@ -13,6 +13,7 @@ using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -37,18 +38,19 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void WriteToStreamAsyncReturnsODataRepresentation()
         {
-            ODataConventionModelBuilder model = new ODataConventionModelBuilder();
-            model.EntitySet<WorkItem>("WorkItems");
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<WorkItem>("WorkItems");
+            IEdmModel model = modelBuilder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            var route = configuration.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
-            configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({id})/{property}");
+            configuration.EnableOData(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route);
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
+            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)");
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
 
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 

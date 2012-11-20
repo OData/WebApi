@@ -13,24 +13,14 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValuePathSegment" /> class.
         /// </summary>
-        /// <param name="previous">The previous segment in the path.</param>
         /// <param name="value">The key value to use for indexing into the collection.</param>
-        public KeyValuePathSegment(ODataPathSegment previous, string value)
-            : base(previous)
+        public KeyValuePathSegment(string value)
         {
             if (value == null)
             {
                 throw Error.ArgumentNull("value");
             }
 
-            IEdmCollectionType previousEdmType = previous.EdmType as IEdmCollectionType;
-            if (previousEdmType == null)
-            {
-                throw Error.Argument(SRResources.PreviousTypeForKeyMustBeCollection, previous.EdmType); 
-            }
-
-            EdmType = previousEdmType.ElementType.Definition;
-            EntitySet = previous.EntitySet;
             Value = value;
         }
 
@@ -52,6 +42,35 @@ namespace System.Web.Http.OData.Routing
             {
                 return ODataSegmentKinds.Key;
             }
+        }
+
+        /// <summary>
+        /// Gets the EDM type for this segment.
+        /// </summary>
+        /// <param name="previousEdmType">The EDM type of the previous path segment.</param>
+        /// <returns>
+        /// The EDM type for this segment.
+        /// </returns>
+        public override IEdmType GetEdmType(IEdmType previousEdmType)
+        {
+            IEdmCollectionType previousCollectionType = previousEdmType as IEdmCollectionType;
+            if (previousCollectionType != null)
+            {
+                return previousCollectionType.ElementType.Definition;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entity set for this segment.
+        /// </summary>
+        /// <param name="previousEntitySet">The entity set of the previous path segment.</param>
+        /// <returns>
+        /// The entity set for this segment.
+        /// </returns>
+        public override IEdmEntitySet GetEntitySet(IEdmEntitySet previousEntitySet)
+        {
+            return previousEntitySet;
         }
 
         /// <summary>

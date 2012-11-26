@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Query
             // Assert
             Assert.Equal(HandleNullPropagationOption.Default, querySettings.HandleNullPropagation);
             Assert.True(querySettings.EnsureStableOrdering);
-            Assert.Equal(1, querySettings.LambdaNestingLimit);
+            Assert.Equal(1, querySettings.MaxAnyAllExpressionDepth);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace System.Web.Http.OData.Query
         {
             Assert.Reflection.IntegerProperty<ODataQuerySettings, int>(
                 new ODataQuerySettings(),
-                o => o.LambdaNestingLimit,
+                o => o.MaxAnyAllExpressionDepth,
                 expectedDefaultValue: 1,
                 minLegalValue: 1,
                 maxLegalValue: int.MaxValue,

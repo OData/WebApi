@@ -22,7 +22,7 @@ namespace System.Web.Http
     public class QueryableAttribute : ActionFilterAttribute
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
-        private int _lambdaNestingLimit = 1;
+        private int _maxAnyAllExpressionDepth = 1;
         private int? _resultLimit;
 
         /// <summary>
@@ -74,11 +74,11 @@ namespace System.Web.Http
         /// <value>
         /// The maxiumum depth of the Any or All elements nested inside the query.
         /// </value>
-        public int LambdaNestingLimit
+        public int MaxAnyAllExpressionDepth
         {
             get
             {
-                return _lambdaNestingLimit;
+                return _maxAnyAllExpressionDepth;
             }
             set
             {
@@ -87,7 +87,7 @@ namespace System.Web.Http
                     throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
 
-                _lambdaNestingLimit = value;
+                _maxAnyAllExpressionDepth = value;
             }
         }
 
@@ -243,7 +243,7 @@ namespace System.Web.Http
             {
                 EnsureStableOrdering = EnsureStableOrdering,
                 HandleNullPropagation = HandleNullPropagation,
-                LambdaNestingLimit = LambdaNestingLimit,
+                MaxAnyAllExpressionDepth = MaxAnyAllExpressionDepth,
                 ResultLimit = _resultLimit
             };
 

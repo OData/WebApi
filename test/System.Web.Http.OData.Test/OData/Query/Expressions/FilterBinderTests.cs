@@ -409,7 +409,7 @@ namespace System.Web.Http.OData.Query.Expressions
             ODataQuerySettings settings = new ODataQuerySettings
             {
                 HandleNullPropagation = HandleNullPropagationOption.True,
-                LambdaNestingLimit = Int32.MaxValue
+                MaxAnyAllExpressionDepth = Int32.MaxValue
             };
 
             Assert.Throws<ODataException>(() => Bind(filter, settings), "The recursion limit has been exceeded.");
@@ -422,7 +422,7 @@ namespace System.Web.Http.OData.Query.Expressions
             ODataQuerySettings settings = new ODataQuerySettings
             {
                 HandleNullPropagation = HandleNullPropagationOption.True,
-                LambdaNestingLimit = Int32.MaxValue
+                MaxAnyAllExpressionDepth = Int32.MaxValue
             };
 
             Expression<Func<Product, bool>> expression = Bind(filter, settings);
@@ -667,7 +667,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [Fact]
         public void RecursiveAllAny()
         {
-            Action<ODataQuerySettings> customizeSettings = (settings) => settings.LambdaNestingLimit = 2;
+            Action<ODataQuerySettings> customizeSettings = (settings) => settings.MaxAnyAllExpressionDepth = 2;
 
             VerifyQueryDeserialization(
                "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
@@ -682,10 +682,10 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             var filter = "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))";
             ODataQuerySettings settings = CreateSettings();
-            settings.LambdaNestingLimit = 1;
+            settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. LambdaNestingLimit can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]
@@ -694,10 +694,10 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             var filter = "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))";
             ODataQuerySettings settings = CreateSettings();
-            settings.LambdaNestingLimit = 1;
+            settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. LambdaNestingLimit can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]
@@ -706,10 +706,10 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             var filter = "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))";
             ODataQuerySettings settings = CreateSettings();
-            settings.LambdaNestingLimit = 1;
+            settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. LambdaNestingLimit can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]
@@ -718,10 +718,10 @@ namespace System.Web.Http.OData.Query.Expressions
             // Arrange
             var filter = "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))";
             ODataQuerySettings settings = CreateSettings();
-            settings.LambdaNestingLimit = 1;
+            settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. LambdaNestingLimit can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]

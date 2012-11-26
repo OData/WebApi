@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Query
     public class ODataQuerySettings
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
-        private int _lambdaNestingLimit = 1;
+        private int _maxAnyAllExpressionDepth = 1;
         private int? _resultLimit;
 
         /// <summary>
@@ -61,11 +61,11 @@ namespace System.Web.Http.OData.Query
         /// <value>
         /// The maxiumum depth of the Any or All elements nested inside the query.
         /// </value>
-        public int LambdaNestingLimit
+        public int MaxAnyAllExpressionDepth
         {
             get
             {
-                return _lambdaNestingLimit;
+                return _maxAnyAllExpressionDepth;
             }
             set
             {
@@ -74,7 +74,7 @@ namespace System.Web.Http.OData.Query
                     throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
 
-                _lambdaNestingLimit = value;
+                _maxAnyAllExpressionDepth = value;
             }
         }
 

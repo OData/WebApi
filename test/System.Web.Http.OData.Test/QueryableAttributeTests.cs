@@ -91,7 +91,7 @@ namespace System.Web.Http.OData
         {
             Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
                 new QueryableAttribute(),
-                o => o.LambdaNestingLimit,
+                o => o.MaxAnyAllExpressionDepth,
                 expectedDefaultValue: 1,
                 minLegalValue: 1,
                 illegalLowerValue: 0,

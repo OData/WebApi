@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http;
+
 namespace Microsoft.AspNet.Mvc.Facebook.Models
 {
-    //[ModelBinder(Name="hub")]
-    public class SubscriptionVerification
+    [FromUri(Name = "hub")]
+    public partial class SubscriptionVerification
     {
         public string Mode { get; set; }
         public string Verify_Token { get; set; }

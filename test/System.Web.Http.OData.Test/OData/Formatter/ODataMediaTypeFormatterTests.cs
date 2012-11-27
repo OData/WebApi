@@ -29,7 +29,7 @@ namespace System.Web.Http.OData.Formatter
         [InlineData("application/json;odata=verbose")]
         public void Constructor(string mediaType)
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();
+            ODataMediaTypeFormatter formatter = CreateFormatter();
             Assert.True(formatter.SupportedMediaTypes.Contains(MediaTypeHeaderValue.Parse(mediaType)), string.Format("SupportedMediaTypes should have included {0}.", mediaType.ToString()));
         }
 
@@ -88,7 +88,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
 
-            new ODataMediaTypeFormatter()
+            CreateFormatter()
             .GetPerRequestFormatterInstance(typeof(int), request, MediaTypeHeaderValue.Parse("application/xml"))
             .SetDefaultContentHeaders(typeof(int), contentHeaders, MediaTypeHeaderValue.Parse("application/xml"));
 
@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage();
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
 
-            new ODataMediaTypeFormatter()
+            CreateFormatter()
                 .GetPerRequestFormatterInstance(typeof(int), request, MediaTypeHeaderValue.Parse(mediaType))
                 .SetDefaultContentHeaders(typeof(int), contentHeaders, MediaTypeHeaderValue.Parse(mediaType));
 
@@ -191,7 +191,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ODataFormatter_DefaultPatchKeyMode_Is_Ignore()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter();
+            ODataMediaTypeFormatter formatter = CreateFormatter();
             Assert.Equal(PatchKeyMode.Ignore, formatter.PatchKeyMode);
         }
 

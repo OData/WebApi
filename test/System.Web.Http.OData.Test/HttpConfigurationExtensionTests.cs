@@ -12,6 +12,7 @@ using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -78,7 +79,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMediaTypeFormatter formatter = new Mock<ODataMediaTypeFormatter>().Object;
+            ODataMediaTypeFormatter formatter = new Mock<ODataMediaTypeFormatter>(EdmCoreModel.Instance).Object;
 
             // Act
             configuration.Formatters.Insert(0, formatter);
@@ -92,7 +93,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMediaTypeFormatter formatter = new Mock<ODataMediaTypeFormatter>().Object;
+            ODataMediaTypeFormatter formatter = new Mock<ODataMediaTypeFormatter>(EdmCoreModel.Instance).Object;
             configuration.Formatters.Add(formatter);
 
             // Act

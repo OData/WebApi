@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace System.Net.Http.Formatting
     /// A test class for common <see cref="MediaTypeFormatter"/> functionality across multiple implementations.
     /// </summary>
     /// <typeparam name="TFormatter">The type of formatter under test.</typeparam>
-    public abstract class MediaTypeFormatterTestBase<TFormatter> where TFormatter : MediaTypeFormatter, new()
+    public abstract class MediaTypeFormatterTestBase<TFormatter> where TFormatter : MediaTypeFormatter
     {
         protected MediaTypeFormatterTestBase()
         {
@@ -256,7 +257,8 @@ namespace System.Net.Http.Formatting
 
         public virtual TFormatter CreateFormatter()
         {
-            return new TFormatter();
+            ConstructorInfo constructor = typeof(TFormatter).GetConstructor(Type.EmptyTypes);
+            return (TFormatter)constructor.Invoke(null);
         }
 
         public Task ReadFromStreamAsync_UsesCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)

@@ -33,14 +33,6 @@ namespace System.Web.Http.OData.Formatter
 
         private PatchKeyMode _patchKeyMode;
 
-        /// <summary>
-        /// This constructor is used for unit testing purposes only
-        /// </summary>
-        public ODataMediaTypeFormatter()
-            : this(EdmCoreModel.Instance)
-        {
-        }
-
         public ODataMediaTypeFormatter(IEdmModel edmModel)
             : this(new DefaultODataDeserializerProvider(edmModel), new DefaultODataSerializerProvider(edmModel))
         {

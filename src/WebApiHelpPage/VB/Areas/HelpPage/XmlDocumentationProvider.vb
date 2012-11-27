@@ -86,7 +86,7 @@ Namespace Areas.HelpPage
                 Dim typeName As String = genericType.FullName
 
                 ' Trim the generic parameter counts from the name
-                typeName = typeName.Substring(0, typeName.IndexOf("`"))
+                typeName = typeName.Substring(0, typeName.IndexOf("`"c))
                 Dim argumentTypeNames() As String = genericArguments.Select(Function(t) GetTypeName(t)).ToArray()
                 Return String.Format(CultureInfo.InvariantCulture, "{0}{{{1}}}", typeName, String.Join(",", argumentTypeNames))
             End If

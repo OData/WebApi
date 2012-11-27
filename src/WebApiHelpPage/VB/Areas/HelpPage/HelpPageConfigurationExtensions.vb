@@ -205,6 +205,7 @@ Namespace Areas.HelpPage
             Return DirectCast(model, HelpPageApiModel)
         End Function
 
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as ErrorMessages.")>
         Public Function GenerateApiModel(apiDescription As ApiDescription, sampleGenerator As HelpPageSampleGenerator) As HelpPageApiModel
             Dim apiModel As New HelpPageApiModel()
             apiModel.ApiDescription = apiDescription

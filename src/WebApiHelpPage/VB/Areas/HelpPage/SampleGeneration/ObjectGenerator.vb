@@ -33,6 +33,7 @@ Namespace Areas.HelpPage
             GenerateObject = GenerateObject(type, New Dictionary(Of Type, Object)())
         End Function
 
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="Here we just want to return null if anything goes wrong.")>
         Private Function GenerateObject(type As Type, createdObjectReferences As Dictionary(Of Type, Object)) As Object
             Try
                 If (SimpleTypeObjectGenerator.CanGenerateObject(type)) Then
@@ -347,6 +348,7 @@ Namespace Areas.HelpPage
 
             Private Shared ReadOnly DefaultGenerators As Dictionary(Of Type, Func(Of Long, Object)) = InitializeGenerators()
 
+            <SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification:="These are simple type factories and cannot be split up.")>
             Private Shared Function InitializeGenerators() As Dictionary(Of Type, Func(Of Long, Object))
                 Return New Dictionary(Of Type, Func(Of Long, Object)) From
                 {

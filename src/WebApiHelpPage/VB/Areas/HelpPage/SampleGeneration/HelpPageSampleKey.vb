@@ -99,13 +99,10 @@ Namespace Areas.HelpPage
         ''' <value>
         ''' The name of the controller.
         ''' </value>
-        Public Property ControllerName As String
+        Public ReadOnly Property ControllerName As String
             Get
                 Return _controllerName
             End Get
-            Private Set(value As String)
-                _controllerName = value
-            End Set
         End Property
 
         ''' <summary>
@@ -114,13 +111,10 @@ Namespace Areas.HelpPage
         ''' <value>
         ''' The name of the action.
         ''' </value>
-        Public Property ActionName As String
+        Public ReadOnly Property ActionName As String
             Get
                 Return _actionName
             End Get
-            Private Set(value As String)
-                _actionName = value
-            End Set
         End Property
 
         ''' <summary>
@@ -129,46 +123,34 @@ Namespace Areas.HelpPage
         ''' <value>
         ''' The media type.
         ''' </value>
-        Public Property MediaType As MediaTypeHeaderValue
+        Public ReadOnly Property MediaType As MediaTypeHeaderValue
             Get
                 Return _mediaType
             End Get
-            Private Set(value As MediaTypeHeaderValue)
-                _mediaType = value
-            End Set
         End Property
 
         ''' <summary>
         ''' Gets the parameter names.
         ''' </summary>
-        Public Property ParameterNames As HashSet(Of String)
+        Public ReadOnly Property ParameterNames As HashSet(Of String)
             Get
                 Return _parameterNames
             End Get
-            Private Set(value As HashSet(Of String))
-                _parameterNames = value
-            End Set
         End Property
 
-        Public Property ParameterType As Type
+        Public ReadOnly Property ParameterType As Type
             Get
                 Return _parameterType
             End Get
-            Private Set(value As Type)
-                _parameterType = value
-            End Set
         End Property
 
         ''' <summary>
         ''' Gets the <see cref="SampleDirection"/>.
         ''' </summary>
-        Public Property SampleDirection As Nullable(Of SampleDirection)
+        Public ReadOnly Property SampleDirection As Nullable(Of SampleDirection)
             Get
                 Return _sampleDirection
             End Get
-            Private Set(value As Nullable(Of SampleDirection))
-                _sampleDirection = value
-            End Set
         End Property
 
         Public Overrides Function Equals(obj As Object) As Boolean

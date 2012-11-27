@@ -182,6 +182,7 @@ Namespace Areas.HelpPage
         ''' <param name="parameterNames">The parameter names.</param>
         ''' <param name="sampleDirection">The value indicating whether the sample is for a request or a response.</param>
         ''' <param name="formatters">The formatters.</param>
+        <SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification:="This is only used in advanced scenarios.")>
         Public Overridable Function ResolveType(api As ApiDescription, controllerName As String, actionName As String, parameterNames As IEnumerable(Of String), sampleDirection As SampleDirection, <Out()> ByRef formatters As Collection(Of MediaTypeFormatter)) As Type
             If (Not [Enum].IsDefined(GetType(SampleDirection), sampleDirection)) Then
                 Throw New InvalidEnumArgumentException("sampleDirection", CInt(sampleDirection), GetType(SampleDirection))
@@ -225,6 +226,8 @@ Namespace Areas.HelpPage
         ''' <param name="type">The type.</param>
         ''' <param name="mediaType">Type of the media.</param>
         ''' <returns></returns>
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as InvalidSample.")>
+        <SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification:="The sample generation is done synchronously.")>
         Public Overridable Function WriteSampleObjectUsingFormatter(formatter As MediaTypeFormatter, value As Object, type As Type, mediaType As MediaTypeHeaderValue) As Object
             If (formatter Is Nothing) Then
                 Throw New ArgumentNullException("formatter")
@@ -277,6 +280,7 @@ Namespace Areas.HelpPage
             Return sample
         End Function
 
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="Handling the failure by returning the original string.")>
         Private Shared Function TryFormatJson(str As String) As String
             Try
                 Dim parsedJson As Object = JsonConvert.DeserializeObject(str)
@@ -287,6 +291,7 @@ Namespace Areas.HelpPage
             End Try
         End Function
 
+        <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="Handling the failure by returning the original string.")>
         Private Shared Function TryFormatXml(str As String) As String
             Try
                 Dim Xml As XDocument = XDocument.Parse(str)

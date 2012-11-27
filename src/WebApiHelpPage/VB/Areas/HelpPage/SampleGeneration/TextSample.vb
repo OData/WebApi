@@ -25,8 +25,8 @@ Namespace Areas.HelpPage
 
         Public Overrides Function Equals(obj As Object) As Boolean
             Equals = False
-            If TypeOf obj Is TextSample Then
-                Dim other As TextSample = DirectCast(obj, TextSample)
+            Dim other As TextSample = TryCast(obj, TextSample)
+            If Not (other Is Nothing) Then
                 Equals = (Text = other.Text)
             End If
         End Function

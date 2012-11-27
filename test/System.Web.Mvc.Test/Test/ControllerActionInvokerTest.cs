@@ -1285,37 +1285,6 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeActionResultWithFiltersPassesSameContextObjectToInnerFilters()
-        {
-            // Arrange
-            ControllerBase controller = new Mock<ControllerBase>().Object;
-            ControllerContext context = GetControllerContext(controller);
-
-            ResultExecutingContext storedContext = null;
-            ActionResult result = new EmptyResult();
-            List<IResultFilter> filters = new List<IResultFilter>()
-            {
-                new ActionFilterImpl()
-                {
-                    OnResultExecutingImpl = delegate(ResultExecutingContext ctx) { storedContext = ctx; },
-                    OnResultExecutedImpl = delegate { }
-                },
-                new ActionFilterImpl()
-                {
-                    OnResultExecutingImpl = delegate(ResultExecutingContext ctx) { Assert.Same(storedContext, ctx); },
-                    OnResultExecutedImpl = delegate { }
-                },
-            };
-            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
-
-            // Act
-            ResultExecutedContext postContext = helper.PublicInvokeActionResultWithFilters(context, filters, result);
-
-            // Assert
-            Assert.Same(result, postContext.Result);
-        }
-
-        [Fact]
         public void InvokeActionReturnsFalseIfMethodNotFound()
         {
             // Arrange
@@ -1514,7 +1483,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFiltersOrdersFiltersCorrectly()
+        public void InvokeActionResultWithFiltersOrdersFiltersCorrectly()
         {
             // Arrange
             List<string> actions = new List<string>();
@@ -1548,7 +1517,7 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFiltersPassesArgumentsCorrectly()
+        public void InvokeActionResultWithFiltersPassesArgumentsCorrectly()
         {
             // Arrange
             bool wasCalled = false;
@@ -1581,12 +1550,56 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFilterWhereContinuationThrowsExceptionAndIsHandled()
+        public void InvokeActionResultWithFiltersPassesSameContextObjectToInnerFilters()
+        {
+            // Arrange
+            ControllerBase controller = new Mock<ControllerBase>().Object;
+            ControllerContext context = GetControllerContext(controller);
+
+            ResultExecutingContext storedContext = null;
+            ActionResult result = new EmptyResult();
+            List<IResultFilter> filters = new List<IResultFilter>()
+            {
+                new ActionFilterImpl()
+                {
+                    OnResultExecutingImpl = delegate(ResultExecutingContext ctx) 
+                    {
+                        Assert.NotNull(ctx);
+                        storedContext = ctx; 
+                    },
+                    OnResultExecutedImpl = delegate { }
+                },
+                new ActionFilterImpl()
+                {
+                    OnResultExecutingImpl = delegate(ResultExecutingContext ctx) 
+                    { 
+                        Assert.NotNull(ctx);
+                        Assert.Same(storedContext, ctx); 
+                    },
+                    OnResultExecutedImpl = delegate { }
+                },
+            };
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
+
+            // Act
+            ResultExecutedContext postContext = helper.PublicInvokeActionResultWithFilters(context, filters, result);
+
+            // Assert
+            Assert.Same(result, postContext.Result);
+        }
+
+        [Fact]
+        public void InvokeActionResultWithFiltersWhereContinuationThrowsExceptionAndIsHandled()
         {
             // Arrange
             List<string> actions = new List<string>();
-            ActionResult actionResult = new EmptyResult();
             Exception exception = new Exception();
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+                throw exception;
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
             ActionFilterImpl filter = new ActionFilterImpl()
             {
                 OnResultExecutingImpl = delegate(ResultExecutingContext filterContext) { actions.Add("OnResultExecuting"); },
@@ -1599,17 +1612,14 @@ namespace System.Web.Mvc.Test
                     filterContext.ExceptionHandled = true;
                 }
             };
-            Func<ResultExecutedContext> continuation = delegate
-            {
-                actions.Add("Continuation");
-                throw exception;
-            };
 
             Mock<ResultExecutingContext> mockResultExecutingContext = new Mock<ResultExecutingContext>() { DefaultValue = DefaultValue.Mock };
             mockResultExecutingContext.Setup(c => c.Result).Returns(actionResult);
+            List<IResultFilter> filters = new List<IResultFilter>() { filter, };
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
 
             // Act
-            ResultExecutedContext result = ControllerActionInvoker.InvokeActionResultFilter(filter, mockResultExecutingContext.Object, continuation);
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(mockResultExecutingContext.Object, filters, actionResult);
 
             // Assert
             Assert.Equal(3, actions.Count);
@@ -1622,24 +1632,29 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFilterWhereContinuationThrowsExceptionAndIsNotHandled()
+        public void InvokeActionResultWithFiltersWhereContinuationThrowsExceptionAndIsNotHandled()
         {
             // Arrange
             List<string> actions = new List<string>();
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+                throw new Exception("Some exception message.");
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
             ActionFilterImpl filter = new ActionFilterImpl()
             {
                 OnResultExecutingImpl = delegate(ResultExecutingContext filterContext) { actions.Add("OnResultExecuting"); },
                 OnResultExecutedImpl = delegate(ResultExecutedContext filterContext) { actions.Add("OnResultExecuted"); }
             };
-            Func<ResultExecutedContext> continuation = delegate
-            {
-                actions.Add("Continuation");
-                throw new Exception("Some exception message.");
-            };
+            Mock<ResultExecutingContext> mockResultExecutingContext = new Mock<ResultExecutingContext>() { DefaultValue = DefaultValue.Mock };
+            mockResultExecutingContext.Setup(c => c.Result).Returns(actionResult);
+            List<IResultFilter> filters = new List<IResultFilter>() { filter, };
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
 
             // Act & Assert
             Assert.Throws<Exception>(
-                delegate { ControllerActionInvoker.InvokeActionResultFilter(filter, new Mock<ResultExecutingContext>() { DefaultValue = DefaultValue.Mock }.Object, continuation); },
+                delegate { helper.PublicInvokeActionResultWithFilters(mockResultExecutingContext.Object, filters, actionResult); },
                 "Some exception message.");
             Assert.Equal(3, actions.Count);
             Assert.Equal("OnResultExecuting", actions[0]);
@@ -1648,15 +1663,19 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFilterWhereContinuationThrowsThreadAbortException()
+        public void InvokeActionResultWithFiltersWhereContinuationThrowsThreadAbortException()
         {
             // Arrange
             List<string> actions = new List<string>();
-            ActionResult actionResult = new EmptyResult();
 
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+                Thread.CurrentThread.Abort();
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
             Mock<ResultExecutingContext> mockPreContext = new Mock<ResultExecutingContext>() { DefaultValue = DefaultValue.Mock };
             mockPreContext.Setup(c => c.Result).Returns(actionResult);
-
             ActionFilterImpl filter = new ActionFilterImpl()
             {
                 OnResultExecutingImpl = delegate(ResultExecutingContext filterContext) { actions.Add("OnResultExecuting"); },
@@ -1669,16 +1688,12 @@ namespace System.Web.Mvc.Test
                     Assert.False(filterContext.ExceptionHandled);
                 }
             };
-            Func<ResultExecutedContext> continuation = delegate
-            {
-                actions.Add("Continuation");
-                Thread.CurrentThread.Abort();
-                return null;
-            };
+            List<IResultFilter> filters = new List<IResultFilter>() { filter, };
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
 
             // Act & Assert
             Assert.Throws<ThreadAbortException>(
-                delegate { ControllerActionInvoker.InvokeActionResultFilter(filter, mockPreContext.Object, continuation); },
+                delegate { helper.PublicInvokeActionResultWithFilters(mockPreContext.Object, filters, actionResult); },
                 "Thread was being aborted.");
             Assert.Equal(3, actions.Count);
             Assert.Equal("OnResultExecuting", actions[0]);
@@ -1687,13 +1702,183 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFilterWhereOnResultExecutingCancels()
+        public void InvokeActionResultWithFiltersWhereContinuationThrowsUnhandledWithMultipleFilters()
+        {
+            // Arrange
+            List<string> actions = new List<string>();
+            string expectedExceptionMessage = "Some exception message.";
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+                throw new Exception(expectedExceptionMessage);
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting1");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted1");
+                    Assert.NotNull(filterContext.Exception);
+                    Assert.Equal(filterContext.Exception.Message, expectedExceptionMessage);
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting2");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted2");
+                    Assert.NotNull(filterContext.Exception);
+                    Assert.Equal(filterContext.Exception.Message, expectedExceptionMessage);
+                }
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
+            ControllerBase controller = new Mock<ControllerBase>().Object;
+            ControllerContext context = GetControllerContext(controller);
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
+            List<IResultFilter> filters = new List<IResultFilter>() { filter1, filter2 };
+
+            // Act
+            Assert.Throws<Exception>(
+                delegate { helper.PublicInvokeActionResultWithFilters(context, filters, actionResult); },
+                expectedExceptionMessage);
+
+            // Assert
+            Assert.Equal(5, actions.Count);
+            Assert.Equal("OnResultExecuting1", actions[0]);
+            Assert.Equal("OnResultExecuting2", actions[1]);
+            Assert.Equal("Continuation", actions[2]);
+            Assert.Equal("OnResultExecuted2", actions[3]);
+            Assert.Equal("OnResultExecuted1", actions[4]);
+        }
+
+        [Fact]
+        public void InvokeActionResultWithFiltersWhereContinuationThrowsHandledByEarlierFilter()
+        {
+            // Arrange
+            List<string> actions = new List<string>();
+            Exception exception = new Exception();
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+                throw exception;
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting1");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted1");
+                    filterContext.ExceptionHandled = true;
+                    Assert.Same(exception, filterContext.Exception);
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting2");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted2");
+                    Assert.Same(exception, filterContext.Exception);
+                }
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
+            ControllerBase controller = new Mock<ControllerBase>().Object;
+            ControllerContext context = GetControllerContext(controller);
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
+            List<IResultFilter> filters = new List<IResultFilter>() { filter1, filter2 };
+
+            // Act
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(context, filters, actionResult);
+
+            // Assert
+            Assert.Equal(5, actions.Count);
+            Assert.Equal("OnResultExecuting1", actions[0]);
+            Assert.Equal("OnResultExecuting2", actions[1]);
+            Assert.Equal("Continuation", actions[2]);
+            Assert.Equal("OnResultExecuted2", actions[3]);
+            Assert.Equal("OnResultExecuted1", actions[4]);
+            Assert.Same(exception, result.Exception);
+            Assert.True(result.ExceptionHandled);
+            Assert.Same(actionResult, result.Result);
+        }
+
+        [Fact]
+        public void InvokeActionResultWithFiltersWhereContinuationThrowsHandledByLaterFilter()
+        {
+            // Arrange
+            List<string> actions = new List<string>();
+            Exception exception = new Exception();
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+                throw exception;
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting1");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted1");
+                    Assert.True(filterContext.ExceptionHandled);
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting2");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted2");
+                    Assert.Same(exception, filterContext.Exception);
+                    filterContext.ExceptionHandled = true;
+                }
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
+            ControllerBase controller = new Mock<ControllerBase>().Object;
+            ControllerContext context = GetControllerContext(controller);
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
+            List<IResultFilter> filters = new List<IResultFilter>() { filter1, filter2 };
+
+            // Act
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(context, filters, actionResult);
+
+            // Assert
+            Assert.Equal(5, actions.Count);
+            Assert.Equal("OnResultExecuting1", actions[0]);
+            Assert.Equal("OnResultExecuting2", actions[1]);
+            Assert.Equal("Continuation", actions[2]);
+            Assert.Equal("OnResultExecuted2", actions[3]);
+            Assert.Equal("OnResultExecuted1", actions[4]);
+            Assert.Same(exception, result.Exception);
+            Assert.True(result.ExceptionHandled);
+            Assert.Same(actionResult, result.Result);
+        }
+
+        [Fact]
+        public void InvokeActionResultWithFiltersWhereCancelled()
         {
             // Arrange
             bool wasCalled = false;
             MethodInfo mi = typeof(object).GetMethod("ToString");
             object[] paramValues = new object[0];
-            ActionResult actionResult = new EmptyResult();
             ActionFilterImpl filter = new ActionFilterImpl()
             {
                 OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
@@ -1703,17 +1888,19 @@ namespace System.Web.Mvc.Test
                     filterContext.Cancel = true;
                 },
             };
-            Func<ResultExecutedContext> continuation = delegate
+            Action continuation = delegate
             {
                 Assert.True(false, "The continuation should not be called.");
-                return null;
             };
+            ActionResult actionResult = new ContinuationResult(continuation);
 
             Mock<ResultExecutingContext> mockResultExecutingContext = new Mock<ResultExecutingContext>() { DefaultValue = DefaultValue.Mock };
             mockResultExecutingContext.Setup(c => c.Result).Returns(actionResult);
+            List<IResultFilter> filters = new List<IResultFilter>() { filter, };
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
 
             // Act
-            ResultExecutedContext result = ControllerActionInvoker.InvokeActionResultFilter(filter, mockResultExecutingContext.Object, continuation);
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(mockResultExecutingContext.Object, filters, actionResult);
 
             // Assert
             Assert.True(wasCalled);
@@ -1723,15 +1910,116 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void InvokeResultFilterWithNormalControlFlow()
+        public void InvokeActionResultWithFiltersWhereCancelledByEarlierFilter()
         {
             // Arrange
             List<string> actions = new List<string>();
-            ActionResult actionResult = new EmptyResult();
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting1");
+                    filterContext.Cancel = true;
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted1");
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
+                {
+                    actions.Add("OnResultExecuting2");
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
+                {
+                    actions.Add("OnResultExecuted2");
+                }
+            };
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
+            ControllerBase controller = new Mock<ControllerBase>().Object;
+            ControllerContext context = GetControllerContext(controller);
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
+            List<IResultFilter> filters = new List<IResultFilter>() { filter1, filter2 };
 
-            Mock<ResultExecutedContext> mockPostContext = new Mock<ResultExecutedContext>();
-            mockPostContext.Setup(c => c.Result).Returns(actionResult);
+            // Act
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(context, filters, actionResult);
 
+            // Assert
+            Assert.Equal(1, actions.Count);
+            Assert.Equal("OnResultExecuting1", actions[0]);
+            Assert.Null(result.Exception);
+            Assert.True(result.Canceled);
+            Assert.Same(actionResult, result.Result);
+        }
+
+        [Fact]
+        public void InvokeActionResultWithFiltersWhereCancelledByLaterFilter()
+        {
+            // Arrange
+            List<string> actions = new List<string>();
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext) 
+                { 
+                    actions.Add("OnResultExecuting1"); 
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext) 
+                { 
+                    actions.Add("OnResultExecuted1");
+                    Assert.True(filterContext.Canceled);
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnResultExecutingImpl = delegate(ResultExecutingContext filterContext) 
+                { 
+                    actions.Add("OnResultExecuting2");
+                    filterContext.Cancel = true;
+                },
+                OnResultExecutedImpl = delegate(ResultExecutedContext filterContext) 
+                { 
+                    actions.Add("OnResultExecuted2");
+                }
+            };
+            Action continuation = delegate 
+            { 
+                actions.Add("Continuation"); 
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
+            ControllerBase controller = new Mock<ControllerBase>().Object;
+            ControllerContext context = GetControllerContext(controller);
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
+            List<IResultFilter> filters = new List<IResultFilter>() { filter1, filter2 };
+
+            // Act
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(context, filters, actionResult);
+
+            // Assert
+            Assert.Equal(3, actions.Count);
+            Assert.Equal("OnResultExecuting1", actions[0]);
+            Assert.Equal("OnResultExecuting2", actions[1]);
+            Assert.Equal("OnResultExecuted1", actions[2]);
+            Assert.Null(result.Exception);
+            Assert.True(result.Canceled);
+            Assert.Same(actionResult, result.Result);
+        }
+
+        [Fact]
+        public void InvokeActionResultWithFiltersWithNormalControlFlow()
+        {
+            // Arrange
+            List<string> actions = new List<string>();
+            Action continuation = delegate
+            {
+                actions.Add("Continuation");
+            };
+            ActionResult actionResult = new ContinuationResult(continuation);
             ActionFilterImpl filter = new ActionFilterImpl()
             {
                 OnResultExecutingImpl = delegate(ResultExecutingContext filterContext)
@@ -1742,28 +2030,27 @@ namespace System.Web.Mvc.Test
                 },
                 OnResultExecutedImpl = delegate(ResultExecutedContext filterContext)
                 {
-                    Assert.Equal(mockPostContext.Object, filterContext);
+                    Assert.Same(actionResult, filterContext.Result);
+                    Assert.False(filterContext.Canceled);
+                    Assert.Null(filterContext.Exception);
+                    Assert.False(filterContext.ExceptionHandled);
                     actions.Add("OnResultExecuted");
                 }
             };
-            Func<ResultExecutedContext> continuation = delegate
-            {
-                actions.Add("Continuation");
-                return mockPostContext.Object;
-            };
-
             Mock<ResultExecutingContext> mockResultExecutingContext = new Mock<ResultExecutingContext>();
             mockResultExecutingContext.Setup(c => c.Result).Returns(actionResult);
+            List<IResultFilter> filters = new List<IResultFilter>() { filter, };
+            ControllerActionInvokerHelper helper = new ControllerActionInvokerHelper();
 
             // Act
-            ResultExecutedContext result = ControllerActionInvoker.InvokeActionResultFilter(filter, mockResultExecutingContext.Object, continuation);
+            ResultExecutedContext result = helper.PublicInvokeActionResultWithFilters(mockResultExecutingContext.Object, filters, actionResult);
 
             // Assert
             Assert.Equal(3, actions.Count);
             Assert.Equal("OnResultExecuting", actions[0]);
             Assert.Equal("Continuation", actions[1]);
             Assert.Equal("OnResultExecuted", actions[2]);
-            Assert.Same(result, mockPostContext.Object);
+            Assert.Same(result.Result, actionResult);
         }
 
         [Fact]

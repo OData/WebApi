@@ -305,32 +305,52 @@ namespace System.Web.Mvc
             actionResult.ExecuteResult(controllerContext);
         }
 
-        internal static ResultExecutedContext InvokeActionResultFilter(IResultFilter filter, ResultExecutingContext preContext, Func<ResultExecutedContext> continuation)
+        private ResultExecutedContext InvokeActionResultFilterRecursive(IList<IResultFilter> filters, int filterIndex, ResultExecutingContext preContext, ControllerContext controllerContext, ActionResult actionResult)
         {
+            // Performance-sensitive
+
+            // For compatbility, the following behavior must be maintained
+            //   The OnResultExecuting events must fire in forward order
+            //   The InvokeActionResult must then fire
+            //   The OnResultExecuted events must fire in reverse order
+            //   Earlier filters can process the results and exceptions from the handling of later filters
+            // This is achieved by calling recursively and moving through the filter list forwards
+
+            // If there are no more filters to recurse over, create the main result
+            if (filterIndex > filters.Count - 1)
+            {
+                InvokeActionResult(controllerContext, actionResult);
+                return new ResultExecutedContext(controllerContext, actionResult, canceled: false, exception: null);
+            }
+
+            // Otherwise process the filters recursively
+            IResultFilter filter = filters[filterIndex];
             filter.OnResultExecuting(preContext);
             if (preContext.Cancel)
             {
-                return new ResultExecutedContext(preContext, preContext.Result, true /* canceled */, null /* exception */);
+                return new ResultExecutedContext(preContext, preContext.Result, canceled: true, exception: null);
             }
 
             bool wasError = false;
             ResultExecutedContext postContext = null;
             try
             {
-                postContext = continuation();
+                // Use the filters in forward direction
+                int nextFilterIndex = filterIndex + 1;
+                postContext = InvokeActionResultFilterRecursive(filters, nextFilterIndex, preContext, controllerContext, actionResult);
             }
             catch (ThreadAbortException)
             {
                 // This type of exception occurs as a result of Response.Redirect(), but we special-case so that
                 // the filters don't see this as an error.
-                postContext = new ResultExecutedContext(preContext, preContext.Result, false /* canceled */, null /* exception */);
+                postContext = new ResultExecutedContext(preContext, preContext.Result, canceled: false, exception: null);
                 filter.OnResultExecuted(postContext);
                 throw;
             }
             catch (Exception ex)
             {
                 wasError = true;
-                postContext = new ResultExecutedContext(preContext, preContext.Result, false /* canceled */, ex);
+                postContext = new ResultExecutedContext(preContext, preContext.Result, canceled: false, exception: ex);
                 filter.OnResultExecuted(postContext);
                 if (!postContext.ExceptionHandled)
                 {
@@ -347,16 +367,9 @@ namespace System.Web.Mvc
         protected virtual ResultExecutedContext InvokeActionResultWithFilters(ControllerContext controllerContext, IList<IResultFilter> filters, ActionResult actionResult)
         {
             ResultExecutingContext preContext = new ResultExecutingContext(controllerContext, actionResult);
-            Func<ResultExecutedContext> continuation = delegate
-            {
-                InvokeActionResult(controllerContext, actionResult);
-                return new ResultExecutedContext(controllerContext, actionResult, false /* canceled */, null /* exception */);
-            };
 
-            // need to reverse the filter list because the continuations are built up backward
-            Func<ResultExecutedContext> thunk = filters.Reverse().Aggregate(continuation,
-                                                                            (next, filter) => () => InvokeActionResultFilter(filter, preContext, next));
-            return thunk();
+            int startingFilterIndex = 0;
+            return InvokeActionResultFilterRecursive(filters, startingFilterIndex, preContext, controllerContext, actionResult);
         }
 
         internal virtual AuthenticationContext InvokeAuthenticationFilters(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor)

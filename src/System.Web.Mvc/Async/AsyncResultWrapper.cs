@@ -20,14 +20,11 @@ namespace System.Web.Mvc.Async
     {
         // helper methods
 
-        private static Func<AsyncVoid> MakeVoidDelegate(Action action)
+        private static readonly EndInvokeDelegate<Action, AsyncVoid> _voidEndInvoke = (IAsyncResult asyncResult, Action action) =>
         {
-            return () =>
-            {
-                action();
-                return default(AsyncVoid);
-            };
-        }
+            action();
+            return default(AsyncVoid);
+        };
 
         private static EndInvokeDelegate<AsyncVoid> MakeVoidDelegate(EndInvokeDelegate endDelegate)
         {
@@ -74,13 +71,10 @@ namespace System.Web.Mvc.Async
 
         // wraps a synchronous operation in an asynchronous wrapper, but still completes synchronously
 
-        public static IAsyncResult BeginSynchronous<TResult>(AsyncCallback callback, object state, Func<TResult> func)
+        public static IAsyncResult BeginSynchronous<TResult, TState>(AsyncCallback callback, object callbackState, EndInvokeDelegate<TState, TResult> func, TState funcState, object tag)
         {
-            return BeginSynchronous<TResult>(callback, state, func, tag: null);
-        }
+            // Frequently called, so keep delegates static
 
-        public static IAsyncResult BeginSynchronous<TResult>(AsyncCallback callback, object state, Func<TResult> func, object tag)
-        {
             // Begin() doesn't perform any work on its own and returns immediately.
             BeginInvokeDelegate beginDelegate = (asyncCallback, asyncState) =>
             {
@@ -89,25 +83,15 @@ namespace System.Web.Mvc.Async
                 return innerAsyncResult;
             };
 
-            // The End() method blocks.
-            EndInvokeDelegate<TResult> endDelegate = _ =>
-            {
-                return func();
-            };
-
-            WrappedAsyncResult<TResult> asyncResult = new WrappedAsyncResult<TResult>(beginDelegate, endDelegate, tag);
-            asyncResult.Begin(callback, state, Timeout.Infinite);
+            // Pass in the blocking function as the End() method
+            WrappedAsyncResult<TResult, TState> asyncResult = new WrappedAsyncResult<TResult, TState>(beginDelegate, func, funcState, tag);
+            asyncResult.Begin(callback, callbackState, Timeout.Infinite);
             return asyncResult;
-        }
-
-        public static IAsyncResult BeginSynchronous(AsyncCallback callback, object state, Action action)
-        {
-            return BeginSynchronous(callback, state, action, tag: null);
         }
 
         public static IAsyncResult BeginSynchronous(AsyncCallback callback, object state, Action action, object tag)
         {
-            return BeginSynchronous<AsyncVoid>(callback, state, MakeVoidDelegate(action), tag);
+            return BeginSynchronous<AsyncVoid, Action>(callback, state, _voidEndInvoke, action, tag);
         }
 
         // completes an asynchronous operation
@@ -119,7 +103,7 @@ namespace System.Web.Mvc.Async
 
         public static TResult End<TResult>(IAsyncResult asyncResult, object tag)
         {
-            return WrappedAsyncResult<TResult>.Cast(asyncResult, tag).End();
+            return WrappedAsyncResultBase<TResult>.Cast(asyncResult, tag).End();
         }
 
         public static void End(IAsyncResult asyncResult)
@@ -134,7 +118,7 @@ namespace System.Web.Mvc.Async
 
         [DebuggerNonUserCode]
         [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "The Timer will be disposed of either when it fires or when the operation completes successfully.")]
-        private sealed class WrappedAsyncResult<TResult> : IAsyncResult
+        private abstract class WrappedAsyncResultBase<TResult> : IAsyncResult
         {
             private const int AsyncStateNone = 0;
             private const int AsyncStateBeginUnwound = 1;
@@ -143,7 +127,6 @@ namespace System.Web.Mvc.Async
             private int _asyncState;
             private readonly BeginInvokeDelegate _beginDelegate;
             private readonly object _beginDelegateLockObj = new object();
-            private readonly EndInvokeDelegate<TResult> _endDelegate;
             private readonly SingleEntryGate _endExecutedGate = new SingleEntryGate(); // prevent End() from being called twice
             private readonly SingleEntryGate _handleCallbackGate = new SingleEntryGate(); // prevent callback from being handled multiple times
             private readonly object _tag; // prevent an instance of this type from being passed to the wrong End() method
@@ -152,10 +135,9 @@ namespace System.Web.Mvc.Async
             private volatile bool _timedOut;
             private Timer _timer;
 
-            public WrappedAsyncResult(BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag)
+            protected WrappedAsyncResultBase(BeginInvokeDelegate beginDelegate, object tag)
             {
                 _beginDelegate = beginDelegate;
-                _endDelegate = endDelegate;
                 _tag = tag;
             }
 
@@ -212,14 +194,16 @@ namespace System.Web.Mvc.Async
                 }
             }
 
-            public static WrappedAsyncResult<TResult> Cast(IAsyncResult asyncResult, object tag)
+            protected abstract TResult CallEndDelegate(IAsyncResult asyncResult);
+
+            public static WrappedAsyncResultBase<TResult> Cast(IAsyncResult asyncResult, object tag)
             {
                 if (asyncResult == null)
                 {
                     throw new ArgumentNullException("asyncResult");
                 }
 
-                WrappedAsyncResult<TResult> castResult = asyncResult as WrappedAsyncResult<TResult>;
+                WrappedAsyncResultBase<TResult> castResult = asyncResult as WrappedAsyncResultBase<TResult>;
                 if (castResult != null && Equals(castResult._tag, tag))
                 {
                     return castResult;
@@ -249,7 +233,7 @@ namespace System.Web.Mvc.Async
                 }
                 WaitForBeginToCompleteAndDestroyTimer();
 
-                return _endDelegate(_innerAsyncResult);
+                return CallEndDelegate(_innerAsyncResult);
             }
 
             private void ExecuteAsynchronousCallback(bool timedOut)
@@ -299,6 +283,39 @@ namespace System.Web.Mvc.Async
                     }
                     _timer = null;
                 }
+            }
+        }
+
+        private sealed class WrappedAsyncResult<TResult> : WrappedAsyncResultBase<TResult>
+        {
+            private readonly EndInvokeDelegate<TResult> _endDelegate;
+
+            public WrappedAsyncResult(BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag) : base(beginDelegate, tag)
+            {
+                _endDelegate = endDelegate;
+            }
+
+            protected override TResult CallEndDelegate(IAsyncResult asyncResult)
+            {
+                return _endDelegate(asyncResult);
+            }
+        }
+
+        private sealed class WrappedAsyncResult<TResult, TState> : WrappedAsyncResultBase<TResult>
+        {
+            private readonly EndInvokeDelegate<TState, TResult> _endDelegate;
+            private readonly TState _state;
+
+            public WrappedAsyncResult(BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState state, object tag)
+                : base(beginDelegate, tag)
+            {
+                _endDelegate = endDelegate;
+                _state = state;
+            }
+
+            protected override TResult CallEndDelegate(IAsyncResult asyncResult)
+            {
+                return _endDelegate(asyncResult, _state);
             }
         }
     }

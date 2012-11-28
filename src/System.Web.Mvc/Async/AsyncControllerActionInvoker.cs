@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
@@ -253,9 +254,13 @@ namespace System.Web.Mvc.Async
 
         private IAsyncResult BeginInvokeSynchronousActionMethod(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters, AsyncCallback callback, object state)
         {
-            return AsyncResultWrapper.BeginSynchronous(callback, state,
-                                                       () => InvokeSynchronousActionMethod(controllerContext, actionDescriptor, parameters),
-                                                       _invokeActionMethodTag);
+            // Frequently called so ensure delegate remains static and arguments do not allocate
+            EndInvokeDelegate<ActionInvocation, ActionResult> endInvokeFunc = (asyncResult, innerInvokeState) =>
+                {
+                    return innerInvokeState.InvokeSynchronousActionMethod();
+                };
+            ActionInvocation endInvokeState = new ActionInvocation(this, controllerContext, actionDescriptor, parameters);
+            return AsyncResultWrapper.BeginSynchronous(callback, state, endInvokeFunc, endInvokeState, _invokeActionMethodTag);
         }
 
         public virtual bool EndInvokeAction(IAsyncResult asyncResult)
@@ -361,9 +366,31 @@ namespace System.Web.Mvc.Async
             }
         }
 
-        private ActionResult InvokeSynchronousActionMethod(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
+        // Keep as value type to avoid per-call allocation
+        private struct ActionInvocation
         {
-            return InvokeActionMethod(controllerContext, actionDescriptor, parameters);
+            private readonly AsyncControllerActionInvoker _invoker;
+            private readonly ControllerContext _controllerContext;
+            private readonly ActionDescriptor _actionDescriptor;
+            private readonly IDictionary<string, object> _parameters;
+
+            internal ActionInvocation(AsyncControllerActionInvoker invoker, ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
+            {
+                Contract.Assert(invoker != null);
+                Contract.Assert(controllerContext != null);
+                Contract.Assert(actionDescriptor != null);
+                Contract.Assert(parameters != null);
+
+                _invoker = invoker;
+                _controllerContext = controllerContext;
+                _actionDescriptor = actionDescriptor;
+                _parameters = parameters;
+            }
+
+            internal ActionResult InvokeSynchronousActionMethod()
+            {
+                return _invoker.InvokeActionMethod(_controllerContext, _actionDescriptor, _parameters);
+            }
         }
     }
 }

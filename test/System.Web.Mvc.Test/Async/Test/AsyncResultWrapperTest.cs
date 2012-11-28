@@ -109,7 +109,7 @@ namespace System.Web.Mvc.Async.Test
             bool actionCalled = false;
 
             // Act
-            IAsyncResult asyncResult = AsyncResultWrapper.BeginSynchronous(null, null, delegate { actionCalled = true; });
+            IAsyncResult asyncResult = AsyncResultWrapper.BeginSynchronous(callback: null, state: null, action: delegate { actionCalled = true; }, tag: null);
             AsyncResultWrapper.End(asyncResult);
 
             // Assert
@@ -121,14 +121,43 @@ namespace System.Web.Mvc.Async.Test
         [Fact]
         public void BeginSynchronous_Func()
         {
+            object expectedReturn = new object();
+            object expectedState = new object();
+            object expectedCallbackState = new object();
+            bool funcCalled = false;
+            bool asyncCalledbackCalled = false;
+
             // Act
-            IAsyncResult asyncResult = AsyncResultWrapper.BeginSynchronous(null, null, () => 42);
-            int retVal = AsyncResultWrapper.End<int>(asyncResult);
+            IAsyncResult asyncResult = AsyncResultWrapper.BeginSynchronous(
+                callback: (innerIAsyncResult) =>
+                {
+                    asyncCalledbackCalled = true;
+                    Assert.NotNull(innerIAsyncResult);
+                    Assert.Same(expectedCallbackState, innerIAsyncResult.AsyncState);
+                    Assert.True(innerIAsyncResult.IsCompleted);
+                    Assert.True(innerIAsyncResult.CompletedSynchronously);
+                },
+                callbackState: expectedCallbackState,
+                func: (innerIAsyncResult, innerState) => 
+                {
+                    funcCalled = true;
+                    Assert.NotNull(innerIAsyncResult);
+                    Assert.Same(expectedCallbackState, innerIAsyncResult.AsyncState);
+                    Assert.Same(expectedState, innerState);
+                    Assert.True(innerIAsyncResult.IsCompleted);
+                    Assert.True(innerIAsyncResult.CompletedSynchronously);
+                    return expectedReturn;
+                }, 
+                funcState: expectedState, 
+                tag: null);
+            object retVal = AsyncResultWrapper.End<object>(asyncResult);
 
             // Assert
-            Assert.Equal(42, retVal);
+            Assert.Same(expectedReturn, retVal);
             Assert.True(asyncResult.IsCompleted);
             Assert.True(asyncResult.CompletedSynchronously);
+            Assert.True(funcCalled);
+            Assert.True(asyncCalledbackCalled);
         }
 
         [Fact]

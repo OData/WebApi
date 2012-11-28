@@ -75,6 +75,7 @@
     <Compile Include="CancellationTokenModelBinder.cs" />
     <Compile Include="CompareAttributeAdapter.cs" />
     <Compile Include="DataTypeAttributeAdapter.cs" />
+    <Compile Include="Async\EndInvokeDelegateOfTResultTState.cs" />
     <Compile Include="FileExtensionsAttributeAdapter.cs" />
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />

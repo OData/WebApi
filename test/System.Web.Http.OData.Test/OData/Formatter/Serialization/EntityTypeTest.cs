@@ -6,6 +6,7 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
@@ -15,7 +16,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void EntityTypeSerializesAsODataEntry()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
+            ODataMediaTypeFormatter formatter = CreateFormatter();
             Employee employee = (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee);
             ObjectContent<Employee> content = new ObjectContent<Employee>(employee, formatter);
 
@@ -26,7 +27,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void ContentHeadersAreAddedForXmlMediaType()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
+            ODataMediaTypeFormatter formatter = CreateFormatter();
             ObjectContent<Employee> content = new ObjectContent<Employee>(new Employee(0, new ReferenceDepthContext(7)), formatter);
             content.LoadIntoBufferAsync().Wait();
 
@@ -37,12 +38,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void ContentHeadersAreAddedForJsonMediaType()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
+            ODataMediaTypeFormatter formatter = CreateFormatter();
             HttpContent content = new ObjectContent<Employee>(new Employee(0, new ReferenceDepthContext(7)), formatter, "application/json");
             content.LoadIntoBufferAsync().Wait();
 
             Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
             Assert.Http.Contains(content.Headers, "Content-Type", "application/json; odata=verbose; charset=utf-8");
+        }
+
+        private static ODataMediaTypeFormatter CreateFormatter()
+        {
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(GetSampleModel());
+            formatter.Request = GetSampleRequest();
+            return formatter;
         }
 
         private static HttpRequestMessage GetSampleRequest()

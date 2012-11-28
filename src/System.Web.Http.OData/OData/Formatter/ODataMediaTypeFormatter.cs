@@ -2,7 +2,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -18,7 +17,6 @@ using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter
@@ -29,14 +27,15 @@ namespace System.Web.Http.OData.Formatter
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
         internal const string EdmModelKey = "MS_EdmModel";
+
         private readonly ODataVersion _defaultODataVersion = ODataFormatterConstants.DefaultODataVersion;
 
         private PatchKeyMode _patchKeyMode;
 
-        public ODataMediaTypeFormatter(IEdmModel edmModel)
-            : this(new DefaultODataDeserializerProvider(edmModel), new DefaultODataSerializerProvider(edmModel))
+        internal ODataMediaTypeFormatter(IEdmModel model)
+            : this(new DefaultODataDeserializerProvider(model), new DefaultODataSerializerProvider(model))
         {
-            Model = edmModel;
+            Model = model;
         }
 
         internal ODataMediaTypeFormatter(ODataVersion oDataVersion, ODataDeserializerProvider oDataDeserializerProvider, ODataSerializerProvider oDataSerializerProvider)
@@ -89,18 +88,6 @@ namespace System.Web.Http.OData.Formatter
         internal ODataDeserializerProvider ODataDeserializerProvider { get; private set; }
 
         internal ODataSerializerProvider ODataSerializerProvider { get; private set; }
-
-        /// <summary>
-        /// Gets the default media type for atom, namely "application/atom+xml".
-        /// </summary>
-        /// <value>
-        /// Because <see cref="MediaTypeHeaderValue"/> is mutable, the value
-        /// returned will be a new instance every time.
-        /// </value>
-        public static MediaTypeHeaderValue DefaultMediaType
-        {
-            get { return ODataFormatterConstants.ApplicationAtomXmlMediaType; }
-        }
 
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)

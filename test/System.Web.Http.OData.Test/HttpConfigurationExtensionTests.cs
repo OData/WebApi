@@ -79,7 +79,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMediaTypeFormatter formatter = new Mock<ODataMediaTypeFormatter>(EdmCoreModel.Instance).Object;
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(EdmCoreModel.Instance);
 
             // Act
             configuration.Formatters.Insert(0, formatter);
@@ -93,7 +93,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMediaTypeFormatter formatter = new Mock<ODataMediaTypeFormatter>(EdmCoreModel.Instance).Object;
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(EdmCoreModel.Instance);
             configuration.Formatters.Add(formatter);
 
             // Act

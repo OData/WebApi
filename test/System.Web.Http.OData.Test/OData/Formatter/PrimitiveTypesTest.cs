@@ -5,6 +5,8 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
+using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -52,7 +54,7 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model.GetEdmModel()) { Request = request };
+            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
 
             Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
 
@@ -74,13 +76,20 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model.GetEdmModel()) { Request = request };
+            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
             ObjectContent content = new ObjectContent(type, value, formatter);
 
             var stream = content.ReadAsStreamAsync().Result;
             Assert.Equal(
                 value,
                 formatter.ReadFromStreamAsync(type, stream, content, new Mock<IFormatterLogger>().Object).Result);
+        }
+
+        private ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request)
+        {
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model);
+            formatter.Request = request;
+            return formatter;
         }
     }
 }

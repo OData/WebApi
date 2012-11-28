@@ -13,7 +13,6 @@ namespace System.Web.Http.OData.Formatter
 {
     public class ODataActionTests
     {
-        ODataMediaTypeFormatter _formatter;
         HttpConfiguration _configuration;
         HttpServer _server;
         HttpClient _client;
@@ -23,9 +22,9 @@ namespace System.Web.Http.OData.Formatter
         {
             _configuration = new HttpConfiguration();
             _model = GetModel();
-            _formatter = new ODataMediaTypeFormatter(_model);
+            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create(_model);
             _configuration.Formatters.Clear();
-            _configuration.Formatters.Insert(0, _formatter);
+            _configuration.Formatters.AddRange(formatters);
             _configuration.SetEdmModel(_model);
 
             _configuration.Routes.MapHttpRoute("OData", "{*odataPath}", new { controller = "Customers", boundId = "1", id = "1" });

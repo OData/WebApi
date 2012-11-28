@@ -16,7 +16,6 @@ namespace System.Web.Http.OData.OData.Formatter
 {
     public class InheritanceTests
     {
-        ODataMediaTypeFormatter _formatter;
         HttpConfiguration _configuration;
         HttpServer _server;
         HttpClient _client;
@@ -25,10 +24,10 @@ namespace System.Web.Http.OData.OData.Formatter
         public InheritanceTests()
         {
             _configuration = new HttpConfiguration();
-            _formatter = new ODataMediaTypeFormatter(GetEdmModel());
+            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create(GetEdmModel());
 
             _configuration.Formatters.Clear();
-            _configuration.Formatters.Add(_formatter);
+            _configuration.Formatters.AddRange(formatters);
 
             _configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
 

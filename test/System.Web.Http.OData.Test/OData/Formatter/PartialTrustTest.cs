@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Formatter
             var _config = new HttpConfiguration();
             _config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
             _config.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
-            _config.Formatters.Insert(0, new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel()));
+            _config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel()));
 
             using (HttpServer host = new HttpServer(_config))
             {
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Formatter
             var _config = new HttpConfiguration();
             _config.Routes.MapHttpRoute(ODataRouteNames.GetById, "{controller}({id})");
             _config.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
-            _config.Formatters.Insert(0, new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel()));
+            _config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel()));
 
             using (HttpServer host = new HttpServer(_config))
             {

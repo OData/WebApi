@@ -7,13 +7,20 @@ using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     public class CollectionTest
     {
-        ODataMediaTypeFormatter _formatter = new ODataMediaTypeFormatter(GetSampleModel()) { Request = GetSampleRequest() };
+        private readonly ODataMediaTypeFormatter _formatter;
+
+        public CollectionTest()
+        {
+            _formatter = new ODataMediaTypeFormatter(GetSampleModel());
+            _formatter.Request = GetSampleRequest();
+        }
 
         /// <summary>
         /// Arrays the of ints serializes as O data.

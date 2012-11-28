@@ -128,6 +128,7 @@
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>
+    <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="ODataRouteVariables.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpErrorExtensions.cs" />
@@ -140,6 +141,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\LinkGenerationConstants.cs" />
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
+    <Compile Include="OData\Formatter\ODataMediaTypeFormatters.cs" />
     <Compile Include="OData\Routing\ActionPathSegment.cs" />
     <Compile Include="OData\Routing\CastPathSegment.cs" />
     <Compile Include="OData\Routing\BatchPathSegment.cs" />

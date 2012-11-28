@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Formatter;
@@ -17,8 +18,8 @@ namespace System.Web.Http.OData.Builder
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
             HttpServer server = new HttpServer();
-            ODataMediaTypeFormatter odataFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-            server.Configuration.Formatters.Insert(0, odataFormatter);
+            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
+            server.Configuration.Formatters.InsertRange(0, odataFormatters);
             server.Configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata", new { Controller = "ODataMetadata", Action = "GetMetadata" });
 
             HttpClient client = new HttpClient(server);
@@ -33,9 +34,9 @@ namespace System.Web.Http.OData.Builder
         public void GetMetadata_Returns_EdmModelFromSetODataFormatter()
         {
             IEdmModel model = new EdmModel();
-            ODataMediaTypeFormatter oDataFormatter = new ODataMediaTypeFormatter(model);
+            IEnumerable<ODataMediaTypeFormatter> oDataFormatters = ODataMediaTypeFormatters.Create(model);
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Formatters.Insert(0, oDataFormatter);
+            configuration.Formatters.InsertRange(0, oDataFormatters);
 
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
@@ -63,8 +64,8 @@ namespace System.Web.Http.OData.Builder
         public void DollarMetaDataWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            ODataMediaTypeFormatter odataFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-            server.Configuration.Formatters.Insert(0, odataFormatter);
+            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
+            server.Configuration.Formatters.InsertRange(0, odataFormatters);
             server.Configuration.Routes.MapHttpRoute(ODataRouteNames.Metadata, "$metadata", new { Controller = "ODataMetadata", Action = "GetMetadata" });
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
@@ -80,8 +81,8 @@ namespace System.Web.Http.OData.Builder
         public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            ODataMediaTypeFormatter odataFormatter = new ODataMediaTypeFormatter(ODataTestUtil.GetEdmModel());
-            server.Configuration.Formatters.Insert(0, odataFormatter);
+            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(ODataTestUtil.GetEdmModel());
+            server.Configuration.Formatters.InsertRange(0, odataFormatters);
             server.Configuration.Routes.MapHttpRoute(ODataRouteNames.ServiceDocument, "", new { Controller = "ODataMetadata", Action = "GetServiceDocument" });
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 

@@ -31,7 +31,7 @@ namespace System.Web.Http.OData.OData.Formatter
             configuration.Routes.MapHttpRoute(ODataRouteNames.PropertyNavigation, "{controller}({parentId})/{navigationProperty}");
             configuration.Routes.MapHttpRoute(ODataRouteNames.Default, "{controller}");
             configuration.Formatters.Clear();
-            configuration.Formatters.Add(new ODataMediaTypeFormatter(model));
+            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create(model));
 
             HttpServer server = new HttpServer(configuration);
             _client = new HttpClient(server);

@@ -15,6 +15,7 @@ using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -29,16 +30,8 @@ namespace System.Web.Http.OData.Formatter
         [InlineData("application/json;odata=verbose")]
         public void Constructor(string mediaType)
         {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutRequest();
             Assert.True(formatter.SupportedMediaTypes.Contains(MediaTypeHeaderValue.Parse(mediaType)), string.Format("SupportedMediaTypes should have included {0}.", mediaType.ToString()));
-        }
-
-        [Fact]
-        public void DefaultMediaTypeReturnsApplicationAtomXml()
-        {
-            MediaTypeHeaderValue mediaType = ODataMediaTypeFormatter.DefaultMediaType;
-            Assert.NotNull(mediaType);
-            Assert.Equal("application/atom+xml", mediaType.MediaType);
         }
 
         [Fact]
@@ -55,7 +48,8 @@ namespace System.Web.Http.OData.Formatter
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route);
 
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model.GetEdmModel()) { Request = request };
+            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel());
+            formatter.Request = request;
 
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 
@@ -88,7 +82,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
 
-            CreateFormatter()
+            CreateFormatterWithoutRequest()
             .GetPerRequestFormatterInstance(typeof(int), request, MediaTypeHeaderValue.Parse("application/xml"))
             .SetDefaultContentHeaders(typeof(int), contentHeaders, MediaTypeHeaderValue.Parse("application/xml"));
 
@@ -106,7 +100,7 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage();
             HttpContentHeaders contentHeaders = new StringContent("").Headers;
 
-            CreateFormatter()
+            CreateFormatterWithoutRequest()
                 .GetPerRequestFormatterInstance(typeof(int), request, MediaTypeHeaderValue.Parse(mediaType))
                 .SetDefaultContentHeaders(typeof(int), contentHeaders, MediaTypeHeaderValue.Parse(mediaType));
 
@@ -142,7 +136,7 @@ namespace System.Web.Http.OData.Formatter
         public override Task WriteToStreamAsync_WhenObjectIsNull_WritesDataButDoesNotCloseStream()
         {
             // Arrange
-            ODataMediaTypeFormatter formatter = CreateFormatter();
+            ODataMediaTypeFormatter formatter = CreateFormatterWithRequest();
             Mock<Stream> mockStream = new Mock<Stream>();
             mockStream.Setup(s => s.CanWrite).Returns(true);
             HttpContent content = new StringContent(String.Empty);
@@ -181,7 +175,7 @@ namespace System.Web.Http.OData.Formatter
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
-            var formatter = new ODataMediaTypeFormatter(builder.GetEdmModel());
+            var formatter = CreateFormatter(builder.GetEdmModel());
 
             Assert.Throws<NotSupportedException>(
                 () => formatter.WriteToStreamAsync(typeof(Customer), new Customer(), new MemoryStream(), content: null, transportContext: null),
@@ -191,7 +185,7 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void ODataFormatter_DefaultPatchKeyMode_Is_Ignore()
         {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutRequest();
             Assert.Equal(PatchKeyMode.Ignore, formatter.PatchKeyMode);
         }
 
@@ -223,13 +217,33 @@ namespace System.Web.Http.OData.Formatter
 
         public override ODataMediaTypeFormatter CreateFormatter()
         {
-            ODataConventionModelBuilder model = new ODataConventionModelBuilder();
-            model.Entity<SampleType>();
-            var formatter = new ODataMediaTypeFormatter(model.GetEdmModel());
+            return CreateFormatterWithRequest();
+        }
+
+        private ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
+        {
+            return new ODataMediaTypeFormatter(model);
+        }
+
+        public ODataMediaTypeFormatter CreateFormatterWithoutRequest()
+        {
+            return CreateFormatter(CreateModel());
+        }
+
+        public ODataMediaTypeFormatter CreateFormatterWithRequest()
+        {
+            var formatter = CreateFormatterWithoutRequest();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             request.Properties["MS_HttpConfiguration"] = new HttpConfiguration();
             formatter.Request = request;
             return formatter;
+        }
+
+        private static IEdmModel CreateModel()
+        {
+            ODataConventionModelBuilder model = new ODataConventionModelBuilder();
+            model.Entity<SampleType>();
+            return model.GetEdmModel();
         }
 
         public override IEnumerable<MediaTypeHeaderValue> ExpectedSupportedMediaTypes

@@ -102,6 +102,23 @@ namespace System.Web.Http.OData.OData.Formatter
         }
 
         [Fact]
+        public void Can_Patch_Entity_In_Inheritance()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            request.Content = new StringContent("{ 'CanDoAWheelie' : false }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
+
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+
+            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            result = result.d;
+
+            Assert.False((bool)result.CanDoAWheelie);
+        }
+
+        [Fact]
         public void Can_Post_DerivedType_To_Action_Expecting_BaseType()
         {
             Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/atom+xml");
@@ -121,6 +138,23 @@ namespace System.Web.Http.OData.OData.Formatter
         }
 
         [Fact]
+        public void Can_Patch_DerivedType_To_Action_Expecting_BaseType()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
+
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+
+            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            result = result.d;
+
+            Assert.False((bool)result.CanDoAWheelie);
+        }
+
+        [Fact]
         public void Posting_NonDerivedType_To_Action_Expecting_BaseType_Throws()
         {
             Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/atom+xml");
@@ -129,6 +163,23 @@ namespace System.Web.Http.OData.OData.Formatter
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
+
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+            Assert.Contains(
+                "An entry with type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' was found, " +
+                "but it is not assignable to the expected type 'System.Web.Http.OData.Builder.TestModels.Car'. " +
+                "The type specified in the entry must be equal to either the expected type or a derived type.",
+                response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void Patch_NonDerivedType_To_Action_Expecting_BaseType_Throws()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Car");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
@@ -215,9 +266,9 @@ namespace System.Web.Http.OData.OData.Formatter
 
     public class InheritanceController : ApiController
     {
-        public static Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true };
-        public static Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };
-        public static SportBike sportBike = new SportBike { Model = 2009, Name = "sample sportsbike", CanDoAWheelie = true, SportBikeProperty_NotVisible = 100 };
+        private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true };
+        private Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };
+        private SportBike sportBike = new SportBike { Model = 2009, Name = "sample sportsbike", CanDoAWheelie = true, SportBikeProperty_NotVisible = 100 };
 
         public Vehicle GetMotorcycleAsVehicle()
         {
@@ -245,9 +296,28 @@ namespace System.Web.Http.OData.OData.Formatter
             return motorcycle;
         }
 
+        public Motorcycle PatchMotorcycle_When_Expecting_Motorcycle(Delta<Motorcycle> patch)
+        {
+            patch.Patch(motorcycle);
+            return motorcycle;
+        }
+
+        public Motorcycle PutMotorcycle_When_Expecting_Motorcycle(Delta<Motorcycle> patch)
+        {
+            patch.Put(motorcycle);
+            return motorcycle;
+        }
+
         public Vehicle PostMotorcycle_When_Expecting_Vehicle(Vehicle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
+            return motorcycle;
+        }
+
+        public Vehicle PatchMotorcycle_When_Expecting_Vehicle(Delta<Vehicle> patch)
+        {
+            Assert.IsType<Motorcycle>(patch.GetEntity());
+            patch.Patch(motorcycle);
             return motorcycle;
         }
 
@@ -258,6 +328,15 @@ namespace System.Web.Http.OData.OData.Formatter
             Assert.NotNull(carErrors);
 
             return carErrors.Errors[0].Exception.Message;
+        }
+
+        public string PatchMotorcycle_When_Expecting_Car(Delta<Car> delta)
+        {
+            Assert.Null(delta);
+            var deltaErrors = ModelState["delta"];
+            Assert.NotNull(deltaErrors);
+
+            return deltaErrors.Errors[0].Exception.Message;
         }
     }
 }

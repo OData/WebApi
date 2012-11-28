@@ -268,6 +268,24 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The entity type &apos;{0}&apos; is not assignable to the Delta type &apos;{1}&apos;..
+        /// </summary>
+        internal static string DeltaEntityTypeNotAssignable {
+            get {
+                return ResourceManager.GetString("DeltaEntityTypeNotAssignable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot use Delta of type &apos;{0}&apos; on an entity of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string DeltaTypeMismatch {
+            get {
+                return ResourceManager.GetString("DeltaTypeMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The ODataDeserializerContext must have a non null Request and RequestUri..
         /// </summary>
         internal static string DeserializerContextRequirementsNotSatisfied {

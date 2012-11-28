@@ -215,6 +215,7 @@ namespace System.Web.Http.OData.Formatter
                 }
                 else
                 {
+                    Type originalType = type;
                     bool isPatchMode = TryGetInnerTypeForDelta(ref type);
                     ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type);
                     if (deserializer == null)
@@ -229,6 +230,11 @@ namespace System.Web.Http.OData.Formatter
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, _deserializerProvider.EdmModel);
                         ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, Request = _request, Model = _model };
+                        if (isPatchMode)
+                        {
+                            readContext.PatchEntityType = originalType;
+                        }
+
                         result = deserializer.Read(oDataMessageReader, readContext);
                     }
                     catch (Exception e)

@@ -21,31 +21,31 @@ namespace System.Web.Http.OData
             _setter = MakeSetter(Property);
             _getter = MakeGetter(Property);
         }
-        
+
         public override object GetValue(TEntityType entity)
         {
-            if (entity == null) 
+            if (entity == null)
             {
                 throw Error.ArgumentNull("entity");
             }
             return _getter(entity);
         }
-        
+
         public override void SetValue(TEntityType entity, object value)
         {
-            if (entity == null) 
+            if (entity == null)
             {
                 throw Error.ArgumentNull("entity");
             }
             _setter(entity, value);
         }
-        
+
         private static Action<TEntityType, object> MakeSetter(PropertyInfo property)
         {
             Type type = typeof(TEntityType);
             ParameterExpression entityParameter = Expression.Parameter(type);
             ParameterExpression objectParameter = Expression.Parameter(typeof(object));
-            MemberExpression toProperty = Expression.Property(entityParameter, property);
+            MemberExpression toProperty = Expression.Property(Expression.TypeAs(entityParameter, property.DeclaringType), property);
             UnaryExpression fromValue = Expression.Convert(objectParameter, property.PropertyType);
             BinaryExpression assignment = Expression.Assign(toProperty, fromValue);
             Expression<Action<TEntityType, object>> lambda = Expression.Lambda<Action<TEntityType, object>>(assignment, entityParameter, objectParameter);
@@ -56,7 +56,7 @@ namespace System.Web.Http.OData
         {
             Type type = typeof(TEntityType);
             ParameterExpression entityParameter = Expression.Parameter(type);
-            MemberExpression fromProperty = Expression.Property(entityParameter, property);
+            MemberExpression fromProperty = Expression.Property(Expression.TypeAs(entityParameter, property.DeclaringType), property);
             UnaryExpression convert = Expression.Convert(fromProperty, typeof(Object));
             Expression<Func<TEntityType, object>> lambda = Expression.Lambda<Func<TEntityType, object>>(convert, entityParameter);
             return lambda.Compile();

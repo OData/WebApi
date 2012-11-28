@@ -9,6 +9,27 @@ namespace System.Web.Http.OData
     public class DeltaTest
     {
         [Fact]
+        public void Ctor_ThrowsArgumentNull_entityType()
+        {
+            Assert.ThrowsArgumentNull(() => new Delta<Base>(entityType: null), "entityType");
+        }
+
+        [Fact]
+        public void Ctor_ThrowsInvalidOperation_If_EntityType_IsNotAssignable_To_TEntityType()
+        {
+            Assert.Throws<InvalidOperationException>(
+                () => new Delta<Derived>(typeof(AnotherDerived)),
+                "The entity type 'System.Web.Http.OData.DeltaTest+AnotherDerived' is not assignable to the Delta type 'System.Web.Http.OData.DeltaTest+Derived'.");
+        }
+
+        [Fact]
+        public void Can_Declare_A_Delta_Of_An_AbstractClass()
+        {
+            Delta<AbstractBase> abstractDelta = null;
+            Assert.Null(abstractDelta);
+        }
+
+        [Fact]
         public void CanGetChangedPropertyNames()
         {
             var original = new AddressEntity { ID = 1, City = "Redmond", State = "NY", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
@@ -72,7 +93,7 @@ namespace System.Web.Http.OData
             dynamic delta = new Delta<AddressEntity>();
             delta.City = "Sammamish";
             delta.StreetAddress = "23213 NE 15th Ct";
-            var idelta = delta as IDelta<AddressEntity>;
+            var idelta = delta as Delta<AddressEntity>;
             idelta.CopyUnchangedValues(original);
             // unchanged values have been reset to defaults
             Assert.Equal(0, original.ID);
@@ -84,7 +105,6 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        [Trait("Description", "Can put - i.e. copy everything")]
         public void CanPut()
         {
             var original = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
@@ -92,7 +112,7 @@ namespace System.Web.Http.OData
             dynamic delta = new Delta<AddressEntity>();
             delta.City = "Sammamish";
             delta.StreetAddress = "23213 NE 15th Ct";
-            var idelta = delta as IDelta<AddressEntity>;
+            var idelta = delta as Delta<AddressEntity>;
             idelta.Put(original);
 
             // unchanged values have been reset to defaults
@@ -105,7 +125,6 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        [Trait("Description", "Can clear")]
         public void CanClear()
         {
             dynamic delta = new Delta<AddressEntity>();
@@ -114,6 +133,159 @@ namespace System.Web.Http.OData
             Assert.Equal(1, idelta.GetChangedPropertyNames().Count());
             idelta.Clear();
             Assert.Equal(0, idelta.GetChangedPropertyNames().Count());
+        }
+
+        [Fact]
+        public void CanCreateDeltaOfDerivedTypes()
+        {
+            var delta = new Delta<Base>(typeof(Derived));
+            Assert.IsType(typeof(Derived), delta.GetEntity());
+        }
+
+        [Fact]
+        public void CanChangeDerivedClassProperties()
+        {
+            // Arrange
+            dynamic delta = new Delta<Base>(typeof(Derived));
+
+            // Act
+            delta.DerivedInt = 10;
+
+            // Assert
+            Assert.Equal(delta.GetChangedPropertyNames(), new[] { "DerivedInt" });
+        }
+
+        [Fact]
+        public void Patch_Patches_DerivedTypeProperties()
+        {
+            // Arrange
+            dynamic delta = new Delta<Base>(typeof(Derived));
+            delta.DerivedInt = 42;
+            Derived derived = new Derived();
+
+            // Act
+            delta.Patch(derived);
+
+            // Assert
+            Assert.Equal(42, derived.DerivedInt);
+            Assert.Equal(0, derived.BaseInt);
+            Assert.Null(derived.BaseString);
+            Assert.Null(derived.DerivedString);
+        }
+
+        [Fact]
+        public void Put_Clears_DerivedTypeProperties()
+        {
+            // Arrange
+            dynamic delta = new Delta<Base>(typeof(Derived));
+            delta.DerivedInt = 24;
+            Derived derived = new Derived { BaseInt = 42, DerivedInt = 0, BaseString = "42", DerivedString = "42" };
+
+            // Act
+            delta.Put(derived);
+
+            // Assert
+            Assert.Equal(24, derived.DerivedInt);
+            Assert.Equal(0, derived.BaseInt);
+            Assert.Null(derived.BaseString);
+            Assert.Null(derived.DerivedString);
+        }
+
+        [Fact]
+        public void Put_DoesNotClear_PropertiesNotOnEntityType()
+        {
+            // Arrange
+            dynamic delta = new Delta<Base>(typeof(Derived));
+            delta.DerivedInt = 24;
+            DerivedDerived derived = new DerivedDerived { BaseInt = 42, DerivedInt = 0, BaseString = "42", DerivedString = "42", DerivedDerivedInt = 42, DerivedDerivedString = "42" };
+
+            // Act
+            delta.Put(derived);
+
+            // Assert
+            Assert.Equal("42", derived.DerivedDerivedString);
+            Assert.Equal(42, derived.DerivedDerivedInt);
+        }
+
+        [Fact]
+        public void Patch_UnRelatedType_Throws_InvalidOp()
+        {
+            // Arrange
+            Delta<Base> delta = new Delta<Base>(typeof(Derived));
+            AnotherDerived unrelatedEntity = new AnotherDerived();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => delta.Patch(unrelatedEntity),
+                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+        }
+
+        [Fact]
+        public void Put_UnRelatedType_Throws_InvalidOp()
+        {
+            // Arrange
+            Delta<Base> delta = new Delta<Base>(typeof(Derived));
+            AnotherDerived unrelatedEntity = new AnotherDerived();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => delta.Put(unrelatedEntity),
+                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+        }
+
+        [Fact]
+        public void CopyChangedValues_UnRelatedType_Throws_InvalidOp()
+        {
+            // Arrange
+            Delta<Base> delta = new Delta<Base>(typeof(Derived));
+            AnotherDerived unrelatedEntity = new AnotherDerived();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => delta.CopyChangedValues(unrelatedEntity),
+                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+        }
+
+        [Fact]
+        public void CopyUnchangedValues_UnRelatedType_Throws_InvalidOp()
+        {
+            // Arrange
+            Delta<Base> delta = new Delta<Base>(typeof(Derived));
+            AnotherDerived unrelatedEntity = new AnotherDerived();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => delta.CopyUnchangedValues(unrelatedEntity),
+                "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+        }
+
+        private abstract class AbstractBase
+        {
+        }
+
+        private class Base
+        {
+            public int BaseInt { get; set; }
+
+            public string BaseString { get; set; }
+        }
+
+        private class Derived : Base
+        {
+            public int DerivedInt { get; set; }
+
+            public string DerivedString { get; set; }
+        }
+
+        private class DerivedDerived : Derived
+        {
+            public int DerivedDerivedInt { get; set; }
+
+            public string DerivedDerivedString { get; set; }
+        }
+
+        private class AnotherDerived : Base
+        {
         }
     }
 }

@@ -227,7 +227,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             else
             {
-                resource = Activator.CreateInstance(typeof(Delta<>).MakeGenericType(clrType));
+                resource = Activator.CreateInstance(readContext.PatchEntityType, clrType);
             }
 
             entryAnnotation.EntityResource = resource;

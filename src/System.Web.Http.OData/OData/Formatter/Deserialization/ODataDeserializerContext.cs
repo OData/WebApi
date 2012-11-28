@@ -22,6 +22,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public bool IsPatchMode { get; set; }
 
         /// <summary>
+        /// Gets or sets the type of <see cref="Delta{TBaseEntityType}"/> being patched.
+        /// </summary>
+        public Type PatchEntityType { get; set; }
+
+        /// <summary>
         /// Gets or sets the HttpRequestMessage. 
         /// The HttpRequestMessage can then be used by ODataDeserializers to learn more about the Request that triggered the deserialization
         /// </summary>

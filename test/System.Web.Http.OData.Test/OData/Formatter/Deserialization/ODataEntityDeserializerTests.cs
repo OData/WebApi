@@ -55,6 +55,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
             _readContext.IsPatchMode = true;
+            _readContext.PatchEntityType = typeof(Delta<Supplier>);
 
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
             Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersPatchData), _edmModel), _readContext) as Delta<Supplier>;

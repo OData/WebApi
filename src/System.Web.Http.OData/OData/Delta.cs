@@ -1,38 +1,71 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData
 {
     /// <summary>
-    /// A class the tracks changes (i.e. the Delta) for a particular TEntityType
+    /// A class the tracks changes (i.e. the Delta) for a particular <typeparamref name="TEntityType"/>.
     /// </summary>
-    /// <typeparam name="TEntityType">TEntityType is the type of entity this delta tracks changes for.</typeparam>
-    /// <remarks>The <typeparamref name="TEntityType"/> must have a public no argument constructor so the Delta can 
-    /// construct a new instance when required.</remarks>
-    public class Delta<TEntityType> : DynamicObject, IDelta<TEntityType> where TEntityType : class, new()
+    /// <typeparam name="TEntityType">TEntityType is the base type of entity this delta tracks changes for.</typeparam>
+    [NonValidatingParameterBinding]
+    public class Delta<TEntityType> : DynamicObject, IDelta where TEntityType : class
     {
-        private static Dictionary<string, PropertyAccessor<TEntityType>> _propertiesThatExist = InitializePropertiesThatExist();
+        // cache property accessors for this type and all its derived types.
+        private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>> _propertyCache = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>>();
 
-        private HashSet<string> _changedProperties = new HashSet<string>();
-        private TEntityType _entity = new TEntityType();
+        private Dictionary<string, PropertyAccessor<TEntityType>> _propertiesThatExist;
+        private HashSet<string> _changedProperties;
+        private TEntityType _entity;
+        private Type _entityType;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// </summary>
+        public Delta()
+            : this(typeof(TEntityType))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// </summary>
+        /// <param name="entityType">The derived entity type for which the changes would be tracked.
+        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.</param>
+        public Delta(Type entityType)
+        {
+            Initialize(entityType);
+        }
+
+        /// <summary>
+        /// The actual type of the entity for which the changes are tracked.
+        /// </summary>
+        public Type EntityType
+        {
+            get
+            {
+                return _entityType;
+            }
+        }
 
         /// <summary>
         /// Clears the Delta and resets the underlying Entity.
         /// </summary>
         public void Clear()
         {
-            _entity = new TEntityType();
-            _changedProperties.Clear();
+            Initialize(_entityType);
         }
 
         /// <summary>
         /// Attempts to set the Property called <paramref name="name"/> to the <paramref name="value"/> specified.
         /// <remarks>
-        /// Only properties that exist on <typeparamref name="TEntityType"/> can be set.
+        /// Only properties that exist on <see cref="EntityType"/> can be set.
         /// If there is a type mismatch the request will fail.
         /// </remarks>
         /// </summary>
@@ -70,7 +103,7 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Attempts to get the value of the Property called <paramref name="name"/> from the underlying Entity.
         /// <remarks>
-        /// Only properties that exist on <typeparamref name="TEntityType"/> can be retrieved.
+        /// Only properties that exist on <see cref="EntityType"/> can be retrieved.
         /// Both modified and unmodified properties can be retrieved.
         /// </remarks>
         /// </summary>
@@ -100,7 +133,7 @@ namespace System.Web.Http.OData
         /// <summary>
         /// Attempts to get the <see cref="Type"/> of the Property called <paramref name="name"/> from the underlying Entity.
         /// <remarks>
-        /// Only properties that exist on <typeparamref name="TEntityType"/> can be retrieved.
+        /// Only properties that exist on <see cref="EntityType"/> can be retrieved.
         /// Both modified and unmodified properties can be retrieved.
         /// </remarks>
         /// </summary>
@@ -129,7 +162,7 @@ namespace System.Web.Http.OData
 
         /// <summary>
         /// Overrides the DynamicObject TrySetMember method, so that only the properties
-        /// of <typeparamref name="TEntityType"/> can be set.
+        /// of <see cref="EntityType"/> can be set.
         /// </summary>
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
@@ -143,7 +176,7 @@ namespace System.Web.Http.OData
 
         /// <summary>
         /// Overrides the DynamicObject TryGetMember method, so that only the properties
-        /// of <typeparamref name="TEntityType"/> can be got.
+        /// of <see cref="EntityType"/> can be got.
         /// </summary>
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
@@ -156,9 +189,10 @@ namespace System.Web.Http.OData
         }
 
         /// <summary>
-        /// Returns the <typeparamref name="TEntityType"/> instance
+        /// Returns the <see cref="EntityType"/> instance
         /// that holds all the changes (and original values) being tracked by this Delta.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Not appropriate to be a property")]
         public TEntityType GetEntity()
         {
             return _entity;
@@ -183,7 +217,7 @@ namespace System.Web.Http.OData
         }
 
         /// <summary>
-        /// Copies the changed property values from the underlying entity (accessible via GetEntity()) 
+        /// Copies the changed property values from the underlying entity (accessible via <see cref="GetEntity()" />) 
         /// to the <paramref name="original"/> entity.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
@@ -193,6 +227,12 @@ namespace System.Web.Http.OData
             {
                 throw Error.ArgumentNull("original");
             }
+
+            if (!_entityType.IsAssignableFrom(original.GetType()))
+            {
+                throw Error.InvalidOperation(SRResources.DeltaTypeMismatch, _entityType, original.GetType());
+            }
+
             PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
             foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
             {
@@ -201,7 +241,7 @@ namespace System.Web.Http.OData
         }
 
         /// <summary>
-        /// Copies the unchanged property values from the underlying entity (accessible via GetEntity()) 
+        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetEntity()" />) 
         /// to the <paramref name="original"/> entity.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
@@ -210,6 +250,11 @@ namespace System.Web.Http.OData
             if (original == null)
             {
                 throw Error.ArgumentNull("original");
+            }
+
+            if (!_entityType.IsAssignableFrom(original.GetType()))
+            {
+                throw Error.InvalidOperation(SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
             PropertyAccessor<TEntityType>[] propertiesToCopy = GetUnchangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
@@ -240,13 +285,33 @@ namespace System.Web.Http.OData
             CopyUnchangedValues(original);
         }
 
-        private static Dictionary<string, PropertyAccessor<TEntityType>> InitializePropertiesThatExist()
+        private void Initialize(Type entityType)
         {
-            Type backingType = typeof(TEntityType);
-            return backingType.GetProperties()
-                                .Where(p => p.GetSetMethod() != null && p.GetGetMethod() != null)
-                                .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new CompiledPropertyAccessor<TEntityType>(p))
-                                .ToDictionary(p => p.Property.Name);
+            if (entityType == null)
+            {
+                throw Error.ArgumentNull("entityType");
+            }
+
+            if (!typeof(TEntityType).IsAssignableFrom(entityType))
+            {
+                throw Error.InvalidOperation(SRResources.DeltaEntityTypeNotAssignable, entityType, typeof(TEntityType));
+            }
+
+            _entity = Activator.CreateInstance(entityType) as TEntityType;
+            _changedProperties = new HashSet<string>();
+            _entityType = entityType;
+            _propertiesThatExist = InitializePropertiesThatExist();
+        }
+
+        private Dictionary<string, PropertyAccessor<TEntityType>> InitializePropertiesThatExist()
+        {
+            return _propertyCache.GetOrAdd(
+                _entityType,
+                (backingType) => backingType
+                    .GetProperties()
+                    .Where(p => p.GetSetMethod() != null && p.GetGetMethod() != null)
+                    .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new CompiledPropertyAccessor<TEntityType>(p))
+                    .ToDictionary(p => p.Property.Name));
         }
     }
 }

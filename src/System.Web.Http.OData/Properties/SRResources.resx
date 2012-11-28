@@ -483,4 +483,10 @@
   <data name="NoRoutingHandlerToSelectController" xml:space="preserve">
     <value>No routing convention was found to select a controller for the OData path with template '{0}'.</value>
   </data>
+  <data name="DeltaTypeMismatch" xml:space="preserve">
+    <value>Cannot use Delta of type '{0}' on an entity of type '{1}'.</value>
+  </data>
+  <data name="DeltaEntityTypeNotAssignable" xml:space="preserve">
+    <value>The entity type '{0}' is not assignable to the Delta type '{1}'.</value>
+  </data>
 </root>

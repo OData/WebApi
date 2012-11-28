@@ -130,6 +130,7 @@
     </Compile>
     <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="ODataRouteConstants.cs" />
+    <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpErrorExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
@@ -237,7 +238,6 @@
     <Compile Include="OData\Formatter\ODataModelBinderProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
-    <Compile Include="OData\IDeltaOfTEntityType.cs" />
     <Compile Include="OData\ODataResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethods.cs" />

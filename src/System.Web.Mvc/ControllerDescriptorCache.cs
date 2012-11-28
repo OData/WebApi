@@ -12,5 +12,10 @@ namespace System.Web.Mvc
         {
             return FetchOrCreateItem(controllerType, creator);
         }
+
+        internal ControllerDescriptor GetDescriptor<TArgument>(Type controllerType, Func<TArgument, ControllerDescriptor> creator, TArgument state)
+        {
+            return FetchOrCreateItem(controllerType, creator, state);
+        }
     }
 }

@@ -74,8 +74,12 @@ namespace System.Web.Mvc
 
         protected virtual ControllerDescriptor GetControllerDescriptor(ControllerContext controllerContext)
         {
+            // Frequently called, so ensure delegate is static
             Type controllerType = controllerContext.Controller.GetType();
-            ControllerDescriptor controllerDescriptor = DescriptorCache.GetDescriptor(controllerType, () => new ReflectedControllerDescriptor(controllerType));
+            ControllerDescriptor controllerDescriptor = DescriptorCache.GetDescriptor(
+                controllerType: controllerType,
+                creator: (Type innerType) => new ReflectedControllerDescriptor(innerType),
+                state: controllerType);
             return controllerDescriptor;
         }
 

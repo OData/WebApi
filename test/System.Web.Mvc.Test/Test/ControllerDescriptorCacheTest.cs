@@ -7,7 +7,7 @@ namespace System.Web.Mvc.Test
     public class ControllerDescriptorCacheTest
     {
         [Fact]
-        public void GetDescriptor()
+        public void GetDescriptorCaches()
         {
             // Arrange
             Type controllerType = typeof(object);
@@ -16,6 +16,37 @@ namespace System.Web.Mvc.Test
             // Act
             ControllerDescriptor descriptor1 = cache.GetDescriptor(controllerType, () => new ReflectedControllerDescriptor(controllerType));
             ControllerDescriptor descriptor2 = cache.GetDescriptor(controllerType, () => new ReflectedControllerDescriptor(controllerType));
+
+            // Assert
+            Assert.Same(controllerType, descriptor1.ControllerType);
+            Assert.Same(descriptor1, descriptor2);
+        }
+
+        [Fact]
+        public void GetDescriptorWithArgumentCaches()
+        {
+            // Arrange
+            Type controllerType = typeof(object);
+            ControllerDescriptorCache cache = new ControllerDescriptorCache();
+            object argument = new object();
+
+            // Act
+            ControllerDescriptor descriptor1 = cache.GetDescriptor(
+                controllerType,
+                (object innerState) =>
+                {
+                    Assert.Same(argument, innerState);
+                    return new ReflectedControllerDescriptor(controllerType);
+                },
+                argument);
+            ControllerDescriptor descriptor2 = cache.GetDescriptor(
+                controllerType,
+                (object innerState) =>
+                {
+                    Assert.Same(argument, innerState);
+                    return new ReflectedControllerDescriptor(controllerType);
+                },
+                argument);
 
             // Assert
             Assert.Same(controllerType, descriptor1.ControllerType);

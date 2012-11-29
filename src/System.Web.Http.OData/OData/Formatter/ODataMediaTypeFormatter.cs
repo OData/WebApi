@@ -47,26 +47,65 @@ namespace System.Web.Http.OData.Formatter
         {
         }
 
-        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
+        private ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
             ODataSerializerProvider serializerProvider,
             ODataVersion version,
             HttpRequestMessage request)
         {
-            Contract.Assert(_deserializerProvider != null);
+            Contract.Assert(deserializerProvider != null);
             _deserializerProvider = deserializerProvider;
             Contract.Assert(deserializerProvider.EdmModel != null);
             _model = deserializerProvider.EdmModel;
-            Contract.Assert(_serializerProvider != null);
+            Contract.Assert(serializerProvider != null);
             _serializerProvider = serializerProvider;
             _defaultODataVersion = version;
             _request = request;
+        }
 
-            SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationAtomXmlMediaType);
-            SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationJsonMediaType);
-            SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationXmlMediaType);
+        private ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version,
+            HttpRequestMessage request)
+        {
+            // Parameter 1: formatter
 
-            SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
-            SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
+            // Execept for the other two parameters, this constructor is a copy constructor, and we need to copy
+            // everything on the other instance.
+
+            // Parameter 1A: Copy this class's private fields.
+            Contract.Assert(formatter._serializerProvider != null);
+            _serializerProvider = formatter._serializerProvider;
+            Contract.Assert(formatter._model != null);
+            _model = formatter._model;
+            Contract.Assert(formatter._deserializerProvider != null);
+            _deserializerProvider = formatter._deserializerProvider;
+
+            // Parameter 1B: Copy the base class's properties.
+            foreach (MediaTypeMapping mediaTypeMapping in formatter.MediaTypeMappings)
+            {
+                // MediaTypeMapping doesn't support clone, and its public surface area is immutable anyway.
+                MediaTypeMappings.Add(mediaTypeMapping);
+            }
+
+            RequiredMemberSelector = formatter.RequiredMemberSelector;
+
+            foreach (Encoding supportedEncoding in formatter.SupportedEncodings)
+            {
+                // Encoding's public surface area is mutable, so clone (and use separate instances) to prevent changes
+                // to one instance from affecting the other.
+                SupportedEncodings.Add((Encoding)supportedEncoding.Clone());
+            }
+
+            foreach (MediaTypeHeaderValue supportedMediaType in formatter.SupportedMediaTypes)
+            {
+                // MediaTypeHeaderValue's public surface area is mutable, so clone (and use separate instances) to
+                // prevent changes to one instance from affecting the other.
+                SupportedMediaTypes.Add((MediaTypeHeaderValue)((ICloneable)supportedMediaType).Clone());
+            }
+
+            // Parameter 2: version
+            _defaultODataVersion = version;
+
+            // Parameter 3: request
+            _request = request;
         }
 
         /// <summary>
@@ -94,7 +133,7 @@ namespace System.Web.Http.OData.Formatter
             }
 
             ODataVersion version = GetResponseODataVersion(request);
-            return new ODataMediaTypeFormatter(_deserializerProvider, _serializerProvider, version, request);
+            return new ODataMediaTypeFormatter(this, version, request);
         }
 
         /// <inheritdoc/>

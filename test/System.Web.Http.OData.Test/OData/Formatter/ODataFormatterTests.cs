@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.OData.Builder.Conventions;
 using System.Xml.Linq;
 using Microsoft.TestCommon;
 

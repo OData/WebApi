@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http.Formatting;
+using System.Text;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter
@@ -18,7 +19,18 @@ namespace System.Web.Http.OData.Formatter
         /// <returns>A set of media type formatters to handle OData.</returns>
         public static IEnumerable<ODataMediaTypeFormatter> Create(IEdmModel model)
         {
-            return new ODataMediaTypeFormatter[] { new ODataMediaTypeFormatter(model) };
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model);
+
+            formatter.SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationAtomXmlMediaType);
+            formatter.SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationJsonMediaType);
+            formatter.SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationXmlMediaType);
+
+            formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true,
+                throwOnInvalidBytes: true));
+            formatter.SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true));
+
+            return new ODataMediaTypeFormatter[] { formatter };
         }
     }
 }

@@ -66,7 +66,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void SupportEncoding_DefaultSupportedMediaTypes()
+        public void SupportMediaTypes_DefaultSupportedMediaTypes()
         {
             TFormatter formatter = CreateFormatter();
             Assert.True(ExpectedSupportedMediaTypes.SequenceEqual(formatter.SupportedMediaTypes));
@@ -161,7 +161,7 @@ namespace System.Net.Http.Formatting
             HttpContent content = new StringContent(String.Empty);
             HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = memStream.Length;
-            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
+            contentHeaders.ContentType = CreateSupportedMediaType();
 
             // Act
             return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
@@ -185,7 +185,7 @@ namespace System.Net.Http.Formatting
             HttpContent content = new StringContent(String.Empty);
             HttpContentHeaders contentHeaders = content.Headers;
             contentHeaders.ContentLength = null;
-            contentHeaders.ContentType = ExpectedSupportedMediaTypes.First();
+            contentHeaders.ContentType = CreateSupportedMediaType();
 
             // Act
             return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
@@ -236,7 +236,7 @@ namespace System.Net.Http.Formatting
             SampleType sampleType = new SampleType { Number = 42 };
             MemoryStream memStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
-            content.Headers.ContentType = ExpectedSupportedMediaTypes.First();
+            content.Headers.ContentType = CreateSupportedMediaType();
 
             // Act
             return formatter.WriteToStreamAsync(typeof(SampleType), sampleType, memStream, content, null).ContinueWith(
@@ -255,10 +255,15 @@ namespace System.Net.Http.Formatting
 
         public abstract Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
 
-        public virtual TFormatter CreateFormatter()
+        protected virtual TFormatter CreateFormatter()
         {
             ConstructorInfo constructor = typeof(TFormatter).GetConstructor(Type.EmptyTypes);
             return (TFormatter)constructor.Invoke(null);
+        }
+
+        protected virtual MediaTypeHeaderValue CreateSupportedMediaType()
+        {
+            return ExpectedSupportedMediaTypes.First();
         }
 
         public Task ReadFromStreamAsync_UsesCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)

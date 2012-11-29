@@ -11,14 +11,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
-using Microsoft.Data.Edm.Library;
-using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -26,15 +22,6 @@ namespace System.Web.Http.OData.Formatter
 {
     public class ODataMediaTypeFormatterTests : MediaTypeFormatterTestBase<ODataMediaTypeFormatter>
     {
-        [Theory]
-        [InlineData("application/atom+xml")]
-        [InlineData("application/json;odata=verbose")]
-        public void Constructor(string mediaType)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutRequest();
-            Assert.True(formatter.SupportedMediaTypes.Contains(MediaTypeHeaderValue.Parse(mediaType)), string.Format("SupportedMediaTypes should have included {0}.", mediaType.ToString()));
-        }
-
         [Fact]
         public void WriteToStreamAsyncReturnsODataRepresentation()
         {
@@ -183,9 +170,14 @@ namespace System.Web.Http.OData.Formatter
                 "The OData formatter does not support writing client requests. This formatter instance must have an associated request.");
         }
 
-        public override ODataMediaTypeFormatter CreateFormatter()
+        protected override ODataMediaTypeFormatter CreateFormatter()
         {
             return CreateFormatterWithRequest();
+        }
+
+        protected override MediaTypeHeaderValue CreateSupportedMediaType()
+        {
+            return new MediaTypeHeaderValue("application/atom+xml");
         }
 
         private ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
@@ -221,9 +213,7 @@ namespace System.Web.Http.OData.Formatter
         {
             get
             {
-                yield return MediaTypeHeaderValue.Parse("application/atom+xml");
-                yield return MediaTypeHeaderValue.Parse("application/json;odata=verbose");
-                yield return MediaTypeHeaderValue.Parse("application/xml");
+                return new MediaTypeHeaderValue[0];
             }
         }
 
@@ -231,8 +221,7 @@ namespace System.Web.Http.OData.Formatter
         {
             get
             {
-                yield return new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true);
-                yield return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+                return new Encoding[0];
             }
         }
 
@@ -240,7 +229,7 @@ namespace System.Web.Http.OData.Formatter
         {
             get
             {
-                return ExpectedSupportedEncodings.ElementAt(0).GetBytes(
+                return Encoding.UTF8.GetBytes(
                   @"<entry xml:base=""http://localhost/"" xmlns=""http://www.w3.org/2005/Atom"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns:georss=""http://www.georss.org/georss"" xmlns:gml=""http://www.opengis.net/gml"">
                       <category term=""System.Net.Http.Formatting.SampleType"" scheme=""http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"" />
                       <id />

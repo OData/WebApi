@@ -10,6 +10,8 @@ namespace System.Threading.Tasks
 {
     public class TaskHelpersExtensionsTest
     {
+        private Exception _expectedCatchInfoException = new Exception("Catch this!");
+
         // ----------------------------------------------------------------
         //   Task<T> Task<object>.CastFromObject()
 
@@ -1400,6 +1402,61 @@ namespace System.Threading.Tasks
         }
 
         [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_NoInputValue_NoReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(catchinfo =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, catchinfo.Exception);
+                return catchinfo.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_NoReturnValue_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(catchinfo =>
+            {
+                Assert.Same(_expectedCatchInfoException, catchinfo.Exception);
+                return catchinfo.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_NoReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1568,6 +1625,61 @@ namespace System.Threading.Tasks
                 Assert.NotEqual(originalThreadId, callbackThreadId);
                 syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Once());
             });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_NoInputValue_ReturnsTask_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_ReturnsTask_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
         }
 
         [Fact, ForceGC, PreserveSyncContext]
@@ -1740,6 +1852,61 @@ namespace System.Threading.Tasks
         }
 
         [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_NoInputValue_WithReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_WithReturnValue_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_WithReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -1909,6 +2076,61 @@ namespace System.Threading.Tasks
         }
 
         [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_NoInputValue_WithTaskReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_NoInputValue_WithTaskReturnValue_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task incompleteTask = new Task(() => { });
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_NoInputValue_WithTaskReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -2072,6 +2294,61 @@ namespace System.Threading.Tasks
                 Assert.NotEqual(originalThreadId, callbackThreadId);
                 syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Once());
             });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_WithInputValue_NoReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_NoReturnValue_IncompleteTask_HandledContinuationException()
+        {
+            // Arrange
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
         }
 
         [Fact, ForceGC, PreserveSyncContext]
@@ -2243,6 +2520,61 @@ namespace System.Threading.Tasks
         }
 
         [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_WithInputValue_WithReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            Exception excpectedException = new Exception("Catch this!");
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw excpectedException;
+            }).Catch(catchinfo =>
+            {
+                Assert.Same(excpectedException, catchinfo.Exception);
+                return catchinfo.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_WithReturnValue_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(() =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(catchinfo =>
+            {
+                Assert.Same(_expectedCatchInfoException, catchinfo.Exception);
+                return catchinfo.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
         public Task Then_WithInputValue_WithReturnValue_CompleteTask_RunsOnSameThreadAndDoesNotPostToSynchronizationContext()
         {
             // Arrange
@@ -2408,6 +2740,61 @@ namespace System.Threading.Tasks
                 Assert.NotEqual(originalThreadId, callbackThreadId);
                 syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Once());
             });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_WithInputValue_ReturnsTask_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_ReturnsTask_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
         }
 
         [Fact, ForceGC, PreserveSyncContext]
@@ -2577,6 +2964,61 @@ namespace System.Threading.Tasks
                 Assert.NotEqual(originalThreadId, callbackThreadId);
                 syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Once());
             });
+        }
+
+        [Fact, ForceGC, PreserveSyncContext]
+        public Task Then_WithInputValue_WithTaskReturnValue_IncompleteTask_RunsOnNewThreadAndPostsContinuationExceptionToSynchronizationContext()
+        {
+            // Arrange
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            int callbackThreadId = Int32.MinValue;
+            var syncContext = new Mock<SynchronizationContext> { CallBase = true };
+            SynchronizationContext.SetSynchronizationContext(syncContext.Object);
+
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                callbackThreadId = Thread.CurrentThread.ManagedThreadId;
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask.ContinueWith(task =>
+            {
+                Assert.NotEqual(originalThreadId, callbackThreadId);
+                syncContext.Verify(sc => sc.Post(It.IsAny<SendOrPostCallback>(), null), Times.Exactly(2));
+            });
+        }
+
+        [Fact, ForceGC]
+        public Task Then_WithInputValue_WithTaskReturnValue_IncompleteTask_HandlesContinuationException()
+        {
+            // Arrange
+            Task<int> incompleteTask = new Task<int>(() => 21);
+
+            // Act
+            Task resultTask = incompleteTask.Then(result =>
+            {
+                throw _expectedCatchInfoException;
+            }).Catch(info =>
+            {
+                Assert.Same(_expectedCatchInfoException, info.Exception);
+                return info.Handled();
+            });
+
+            // Assert
+            incompleteTask.Start();
+
+            return resultTask;
         }
 
         [Fact, ForceGC, PreserveSyncContext]

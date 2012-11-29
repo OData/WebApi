@@ -717,7 +717,14 @@ namespace System.Threading.Tasks
                     }
                     else
                     {
-                        tcs.TrySetResult(continuation(task));
+                        try
+                        {
+                            tcs.TrySetResult(continuation(task));
+                        }
+                        catch (Exception ex)
+                        {
+                            tcs.TrySetException(ex);
+                        }
                     }
                 }
             }, runSynchronously ? TaskContinuationOptions.ExecuteSynchronously : TaskContinuationOptions.None);

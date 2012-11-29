@@ -28,7 +28,7 @@ End Code
             Html.DisplayFor(Function(apiModel) apiModel.SampleRequests, "Samples")
         End If
     End If
-       
+
     @If hasResponseSamples Then
         @<h2>Response Information</h2> 
         @<h3>Response body formats</h3>

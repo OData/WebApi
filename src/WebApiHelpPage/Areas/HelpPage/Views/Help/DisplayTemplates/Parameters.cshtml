@@ -13,7 +13,7 @@
         string parameterDocumentation = parameter.Documentation != null ?
             parameter.Documentation :
             "No documentation available.";
-    
+
         // Don't show CancellationToken because it's a special parameter
         if (!typeof(CancellationToken).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType))
         {

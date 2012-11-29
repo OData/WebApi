@@ -12,7 +12,7 @@
         Dim parameterDocumentation As String = If(Not parameter.Documentation Is Nothing,
                                                   parameter.Documentation,
                                                   "No documentation available.")
-    
+
         ' Don't show CancellationToken because it's a special parameter
         If (Not GetType(CancellationToken).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType)) Then
             @<tr>

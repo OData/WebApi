@@ -3,7 +3,6 @@ Imports System.Collections.ObjectModel
 Imports System.Net.Http.Headers
 Imports System.Web.Http.Description
 
-
 Namespace Areas.HelpPage.Models
     ''' <summary>
     ''' The model that represents an API displayed on the help page.

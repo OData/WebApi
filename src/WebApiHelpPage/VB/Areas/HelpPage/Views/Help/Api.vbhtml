@@ -2,7 +2,7 @@
 @Imports System.Web.Http.Description
 @Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.Models
 @ModelType HelpPageApiModel
-           
+
 @Code
     Dim description As ApiDescription = Model.ApiDescription
     ViewData("Title") = description.HttpMethod.Method + " " + description.RelativePath
@@ -12,7 +12,7 @@ End Code
     <section class="featured">
         <div class="content-wrapper">
             <p>
-                @Html.ActionLink("Help Page Home", "Index")             
+                @Html.ActionLink("Help Page Home", "Index")
             </p>
         </div>
     </section>

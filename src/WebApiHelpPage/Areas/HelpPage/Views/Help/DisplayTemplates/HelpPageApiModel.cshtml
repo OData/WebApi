@@ -33,9 +33,9 @@
             @Html.DisplayFor(apiModel => apiModel.SampleRequests, "Samples")
         }
     } 
-       
+
     @if (hasResponseSamples)
-    {      
+    {
         <h2>Response Information</h2> 
         <h3>Response body formats</h3>
         @Html.DisplayFor(apiModel => apiModel.SampleResponses, "Samples")

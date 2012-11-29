@@ -3,7 +3,7 @@
 @Imports System.Collections.ObjectModel
 @Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage
 @ModelType Collection(Of ApiDescription)
-           
+
 @Code
     ViewData("Title") = "ASP.NET Web API Help Page"
     

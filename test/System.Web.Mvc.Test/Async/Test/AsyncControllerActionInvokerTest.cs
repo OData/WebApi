@@ -245,194 +245,149 @@ namespace System.Web.Mvc.Async.Test
         }
 
         [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NextInChainThrowsOnActionExecutedException_Handled()
+        public void BeginInvokeActionMethodWithFilters_BeginExecuteThrowsOnActionExecutingException_Handled()
         {
             // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool nextInChainWasCalled = false;
-            bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
-            ActionFilterImpl actionFilter = new ActionFilterImpl()
-            {
-                OnActionExecutedImpl = filterContext =>
-                {
-                    onActionExecutedWasCalled = true;
-                    Assert.NotNull(filterContext.Exception);
-                    filterContext.ExceptionHandled = true;
-                    filterContext.Result = expectedResult;
-                }
-            };
-
-            // Act & assert pre-execution
-            Func<ActionExecutedContext> continuation = AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                actionFilter, preContext,
-                () => () =>
-                {
-                    nextInChainWasCalled = true;
-                    throw new Exception("Some exception text.");
-                });
-
-            Assert.False(onActionExecutedWasCalled);
-
-            // Act & assert post-execution
-            ActionExecutedContext postContext = continuation();
-
-            Assert.True(nextInChainWasCalled);
-            Assert.True(onActionExecutedWasCalled);
-            Assert.Equal(expectedResult, postContext.Result);
-        }
-
-        [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NextInChainThrowsOnActionExecutedException_NotHandled()
-        {
-            // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
-            ActionFilterImpl actionFilter = new ActionFilterImpl()
-            {
-                OnActionExecutedImpl = filterContext => { onActionExecutedWasCalled = true; }
-            };
-
-            // Act & assert
-            Func<ActionExecutedContext> continuation = AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(actionFilter, preContext,
-                                                                                                                           () => () => { throw new Exception("Some exception text."); });
-
-            Assert.Throws<Exception>(
-                delegate { continuation(); },
-                @"Some exception text.");
-
-            // Assert
-            Assert.True(onActionExecutedWasCalled);
-        }
-
-        [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NextInChainThrowsOnActionExecutedException_ThreadAbort()
-        {
-            // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
-            ActionFilterImpl actionFilter = new ActionFilterImpl()
-            {
-                OnActionExecutedImpl = filterContext =>
-                {
-                    onActionExecutedWasCalled = true;
-                    Thread.ResetAbort();
-                }
-            };
-
-            // Act & assert
-            Func<ActionExecutedContext> continuation = AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                actionFilter, preContext,
-                () => () =>
-                {
-                    Thread.CurrentThread.Abort();
-                    return null;
-                });
-
-            Assert.Throws<ThreadAbortException>(
-                delegate { continuation(); });
-
-            // Assert
-            Assert.True(onActionExecutedWasCalled);
-        }
-
-        [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NextInChainThrowsOnActionExecutingException_Handled()
-        {
-            // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool nextInChainWasCalled = false;
+            ActionResult expectedResult = new ViewResult();
+            Exception expectedException = new Exception("Some exception text.");
             bool onActionExecutingWasCalled = false;
             bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
             ActionFilterImpl actionFilter = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = filterContext => { onActionExecutingWasCalled = true; },
                 OnActionExecutedImpl = filterContext =>
                 {
                     onActionExecutedWasCalled = true;
-                    Assert.NotNull(filterContext.Exception);
+                    Assert.Same(expectedException, filterContext.Exception);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = expectedResult;
+                }
+            };
+            Func<IAsyncResult> beginExecute = delegate
+            {
+                throw expectedException;
+            };
+
+            // Act
+            ActionResult result = BeingInvokeActionMethodWithFiltersBeginTester(beginExecute, actionFilter);
+
+            // Assert
+            Assert.True(onActionExecutingWasCalled);
+            Assert.True(onActionExecutedWasCalled);
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_BeginExecuteThrowsOnActionExecutingException_HandledByEarlier()
+        {
+            // Arrange
+            ActionResult expectedResult = new ViewResult();
+            List<string> actionLog = new List<string>();
+            Exception exception = new Exception("Some exception text.");
+            Func<IAsyncResult> beginExecute = delegate
+            {
+                actionLog.Add("BeginExecute");
+                throw exception;
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting1"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext)
+                {
+                    actionLog.Add("OnActionExecuted1");
+                    Assert.Same(exception, filterContext.Exception);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = expectedResult;
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting2"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext) { actionLog.Add("OnActionExecuted2"); }
+            };
+
+            // Act
+            ActionResult result = BeingInvokeActionMethodWithFiltersBeginTester(beginExecute, filter1, filter2);
+
+            // Assert
+            Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "BeginExecute", "OnActionExecuted2", "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_BeginExecuteThrowsOnActionExecutingException_HandledByLater()
+        {
+            // Arrange
+            List<string> actionLog = new List<string>();
+            Exception exception = new Exception("Some exception text.");
+            ActionResult expectedResult = new ViewResult();
+            Func<IAsyncResult> beginExecute = delegate
+            {
+                actionLog.Add("BeginExecute");
+                throw exception;
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting1"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext) { actionLog.Add("OnActionExecuted1"); }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting2"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext)
+                {
+                    actionLog.Add("OnActionExecuted2");
+                    Assert.Same(exception, filterContext.Exception);
                     filterContext.ExceptionHandled = true;
                     filterContext.Result = expectedResult;
                 }
             };
 
             // Act
-            Func<ActionExecutedContext> continuation = AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                actionFilter, preContext,
-                () =>
-                {
-                    nextInChainWasCalled = true;
-                    throw new Exception("Some exception text.");
-                });
+            ActionResult result = BeingInvokeActionMethodWithFiltersBeginTester(beginExecute, filter1, filter2);
 
             // Assert
-            Assert.True(nextInChainWasCalled);
-            Assert.True(onActionExecutingWasCalled);
-            Assert.True(onActionExecutedWasCalled);
-
-            ActionExecutedContext postContext = continuation();
-            Assert.Equal(expectedResult, postContext.Result);
+            Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "BeginExecute", "OnActionExecuted2", "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal(expectedResult, result);
         }
 
         [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NextInChainThrowsOnActionExecutingException_NotHandled()
+        public void BeginInvokeActionMethodWithFilters_BeginExecuteThrowsOnActionExecutingException_NotHandled()
         {
             // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool nextInChainWasCalled = false;
+            string expectedExceptionText = "Some exception text.";
+            Exception expectedException = new Exception(expectedExceptionText);
             bool onActionExecutingWasCalled = false;
             bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
             ActionFilterImpl actionFilter = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = filterContext => { onActionExecutingWasCalled = true; },
                 OnActionExecutedImpl = filterContext => { onActionExecutedWasCalled = true; }
+            };
+            Func<IAsyncResult> beginExecute = delegate
+            {
+                throw expectedException;
             };
 
             // Act & assert
             Assert.Throws<Exception>(
                 delegate
                 {
-                    AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                        actionFilter, preContext,
-                        () =>
-                        {
-                            nextInChainWasCalled = true;
-                            throw new Exception("Some exception text.");
-                        });
+                    BeingInvokeActionMethodWithFiltersBeginTester(beginExecute, actionFilter);
                 },
-                @"Some exception text.");
+                expectedExceptionText);
 
             // Assert
-            Assert.True(nextInChainWasCalled);
             Assert.True(onActionExecutingWasCalled);
             Assert.True(onActionExecutedWasCalled);
         }
 
         [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NextInChainThrowsOnActionExecutingException_ThreadAbort()
+        public void BeginInvokeActionMethodWithFilters_BeginExecuteThrowsOnActionExecutingException_ThreadAbort()
         {
             // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool nextInChainWasCalled = false;
             bool onActionExecutingWasCalled = false;
             bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
             ActionFilterImpl actionFilter = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = filterContext => { onActionExecutingWasCalled = true; },
@@ -442,71 +397,217 @@ namespace System.Web.Mvc.Async.Test
                     Thread.ResetAbort();
                 }
             };
+            Func<IAsyncResult> beginExecute = delegate
+            {
+                Thread.CurrentThread.Abort();
+                return null;
+            };
 
             // Act & assert
             Assert.Throws<ThreadAbortException>(
                 delegate
                 {
-                    AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                        actionFilter, preContext,
-                        () =>
-                        {
-                            nextInChainWasCalled = true;
-                            Thread.CurrentThread.Abort();
-                            return null;
-                        });
+                    BeingInvokeActionMethodWithFiltersBeginTester(beginExecute, actionFilter);
                 });
 
             // Assert
-            Assert.True(nextInChainWasCalled);
             Assert.True(onActionExecutingWasCalled);
             Assert.True(onActionExecutedWasCalled);
         }
 
         [Fact]
-        public void InvokeActionMethodFilterAsynchronously_NormalExecutionNotCanceled()
+        public void BeginInvokeActionMethodWithFilters_EndExecuteThrowsOnActionExecutedException_Handled()
         {
             // Arrange
-            bool nextInChainWasCalled = false;
+            ViewResult expectedResult = new ViewResult();
+            Exception exepctedException = new Exception("Some exception message.");
+            bool actionCalled = false;
+            bool onActionExecutedCalled = false;
+            ActionFilterImpl actionFilter = new ActionFilterImpl()
+            {
+                OnActionExecutedImpl = (filterContext) =>
+                {
+                    onActionExecutedCalled = true;
+                    Assert.Same(exepctedException, filterContext.Exception);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = expectedResult;
+                }
+            };
+            Func<ActionResult> action = () =>
+            {
+                actionCalled = true;
+                throw exepctedException;
+            };
+
+            // Act
+            ActionResult result = BeingInvokeActionMethodWithFiltersEndTester(action, actionFilter);
+
+            // Assert
+            Assert.True(actionCalled);
+            Assert.True(onActionExecutedCalled);
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_EndExecuteThrowsOnActionExecutedException_HandledByEarlier()
+        {
+            // Arrange
+            List<string> actionLog = new List<string>();
+            Exception exception = new Exception("Some exception message.");
+            ViewResult expectedResult = new ViewResult();
+            Func<ActionResult> action = delegate
+            {
+                actionLog.Add("EndExecute");
+                throw exception;
+
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting1"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext)
+                {
+                    actionLog.Add("OnActionExecuted1");
+                    Assert.Same(exception, filterContext.Exception);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = expectedResult;
+                }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting2"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext) { actionLog.Add("OnActionExecuted2"); }
+            };
+
+            // Act
+            ActionResult result = BeingInvokeActionMethodWithFiltersEndTester(action, filter1, filter2);
+
+            // Assert
+            Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "EndExecute", "OnActionExecuted2", "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_EndExecuteThrowsOnActionExecutedException_HandledByLater()
+        {
+            // Arrange
+            List<string> actionLog = new List<string>();
+            Exception exception = new Exception("Some exception message.");
+            ActionResult expectedResult = new ViewResult();
+            Func<ActionResult> action = delegate
+            {
+                actionLog.Add("EndExecute");
+                throw exception;
+
+            };
+            ActionFilterImpl filter1 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting1"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext) { actionLog.Add("OnActionExecuted1"); }
+            };
+            ActionFilterImpl filter2 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting2"); },
+                OnActionExecutedImpl = delegate(ActionExecutedContext filterContext)
+                {
+                    actionLog.Add("OnActionExecuted2");
+                    Assert.Same(exception, filterContext.Exception);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = expectedResult;
+                }
+            };
+
+            // Act
+            ActionResult result = BeingInvokeActionMethodWithFiltersEndTester(action, filter1, filter2);
+
+            // Assert
+            Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "EndExecute", "OnActionExecuted2", "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_EndExecuteThrowsOnActionExecutedException_NotHandled()
+        {
+            // Arrange
+            bool onActionExecutedWasCalled = false;
+            string expectedExceptionText = "Some exception text.";
+            ActionFilterImpl actionFilter = new ActionFilterImpl()
+            {
+                OnActionExecutedImpl = filterContext => { onActionExecutedWasCalled = true; }
+            };
+            Func<ActionResult> action = delegate
+            {
+                throw new Exception(expectedExceptionText);
+            };
+
+            // Act & assert
+            Assert.Throws<Exception>(
+                () => { BeingInvokeActionMethodWithFiltersEndTester(action, actionFilter); },
+                expectedExceptionText);
+
+            // Assert
+            Assert.True(onActionExecutedWasCalled);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_EndExecuteThrowsOnActionExecutedException_ThreadAbort()
+        {
+            // Arrange
+            bool onActionExecutedWasCalled = false;
+            ActionFilterImpl actionFilter = new ActionFilterImpl()
+            {
+                OnActionExecutedImpl = filterContext =>
+                {
+                    onActionExecutedWasCalled = true;
+                    Thread.ResetAbort();
+                }
+            };
+            Func<ActionResult> action = delegate
+            {
+                Thread.CurrentThread.Abort();
+                return null;
+            };
+
+            // Act & assert
+            Assert.Throws<ThreadAbortException>(
+                delegate { BeingInvokeActionMethodWithFiltersEndTester(action, actionFilter); });
+
+            // Assert
+            Assert.True(onActionExecutedWasCalled);
+        }
+
+        [Fact]
+        public void BeginInvokeActionMethodWithFilters_NormalExecutionNotCanceled()
+        {
+            // Arrange
             bool onActionExecutingWasCalled = false;
             bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
+            MockAsyncResult innerAsyncResult = new MockAsyncResult();
             ActionFilterImpl actionFilter = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = _ => { onActionExecutingWasCalled = true; },
                 OnActionExecutedImpl = _ => { onActionExecutedWasCalled = true; }
             };
+            Func<IAsyncResult> beginExecute = delegate
+            {
+                return innerAsyncResult;
+            };
 
             // Act
-            Func<ActionExecutedContext> continuation = AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                actionFilter, preContext,
-                () =>
-                {
-                    nextInChainWasCalled = true;
-                    return () => new ActionExecutedContext();
-                });
+            ActionResult result = BeingInvokeActionMethodWithFiltersBeginTester(beginExecute, actionFilter);
 
             // Assert
-            Assert.True(nextInChainWasCalled);
             Assert.True(onActionExecutingWasCalled);
-            Assert.False(onActionExecutedWasCalled);
-
-            continuation();
             Assert.True(onActionExecutedWasCalled);
         }
 
         [Fact]
-        public void InvokeActionMethodFilterAsynchronously_OnActionExecutingSetsResult()
+        public void BeginInvokeActionMethodWithFilters_OnActionExecutingSetsResult()
         {
             // Arrange
-            ViewResult expectedResult = new ViewResult();
-
-            bool nextInChainWasCalled = false;
+            ActionResult expectedResult = new ViewResult();
+            ActionResult overriddenResult = new ViewResult();
             bool onActionExecutingWasCalled = false;
             bool onActionExecutedWasCalled = false;
-
-            ActionExecutingContext preContext = GetActionExecutingContext();
             ActionFilterImpl actionFilter = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = filterContext =>
@@ -516,36 +617,32 @@ namespace System.Web.Mvc.Async.Test
                 },
                 OnActionExecutedImpl = _ => { onActionExecutedWasCalled = true; }
             };
+            Func<ActionResult> endExecute = delegate
+            {
+                return overriddenResult;
+            };
 
             // Act
-            Func<ActionExecutedContext> continuation = AsyncControllerActionInvoker.InvokeActionMethodFilterAsynchronously(
-                actionFilter, preContext,
-                () =>
-                {
-                    nextInChainWasCalled = true;
-                    return () => new ActionExecutedContext();
-                });
+            ActionResult result = BeingInvokeActionMethodWithFiltersTester(() => new MockAsyncResult(), endExecute, checkBegin: false, checkEnd: false, filters: new IActionFilter[] { actionFilter } );
 
             // Assert
-            Assert.False(nextInChainWasCalled);
             Assert.True(onActionExecutingWasCalled);
             Assert.False(onActionExecutedWasCalled);
-
-            ActionExecutedContext postContext = continuation();
-            Assert.False(onActionExecutedWasCalled);
-            Assert.Equal(expectedResult, postContext.Result);
+            Assert.Equal(expectedResult, result);
         }
 
         [Fact]
-        public void InvokeActionMethodWithFilters()
+        public void BeginInvokeActionMethodWithFilters_FiltersOrderedCorrectly()
         {
             // Arrange
             List<string> actionLog = new List<string>();
-            ControllerContext controllerContext = new ControllerContext();
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            MockAsyncResult innerAsyncResult = new MockAsyncResult();
             ActionResult actionResult = new ViewResult();
+            Func<ActionResult> continuation = delegate
+            {
+                actionLog.Add("Continuation");
+                return actionResult;
 
+            };
             ActionFilterImpl filter1 = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting1"); },
@@ -557,31 +654,21 @@ namespace System.Web.Mvc.Async.Test
                 OnActionExecutedImpl = delegate(ActionExecutedContext filterContext) { actionLog.Add("OnActionExecuted2"); }
             };
 
-            Mock<AsyncActionDescriptor> mockActionDescriptor = new Mock<AsyncActionDescriptor>();
-            mockActionDescriptor.Setup(d => d.BeginExecute(controllerContext, parameters, It.IsAny<AsyncCallback>(), It.IsAny<object>())).Returns(innerAsyncResult);
-            mockActionDescriptor.Setup(d => d.EndExecute(innerAsyncResult)).Returns(actionResult);
-
-            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
-            IActionFilter[] filters = new IActionFilter[] { filter1, filter2 };
-
             // Act
-            IAsyncResult outerAsyncResult = invoker.BeginInvokeActionMethodWithFilters(controllerContext, filters, mockActionDescriptor.Object, parameters, null, null);
-            ActionExecutedContext postContext = invoker.EndInvokeActionMethodWithFilters(outerAsyncResult);
+            ActionResult result = BeingInvokeActionMethodWithFiltersEndTester(continuation, filter1, filter2);
 
             // Assert
-            Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "OnActionExecuted2", "OnActionExecuted1" }, actionLog.ToArray());
-            Assert.Equal(actionResult, postContext.Result);
+            Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "Continuation", "OnActionExecuted2", "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal(actionResult, result);
         }
 
         [Fact]
-        public void InvokeActionMethodWithFilters_ShortCircuited()
+        public void BeginInvokeActionMethodWithFilters_ShortCircuited()
         {
             // Arrange
             List<string> actionLog = new List<string>();
-            ControllerContext controllerContext = new ControllerContext();
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            ActionResult actionResult = new ViewResult();
-
+            ActionResult shortCircuitResult = new ViewResult();
+            ActionResult executeResult = new ViewResult();
             ActionFilterImpl filter1 = new ActionFilterImpl()
             {
                 OnActionExecutingImpl = delegate(ActionExecutingContext filterContext) { actionLog.Add("OnActionExecuting1"); },
@@ -592,25 +679,86 @@ namespace System.Web.Mvc.Async.Test
                 OnActionExecutingImpl = delegate(ActionExecutingContext filterContext)
                 {
                     actionLog.Add("OnActionExecuting2");
-                    filterContext.Result = actionResult;
+                    filterContext.Result = shortCircuitResult;
                 },
                 OnActionExecutedImpl = delegate(ActionExecutedContext filterContext) { actionLog.Add("OnActionExecuted2"); }
             };
-
-            Mock<AsyncActionDescriptor> mockActionDescriptor = new Mock<AsyncActionDescriptor>();
-            mockActionDescriptor.Setup(d => d.BeginExecute(controllerContext, parameters, It.IsAny<AsyncCallback>(), It.IsAny<object>())).Throws(new Exception("I shouldn't have been called."));
-            mockActionDescriptor.Setup(d => d.EndExecute(It.IsAny<IAsyncResult>())).Throws(new Exception("I shouldn't have been called."));
-
-            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
-            IActionFilter[] filters = new IActionFilter[] { filter1, filter2 };
+            Func<ActionResult> endExecute = () =>
+            {
+                actionLog.Add("ExecuteCalled");
+                return executeResult;
+            };
 
             // Act
-            IAsyncResult outerAsyncResult = invoker.BeginInvokeActionMethodWithFilters(controllerContext, filters, mockActionDescriptor.Object, parameters, null, null);
-            ActionExecutedContext postContext = invoker.EndInvokeActionMethodWithFilters(outerAsyncResult);
+            ActionResult result = BeingInvokeActionMethodWithFiltersTester(() => new MockAsyncResult(), endExecute, checkBegin: false, checkEnd: false, filters: new IActionFilter[] { filter1, filter2 });
 
             // Assert
             Assert.Equal(new[] { "OnActionExecuting1", "OnActionExecuting2", "OnActionExecuted1" }, actionLog.ToArray());
-            Assert.Equal(actionResult, postContext.Result);
+            Assert.Equal(shortCircuitResult, result);
+        }
+
+        private ActionResult BeingInvokeActionMethodWithFiltersBeginTester(Func<IAsyncResult> beginFunction, params IActionFilter[] filters)
+        {
+            return BeingInvokeActionMethodWithFiltersTester(beginFunction, () => new Mock<ActionResult>().Object, checkBegin: true, checkEnd: false, filters: filters);
+        }
+
+        private ActionResult BeingInvokeActionMethodWithFiltersEndTester(Func<ActionResult> endFunction, params IActionFilter[] filters)
+        {
+            return BeingInvokeActionMethodWithFiltersTester(() => new MockAsyncResult(), endFunction, checkBegin: true, checkEnd: true, filters: filters);
+        }
+
+        private ActionResult BeingInvokeActionMethodWithFiltersTester(Func<IAsyncResult> beginFunction, Func<ActionResult> endFunction, bool checkBegin, bool checkEnd, IActionFilter[] filters)
+        {
+            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+            ControllerContext controllerContext = new ControllerContext();
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            Mock<AsyncActionDescriptor> mockActionDescriptor = new Mock<AsyncActionDescriptor>();
+            bool endExecuteCalled = false;
+            bool beginExecuteCalled = false;
+            Func<ActionResult> endExecute = () =>
+            {
+                endExecuteCalled = true;
+                return endFunction();
+            };
+            Func<IAsyncResult> beingExecute = () =>
+            {
+                beginExecuteCalled = true;
+                return beginFunction();
+            };
+
+            mockActionDescriptor.Setup(d => d.BeginExecute(controllerContext, parameters, It.IsAny<AsyncCallback>(), It.IsAny<object>())).Returns(beingExecute);
+            mockActionDescriptor.Setup(d => d.EndExecute(It.IsAny<IAsyncResult>())).Returns(endExecute);
+
+            IAsyncResult outerAsyncResult = null;
+            try
+            {
+                outerAsyncResult = invoker.BeginInvokeActionMethodWithFilters(controllerContext, filters, mockActionDescriptor.Object, parameters, null, null);
+            }
+            catch (Exception ex)
+            {
+                if (checkEnd)
+                {
+                    // Testing end, so not expecting exception thrown from begin
+                    Assert.NotNull(ex);
+                }
+                else
+                {
+                    throw ex;
+                }
+            }
+
+            Assert.NotNull(outerAsyncResult);
+            Assert.Equal(checkBegin, beginExecuteCalled);
+            Assert.False(endExecuteCalled);
+
+            ActionExecutedContext postContext = invoker.EndInvokeActionMethodWithFilters(outerAsyncResult);
+
+            Assert.NotNull(postContext);
+            if (checkEnd)
+            {
+                Assert.True(endExecuteCalled);
+            }
+            return postContext.Result;
         }
 
         private static ActionExecutingContext GetActionExecutingContext()

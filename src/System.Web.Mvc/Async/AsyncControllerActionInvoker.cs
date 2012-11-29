@@ -195,34 +195,21 @@ namespace System.Web.Mvc.Async
 
             BeginInvokeDelegate beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState)
             {
-                ActionExecutingContext preContext = new ActionExecutingContext(controllerContext, actionDescriptor, parameters);
-                IAsyncResult innerAsyncResult = null;
+                AsyncInvocationWithFilters invocation = new AsyncInvocationWithFilters(this, controllerContext, actionDescriptor, filters, parameters, asyncCallback, asyncState);
 
-                Func<Func<ActionExecutedContext>> beginContinuation = () =>
-                {
-                    innerAsyncResult = BeginInvokeActionMethod(controllerContext, actionDescriptor, parameters, asyncCallback, asyncState);
-                    return () =>
-                           new ActionExecutedContext(controllerContext, actionDescriptor, false /* canceled */, null /* exception */)
-                           {
-                               Result = EndInvokeActionMethod(innerAsyncResult)
-                           };
-                };
+                const int StartingFilterIndex = 0;
+                endContinuation = invocation.InvokeActionMethodFilterAsynchronouslyRecursive(StartingFilterIndex);
 
-                // need to reverse the filter list because the continuations are built up backward
-                Func<Func<ActionExecutedContext>> thunk = filters.Reverse().Aggregate(beginContinuation,
-                                                                                      (next, filter) => () => InvokeActionMethodFilterAsynchronously(filter, preContext, next));
-                endContinuation = thunk();
-
-                if (innerAsyncResult != null)
+                if (invocation.InnerAsyncResult != null)
                 {
                     // we're just waiting for the inner result to complete
-                    return innerAsyncResult;
+                    return invocation.InnerAsyncResult;
                 }
                 else
                 {
                     // something was short-circuited and the action was not called, so this was a synchronous operation
                     SimpleAsyncResult newAsyncResult = new SimpleAsyncResult(asyncState);
-                    newAsyncResult.MarkCompleted(true /* completedSynchronously */, asyncCallback);
+                    newAsyncResult.MarkCompleted(completedSynchronously: true, callback: asyncCallback);
                     return newAsyncResult;
                 }
             };
@@ -289,87 +276,6 @@ namespace System.Web.Mvc.Async
             return controllerDescriptor;
         }
 
-        internal static Func<ActionExecutedContext> InvokeActionMethodFilterAsynchronously(IActionFilter filter, ActionExecutingContext preContext, Func<Func<ActionExecutedContext>> nextInChain)
-        {
-            filter.OnActionExecuting(preContext);
-            if (preContext.Result != null)
-            {
-                ActionExecutedContext shortCircuitedPostContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, true /* canceled */, null /* exception */)
-                {
-                    Result = preContext.Result
-                };
-                return () => shortCircuitedPostContext;
-            }
-
-            // There is a nested try / catch block here that contains much the same logic as the outer block.
-            // Since an exception can occur on either side of the asynchronous invocation, we need guards on
-            // on both sides. In the code below, the second side is represented by the nested delegate. This
-            // is really just a parallel of the synchronous ControllerActionInvoker.InvokeActionMethodFilter()
-            // method.
-
-            try
-            {
-                Func<ActionExecutedContext> continuation = nextInChain();
-
-                // add our own continuation, then return the new function
-                return () =>
-                {
-                    ActionExecutedContext postContext;
-                    bool wasError = true;
-
-                    try
-                    {
-                        postContext = continuation();
-                        wasError = false;
-                    }
-                    catch (ThreadAbortException)
-                    {
-                        // This type of exception occurs as a result of Response.Redirect(), but we special-case so that
-                        // the filters don't see this as an error.
-                        postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, false /* canceled */, null /* exception */);
-                        filter.OnActionExecuted(postContext);
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, false /* canceled */, ex);
-                        filter.OnActionExecuted(postContext);
-                        if (!postContext.ExceptionHandled)
-                        {
-                            throw;
-                        }
-                    }
-                    if (!wasError)
-                    {
-                        filter.OnActionExecuted(postContext);
-                    }
-
-                    return postContext;
-                };
-            }
-            catch (ThreadAbortException)
-            {
-                // This type of exception occurs as a result of Response.Redirect(), but we special-case so that
-                // the filters don't see this as an error.
-                ActionExecutedContext postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, false /* canceled */, null /* exception */);
-                filter.OnActionExecuted(postContext);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                ActionExecutedContext postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, false /* canceled */, ex);
-                filter.OnActionExecuted(postContext);
-                if (postContext.ExceptionHandled)
-                {
-                    return () => postContext;
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
-
         // Keep as value type to avoid per-call allocation
         private struct ActionInvocation
         {
@@ -394,6 +300,149 @@ namespace System.Web.Mvc.Async
             internal ActionResult InvokeSynchronousActionMethod()
             {
                 return _invoker.InvokeActionMethod(_controllerContext, _actionDescriptor, _parameters);
+            }
+        }
+
+        // Large and passed to many function calls, so keep as a reference type to minimize copying
+        private class AsyncInvocationWithFilters
+        {
+            private readonly AsyncControllerActionInvoker _invoker;
+            private readonly ControllerContext _controllerContext;
+            private readonly ActionDescriptor _actionDescriptor;
+            private readonly IList<IActionFilter> _filters;
+            private readonly IDictionary<string, object> _parameters;
+            private readonly AsyncCallback _asyncCallback;
+            private readonly object _asyncState;
+            private readonly int _filterCount;
+            private readonly ActionExecutingContext _preContext;
+
+            internal IAsyncResult InnerAsyncResult;
+
+            internal AsyncInvocationWithFilters(AsyncControllerActionInvoker invoker, ControllerContext controllerContext, ActionDescriptor actionDescriptor, IList<IActionFilter> filters, IDictionary<string, object> parameters, AsyncCallback asyncCallback, object asyncState)
+            {
+                Contract.Assert(invoker != null);
+                Contract.Assert(controllerContext != null);
+                Contract.Assert(actionDescriptor != null);
+                Contract.Assert(filters != null);
+                Contract.Assert(parameters != null);
+
+                _invoker = invoker;
+                _controllerContext = controllerContext;
+                _actionDescriptor = actionDescriptor;
+                _filters = filters;
+                _parameters = parameters;
+                _asyncCallback = asyncCallback;
+                _asyncState = asyncState;
+
+                _preContext = new ActionExecutingContext(controllerContext, actionDescriptor, parameters);
+                // For IList<T> it is faster to cache the count
+                _filterCount = _filters.Count;
+            }
+
+            internal Func<ActionExecutedContext> InvokeActionMethodFilterAsynchronouslyRecursive(int filterIndex)
+            {
+                // Performance-sensitive
+
+                // For compatability, the following behavior must be maintained
+                //   The OnActionExecuting events must fire in forward order
+                //   The Begin and End events must fire
+                //   The OnActionExecuted events must fire in reverse order
+                //   Earlier filters can process the results and exceptions from the handling of later filters
+                // This is achieved by calling recursively and moving through the filter list forwards
+
+                // If there are no more filters to recurse over, create the main result
+                if (filterIndex > _filterCount - 1)
+                {
+                    InnerAsyncResult = _invoker.BeginInvokeActionMethod(_controllerContext, _actionDescriptor, _parameters, _asyncCallback, _asyncState);
+                    return () =>
+                           new ActionExecutedContext(_controllerContext, _actionDescriptor, canceled: false, exception: null)
+                           {
+                               Result = _invoker.EndInvokeActionMethod(InnerAsyncResult)
+                           };
+                }
+
+                // Otherwise process the filters recursively
+                IActionFilter filter = _filters[filterIndex];
+                ActionExecutingContext preContext = _preContext;
+                filter.OnActionExecuting(preContext);
+                if (preContext.Result != null)
+                {
+                    ActionExecutedContext shortCircuitedPostContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: true, exception: null)
+                    {
+                        Result = preContext.Result
+                    };
+                    return () => shortCircuitedPostContext;
+                }
+
+                // There is a nested try / catch block here that contains much the same logic as the outer block.
+                // Since an exception can occur on either side of the asynchronous invocation, we need guards on
+                // on both sides. In the code below, the second side is represented by the nested delegate. This
+                // is really just a parallel of the synchronous ControllerActionInvoker.InvokeActionMethodFilter()
+                // method.
+
+                try
+                {
+                    // Use the filters in forward direction
+                    int nextFilterIndex = filterIndex + 1;
+                    Func<ActionExecutedContext> continuation = InvokeActionMethodFilterAsynchronouslyRecursive(nextFilterIndex);
+
+                    // add our own continuation, then return the new function
+                    return () =>
+                    {
+                        ActionExecutedContext postContext;
+                        bool wasError = true;
+
+                        try
+                        {
+                            postContext = continuation();
+                            wasError = false;
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            // This type of exception occurs as a result of Response.Redirect(), but we special-case so that
+                            // the filters don't see this as an error.
+                            postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: false, exception: null);
+                            filter.OnActionExecuted(postContext);
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: false, exception: ex);
+                            filter.OnActionExecuted(postContext);
+                            if (!postContext.ExceptionHandled)
+                            {
+                                throw;
+                            }
+                        }
+                        if (!wasError)
+                        {
+                            filter.OnActionExecuted(postContext);
+                        }
+
+                        return postContext;
+                    };
+                }
+                catch (ThreadAbortException)
+                {
+                    // This type of exception occurs as a result of Response.Redirect(), but we special-case so that
+                    // the filters don't see this as an error.
+                    ActionExecutedContext postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: false, exception: null);
+                    filter.OnActionExecuted(postContext);
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    ActionExecutedContext postContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: false, exception: ex);
+                    filter.OnActionExecuted(postContext);
+                    if (postContext.ExceptionHandled)
+                    {
+                        return () => postContext;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
         }
     }

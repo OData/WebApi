@@ -68,58 +68,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Read_PatchMode_PatchKeyModeIsIgnore()
-        {
-            IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
-            _readContext.IsPatchMode = true;
-            _readContext.PatchKeyMode = PatchKeyMode.Ignore;
-
-            ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
-            Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersPatchData), _edmModel), _readContext) as Delta<Supplier>;
-
-            Assert.NotNull(supplier);
-            Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "Name", "Address" });
-
-            Assert.Equal((supplier as dynamic).Name, "Supplier Name");
-            Assert.Equal("Supplier City", (supplier as dynamic).Address.City);
-            Assert.Equal("123456", (supplier as dynamic).Address.ZipCode);
-        }
-
-        [Fact]
-        public void Read_PatchMode_PatchKeyModeIsThrow()
-        {
-            IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
-            _readContext.IsPatchMode = true;
-            _readContext.PatchKeyMode = PatchKeyMode.Throw;
-
-            ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
-
-            Assert.Throws<InvalidOperationException>(
-                () => deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersPatchData), _edmModel), _readContext),
-                "Cannot apply PATCH on key property 'ID' on entity type 'ODataDemo.Supplier' when 'PatchKeyMode' is 'Throw'.");
-        }
-
-        [Fact]
-        public void Read_PatchMode_PatchKeyModeIsPatch()
-        {
-            IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
-            _readContext.IsPatchMode = true;
-            _readContext.PatchKeyMode = PatchKeyMode.Patch;
-
-            ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
-
-            Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersPatchData), _edmModel), _readContext) as Delta<Supplier>;
-
-            Assert.NotNull(supplier);
-            Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "ID", "Name", "Address" });
-
-            Assert.Equal(123, (supplier as dynamic).ID);
-            Assert.Equal("Supplier Name", (supplier as dynamic).Name);
-            Assert.Equal("Supplier City", (supplier as dynamic).Address.City);
-            Assert.Equal("123456", (supplier as dynamic).Address.ZipCode);
-        }
-
-        [Fact]
         public void Read_Throws_On_UnknownEntityType()
         {
             IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;

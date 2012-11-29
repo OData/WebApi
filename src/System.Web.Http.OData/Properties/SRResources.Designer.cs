@@ -187,15 +187,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot apply PATCH on key property &apos;{0}&apos; on entity type &apos;{1}&apos; when &apos;{2}&apos; is &apos;{3}&apos;..
-        /// </summary>
-        internal static string CannotPatchKeyProperty {
-            get {
-                return ResourceManager.GetString("CannotPatchKeyProperty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot apply PATCH to navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
         /// </summary>
         internal static string CannotPatchNavigationProperties {

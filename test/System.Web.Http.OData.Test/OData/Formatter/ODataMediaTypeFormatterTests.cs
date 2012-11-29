@@ -181,39 +181,6 @@ namespace System.Web.Http.OData.Formatter
                 "The OData formatter does not support writing client requests. This formatter instance must have an associated request.");
         }
 
-        [Fact]
-        public void ODataFormatter_DefaultPatchKeyMode_Is_Ignore()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutRequest();
-            Assert.Equal(PatchKeyMode.Ignore, formatter.PatchKeyMode);
-        }
-
-        [Fact]
-        public void ReadFromStreamAsync_PassesPatchKeyModeToTheDeserializers()
-        {
-            ODataDeserializerContext context = null;
-            Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Entry);
-            deserializer
-                .Setup(d => d.Read(It.IsAny<ODataMessageReader>(), It.IsAny<ODataDeserializerContext>()))
-                .Callback((ODataMessageReader reader, ODataDeserializerContext deserializerContext) =>
-                {
-                    context = deserializerContext;
-                });
-            Mock<Type> type = new Mock<Type>();
-            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>(EdmCoreModel.Instance);
-            deserializerProvider.Setup(d => d.GetODataDeserializer(type.Object)).Returns(deserializer.Object);
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, new DefaultODataSerializerProvider(EdmCoreModel.Instance));
-            formatter.PatchKeyMode = PatchKeyMode.Patch;
-
-            Mock<Stream> stream = new Mock<Stream>();
-            Mock<HttpContent> content = new Mock<HttpContent>();
-            Mock<IFormatterLogger> formatterLogger = new Mock<IFormatterLogger>();
-
-            formatter.ReadFromStreamAsync(type.Object, stream.Object, content.Object, formatterLogger.Object);
-
-            Assert.Equal(context.PatchKeyMode, PatchKeyMode.Patch);
-        }
-
         public override ODataMediaTypeFormatter CreateFormatter()
         {
             return CreateFormatterWithRequest();

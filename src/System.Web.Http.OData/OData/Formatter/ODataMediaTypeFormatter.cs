@@ -34,8 +34,6 @@ namespace System.Web.Http.OData.Formatter
         private readonly HttpRequestMessage _request;
         private readonly ODataSerializerProvider _serializerProvider;
 
-        private PatchKeyMode _patchKeyMode;
-
         internal ODataMediaTypeFormatter(IEdmModel model)
             : this(model, request: null)
         {
@@ -44,12 +42,6 @@ namespace System.Web.Http.OData.Formatter
         internal ODataMediaTypeFormatter(IEdmModel model, HttpRequestMessage request)
             : this(new DefaultODataDeserializerProvider(model), new DefaultODataSerializerProvider(model),
                 ODataFormatterConstants.DefaultODataVersion, request)
-        {
-        }
-
-        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
-            ODataSerializerProvider serializerProvider)
-            : this(deserializerProvider, serializerProvider, ODataFormatterConstants.DefaultODataVersion, null)
         {
         }
 
@@ -83,23 +75,6 @@ namespace System.Web.Http.OData.Formatter
             get
             {
                 return _model;
-            }
-        }
-
-        /// <summary>
-        /// The <see cref="PatchKeyMode"/> to be used during deserialization.
-        /// </summary>
-        public PatchKeyMode PatchKeyMode
-        {
-            get
-            {
-                return _patchKeyMode;
-            }
-
-            set
-            {
-                PatchKeyModeHelper.Validate(value, "value");
-                _patchKeyMode = value;
             }
         }
 
@@ -212,7 +187,7 @@ namespace System.Web.Http.OData.Formatter
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, _deserializerProvider.EdmModel);
-                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, PatchKeyMode = PatchKeyMode, Request = _request, Model = _model };
+                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, Request = _request, Model = _model };
                         result = deserializer.Read(oDataMessageReader, readContext);
                     }
                     catch (Exception e)

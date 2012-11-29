@@ -99,15 +99,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (isDelta && resourceType.AsEntity().Key().Select(key => key.Name).Contains(propertyName))
             {
-                // we are patching a key property.
-                if (readContext.PatchKeyMode == PatchKeyMode.Ignore)
-                {
-                    return;
-                }
-                else if (readContext.PatchKeyMode == PatchKeyMode.Throw)
-                {
-                    throw Error.InvalidOperation(SRResources.CannotPatchKeyProperty, propertyName, resourceType.FullName(), typeof(PatchKeyMode).Name, PatchKeyMode.Throw);
-                }
+                return;
             }
 
             EdmTypeKind propertyKind;

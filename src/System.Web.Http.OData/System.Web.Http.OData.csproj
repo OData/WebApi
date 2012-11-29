@@ -223,8 +223,6 @@
     <Compile Include="OData\Formatter\EdmPrimitiveHelpers.cs" />
     <Compile Include="OData\Formatter\EdmTypeReferenceEqualityComparer.cs" />
     <Compile Include="OData\Formatter\ODataFormatterParameterBinding.cs" />
-    <Compile Include="OData\Formatter\PatchKeyMode.cs" />
-    <Compile Include="OData\Formatter\PatchKeyModeHelper.cs" />
     <Compile Include="OData\Formatter\ODataModelBinderProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />

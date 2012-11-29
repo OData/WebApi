@@ -14,30 +14,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     {
         private const int MaxReferenceDepth = 200;
         private int _currentReferenceDepth = 0;
-        private PatchKeyMode _patchKeyMode;
 
         /// <summary>
         /// Gets or sets whether the <see cref="ODataMediaTypeFormatter"/> is reading a 
         /// PATCH request.
         /// </summary>
         public bool IsPatchMode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="PatchKeyMode"/> to be used when reading a PATCH request.
-        /// </summary>
-        public PatchKeyMode PatchKeyMode
-        {
-            get
-            {
-                return _patchKeyMode;
-            }
-
-            set
-            {
-                PatchKeyModeHelper.Validate(value, "value");
-                _patchKeyMode = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the HttpRequestMessage. 

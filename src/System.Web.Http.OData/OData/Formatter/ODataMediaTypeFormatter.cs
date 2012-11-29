@@ -372,11 +372,11 @@ namespace System.Web.Http.OData.Formatter
                 return ODataFormatterConstants.DefaultODataFormat;
             }
 
-            if (String.Equals(contentHeaders.ContentType.MediaType, ODataFormatterConstants.DefaultApplicationODataMediaType, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(contentHeaders.ContentType.MediaType, ODataMediaTypes.ApplicationXml.MediaType, StringComparison.OrdinalIgnoreCase))
             {
                 return ODataFormat.Atom;
             }
-            else if (String.Equals(contentHeaders.ContentType.MediaType, ODataFormatterConstants.ApplicationJsonMediaType.MediaType, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(contentHeaders.ContentType.MediaType, ODataMediaTypes.ApplicationJsonODataVerbose.MediaType, StringComparison.OrdinalIgnoreCase))
             {
                 return ODataFormat.VerboseJson;
             }

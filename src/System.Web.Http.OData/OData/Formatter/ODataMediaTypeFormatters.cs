@@ -21,9 +21,9 @@ namespace System.Web.Http.OData.Formatter
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model);
 
-            formatter.SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationAtomXmlMediaType);
-            formatter.SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationJsonMediaType);
-            formatter.SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationXmlMediaType);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataVerbose);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
 
             formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true,
                 throwOnInvalidBytes: true));

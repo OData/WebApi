@@ -155,7 +155,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializerTests.cs" />
     <Compile Include="OData\Formatter\EdmLibHelpersTests.cs" />
-    <Compile Include="OData\Formatter\ODataFormatterConstantsTest.cs" />
+    <Compile Include="OData\Formatter\ODataMediaTypesTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializerTest.cs" />
     <Compile Include="OData\ODataResultOfTTest.cs" />
     <Compile Include="OData\Query\Controllers\PrimitiveController.cs" />

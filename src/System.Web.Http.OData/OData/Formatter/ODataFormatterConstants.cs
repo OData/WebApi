@@ -10,11 +10,9 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     internal static class ODataFormatterConstants
     {
-        public const string DataServiceRelatedNamespace = "http://schemas.microsoft.com/ado/2007/08/dataservices/related/";
         public const string DefaultNamespace = "http://www.tempuri.org";
 
         public const string Element = "element";
-        public const string Id = "Id";
 
         public const string Entry = "entry";
         public const string Feed = "feed";
@@ -24,25 +22,5 @@ namespace System.Web.Http.OData.Formatter
 
         public const ODataVersion DefaultODataVersion = ODataVersion.V3;
         public static readonly ODataFormat DefaultODataFormat = ODataFormat.Atom;
-
-        public const string DefaultApplicationODataMediaType = "application/atom+xml";
-        private static readonly MediaTypeHeaderValue DefaultApplicationAtomXmlMediaType = new MediaTypeHeaderValue(DefaultApplicationODataMediaType);
-        private static readonly MediaTypeHeaderValue DefaultApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
-        private static readonly MediaTypeHeaderValue DefaultApplicationXmlMediaType = MediaTypeHeaderValue.Parse("application/xml");
-
-        public static MediaTypeHeaderValue ApplicationAtomXmlMediaType
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationAtomXmlMediaType).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonMediaType
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationJsonMediaType).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationXmlMediaType
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)DefaultApplicationXmlMediaType).Clone(); }
-        }
     }
 }

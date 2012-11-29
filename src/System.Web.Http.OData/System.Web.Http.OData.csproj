@@ -141,6 +141,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatters.cs" />
+    <Compile Include="OData\Formatter\ODataMediaTypes.cs" />
     <Compile Include="OData\Routing\ActionPathSegment.cs" />
     <Compile Include="OData\Routing\CastPathSegment.cs" />
     <Compile Include="OData\Routing\BatchPathSegment.cs" />

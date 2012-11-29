@@ -48,8 +48,7 @@ namespace System.Web.Http.OData.Formatter
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(route);
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel());
-            formatter.Request = request;
+            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
 
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 
@@ -225,6 +224,11 @@ namespace System.Web.Http.OData.Formatter
             return new ODataMediaTypeFormatter(model);
         }
 
+        public ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request)
+        {
+            return new ODataMediaTypeFormatter(model, request);
+        }
+
         public ODataMediaTypeFormatter CreateFormatterWithoutRequest()
         {
             return CreateFormatter(CreateModel());
@@ -232,11 +236,9 @@ namespace System.Web.Http.OData.Formatter
 
         public ODataMediaTypeFormatter CreateFormatterWithRequest()
         {
-            var formatter = CreateFormatterWithoutRequest();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             request.Properties["MS_HttpConfiguration"] = new HttpConfiguration();
-            formatter.Request = request;
-            return formatter;
+            return CreateFormatter(CreateModel(), request);
         }
 
         private static IEdmModel CreateModel()

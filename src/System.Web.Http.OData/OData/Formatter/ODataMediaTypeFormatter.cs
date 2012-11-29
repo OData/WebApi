@@ -28,27 +28,44 @@ namespace System.Web.Http.OData.Formatter
     {
         internal const string EdmModelKey = "MS_EdmModel";
 
-        private readonly ODataVersion _defaultODataVersion = ODataFormatterConstants.DefaultODataVersion;
+        private readonly ODataVersion _defaultODataVersion;
+        private readonly ODataDeserializerProvider _deserializerProvider;
+        private readonly IEdmModel _model;
+        private readonly HttpRequestMessage _request;
+        private readonly ODataSerializerProvider _serializerProvider;
 
         private PatchKeyMode _patchKeyMode;
 
         internal ODataMediaTypeFormatter(IEdmModel model)
-            : this(new DefaultODataDeserializerProvider(model), new DefaultODataSerializerProvider(model))
+            : this(model, request: null)
         {
-            Model = model;
         }
 
-        internal ODataMediaTypeFormatter(ODataVersion oDataVersion, ODataDeserializerProvider oDataDeserializerProvider, ODataSerializerProvider oDataSerializerProvider)
-            : this(oDataDeserializerProvider, oDataSerializerProvider)
+        internal ODataMediaTypeFormatter(IEdmModel model, HttpRequestMessage request)
+            : this(new DefaultODataDeserializerProvider(model), new DefaultODataSerializerProvider(model),
+                ODataFormatterConstants.DefaultODataVersion, request)
         {
-            _defaultODataVersion = oDataVersion;
         }
 
-        internal ODataMediaTypeFormatter(ODataDeserializerProvider oDataDeserializerProvider, ODataSerializerProvider oDataSerializerProvider)
+        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
+            ODataSerializerProvider serializerProvider)
+            : this(deserializerProvider, serializerProvider, ODataFormatterConstants.DefaultODataVersion, null)
         {
-            ODataDeserializerProvider = oDataDeserializerProvider;
-            Model = oDataDeserializerProvider.EdmModel;
-            ODataSerializerProvider = oDataSerializerProvider;
+        }
+
+        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
+            ODataSerializerProvider serializerProvider,
+            ODataVersion version,
+            HttpRequestMessage request)
+        {
+            Contract.Assert(_deserializerProvider != null);
+            _deserializerProvider = deserializerProvider;
+            Contract.Assert(deserializerProvider.EdmModel != null);
+            _model = deserializerProvider.EdmModel;
+            Contract.Assert(_serializerProvider != null);
+            _serializerProvider = serializerProvider;
+            _defaultODataVersion = version;
+            _request = request;
 
             SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationAtomXmlMediaType);
             SupportedMediaTypes.Add(ODataFormatterConstants.ApplicationJsonMediaType);
@@ -61,7 +78,13 @@ namespace System.Web.Http.OData.Formatter
         /// <summary>
         /// The <see cref="IEdmModel"/> used by this formatter.
         /// </summary>
-        public IEdmModel Model { get; private set; }
+        public IEdmModel Model
+        {
+            get
+            {
+                return _model;
+            }
+        }
 
         /// <summary>
         /// The <see cref="PatchKeyMode"/> to be used during deserialization.
@@ -80,15 +103,6 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        /// <summary>
-        /// The incoming <see cref="HttpRequestMessage" />.
-        /// </summary>
-        internal HttpRequestMessage Request { get; set; }
-
-        internal ODataDeserializerProvider ODataDeserializerProvider { get; private set; }
-
-        internal ODataSerializerProvider ODataSerializerProvider { get; private set; }
-
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
         {
@@ -99,11 +113,11 @@ namespace System.Web.Http.OData.Formatter
             // This is a workaround until tracing provides information about the wrapped inner formatter
             if (type == typeof(IEdmModel))
             {
-                request.Properties.Add(EdmModelKey, Model);
+                request.Properties.Add(EdmModelKey, _model);
             }
 
             ODataVersion version = GetResponseODataVersion(request);
-            return new ODataMediaTypeFormatter(version, ODataDeserializerProvider, ODataSerializerProvider) { Request = request };
+            return new ODataMediaTypeFormatter(_deserializerProvider, _serializerProvider, version, request);
         }
 
         /// <inheritdoc/>
@@ -145,7 +159,7 @@ namespace System.Web.Http.OData.Formatter
             }
 
             TryGetInnerTypeForDelta(ref type);
-            return ODataDeserializerProvider.GetODataDeserializer(type) != null;
+            return _deserializerProvider.GetODataDeserializer(type) != null;
         }
 
         /// <inheritdoc/>
@@ -156,7 +170,7 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("type");
             }
 
-            ODataSerializer serializer = ODataSerializerProvider.GetODataPayloadSerializer(type);
+            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
             return serializer != null;
         }
 
@@ -186,7 +200,7 @@ namespace System.Web.Http.OData.Formatter
                 else
                 {
                     bool isPatchMode = TryGetInnerTypeForDelta(ref type);
-                    ODataDeserializer deserializer = ODataDeserializerProvider.GetODataDeserializer(type);
+                    ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type);
                     if (deserializer == null)
                     {
                         throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
@@ -197,8 +211,8 @@ namespace System.Web.Http.OData.Formatter
                     try
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
-                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, ODataDeserializerProvider.EdmModel);
-                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, PatchKeyMode = PatchKeyMode, Request = Request, Model = Model };
+                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, _deserializerProvider.EdmModel);
+                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, PatchKeyMode = PatchKeyMode, Request = _request, Model = _model };
                         result = deserializer.Read(oDataMessageReader, readContext);
                     }
                     catch (Exception e)
@@ -238,7 +252,7 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("writeStream");
             }
 
-            if (Request == null)
+            if (_request == null)
             {
                 throw Error.NotSupported(SRResources.WriteToStreamAsyncMustHaveRequest);
             }
@@ -260,25 +274,25 @@ namespace System.Web.Http.OData.Formatter
 
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
-                ODataSerializer serializer = ODataSerializerProvider.GetODataPayloadSerializer(type);
+                ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
                 if (serializer == null)
                 {
                     throw Error.InvalidOperation(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);
                 }
 
-                UrlHelper urlHelper = Request.GetUrlHelper();
+                UrlHelper urlHelper = _request.GetUrlHelper();
 
                 IEdmEntitySet targetEntitySet = null;
-                ODataUriHelpers.TryGetEntitySetAndEntityType(Request.RequestUri, Model, out targetEntitySet);
+                ODataUriHelpers.TryGetEntitySetAndEntityType(_request.RequestUri, _model, out targetEntitySet);
 
                 // serialize a response
-                Uri baseAddress = new Uri(Request.RequestUri, Request.GetConfiguration().VirtualPathRoot);
+                Uri baseAddress = new Uri(_request.RequestUri, _request.GetConfiguration().VirtualPathRoot);
 
                 // TODO: Bug 467617: figure out the story for the operation name on the client side and server side.
                 // This is clearly a workaround. We are assuming that the operation name is the last segment in the request uri 
                 // which works for most cases and fall back to the type name of the object being written.
                 // We should rather use uri parser semantic tree to figure out the operation name from the request url.
-                string operationName = ODataUriHelpers.GetOperationName(Request.RequestUri, baseAddress);
+                string operationName = ODataUriHelpers.GetOperationName(_request.RequestUri, baseAddress);
                 operationName = operationName ?? type.Name;
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
@@ -300,7 +314,7 @@ namespace System.Web.Http.OData.Formatter
                     writerSettings.SetContentType(contentHeaders.ContentType.ToString(), Encoding.UTF8.WebName);
                 }
 
-                using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, ODataDeserializerProvider.EdmModel))
+                using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, _deserializerProvider.EdmModel))
                 {
                     ODataSerializerContext writeContext = new ODataSerializerContext()
                     {
@@ -308,7 +322,7 @@ namespace System.Web.Http.OData.Formatter
                         UrlHelper = urlHelper,
                         ServiceOperationName = operationName,
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
-                        Request = Request
+                        Request = _request
                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);
@@ -329,7 +343,7 @@ namespace System.Web.Http.OData.Formatter
             writerSettings.SetContentType(odataFormat);
             using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings))
             {
-                ODataSerializer serializer = ODataSerializerProvider.GetODataPayloadSerializer(graphType);
+                ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(graphType);
 
                 // get the OData specific headers for the payloadkind
                 ODataUtils.SetHeadersForPayload(messageWriter, serializer.ODataPayloadKind);

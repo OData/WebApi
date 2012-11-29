@@ -87,9 +87,7 @@ namespace System.Web.Http.OData.Formatter
 
         private ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request)
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model);
-            formatter.Request = request;
-            return formatter;
+            return new ODataMediaTypeFormatter(model, request);
         }
     }
 }

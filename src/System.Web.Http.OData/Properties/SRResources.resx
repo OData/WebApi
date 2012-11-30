@@ -423,8 +423,8 @@
   <data name="QueryingRequiresObjectContent" xml:space="preserve">
     <value>Queries can not be applied to a response content of type '{0}'. The response content must be an ObjectContent.</value>
   </data>
-  <data name="LambdaNestingLimitExceeded" xml:space="preserve">
-    <value>The Any/All nesting limit of {0} has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.</value>
+  <data name="MaxAnyAllExpressionLimitExceeded" xml:space="preserve">
+    <value>The Any/All nesting limit of '{0}' has been exceeded. '{1}' can be configured on ODataQuerySettings or QueryableAttribute.</value>
   </data>
   <data name="NoODataFormatterForMetadata" xml:space="preserve">
     <value>No OData formatter was found to write the OData metadata. Consider registering an appropriate ODataMediaTypeFormatter on the configuration's formatter collection.</value>
@@ -548,5 +548,23 @@
   </data>
   <data name="EntitySetControllerUnsupportedUpdateErrorCode" xml:space="preserve">
     <value>PUT requests are not supported.</value>
+  </data>
+  <data name="NotAllowedArithmeticOperator" xml:space="preserve">
+    <value>Arithmetic operator '{0}' is not allowed. To allow it, try setting the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+  </data>
+  <data name="NotAllowedFunctionName" xml:space="preserve">
+    <value>Function '{0}' is not allowed. To allow it, try setting the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+  </data>
+  <data name="NotAllowedLogicalOperator" xml:space="preserve">
+    <value>Logical operator '{0}' is not allowed. To allow it, try setting the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+  </data>
+  <data name="NotAllowedOrderByProperty" xml:space="preserve">
+    <value>Order by '{0}' is not allowed. To allow it, try setting the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+  </data>
+  <data name="NotAllowedQueryOption" xml:space="preserve">
+    <value>Query option '{0}' is not allowed. To allow it, try setting the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
+  </data>
+  <data name="SkipTopLimitExceeded" xml:space="preserve">
+    <value>The limit of '{0}' for {1} query has been exceeded. The value from the incoming request is '{2}'. </value>
   </data>
 </root>

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Query.Expressions;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
@@ -20,6 +21,7 @@ namespace System.Web.Http.OData.Query
     {
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private FilterQueryNode _queryNode;
+        private FilterQueryValidator _validator;
 
         /// <summary>
         /// Initialize a new instance of <see cref="FilterQueryOption"/> based on the raw $filter value and 
@@ -41,12 +43,33 @@ namespace System.Web.Http.OData.Query
 
             Context = context;
             RawValue = rawValue;
+            Validator = new FilterQueryValidator();
         }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>.
         /// </summary>
         public ODataQueryContext Context { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the Filter Query Validator
+        /// </summary>
+        public FilterQueryValidator Validator
+        {
+            get
+            {
+                return _validator;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _validator = value;
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="FilterQueryNode"/> for this query option.
@@ -126,6 +149,16 @@ namespace System.Web.Http.OData.Query
             Expression filter = FilterBinder.Bind(node, Context.EntityClrType, Context.Model, assembliesResolver, querySettings);
             query = ExpressionHelpers.Where(query, filter, Context.EntityClrType);
             return query;
+        }
+
+        public void Validate(ODataValidationSettings validationSettings)
+        {
+            if (validationSettings == null)
+            {
+                throw Error.ArgumentNull("validationSettings");
+            }
+
+            Validator.Validate(this, validationSettings);
         }
     }
 }

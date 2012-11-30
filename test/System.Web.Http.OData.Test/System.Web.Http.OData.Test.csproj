@@ -173,6 +173,11 @@
     <Compile Include="OData\Routing\ODataRoutingModel.cs" />
     <Compile Include="OData\Routing\ODataRoutingTest.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandlerTest.cs" />
+    <Compile Include="OData\Query\Validators\ODataQueryValidatorTest.cs" />
+    <Compile Include="OData\Query\Validators\OrderByQueryValidatorTest.cs" />
+    <Compile Include="OData\Query\Validators\SkipQueryValidatorTest.cs" />
+    <Compile Include="OData\Query\Validators\FilterQueryValidatorTest.cs" />
+    <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />
     <Compile Include="TestCommon\MockType.cs" />

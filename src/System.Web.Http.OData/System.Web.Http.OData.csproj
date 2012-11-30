@@ -145,6 +145,16 @@
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatters.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypes.cs" />
+    <Compile Include="OData\Query\Validators\FilterQueryValidator.cs" />
+    <Compile Include="OData\Query\AllowedArithmeticOperators.cs" />
+    <Compile Include="OData\Query\AllowedFunctionNames.cs" />
+    <Compile Include="OData\Query\AllowedLogicalOperators.cs" />
+    <Compile Include="OData\Query\AllowedQueryOptions.cs" />
+    <Compile Include="OData\Query\Validators\ODataQueryValidator.cs" />
+    <Compile Include="OData\Query\ODataValidationSettings.cs" />
+    <Compile Include="OData\Query\Validators\OrderByQueryValidator.cs" />
+    <Compile Include="OData\Query\Validators\SkipQueryValidator.cs" />
+    <Compile Include="OData\Query\Validators\TopQueryValidator.cs" />
     <Compile Include="OData\Routing\ActionPathSegment.cs" />
     <Compile Include="OData\Routing\CastPathSegment.cs" />
     <Compile Include="OData\Routing\BatchPathSegment.cs" />

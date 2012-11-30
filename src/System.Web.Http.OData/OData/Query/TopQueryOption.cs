@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -12,6 +13,7 @@ namespace System.Web.Http.OData.Query
     public class TopQueryOption
     {
         private int? _value;
+        private TopQueryValidator _validator;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $top value and 
@@ -33,6 +35,7 @@ namespace System.Web.Http.OData.Query
 
             Context = context;
             RawValue = rawValue;
+            Validator = new TopQueryValidator();
         }
 
         /// <summary>
@@ -69,6 +72,26 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
+        /// Gets or sets the Top Query Validator
+        /// </summary>
+        public TopQueryValidator Validator
+        {
+            get
+            {
+                return _validator;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _validator = value;
+            }
+        }
+
+        /// <summary>
         /// Apply the $top query to the given IQueryable.
         /// </summary>
         /// <param name="query">The IQueryable that we are applying top query against.</param>
@@ -86,6 +109,16 @@ namespace System.Web.Http.OData.Query
         public IQueryable ApplyTo(IQueryable query)
         {
             return ApplyToCore(query);
+        }
+
+        public void Validate(ODataValidationSettings validationSettings)
+        {
+            if (validationSettings == null)
+            {
+                throw Error.ArgumentNull("validationSettings");
+            }
+
+             Validator.Validate(this, validationSettings);
         }
 
         private IQueryable ApplyToCore(IQueryable query)

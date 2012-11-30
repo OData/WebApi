@@ -946,7 +946,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             if (_currentLambdaNestingCount >= _querySettings.MaxAnyAllExpressionDepth)
             {
-                throw new ODataException(Error.Format(SRResources.LambdaNestingLimitExceeded, _querySettings.MaxAnyAllExpressionDepth));
+                throw new ODataException(Error.Format(SRResources.MaxAnyAllExpressionLimitExceeded, _querySettings.MaxAnyAllExpressionDepth, "MaxAnyAllExpressionDepth"));
             }
 
             _currentLambdaNestingCount++;

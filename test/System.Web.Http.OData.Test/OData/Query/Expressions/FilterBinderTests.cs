@@ -685,7 +685,7 @@ namespace System.Web.Http.OData.Query.Expressions
             settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]
@@ -697,7 +697,7 @@ namespace System.Web.Http.OData.Query.Expressions
             settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]
@@ -709,7 +709,7 @@ namespace System.Web.Http.OData.Query.Expressions
             settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]
@@ -721,7 +721,7 @@ namespace System.Web.Http.OData.Query.Expressions
             settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of 1 has been exceeded. MaxAnyAllExpressionDepth can be configured on ODataQuerySettings or QueryableAttribute.");
+            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
         }
 
         [Fact]

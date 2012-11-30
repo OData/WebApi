@@ -93,8 +93,8 @@ namespace System.Web.Http.OData
                 new QueryableAttribute(),
                 o => o.MaxAnyAllExpressionDepth,
                 expectedDefaultValue: 1,
-                minLegalValue: 1,
-                illegalLowerValue: 0,
+                minLegalValue: 0,
+                illegalLowerValue: -1,
                 illegalUpperValue: null,
                 maxLegalValue: int.MaxValue,
                 roundTripTestValue: 2);
@@ -333,6 +333,7 @@ namespace System.Web.Http.OData
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
             HttpConfiguration config = new HttpConfiguration();
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Primitive", typeof(PrimitiveController));
@@ -343,14 +344,14 @@ namespace System.Web.Http.OData
             context.Response.Content = new ObjectContent(typeof(IEnumerable<int>), new List<int>(), new JsonMediaTypeFormatter());
 
             // Act and Assert
-            HttpResponseException responseException = Assert.Throws<HttpResponseException>(() => attribute.OnActionExecuted(context));
-            HttpResponseMessage response = responseException.Response;
+            attribute.OnActionExecuted(context);
+            HttpResponseMessage response = context.Response;
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.IsAssignableFrom(typeof(ObjectContent), response.Content);
-            Assert.IsType(typeof(HttpError), ((ObjectContent)response.Content).Value);
-            Assert.Equal("Only $skip and $top OData query options are supported for this type.",
-                         ((HttpError)((ObjectContent)response.Content).Value).Message);
+            HttpError error = ((ObjectContent)response.Content).Value as HttpError;
+            Assert.NotNull(error);
+            Assert.Equal("Only $skip and $top OData query options are supported for this type.", error["ExceptionMessage"]);
         }
 
         [Fact]
@@ -376,12 +377,15 @@ namespace System.Web.Http.OData
         }
 
         [Theory]
-        [PropertyData("SupportedQueryNames")]
-        public void ValidateQuery_Accepts_All_Supported_QueryNames(string queryName)
+        [InlineData("$filter=Name eq 'abc'")]
+        [InlineData("$orderby=Name")]
+        [InlineData("$skip=3")]
+        [InlineData("$top=2")]
+        public void ValidateQuery_Accepts_All_Supported_QueryNames(string query)
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName + "=x");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
 

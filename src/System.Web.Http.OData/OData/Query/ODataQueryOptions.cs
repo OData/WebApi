@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -31,6 +32,7 @@ namespace System.Web.Http.OData.Query
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
+        private ODataQueryValidator _validator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from 
@@ -106,6 +108,8 @@ namespace System.Web.Http.OData.Query
                         break;
                 }
             }
+
+            Validator = new ODataQueryValidator();
         }
 
         /// <summary>
@@ -142,6 +146,26 @@ namespace System.Web.Http.OData.Query
         /// Gets the <see cref="TopQueryOption"/>.
         /// </summary>
         public TopQueryOption Top { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the Filter Query Validator
+        /// </summary>
+        public ODataQueryValidator Validator
+        {
+            get
+            {
+                return _validator;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _validator = value;
+            }
+        }
 
         /// <summary>
         /// Check if the given query is supported by the built in ODataQueryOptions.
@@ -244,6 +268,16 @@ namespace System.Web.Http.OData.Query
             }
 
             return result;
+        }
+
+        public virtual void Validate(ODataValidationSettings validationSettings)
+        {
+            if (validationSettings == null)
+            {
+                throw Error.ArgumentNull("validationSettings");
+            }
+
+            Validator.Validate(this, validationSettings);
         }
 
         private static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)

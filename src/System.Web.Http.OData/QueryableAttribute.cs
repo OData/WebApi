@@ -21,9 +21,17 @@ namespace System.Web.Http
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public class QueryableAttribute : ActionFilterAttribute
     {
+        private const char CommaSeparator = ',';
+        private const int MinAnyAllExpressionDepth = 0;
+        private const int MinMaxTop = 0;
+        private const int MinMaxSkip = 0;
+
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int _maxAnyAllExpressionDepth = 1;
         private int? _resultLimit;
+
+        private ODataValidationSettings _validationSettings;
+        private string _allowedOrderByProperties;
 
         /// <summary>
         /// Enables a controller action to support OData query parameters.
@@ -31,6 +39,7 @@ namespace System.Web.Http
         public QueryableAttribute()
         {
             EnsureStableOrdering = true;
+            _validationSettings = new ODataValidationSettings();
         }
 
         /// <summary>
@@ -82,9 +91,9 @@ namespace System.Web.Http
             }
             set
             {
-                if (value <= 0)
+                if (value < MinAnyAllExpressionDepth)
                 {
-                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinAnyAllExpressionDepth);
                 }
 
                 _maxAnyAllExpressionDepth = value;
@@ -110,6 +119,112 @@ namespace System.Web.Http
                     throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
                 _resultLimit = value;
+            }
+        }
+
+        public AllowedQueryOptions AllowedQueryOptions
+        {
+            get
+            {
+                return _validationSettings.AllowedQueryOptions;
+            }
+            set
+            {
+                _validationSettings.AllowedQueryOptions = value;
+            }
+        }
+
+        public AllowedFunctionNames AllowedFunctionNames
+        {
+            get
+            {
+                return _validationSettings.AllowedFunctionNames;
+            }
+            set
+            {
+                _validationSettings.AllowedFunctionNames = value;
+            }
+        }
+
+        public AllowedArithmeticOperators AllowedArithmeticOperators
+        {
+            get
+            {
+                return _validationSettings.AllowedArithmeticOperators;
+            }
+            set
+            {
+                _validationSettings.AllowedArithmeticOperators = value;
+            }
+        }
+
+        public AllowedLogicalOperators AllowedLogicalOperators
+        {
+            get
+            {
+                return _validationSettings.AllowedLogicalOperators;
+            }
+            set
+            {
+                _validationSettings.AllowedLogicalOperators = value;
+            }
+        }
+
+        public string AllowedOrderByProperties
+        {
+            get
+            {
+                return _allowedOrderByProperties;
+            }
+            set
+            {
+                if (String.IsNullOrEmpty(value))
+                {
+                    throw Error.ArgumentNullOrEmpty("value");
+                }
+
+                _allowedOrderByProperties = value;
+
+                // now parse the value and set it to validationSettings
+                string[] properties = _allowedOrderByProperties.Split(CommaSeparator);
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    _validationSettings.AllowedOrderByProperties.Add(properties[i].Trim());
+                }
+            }
+        }
+
+        public int MaxSkip
+        {
+            get
+            {
+                return _validationSettings.MaxSkip ?? default(int);
+            }
+            set
+            {
+                if (value < MinMaxSkip)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxSkip);
+                }
+
+                _validationSettings.MaxSkip = value;
+            }
+        }
+
+        public int MaxTop
+        {
+            get
+            {
+                return _validationSettings.MaxTop ?? default(int);
+            }
+            set
+            {
+                if (value < MinMaxTop)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxTop);
+                }
+
+                _validationSettings.MaxTop = value;
             }
         }
 
@@ -309,15 +424,7 @@ namespace System.Web.Http
                 }
             }
 
-            // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
-            if (queryOptions.Context.IsPrimitiveClrType && (queryOptions.Filter != null || queryOptions.OrderBy != null))
-            {
-                // An attempt to use a query option not allowed for primitive types
-                // generates a BadRequest with a general message that avoids information disclosure.
-                throw new HttpResponseException(request.CreateErrorResponse(
-                                                    HttpStatusCode.BadRequest,
-                                                    SRResources.OnlySkipAndTopSupported));
-            }
+            queryOptions.Validate(_validationSettings);
         }
     }
 }

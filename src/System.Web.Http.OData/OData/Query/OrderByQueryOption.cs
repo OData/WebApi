@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -18,6 +19,7 @@ namespace System.Web.Http.OData.Query
     {
         private OrderByQueryNode _queryNode;
         private ICollection<OrderByPropertyNode> _propertyNodes;
+        private OrderByQueryValidator _validator;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
@@ -39,6 +41,7 @@ namespace System.Web.Http.OData.Query
 
             Context = context;
             RawValue = rawValue;
+            Validator = new OrderByQueryValidator();
         }
 
         /// <summary>
@@ -69,6 +72,26 @@ namespace System.Web.Http.OData.Query
         ///  Gets the raw $orderby value.
         /// </summary>
         public string RawValue { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the OrderBy Query Validator
+        /// </summary>
+        public OrderByQueryValidator Validator
+        {
+            get
+            {
+                return _validator;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _validator = value;
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="OrderByQueryNode"/> for this query option.
@@ -108,6 +131,16 @@ namespace System.Web.Http.OData.Query
         public IOrderedQueryable ApplyTo(IQueryable query)
         {
             return ApplyToCore(query);
+        }
+
+        public void Validate(ODataValidationSettings validationSettings)
+        {
+            if (validationSettings == null)
+            {
+                throw Error.ArgumentNull("validationSettings");
+            }
+
+            Validator.Validate(this, validationSettings);
         }
 
         private IOrderedQueryable ApplyToCore(IQueryable query)

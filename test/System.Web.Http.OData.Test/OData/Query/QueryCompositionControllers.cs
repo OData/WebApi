@@ -5,7 +5,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.OData;
+using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Query
 {
@@ -96,6 +98,84 @@ namespace System.Web.Http.OData.Query
         public IQueryable<QueryCompositionCustomer> Get()
         {
             return QueryCompositionCustomerController.CustomerList.AsQueryable();
+        }
+    }
+
+    public class QueryCompositionCustomerValidationController : ApiController
+    {
+        [Queryable(MaxSkip = 1, MaxTop = 2, AllowedArithmeticOperators = AllowedArithmeticOperators.Modulo, AllowedFunctionNames = AllowedFunctionNames.Length,
+            AllowedLogicalOperators = AllowedLogicalOperators.Equal, AllowedOrderByProperties = "Id,Name")]
+        public IQueryable<QueryCompositionCustomer> Get()
+        {
+            return QueryCompositionCustomerController.CustomerList.AsQueryable();
+        }
+
+        // low level api
+        [MyQueryable]
+        public IQueryable<QueryCompositionCustomer> Get(int id)
+        {
+            return QueryCompositionCustomerController.CustomerList.AsQueryable();
+        }
+    }
+
+    public class MyQueryableAttribute : QueryableAttribute
+    {
+        public override void ValidateQuery(HttpRequestMessage request, ODataQueryOptions queryOptions)
+        {
+            if (queryOptions.Filter != null)
+            {
+                queryOptions.Filter.Validator = new MyFilterQueryValidator();
+            }
+
+            if (queryOptions.OrderBy != null)
+            {
+                queryOptions.OrderBy.Validator = new MyOrderByQueryValidator();
+            }
+
+            base.ValidateQuery(request, queryOptions);
+        }
+    }
+
+    public class MyFilterQueryValidator : FilterQueryValidator
+    {
+        public override void ValidateConstantQueryNode(ConstantQueryNode constantNode, ODataValidationSettings settings)
+        {
+            // Validate that client did not send a big constant in the query
+            if (Convert.ToInt32(constantNode.Value) > 100)
+            {
+                throw new ODataException("Any constant that is more than 100 is not allowed.");
+            }
+
+            base.ValidateConstantQueryNode(constantNode, settings);
+        }
+    }
+
+    public class MyOrderByQueryValidator : OrderByQueryValidator
+    {
+        public override void Validate(OrderByQueryOption option, ODataValidationSettings validationSettings)
+        {
+            // validate the orderby is executed in a way that one can order either by Id or by Name, but not both
+            if (option.PropertyNodes.Count > 1 )
+            {
+                throw new ODataException("Order by more than one property is not allowed.");
+            }
+
+            base.Validate(option, validationSettings);
+        }
+    }
+
+    public class QueryCompositionCategoryValidationController : ApiController
+    {
+        [Queryable(AllowedQueryOptions = AllowedQueryOptions.OrderBy | AllowedQueryOptions.Filter)]
+        public IQueryable<QueryCompositionCategory> Get()
+        {
+            return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
+        }
+
+        [Queryable(AllowedOrderByProperties="Id")]
+        public IQueryable<QueryCompositionCategory> Get(int id)
+        {
+            return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
         }
     }
 

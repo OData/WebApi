@@ -447,7 +447,7 @@ namespace System.Web.Http.OData.Formatter
 
         public static bool IsNullable(Type type)
         {
-            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
+            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

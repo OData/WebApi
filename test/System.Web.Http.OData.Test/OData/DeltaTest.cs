@@ -1,13 +1,38 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
+using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.TestCommon.Models;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData
 {
     public class DeltaTest
     {
+        public static IEnumerable<object[]> DeltaModelPropertyNamesData
+        {
+            get
+            {
+                MethodInfo getDefaultValue = typeof(DeltaTest).GetMethod("GetDefaultValue");
+
+                var defaultValues = typeof(DeltaModel).GetProperties().Select(p => new[] { p.Name, getDefaultValue.MakeGenericMethod(p.PropertyType).Invoke(obj: null, parameters: null) });
+                return defaultValues.Concat(new object[][] 
+                {
+                    new object[] { "StringProperty" , "42" },
+                    new object[] { "ComplexModelProperty", new ComplexModel { ComplexIntProperty = 42, ComplexNullableIntProperty = null } },
+                    new object[] { "CollectionProperty", new Collection<int> { 1, 2, 3 }}
+                });
+
+            }
+        }
+
         [Fact]
         public void Ctor_ThrowsArgumentNull_entityType()
         {
@@ -27,6 +52,22 @@ namespace System.Web.Http.OData
         {
             Delta<AbstractBase> abstractDelta = null;
             Assert.Null(abstractDelta);
+        }
+
+        [Theory]
+        [PropertyData("DeltaModelPropertyNamesData")]
+        public void RoundTrip_Properties(string propertyName, object value)
+        {
+            Delta<DeltaModel> delta = new Delta<DeltaModel>();
+
+            Type propertyType;
+            Assert.True(delta.TryGetPropertyType(propertyName, out propertyType));
+
+            Assert.True(delta.TrySetPropertyValue(propertyName, value));
+
+            object retrievedValue;
+            delta.TryGetPropertyValue(propertyName, out retrievedValue);
+            Assert.Equal(value, retrievedValue);
         }
 
         [Fact]
@@ -257,6 +298,109 @@ namespace System.Web.Http.OData
             Assert.Throws<InvalidOperationException>(
                 () => delta.CopyUnchangedValues(unrelatedEntity),
                 "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
+        }
+
+        public static TheoryDataSet<string, string, object> ODataFormatter_Can_Read_Delta_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, object>()
+                {
+                    { "IntProperty", "23", 23 },
+                    { "LongProperty", Error.Format("'{0}'", Int64.MaxValue), Int64.MaxValue }, // longs are serialized as strings in odata json
+                    { "LongProperty", Error.Format("'{0}'", Int64.MinValue), Int64.MinValue }, // longs are serialized as strings in odata json
+                    { "NullableIntProperty", "null", null },
+                    { "BoolProperty", "true", true },
+                    { "NullableBoolProperty", "null", null },
+                    { "DateTimeProperty", "'\\/Date(694224000000)\\/'", new DateTime(1992, 1, 1) },
+                    { "StringProperty", "'42'", "42" },
+                    { "ComplexModelProperty", "{ 'ComplexIntProperty' : 42 }", new ComplexModel { ComplexIntProperty = 42 } },
+                    { "CollectionProperty", "{ 'results' : [ 1, 2, 3 ] }", new Collection<int> { 1,2, 3} },
+                    { "ComplexModelCollectionProperty", "{ 'results' : [ { 'ComplexIntProperty' : 42 } ] }", new Collection<ComplexModel> { new ComplexModel { ComplexIntProperty = 42 } } }
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("ODataFormatter_Can_Read_Delta_DataSet")]
+        public void ODataFormatter_Can_Read_Delta(string propertyName, string propertyJsonValue, object expectedValue)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<DeltaModel>();
+            IEdmModel model = builder.GetEdmModel();
+            var odataFormatters = ODataMediaTypeFormatters.Create(model);
+            HttpContent content = new StringContent(String.Format("{{ '{0}' : {1} }}", propertyName, propertyJsonValue));
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+
+            // Act
+            Delta<DeltaModel> delta = content.ReadAsAsync<Delta<DeltaModel>>(odataFormatters).Result;
+
+            // Assert
+            Assert.Equal(delta.GetChangedPropertyNames(), new[] { propertyName });
+            object value;
+            Assert.True(delta.TryGetPropertyValue(propertyName, out value));
+            Assert.Equal(expectedValue, value);
+        }
+
+        public static T GetDefaultValue<T>()
+        {
+            return default(T);
+        }
+
+        private class DeltaModel
+        {
+            public int IntProperty { get; set; }
+
+            public int? NullableIntProperty { get; set; }
+
+            public long LongProperty { get; set; }
+
+            public long? NullableLongProperty { get; set; }
+
+            public bool BoolProperty { get; set; }
+
+            public bool? NullableBoolProperty { get; set; }
+
+            public Guid GuidProperty { get; set; }
+
+            public Guid? NullableGuidProperty { get; set; }
+
+            public DateTime DateTimeProperty { get; set; }
+
+            public DateTime? NullableDateTimeProperty { get; set; }
+
+            public string StringProperty { get; set; }
+
+            public ComplexModel ComplexModelProperty { get; set; }
+
+            public Collection<int> CollectionProperty { get; set; }
+
+            public Collection<ComplexModel> ComplexModelCollectionProperty { get; set; }
+        }
+
+        private class ComplexModel
+        {
+            public int ComplexIntProperty { get; set; }
+
+            public int? ComplexNullableIntProperty { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                ComplexModel model = obj as ComplexModel;
+
+                if (model == null)
+                {
+                    return false;
+                }
+
+                return ComplexIntProperty == model.ComplexIntProperty && ComplexNullableIntProperty == model.ComplexNullableIntProperty;
+            }
+
+            public override int GetHashCode()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private abstract class AbstractBase

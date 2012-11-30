@@ -102,7 +102,10 @@ namespace System.Web.Http.OData.Formatter
         [InlineData(typeof(Nullable<int>), true)]
         [InlineData(typeof(int), false)]
         [InlineData(typeof(char), false)]
-        public void IsNullable_RecognizesClassesAndNullableOfTs(Type type, bool isNullable)
+        [InlineData(typeof(IEnumerable<int>), true)]
+        [InlineData(typeof(ICollection<int>), true)]
+        [InlineData(typeof(DateTime), false)]
+        public void IsNullable_RecognizesClassesAndInterfacesAndNullableOfTs(Type type, bool isNullable)
         {
             Assert.Equal(isNullable, EdmLibHelpers.IsNullable(type));
         }

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData
@@ -85,13 +86,15 @@ namespace System.Web.Http.OData
             }
 
             PropertyAccessor<TEntityType> cacheHit = _propertiesThatExist[name];
-            Type valueType = value != null ? value.GetType() : null;
-            if (cacheHit.Property.PropertyType != valueType)
+
+            if (value == null && !EdmLibHelpers.IsNullable(cacheHit.Property.PropertyType))
             {
-                if (!(cacheHit.Property.PropertyType.IsClass && value == null))
-                {
-                    return false;
-                }
+                return false;
+            }
+
+            if (value != null && !cacheHit.Property.PropertyType.IsAssignableFrom(value.GetType()))
+            {
+                return false;
             }
 
             //.Setter.Invoke(_entity, new object[] { value });

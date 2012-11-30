@@ -170,6 +170,8 @@
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />
     <Compile Include="OData\Query\PartialTrustTest.cs" />
+    <Compile Include="OData\Routing\ODataRoutingModel.cs" />
+    <Compile Include="OData\Routing\ODataRoutingTest.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandlerTest.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />

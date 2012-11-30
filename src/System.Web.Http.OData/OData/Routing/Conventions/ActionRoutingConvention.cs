@@ -42,8 +42,7 @@ namespace System.Web.Http.OData.Routing.Conventions
 
             if (controllerContext.Request.Method == HttpMethod.Post)
             {
-                if (odataPath.PathTemplate == "~/entityset/key/action" || odataPath.PathTemplate == "~/entityset/key/cast/action" ||
-                    odataPath.PathTemplate == "~/entityset/action")
+                if (odataPath.PathTemplate == "~/entityset/key/action" || odataPath.PathTemplate == "~/entityset/key/cast/action")
                 {
                     ActionPathSegment actionSegment = odataPath.Segments.Last() as ActionPathSegment;
                     IEdmFunctionImport action = actionSegment.Action;
@@ -55,15 +54,30 @@ namespace System.Web.Http.OData.Routing.Conventions
                         IEdmEntityType bindingParameterType = bindingParameter.Type.Definition as IEdmEntityType;
                         if (bindingParameterType != null)
                         {
-                            // if we have a key in our path, add it as a route value
-                            if (odataPath.Segments.Count > 2)
-                            {
-                                KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                                controllerContext.RouteData.Values.Add(ODataRouteConstants.Key, keyValueSegment.Value);
-                            }
+                            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+                            controllerContext.RouteData.Values.Add(ODataRouteConstants.Key, keyValueSegment.Value);
 
                             // e.g. Try ActionOnBindingParameterType first, then fallback on Action action name
                             string actionOnBindingTypeActionName = action.Name + "On" + bindingParameterType.Name;
+                            return actionMap.Contains(actionOnBindingTypeActionName) ? actionOnBindingTypeActionName : action.Name;
+                        }
+                    }
+                }
+                else if (odataPath.PathTemplate == "~/entityset/action" || odataPath.PathTemplate == "~/entityset/cast/action")
+                {
+                    ActionPathSegment actionSegment = odataPath.Segments.Last() as ActionPathSegment;
+                    IEdmFunctionImport action = actionSegment.Action;
+
+                    // The binding parameter is the first parameter by convention
+                    IEdmFunctionParameter bindingParameter = action.Parameters.FirstOrDefault();
+                    if (action.IsBindable && bindingParameter != null)
+                    {
+                        IEdmCollectionType bindingParameterType = bindingParameter.Type.Definition as IEdmCollectionType;
+                        if (bindingParameterType != null)
+                        {
+                            // e.g. Try ActionOnBindingParameterType first, then fallback on Action action name
+                            IEdmEntityType elementType = bindingParameterType.ElementType.Definition as IEdmEntityType;
+                            string actionOnBindingTypeActionName = action.Name + "OnCollectionOf" + elementType.Name;
                             return actionMap.Contains(actionOnBindingTypeActionName) ? actionOnBindingTypeActionName : action.Name;
                         }
                     }

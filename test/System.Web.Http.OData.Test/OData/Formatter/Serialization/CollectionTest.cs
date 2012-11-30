@@ -19,7 +19,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         public CollectionTest()
         {
-            _formatter = new ODataMediaTypeFormatter(GetSampleModel(), GetSampleRequest());
+            _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
+                new ODataPayloadKind[] { ODataPayloadKind.Collection }, GetSampleRequest());
         }
 
         /// <summary>

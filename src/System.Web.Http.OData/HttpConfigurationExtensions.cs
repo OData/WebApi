@@ -2,15 +2,13 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.Routing.Conventions;
@@ -23,7 +21,6 @@ namespace System.Web.Http
     public static class HttpConfigurationExtensions
     {
         private const string EdmModelKey = "MS_EdmModel";
-        private const string ODataFormatterKey = "MS_ODataFormatter";
         private const string ODataPathHandlerKey = "MS_ODataPathHandler";
         private const string ODataRoutingConventionsKey = "MS_ODataRoutingConventions";
 
@@ -73,60 +70,22 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Retrieve the <see cref="MediaTypeFormatter" /> from the configuration. Null if user has not set it.
+        /// Retrieve the OData <see cref="MediaTypeFormatter" />s from the configuration. An empty list if user has not
+        /// set it.
         /// </summary>
         /// <param name="configuration">Configuration to look into.</param>
-        /// <param name="edmModel">The EDM model.</param>
         /// <returns>
-        /// Returns an <see cref="MediaTypeFormatter" /> for this configuration.
+        /// Returns a list of all OData <see cref="MediaTypeFormatter" />s for this configuration.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Calling the formatter only to identify the ODataFormatter; exceptions can be ignored")]
-        internal static MediaTypeFormatter GetODataFormatter(this HttpConfiguration configuration, out IEdmModel edmModel)
+        internal static IEnumerable<MediaTypeFormatter> GetODataFormatters(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            foreach (MediaTypeFormatter formatter in configuration.Formatters)
-            {
-                ODataMediaTypeFormatter odataFormatter = formatter as ODataMediaTypeFormatter;
-                if (odataFormatter != null)
-                {
-                    edmModel = odataFormatter.Model;
-                    return odataFormatter;
-                }
-            }
-
-            // Detects ODataFormatters that are wrapped by tracing
-            // Creates a dummy request message and sees if the formatter adds a model to the request properties
-            // This is a workaround until tracing provides information about the wrapped inner formatter
-            foreach (MediaTypeFormatter formatter in configuration.Formatters)
-            {
-                using (HttpRequestMessage request = new HttpRequestMessage())
-                {
-                    try
-                    {
-                        formatter.GetPerRequestFormatterInstance(typeof(IEdmModel), request, mediaType: null);
-                        object model;
-                        if (request.Properties.TryGetValue(ODataMediaTypeFormatter.EdmModelKey, out model))
-                        {
-                            edmModel = model as IEdmModel;
-                            if (edmModel != null)
-                            {
-                                return formatter;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Ignore exceptions - it isn't the OData formatter we're looking for
-                    }
-                }
-            }
-
-            edmModel = null;
-            return null;
+            Contract.Assert(configuration.Formatters != null);
+            return configuration.Formatters.Where(f => f != null && f.IsODataFormatter());
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     internal class ODataMetadataSerializer : ODataSerializer
     {
         public ODataMetadataSerializer()
-            : base(ODataPayloadKind.ServiceDocument)
+            : base(ODataPayloadKind.MetadataDocument)
         {
         }
 

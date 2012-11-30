@@ -15,6 +15,7 @@ using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -37,7 +38,7 @@ namespace System.Web.Http.OData.Formatter
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
             request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)");
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
 
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 
@@ -182,12 +183,13 @@ namespace System.Web.Http.OData.Formatter
 
         private ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
         {
-            return new ODataMediaTypeFormatter(model);
+            return new ODataMediaTypeFormatter(model, new ODataPayloadKind[0]);
         }
 
-        public ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request)
+        public ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request,
+            params ODataPayloadKind[] payloadKinds)
         {
-            return new ODataMediaTypeFormatter(model, request);
+            return new ODataMediaTypeFormatter(model, payloadKinds, request);
         }
 
         public ODataMediaTypeFormatter CreateFormatterWithoutRequest()

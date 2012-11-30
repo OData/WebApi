@@ -61,7 +61,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private ODataMediaTypeFormatter CreateFormatter()
         {
-            return new ODataMediaTypeFormatter(_model, GetSampleRequest());
+            return new ODataMediaTypeFormatter(_model,
+                new ODataPayloadKind[] { ODataPayloadKind.Feed }, GetSampleRequest());
         }
 
         private HttpRequestMessage GetSampleRequest()

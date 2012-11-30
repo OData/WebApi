@@ -13,6 +13,7 @@ using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -76,7 +77,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(EdmCoreModel.Instance);
+            ODataMediaTypeFormatter formatter = CreateODataFormatter();
 
             // Act
             configuration.Formatters.Insert(0, formatter);
@@ -86,19 +87,25 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void GetODataFormatter_ReturnsFormatter_IfSet()
+        public void GetODataFormatters_ReturnsFormatter_IfSet()
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(EdmCoreModel.Instance);
-            configuration.Formatters.Add(formatter);
+            ODataMediaTypeFormatter formatter1 = CreateODataFormatter();
+            ODataMediaTypeFormatter formatter2 = CreateODataFormatter();
+            configuration.Formatters.Add(formatter1);
+            configuration.Formatters.Add(formatter2);
 
             // Act
-            IEdmModel model;
-            MediaTypeFormatter result = configuration.GetODataFormatter(out model);
+            IEnumerable<MediaTypeFormatter> result = configuration.GetODataFormatters();
 
             // Assert
-            Assert.Same(formatter, result);
+            IEnumerable<MediaTypeFormatter> expectedFormatters = new MediaTypeFormatter[]
+            {
+                formatter1, formatter2
+            };
+
+            Assert.True(expectedFormatters.SequenceEqual(result));
         }
 
         [Fact]
@@ -138,6 +145,11 @@ namespace System.Web.Http.OData
 
             Assert.Equal(1, filters.Count);
             Assert.Equal(100, ((QueryableAttribute)filters[0].Instance).ResultLimit);
+        }
+
+        private static ODataMediaTypeFormatter CreateODataFormatter()
+        {
+            return new ODataMediaTypeFormatter(EdmCoreModel.Instance, new ODataPayloadKind[0]);
         }
     }
 }

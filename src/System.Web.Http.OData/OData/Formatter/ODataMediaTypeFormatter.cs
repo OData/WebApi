@@ -33,31 +33,42 @@ namespace System.Web.Http.OData.Formatter
         private readonly ODataVersion _defaultODataVersion;
         private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly IEdmModel _model;
+
+        /// <summary>
+        /// The set of payload kinds this formatter will accept (in CanReadType and CanWriteType).
+        /// </summary>
+        private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
+
         private readonly HttpRequestMessage _request;
         private readonly ODataSerializerProvider _serializerProvider;
 
-        internal ODataMediaTypeFormatter(IEdmModel model)
-            : this(model, request: null)
+        internal ODataMediaTypeFormatter(IEdmModel model, IEnumerable<ODataPayloadKind> payloadKinds)
+            : this(model, payloadKinds, request: null)
         {
         }
 
-        internal ODataMediaTypeFormatter(IEdmModel model, HttpRequestMessage request)
+        internal ODataMediaTypeFormatter(IEdmModel model, IEnumerable<ODataPayloadKind> payloadKinds,
+            HttpRequestMessage request)
             : this(new DefaultODataDeserializerProvider(model), new DefaultODataSerializerProvider(model),
-                ODataFormatterConstants.DefaultODataVersion, request)
+                payloadKinds, ODataFormatterConstants.DefaultODataVersion, request)
         {
         }
 
         private ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
             ODataSerializerProvider serializerProvider,
+            IEnumerable<ODataPayloadKind> payloadKinds,
             ODataVersion version,
             HttpRequestMessage request)
         {
             Contract.Assert(deserializerProvider != null);
-            _deserializerProvider = deserializerProvider;
             Contract.Assert(deserializerProvider.EdmModel != null);
-            _model = deserializerProvider.EdmModel;
             Contract.Assert(serializerProvider != null);
+            Contract.Assert(payloadKinds != null);
+
+            _deserializerProvider = deserializerProvider;
+            _model = deserializerProvider.EdmModel;
             _serializerProvider = serializerProvider;
+            _payloadKinds = payloadKinds;
             _defaultODataVersion = version;
             _request = request;
         }
@@ -65,18 +76,22 @@ namespace System.Web.Http.OData.Formatter
         private ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version,
             HttpRequestMessage request)
         {
+            Contract.Assert(formatter._serializerProvider != null);
+            Contract.Assert(formatter._model != null);
+            Contract.Assert(formatter._deserializerProvider != null);
+            Contract.Assert(formatter._payloadKinds != null);
+            Contract.Assert(request != null);
+
             // Parameter 1: formatter
 
             // Execept for the other two parameters, this constructor is a copy constructor, and we need to copy
             // everything on the other instance.
 
             // Parameter 1A: Copy this class's private fields.
-            Contract.Assert(formatter._serializerProvider != null);
             _serializerProvider = formatter._serializerProvider;
-            Contract.Assert(formatter._model != null);
             _model = formatter._model;
-            Contract.Assert(formatter._deserializerProvider != null);
             _deserializerProvider = formatter._deserializerProvider;
+            _payloadKinds = formatter._payloadKinds;
 
             // Parameter 1B: Copy the base class's properties.
             foreach (MediaTypeMapping mediaTypeMapping in formatter.MediaTypeMappings)
@@ -147,7 +162,7 @@ namespace System.Web.Http.OData.Formatter
             // call base to validate parameters and set Content-Type header based on mediaType parameter.
             base.SetDefaultContentHeaders(type, headers, mediaType);
 
-            ODataFormat format = GetODataFormat(headers);
+            ODataFormat format = GetODataFormat(headers, type);
             IEnumerable<KeyValuePair<string, string>> oDataHeaders = GetResponseMessageHeaders(type, format, _defaultODataVersion);
 
             foreach (KeyValuePair<string, string> pair in oDataHeaders)
@@ -175,7 +190,14 @@ namespace System.Web.Http.OData.Formatter
             }
 
             TryGetInnerTypeForDelta(ref type);
-            return _deserializerProvider.GetODataDeserializer(type) != null;
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type);
+
+            if (deserializer == null)
+            {
+                return false;
+            }
+
+            return _payloadKinds.Contains(deserializer.ODataPayloadKind);
         }
 
         /// <inheritdoc/>
@@ -187,7 +209,13 @@ namespace System.Web.Http.OData.Formatter
             }
 
             ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
-            return serializer != null;
+
+            if (serializer == null)
+            {
+                return false;
+            }
+
+            return _payloadKinds.Contains(serializer.ODataPayloadKind);
         }
 
         /// <inheritdoc/>
@@ -369,16 +397,22 @@ namespace System.Web.Http.OData.Formatter
             return responseMessage.Headers;
         }
 
-        private static ODataFormat GetODataFormat(HttpContentHeaders contentHeaders)
+        private static ODataFormat GetODataFormat(HttpContentHeaders contentHeaders, Type type)
         {
             Contract.Assert(contentHeaders != null);
+
+            // TODO: Move responsibility for Content-Type to Web API content negotation and remove this special logic.
+            if (typeof(IEdmModel).IsAssignableFrom(type))
+            {
+                return ODataFormat.Metadata;
+            }
 
             if (contentHeaders.ContentType == null)
             {
                 return ODataFormatterConstants.DefaultODataFormat;
             }
 
-            if (String.Equals(contentHeaders.ContentType.MediaType, ODataMediaTypes.ApplicationXml.MediaType, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(contentHeaders.ContentType.MediaType, ODataMediaTypes.ApplicationAtomXml.MediaType, StringComparison.OrdinalIgnoreCase))
             {
                 return ODataFormat.Atom;
             }

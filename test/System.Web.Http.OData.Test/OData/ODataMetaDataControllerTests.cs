@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Builder
             var response = client.GetAsync("http://localhost/$metadata").Result;
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(response.Content.Headers.ContentType.MediaType, "application/xml");
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
         }
 
@@ -40,8 +40,7 @@ namespace System.Web.Http.OData.Builder
             controller.Request = new HttpRequestMessage();
             controller.Request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
-            IEdmModel responseModel;
-            Assert.True(controller.GetMetadata().TryGetContentValue<IEdmModel>(out responseModel));
+            IEdmModel responseModel = controller.GetMetadata();
             Assert.Equal(model, responseModel);
         }
 
@@ -69,7 +68,7 @@ namespace System.Web.Http.OData.Builder
             var response = client.GetAsync("http://localhost/$metadata").Result;
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(response.Content.Headers.ContentType.MediaType, "application/xml");
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
         }
 
@@ -84,7 +83,7 @@ namespace System.Web.Http.OData.Builder
             var response = client.GetAsync("http://localhost/").Result;
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(response.Content.Headers.ContentType.MediaType, "application/xml");
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<workspace>", response.Content.ReadAsStringAsync().Result);
         }
     }

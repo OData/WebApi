@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net.Http.Formatting;
 
 namespace System.Web.Http
@@ -64,6 +66,20 @@ namespace System.Web.Http
             foreach (MediaTypeFormatter item in items)
             {
                 collection.Insert(index++, item);
+            }
+        }
+
+        internal static void RemoveRange(this MediaTypeFormatterCollection collection,
+            IEnumerable<MediaTypeFormatter> items)
+        {
+            Contract.Assert(collection != null);
+            Contract.Assert(items != null);
+
+            // Instantiate a separate array in case items and collection are linked. Otherwise, if modifying collection
+            // itself modified items, this code would throw during enumeration.
+            foreach (MediaTypeFormatter item in items.ToArray())
+            {
+                collection.Remove(item);
             }
         }
     }

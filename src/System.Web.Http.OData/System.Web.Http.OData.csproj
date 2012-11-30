@@ -131,6 +131,7 @@
     <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="ODataRouteConstants.cs" />
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
+    <Compile Include="MediaTypeFormatterExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HttpErrorExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />

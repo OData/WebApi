@@ -16,7 +16,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         public ComplexTypeTest()
         {
-            _formatter = new ODataMediaTypeFormatter(GetSampleModel(), GetSampleRequest());
+            _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
+                new ODataPayloadKind[] { ODataPayloadKind.Property }, GetSampleRequest());
         }
 
         [Fact]

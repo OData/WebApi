@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,22 +18,31 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataFormatterParameterBinding : HttpParameterBinding
     {
-        private MediaTypeFormatter _formatter;
+        private IEnumerable<MediaTypeFormatter> _formatters;
 
-        public ODataFormatterParameterBinding(HttpParameterDescriptor descriptor, MediaTypeFormatter formatter)
+        public ODataFormatterParameterBinding(HttpParameterDescriptor descriptor,
+            IEnumerable<MediaTypeFormatter> formatters)
             : base(descriptor)
         {
-            if (formatter == null)
+            if (formatters == null)
             {
-                throw Error.ArgumentNull("formatter");
+                throw Error.ArgumentNull("formatters");
             }
-            _formatter = formatter;
+
+            _formatters = formatters;
         }
 
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
         {
-            var formatter = _formatter.GetPerRequestFormatterInstance(Descriptor.ParameterType, actionContext.Request, actionContext.Request.Content.Headers.ContentType);
-            return Descriptor.BindWithFormatter(new[] { formatter }).ExecuteBindingAsync(metadataProvider, actionContext, cancellationToken);
+            List<MediaTypeFormatter> perRequestFormatters = new List<MediaTypeFormatter>();
+
+            foreach (MediaTypeFormatter formatter in _formatters)
+            {
+                MediaTypeFormatter perRequestFormatter = formatter.GetPerRequestFormatterInstance(Descriptor.ParameterType, actionContext.Request, actionContext.Request.Content.Headers.ContentType);
+                perRequestFormatters.Add(perRequestFormatter);
+            }
+
+            return Descriptor.BindWithFormatter(perRequestFormatters).ExecuteBindingAsync(metadataProvider, actionContext, cancellationToken);
         }
     }
 }

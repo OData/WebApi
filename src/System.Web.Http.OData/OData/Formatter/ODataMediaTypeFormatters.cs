@@ -22,8 +22,11 @@ namespace System.Web.Http.OData.Formatter
         {
             return new ODataMediaTypeFormatter[]
             {
-                CreateApplicationAtomXml(model),
+                CreateApplicationAtomXmlTypeFeed(model),
+                CreateApplicationAtomXmlTypeEntry(model),
                 CreateApplicationXml(model),
+                CreateApplicationAtomSvcXml(model),
+                CreateTextXml(model),
                 CreateApplicationJsonODataVerbose(model)
             };
         }
@@ -36,12 +39,31 @@ namespace System.Web.Http.OData.Formatter
                 throwOnInvalidBytes: true));
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationAtomXml(IEdmModel model)
+        private static ODataMediaTypeFormatter CreateApplicationAtomSvcXml(IEdmModel model)
         {
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
                 model,
-                ODataPayloadKind.Feed,
+                ODataPayloadKind.ServiceDocument);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomSvcXml);
+            return formatter;
+        }
+
+        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeEntry(IEdmModel model)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                model,
                 ODataPayloadKind.Entry);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeEntry);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
+            return formatter;
+        }
+
+        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeFeed(IEdmModel model)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                model,
+                ODataPayloadKind.Feed);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeFeed);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
             return formatter;
         }
@@ -83,6 +105,18 @@ namespace System.Web.Http.OData.Formatter
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(model, payloadKinds);
             AddSupportedEncodings(formatter);
+            return formatter;
+        }
+
+        private static ODataMediaTypeFormatter CreateTextXml(IEdmModel model)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                model,
+                ODataPayloadKind.Property,
+                ODataPayloadKind.EntityReferenceLink,
+                ODataPayloadKind.EntityReferenceLinks,
+                ODataPayloadKind.Collection);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.TextXml);
             return formatter;
         }
     }

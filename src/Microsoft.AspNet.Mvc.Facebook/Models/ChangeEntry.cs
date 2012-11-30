@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Models
 {
-    public partial class ChangeEntry
+    public class ChangeEntry
     {
         [JsonProperty("UId")]
         public long UserId { get; set; }

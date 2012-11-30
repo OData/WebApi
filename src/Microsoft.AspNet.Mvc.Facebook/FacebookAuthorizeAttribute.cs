@@ -17,6 +17,10 @@ namespace Microsoft.AspNet.Mvc.Facebook
 
         public FacebookAuthorizeAttribute(params string[] permissions)
         {
+            if (permissions == null)
+            {
+                throw new ArgumentNullException("permissions");
+            }
             _permissions = new ReadOnlyCollection<string>(permissions);
         }
 

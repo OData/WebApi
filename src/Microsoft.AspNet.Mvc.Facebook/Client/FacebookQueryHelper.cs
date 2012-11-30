@@ -12,8 +12,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
 {
     public class FacebookQueryHelper
     {
-        internal static readonly string SignedRequestKey = "signed_request";
-
         public static string GetFields(Type modelType)
         {
             IList<string> fieldNames = GetFieldNames(modelType, typesVisited: new HashSet<Type>());

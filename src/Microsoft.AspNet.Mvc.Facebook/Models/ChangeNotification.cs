@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Models
 {
-    public partial class ChangeNotification
+    public class ChangeNotification
     {
         public string Object { get; set; }
         public IEnumerable<ChangeEntry> Entry { get; set; }

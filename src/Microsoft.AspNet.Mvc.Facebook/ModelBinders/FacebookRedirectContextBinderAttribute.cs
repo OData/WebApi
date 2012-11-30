@@ -6,7 +6,7 @@ using System.Web.Mvc;
 namespace Microsoft.AspNet.Mvc.Facebook.ModelBinders
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    internal class FacebookRedirectContextBinderAttribute : CustomModelBinderAttribute
+    internal sealed class FacebookRedirectContextBinderAttribute : CustomModelBinderAttribute
     {
         public override IModelBinder GetBinder()
         {

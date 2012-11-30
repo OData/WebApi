@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Models
 {
-    public partial class UserPermissions
+    public class UserPermissions
     {
         public string Id { get; set; }
         public string Permissions { get; set; }

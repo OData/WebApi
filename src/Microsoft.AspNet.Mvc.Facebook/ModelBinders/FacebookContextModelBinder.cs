@@ -24,7 +24,12 @@ namespace Microsoft.AspNet.Mvc.Facebook.ModelBinders
         public virtual object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
         {
             FacebookClient client = _config.ClientProvider.CreateClient();
-            dynamic signedRequest = client.ParseSignedRequest(controllerContext.HttpContext.Request);
+            dynamic signedRequest = FacebookRequestHelpers.GetSignedRequest(
+                controllerContext.HttpContext,
+                rawSignedRequest =>
+                {
+                    return client.ParseSignedRequest(rawSignedRequest);
+                });
             if (signedRequest != null)
             {
                 string accessToken = signedRequest.oauth_token;

@@ -105,6 +105,10 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\FacebookRequestHelper.cs" />
+    <Compile Include="FacebookAppSettingKeys.cs" />
+    <Compile Include="FacebookPreAppStartSettings.cs" />
+    <Compile Include="FacebookAuthenticationModule.cs" />
     <Compile Include="FacebookHtmlHelperExtensions.cs" />
     <Compile Include="GlobalFacebookConfiguration.cs" />
     <Compile Include="ModelBinders\FacebookRedirectContextBinderAttribute.cs" />

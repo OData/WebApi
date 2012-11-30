@@ -49,13 +49,29 @@ namespace Microsoft.AspNet.Mvc.Facebook
             get { return _properties; }
         }
 
-        public void LoadFromAppSettings()
+        public virtual void LoadFromAppSettings()
         {
-            AppId = ConfigurationManager.AppSettings["Facebook:AppId"];
-            AppSecret = ConfigurationManager.AppSettings["Facebook:AppSecret"];
-            AppNamespace = ConfigurationManager.AppSettings["Facebook:AppNamespace"];
-            AppUrl = ConfigurationManager.AppSettings["Facebook:AppUrl"];
-            AuthorizationRedirectPath = ConfigurationManager.AppSettings["Facebook:AuthorizationRedirectPath"];
+            AppId = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppId];
+            if (String.IsNullOrEmpty(AppId))
+            {
+                throw new InvalidOperationException(String.Format(
+                    CultureInfo.CurrentCulture,
+                    Resources.AppSettingIsRequired,
+                    FacebookAppSettingKeys.AppId));
+            }
+
+            AppSecret = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppSecret];
+            if (String.IsNullOrEmpty(AppSecret))
+            {
+                throw new InvalidOperationException(String.Format(
+                    CultureInfo.CurrentCulture,
+                    Resources.AppSettingIsRequired,
+                    FacebookAppSettingKeys.AppSecret));
+            }
+
+            AppNamespace = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppNamespace];
+            AppUrl = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppUrl];
+            AuthorizationRedirectPath = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AuthorizationRedirectPath];
         }
 
         private string GetAppUrl()

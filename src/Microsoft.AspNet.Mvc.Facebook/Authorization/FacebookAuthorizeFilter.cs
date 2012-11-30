@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using Facebook;
 using Microsoft.AspNet.Mvc.Facebook.Client;
@@ -27,8 +28,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
 
         public virtual void OnAuthorization(AuthorizationContext filterContext)
         {
-            // TODO, set the state parameter to protect against cross-site request forgery (https://developers.facebook.com/docs/howtos/login/server-side-login/).
-            // This will require session state to be used so we have to fall back if session is disabled (https://developers.facebook.com/docs/reference/dialogs/oauth/#parameters).
             if (filterContext == null)
             {
                 throw new ArgumentNullException("filterContext");
@@ -42,7 +41,13 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
             }
 
             FacebookClient client = _config.ClientProvider.CreateClient();
-            dynamic signedRequest = client.ParseSignedRequest(filterContext.HttpContext.Request);
+            HttpRequestBase request = filterContext.HttpContext.Request;
+            dynamic signedRequest = FacebookRequestHelpers.GetSignedRequest(
+                filterContext.HttpContext,
+                rawSignedRequest =>
+                {
+                    return client.ParseSignedRequest(rawSignedRequest);
+                });
             string userId = null;
             string accessToken = null;
             if (signedRequest != null)
@@ -52,10 +57,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
             }
 
             string appUrl = _config.AppUrl;
-            string redirectUrl = appUrl + filterContext.HttpContext.Request.Url.PathAndQuery;
-            if (signedRequest == null || userId == null || accessToken == null)
+            string redirectUrl = appUrl + request.Url.PathAndQuery;
+            if (signedRequest == null || String.IsNullOrEmpty(userId) || String.IsNullOrEmpty(accessToken))
             {
-                // Request is not coming from facebook, redirect to facebook login.
+                // Cannot obtain user information from signed_request, redirect to Facebook login.
                 Uri loginUrl = client.GetLoginUrl(redirectUrl, _config.AppId, null);
                 filterContext.Result = CreateRedirectResult(loginUrl);
             }
@@ -67,7 +72,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
                     IEnumerable<string> currentPermissions = _config.PermissionService.GetUserPermissions(userId, accessToken);
 
                     // If the current permissions doesn't cover all required permissions,
-                    // redirect to facebook login or to the specified redirect path.
+                    // redirect to Facebook login or to the specified redirect path.
                     if (currentPermissions == null || !requiredPermissions.IsSubsetOf(currentPermissions))
                     {
                         string requiredPermissionString = String.Join(",", requiredPermissions);

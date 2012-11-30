@@ -61,6 +61,15 @@ namespace Microsoft.AspNet.Mvc.Facebook {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The app setting &apos;{0}&apos; is required and cannot be missing or empty. Make sure you set it in the configuration file..
+        /// </summary>
+        internal static string AppSettingIsRequired {
+            get {
+                return ResourceManager.GetString("AppSettingIsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This argument cannot be null or empty..
         /// </summary>
         internal static string ArgumentCannotBeNullOrEmpty {

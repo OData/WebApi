@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalFacebookConfigurationTest.cs" />
     <Compile Include="FacebookAuthorizeFilterTest.cs" />
     <Compile Include="FacebookClientExtensionsTest.cs" />
     <Compile Include="FacebookQueryHelperTest.cs" />
@@ -118,7 +119,7 @@
     <Compile Include="FacebookRedirectContextModelBinderTest.cs" />
     <Compile Include="FacebookConfigurationTest.cs" />
     <Compile Include="FacebookContextModelBinderTest.cs" />
-    <Compile Include="GlobalFacebookConfigurationTest.cs" />
+    <Compile Include="PreApplicationStartCodeTest.cs" />
     <Compile Include="FacebookRealtimeControllerTest.cs" />
     <Compile Include="Helpers\ContextHelpers.cs" />
     <Compile Include="Helpers\LocalFacebookClient.cs" />

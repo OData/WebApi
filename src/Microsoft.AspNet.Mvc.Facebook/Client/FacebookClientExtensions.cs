@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Facebook;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Client
@@ -96,16 +95,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
             }
 
             return client.GetLoginUrl(loginUrlParameters);
-        }
-
-        internal static object ParseSignedRequest(this FacebookClient client, HttpRequestBase request)
-        {
-            string requestParam = request.Form[FacebookQueryHelper.SignedRequestKey] ?? request.QueryString[FacebookQueryHelper.SignedRequestKey];
-            if (requestParam != null)
-            {
-                return client.ParseSignedRequest(requestParam);
-            }
-            return null;
         }
 
         internal static IEnumerable<string> GetCurrentUserPermissions(this FacebookClient client)

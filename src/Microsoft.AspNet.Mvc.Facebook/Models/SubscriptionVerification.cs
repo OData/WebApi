@@ -5,7 +5,7 @@ using System.Web.Http;
 namespace Microsoft.AspNet.Mvc.Facebook.Models
 {
     [FromUri(Name = "hub")]
-    public partial class SubscriptionVerification
+    public class SubscriptionVerification
     {
         public string Mode { get; set; }
         public string Verify_Token { get; set; }

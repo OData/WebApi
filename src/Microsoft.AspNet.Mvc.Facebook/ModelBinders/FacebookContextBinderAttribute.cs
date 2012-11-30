@@ -6,7 +6,7 @@ using System.Web.Mvc;
 namespace Microsoft.AspNet.Mvc.Facebook.ModelBinders
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    internal class FacebookContextBinderAttribute : CustomModelBinderAttribute
+    internal sealed class FacebookContextBinderAttribute : CustomModelBinderAttribute
     {
         public override IModelBinder GetBinder()
         {

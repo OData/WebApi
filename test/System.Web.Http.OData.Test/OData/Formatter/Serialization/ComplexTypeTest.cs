@@ -28,26 +28,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Xml.Equal(BaselineResource.TestComplexTypePerson, content.ReadAsStringAsync().Result);
         }
 
-        [Fact]
-        public void ContentHeadersAreAddedForXmlMediaType()
-        {
-            ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)), _formatter);
-            content.LoadIntoBufferAsync().Wait();
-
-            Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Http.Contains(content.Headers, "Content-Type", "application/xml; charset=utf-8");
-        }
-
-        [Fact]
-        public void ContentHeadersAreAddedForJsonMediaType()
-        {
-            HttpContent content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)), _formatter, "application/json");
-            content.LoadIntoBufferAsync().Wait();
-
-            Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Equal(content.Headers.ContentType.MediaType, "application/json");
-        }
-
         private static HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");

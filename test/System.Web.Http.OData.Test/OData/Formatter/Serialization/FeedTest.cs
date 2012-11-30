@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
@@ -33,30 +34,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             RegexReplacement replaceUpdateTime = new RegexReplacement("<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
             Assert.Xml.Equal(BaselineResource.TestFeedOfEmployee, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
-        }
-
-        [Fact]
-        public void ContentHeadersAreAddedForXmlMediaType()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-
-            ObjectContent<IEnumerable<Employee>> content = new ObjectContent<IEnumerable<Employee>>(new Employee[] { new Employee(0, new ReferenceDepthContext(7)) }, formatter);
-            content.LoadIntoBufferAsync().Wait();
-
-            Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Http.Contains(content.Headers, "Content-Type", "application/atom+xml; type=feed; charset=utf-8");
-        }
-
-        [Fact]
-        public void ContentHeadersAreAddedForJsonMediaType()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-
-            HttpContent content = new ObjectContent<IEnumerable<Employee>>(new Employee[] { new Employee(0, new ReferenceDepthContext(7)) }, formatter, "application/json");
-            content.LoadIntoBufferAsync().Wait();
-
-            Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Http.Contains(content.Headers, "Content-Type", "application/json; odata=verbose; charset=utf-8");
         }
 
         private ODataMediaTypeFormatter CreateFormatter()

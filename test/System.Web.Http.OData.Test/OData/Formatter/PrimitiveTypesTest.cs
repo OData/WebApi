@@ -80,7 +80,7 @@ namespace System.Web.Http.OData.Formatter
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
-            ObjectContent content = new ObjectContent(type, value, formatter);
+            ObjectContent content = new ObjectContent(type, value, formatter, "application/xml");
 
             var stream = content.ReadAsStreamAsync().Result;
             Assert.Equal(

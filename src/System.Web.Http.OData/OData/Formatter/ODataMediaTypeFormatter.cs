@@ -30,9 +30,9 @@ namespace System.Web.Http.OData.Formatter
         private const string ElementNameDefault = "root";
         internal const string EdmModelKey = "MS_EdmModel";
 
-        private readonly ODataVersion _defaultODataVersion;
         private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly IEdmModel _model;
+        private readonly ODataVersion _version;
 
         /// <summary>
         /// The set of payload kinds this formatter will accept (in CanReadType and CanWriteType).
@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Formatter
             _model = deserializerProvider.EdmModel;
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
-            _defaultODataVersion = version;
+            _version = version;
             _request = request;
         }
 
@@ -117,7 +117,7 @@ namespace System.Web.Http.OData.Formatter
             }
 
             // Parameter 2: version
-            _defaultODataVersion = version;
+            _version = version;
 
             // Parameter 3: request
             _request = request;
@@ -154,31 +154,11 @@ namespace System.Web.Http.OData.Formatter
         /// <inheritdoc/>
         public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
         {
-            if (headers == null)
-            {
-                throw Error.ArgumentNull("headers");
-            }
-
             // call base to validate parameters and set Content-Type header based on mediaType parameter.
             base.SetDefaultContentHeaders(type, headers, mediaType);
 
-            ODataFormat format = GetODataFormat(headers, type);
-            IEnumerable<KeyValuePair<string, string>> oDataHeaders = GetResponseMessageHeaders(type, format, _defaultODataVersion);
-
-            foreach (KeyValuePair<string, string> pair in oDataHeaders)
-            {
-                // Special case Content-Type header so that we don't end up with two values for it
-                // since base.SetDefaultContentHeaders could also have set it.
-                if (String.Equals("Content-Type", pair.Key, StringComparison.OrdinalIgnoreCase))
-                {
-                    headers.ContentType = MediaTypeHeaderValue.Parse(pair.Value);
-                    headers.ContentType.CharSet = Encoding.UTF8.WebName;
-                }
-                else
-                {
-                    headers.TryAddWithoutValidation(pair.Key, pair.Value);
-                }
-            }
+            headers.TryAddWithoutValidation(ODataFormatterConstants.ODataServiceVersion,
+                ODataUtils.ODataVersionToString(_version) + ";");
         }
 
         /// <inheritdoc/>
@@ -310,18 +290,6 @@ namespace System.Web.Http.OData.Formatter
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
             return TaskHelpers.RunSynchronously(() =>
             {
-                // Get the format and version to use from the ODataServiceVersion content header or if not available use the
-                // values configured for the specialized formatter instance.
-                ODataVersion version;
-                if (contentHeaders == null)
-                {
-                    version = _defaultODataVersion;
-                }
-                else
-                {
-                    version = GetODataVersion(contentHeaders, ODataFormatterConstants.ODataServiceVersion) ?? _defaultODataVersion;
-                }
-
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
                 ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
@@ -348,14 +316,15 @@ namespace System.Web.Http.OData.Formatter
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
                     BaseUri = baseAddress,
-                    Version = version,
+                    Version = _version,
                     Indent = true,
                     DisableMessageStreamDisposal = true
                 };
 
                 if (contentHeaders != null && contentHeaders.ContentType != null)
                 {
-                    writerSettings.SetContentType(contentHeaders.ContentType.ToString(), Encoding.UTF8.WebName);
+                    MediaTypeHeaderValue contentType = contentHeaders.ContentType;
+                    writerSettings.SetContentType(contentType.ToString(), contentType.CharSet);
                 }
 
                 using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, _deserializerProvider.EdmModel))
@@ -373,57 +342,6 @@ namespace System.Web.Http.OData.Formatter
                     serializer.WriteObject(value, messageWriter, writeContext);
                 }
             });
-        }
-
-        private IEnumerable<KeyValuePair<string, string>> GetResponseMessageHeaders(Type graphType, ODataFormat odataFormat, ODataVersion version)
-        {
-            IODataResponseMessage responseMessage = new ODataMessageWrapper();
-
-            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
-            {
-                BaseUri = new Uri(ODataFormatterConstants.DefaultNamespace),
-                Version = version,
-                Indent = false
-            };
-            writerSettings.SetContentType(odataFormat);
-            using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings))
-            {
-                ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(graphType);
-
-                // get the OData specific headers for the payloadkind
-                ODataUtils.SetHeadersForPayload(messageWriter, serializer.ODataPayloadKind);
-            }
-
-            return responseMessage.Headers;
-        }
-
-        private static ODataFormat GetODataFormat(HttpContentHeaders contentHeaders, Type type)
-        {
-            Contract.Assert(contentHeaders != null);
-
-            // TODO: Move responsibility for Content-Type to Web API content negotation and remove this special logic.
-            if (typeof(IEdmModel).IsAssignableFrom(type))
-            {
-                return ODataFormat.Metadata;
-            }
-
-            if (contentHeaders.ContentType == null)
-            {
-                return ODataFormatterConstants.DefaultODataFormat;
-            }
-
-            if (String.Equals(contentHeaders.ContentType.MediaType, ODataMediaTypes.ApplicationAtomXml.MediaType, StringComparison.OrdinalIgnoreCase))
-            {
-                return ODataFormat.Atom;
-            }
-            else if (String.Equals(contentHeaders.ContentType.MediaType, ODataMediaTypes.ApplicationJsonODataVerbose.MediaType, StringComparison.OrdinalIgnoreCase))
-            {
-                return ODataFormat.VerboseJson;
-            }
-            else
-            {
-                return ODataFormatterConstants.DefaultODataFormat;
-            }
         }
 
         private static ODataVersion GetResponseODataVersion(HttpRequestMessage request)

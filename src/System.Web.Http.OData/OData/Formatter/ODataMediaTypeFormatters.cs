@@ -33,9 +33,9 @@ namespace System.Web.Http.OData.Formatter
 
         private static void AddSupportedEncodings(MediaTypeFormatter formatter)
         {
-            formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true,
-                throwOnInvalidBytes: true));
             formatter.SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true));
+            formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true,
                 throwOnInvalidBytes: true));
         }
 

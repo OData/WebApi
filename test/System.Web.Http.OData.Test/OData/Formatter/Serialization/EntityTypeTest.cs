@@ -27,28 +27,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Xml.Equal(BaselineResource.TestEntityTypeBasic, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
         }
 
-        [Fact]
-        public void ContentHeadersAreAddedForXmlMediaType()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            ObjectContent<Employee> content = new ObjectContent<Employee>(new Employee(0, new ReferenceDepthContext(7)), formatter);
-            content.LoadIntoBufferAsync().Wait();
-
-            Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Http.Contains(content.Headers, "Content-Type", "application/atom+xml; type=entry; charset=utf-8");
-        }
-
-        [Fact]
-        public void ContentHeadersAreAddedForJsonMediaType()
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatter();
-            HttpContent content = new ObjectContent<Employee>(new Employee(0, new ReferenceDepthContext(7)), formatter, "application/json");
-            content.LoadIntoBufferAsync().Wait();
-
-            Assert.Http.Contains(content.Headers, "DataServiceVersion", "3.0;");
-            Assert.Http.Contains(content.Headers, "Content-Type", "application/json; odata=verbose; charset=utf-8");
-        }
-
         private ODataMediaTypeFormatter CreateFormatter()
         {
             return new ODataMediaTypeFormatter(_model,

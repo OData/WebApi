@@ -77,34 +77,40 @@ namespace System.Web.Mvc
             if (asyncController != null)
             {
                 // asynchronous controller
-                BeginInvokeDelegate beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState)
+
+                // Ensure delegates continue to use the C# Compiler static delegate caching optimization.
+                BeginInvokeDelegate<ProcessRequestState> beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState, ProcessRequestState innerState)
                 {
                     try
                     {
-                        return asyncController.BeginExecute(RequestContext, asyncCallback, asyncState);
+                        return innerState.AsyncController.BeginExecute(innerState.RequestContext, asyncCallback, asyncState);
                     }
                     catch
                     {
-                        factory.ReleaseController(asyncController);
+                        innerState.ReleaseController();
                         throw;
                     }
                 };
 
-                EndInvokeDelegate endDelegate = delegate(IAsyncResult asyncResult)
+                EndInvokeVoidDelegate<ProcessRequestState> endDelegate = delegate(IAsyncResult asyncResult, ProcessRequestState innerState)
                 {
                     try
                     {
-                        asyncController.EndExecute(asyncResult);
+                        innerState.AsyncController.EndExecute(asyncResult);
                     }
                     finally
                     {
-                        factory.ReleaseController(asyncController);
+                        innerState.ReleaseController();
                     }
+                };
+                ProcessRequestState outerState = new ProcessRequestState() 
+                {
+                    AsyncController = asyncController, Factory = factory, RequestContext = RequestContext
                 };
 
                 SynchronizationContext syncContext = SynchronizationContextUtil.GetSynchronizationContext();
                 AsyncCallback newCallback = AsyncUtil.WrapCallbackForSynchronizedExecution(callback, syncContext);
-                return AsyncResultWrapper.Begin(newCallback, state, beginDelegate, endDelegate, _processRequestTag);
+                return AsyncResultWrapper.Begin(newCallback, state, beginDelegate, endDelegate, outerState, _processRequestTag);
             }
             else
             {
@@ -230,5 +236,18 @@ namespace System.Web.Mvc
         }
 
         #endregion
+
+        // Keep as value type to avoid allocating
+        private struct ProcessRequestState
+        {
+            internal IAsyncController AsyncController;
+            internal IControllerFactory Factory;
+            internal RequestContext RequestContext;
+
+            internal void ReleaseController()
+            {
+                Factory.ReleaseController(AsyncController);
+            }
+        }
     }
 }

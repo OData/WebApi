@@ -26,59 +26,27 @@ namespace System.Web.Mvc.Async
             return default(AsyncVoid);
         };
 
-        private static EndInvokeDelegate<AsyncVoid> MakeVoidDelegate(EndInvokeDelegate endDelegate)
-        {
-            return ar =>
-            {
-                endDelegate(ar);
-                return default(AsyncVoid);
-            };
-        }
-
         // kicks off an asynchronous operation
 
-        public static IAsyncResult Begin<TResult>(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate)
-        {
-            return Begin<TResult>(callback, state, beginDelegate, endDelegate, tag: null);
-        }
-
-        public static IAsyncResult Begin<TResult>(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag)
-        {
-            return Begin<TResult>(callback, state, beginDelegate, endDelegate, tag, Timeout.Infinite);
-        }
-
-        public static IAsyncResult Begin<TResult>(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag, int timeout)
+        public static IAsyncResult Begin<TResult>(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag = null, int timeout = Timeout.Infinite)
         {
             WrappedAsyncResult<TResult> asyncResult = new WrappedAsyncResult<TResult>(beginDelegate, endDelegate, tag);
             asyncResult.Begin(callback, state, timeout);
             return asyncResult;
         }
 
-        public static IAsyncResult Begin<TResult, TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState invokeState, object tag)
-        {
-            return Begin<TResult, TState>(callback, callbackState, beginDelegate, endDelegate, invokeState, tag, Timeout.Infinite);
-        }
-
-        public static IAsyncResult Begin<TResult, TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState invokeState, object tag, int timeout)
+        public static IAsyncResult Begin<TResult, TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState invokeState, object tag = null, int timeout = Timeout.Infinite)
         {
             WrappedAsyncResult<TResult, TState> asyncResult = new WrappedAsyncResult<TResult, TState>(beginDelegate, endDelegate, invokeState, tag);
             asyncResult.Begin(callback, callbackState, timeout);
             return asyncResult;
         }
 
-        public static IAsyncResult Begin(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate endDelegate)
+        public static IAsyncResult Begin<TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeVoidDelegate<TState> endDelegate, TState invokeState, object tag = null, int timeout = Timeout.Infinite)
         {
-            return Begin(callback, state, beginDelegate, endDelegate, tag: null);
-        }
-
-        public static IAsyncResult Begin(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate endDelegate, object tag)
-        {
-            return Begin(callback, state, beginDelegate, endDelegate, tag, Timeout.Infinite);
-        }
-
-        public static IAsyncResult Begin(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate endDelegate, object tag, int timeout)
-        {
-            return Begin<AsyncVoid>(callback, state, beginDelegate, MakeVoidDelegate(endDelegate), tag, timeout);
+            WrappedAsyncVoid<TState> asyncResult = new WrappedAsyncVoid<TState>(beginDelegate, endDelegate, invokeState, tag);
+            asyncResult.Begin(callback, callbackState, timeout);
+            return asyncResult;
         }
 
         // wraps a synchronous operation in an asynchronous wrapper, but still completes synchronously
@@ -343,6 +311,32 @@ namespace System.Web.Mvc.Async
             protected override TResult CallEndDelegate(IAsyncResult asyncResult)
             {
                 return _endDelegate(asyncResult, _state);
+            }
+
+            protected override IAsyncResult CallBeginDelegate(AsyncCallback callback, object callbackState)
+            {
+                return _beginDelegate(callback, callbackState, _state);
+            }
+        }
+
+        private sealed class WrappedAsyncVoid<TState> : WrappedAsyncResultBase<AsyncVoid>
+        {
+            private readonly BeginInvokeDelegate<TState> _beginDelegate;
+            private readonly EndInvokeVoidDelegate<TState> _endDelegate;
+            private readonly TState _state;
+
+            public WrappedAsyncVoid(BeginInvokeDelegate<TState> beginDelegate, EndInvokeVoidDelegate<TState> endDelegate, TState state, object tag)
+                : base(tag)
+            {
+                _beginDelegate = beginDelegate;
+                _endDelegate = endDelegate;
+                _state = state;
+            }
+
+            protected override AsyncVoid CallEndDelegate(IAsyncResult asyncResult)
+            {
+                _endDelegate(asyncResult, _state);
+                return default(AsyncVoid);
             }
 
             protected override IAsyncResult CallBeginDelegate(AsyncCallback callback, object callbackState)

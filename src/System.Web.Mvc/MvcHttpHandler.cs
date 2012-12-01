@@ -24,15 +24,17 @@ namespace System.Web.Mvc
             if (httpAsyncHandler != null)
             {
                 // asynchronous handler
-                BeginInvokeDelegate beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState)
+
+                // Ensure delegates continue to use the C# Compiler static delegate caching optimization.
+                BeginInvokeDelegate<IHttpAsyncHandler> beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState, IHttpAsyncHandler innerHandler)
                 {
-                    return httpAsyncHandler.BeginProcessRequest(HttpContext.Current, asyncCallback, asyncState);
+                    return innerHandler.BeginProcessRequest(HttpContext.Current, asyncCallback, asyncState);
                 };
-                EndInvokeDelegate endDelegate = delegate(IAsyncResult asyncResult)
+                EndInvokeVoidDelegate<IHttpAsyncHandler> endDelegate = delegate(IAsyncResult asyncResult, IHttpAsyncHandler innerHandler)
                 {
-                    httpAsyncHandler.EndProcessRequest(asyncResult);
+                    innerHandler.EndProcessRequest(asyncResult);
                 };
-                return AsyncResultWrapper.Begin(callback, state, beginDelegate, endDelegate, _processRequestTag);
+                return AsyncResultWrapper.Begin(callback, state, beginDelegate, endDelegate, httpAsyncHandler, _processRequestTag);
             }
             else
             {

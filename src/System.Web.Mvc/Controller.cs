@@ -810,7 +810,17 @@ namespace System.Web.Mvc
 
                 VerifyExecuteCalledOnce();
                 Initialize(requestContext);
-                return AsyncResultWrapper.Begin(callback, state, BeginExecuteCore, EndExecuteCore, _executeTag);
+
+                // Ensure delegates continue to use the C# Compiler static delegate caching optimization.
+                BeginInvokeDelegate<Controller> beginDelegate = (AsyncCallback asyncCallback, object callbackState, Controller controller) =>
+                    {
+                        return controller.BeginExecuteCore(asyncCallback, callbackState);
+                    };
+                EndInvokeVoidDelegate<Controller> endDelegate = (IAsyncResult asyncResult, Controller controller) =>
+                    {
+                        controller.EndExecuteCore(asyncResult);
+                    };
+                return AsyncResultWrapper.Begin(callback, state, beginDelegate, endDelegate, this, _executeTag);
             }
         }
 
@@ -827,20 +837,22 @@ namespace System.Web.Mvc
                 if (asyncInvoker != null)
                 {
                     // asynchronous invocation
-                    BeginInvokeDelegate beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState)
+                    // Ensure delegates continue to use the C# Compiler static delegate caching optimization.
+                    BeginInvokeDelegate<ExecuteCoreState> beginDelegate = delegate(AsyncCallback asyncCallback, object asyncState, ExecuteCoreState innerState)
                     {
-                        return asyncInvoker.BeginInvokeAction(ControllerContext, actionName, asyncCallback, asyncState);
+                        return innerState.AsyncInvoker.BeginInvokeAction(innerState.Controller.ControllerContext, innerState.ActionName, asyncCallback, asyncState);
                     };
 
-                    EndInvokeDelegate endDelegate = delegate(IAsyncResult asyncResult)
+                    EndInvokeVoidDelegate<ExecuteCoreState> endDelegate = delegate(IAsyncResult asyncResult, ExecuteCoreState innerState)
                     {
-                        if (!asyncInvoker.EndInvokeAction(asyncResult))
+                        if (!innerState.AsyncInvoker.EndInvokeAction(asyncResult))
                         {
-                            HandleUnknownAction(actionName);
+                            innerState.Controller.HandleUnknownAction(innerState.ActionName);
                         }
                     };
+                    ExecuteCoreState executeState = new ExecuteCoreState() { Controller = this, AsyncInvoker = asyncInvoker, ActionName = actionName };
 
-                    return AsyncResultWrapper.Begin(callback, state, beginDelegate, endDelegate, _executeCoreTag);
+                    return AsyncResultWrapper.Begin(callback, state, beginDelegate, endDelegate, executeState, _executeCoreTag);
                 }
                 else
                 {
@@ -941,5 +953,13 @@ namespace System.Web.Mvc
         }
 
         #endregion
+
+        // Keep as value type to avoid allocating
+        private struct ExecuteCoreState
+        {
+            internal IAsyncActionInvoker AsyncInvoker;
+            internal Controller Controller;
+            internal string ActionName;
+        }
     }
 }

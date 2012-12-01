@@ -83,6 +83,7 @@
     <Compile Include="CompareAttributeAdapter.cs" />
     <Compile Include="DataTypeAttributeAdapter.cs" />
     <Compile Include="Async\EndInvokeDelegateOfTResultTState.cs" />
+    <Compile Include="Async\EndInvokeVoidDelegate.cs" />
     <Compile Include="FileExtensionsAttributeAdapter.cs" />
     <Compile Include="Filters\IAuthenticationFilter.cs" />
     <Compile Include="Filters\IOverrideFilter.cs" />
@@ -219,7 +220,6 @@
     <Compile Include="Async\Trigger.cs" />
     <Compile Include="Async\TriggerListener.cs" />
     <Compile Include="Async\SimpleAsyncResult.cs" />
-    <Compile Include="Async\EndInvokeDelegate.cs" />
     <Compile Include="Async\EndInvokeDelegateOfTResult.cs" />
     <Compile Include="Async\SynchronizationContextUtil.cs" />
     <Compile Include="AuthorizationContext.cs" />

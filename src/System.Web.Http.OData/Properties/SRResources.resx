@@ -489,4 +489,64 @@
   <data name="DeltaEntityTypeNotAssignable" xml:space="preserve">
     <value>The entity type '{0}' is not assignable to the Delta type '{1}'.</value>
   </data>
+  <data name="EntitySetControllerErrorMessageLanguage" xml:space="preserve">
+    <value>en-US</value>
+  </data>
+  <data name="EntitySetControllerUnmappedRequest" xml:space="preserve">
+    <value>This service doesn't support OData requests in the form '{0}'.</value>
+  </data>
+  <data name="EntitySetControllerUnmappedRequestErrorCode" xml:space="preserve">
+    <value>Not Implemented.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedCreate" xml:space="preserve">
+    <value>Creating entities is not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedPostErrorCode" xml:space="preserve">
+    <value>POST requests are not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedCreateLink" xml:space="preserve">
+    <value>Creating a '{0}' link is not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedCreateLinkErrorCode" xml:space="preserve">
+    <value>Creating link failed.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedDelete" xml:space="preserve">
+    <value>Deleting entities is not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedDeleteErrorCode" xml:space="preserve">
+    <value>DELETE requests are not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedDeleteLink" xml:space="preserve">
+    <value>Deleting a '{0}' link is not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedDeleteLinkErrorCode" xml:space="preserve">
+    <value>Deleting link failed.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedGet" xml:space="preserve">
+    <value>GET requests are not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedGetByKey" xml:space="preserve">
+    <value>GET requests by key are not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedGetByKeyErrorCode" xml:space="preserve">
+    <value>GET requests by key are not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedGetErrorCode" xml:space="preserve">
+    <value>GET requests are not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedGetKey" xml:space="preserve">
+    <value>Extracting the key from entity instances is not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedPatch" xml:space="preserve">
+    <value>Patching entities is not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedPatchErrorCode" xml:space="preserve">
+    <value>PATCH requests are not supported.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedUpdate" xml:space="preserve">
+    <value>Replacing entities is not supported for this entity set.</value>
+  </data>
+  <data name="EntitySetControllerUnsupportedUpdateErrorCode" xml:space="preserve">
+    <value>PUT requests are not supported.</value>
+  </data>
 </root>

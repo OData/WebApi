@@ -101,11 +101,21 @@ namespace System.Web.Http
             }
 
             object pathHandler;
-            if (configuration.Properties.TryGetValue(ODataPathHandlerKey, out pathHandler))
+            if (!configuration.Properties.TryGetValue(ODataPathHandlerKey, out pathHandler))
             {
-                return pathHandler as IODataPathHandler;
+                IEdmModel model = configuration.GetEdmModel();
+                if (model == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    IODataPathHandler defaultPathHandler = new DefaultODataPathHandler(model);
+                    configuration.SetODataPathHandler(defaultPathHandler);
+                    return defaultPathHandler;
+                }
             }
-            return null;            
+            return pathHandler as IODataPathHandler;
         }
 
         /// <summary>

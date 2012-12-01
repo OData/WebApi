@@ -358,6 +358,186 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to en-US.
+        /// </summary>
+        internal static string EntitySetControllerErrorMessageLanguage {
+            get {
+                return ResourceManager.GetString("EntitySetControllerErrorMessageLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This service doesn&apos;t support OData requests in the form &apos;{0}&apos;..
+        /// </summary>
+        internal static string EntitySetControllerUnmappedRequest {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnmappedRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not Implemented..
+        /// </summary>
+        internal static string EntitySetControllerUnmappedRequestErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnmappedRequestErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating entities is not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedCreate {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedCreate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating a &apos;{0}&apos; link is not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedCreateLink {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedCreateLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating link failed..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedCreateLinkErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedCreateLinkErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleting entities is not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedDelete {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DELETE requests are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedDeleteErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedDeleteErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleting a &apos;{0}&apos; link is not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedDeleteLink {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedDeleteLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleting link failed..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedDeleteLinkErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedDeleteLinkErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GET requests are not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedGet {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GET requests by key are not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedGetByKey {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedGetByKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GET requests by key are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedGetByKeyErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedGetByKeyErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GET requests are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedGetErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedGetErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Extracting the key from entity instances is not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedGetKey {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedGetKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Patching entities is not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedPatch {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedPatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PATCH requests are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedPatchErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedPatchErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to POST requests are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedPostErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedPostErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Replacing entities is not supported for this entity set..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedUpdate {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PUT requests are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedUpdateErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedUpdateErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The entity set &apos;{0}&apos; is missing link generation configuration. Check that the self and edit links are configured during model building..
         /// </summary>
         internal static string EntitySetHasNoBuildLinkAnnotation {

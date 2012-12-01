@@ -48,7 +48,7 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void GetODataPathHandlerReturnsNullByDefault()
+        public void GetODataPathHandlerReturnsDefaultPathHandlerByDefault()
         {
             HttpConfiguration config = new HttpConfiguration();
             ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -56,7 +56,10 @@ namespace System.Web.Http.OData
             IEdmModel model = modelBuilder.GetEdmModel();
             config.SetEdmModel(model);
 
-            Assert.Null(config.GetODataPathHandler());
+            var pathHandler = config.GetODataPathHandler();
+
+            Assert.NotNull(pathHandler);
+            Assert.IsType<DefaultODataPathHandler>(pathHandler);
         }
 
         [Fact]

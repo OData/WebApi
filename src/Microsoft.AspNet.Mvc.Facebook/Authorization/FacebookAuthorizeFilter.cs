@@ -2,10 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Web;
-using System.Web.Helpers;
 using System.Web.Mvc;
 using Facebook;
 using Microsoft.AspNet.Mvc.Facebook.Client;
@@ -56,11 +56,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
                 accessToken = signedRequest.oauth_token;
             }
 
-            string appUrl = _config.AppUrl;
-            string redirectUrl = appUrl + request.Url.PathAndQuery;
             if (signedRequest == null || String.IsNullOrEmpty(userId) || String.IsNullOrEmpty(accessToken))
             {
-                // Cannot obtain user information from signed_request, redirect to Facebook login.
+                // Cannot obtain user information from signed_request, redirect to Facebook OAuth dialog.
+                string redirectUrl = GetRedirectUrl(request);
                 Uri loginUrl = client.GetLoginUrl(redirectUrl, _config.AppId, null);
                 filterContext.Result = CreateRedirectResult(loginUrl);
             }
@@ -72,24 +71,26 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
                     IEnumerable<string> currentPermissions = _config.PermissionService.GetUserPermissions(userId, accessToken);
 
                     // If the current permissions doesn't cover all required permissions,
-                    // redirect to Facebook login or to the specified redirect path.
+                    // redirect to the specified redirect path or to the Facebook OAuth dialog.
                     if (currentPermissions == null || !requiredPermissions.IsSubsetOf(currentPermissions))
                     {
+                        string redirectUrl = GetRedirectUrl(request);
                         string requiredPermissionString = String.Join(",", requiredPermissions);
                         Uri authorizationUrl;
-                        if (String.IsNullOrEmpty(_config.AuthorizationRedirectPath))
+
+                        if (!String.IsNullOrEmpty(_config.AuthorizationRedirectPath))
                         {
-                            authorizationUrl = client.GetLoginUrl(redirectUrl, _config.AppId, requiredPermissionString);
-                        }
-                        else
-                        {
-                            UriBuilder authorizationUrlBuilder = new UriBuilder(appUrl);
+                            UriBuilder authorizationUrlBuilder = new UriBuilder(_config.AppUrl);
                             authorizationUrlBuilder.Path += "/" + _config.AuthorizationRedirectPath.TrimStart('/');
                             authorizationUrlBuilder.Query = String.Format(CultureInfo.InvariantCulture,
                                 "originUrl={0}&permissions={1}",
                                 HttpUtility.UrlEncode(redirectUrl),
                                 HttpUtility.UrlEncode(requiredPermissionString));
                             authorizationUrl = authorizationUrlBuilder.Uri;
+                        }
+                        else
+                        {
+                            authorizationUrl = client.GetLoginUrl(redirectUrl, _config.AppId, requiredPermissionString);
                         }
                         filterContext.Result = CreateRedirectResult(authorizationUrl);
                     }
@@ -112,6 +113,31 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
                 "<script>window.top.location = '{0}';</script>",
                 HttpUtility.JavaScriptStringEncode(redirectUrl.AbsoluteUri));
             return facebookAuthResult;
+        }
+
+        private string GetRedirectUrl(HttpRequestBase request)
+        {
+            NameValueCollection queryNameValuePair = HttpUtility.ParseQueryString(request.Url.Query);
+
+            // Don't propagate query strings added by Facebook OAuth Dialog
+            queryNameValuePair.Remove("code");
+            queryNameValuePair.Remove("error");
+            queryNameValuePair.Remove("error_reason");
+            queryNameValuePair.Remove("error_description");
+
+            string redirectUrl = String.Format(
+                CultureInfo.InvariantCulture,
+                "{0}/{1}",
+                _config.AppUrl.TrimEnd('/'),
+                request.AppRelativeCurrentExecutionFilePath.TrimStart('~', '/'));
+
+            string query = queryNameValuePair.ToString();
+            if (!String.IsNullOrEmpty(query))
+            {
+                redirectUrl += "?" + query;
+            }
+
+            return redirectUrl;
         }
 
         private static HashSet<string> GetRequiredPermissions(IEnumerable<object> facebookAuthorizeAttributes)

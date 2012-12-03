@@ -18,7 +18,7 @@ End Code
             If sample Is Nothing Then
                 @<p>Sample not available.</p>
             Else
-               Html.DisplayFor(Function(s) sample)
+                @Html.DisplayFor(Function(s) sample)
             End If
             End code
         </div>

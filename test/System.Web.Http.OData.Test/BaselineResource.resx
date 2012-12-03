@@ -551,7 +551,7 @@
     &lt;Age m:type="Edm.Int32"&gt;20&lt;/Age&gt;
     &lt;Gender&gt;Male&lt;/Gender&gt;
     &lt;FirstName&gt;Frank&lt;/FirstName&gt;
-    &lt;Alias m:type="Collection(Edm.String)"&gt;
+    &lt;Alias&gt;
       &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias0&lt;/d:element&gt;
     &lt;/Alias&gt;
     &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
@@ -574,7 +574,7 @@
     &lt;Age m:type="Edm.Int32"&gt;21&lt;/Age&gt;
     &lt;Gender&gt;Male&lt;/Gender&gt;
     &lt;FirstName&gt;Steve&lt;/FirstName&gt;
-    &lt;Alias m:type="Collection(Edm.String)"&gt;
+    &lt;Alias&gt;
       &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias1&lt;/d:element&gt;
     &lt;/Alias&gt;
     &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
@@ -597,7 +597,7 @@
     &lt;Age m:type="Edm.Int32"&gt;22&lt;/Age&gt;
     &lt;Gender&gt;Male&lt;/Gender&gt;
     &lt;FirstName&gt;Tom&lt;/FirstName&gt;
-    &lt;Alias m:type="Collection(Edm.String)"&gt;
+    &lt;Alias&gt;
       &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias2&lt;/d:element&gt;
     &lt;/Alias&gt;
     &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
@@ -624,7 +624,7 @@
   &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
   &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
   &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-  &lt;d:Alias m:type="Collection(Edm.String)"&gt;
+  &lt;d:Alias&gt;
     &lt;d:element&gt;Alias0&lt;/d:element&gt;
   &lt;/d:Alias&gt;
   &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
@@ -686,7 +686,7 @@
       &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
       &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
       &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-      &lt;d:Alias m:type="Collection(Edm.String)"&gt;
+      &lt;d:Alias&gt;
         &lt;d:element&gt;Alias0&lt;/d:element&gt;
       &lt;/d:Alias&gt;
       &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
@@ -862,7 +862,7 @@
         &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
         &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
         &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-        &lt;d:Alias m:type="Collection(Edm.String)"&gt;
+        &lt;d:Alias&gt;
           &lt;d:element&gt;Alias0&lt;/d:element&gt;
         &lt;/d:Alias&gt;
         &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
@@ -902,7 +902,7 @@
         &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
         &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
         &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
-        &lt;d:Alias m:type="Collection(Edm.String)"&gt;
+        &lt;d:Alias&gt;
           &lt;d:element&gt;Alias1&lt;/d:element&gt;
         &lt;/d:Alias&gt;
         &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;

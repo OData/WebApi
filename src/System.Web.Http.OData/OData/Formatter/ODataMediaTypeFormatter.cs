@@ -87,11 +87,12 @@ namespace System.Web.Http.OData.Formatter
             // Execept for the other two parameters, this constructor is a copy constructor, and we need to copy
             // everything on the other instance.
 
-            // Parameter 1A: Copy this class's private fields.
+            // Parameter 1A: Copy this class's private fields and internal properties.
             _serializerProvider = formatter._serializerProvider;
             _model = formatter._model;
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
+            WriteOnly = formatter.WriteOnly;
 
             // Parameter 1B: Copy the base class's properties.
             foreach (MediaTypeMapping mediaTypeMapping in formatter.MediaTypeMappings)
@@ -134,6 +135,12 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to support serialization only (whether to disable deserialization
+        /// support).
+        /// </summary>
+        internal bool WriteOnly { get; set; }
+
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
         {
@@ -167,6 +174,12 @@ namespace System.Web.Http.OData.Formatter
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
+            }
+
+            // TODO: Feature #664 - Remove this logic (and property) once JSON light read support is available.
+            if (WriteOnly)
+            {
+                return false;
             }
 
             TryGetInnerTypeForDelta(ref type);
@@ -309,10 +322,6 @@ namespace System.Web.Http.OData.Formatter
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
 
-                // TODO: Issue 483: http://aspnetwebstack.codeplex.com/workitem/483
-                // We need to set the MetadataDocumentUri when this property is added to ODataMessageWriterSettings as 
-                // part of the JSON Light work.
-                // This is required so ODataLib can coerce AbsoluteUri's into RelativeUri's when appropriate in JSON Light.
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
                     BaseUri = baseAddress,
@@ -320,6 +329,25 @@ namespace System.Web.Http.OData.Formatter
                     Indent = true,
                     DisableMessageStreamDisposal = true
                 };
+
+                IODataPathHandler pathHandler = configuration.GetODataPathHandler() ??
+                    new DefaultODataPathHandler(_model);
+
+                // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
+                // for errors, such as when routing itself fails. In that case, the route data property is not
+                // available on the request, and due to a bug with HttpRoute.GetVirtualPath (bug #669) we won't be able
+                // to generate a metadata link.
+                if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
+                {
+                    string metadataLink = urlHelper.ODataLink(pathHandler, new MetadataPathSegment());
+
+                    if (metadataLink == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.UnableToDetermineMetadataUrl);
+                    }
+
+                    writerSettings.SetMetadataDocumentUri(new Uri(metadataLink));
+                }
 
                 if (contentHeaders != null && contentHeaders.ContentType != null)
                 {
@@ -333,7 +361,7 @@ namespace System.Web.Http.OData.Formatter
                     {
                         EntitySet = targetEntitySet,
                         UrlHelper = urlHelper,
-                        PathHandler = configuration.GetODataPathHandler() ?? new DefaultODataPathHandler(Model),
+                        PathHandler = pathHandler,
                         RootElementName = GetRootElementName(path) ?? ElementNameDefault,
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                         Request = _request

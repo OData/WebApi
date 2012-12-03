@@ -32,6 +32,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             ODataProperty property = CreateProperty(graph, writeContext.RootElementName, writeContext);
+
             messageWriter.WriteProperty(property);
         }
 
@@ -68,14 +69,23 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                     propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
                 }
+
+                string typeName = _edmComplexType.FullName();
+
+                ODataComplexValue value = new ODataComplexValue()
+                {
+                    Properties = propertyCollection,
+                    TypeName = typeName
+                };
+
+                // Required to support JSON light full metadata mode.
+                value.SetAnnotation<SerializationTypeNameAnnotation>(
+                    new SerializationTypeNameAnnotation { TypeName = typeName });
+
                 return new ODataProperty()
                 {
                     Name = elementName,
-                    Value = new ODataComplexValue()
-                    {
-                        Properties = propertyCollection,
-                        TypeName = _edmComplexType.FullName()
-                    }
+                    Value = value
                 };
             }
         }

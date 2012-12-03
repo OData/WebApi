@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -17,6 +18,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public ODataCollectionSerializer(IEdmCollectionTypeReference edmCollectionType, ODataSerializerProvider serializerProvider)
             : base(edmCollectionType, ODataPayloadKind.Collection, serializerProvider)
         {
+            Contract.Assert(edmCollectionType != null);
             _edmCollectionType = edmCollectionType;
         }
 
@@ -33,6 +35,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
+            // TODO: Feature #664 - Support JSON light (pass type reference).
             ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter();
             writer.WriteStart(
                 new ODataCollectionStart
@@ -41,18 +44,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 });
 
             ODataProperty property = CreateProperty(graph, writeContext.RootElementName, writeContext);
-            if (property != null)
+
+            Contract.Assert(property != null);
+
+            ODataCollectionValue collectionValue = property.Value as ODataCollectionValue;
+
+            Contract.Assert(collectionValue != null);
+
+            foreach (object item in collectionValue.Items)
             {
-                ODataCollectionValue collectionValue = property.Value as ODataCollectionValue;
-
-                foreach (object item in collectionValue.Items)
-                {
-                    writer.WriteItem(item);
-                }
-
-                writer.WriteEnd();
-                writer.Flush();
+                writer.WriteItem(item);
             }
+
+            writer.WriteEnd();
+            writer.Flush();
         }
 
         /// <inheritdoc/>
@@ -68,32 +73,44 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable == null)
+            ArrayList valueCollection = new ArrayList();
+
+            IEdmTypeReference itemType = _edmCollectionType.ElementType();
+            ODataSerializer itemSerializer = SerializerProvider.GetEdmTypeSerializer(itemType);
+            if (itemSerializer == null)
             {
-                return new ODataProperty() { Name = elementName, Value = null };
+                throw Error.NotSupported(SRResources.TypeCannotBeSerialized, itemType.FullName(), typeof(ODataMediaTypeFormatter).Name);
             }
-            else
+
+            IEnumerable enumerable = graph as IEnumerable;
+
+            if (enumerable != null)
             {
-                ArrayList valueCollection = new ArrayList();
-
-                IEdmTypeReference itemType = _edmCollectionType.ElementType();
-                ODataSerializer itemSerializer = SerializerProvider.GetEdmTypeSerializer(itemType);
-                if (itemSerializer == null)
-                {
-                    throw Error.NotSupported(SRResources.TypeCannotBeSerialized, itemType.FullName(), typeof(ODataMediaTypeFormatter).Name);
-                }
-
                 foreach (object item in enumerable)
                 {
                     valueCollection.Add(itemSerializer.CreateProperty(item, ODataFormatterConstants.Element, writeContext).Value);
                 }
-
-                // ODataCollectionValue is only a V3 property, arrays inside Complex Types or Entity types are only supported in V3
-                // if a V1 or V2 Client requests a type that has a collection within it ODataLIb will throw.
-                // Also, note that TypeName is an optional property for ODataCollectionValue
-                return new ODataProperty() { Name = elementName, Value = new ODataCollectionValue { Items = valueCollection } };
             }
+
+            string typeName = _edmCollectionType.FullName();
+
+            // ODataCollectionValue is only a V3 property, arrays inside Complex Types or Entity types are only supported in V3
+            // if a V1 or V2 Client requests a type that has a collection within it ODataLib will throw.
+            ODataCollectionValue value = new ODataCollectionValue
+            {
+                Items = valueCollection,
+                TypeName = typeName
+            };
+
+            // Required to support JSON light full metadata mode.
+            value.SetAnnotation<SerializationTypeNameAnnotation>(
+                new SerializationTypeNameAnnotation { TypeName = typeName });
+
+            return new ODataProperty()
+            {
+                Name = elementName,
+                Value = value
+            };
         }
     }
 }

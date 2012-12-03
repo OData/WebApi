@@ -34,6 +34,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
+            // TODO: Feature #664 - Support JSON light (pass entity set).
             ODataReader odataReader = messageReader.CreateODataEntryReader(EdmEntityType.EntityDefinition());
             ODataEntry topLevelEntry = ReadEntryOrFeed(odataReader, readContext) as ODataEntry;
             Contract.Assert(topLevelEntry != null);

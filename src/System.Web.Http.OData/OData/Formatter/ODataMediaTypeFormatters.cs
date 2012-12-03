@@ -27,6 +27,7 @@ namespace System.Web.Http.OData.Formatter
                 CreateApplicationXml(model),
                 CreateApplicationAtomSvcXml(model),
                 CreateTextXml(model),
+                CreateApplicationJsonODataLight(model),
                 CreateApplicationJsonODataVerbose(model)
             };
         }
@@ -65,6 +66,24 @@ namespace System.Web.Http.OData.Formatter
                 ODataPayloadKind.Feed);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeFeed);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
+            return formatter;
+        }
+
+        private static ODataMediaTypeFormatter CreateApplicationJsonODataLight(IEdmModel model)
+        {
+            // TODO: Feature #664 - Support the remaining payload kinds in JSON light.
+            // (Property, EntityReferenceLink(s), Collection, Parameter)
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                model,
+                ODataPayloadKind.Feed,
+                ODataPayloadKind.Entry,
+                ODataPayloadKind.ServiceDocument,
+                ODataPayloadKind.Error);
+            // TODO: Feature #664 - Support reading for JSON light.
+            formatter.WriteOnly = true;
+            // TODO: Feature #664 - Support streaming=true for JSON light.
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
             return formatter;
         }
 

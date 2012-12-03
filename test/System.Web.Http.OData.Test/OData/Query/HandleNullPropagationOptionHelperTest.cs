@@ -7,7 +7,7 @@ using System.Text;
 using System.Web.Http.OData.Query;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.OData.Query
+namespace System.Web.Http.OData.Query
 {
     public class HandleNullPropagationOptionHelperTest : EnumHelperTestBase<HandleNullPropagationOption>
     {

@@ -13,7 +13,7 @@ using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.Http.OData.OData.Formatter
+namespace System.Web.Http.OData.Formatter
 {
     public class CollectionsTests
     {

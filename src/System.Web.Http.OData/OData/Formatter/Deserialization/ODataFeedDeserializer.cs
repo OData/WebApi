@@ -24,24 +24,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             _edmEntityType = _edmCollectionType.ElementType().AsEntity();
         }
 
-        public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
-        {
-            if (messageReader == null)
-            {
-                throw Error.ArgumentNull("messageReader");
-            }
-
-            if (readContext == null)
-            {
-                throw Error.ArgumentNull("readContext");
-            }
-
-            ODataReader reader = messageReader.CreateODataFeedReader(_edmEntityType.EntityDefinition());
-            ODataFeed feed = ODataEntityDeserializer.ReadEntryOrFeed(reader, readContext) as ODataFeed;
-
-            return ReadInline(feed, readContext);
-        }
-
         public override object ReadInline(ODataFeed feed, ODataDeserializerContext readContext)
         {
             if (readContext == null)

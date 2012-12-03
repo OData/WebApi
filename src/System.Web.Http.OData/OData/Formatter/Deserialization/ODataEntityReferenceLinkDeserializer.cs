@@ -18,7 +18,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
+            // TODO: Feature #664 - Support JSON light (pass navigation property).
             ODataEntityReferenceLink entityReferenceLink = messageReader.ReadEntityReferenceLink();
+
             if (entityReferenceLink != null)
             {
                 return entityReferenceLink.Url;

@@ -2,17 +2,18 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Routing;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.Http.OData.OData.Formatter
+namespace System.Web.Http.OData.Formatter
 {
     public class InheritanceTests
     {
@@ -20,14 +21,18 @@ namespace System.Web.Http.OData.OData.Formatter
         HttpServer _server;
         HttpClient _client;
         XNamespace _atomNamespace = "http://www.w3.org/2005/Atom";
+        IEdmModel _model;
 
         public InheritanceTests()
         {
             _configuration = new HttpConfiguration();
-            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create(GetEdmModel());
+            _model = GetEdmModel();
+            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create(_model);
 
             _configuration.Formatters.Clear();
             _configuration.Formatters.AddRange(formatters);
+
+            _configuration.AddFakeODataRoute();
 
             _configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
 
@@ -89,6 +94,7 @@ namespace System.Web.Http.OData.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Motorcycle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
 
@@ -106,6 +112,7 @@ namespace System.Web.Http.OData.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             request.Content = new StringContent("{ 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
@@ -125,6 +132,7 @@ namespace System.Web.Http.OData.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
 
@@ -142,6 +150,7 @@ namespace System.Web.Http.OData.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
@@ -194,6 +203,7 @@ namespace System.Web.Http.OData.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+            AddODataPath(request);
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
             Stream stream = response.Content.ReadAsStreamAsync().Result;
@@ -229,11 +239,18 @@ namespace System.Web.Http.OData.OData.Formatter
             Assert.Null(result.SportBikeProperty_NotVisible);
         }
 
-        private static HttpRequestMessage GetODataRequest(string uri)
+        private HttpRequestMessage GetODataRequest(string uri)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             return request;
+        }
+
+        private void AddODataPath(HttpRequestMessage request)
+        {
+            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(_model).Parse(
+                GetODataPath(request.RequestUri.AbsoluteUri));
         }
 
         private static IEdmModel GetEdmModel()
@@ -256,11 +273,33 @@ namespace System.Web.Http.OData.OData.Formatter
                 .DerivesFrom<Vehicle>()
                 .Property(c => c.SeatingCapacity);
 
-            builder.EntitySet<Vehicle>("vehicles");
-            builder.EntitySet<Motorcycle>("motorcycles");
+            builder.EntitySet<Vehicle>("vehicles").HasEditLink(
+                (v) => "http://localhost/vehicles/" + v.EntityInstance.Name);
+            builder.EntitySet<Motorcycle>("motorcycles").HasEditLink(
+                (m) => "http://localhost/motorcycles/" + m.EntityInstance.Name);
             builder.EntitySet<Car>("cars");
 
+            new ActionConfiguration(builder, "GetCarAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");
+            new ActionConfiguration(builder, "GetMotorcycleAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");
+            new ActionConfiguration(builder, "GetSportBikeAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");
+            new ActionConfiguration(builder, "GetVehicles").ReturnsFromEntitySet<Vehicle>("vehicles");
+            new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Motorcycle")
+                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Motorcycle")
+                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Vehicle")
+                .ReturnsFromEntitySet<Vehicle>("vehicles");
+            new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Vehicle")
+                .ReturnsFromEntitySet<Vehicle>("vehicles");
+
             return builder.GetEdmModel();
+        }
+
+        private static string GetODataPath(string url)
+        {
+            string serverBaseUri = "http://localhost/";
+            Assert.True(url.StartsWith(serverBaseUri)); // Guard
+            return url.Substring(serverBaseUri.Length);
         }
     }
 

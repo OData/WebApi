@@ -53,6 +53,7 @@ namespace System.Web.Http.OData.Formatter
             IEdmModel model = modelBuilder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
+            configuration.AddFakeODataRoute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)/ID");
@@ -73,13 +74,15 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpConfiguration configuration = new HttpConfiguration();
 
-            ODataConventionModelBuilder model = new ODataConventionModelBuilder();
-            model.EntitySet<WorkItem>("WorkItems");
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<WorkItem>("WorkItems");
+            IEdmModel model = modelBuilder.GetEdmModel();
 
+            configuration.AddFakeODataRoute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model.GetEdmModel(), request);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
             ObjectContent content = new ObjectContent(type, value, formatter, "application/xml");
 
             var stream = content.ReadAsStreamAsync().Result;

@@ -49,6 +49,7 @@ namespace System.Web.Http.OData
         {
             ODataResourceCollectionInfo info = new ODataResourceCollectionInfo
             {
+                Name = name, // Required for JSON light support
                 Url = new Uri(url, UriKind.Relative)
             };
 

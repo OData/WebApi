@@ -21,16 +21,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private const string FeedNamespace = "http://schemas.datacontract.org/2004/07/";
         private const string SelfLinkRelation = "self";
 
-        private IEdmCollectionTypeReference _edmCollectionType;
+        private readonly IEdmCollectionTypeReference _edmCollectionType;
+        private readonly IEdmEntityType _edmElementType;
 
         public ODataFeedSerializer(IEdmCollectionTypeReference edmCollectionType, ODataSerializerProvider serializerProvider)
             : base(edmCollectionType, ODataPayloadKind.Feed, serializerProvider)
         {
+            Contract.Assert(edmCollectionType != null);
             _edmCollectionType = edmCollectionType;
             if (!edmCollectionType.ElementType().IsEntity())
             {
                 throw Error.NotSupported(SRResources.TypeMustBeEntityCollection, edmCollectionType.ElementType().FullName(), typeof(IEdmEntityType).Name);
             }
+
+            Contract.Assert(edmCollectionType.ElementType() != null);
+            Contract.Assert(edmCollectionType.ElementType().AsEntity() != null);
+            Contract.Assert(edmCollectionType.ElementType().AsEntity().Definition != null);
+            Contract.Assert(edmCollectionType.ElementType().AsEntity().Definition as IEdmEntityType != null);
+            _edmElementType = _edmCollectionType.ElementType().AsEntity().Definition as IEdmEntityType;
         }
 
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
@@ -40,7 +48,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("messageWriter");
             }
 
-            ODataWriter writer = messageWriter.CreateODataFeedWriter();
+            if (writeContext == null)
+            {
+                throw Error.ArgumentNull("writeContext");
+            }
+
+            IEdmEntitySet entitySet = writeContext.EntitySet;
+
+            if (entitySet == null)
+            {
+                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
+            }
+
+            // No null check; entity type is not required for successful serialization.
+            IEdmEntityType entityType = _edmElementType;
+
+            ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType);
             WriteObjectInline(graph, writer, writeContext);
             writer.Flush();
         }
@@ -67,7 +90,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+         private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             IEnumerable enumerable = graph as IEnumerable; // Data to serialize
             if (enumerable != null)

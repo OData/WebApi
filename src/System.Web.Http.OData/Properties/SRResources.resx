@@ -559,4 +559,19 @@
   <data name="FromODataUriRequiresPrimitive" xml:space="preserve">
     <value>Type '{0}' is not a valid EDM primitive. The [FromODataUri] attribute can only be used on parameters with types that correspond to EDM primitives.</value>
   </data>
+  <data name="EntitySetMissingDuringSerialization" xml:space="preserve">
+    <value>The related entity set could not be found. The related entity set is required to serialize the payload.</value>
+  </data>
+  <data name="NavigationPropertyMissingDuringSerialization" xml:space="preserve">
+    <value>The related navigation property could not be found. The related navigation property is required to serialize the payload.</value>
+  </data>
+  <data name="RequestMissingDuringSerialization" xml:space="preserve">
+    <value>The request could not be found. The request is required to serialize the payload.</value>
+  </data>
+  <data name="UnsupportedPrimitiveType" xml:space="preserve">
+    <value>The type '{0}' is not a supported primitive type.</value>
+  </data>
+  <data name="UnableToDetermineMetadataUrl" xml:space="preserve">
+    <value>The ODataMediaTypeFormatter must be able to determine the metadata URL for a request in order to serialize the response.</value>
+  </data>
 </root>

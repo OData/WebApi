@@ -53,8 +53,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        [Trait("Description", "Demonstrates how to get the response from an Http GET in OData atom format when the accept header is application/json")]
-        public void Get_Entry_In_OData_Json_Format()
+        public void Get_Entry_In_OData_Json_Verbose_Format()
         {
             using (HttpServer host = new HttpServer(_config))
             {

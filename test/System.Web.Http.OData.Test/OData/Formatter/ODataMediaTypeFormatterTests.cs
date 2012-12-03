@@ -183,14 +183,20 @@ namespace System.Web.Http.OData.Formatter
         public ODataMediaTypeFormatter CreateFormatterWithRequest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
-            request.Properties["MS_HttpConfiguration"] = new HttpConfiguration();
-            return CreateFormatter(CreateModel(), request);
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.AddFakeODataRoute();
+            request.Properties["MS_HttpConfiguration"] = configuration;
+            IEdmModel model = CreateModel();
+            request.Properties["MS_ODataPath"] = new ODataPath(new EntitySetPathSegment(
+                model.EntityContainers().Single().EntitySets().Single()));
+            return CreateFormatter(model, request);
         }
 
         private static IEdmModel CreateModel()
         {
             ODataConventionModelBuilder model = new ODataConventionModelBuilder();
             model.Entity<SampleType>();
+            model.EntitySet<SampleType>("sampleTypes");
             return model.GetEdmModel();
         }
 

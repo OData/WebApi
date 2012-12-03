@@ -60,7 +60,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var property = _serializer.CreateProperty(null, "TestCollection", new ODataSerializerContext());
 
             Assert.NotNull(property);
-            Assert.Null(property.Value);
+            Assert.IsType(typeof(ODataCollectionValue), property.Value);
+            ODataCollectionValue collection = (ODataCollectionValue)property.Value;
+            Assert.Empty(collection.Items);
         }
     }
 }

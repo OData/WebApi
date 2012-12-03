@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
@@ -39,7 +40,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
 
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider(_model);
-            _serializer = new ODataEntityTypeSerializer(new EdmEntityTypeReference(_customerSet.ElementType, isNullable: false), serializerProvider);
+            _serializer = new ODataEntityTypeSerializer(
+                new EdmEntityTypeReference(_customerSet.ElementType, isNullable: false),
+                serializerProvider);
             _urlHelper = new Mock<UrlHelper>(new HttpRequestMessage()).Object;
             _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, UrlHelper = _urlHelper };
         }

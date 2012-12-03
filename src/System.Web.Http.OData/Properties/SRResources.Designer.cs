@@ -511,6 +511,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The related entity set could not be found. The related entity set is required to serialize the payload..
+        /// </summary>
+        internal static string EntitySetMissingDuringSerialization {
+            get {
+                return ResourceManager.GetString("EntitySetMissingDuringSerialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The given entitySet must be in the given Entity Data Model..
         /// </summary>
         internal static string EntitySetMustBeInTheModel {
@@ -849,6 +858,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string MustHaveMatchingMultiplicity {
             get {
                 return ResourceManager.GetString("MustHaveMatchingMultiplicity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The related navigation property could not be found. The related navigation property is required to serialize the payload..
+        /// </summary>
+        internal static string NavigationPropertyMissingDuringSerialization {
+            get {
+                return ResourceManager.GetString("NavigationPropertyMissingDuringSerialization", resourceCulture);
             }
         }
         
@@ -1222,6 +1240,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The request could not be found. The request is required to serialize the payload..
+        /// </summary>
+        internal static string RequestMissingDuringSerialization {
+            get {
+                return ResourceManager.GetString("RequestMissingDuringSerialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request message does not contain an HttpConfiguration object..
         /// </summary>
         internal static string RequestMustContainConfiguration {
@@ -1321,6 +1348,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The ODataMediaTypeFormatter must be able to determine the metadata URL for a request in order to serialize the response..
+        /// </summary>
+        internal static string UnableToDetermineMetadataUrl {
+            get {
+                return ResourceManager.GetString("UnableToDetermineMetadataUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found unsupported EdmTypeKind &apos;{0}&apos; in list of available types..
         /// </summary>
         internal static string UnsupportedEdmTypeKind {
@@ -1335,6 +1371,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string UnsupportedExpressionNodeType {
             get {
                 return ResourceManager.GetString("UnsupportedExpressionNodeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a supported primitive type..
+        /// </summary>
+        internal static string UnsupportedPrimitiveType {
+            get {
+                return ResourceManager.GetString("UnsupportedPrimitiveType", resourceCulture);
             }
         }
         

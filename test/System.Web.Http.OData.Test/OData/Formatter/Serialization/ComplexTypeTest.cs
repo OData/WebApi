@@ -32,6 +32,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             HttpConfiguration config = new HttpConfiguration();
+            config.AddFakeODataRoute();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             return request;
         }

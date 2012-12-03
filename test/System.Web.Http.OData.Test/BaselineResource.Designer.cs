@@ -387,8 +387,8 @@ namespace System.Web.Http.OData {
         ///    &lt;Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/Age&gt;
         ///    &lt;Gender&gt;Male&lt;/Gender&gt;
         ///    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
-        ///    &lt;Alias m:type=&quot;Collection(Edm.String)&quot;&gt;
-        ///      &lt;d:element xmlns:d=&quot;http:// [rest of string was truncated]&quot;;.
+        ///    &lt;Alias&gt;
+        ///      &lt;d:element xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/0 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TestCollectionOfPerson {
             get {
@@ -402,9 +402,10 @@ namespace System.Web.Http.OData {
         ///  &lt;d:Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/d:Age&gt;
         ///  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
         ///  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-        ///  &lt;d:Alias m:type=&quot;Collection(Edm.String)&quot;&gt;
+        ///  &lt;d:Alias&gt;
         ///    &lt;d:element&gt;Alias0&lt;/d:element&gt;
-        ///  [rest of string was truncated]&quot;;.
+        ///  &lt;/d:Alias&gt;
+        ///  &lt;d:Address m:type [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TestComplexTypePerson {
             get {

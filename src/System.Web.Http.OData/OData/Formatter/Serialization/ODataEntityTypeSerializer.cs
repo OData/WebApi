@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
@@ -23,6 +24,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public ODataEntityTypeSerializer(IEdmEntityTypeReference edmEntityType, ODataSerializerProvider serializerProvider)
             : base(edmEntityType, ODataPayloadKind.Entry, serializerProvider)
         {
+            Contract.Assert(edmEntityType != null);
             _edmEntityTypeReference = edmEntityType;
         }
 
@@ -38,7 +40,23 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            ODataWriter writer = messageWriter.CreateODataEntryWriter();
+            if (graph == null)
+            {
+                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull,
+                    ODataFormatterConstants.Entry));
+            }
+
+            IEdmEntitySet entitySet = writeContext.EntitySet;
+
+            if (entitySet == null)
+            {
+                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
+            }
+
+            // No null check; entity type is not required for successful serialization.
+            IEdmEntityType entityType = _edmEntityTypeReference.Definition as IEdmEntityType;
+
+            ODataWriter writer = messageWriter.CreateODataEntryWriter(entitySet, entityType);
             WriteObjectInline(graph, writer, writeContext);
             writer.Flush();
         }

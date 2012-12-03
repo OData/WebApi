@@ -34,7 +34,8 @@ namespace System.Web.Http.OData.Routing.Conventions
                 throw Error.ArgumentNull("request");
             }
 
-            if (odataPath.PathTemplate == "~" || odataPath.PathTemplate == "~/$metadata")
+            if (odataPath.PathTemplate == "~" ||
+                odataPath.PathTemplate == "~/$metadata")
             {
                 return "ODataMetadata";
             }

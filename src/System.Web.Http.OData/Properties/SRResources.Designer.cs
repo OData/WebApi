@@ -376,7 +376,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not Implemented..
+        ///   Looks up a localized string similar to Not implemented..
         /// </summary>
         internal static string EntitySetControllerUnmappedRequestErrorCode {
             get {
@@ -394,7 +394,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creating a &apos;{0}&apos; link is not supported..
+        ///   Looks up a localized string similar to Creating a &apos;{0}&apos; link is not supported for this entity set..
         /// </summary>
         internal static string EntitySetControllerUnsupportedCreateLink {
             get {
@@ -421,16 +421,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DELETE requests are not supported..
-        /// </summary>
-        internal static string EntitySetControllerUnsupportedDeleteErrorCode {
-            get {
-                return ResourceManager.GetString("EntitySetControllerUnsupportedDeleteErrorCode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Deleting a &apos;{0}&apos; link is not supported..
+        ///   Looks up a localized string similar to Deleting a &apos;{0}&apos; link is not supported for this entity set..
         /// </summary>
         internal static string EntitySetControllerUnsupportedDeleteLink {
             get {
@@ -448,7 +439,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to GET requests are not supported for this entity set..
+        ///   Looks up a localized string similar to Getting entities is not supported for this entity set..
         /// </summary>
         internal static string EntitySetControllerUnsupportedGet {
             get {
@@ -457,7 +448,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to GET requests by key are not supported for this entity set..
+        ///   Looks up a localized string similar to Getting entities by key is not supported for this entity set..
         /// </summary>
         internal static string EntitySetControllerUnsupportedGetByKey {
             get {
@@ -475,20 +466,20 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to GET requests are not supported..
-        /// </summary>
-        internal static string EntitySetControllerUnsupportedGetErrorCode {
-            get {
-                return ResourceManager.GetString("EntitySetControllerUnsupportedGetErrorCode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Extracting the key from entity instances is not supported for this entity set..
         /// </summary>
         internal static string EntitySetControllerUnsupportedGetKey {
             get {
                 return ResourceManager.GetString("EntitySetControllerUnsupportedGetKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} requests are not supported..
+        /// </summary>
+        internal static string EntitySetControllerUnsupportedMethodErrorCode {
+            get {
+                return ResourceManager.GetString("EntitySetControllerUnsupportedMethodErrorCode", resourceCulture);
             }
         }
         
@@ -502,38 +493,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to PATCH requests are not supported..
-        /// </summary>
-        internal static string EntitySetControllerUnsupportedPatchErrorCode {
-            get {
-                return ResourceManager.GetString("EntitySetControllerUnsupportedPatchErrorCode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to POST requests are not supported..
-        /// </summary>
-        internal static string EntitySetControllerUnsupportedPostErrorCode {
-            get {
-                return ResourceManager.GetString("EntitySetControllerUnsupportedPostErrorCode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Replacing entities is not supported for this entity set..
         /// </summary>
         internal static string EntitySetControllerUnsupportedUpdate {
             get {
                 return ResourceManager.GetString("EntitySetControllerUnsupportedUpdate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to PUT requests are not supported..
-        /// </summary>
-        internal static string EntitySetControllerUnsupportedUpdateErrorCode {
-            get {
-                return ResourceManager.GetString("EntitySetControllerUnsupportedUpdateErrorCode", resourceCulture);
             }
         }
         

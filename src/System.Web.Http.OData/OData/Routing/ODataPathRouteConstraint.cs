@@ -20,6 +20,11 @@ namespace System.Web.Http.OData.Routing
         /// <param name="pathHandler">The OData path handler to use for parsing.</param>
         public ODataPathRouteConstraint(IODataPathHandler pathHandler)
         {
+            if (pathHandler == null)
+            {
+                throw Error.ArgumentNull("pathHandler");
+            }
+
             _pathHandler = pathHandler;
         }
 

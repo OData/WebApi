@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http
+namespace System.Web.Http.OData
 {
     /// <summary>
     /// This class contains route constants for OData.
@@ -31,6 +31,11 @@ namespace System.Web.Http
         /// Route data key for the action name.
         /// </summary>
         public static readonly string Action = "action";
+
+        /// <summary>
+        /// Route data key for the controller name.
+        /// </summary>
+        public static readonly string Controller = "controller";
 
         /// <summary>
         /// Route data key for entity keys.

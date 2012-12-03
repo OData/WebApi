@@ -80,13 +80,13 @@ namespace System.Web.Http.OData.Routing
             {
                 if (_pathTemplate == null)
                 {
-                    StringBuilder sb = new StringBuilder("~");
+                    StringBuilder templateBuilder = new StringBuilder("~");
                     foreach (ODataPathSegment segment in Segments)
                     {
-                        sb.Append("/");
-                        sb.Append(segment.SegmentKind);
+                        templateBuilder.Append("/");
+                        templateBuilder.Append(segment.SegmentKind);
                     }
-                    _pathTemplate = sb.ToString();
+                    _pathTemplate = templateBuilder.ToString();
                 }
                 return _pathTemplate;
             }

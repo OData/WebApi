@@ -38,7 +38,9 @@ namespace System.Web.Http.OData.Routing.Conventions
                 throw Error.ArgumentNull("actionMap");
             }
 
-            if (controllerContext.Request.Method == HttpMethod.Get && (odataPath.PathTemplate == "~/entityset/key/navigation" || odataPath.PathTemplate == "~/entityset/key/cast/navigation"))
+            if (controllerContext.Request.Method == HttpMethod.Get &&
+                (odataPath.PathTemplate == "~/entityset/key/navigation" ||
+                 odataPath.PathTemplate == "~/entityset/key/cast/navigation"))
             {
                 NavigationPathSegment navigationSegment = odataPath.Segments.Last() as NavigationPathSegment;
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;

@@ -39,7 +39,8 @@ namespace System.Web.Http.OData.Routing.Conventions
                 throw Error.ArgumentNull("actionMap");
             }
 
-            if (odataPath.PathTemplate == "~/entityset/key" || odataPath.PathTemplate == "~/entityset/key/cast")
+            if (odataPath.PathTemplate == "~/entityset/key" ||
+                odataPath.PathTemplate == "~/entityset/key/cast")
             {
                 HttpMethod httpMethod = controllerContext.Request.Method;
                 string httpMethodName;

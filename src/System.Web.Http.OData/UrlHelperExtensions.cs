@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Web.Http.OData;
 using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 
-namespace System.Web.Http.Routing
+namespace System.Web.Http
 {
     /// <summary>
     /// Provides extension methods for the <see cref="UrlHelper"/> class.

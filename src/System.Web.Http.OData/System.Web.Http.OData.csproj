@@ -125,7 +125,7 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
-    <Compile Include="ODataRouteConstants.cs" />
+    <Compile Include="OData\ODataRouteConstants.cs" />
     <Compile Include="OData\EntitySetController.cs" />
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
     <Compile Include="MediaTypeFormatterExtensions.cs" />
@@ -312,7 +312,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializer.cs" />
     <Compile Include="QueryableAttribute.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
-    <Compile Include="Routing\UrlHelperExtensions.cs" />
+    <Compile Include="UrlHelperExtensions.cs" />
     <Compile Include="TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinder.cs" />

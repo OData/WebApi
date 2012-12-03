@@ -8,6 +8,7 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.OData;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
@@ -199,10 +200,13 @@ namespace System.Web.Http
                 routePrefix + "/" + ODataRouteConstants.ODataPathTemplate;
             IODataPathHandler pathHandler = configuration.GetODataPathHandler() ?? new DefaultODataPathHandler(model);
             IHttpRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler);
-
             configuration.Routes.MapHttpRoute(ODataRouteConstants.RouteName, routeTemplate, null, new HttpRouteValueDictionary() { { ODataRouteConstants.ConstraintName, routeConstraint } });
-            configuration.Services.Replace(typeof(IHttpControllerSelector), new ODataControllerSelector(configuration));
-            configuration.Services.Replace(typeof(IHttpActionSelector), new ODataActionSelector());
+
+            IEnumerable<IODataRoutingConvention> routingConventions = configuration.GetODataRoutingConventions();
+            IHttpControllerSelector controllerSelector = new ODataControllerSelector(routingConventions, configuration.Services.GetHttpControllerSelector());
+            IHttpActionSelector actionSelector = new ODataActionSelector(routingConventions, configuration.Services.GetActionSelector());
+            configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
+            configuration.Services.Replace(typeof(IHttpActionSelector), actionSelector);
 
             // Formatter
             configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));

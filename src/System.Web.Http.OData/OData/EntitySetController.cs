@@ -52,7 +52,7 @@ namespace System.Web.Http.OData
                     {
                         Message = SRResources.EntitySetControllerUnsupportedGet,
                         MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                        ErrorCode = SRResources.EntitySetControllerUnsupportedGetErrorCode
+                        ErrorCode = Error.Format(SRResources.EntitySetControllerUnsupportedMethodErrorCode, "GET")
                     }));
         }
 
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData
         [AcceptVerbs("PATCH", "MERGE")]
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "1#", Justification = "Patch is the action name by WebAPI convention.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage Patch([FromUri] TKey key, [FromBody] Delta<TEntity> patch)
+        public virtual HttpResponseMessage Patch([FromUri] TKey key, Delta<TEntity> patch)
         {
             TEntity updated = PatchEntity(key, patch);
 
@@ -139,7 +139,7 @@ namespace System.Web.Http.OData
 
         [AcceptVerbs("POST", "PUT")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage CreateLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        public virtual void CreateLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(
@@ -153,7 +153,7 @@ namespace System.Web.Http.OData
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage DeleteLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        public virtual void DeleteLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(
@@ -167,7 +167,7 @@ namespace System.Web.Http.OData
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage DeleteLink([FromUri] TKey key, string relatedKey, string navigationProperty)
+        public virtual void DeleteLink([FromUri] TKey key, string relatedKey, string navigationProperty)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(
@@ -206,7 +206,7 @@ namespace System.Web.Http.OData
                     {
                         Message = SRResources.EntitySetControllerUnsupportedGetKey,
                         MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                        ErrorCode = SRResources.EntitySetControllerUnsupportedPostErrorCode
+                        ErrorCode = Error.Format(SRResources.EntitySetControllerUnsupportedMethodErrorCode, "POST")
                     }));
         }
 
@@ -234,7 +234,7 @@ namespace System.Web.Http.OData
                     {
                         Message = SRResources.EntitySetControllerUnsupportedCreate,
                         MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                        ErrorCode = SRResources.EntitySetControllerUnsupportedPostErrorCode
+                        ErrorCode = Error.Format(SRResources.EntitySetControllerUnsupportedMethodErrorCode, "POST")
                     }));
         }
 
@@ -248,7 +248,7 @@ namespace System.Web.Http.OData
                             {
                                 Message = SRResources.EntitySetControllerUnsupportedUpdate,
                                 MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                                ErrorCode = SRResources.EntitySetControllerUnsupportedUpdateErrorCode
+                                ErrorCode = Error.Format(SRResources.EntitySetControllerUnsupportedMethodErrorCode, "PUT")
                             }));
         }
 
@@ -262,7 +262,7 @@ namespace System.Web.Http.OData
                         {
                             Message = SRResources.EntitySetControllerUnsupportedPatch,
                             MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                            ErrorCode = SRResources.EntitySetControllerUnsupportedPatchErrorCode
+                            ErrorCode = Error.Format(SRResources.EntitySetControllerUnsupportedMethodErrorCode, "PATCH")
                         }));
         }
 
@@ -276,7 +276,7 @@ namespace System.Web.Http.OData
                     {
                         Message = SRResources.EntitySetControllerUnsupportedDelete,
                         MessageLanguage = SRResources.EntitySetControllerErrorMessageLanguage,
-                        ErrorCode = SRResources.EntitySetControllerUnsupportedDeleteErrorCode
+                        ErrorCode = Error.Format(SRResources.EntitySetControllerUnsupportedMethodErrorCode, "DELETE")
                     }));
         }
 

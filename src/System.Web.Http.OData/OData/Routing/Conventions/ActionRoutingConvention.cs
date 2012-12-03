@@ -42,7 +42,8 @@ namespace System.Web.Http.OData.Routing.Conventions
 
             if (controllerContext.Request.Method == HttpMethod.Post)
             {
-                if (odataPath.PathTemplate == "~/entityset/key/action" || odataPath.PathTemplate == "~/entityset/key/cast/action")
+                if (odataPath.PathTemplate == "~/entityset/key/action" ||
+                    odataPath.PathTemplate == "~/entityset/key/cast/action")
                 {
                     ActionPathSegment actionSegment = odataPath.Segments.Last() as ActionPathSegment;
                     IEdmFunctionImport action = actionSegment.Action;
@@ -63,7 +64,8 @@ namespace System.Web.Http.OData.Routing.Conventions
                         }
                     }
                 }
-                else if (odataPath.PathTemplate == "~/entityset/action" || odataPath.PathTemplate == "~/entityset/cast/action")
+                else if (odataPath.PathTemplate == "~/entityset/action" ||
+                         odataPath.PathTemplate == "~/entityset/cast/action")
                 {
                     ActionPathSegment actionSegment = odataPath.Segments.Last() as ActionPathSegment;
                     IEdmFunctionImport action = actionSegment.Action;

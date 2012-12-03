@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
                     PathHandler = new DefaultODataPathHandler(model),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }                    
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 carManufacturerProperty);
 
@@ -150,7 +150,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
                     PathHandler = new DefaultODataPathHandler(model),
-                    EntityInstance = new Car { Model = 2009, Name = "Accord" }                    
+                    EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 carManufacturerProperty);
 

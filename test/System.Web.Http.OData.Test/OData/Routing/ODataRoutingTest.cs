@@ -13,8 +13,8 @@ namespace System.Web.Http.OData.Routing
 {
     public class ODataRoutingTest
     {
-        HttpServer _server;
-        HttpClient _client;
+        private HttpServer _server;
+        private HttpClient _client;
 
         public ODataRoutingTest()
         {

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-
 namespace Microsoft.AspNet.Mvc.Facebook
 {
-    public class FacebookGroupConnection<T>
+    public static class FacebookClaimTypes
     {
-        public IList<T> Data { get; set; }
+        public static readonly string FacebookUserId = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/facebookuserid";
     }
 }

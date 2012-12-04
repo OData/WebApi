@@ -40,39 +40,39 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
             return GetFacebookObjectAsync<TUser>(client, "me");
         }
 
-        public static Task<IEnumerable<object>> GetCurrentUserFriendsAsync(this FacebookClient client)
+        public static Task<IList<object>> GetCurrentUserFriendsAsync(this FacebookClient client)
         {
             return GetCurrentUserFriendsAsync<object>(client);
         }
 
-        public static async Task<IEnumerable<TUserFriend>> GetCurrentUserFriendsAsync<TUserFriend>(this FacebookClient client) where TUserFriend : class
+        public static async Task<IList<TUserFriend>> GetCurrentUserFriendsAsync<TUserFriend>(this FacebookClient client) where TUserFriend : class
         {
             FacebookGroupConnection<TUserFriend> friends = await GetFacebookObjectAsync<FacebookGroupConnection<TUserFriend>>(client, "me/friends");
             return friends != null ?
                 friends.Data :
-                Enumerable.Empty<TUserFriend>();
+                new TUserFriend[0];
         }
 
-        public static async Task<IEnumerable<string>> GetCurrentUserPermissionsAsync(this FacebookClient client)
+        public static async Task<IList<string>> GetCurrentUserPermissionsAsync(this FacebookClient client)
         {
             FacebookGroupConnection<IDictionary<string, int>> permissionResults = await client.GetTaskAsync<FacebookGroupConnection<IDictionary<string, int>>>("me/permissions");
             return ParsePermissions(permissionResults.Data);
         }
 
-        public static async Task<IEnumerable<TStatus>> GetCurrentUserStatusesAsync<TStatus>(this FacebookClient client) where TStatus : class
+        public static async Task<IList<TStatus>> GetCurrentUserStatusesAsync<TStatus>(this FacebookClient client) where TStatus : class
         {
             FacebookGroupConnection<TStatus> statuses = await GetFacebookObjectAsync<FacebookGroupConnection<TStatus>>(client, "me/statuses");
             return statuses != null ?
                 statuses.Data :
-                Enumerable.Empty<TStatus>();
+                new TStatus[0];
         }
 
-        public static async Task<IEnumerable<TPhotos>> GetCurrentUserPhotosAsync<TPhotos>(this FacebookClient client) where TPhotos : class
+        public static async Task<IList<TPhotos>> GetCurrentUserPhotosAsync<TPhotos>(this FacebookClient client) where TPhotos : class
         {
             FacebookGroupConnection<TPhotos> photos = await GetFacebookObjectAsync<FacebookGroupConnection<TPhotos>>(client, "me/photos");
             return photos != null ?
                 photos.Data :
-                Enumerable.Empty<TPhotos>();
+                new TPhotos[0];
         }
 
         internal static Uri GetLoginUrl(this FacebookClient client, string redirectUrl, string appId, string permissions)
@@ -97,24 +97,24 @@ namespace Microsoft.AspNet.Mvc.Facebook.Client
             return client.GetLoginUrl(loginUrlParameters);
         }
 
-        internal static IEnumerable<string> GetCurrentUserPermissions(this FacebookClient client)
+        internal static IList<string> GetCurrentUserPermissions(this FacebookClient client)
         {
             FacebookGroupConnection<IDictionary<string, int>> permissionResults = client.Get<FacebookGroupConnection<IDictionary<string, int>>>("me/permissions");
             return ParsePermissions(permissionResults.Data);
         }
 
-        private static IEnumerable<string> ParsePermissions(IEnumerable<IDictionary<string, int>> permissionResults)
+        private static IList<string> ParsePermissions(IList<IDictionary<string, int>> permissionResults)
         {
             if (permissionResults != null)
             {
                 IDictionary<string, int> permissionResult = permissionResults.FirstOrDefault();
                 if (permissionResult != null)
                 {
-                    return permissionResult.Where(kvp => kvp.Value == 1).Select(kvp => kvp.Key);
+                    return permissionResult.Where(kvp => kvp.Value == 1).Select(kvp => kvp.Key).ToList();
                 }
             }
 
-            return Enumerable.Empty<string>();
+            return new string[0];
         }
     }
 }

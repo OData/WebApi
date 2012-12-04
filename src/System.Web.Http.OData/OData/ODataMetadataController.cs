@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -17,11 +16,9 @@ using Microsoft.Data.OData.Atom;
 
 namespace System.Web.Http.OData
 {
-    [CustomConfiguration]
+    [PerControllerConfiguration]
     public class ODataMetadataController : ApiController
     {
-        private const string ModelPropertyKey = "EdmModel";
-
         private static readonly Version _defaultEdmxVersion = new Version(1, 0);
         private static readonly Version _defaultDataServiceVersion = new Version(1, 0);
 
@@ -69,8 +66,8 @@ namespace System.Web.Http.OData
                 throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
             }
 
-            MediaTypeFormatter firstODataFormatter = configuration.Formatters.Where(
-                f => f != null && f.IsODataFormatter()).FirstOrDefault();
+            MediaTypeFormatter firstODataFormatter = configuration.Formatters.FirstOrDefault(
+                f => f != null && f.IsODataFormatter());
 
             if (firstODataFormatter == null)
             {
@@ -84,7 +81,7 @@ namespace System.Web.Http.OData
             return model;
         }
 
-        private sealed class CustomConfigurationAttribute : Attribute, IControllerConfiguration
+        private sealed class PerControllerConfigurationAttribute : Attribute, IControllerConfiguration
         {
             public void Initialize(HttpControllerSettings controllerSettings,
                 HttpControllerDescriptor controllerDescriptor)

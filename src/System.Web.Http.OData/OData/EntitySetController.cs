@@ -16,6 +16,11 @@ using Microsoft.Data.OData.Query;
 
 namespace System.Web.Http.OData
 {
+    /// <summary>
+    /// Provides a convenient starting point for a controller that exposes an OData entity set.
+    /// </summary>
+    /// <typeparam name="TEntity">The type associated with the exposed entity set's entity type.</typeparam>
+    /// <typeparam name="TKey">The type associated with the entity key of the exposed entity set's entity type.</typeparam>
     [CLSCompliant(false)]
     public abstract class EntitySetController<TEntity, TKey> : ApiController where TEntity : class
     {
@@ -24,6 +29,9 @@ namespace System.Web.Http.OData
         private const string ReturnContentHeaderValue = "return-content";
         private const string ReturnNoContentHeaderValue = "return-no-content";
 
+        /// <summary>
+        /// Gets the OData path of the current request.
+        /// </summary>
         public ODataPath ODataPath
         {
             get
@@ -32,6 +40,9 @@ namespace System.Web.Http.OData
             }
         }
 
+        /// <summary>
+        /// Gets the OData query options of the current request.
+        /// </summary>
         public ODataQueryOptions<TEntity> QueryOptions
         {
             get
@@ -41,6 +52,10 @@ namespace System.Web.Http.OData
             }
         }
 
+        /// <summary>
+        /// This method should be overriden to handle GET requests that attempt to retrieve entities from the entity set.
+        /// </summary>
+        /// <returns>The matching entities from the entity set.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual IQueryable<TEntity> Get()
@@ -56,6 +71,11 @@ namespace System.Web.Http.OData
                     }));
         }
 
+        /// <summary>
+        /// Handles GET requests that attempt to retrieve an individual entity by key from the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to retrieve.</param>
+        /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual HttpResponseMessage Get([FromUri] TKey key)
@@ -71,6 +91,11 @@ namespace System.Web.Http.OData
             }
         }
 
+        /// <summary>
+        /// Handles POST requests that create new entities in the entity set.
+        /// </summary>
+        /// <param name="entity">The entity to insert into the entity set.</param>
+        /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual HttpResponseMessage Post([FromBody] TEntity entity)
         {
@@ -95,6 +120,12 @@ namespace System.Web.Http.OData
             return response;
         }
 
+        /// <summary>
+        /// Handles PUT requests that attempt to replace a single entity in the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to replace.</param>
+        /// <param name="update">The updated entity.</param>
+        /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual HttpResponseMessage Put([FromUri] TKey key, [FromBody] TEntity update)
         {
@@ -111,6 +142,12 @@ namespace System.Web.Http.OData
             }
         }
 
+        /// <summary>
+        /// Handles PATCH and MERGE requests to partially update a single entity in the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to update.</param>
+        /// <param name="patch">The patch representing the partial update.</param>
+        /// <returns>The response message to send back to the client.</returns>
         [AcceptVerbs("PATCH", "MERGE")]
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "1#", Justification = "Patch is the action name by WebAPI convention.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
@@ -130,6 +167,11 @@ namespace System.Web.Http.OData
             }
         }
 
+        /// <summary>
+        /// Handles DELETE requests for deleting existing entities from the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to delete.</param>
+        /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual HttpResponseMessage Delete([FromUri] TKey key)
         {
@@ -137,6 +179,12 @@ namespace System.Web.Http.OData
             return Request.CreateResponse(HttpStatusCode.Accepted);
         }
 
+        /// <summary>
+        /// This method should be overriden to handle POST and PUT requests that attempt to create a link between two entities.
+        /// </summary>
+        /// <param name="key">The key of the entity with the navigation property.</param>
+        /// <param name="navigationProperty">The name of the navigation property.</param>
+        /// <param name="link">The URI of the entity to link.</param>
         [AcceptVerbs("POST", "PUT")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual void CreateLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
@@ -152,6 +200,12 @@ namespace System.Web.Http.OData
                         }));
         }
 
+        /// <summary>
+        /// This method should be overriden to handle DELETE requests that attempt to break a relationship between two entities.
+        /// </summary>
+        /// <param name="key">The key of the entity with the navigation property.</param>
+        /// <param name="navigationProperty">The name of the navigation property.</param>
+        /// <param name="link">The URI of the entity to remove from the navigation property.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual void DeleteLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
@@ -166,6 +220,12 @@ namespace System.Web.Http.OData
                         }));
         }
 
+        /// <summary>
+        /// This method should be overriden to handle DELETE requests that attempt to break a relationship between two entities.
+        /// </summary>
+        /// <param name="key">The key of the entity with the navigation property.</param>
+        /// <param name="relatedKey">The key of the related entity.</param>
+        /// <param name="navigationProperty">The name of the navigation property.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         public virtual void DeleteLink([FromUri] TKey key, string relatedKey, string navigationProperty)
         {
@@ -180,6 +240,11 @@ namespace System.Web.Http.OData
                         }));
         }
 
+        /// <summary>
+        /// This method should be overriden to handle all unmapped OData requests.
+        /// </summary>
+        /// <param name="odataPath">The OData path of the request.</param>
+        /// <returns>The response message to send back to the client.</returns>
         [AcceptVerbs("GET", "POST", "PUT", "PATCH", "MERGE", "DELETE")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
@@ -196,6 +261,11 @@ namespace System.Web.Http.OData
                     }));
         }
 
+        /// <summary>
+        /// This method should be overridden to get the entity key of the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The entity key value</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual TKey GetKey(TEntity entity)
         {
@@ -210,6 +280,11 @@ namespace System.Web.Http.OData
                     }));
         }
 
+        /// <summary>
+        /// This method should be overridden to retrieve an entity by key from the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to retrieve.</param>
+        /// <returns>The retrieved entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual TEntity GetEntityByKey(TKey key)
         {
@@ -224,6 +299,11 @@ namespace System.Web.Http.OData
                     }));
         }
 
+        /// <summary>
+        /// This method should be overriden to create a new entity in the entity set.
+        /// </summary>
+        /// <param name="entity">The entity to add to the entity set.</param>
+        /// <returns>The created entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual TEntity CreateEntity(TEntity entity)
         {
@@ -238,6 +318,12 @@ namespace System.Web.Http.OData
                     }));
         }
 
+        /// <summary>
+        /// This method should be overriden to update an existing entity in the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to update.</param>
+        /// <param name="update">The updated entity.</param>
+        /// <returns>The updated entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual TEntity UpdateEntity(TKey key, TEntity update)
         {
@@ -252,6 +338,12 @@ namespace System.Web.Http.OData
                             }));
         }
 
+        /// <summary>
+        /// This method should be overriden to apply a partial update to an existing entity in the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to update.</param>
+        /// <param name="patch">The patch representing the partial update.</param>
+        /// <returns>The updated entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual TEntity PatchEntity(TKey key, Delta<TEntity> patch)
         {
@@ -266,6 +358,10 @@ namespace System.Web.Http.OData
                         }));
         }
 
+        /// <summary>
+        /// This method should be overriden to deletes an existing entity from the entity set.
+        /// </summary>
+        /// <param name="key">The entity key of the entity to delete.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual void DeleteEntity(TKey key)
         {
@@ -280,6 +376,10 @@ namespace System.Web.Http.OData
                     }));
         }
 
+        /// <summary>
+        /// Returns whether or not the request prefers content to be returned.
+        /// </summary>
+        /// <returns><c>true</c> if the request has a Prefer header value for "return-content", <c>false</c> otherwise</returns>
         protected bool RequestPrefersReturnContent()
         {
             IEnumerable<string> preferences = null;
@@ -290,6 +390,10 @@ namespace System.Web.Http.OData
             return false;
         }
 
+        /// <summary>
+        /// Returns whether or not the request prefers no content to be returned.
+        /// </summary>
+        /// <returns><c>true</c> if the request has a Prefer header value for "return-no-content", <c>false</c> otherwise</returns>
         protected bool RequestPrefersReturnNoContent()
         {
             IEnumerable<string> preferences = null;

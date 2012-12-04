@@ -21,6 +21,10 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingFalse =
             MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadata =
+            MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingFalse =
+            MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonODataVerbose =
             MediaTypeHeaderValue.Parse("application/json;odata=verbose");
         private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
@@ -54,6 +58,19 @@ namespace System.Web.Http.OData.Formatter
         public static MediaTypeHeaderValue ApplicationJsonODataFullMetadataStreamingFalse
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataFullMetadataStreamingFalse).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadata
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadata).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadataStreamingFalse
+        {
+            get
+            {
+                return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadataStreamingFalse).Clone();
+            }
         }
 
         public static MediaTypeHeaderValue ApplicationJsonODataVerbose

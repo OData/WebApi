@@ -284,7 +284,7 @@ namespace System.Web.Http.OData
         /// This method should be overridden to retrieve an entity by key from the entity set.
         /// </summary>
         /// <param name="key">The entity key of the entity to retrieve.</param>
-        /// <returns>The retrieved entity.</returns>
+        /// <returns>The retrieved entity, or <c>null</c> if an entity with the specified entity key cannot be found in the entity set.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
         protected virtual TEntity GetEntityByKey(TKey key)
         {
@@ -359,7 +359,7 @@ namespace System.Web.Http.OData
         }
 
         /// <summary>
-        /// This method should be overriden to deletes an existing entity from the entity set.
+        /// This method should be overriden to delete an existing entity from the entity set.
         /// </summary>
         /// <param name="key">The entity key of the entity to delete.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]

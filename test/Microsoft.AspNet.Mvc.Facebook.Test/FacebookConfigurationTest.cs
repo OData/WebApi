@@ -15,7 +15,6 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             Assert.Null(config.AppSecret);
             Assert.NotNull(config.AppUrl);
             Assert.Null(config.AuthorizationRedirectPath);
-            Assert.Null(config.StorageProvider);
             Assert.Null(config.ClientProvider);
             Assert.Null(config.PermissionService);
             Assert.NotNull(config.Properties);

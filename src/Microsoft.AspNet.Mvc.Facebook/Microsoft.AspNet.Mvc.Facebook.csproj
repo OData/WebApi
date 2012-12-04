@@ -128,7 +128,6 @@
     <Compile Include="FacebookGroupConnection.cs" />
     <Compile Include="ModelBinders\FacebookRedirectContextModelBinder.cs" />
     <Compile Include="FacebookRedirectContext.cs" />
-    <Compile Include="Models\UserPermissions.cs" />
     <Compile Include="FacebookContext.cs" />
     <Compile Include="ModelBinders\FacebookContextModelBinder.cs" />
     <Compile Include="Models\SubscriptionVerification.cs" />
@@ -136,7 +135,6 @@
     <Compile Include="Providers\DefaultFacebookClientProvider.cs" />
     <Compile Include="FacebookConfiguration.cs" />
     <Compile Include="Providers\IFacebookClientProvider.cs" />
-    <Compile Include="Providers\IFacebookStorageProvider.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

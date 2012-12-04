@@ -42,8 +42,6 @@ namespace Microsoft.AspNet.Mvc.Facebook
 
         public IFacebookPermissionService PermissionService { get; set; }
 
-        public IFacebookStorageProvider StorageProvider { get; set; }
-
         public ConcurrentDictionary<object, object> Properties
         {
             get { return _properties; }

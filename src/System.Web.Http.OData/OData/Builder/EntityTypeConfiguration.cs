@@ -133,6 +133,22 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Removes the property from the entity keys collection.
+        /// </summary>
+        /// <param name="keyProperty">The key to be removed.</param>
+        /// <remarks>This method just disable the property to be not a key anymore. It does not remove the property all together.
+        /// To remove the property completely, use the method <see cref="RemoveProperty"/></remarks>
+        public virtual void RemoveKey(PrimitivePropertyConfiguration keyProperty)
+        {
+            if (keyProperty == null)
+            {
+                throw Error.ArgumentNull("keyProperty");
+            }
+
+            _keys.Remove(keyProperty);
+        }
+
+        /// <summary>
         /// Sets the base type of this entity type to <c>null</c> meaning that this entity type 
         /// does not derive from anything.
         /// </summary>

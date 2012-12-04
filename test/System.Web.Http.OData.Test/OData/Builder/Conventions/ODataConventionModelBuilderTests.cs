@@ -671,6 +671,38 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
+        public void DerivedTypes_Can_DefineKeys_InQueryCompositionMode()
+        {
+            // Arrange
+            MockType baseType =
+                 new MockType("BaseType")
+                 .Property(typeof(int), "ID");
+
+            MockType derivedType =
+                new MockType("DerivedType")
+                .Property(typeof(int), "DerivedTypeId")
+                .BaseType(baseType);
+
+            MockAssembly assembly = new MockAssembly(baseType, derivedType);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
+            var builder = new ODataConventionModelBuilder(configuration, isQueryCompositionMode: true);
+
+            builder.AddEntitySet("bases", builder.AddEntity(baseType));
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            model.AssertHasEntitySet("bases", baseType);
+            IEdmEntityType baseEntityType = model.AssertHasEntityType(baseType);
+            IEdmEntityType derivedEntityType = model.AssertHasEntityType(derivedType, baseType);
+            baseEntityType.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
+            derivedEntityType.AssertHasPrimitiveProperty(model, "DerivedTypeId", EdmPrimitiveTypeKind.Int32, isNullable: false);
+        }
+
+        [Fact]
         public void ModelBuilder_DerivedComplexTypeHavingKeys_Throws()
         {
             MockType baseComplexType = new MockType("BaseComplexType");

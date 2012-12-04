@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Builder
             _configurations = configurations.ToList();
         }
 
-        private IEnumerable<IEdmStructuredType> GetEdmTypes()
+        private Dictionary<Type, IEdmStructuredType> GetEdmTypes()
         {
             // Reset
             _types.Clear();
@@ -39,10 +39,7 @@ namespace System.Web.Http.OData.Builder
                 CreateEdmTypeBody(config);
             }
 
-            foreach (StructuralTypeConfiguration config in _configurations)
-            {
-                yield return _types[config.ClrType];
-            }
+            return _types;
         }
 
         private void CreateEdmTypeHeader(StructuralTypeConfiguration config)
@@ -165,8 +162,8 @@ namespace System.Web.Http.OData.Builder
         /// Builds <see cref="IEdmType"/>'s from <paramref name="configurations"/>
         /// </summary>
         /// <param name="configurations">A collection of <see cref="StructuralTypeConfiguration"/>'s</param>
-        /// <returns>The built collection of <see cref="IEdmType"/></returns>
-        public static IEnumerable<IEdmStructuredType> GetTypes(IEnumerable<StructuralTypeConfiguration> configurations)
+        /// <returns>The built dictionary of <see cref="StructuralTypeConfiguration"/>'s indexed by their backing CLR type</returns>
+        public static Dictionary<Type, IEdmStructuredType> GetTypes(IEnumerable<StructuralTypeConfiguration> configurations)
         {
             if (configurations == null)
             {

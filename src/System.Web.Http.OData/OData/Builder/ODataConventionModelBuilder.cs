@@ -216,6 +216,17 @@ namespace System.Web.Http.OData.Builder
                     if (entityMap.TryGetValue(baseClrType, out baseEntityType))
                     {
                         RemoveBaseTypeProperties(entity, baseEntityType);
+
+                        // disable derived type key check if we are building a model for query composition.
+                        if (_isQueryCompositionMode)
+                        {
+                            // modifying the collection in the iterator, hence the ToArray().
+                            foreach (PrimitivePropertyConfiguration keyProperty in entity.Keys.ToArray())
+                            {
+                                entity.RemoveKey(keyProperty);
+                            }
+                        }
+
                         entity.DerivesFrom(baseEntityType);
                         break;
                     }

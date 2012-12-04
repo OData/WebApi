@@ -425,5 +425,35 @@ namespace System.Web.Http.OData.Builder
 
             Assert.True(motorcycle.BaseTypeConfigured);
         }
+
+        [Fact]
+        public void RemoveKey_ThrowsArgumentNull()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => motorcycle.RemoveKey(keyProperty: null),
+                "keyProperty");
+        }
+
+        [Fact]
+        public void RemoveKey_Removes_KeyProperty()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.AddEntity(typeof(Motorcycle));
+            PrimitivePropertyConfiguration modelProperty = motorcycle.AddProperty(typeof(Motorcycle).GetProperty("Model"));
+            motorcycle.HasKey(typeof(Motorcycle).GetProperty("Model"));
+            Assert.Equal(new[] { modelProperty }, motorcycle.Keys);
+
+            // Act
+            motorcycle.RemoveKey(modelProperty);
+
+            // Assert
+            Assert.Empty(motorcycle.Keys);
+        }
     }
 }

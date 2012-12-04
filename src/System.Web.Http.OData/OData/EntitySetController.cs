@@ -2,15 +2,12 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http.ModelBinding;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 
@@ -78,7 +75,7 @@ namespace System.Web.Http.OData
         /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage Get([FromUri] TKey key)
+        public virtual HttpResponseMessage Get([FromODataUri] TKey key)
         {
             TEntity entity = GetEntityByKey(key);
             if (entity == null)
@@ -127,7 +124,7 @@ namespace System.Web.Http.OData
         /// <param name="update">The updated entity.</param>
         /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage Put([FromUri] TKey key, [FromBody] TEntity update)
+        public virtual HttpResponseMessage Put([FromODataUri] TKey key, [FromBody] TEntity update)
         {
             TEntity updated = UpdateEntity(key, update);
             if (RequestPrefersReturnContent())
@@ -151,7 +148,7 @@ namespace System.Web.Http.OData
         [AcceptVerbs("PATCH", "MERGE")]
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "1#", Justification = "Patch is the action name by WebAPI convention.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage Patch([FromUri] TKey key, Delta<TEntity> patch)
+        public virtual HttpResponseMessage Patch([FromODataUri] TKey key, Delta<TEntity> patch)
         {
             TEntity updated = PatchEntity(key, patch);
 
@@ -173,7 +170,7 @@ namespace System.Web.Http.OData
         /// <param name="key">The entity key of the entity to delete.</param>
         /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage Delete([FromUri] TKey key)
+        public virtual HttpResponseMessage Delete([FromODataUri] TKey key)
         {
             DeleteEntity(key);
             return Request.CreateResponse(HttpStatusCode.Accepted);
@@ -187,7 +184,7 @@ namespace System.Web.Http.OData
         /// <param name="link">The URI of the entity to link.</param>
         [AcceptVerbs("POST", "PUT")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual void CreateLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        public virtual void CreateLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(
@@ -207,7 +204,7 @@ namespace System.Web.Http.OData
         /// <param name="navigationProperty">The name of the navigation property.</param>
         /// <param name="link">The URI of the entity to remove from the navigation property.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual void DeleteLink([FromUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        public virtual void DeleteLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(
@@ -227,7 +224,7 @@ namespace System.Web.Http.OData
         /// <param name="relatedKey">The key of the related entity.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual void DeleteLink([FromUri] TKey key, string relatedKey, string navigationProperty)
+        public virtual void DeleteLink([FromODataUri] TKey key, string relatedKey, string navigationProperty)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(

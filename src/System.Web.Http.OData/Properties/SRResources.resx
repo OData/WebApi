@@ -538,9 +538,6 @@
   <data name="EntitySetControllerUnsupportedUpdate" xml:space="preserve">
     <value>Replacing entities is not supported for this entity set.</value>
   </data>
-  <data name="EntitySetControllerUnsupportedUpdateErrorCode" xml:space="preserve">
-    <value>PUT requests are not supported.</value>
-  </data>
   <data name="NotAllowedArithmeticOperator" xml:space="preserve">
     <value>Arithmetic operator '{0}' is not allowed. To allow it, try setting the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
   </data>
@@ -558,5 +555,8 @@
   </data>
   <data name="SkipTopLimitExceeded" xml:space="preserve">
     <value>The limit of '{0}' for {1} query has been exceeded. The value from the incoming request is '{2}'. </value>
+  </data>
+  <data name="FromODataUriRequiresPrimitive" xml:space="preserve">
+    <value>Type '{0}' is not a valid EDM primitive. The [FromODataUri] attribute can only be used on parameters with types that correspond to EDM primitives.</value>
   </data>
 </root>

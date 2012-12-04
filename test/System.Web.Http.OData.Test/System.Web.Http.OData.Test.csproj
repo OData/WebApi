@@ -128,6 +128,8 @@
     <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
+    <Compile Include="OData\EntitySetControllerTest.cs" />
+    <Compile Include="OData\FromODataUriTest.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormattersTests.cs" />
     <Compile Include="OData\ODataActionParametersTest.cs" />
     <Compile Include="OData\Formatter\CollectionsTests.cs" />

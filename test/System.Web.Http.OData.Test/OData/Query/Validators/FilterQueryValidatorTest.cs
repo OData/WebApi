@@ -21,6 +21,7 @@ namespace System.Web.Http.OData.Query.Validators
         {
             _validator = new MyFilterValidator();
             _builder = new ODataConventionModelBuilder();
+            _builder.Entity<QueryCompositionCustomerBase>();
             _builder.EntitySet<QueryCompositionCustomer>("Customer");
             _model = _builder.GetEdmModel();
             _settings = new ODataValidationSettings();
@@ -99,6 +100,50 @@ namespace System.Web.Http.OData.Query.Validators
             Assert.Equal(1, _validator.Times["ValidateConstantQueryNode"]); // 1
             Assert.Equal(1, _validator.Times["ValidateBinaryOperatorQueryNode"]); // eq
             Assert.Equal(1, _validator.Times["ValidateParameterQueryNode"]); // $it
+        }
+
+        [Theory]
+        [InlineData("Id eq 1")]
+        [InlineData("Id ne 1")]
+        [InlineData("Id gt 1")]
+        [InlineData("Id lt 1")]
+        [InlineData("Id ge 1")]
+        [InlineData("Id le 1")]
+        [InlineData("Id eq Id add 1")]
+        [InlineData("Id eq Id sub 1")]
+        [InlineData("Id eq Id mul 1")]
+        [InlineData("Id eq Id div 1")]
+        [InlineData("Id eq Id mod 1")]
+        [InlineData("startswith(Name, 'Microsoft')")]
+        [InlineData("endswith(Name, 'Microsoft')")]
+        [InlineData("substringof(Name, 'Microsoft')")]
+        [InlineData("substring(Name, 1) eq 'Name'")]
+        [InlineData("substring(Name, 1, 2) eq 'Name'")]
+        [InlineData("length(Name) eq 1")]
+        [InlineData("tolower(Name) eq 'Name'")]
+        [InlineData("toupper(Name) eq 'Name'")]
+        [InlineData("trim(Name) eq 'Name'")]
+        [InlineData("indexof(Name, 'Microsoft') eq 1")]
+        [InlineData("concat(Name, 'Microsoft') eq 'Microsoft'")]
+        [InlineData("year(Birthday) eq 2000")]
+        [InlineData("month(Birthday) eq 2000")]
+        [InlineData("day(Birthday) eq 2000")]
+        [InlineData("hour(Birthday) eq 2000")]
+        [InlineData("minute(Birthday) eq 2000")]
+        [InlineData("round(AmountSpent) eq 0")]
+        [InlineData("floor(AmountSpent) eq 0")]
+        [InlineData("ceiling(AmountSpent) eq 0")]
+        [InlineData("Tags/any()")]
+        [InlineData("Tags/all(t : t eq '1')")]
+        [InlineData("System.Web.Http.OData.Query.QueryCompositionCustomerBase/Id eq 1")]
+        [InlineData("Contacts/System.Web.Http.OData.Query.QueryCompositionCustomerBase/any()")]
+        public void Validator_Doesnot_Throw_For_ValidQueries(string filter)
+        {
+            // Arrange
+            FilterQueryOption option = new FilterQueryOption(filter, _context);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, _settings));
         }
 
         private class MyFilterValidator : FilterQueryValidator

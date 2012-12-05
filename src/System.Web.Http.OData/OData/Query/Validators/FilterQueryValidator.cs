@@ -372,6 +372,36 @@ namespace System.Web.Http.OData.Query.Validators
             }
         }
 
+        /// <summary>
+        /// Override this method if you want to validate casts on entity collections.
+        /// </summary>
+        /// <param name="entityCollectionCastNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateEntityCollectionCastNode(EntityCollectionCastNode entityCollectionCastNode, ODataValidationSettings settings)
+        {
+            if (entityCollectionCastNode == null)
+            {
+                throw Error.ArgumentNull("entityCollectionCastNode");
+            }
+
+            ValidateQueryNode(entityCollectionCastNode.Source, settings);
+        }
+
+        /// <summary>
+        /// Override this method if you want to validate casts on single entities.
+        /// </summary>
+        /// <param name="singleEntityCastNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateSingleEntityCastNode(SingleEntityCastNode singleEntityCastNode, ODataValidationSettings settings)
+        {
+            if (singleEntityCastNode == null)
+            {
+                throw Error.ArgumentNull("singleEntityCastNode");
+            }
+
+            ValidateQueryNode(singleEntityCastNode.Source, settings);
+        }
+
         private void ValidateCollectionNode(CollectionNode node, ODataValidationSettings settings)
         {
             switch (node.Kind)
@@ -384,6 +414,10 @@ namespace System.Web.Http.OData.Query.Validators
                 case QueryNodeKind.CollectionNavigationNode:
                     CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
+                    break;
+
+                case QueryNodeKind.EntityCollectionCast:
+                    ValidateEntityCollectionCastNode(node as EntityCollectionCastNode, settings);
                     break;
             }
         }
@@ -434,6 +468,10 @@ namespace System.Web.Http.OData.Query.Validators
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
                     break;
 
+                case QueryNodeKind.SingleEntityCast:
+                    ValidateSingleEntityCastNode(node as SingleEntityCastNode, settings);
+                    break;
+
                 case QueryNodeKind.Any:
                     ValidateAnyNode(node as AnyNode, settings);
                     break;
@@ -441,9 +479,6 @@ namespace System.Web.Http.OData.Query.Validators
                 case QueryNodeKind.All:
                     ValidateAllNode(node as AllNode, settings);
                     break;
-
-                default:
-                    throw new ODataException(Error.Format(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterQueryValidator).Name));
             }
         }
 

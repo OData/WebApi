@@ -155,7 +155,7 @@ namespace System.Web.Http.OData.Query
         public override void Validate(OrderByQueryOption option, ODataValidationSettings validationSettings)
         {
             // validate the orderby is executed in a way that one can order either by Id or by Name, but not both
-            if (option.PropertyNodes.Count > 1 )
+            if (option.PropertyNodes.Count > 1)
             {
                 throw new ODataException("Order by more than one property is not allowed.");
             }
@@ -172,7 +172,7 @@ namespace System.Web.Http.OData.Query
             return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
         }
 
-        [Queryable(AllowedOrderByProperties="Id")]
+        [Queryable(AllowedOrderByProperties = "Id")]
         public IQueryable<QueryCompositionCategory> Get(int id)
         {
             return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
@@ -289,6 +289,8 @@ namespace System.Web.Http.OData.Query
         public IEnumerable<string> Tags { get; set; }
         public IEnumerable<QueryCompositionCustomer> Contacts { get; set; }
         public byte[] Image { get; set; }
+        public DateTime Birthday { get; set; }
+        public double AmountSpent { get; set; }
     }
 
     public class QueryCompositionAddress

@@ -17,6 +17,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue.Parse("application/atom+xml;type=entry");
         private static readonly MediaTypeHeaderValue _applicationAtomXmlTypeFeed =
             MediaTypeHeaderValue.Parse("application/atom+xml;type=feed");
+        private static readonly MediaTypeHeaderValue _applicationJson = new MediaTypeHeaderValue("application/json");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadata =
             MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingFalse =
@@ -27,6 +28,8 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonODataVerbose =
             MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+        private static readonly MediaTypeHeaderValue _applicationJsonStreamingFalse =
+            MediaTypeHeaderValue.Parse("application/json;streaming=false");
         private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
         private static readonly MediaTypeHeaderValue _textXml = new MediaTypeHeaderValue("text/xml");
 
@@ -48,6 +51,11 @@ namespace System.Web.Http.OData.Formatter
         public static MediaTypeHeaderValue ApplicationAtomXmlTypeFeed
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationAtomXmlTypeFeed).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJson
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJson).Clone(); }
         }
 
         public static MediaTypeHeaderValue ApplicationJsonODataFullMetadata
@@ -76,6 +84,11 @@ namespace System.Web.Http.OData.Formatter
         public static MediaTypeHeaderValue ApplicationJsonODataVerbose
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataVerbose).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonStreamingFalse
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonStreamingFalse).Clone(); }
         }
 
         public static MediaTypeHeaderValue ApplicationXml

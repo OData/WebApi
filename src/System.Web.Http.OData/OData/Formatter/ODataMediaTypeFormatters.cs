@@ -27,8 +27,8 @@ namespace System.Web.Http.OData.Formatter
                 CreateApplicationXml(model),
                 CreateApplicationAtomSvcXml(model),
                 CreateTextXml(model),
-                CreateApplicationJsonODataLight(model),
-                CreateApplicationJsonODataVerbose(model)
+                CreateApplicationJsonODataVerbose(model),
+                CreateApplicationJsonODataLight(model)
             };
         }
 
@@ -86,6 +86,9 @@ namespace System.Web.Http.OData.Formatter
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            // TODO: Bug #671 - Don't silently take over application/json globally.
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingFalse);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJson);
             return formatter;
         }
 

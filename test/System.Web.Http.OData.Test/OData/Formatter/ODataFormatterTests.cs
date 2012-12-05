@@ -82,7 +82,8 @@ namespace System.Web.Http.OData.Formatter
         {
             foreach (ODataMediaTypeFormatter odataFormatter in _serverFormatters)
             {
-                odataFormatter.SupportedMediaTypes.Remove(ODataTestUtil.ApplicationJsonMediaType);
+                odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJsonODataVerbose);
+                odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJson);
             }
 
             using (HttpServer host = new HttpServer(_config))

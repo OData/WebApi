@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.Mvc.Facebook
                     string userId = signedRequest.user_id;
                     if (!String.IsNullOrEmpty(userId))
                     {
-                        ClaimsPrincipal principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(FacebookClaimTypes.FacebookUserId, userId) }));
+                        ClaimsPrincipal principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }));
                         Thread.CurrentPrincipal = principal;
                         httpContext.User = principal;
                     }

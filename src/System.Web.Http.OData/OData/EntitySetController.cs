@@ -129,7 +129,7 @@ namespace System.Web.Http.OData
             TEntity updated = UpdateEntity(key, update);
             if (RequestPrefersReturnContent())
             {
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Accepted, updated);
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK, updated);
                 response.Headers.Add(PreferenceAppliedHeaderName, ReturnContentHeaderValue);
                 return response;
             }
@@ -154,7 +154,7 @@ namespace System.Web.Http.OData
 
             if (RequestPrefersReturnContent())
             {
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Accepted, updated);
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK, updated);
                 response.Headers.Add(PreferenceAppliedHeaderName, ReturnContentHeaderValue);
                 return response;
             }
@@ -170,10 +170,9 @@ namespace System.Web.Http.OData
         /// <param name="key">The entity key of the entity to delete.</param>
         /// <returns>The response message to send back to the client.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        public virtual HttpResponseMessage Delete([FromODataUri] TKey key)
+        public virtual void Delete([FromODataUri] TKey key)
         {
             DeleteEntity(key);
-            return Request.CreateResponse(HttpStatusCode.Accepted);
         }
 
         /// <summary>
@@ -264,7 +263,7 @@ namespace System.Web.Http.OData
         /// <param name="entity">The entity.</param>
         /// <returns>The entity key value</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        protected virtual TKey GetKey(TEntity entity)
+        protected internal virtual TKey GetKey(TEntity entity)
         {
             throw new HttpResponseException(
                 Request.CreateResponse(
@@ -283,7 +282,7 @@ namespace System.Web.Http.OData
         /// <param name="key">The entity key of the entity to retrieve.</param>
         /// <returns>The retrieved entity, or <c>null</c> if an entity with the specified entity key cannot be found in the entity set.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        protected virtual TEntity GetEntityByKey(TKey key)
+        protected internal virtual TEntity GetEntityByKey(TKey key)
         {
             throw new HttpResponseException(
                 Request.CreateResponse(
@@ -302,7 +301,7 @@ namespace System.Web.Http.OData
         /// <param name="entity">The entity to add to the entity set.</param>
         /// <returns>The created entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        protected virtual TEntity CreateEntity(TEntity entity)
+        protected internal virtual TEntity CreateEntity(TEntity entity)
         {
             throw new HttpResponseException(
                 Request.CreateResponse(
@@ -322,7 +321,7 @@ namespace System.Web.Http.OData
         /// <param name="update">The updated entity.</param>
         /// <returns>The updated entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        protected virtual TEntity UpdateEntity(TKey key, TEntity update)
+        protected internal virtual TEntity UpdateEntity(TKey key, TEntity update)
         {
             throw new HttpResponseException(
                         Request.CreateResponse(
@@ -342,7 +341,7 @@ namespace System.Web.Http.OData
         /// <param name="patch">The patch representing the partial update.</param>
         /// <returns>The updated entity.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        protected virtual TEntity PatchEntity(TKey key, Delta<TEntity> patch)
+        protected internal virtual TEntity PatchEntity(TKey key, Delta<TEntity> patch)
         {
             throw new HttpResponseException(
                     Request.CreateResponse(
@@ -360,7 +359,7 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="key">The entity key of the entity to delete.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed later")]
-        protected virtual void DeleteEntity(TKey key)
+        protected internal virtual void DeleteEntity(TKey key)
         {
             throw new HttpResponseException(
                 Request.CreateResponse(

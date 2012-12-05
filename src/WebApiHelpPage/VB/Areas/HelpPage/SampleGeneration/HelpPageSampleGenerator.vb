@@ -227,7 +227,6 @@ Namespace Areas.HelpPage
         ''' <param name="mediaType">Type of the media.</param>
         ''' <returns></returns>
         <SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification:="The exception is recorded as InvalidSample.")>
-        <SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification:="The sample generation is done synchronously.")>
         Public Overridable Function WriteSampleObjectUsingFormatter(formatter As MediaTypeFormatter, value As Object, type As Type, mediaType As MediaTypeHeaderValue) As Object
             If (formatter Is Nothing) Then
                 Throw New ArgumentNullException("formatter")

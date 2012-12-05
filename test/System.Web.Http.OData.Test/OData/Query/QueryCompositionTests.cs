@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Deserialization;
 using Microsoft.Data.Edm;
@@ -562,6 +561,40 @@ namespace System.Web.Http.OData.Query
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Order by more than one property is not allowed."));
+        }
+
+        public static TheoryDataSet<string, IEnumerable<int>> PrimitiveTypesQueryCompositionData
+        {
+            get
+            {
+                var range = Enumerable.Range(0, 100).AsQueryable();
+                return new TheoryDataSet<string, IEnumerable<int>>
+                {
+                    { "", range.ToArray() },
+                    { "$filter=$it eq 1", new[] { 1 } },
+                    { "$filter=$it mod 2 eq 1", range.Where(i => i%2 == 1).ToArray() },
+                    { "$filter=$it mod 2 eq 1 &$orderby=$it desc", range.Where(i => i%2 == 1).OrderByDescending(i => i).ToArray() },
+                    { "$filter=$it mod 2 eq 1 &$skip=10", range.Where(i => i%2 == 1).Skip(10).ToArray() },
+                    { "$filter=$it mod 2 eq 1 &$skip=10&$top=10", range.Where(i => i%2 == 1).Skip(10).Take(10).ToArray() },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("PrimitiveTypesQueryCompositionData")]
+        public virtual void PrimitiveTypesQueryComposition(string query, IEnumerable<int> expectedResults)
+        {
+            // Arrange
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionPrimitive", useCustomEdmModel: false));
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionPrimitive?" + query).Result;
+            response.EnsureSuccessStatusCode();
+
+            // Assert
+            List<int> results = response.Content.ReadAsAsync<List<int>>().Result;
+            Assert.Equal(expectedResults, results);
         }
 
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)

@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             Assert.Throws<ArgumentException>(() =>
-                new TopQueryOption(null, new ODataQueryContext(model, typeof(Customer), "Customers")));
+                new TopQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             Assert.Throws<ArgumentException>(() =>
-                new TopQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer), "Customers")));
+                new TopQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Query
         public void CanConstructValidFilterQuery(string topValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var top = new TopQueryOption(topValue, context);
 
             Assert.Same(context, top.Context);
@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Query
         public void ApplyInvalidSkipQueryThrows(string topValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var top = new TopQueryOption(topValue, context);
 
             Assert.Throws<ODataException>(() =>
@@ -73,7 +73,7 @@ namespace System.Web.Http.OData.Query
         public void Value_Returns_ParsedTopValue(string topValue, int expectedValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var top = new TopQueryOption(topValue, context);
 
             Assert.Equal(expectedValue, top.Value);
@@ -86,7 +86,7 @@ namespace System.Web.Http.OData.Query
         public void Value_ThrowsODataException_ForInvalidValues(string skipValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var top = new TopQueryOption(skipValue, context);
 
             Assert.Throws<ODataException>(() => top.Value);
@@ -96,7 +96,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyTop()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var topOption = new TopQueryOption("1", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var topOption = new TopQueryOption("1", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "Andy" },
@@ -113,7 +113,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplySkipTopOrderby()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var orderbyOption = new OrderByQueryOption("Name", context);
             var skipOption = new SkipQueryOption("2", context);
             var topOption = new TopQueryOption("2", context);

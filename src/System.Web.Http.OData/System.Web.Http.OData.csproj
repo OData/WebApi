@@ -153,6 +153,8 @@
     <Compile Include="OData\Formatter\ODataMediaTypes.cs" />
     <Compile Include="OData\Query\InlineCountValue.cs" />
     <Compile Include="OData\Query\InlineCountQueryOption.cs" />
+    <Compile Include="OData\Query\OrderByItNode.cs" />
+    <Compile Include="OData\Query\OrderByNode.cs" />
     <Compile Include="OData\Query\Validators\FilterQueryValidator.cs" />
     <Compile Include="OData\Query\AllowedArithmeticOperators.cs" />
     <Compile Include="OData\Query\AllowedFunctions.cs" />

@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Query
         {
             if (Value == InlineCountValue.AllPages)
             {
-                return ExpressionHelpers.Count(query, Context.EntityClrType);
+                return ExpressionHelpers.Count(query, Context.ElementClrType);
             }
             else
             {

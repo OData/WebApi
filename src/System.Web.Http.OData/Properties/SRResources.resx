@@ -153,12 +153,6 @@
   <data name="UnsupportedExpressionNodeType" xml:space="preserve">
     <value>Unsupported Expression NodeType.</value>
   </data>
-  <data name="EntitySetMustBeInTheModel" xml:space="preserve">
-    <value>The given entitySet must be in the given Entity Data Model.</value>
-  </data>
-  <data name="EntitySetNotFound" xml:space="preserve">
-    <value>No EntitySet exists in the EdmModel with EntityClrType '{0}'.</value>
-  </data>
   <data name="FailedToBuildEdmModelBecauseReturnTypeIsNull" xml:space="preserve">
     <value>Cannot create an EDM model as the action '{0}' on controller '{1}' has a void return type.</value>
   </data>
@@ -183,15 +177,6 @@
   <data name="ActionExecutedContextMustHaveRequest" xml:space="preserve">
     <value>The HttpExecutedActionContext.Request is null.</value>
   </data>
-  <data name="EntityClrTypeNotFound" xml:space="preserve">
-    <value>The model does not contain the entityClrType '{0}'.</value>
-  </data>
-  <data name="EntityClrTypeNotMatchEntitySetName" xml:space="preserve">
-    <value>The EntityClrType '{0}' does not match with the given entitySetName '{1}'.</value>
-  </data>
-  <data name="EntityClrTypeNotMatchEntitySet" xml:space="preserve">
-    <value>The EntityClrType '{0}' does not match with the given entitySet '{1}'.</value>
-  </data>
   <data name="OrderByPropertyNotFound" xml:space="preserve">
     <value>It is unsupported that the OrderByNode.Expression is not an instance of PropertyAccessQueryNode type.</value>
   </data>
@@ -200,9 +185,6 @@
   </data>
   <data name="EntitySetNotFoundForName" xml:space="preserve">
     <value>No EntitySet exists in the EdmModel with entitySetName '{0}'.</value>
-  </data>
-  <data name="MultipleEntitySetMatchedClrType" xml:space="preserve">
-    <value>There are multiple EntitySets found that match EntityClrType '{0}'.</value>
   </data>
   <data name="QueryCannotBeEmpty" xml:space="preserve">
     <value>The value for OData query '{0}' cannot be empty.</value>
@@ -220,7 +202,7 @@
     <value>Binding OData QueryNode of kind {0} is not supported by {1}.</value>
   </data>
   <data name="OrderByDuplicateProperty" xml:space="preserve">
-    <value>Duplicate property named '{0}' is not supported in the OrderByNode.</value>
+    <value>Duplicate property named '{0}' is not supported in '$orderby'.</value>
   </data>
   <data name="ErrorTypeMustBeODataErrorOrHttpError" xml:space="preserve">
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
@@ -299,12 +281,6 @@
   </data>
   <data name="CannotCastFilter" xml:space="preserve">
     <value>Cannot cast $filter of type '{0}' to type '{1}'.</value>
-  </data>
-  <data name="OnlySkipAndTopSupported" xml:space="preserve">
-    <value>Only $skip and $top OData query options are supported for this type.</value>
-  </data>
-  <data name="PrimitiveTypeRequired" xml:space="preserve">
-    <value>The type '{0}' is not a primitive type.</value>
   </data>
   <data name="ComplexTypeRefersToEntityType" xml:space="preserve">
     <value>The complex type '{0}' refers to the entity type '{1}' through the property '{2}'.</value>
@@ -570,5 +546,11 @@
   </data>
   <data name="ODataPathMissing" xml:space="preserve">
     <value>The operation cannot be completed because no ODataPath is available for the request.</value>
+  </data>
+  <data name="OrderByDuplicateIt" xml:space="preserve">
+    <value>Multiple '$it' nodes are not supported in '$orderby'.</value>
+  </data>
+  <data name="ClrTypeNotInModel" xml:space="preserve">
+    <value>The given model does not contain the type '{0}'.</value>
   </data>
 </root>

@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Query
     public class OrderByQueryOption
     {
         private OrderByClause _orderByClause;
-        private ICollection<OrderByPropertyNode> _propertyNodes;
+        private ICollection<OrderByNode> _orderByNodes;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
@@ -54,15 +54,15 @@ namespace System.Web.Http.OData.Query
         /// <remarks>
         /// This collection can be modified as needed.
         /// </remarks>
-        public ICollection<OrderByPropertyNode> PropertyNodes
+        public ICollection<OrderByNode> OrderByNodes
         {
             get
             {
-                if (_propertyNodes == null)
+                if (_orderByNodes == null)
                 {
-                    _propertyNodes = OrderByPropertyNode.CreateCollection(OrderByClause);
+                    _orderByNodes = OrderByNode.CreateCollection(OrderByClause);
                 }
-                return _propertyNodes;
+                return _orderByNodes;
             }
         }
 
@@ -75,7 +75,7 @@ namespace System.Web.Http.OData.Query
         /// Gets or sets the OrderBy Query Validator
         /// </summary>
         public OrderByQueryValidator Validator { get; set; }
-      
+
         /// <summary>
         /// Gets the parsed <see cref="OrderByClause"/> for this query option.
         /// </summary>
@@ -85,7 +85,7 @@ namespace System.Web.Http.OData.Query
             {
                 if (_orderByClause == null)
                 {
-                    _orderByClause = ODataUriParser.ParseOrderBy(RawValue, Context.Model, Context.EntitySet.ElementType);
+                    _orderByClause = ODataUriParser.ParseOrderBy(RawValue, Context.Model, Context.ElementType);
                 }
                 return _orderByClause;
             }
@@ -126,27 +126,45 @@ namespace System.Web.Http.OData.Query
 
         private IOrderedQueryable ApplyToCore(IQueryable query)
         {
-            // TODO 463999: [OData] Consider moving OrderByPropertyNode to ODataLib
-            ICollection<OrderByPropertyNode> props = PropertyNodes;
+            ICollection<OrderByNode> nodes = OrderByNodes;
 
             bool alreadyOrdered = false;
             IQueryable querySoFar = query;
+
             HashSet<IEdmProperty> propertiesSoFar = new HashSet<IEdmProperty>();
+            bool orderByItSeen = false;
 
-            foreach (OrderByPropertyNode prop in props)
+            foreach (OrderByNode node in nodes)
             {
-                IEdmProperty property = prop.Property;
-                OrderByDirection direction = prop.Direction;
+                OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
 
-                // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
-                if (propertiesSoFar.Contains(property))
+                if (propertyNode != null)
                 {
-                    throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
-                }
-                propertiesSoFar.Add(property);
+                    IEdmProperty property = propertyNode.Property;
+                    OrderByDirection direction = propertyNode.Direction;
 
-                querySoFar = ExpressionHelpers.OrderBy(querySoFar, property, direction, Context.EntityClrType, alreadyOrdered);
-                alreadyOrdered = true;
+                    // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
+                    if (propertiesSoFar.Contains(property))
+                    {
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
+                    }
+                    propertiesSoFar.Add(property);
+
+                    querySoFar = ExpressionHelpers.OrderBy(querySoFar, property, direction, Context.ElementClrType, alreadyOrdered);
+                    alreadyOrdered = true;
+                }
+                else
+                {
+                    // This check prevents queries with duplicate nodes (e.g. $orderby=$it,$it,$it,$it...) from causing stack overflows
+                    if (orderByItSeen)
+                    {
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateIt));
+                    }
+
+                    querySoFar = ExpressionHelpers.OrderByIt(querySoFar, node.Direction, Context.ElementClrType, alreadyOrdered);
+                    alreadyOrdered = true;
+                    orderByItSeen = true;
+                }
             }
 
             return querySoFar as IOrderedQueryable;

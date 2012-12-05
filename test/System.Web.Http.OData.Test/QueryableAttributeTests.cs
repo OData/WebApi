@@ -317,43 +317,13 @@ namespace System.Web.Http.OData
             Assert.Equal(expectedResponse, response.Content);
         }
 
-        [Theory]
-        [InlineData("$filter=2 eq 1")]
-        [InlineData("$orderby=1")]
-        public void Primitives_Cannot_Be_Used_By_Filter_And_OrderBy(string filter)
-        {
-            // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
-            HttpConfiguration config = new HttpConfiguration();
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
-            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
-            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Primitive", typeof(PrimitiveController));
-            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(PrimitiveController).GetMethod("GetIEnumerableOfInt"));
-            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
-            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
-            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
-            context.Response.Content = new ObjectContent(typeof(IEnumerable<int>), new List<int>(), new JsonMediaTypeFormatter());
-
-            // Act and Assert
-            attribute.OnActionExecuted(context);
-            HttpResponseMessage response = context.Response;
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.IsAssignableFrom(typeof(ObjectContent), response.Content);
-            HttpError error = ((ObjectContent)response.Content).Value as HttpError;
-            Assert.NotNull(error);
-            Assert.Equal("Only $skip and $top OData query options are supported for this type.", error["ExceptionMessage"]);
-        }
-
         [Fact]
         public void ValidateQuery_Throws_With_Null_Request()
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), new HttpRequestMessage());
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer)), new HttpRequestMessage());
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null, options), "request");
@@ -380,7 +350,7 @@ namespace System.Web.Http.OData
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
             attribute.ValidateQuery(request, options);
@@ -393,7 +363,7 @@ namespace System.Web.Http.OData
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
             HttpResponseException responseException = Assert.Throws<HttpResponseException>(

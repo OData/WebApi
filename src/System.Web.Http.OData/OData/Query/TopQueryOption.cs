@@ -110,7 +110,7 @@ namespace System.Web.Http.OData.Query
 
         private IQueryable ApplyToCore(IQueryable query)
         {
-            return ExpressionHelpers.Take(query, Value, Context.EntityClrType);
+            return ExpressionHelpers.Take(query, Value, Context.ElementClrType);
         }
     }
 }

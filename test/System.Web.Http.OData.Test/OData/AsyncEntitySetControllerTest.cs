@@ -61,7 +61,7 @@ namespace System.Web.Http.OData
 
             Assert.Equal(request, queryOptions.Request);
             Assert.Equal(model, queryOptions.Context.Model);
-            Assert.Equal(typeof(FormatterPerson), queryOptions.Context.EntityClrType);
+            Assert.Equal(typeof(FormatterPerson), queryOptions.Context.ElementClrType);
         }
 
         [Fact]

@@ -214,6 +214,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given model does not contain the type &apos;{0}&apos;..
+        /// </summary>
+        internal static string ClrTypeNotInModel {
+            get {
+                return ResourceManager.GetString("ClrTypeNotInModel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CollectionProperties must implement IEnumerable&lt;&gt;. The Property &apos;{0}&apos; declared on &apos;{1}&apos; does not implement IEnumerable&lt;&gt;. .
         /// </summary>
         internal static string CollectionPropertiesMustReturnIEnumerable {
@@ -309,33 +318,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string EdmTypeNotSupported {
             get {
                 return ResourceManager.GetString("EdmTypeNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The model does not contain the entityClrType &apos;{0}&apos;..
-        /// </summary>
-        internal static string EntityClrTypeNotFound {
-            get {
-                return ResourceManager.GetString("EntityClrTypeNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The EntityClrType &apos;{0}&apos; does not match with the given entitySet &apos;{1}&apos;..
-        /// </summary>
-        internal static string EntityClrTypeNotMatchEntitySet {
-            get {
-                return ResourceManager.GetString("EntityClrTypeNotMatchEntitySet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The EntityClrType &apos;{0}&apos; does not match with the given entitySetName &apos;{1}&apos;..
-        /// </summary>
-        internal static string EntityClrTypeNotMatchEntitySetName {
-            get {
-                return ResourceManager.GetString("EntityClrTypeNotMatchEntitySetName", resourceCulture);
             }
         }
         
@@ -507,24 +489,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string EntitySetMissingDuringSerialization {
             get {
                 return ResourceManager.GetString("EntitySetMissingDuringSerialization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The given entitySet must be in the given Entity Data Model..
-        /// </summary>
-        internal static string EntitySetMustBeInTheModel {
-            get {
-                return ResourceManager.GetString("EntitySetMustBeInTheModel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No EntitySet exists in the EdmModel with EntityClrType &apos;{0}&apos;..
-        /// </summary>
-        internal static string EntitySetNotFound {
-            get {
-                return ResourceManager.GetString("EntitySetNotFound", resourceCulture);
             }
         }
         
@@ -790,15 +754,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are multiple EntitySets found that match EntityClrType &apos;{0}&apos;..
-        /// </summary>
-        internal static string MultipleEntitySetMatchedClrType {
-            get {
-                return ResourceManager.GetString("MultipleEntitySetMatchedClrType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to More than one matching clr type found for the Edm type {0}.\nThe matching clr types are {1}..
         /// </summary>
         internal static string MultipleMatchingClrTypesForEdmType {
@@ -1033,16 +988,16 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only $skip and $top OData query options are supported for this type..
+        ///   Looks up a localized string similar to Multiple &apos;$it&apos; nodes are not supported in &apos;$orderby&apos;..
         /// </summary>
-        internal static string OnlySkipAndTopSupported {
+        internal static string OrderByDuplicateIt {
             get {
-                return ResourceManager.GetString("OnlySkipAndTopSupported", resourceCulture);
+                return ResourceManager.GetString("OrderByDuplicateIt", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Duplicate property named &apos;{0}&apos; is not supported in the OrderByNode..
+        ///   Looks up a localized string similar to Duplicate property named &apos;{0}&apos; is not supported in &apos;$orderby&apos;..
         /// </summary>
         internal static string OrderByDuplicateProperty {
             get {
@@ -1110,15 +1065,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string PreviousSegmentMustBeEntityType {
             get {
                 return ResourceManager.GetString("PreviousSegmentMustBeEntityType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The type &apos;{0}&apos; is not a primitive type..
-        /// </summary>
-        internal static string PrimitiveTypeRequired {
-            get {
-                return ResourceManager.GetString("PrimitiveTypeRequired", resourceCulture);
             }
         }
         

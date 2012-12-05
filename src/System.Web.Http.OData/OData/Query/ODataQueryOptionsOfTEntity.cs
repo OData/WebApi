@@ -23,9 +23,9 @@ namespace System.Web.Http.OData.Query
         public ODataQueryOptions(ODataQueryContext context, HttpRequestMessage request)
             : base(context, request)
         {
-            if (context.EntityClrType != typeof(TEntity))
+            if (context.ElementClrType != typeof(TEntity))
             {
-                throw Error.Argument("context", SRResources.EntityTypeMismatch, context.EntityClrType.FullName, typeof(TEntity).FullName);
+                throw Error.Argument("context", SRResources.EntityTypeMismatch, context.ElementClrType.FullName, typeof(TEntity).FullName);
             }
         }
 

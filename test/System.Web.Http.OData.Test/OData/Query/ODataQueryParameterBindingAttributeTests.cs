@@ -76,7 +76,7 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(1, actionContext.ActionArguments.Count);
             ODataQueryOptions options = actionContext.ActionArguments[parameterDescriptor.ParameterName] as ODataQueryOptions;
             Assert.NotNull(options);
-            Assert.Equal(entityClrType, options.Context.EntityClrType);
+            Assert.Equal(entityClrType, options.Context.ElementClrType);
         }
 
         [Theory]

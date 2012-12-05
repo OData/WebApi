@@ -11,6 +11,15 @@ using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Query
 {
+    public class QueryCompositionPrimitiveController : ApiController
+    {
+        [Queryable]
+        public IQueryable<int> GET()
+        {
+            return Enumerable.Range(0, 100).AsQueryable();
+        }
+    }
+
     public class QueryCompositionCustomerController : ApiController
     {   
         internal static List<QueryCompositionCustomer> CustomerList = new List<QueryCompositionCustomer>
@@ -155,7 +164,7 @@ namespace System.Web.Http.OData.Query
         public override void Validate(OrderByQueryOption option, ODataValidationSettings validationSettings)
         {
             // validate the orderby is executed in a way that one can order either by Id or by Name, but not both
-            if (option.PropertyNodes.Count > 1)
+            if (option.OrderByNodes.Count > 1)
             {
                 throw new ODataException("Order by more than one property is not allowed.");
             }

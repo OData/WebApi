@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Builder;
-using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -71,6 +70,32 @@ namespace System.Web.Http.OData.Query.Validators
 
             // Act & Assert
             Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Fact]
+        public void ValidateAllowsOrderByIt()
+        {
+            // Arrange
+            OrderByQueryOption option = new OrderByQueryOption("$it", _context);
+            ODataValidationSettings settings = new ODataValidationSettings();
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Fact]
+        public void ValidateDisallowsOrderByIt_IfTurnedOff()
+        {
+            // Arrange
+            _context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
+            OrderByQueryOption option = new OrderByQueryOption("$it", _context);
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.AllowedOrderByProperties.Add("dummy");
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _validator.Validate(option, settings),
+                "Order by '$it' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
         }
     }
 }

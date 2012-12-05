@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             Assert.Throws<ArgumentException>(() =>
-                new SkipQueryOption(null, new ODataQueryContext(model, typeof(Customer), "Customers")));
+                new SkipQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             Assert.Throws<ArgumentException>(() =>
-                new SkipQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer), "Customers")));
+                new SkipQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Query
         public void CanConstructValidFilterQuery(string skipValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var skip = new SkipQueryOption(skipValue, context);
 
             Assert.Same(context, skip.Context);
@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Query
         public void ApplyInValidSkipQueryThrows(string skipValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var skip = new SkipQueryOption(skipValue, context);
 
             Assert.Throws<ODataException>(() =>
@@ -73,7 +73,7 @@ namespace System.Web.Http.OData.Query
         public void Value_Returns_ParsedSkipValue(string skipValue, int expectedValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var skip = new SkipQueryOption(skipValue, context);
 
             Assert.Equal(expectedValue, skip.Value);
@@ -86,7 +86,7 @@ namespace System.Web.Http.OData.Query
         public void Value_ThrowsODataException_ForInvalidValues(string skipValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var skip = new SkipQueryOption(skipValue, context);
 
             Assert.Throws<ODataException>(() => skip.Value);
@@ -96,7 +96,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplySkip()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var skipOption = new SkipQueryOption("1", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var skipOption = new SkipQueryOption("1", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "Andy" },
@@ -114,7 +114,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplySkipOrderby()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var orderbyOption = new OrderByQueryOption("Name", context);
             var skipOption = new SkipQueryOption("1", context);
 

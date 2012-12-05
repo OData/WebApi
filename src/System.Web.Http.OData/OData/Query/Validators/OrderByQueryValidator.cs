@@ -22,13 +22,24 @@ namespace System.Web.Http.OData.Query.Validators
 
             if (validationSettings.AllowedOrderByProperties.Count > 0)
             {
-                ICollection<OrderByPropertyNode> propertyNodes = orderByOption.PropertyNodes;
+                IEnumerable<OrderByNode> orderByNodes = orderByOption.OrderByNodes;
 
-                foreach (OrderByPropertyNode property in propertyNodes)
+                foreach (OrderByNode node in orderByNodes)
                 {
-                    if (!validationSettings.AllowedOrderByProperties.Contains(property.Property.Name))
+                    string propertyName = null;
+                    OrderByPropertyNode property = node as OrderByPropertyNode;
+                    if (property != null)
                     {
-                        throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, property.Property.Name, "AllowedOrderByProperties"));
+                        propertyName = property.Property.Name;
+                    }
+                    else if ((node as OrderByItNode) != null && !validationSettings.AllowedOrderByProperties.Contains("$it"))
+                    {
+                        propertyName = "$it";
+                    }
+
+                    if (propertyName != null && !validationSettings.AllowedOrderByProperties.Contains(propertyName))
+                    {
+                        throw new ODataException(Error.Format(SRResources.NotAllowedOrderByProperty, propertyName, "AllowedOrderByProperties"));
                     }
                 }
             }

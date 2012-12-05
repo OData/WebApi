@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Query
     public class InlineCountQueryOptionTest
     {
         private static IEdmModel _model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-        private static ODataQueryContext _context = new ODataQueryContext(_model, typeof(Customer), "Customers");
+        private static ODataQueryContext _context = new ODataQueryContext(_model, typeof(Customer));
         private static IQueryable _customers = new List<Customer>()
             {
                 new Customer { CustomerId = 1, Name = "Andy" },

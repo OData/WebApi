@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Query
             {
                 if (_filterClause == null)
                 {
-                    _filterClause = ODataUriParser.ParseFilter(RawValue, Context.Model, Context.EntitySet.ElementType);
+                    _filterClause = ODataUriParser.ParseFilter(RawValue, Context.Model, Context.ElementType);
                 }
 
                 return _filterClause;
@@ -121,8 +121,8 @@ namespace System.Web.Http.OData.Query
             FilterClause filterClause = FilterClause;
             Contract.Assert(filterClause != null);
 
-            Expression filter = FilterBinder.Bind(filterClause, Context.EntityClrType, Context.Model, assembliesResolver, querySettings);
-            query = ExpressionHelpers.Where(query, filter, Context.EntityClrType);
+            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, assembliesResolver, querySettings);
+            query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
             return query;
         }
 

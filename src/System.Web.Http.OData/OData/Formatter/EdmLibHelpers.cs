@@ -98,8 +98,8 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("clrType");
             }
 
-            IEdmPrimitiveType primitiveType;
-            if (_builtInTypesMapping.TryGetValue(clrType, out primitiveType))
+            IEdmPrimitiveType primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
+            if (primitiveType != null)
             {
                 return primitiveType;
             }

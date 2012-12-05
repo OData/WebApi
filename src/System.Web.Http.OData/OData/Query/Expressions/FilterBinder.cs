@@ -107,7 +107,7 @@ namespace System.Web.Http.OData.Query.Expressions
             }
 
             FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings);
-            Expression filter = binder.BindFilterClause(filterClause);
+            Expression filter = binder.BindFilterClause(filterClause, filterType);
 
             Type expectedFilterType = typeof(Func<,>).MakeGenericType(filterType, typeof(bool));
             if (filter.Type != expectedFilterType)
@@ -368,9 +368,8 @@ namespace System.Web.Http.OData.Query.Expressions
             }
         }
 
-        private Expression BindFilterClause(FilterClause filterClause)
+        private Expression BindFilterClause(FilterClause filterClause, Type filterType)
         {
-            Type filterType = EdmLibHelpers.GetClrType(filterClause.ItemType, _model, _assembliesResolver);
             ParameterExpression filterParameter = Expression.Parameter(filterType, filterClause.RangeVariable.Name);
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
             _lambdaParameters.Add(filterClause.RangeVariable.Name, filterParameter);
@@ -413,7 +412,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression BindRangeVariable(RangeVariable rangeVariable)
         {
-            return _lambdaParameters[rangeVariable.Name];
+            ParameterExpression parameter = _lambdaParameters[rangeVariable.Name];
+            return ConvertNonStandardPrimitives(parameter);
         }
 
         private Expression BindCollectionPropertyAccessNode(CollectionPropertyAccessNode propertyAccessNode)

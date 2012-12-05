@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,9 +8,10 @@ using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
-using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 
 namespace System.Web.Http.OData.Query
 {
@@ -77,43 +79,43 @@ namespace System.Web.Http.OData.Query
                 return new TheoryDataSet<string, bool, string>
                 {
                     // First key present with $skip, adds 2nd key
-                    { "$orderby=CustomerId&$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+                    { "$orderby=CustomerId&$skip=1", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).Skip(1)" },
 
                     // First key present with $top, adds 2nd key
-                    { "$orderby=CustomerId&$top=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Take(1)" },
+                    { "$orderby=CustomerId&$top=1", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).Take(1)" },
 
                     // First key present with $skip and $top, adds 2nd key
-                    { "$orderby=CustomerId&$skip=1&$top=2", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1).Take(2)" },
+                    { "$orderby=CustomerId&$skip=1&$top=2", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).Skip(1).Take(2)" },
 
                     // First key present, no $skip or $top, no modification
-                    { "$orderby=CustomerId", false, "OrderBy(p1 => p1.CustomerId)" },
+                    { "$orderby=CustomerId", false, "OrderBy($it => $it.CustomerId)" },
 
                     // First key present, 'ensureStableOrdering' is false, no modification
-                    { "$orderby=CustomerId&$skip=1", false, "OrderBy(p1 => p1.CustomerId).Skip(1)" },
+                    { "$orderby=CustomerId&$skip=1", false, "OrderBy($it => $it.CustomerId).Skip(1)" },
 
                     // Second key present, adds 1st key after 2nd
-                    { "$orderby=Name&$skip=1", true, "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+                    { "$orderby=Name&$skip=1", true, "OrderBy($it => $it.Name).ThenBy($it => $it.CustomerId).Skip(1)" },
 
                     // Second key plus 'asc' suffix, adds 1st key and preserves suffix
-                    { "$orderby=Name asc&$skip=1", true, "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+                    { "$orderby=Name asc&$skip=1", true, "OrderBy($it => $it.Name).ThenBy($it => $it.CustomerId).Skip(1)" },
 
                     // Second key plus 'desc' suffix, adds 1st key and preserves suffix
-                    { "$orderby=Name desc&$skip=1", true, "OrderByDescending(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+                    { "$orderby=Name desc&$skip=1", true, "OrderByDescending($it => $it.Name).ThenBy($it => $it.CustomerId).Skip(1)" },
 
                     // All keys present, no modification
-                    { "$orderby=CustomerId,Name&$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+                    { "$orderby=CustomerId,Name&$skip=1", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).Skip(1)" },
 
                     // All keys present but in reverse order, no modification
-                    { "$orderby=Name,CustomerId&$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)" },
+                    { "$orderby=Name,CustomerId&$skip=1", true,  "OrderBy($it => $it.Name).ThenBy($it => $it.CustomerId).Skip(1)" },
 
                     // First key present but with extraneous whitespace, adds 2nd key
-                    { "$orderby= CustomerId &$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+                    { "$orderby= CustomerId &$skip=1", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).Skip(1)" },
 
                     // All keys present with extraneous whitespace, no modification
-                    { "$orderby= \t CustomerId \t , Name \t desc \t &$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenByDescending(p1 => p1.Name).Skip(1)" },
+                    { "$orderby= \t CustomerId \t , Name \t desc \t &$skip=1", true,  "OrderBy($it => $it.CustomerId).ThenByDescending($it => $it.Name).Skip(1)" },
 
                     // Ordering on non-key property, adds all keys
-                    { "$orderby=Website&$skip=1", true,  "OrderBy(p1 => p1.Website).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).Skip(1)" },
+                    { "$orderby=Website&$skip=1", true,  "OrderBy($it => $it.Website).ThenBy($it => $it.CustomerId).ThenBy($it => $it.Name).Skip(1)" },
                 };
             }
         }
@@ -128,25 +130,25 @@ namespace System.Web.Http.OData.Query
                 return new TheoryDataSet<string, bool, string>
                 {
                     // Single property present with $skip, adds all remaining in alphabetic order
-                    { "$orderby=CustomerId&$skip=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Skip(1)" },
+                    { "$orderby=CustomerId&$skip=1", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).ThenBy($it => $it.SharePrice).ThenBy($it => $it.ShareSymbol).ThenBy($it => $it.Website).Skip(1)" },
 
                     // Single property present with $top, adds all remaining in alphabetic order
-                    { "$orderby=CustomerId&$top=1", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Take(1)" },
+                    { "$orderby=CustomerId&$top=1", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).ThenBy($it => $it.SharePrice).ThenBy($it => $it.ShareSymbol).ThenBy($it => $it.Website).Take(1)" },
 
                     // Single property present with $skip and $top, adds all remaining in alphabetic order
-                    { "$orderby=CustomerId&$skip=1&$top=2", true,  "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Skip(1).Take(2)" },
+                    { "$orderby=CustomerId&$skip=1&$top=2", true,  "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).ThenBy($it => $it.SharePrice).ThenBy($it => $it.ShareSymbol).ThenBy($it => $it.Website).Skip(1).Take(2)" },
 
                     // Single property present, no $skip or $top, no modification
-                    { "$orderby=SharePrice", false,  "OrderBy(p1 => p1.SharePrice)" },
+                    { "$orderby=SharePrice", false,  "OrderBy($it => $it.SharePrice)" },
 
                     // Single property present, ensureStableOrdering is false, no modification
-                    { "$orderby=SharePrice&$skip=1", false,  "OrderBy(p1 => p1.SharePrice).Skip(1)" },
+                    { "$orderby=SharePrice&$skip=1", false,  "OrderBy($it => $it.SharePrice).Skip(1)" },
 
                     // All properties present, non-alphabetic order, no modification
-                    { "$orderby=Name,SharePrice,CustomerId,Website,ShareSymbol&$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Website).ThenBy(p1 => p1.ShareSymbol).Skip(1)" },
+                    { "$orderby=Name,SharePrice,CustomerId,Website,ShareSymbol&$skip=1", true,  "OrderBy($it => $it.Name).ThenBy($it => $it.SharePrice).ThenBy($it => $it.CustomerId).ThenBy($it => $it.Website).ThenBy($it => $it.ShareSymbol).Skip(1)" },
 
                     // All properties present, extraneous whitespace, non-alphabetic order, no modification
-                    { "$orderby= \t Name \t , \t SharePrice \t , \t CustomerId \t , \t Website \t , \t ShareSymbol \t &$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Website).ThenBy(p1 => p1.ShareSymbol).Skip(1)" },
+                    { "$orderby= \t Name \t , \t SharePrice \t , \t CustomerId \t , \t Website \t , \t ShareSymbol \t &$skip=1", true,  "OrderBy($it => $it.Name).ThenBy($it => $it.SharePrice).ThenBy($it => $it.CustomerId).ThenBy($it => $it.Website).ThenBy($it => $it.ShareSymbol).Skip(1)" },
 
                 };
             }
@@ -182,7 +184,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Equal("Filter", queryOptions.RawValues.Filter);
             Assert.NotNull(queryOptions.Filter);
             Assert.Equal("OrderBy", queryOptions.RawValues.OrderBy);
@@ -208,7 +210,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null), "query");
@@ -225,7 +227,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, new ODataQuerySettings()), "query");
@@ -242,7 +244,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$inlinecount=allpages&$skiptoken=SkipToken")
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
@@ -261,9 +263,9 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?" + oDataQuery)
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
-            ODataQuerySettings querySettings = new ODataQuerySettings 
-            { 
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            ODataQuerySettings querySettings = new ODataQuerySettings
+            {
                 EnsureStableOrdering = ensureStableOrdering,
             };
 
@@ -290,8 +292,8 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?" + oDataQuery)
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
-            ODataQuerySettings querySettings = new ODataQuerySettings 
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            ODataQuerySettings querySettings = new ODataQuerySettings
             {
                 EnsureStableOrdering = ensureStableOrdering,
             };
@@ -319,7 +321,7 @@ namespace System.Web.Http.OData.Query
             );
 
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             OrderByQueryOption originalOption = queryOptions.OrderBy;
             ODataQuerySettings querySettings = new ODataQuerySettings();
 
@@ -340,7 +342,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers")
             );
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
-            var entityType = queryOptions.Context.EntityClrType;
+            var entityType = queryOptions.Context.ElementClrType;
             Assert.NotNull(entityType);
             Assert.Equal(typeof(Customer).FullName, entityType.Namespace + "." + entityType.Name);
         }
@@ -373,11 +375,11 @@ namespace System.Web.Http.OData.Query
             if (String.IsNullOrWhiteSpace(queryValue))
             {
                 Assert.Throws<ODataException>(() =>
-                    new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message));
+                    new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message));
             }
             else
             {
-                var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+                var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
                 if (queryName == "$filter")
                 {
@@ -412,7 +414,7 @@ namespace System.Web.Http.OData.Query
             );
 
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Assert: everything is null
             Assert.Null(queryOptions.RawValues.OrderBy);
@@ -431,7 +433,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?$orderby=UnknownProperty")
             );
 
-            var option = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var option = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
             {
                 option.ApplyTo(new List<Customer>().AsQueryable());
@@ -448,7 +450,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?$top=NotANumber")
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Failed to convert 'NotANumber' to an integer.");
@@ -458,7 +460,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?$top=''")
             );
 
-            options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Failed to convert '''' to an integer.");
@@ -475,7 +477,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?$skip=NotANumber")
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Failed to convert 'NotANumber' to an integer.");
@@ -485,22 +487,22 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?$skip=''")
             );
 
-            options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             Assert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Failed to convert '''' to an integer.");
         }
 
         [Theory]
-        [InlineData("$skip=1", typeof(ODataQueryOptionTest_ComplexModel), "OrderBy(p1 => p1.A).ThenBy(p1 => p1.B).Skip(1)")]
-        [InlineData("$skip=1", typeof(ODataQueryOptionTest_EntityModel), "OrderBy(p1 => p1.ID).Skip(1)")]
-        [InlineData("$skip=1", typeof(ODataQueryOptionTest_EntityModelMultipleKeys), "OrderBy(p1 => p1.ID1).ThenBy(p1 => p1.ID2).Skip(1)")]
-        [InlineData("$top=1", typeof(ODataQueryOptionTest_ComplexModel), "OrderBy(p1 => p1.A).ThenBy(p1 => p1.B).Take(1)")]
-        [InlineData("$top=1", typeof(ODataQueryOptionTest_EntityModel), "OrderBy(p1 => p1.ID).Take(1)")]
-        [InlineData("$top=1", typeof(ODataQueryOptionTest_EntityModelMultipleKeys), "OrderBy(p1 => p1.ID1).ThenBy(p1 => p1.ID2).Take(1)")]
-        [InlineData("$skip=1&$top=1", typeof(ODataQueryOptionTest_ComplexModel), "OrderBy(p1 => p1.A).ThenBy(p1 => p1.B).Skip(1).Take(1)")]
-        [InlineData("$skip=1&$top=1", typeof(ODataQueryOptionTest_EntityModel), "OrderBy(p1 => p1.ID).Skip(1).Take(1)")]
-        [InlineData("$skip=1&$top=1", typeof(ODataQueryOptionTest_EntityModelMultipleKeys), "OrderBy(p1 => p1.ID1).ThenBy(p1 => p1.ID2).Skip(1).Take(1)")]
+        [InlineData("$skip=1", typeof(ODataQueryOptionTest_ComplexModel), "OrderBy($it => $it.A).ThenBy($it => $it.B).Skip(1)")]
+        [InlineData("$skip=1", typeof(ODataQueryOptionTest_EntityModel), "OrderBy($it => $it.ID).Skip(1)")]
+        [InlineData("$skip=1", typeof(ODataQueryOptionTest_EntityModelMultipleKeys), "OrderBy($it => $it.ID1).ThenBy($it => $it.ID2).Skip(1)")]
+        [InlineData("$top=1", typeof(ODataQueryOptionTest_ComplexModel), "OrderBy($it => $it.A).ThenBy($it => $it.B).Take(1)")]
+        [InlineData("$top=1", typeof(ODataQueryOptionTest_EntityModel), "OrderBy($it => $it.ID).Take(1)")]
+        [InlineData("$top=1", typeof(ODataQueryOptionTest_EntityModelMultipleKeys), "OrderBy($it => $it.ID1).ThenBy($it => $it.ID2).Take(1)")]
+        [InlineData("$skip=1&$top=1", typeof(ODataQueryOptionTest_ComplexModel), "OrderBy($it => $it.A).ThenBy($it => $it.B).Skip(1).Take(1)")]
+        [InlineData("$skip=1&$top=1", typeof(ODataQueryOptionTest_EntityModel), "OrderBy($it => $it.ID).Skip(1).Take(1)")]
+        [InlineData("$skip=1&$top=1", typeof(ODataQueryOptionTest_EntityModelMultipleKeys), "OrderBy($it => $it.ID1).ThenBy($it => $it.ID2).Skip(1).Take(1)")]
         public void ApplyTo_Picks_DefaultOrder(string oDataQuery, Type elementType, string expectedExpression)
         {
             IQueryable query = Array.CreateInstance(elementType, 0).AsQueryable();
@@ -513,7 +515,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/entityset?" + oDataQuery)
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, elementType, "entityset"), message);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, elementType), message);
             IQueryable finalQuery = options.ApplyTo(query);
 
             string queryExpression = finalQuery.Expression.ToString();
@@ -534,7 +536,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?" + oDataQuery)
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             IQueryable finalQuery = options.ApplyTo(Customers);
             string queryExpression = finalQuery.Expression.ToString();
 
@@ -542,10 +544,10 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [InlineData("$orderby=Name", "OrderBy(p1 => p1.Name)")]
-        [InlineData("$orderby=Website", "OrderBy(p1 => p1.Website)")]
-        [InlineData("$orderby=Name&$skip=1", "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.CustomerId).Skip(1)")]
-        [InlineData("$orderby=Website&$top=1&$skip=1", "OrderBy(p1 => p1.Website).ThenBy(p1 => p1.CustomerId).Skip(1).Take(1)")]
+        [InlineData("$orderby=Name", "OrderBy($it => $it.Name)")]
+        [InlineData("$orderby=Website", "OrderBy($it => $it.Website)")]
+        [InlineData("$orderby=Name&$skip=1", "OrderBy($it => $it.Name).ThenBy($it => $it.CustomerId).Skip(1)")]
+        [InlineData("$orderby=Website&$top=1&$skip=1", "OrderBy($it => $it.Website).ThenBy($it => $it.CustomerId).Skip(1).Take(1)")]
         public void ApplyTo_DoesnotPickDefaultOrder_IfOrderByIsPresent(string oDataQuery, string expectedExpression)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
@@ -555,7 +557,7 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?" + oDataQuery)
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             IQueryable finalQuery = options.ApplyTo(Customers);
 
             string queryExpression = finalQuery.Expression.ToString();
@@ -565,7 +567,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [InlineData("$skip=1", true, "OrderBy(p1 => p1.CustomerId).Skip(1)")]
+        [InlineData("$skip=1", true, "OrderBy($it => $it.CustomerId).Skip(1)")]
         [InlineData("$skip=1", false, "Skip(1)")]
         [InlineData("$filter=1 eq 1", true, "Where($it => (1 == 1))")]
         [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
@@ -578,9 +580,9 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?" + oDataQuery)
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
-            ODataQuerySettings querySettings = new ODataQuerySettings 
-            { 
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            ODataQuerySettings querySettings = new ODataQuerySettings
+            {
                 EnsureStableOrdering = ensureStableOrdering
             };
 
@@ -593,7 +595,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [InlineData("$skip=1", true, "OrderBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.ShareSymbol).ThenBy(p1 => p1.Website).Skip(1)")]
+        [InlineData("$skip=1", true, "OrderBy($it => $it.CustomerId).ThenBy($it => $it.Name).ThenBy($it => $it.SharePrice).ThenBy($it => $it.ShareSymbol).ThenBy($it => $it.Website).Skip(1)")]
         [InlineData("$skip=1", false, "Skip(1)")]
         [InlineData("$filter=1 eq 1", true, "Where($it => (1 == 1))")]
         [InlineData("$filter=1 eq 1", false, "Where($it => (1 == 1))")]
@@ -606,10 +608,10 @@ namespace System.Web.Http.OData.Query
                 new Uri("http://server/service/Customers?" + oDataQuery)
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer), "Customers"), message);
-            ODataQuerySettings querySettings = new ODataQuerySettings 
-            { 
-                EnsureStableOrdering = ensureStableOrdering 
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            ODataQuerySettings querySettings = new ODataQuerySettings
+            {
+                EnsureStableOrdering = ensureStableOrdering
             };
             IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
@@ -648,7 +650,7 @@ namespace System.Web.Http.OData.Query
                 new Customer() { CustomerId = 3 }
             }.AsQueryable();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
 
             bool resultsLimited;
             IQueryable<Customer> result = ODataQueryOptions.LimitResults(queryable, limit, out resultsLimited);
@@ -696,6 +698,55 @@ namespace System.Web.Http.OData.Query
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));
 
+        }
+
+        public static TheoryDataSet<IQueryable, string, object> Querying_Primitive_Collections_Data
+        {
+            get
+            {
+                IQueryable<int> e = Enumerable.Range(1, 9).AsQueryable();
+                return new TheoryDataSet<IQueryable, string, object>
+                {
+                    { e.Select(i => (short)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (short)6 },
+                    { e.Select(i => i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", 6 },
+                    { e.Select(i => (long)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (long)6 },
+                    { e.Select(i => (ushort)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (ushort)6 },
+                    { e.Select(i => (uint)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (uint)6 },
+                    { e.Select(i => (ulong)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (ulong)6 },
+                    { e.Select(i => (float)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (float)6 },
+                    { e.Select(i => (double)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (double)6 },
+                    { e.Select(i => (decimal)i), "$filter=$it ge 5&$orderby=$it desc&$skip=3&$top=1", (decimal)6 },
+                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq 'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
+                    { e.Select(i => new DateTime(i, 1, 1)), "$filter=year($it) ge 5&$orderby=$it desc&$skip=3&$top=1", new DateTime(year: 6, month: 1, day: 1) },
+                    { e.Select(i => i.ToString()), "$filter=$it ge '5'&$orderby=$it desc&$skip=3&$top=1", "6" },
+                  
+                    { e.Select(i => (i % 2 != 0 ? null : (short?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (short?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (int?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (int?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (long?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (long?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (ushort?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (ushort?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (uint?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (uint?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (ulong?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (ulong?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (float?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (float?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (double?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (double?)6 },
+                    { e.Select(i => (i % 2 != 0 ? null : (decimal?)i)), "$filter=$it ge 5&$orderby=$it desc&$skip=1&$top=1", (decimal?)6 },
+                    { e.Select(i => (SimpleEnum?)null), "$filter=$it eq null&$orderby=$it desc&$skip=1&$top=1", null },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("Querying_Primitive_Collections_Data")]
+        public void Querying_Primitive_Collections(IQueryable queryable, string query, object result)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
+            ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, queryable.ElementType);
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+
+            queryable = options.ApplyTo(queryable);
+
+            IEnumerator enumerator = queryable.GetEnumerator();
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal(result, enumerator.Current);
         }
     }
 

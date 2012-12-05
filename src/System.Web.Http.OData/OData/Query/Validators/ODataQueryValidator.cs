@@ -25,14 +25,6 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("validationSettings");
             }
 
-            // Filter and OrderBy require entity sets.  Top and Skip may accept primitives.
-            if (options.Context.IsPrimitiveClrType && (options.Filter != null || options.OrderBy != null))
-            {
-                // An attempt to use a query option not allowed for primitive types
-                // generates a BadRequest with a general message that avoids information disclosure.
-                throw new ODataException(SRResources.OnlySkipAndTopSupported);
-            }
-
             // Validate each query options
             if (options.Skip != null)
             {

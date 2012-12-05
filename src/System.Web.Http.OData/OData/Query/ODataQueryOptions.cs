@@ -31,7 +31,7 @@ namespace System.Web.Http.OData.Query
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
-      
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from 
         /// the <see cref="ODataQueryContext"/>.
@@ -235,7 +235,7 @@ namespace System.Web.Http.OData.Query
             // Result limits require a stable sort to be able to generate a next page link.
             // If either is present in the query and we have permission,
             // generate an $orderby that will produce a stable sort.
-            if (querySettings.EnsureStableOrdering && !Context.IsPrimitiveClrType &&
+            if (querySettings.EnsureStableOrdering &&
                 (Skip != null || Top != null || querySettings.PageSize.HasValue))
             {
                 // If there is no OrderBy present, we manufacture a default.
@@ -332,18 +332,25 @@ namespace System.Web.Http.OData.Query
         // Otherwise, when no keys are present, all primitive properties are returned.
         private static IEnumerable<IEdmStructuralProperty> GetAvailableOrderByProperties(ODataQueryContext context)
         {
-            Contract.Assert(context != null && context.EntitySet != null);
+            Contract.Assert(context != null);
 
-            IEdmEntityType entityType = context.EntitySet.ElementType;
-            IEnumerable<IEdmStructuralProperty> properties =
-                entityType.Key().Any()
-                    ? entityType.Key()
-                    : entityType
-                        .StructuralProperties()
-                        .Where(property => property.Type.IsPrimitive());
+            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
+            if (entityType != null)
+            {
+                IEnumerable<IEdmStructuralProperty> properties =
+                    entityType.Key().Any()
+                        ? entityType.Key()
+                        : entityType
+                            .StructuralProperties()
+                            .Where(property => property.Type.IsPrimitive());
 
-            // Sort properties alphabetically for stable sort
-            return properties.OrderBy(property => property.Name);
+                // Sort properties alphabetically for stable sort
+                return properties.OrderBy(property => property.Name);
+            }
+            else
+            {
+                return Enumerable.Empty<IEdmStructuralProperty>();
+            }
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top
@@ -372,18 +379,14 @@ namespace System.Web.Http.OData.Query
         private static OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context)
         {
             Contract.Assert(orderBy != null);
-            Contract.Assert(context != null && context.EntitySet != null);
+            Contract.Assert(context != null);
 
             // Strategy: create a hash of all properties already used in the given OrderBy
             // and remove them from the list of properties we need to add to make the sort stable.
             HashSet<string> usedPropertyNames =
-                new HashSet<string>(
-                    orderBy.PropertyNodes
-                        .Select<OrderByPropertyNode, string>(node => node.Property.Name));
+                new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(node => node.Property.Name));
 
-            IEnumerable<IEdmStructuralProperty> propertiesToAdd =
-                GetAvailableOrderByProperties(context)
-                    .Where(prop => !usedPropertyNames.Contains(prop.Name));
+            IEnumerable<IEdmStructuralProperty> propertiesToAdd = GetAvailableOrderByProperties(context).Where(prop => !usedPropertyNames.Contains(prop.Name));
 
             if (propertiesToAdd.Any())
             {
@@ -394,7 +397,7 @@ namespace System.Web.Http.OData.Query
                 orderBy = new OrderByQueryOption(orderBy.RawValue, context);
                 foreach (IEdmStructuralProperty property in propertiesToAdd)
                 {
-                    orderBy.PropertyNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+                    orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
                 }
             }
 
@@ -403,7 +406,7 @@ namespace System.Web.Http.OData.Query
 
         internal static IQueryable LimitResults(IQueryable queryable, int limit, ODataQueryContext context, out bool resultsLimited)
         {
-            MethodInfo genericMethod = _limitResultsGenericMethod.MakeGenericMethod(context.EntityClrType);
+            MethodInfo genericMethod = _limitResultsGenericMethod.MakeGenericMethod(context.ElementClrType);
             object[] args = new object[] { queryable, limit, null };
             IQueryable results = genericMethod.Invoke(null, args) as IQueryable;
             resultsLimited = (bool)args[2];

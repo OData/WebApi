@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
-using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             Assert.Throws<ArgumentException>(() =>
-                new OrderByQueryOption(null, new ODataQueryContext(model, typeof(Customer), "Customers")));
+                new OrderByQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace System.Web.Http.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             Assert.Throws<ArgumentException>(() =>
-                new OrderByQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer), "Customers")));
+                new OrderByQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
         }
 
         [Theory]
@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Query
         public void CanConstructValidFilterQuery(string orderbyValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var orderby = new OrderByQueryOption(orderbyValue, context);
 
             Assert.Same(context, orderby.Context);
@@ -56,17 +56,18 @@ namespace System.Web.Http.OData.Query
         {
             // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var orderby = new OrderByQueryOption("Name,Website", context);
 
-            // Act
-            ICollection<OrderByPropertyNode> nodes = orderby.PropertyNodes;
+            ICollection<OrderByNode> nodes = orderby.OrderByNodes;
 
             // Assert
-            Assert.NotNull(nodes);
-            Assert.Equal(2, nodes.Count);
-            Assert.Equal("Name", nodes.First().Property.Name);
-            Assert.Equal("Website", nodes.Last().Property.Name);
+            Assert.False(nodes.OfType<OrderByItNode>().Any());
+            IEnumerable<OrderByPropertyNode> propertyNodes = nodes.OfType<OrderByPropertyNode>();
+            Assert.NotNull(propertyNodes);
+            Assert.Equal(2, propertyNodes.Count());
+            Assert.Equal("Name", propertyNodes.First().Property.Name);
+            Assert.Equal("Website", propertyNodes.Last().Property.Name);
         }
 
         [Theory]
@@ -79,7 +80,7 @@ namespace System.Web.Http.OData.Query
         public void ApplyInValidOrderbyQueryThrows(string orderbyValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer), "Customers");
+            var context = new ODataQueryContext(model, typeof(Customer));
             var orderby = new OrderByQueryOption(orderbyValue, context);
 
             Assert.Throws<ODataException>(() =>
@@ -91,7 +92,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyOrderBy()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Name", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var orderByOption = new OrderByQueryOption("Name", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "Andy" },
@@ -110,7 +111,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyOrderByAsc()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Name asc", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var orderByOption = new OrderByQueryOption("Name asc", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "Andy" },
@@ -129,7 +130,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyOrderByDescending()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Name desc", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var orderByOption = new OrderByQueryOption("Name desc", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "Andy" },
@@ -148,7 +149,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyOrderByThenBy()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Name,Website", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var orderByOption = new OrderByQueryOption("Name,Website", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.net" },
@@ -167,7 +168,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyOrderByDescThenBy()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Name desc,Website", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var orderByOption = new OrderByQueryOption("Name desc,Website", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.net" },
@@ -186,7 +187,7 @@ namespace System.Web.Http.OData.Query
         public void CanApplyOrderByDescThenByDesc()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Name desc,Website desc", new ODataQueryContext(model, typeof(Customer), "Customers"));
+            var orderByOption = new OrderByQueryOption("Name desc,Website desc", new ODataQueryContext(model, typeof(Customer)));
 
             var customers = (new List<Customer>{
                 new Customer { CustomerId = 1, Name = "ACME", Website = "http://www.acme.net" },
@@ -208,7 +209,7 @@ namespace System.Web.Http.OData.Query
             builder.EntitySet<EnumModel>("EnumModels");
             var model = builder.GetEdmModel();
 
-            var context = new ODataQueryContext(model, typeof(EnumModel), "EnumModels");
+            var context = new ODataQueryContext(model, typeof(EnumModel));
             var orderbyOption = new OrderByQueryOption("Flag", context);
             IEnumerable<EnumModel> enumModels = FilterQueryOptionTest.EnumModelTestData;
 
@@ -239,6 +240,34 @@ namespace System.Web.Http.OData.Query
 
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));
+        }
+
+        [Fact]
+        public void OrderByDuplicatePropertyThrows()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
+
+            var context = new ODataQueryContext(model, typeof(Customer));
+            var orderbyOption = new OrderByQueryOption("Name, Name", context);
+
+            // Act
+            Assert.Throws<ODataException>(
+                () => orderbyOption.ApplyTo(Enumerable.Empty<Customer>().AsQueryable()),
+                "Duplicate property named 'Name' is not supported in '$orderby'.");
+        }
+
+        [Fact]
+        public void OrderByDuplicateItThrows()
+        {
+            // Arrange
+            var context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
+            var orderbyOption = new OrderByQueryOption("$it, $it", context);
+
+            // Act
+            Assert.Throws<ODataException>(
+                () => orderbyOption.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
+                "Multiple '$it' nodes are not supported in '$orderby'.");
         }
     }
 }

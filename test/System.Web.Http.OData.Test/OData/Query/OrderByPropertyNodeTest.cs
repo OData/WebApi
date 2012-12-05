@@ -48,14 +48,16 @@ namespace System.Web.Http.OData.Query
             OrderByClause orderbyNode = ODataUriParser.ParseOrderBy("Property1 desc, Property2 asc", model, sampleClassEntityType);
 
             // Act
-            ICollection<OrderByPropertyNode> nodes = OrderByPropertyNode.CreateCollection(orderbyNode);
+            ICollection<OrderByNode> nodes = OrderByNode.CreateCollection(orderbyNode);
 
             // Assert
-            Assert.Equal(2, nodes.Count);
-            Assert.Equal("Property1", nodes.First().Property.Name);
-            Assert.Equal(OrderByDirection.Descending, nodes.First().Direction);
+            Assert.False(nodes.OfType<OrderByItNode>().Any());
+            IEnumerable<OrderByPropertyNode> propertyNodes = nodes.OfType<OrderByPropertyNode>();
+            Assert.Equal(2, propertyNodes.Count());
+            Assert.Equal("Property1", propertyNodes.First().Property.Name);
+            Assert.Equal(OrderByDirection.Descending, propertyNodes.First().Direction);
 
-            Assert.ReferenceEquals("Property2", nodes.Last().Property.Name);
+            Assert.ReferenceEquals("Property2", propertyNodes.Last().Property.Name);
             Assert.Equal(OrderByDirection.Ascending, nodes.Last().Direction);
         }
 

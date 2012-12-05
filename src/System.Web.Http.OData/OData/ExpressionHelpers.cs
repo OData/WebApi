@@ -14,7 +14,7 @@ namespace System.Web.Http.OData
         {
             MethodInfo countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(type);
             return (long)countMethod.Invoke(null, new object[] { query });
-        }        
+        }
 
         public static IQueryable<TEntityType> Skip<TEntityType>(IQueryable<TEntityType> query, int count)
         {
@@ -43,14 +43,31 @@ namespace System.Web.Http.OData
             return OrderBy(query, property, direction, typeof(TEntityType), alreadyOrdered) as IQueryable<TEntityType>;
         }
 
+        public static IQueryable OrderByIt(IQueryable query, OrderByDirection direction, Type type, bool alreadyOrdered = false)
+        {
+            LambdaExpression orderByLambda;
+
+            ParameterExpression odataItParameter = Expression.Parameter(type, "$it");
+            orderByLambda = Expression.Lambda(odataItParameter, odataItParameter);
+
+            return OrderBy(query, orderByLambda, direction, type, alreadyOrdered);
+        }
+
         public static IQueryable OrderBy(IQueryable query, IEdmProperty property, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
+            LambdaExpression orderByLambda;
+
             PropertyInfo propertyInfo = type.GetProperty(property.Name);
-            Type returnType = propertyInfo.PropertyType;
+            orderByLambda = GetPropertyAccessLambda(type, property.Name);
 
-            Expression orderByLambda = GetPropertyAccessLambda(type, property.Name);
+            return OrderBy(query, orderByLambda, direction, type, alreadyOrdered);
+        }
+
+        private static IQueryable OrderBy(IQueryable query, LambdaExpression orderByLambda, OrderByDirection direction, Type type, bool alreadyOrdered = false)
+        {
+            Type returnType = orderByLambda.Body.Type;
+
             MethodInfo orderByMethod = null;
-
             IOrderedQueryable orderedQuery = null;
 
             // unfortunately unordered L2O.AsQueryable implements IOrderedQueryable
@@ -93,11 +110,11 @@ namespace System.Web.Http.OData
             return whereMethod.Invoke(null, new object[] { query, where }) as IQueryable;
         }
 
-        private static Expression GetPropertyAccessLambda(Type type, string propertyName)
+        private static LambdaExpression GetPropertyAccessLambda(Type type, string propertyName)
         {
-            ParameterExpression p1 = Expression.Parameter(type, "p1");
-            MemberExpression propertyOnP1 = Expression.Property(p1, propertyName);
-            return Expression.Lambda(propertyOnP1, p1);
+            ParameterExpression odataItParameter = Expression.Parameter(type, "$it");
+            MemberExpression propertyAccess = Expression.Property(odataItParameter, propertyName);
+            return Expression.Lambda(propertyAccess, odataItParameter);
         }
     }
 }

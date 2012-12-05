@@ -367,27 +367,19 @@ namespace System.Web.Http
 
         private static ODataQueryContext CreateQueryContext(Type entityClrType, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
         {
-            // Primitive types do not construct an EDM model and deal only with the CLR Type
-            if (TypeHelper.IsQueryPrimitiveType(entityClrType))
-            {
-                return new ODataQueryContext(entityClrType);
-            }
-            else
-            {
-                // Get model for the entire app
-                IEdmModel model = configuration.GetEdmModel();
+            // Get model for the entire app
+            IEdmModel model = configuration.GetEdmModel();
 
-                if (model == null)
-                {
-                    // user has not configured anything, now let's create one just for this type
-                    // and cache it in the action descriptor
-                    model = actionDescriptor.GetEdmModel(entityClrType);
-                    Contract.Assert(model != null);
-                }
-
-                // parses the query from request uri
-                return new ODataQueryContext(model, entityClrType);
+            if (model == null)
+            {
+                // user has not configured anything, now let's create one just for this type
+                // and cache it in the action descriptor
+                model = actionDescriptor.GetEdmModel(entityClrType);
+                Contract.Assert(model != null);
             }
+
+            // parses the query from request uri
+            return new ODataQueryContext(model, entityClrType);
         }
 
         /// <summary>

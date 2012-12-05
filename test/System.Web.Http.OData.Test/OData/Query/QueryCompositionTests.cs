@@ -396,7 +396,7 @@ namespace System.Web.Http.OData.Query
 
             // skip = 2 exceeds the limit
             response = client.GetAsync("http://localhost:8080/QueryCompositionCustomerValidation/?$skip=2").Result;
-            
+
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.True(response.Content.ReadAsStringAsync().Result.Contains("The limit of '1' for Skip query has been exceeded. The value from the incoming request is '2'."));
@@ -441,7 +441,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Arithmetic operator 'Add' is not allowed. To allow it, try setting the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings."));
+            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Arithmetic operator 'Add' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings."));
         }
 
         [Fact]
@@ -462,7 +462,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Function 'endswith' is not allowed. To allow it, try setting the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings."));
+            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Function 'endswith' is not allowed. To allow it, set the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings."));
         }
 
         [Fact]
@@ -483,7 +483,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Logical operator 'NotEqual' is not allowed. To allow it, try setting the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings."));
+            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Logical operator 'NotEqual' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings."));
         }
 
         [Fact]
@@ -501,7 +501,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Query option 'Top' is not allowed. To allow it, try setting the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings."));
+            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Query option 'Top' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings."));
         }
 
         [Fact]
@@ -519,7 +519,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Order by 'Name' is not allowed. To allow it, try setting the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings."));
+            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings."));
         }
 
         [Fact]

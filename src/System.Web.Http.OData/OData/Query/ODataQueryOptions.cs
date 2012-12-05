@@ -31,8 +31,7 @@ namespace System.Web.Http.OData.Query
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
-        private ODataQueryValidator _validator;
-
+      
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from 
         /// the <see cref="ODataQueryContext"/>.
@@ -156,22 +155,7 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Gets or sets the Filter Query Validator
         /// </summary>
-        public ODataQueryValidator Validator
-        {
-            get
-            {
-                return _validator;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _validator = value;
-            }
-        }
+        public ODataQueryValidator Validator { get; set; }
 
         /// <summary>
         /// Check if the given query is supported by the built in ODataQueryOptions.
@@ -293,7 +277,10 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("validationSettings");
             }
 
-            Validator.Validate(this, validationSettings);
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
+            }
         }
 
         private static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)

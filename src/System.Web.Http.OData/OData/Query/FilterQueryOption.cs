@@ -20,8 +20,7 @@ namespace System.Web.Http.OData.Query
     {
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private FilterClause _filterClause;
-        private FilterQueryValidator _validator;
-
+    
         /// <summary>
         /// Initialize a new instance of <see cref="FilterQueryOption"/> based on the raw $filter value and 
         /// an EdmModel from <see cref="ODataQueryContext"/>.
@@ -53,23 +52,8 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Gets or sets the Filter Query Validator
         /// </summary>
-        public FilterQueryValidator Validator
-        {
-            get
-            {
-                return _validator;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _validator = value;
-            }
-        }
-
+        public FilterQueryValidator Validator { get; set; }
+       
         /// <summary>
         /// Gets the parsed <see cref="FilterClause"/> for this query option.
         /// </summary>
@@ -149,7 +133,10 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("validationSettings");
             }
 
-            Validator.Validate(this, validationSettings);
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
+            }
         }
     }
 }

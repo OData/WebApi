@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Query.Validators;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -219,6 +221,24 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(
                 new int[] { 2, 1, 3 },
                 actualCustomers.Select(enumModel => enumModel.Id));
+        }
+
+        [Fact]
+        public void CanTurnOffValidationForOrderBy()
+        {
+            // Arrange
+            ODataQueryContext context = ValidationTestHelper.CreateCustomerContext();
+
+            OrderByQueryOption option = new OrderByQueryOption("Name", context);
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.AllowedOrderByProperties.Add("Id");
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => option.Validate(settings),
+                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+
+            option.Validator = null;
+            Assert.DoesNotThrow(() => option.Validate(settings));
         }
     }
 }

@@ -13,7 +13,6 @@ namespace System.Web.Http.OData.Query
     public class TopQueryOption
     {
         private int? _value;
-        private TopQueryValidator _validator;
 
         /// <summary>
         /// Initialize a new instance of <see cref="TopQueryOption"/> based on the raw $top value and 
@@ -74,23 +73,8 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Gets or sets the Top Query Validator
         /// </summary>
-        public TopQueryValidator Validator
-        {
-            get
-            {
-                return _validator;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _validator = value;
-            }
-        }
-
+        public TopQueryValidator Validator { get; set; }
+ 
         /// <summary>
         /// Apply the $top query to the given IQueryable.
         /// </summary>
@@ -118,7 +102,10 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("validationSettings");
             }
 
-             Validator.Validate(this, validationSettings);
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
+            }
         }
 
         private IQueryable ApplyToCore(IQueryable query)

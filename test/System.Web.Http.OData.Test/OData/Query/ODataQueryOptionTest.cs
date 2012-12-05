@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Query.Validators;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -688,6 +690,31 @@ namespace System.Web.Http.OData.Query
             Uri nextPageLink = ODataQueryOptions.GetNextPageLink(request, resultLimit);
 
             Assert.Equal(nextPageUri, nextPageLink.AbsoluteUri);
+        }
+
+        [Fact]
+        public void CanTurnOffAllValidation()
+        {
+            // Arrange
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("http://localhost/?$filter=Name eq 'abc'")
+            );
+
+            ODataQueryContext context = ValidationTestHelper.CreateCustomerContext();
+            ODataQueryOptions option = new ODataQueryOptions(context, message);
+            ODataValidationSettings settings = new ODataValidationSettings()
+            {
+                AllowedQueryOptions = AllowedQueryOptions.OrderBy
+            };
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => option.Validate(settings),
+                "Query option 'Filter' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.");
+
+            option.Validator = null;
+            Assert.DoesNotThrow(() => option.Validate(settings));
+
         }
     }
 

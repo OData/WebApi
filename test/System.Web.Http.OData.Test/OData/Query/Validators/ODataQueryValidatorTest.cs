@@ -11,17 +11,12 @@ namespace System.Web.Http.OData.Query.Validators
     public class ODataQueryValidatorTest
     {
         private ODataQueryValidator _validator;
-        private ODataConventionModelBuilder _builder;
-        private IEdmModel _model;
         private ODataQueryContext _context;
 
         public ODataQueryValidatorTest()
         {
             _validator = new ODataQueryValidator();
-            _builder = new ODataConventionModelBuilder();
-            _builder.EntitySet<QueryCompositionCustomer>("Customer");
-            _model = _builder.GetEdmModel();
-            _context = new ODataQueryContext(_model, typeof(QueryCompositionCustomer));
+            _context = ValidationTestHelper.CreateCustomerContext();
         }
 
         [Fact]
@@ -53,8 +48,8 @@ namespace System.Web.Http.OData.Query.Validators
             };
 
             // Act & Assert
-             Assert.Throws<ODataException>(() => _validator.Validate(option, settings),
-                 "Query option 'Filter' is not allowed. To allow it, try setting the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.");
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings),
+                "Query option 'Filter' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.");
         }
 
         [Fact]

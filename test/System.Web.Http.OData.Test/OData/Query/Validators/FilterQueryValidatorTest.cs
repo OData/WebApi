@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
@@ -12,20 +13,13 @@ namespace System.Web.Http.OData.Query.Validators
     public class FilterQueryValidatorTest
     {
         private MyFilterValidator _validator;
-        private ODataConventionModelBuilder _builder;
-        private IEdmModel _model;
-        private ODataValidationSettings _settings;
+        private ODataValidationSettings _settings = new ODataValidationSettings();
         private ODataQueryContext _context;
 
         public FilterQueryValidatorTest()
         {
             _validator = new MyFilterValidator();
-            _builder = new ODataConventionModelBuilder();
-            _builder.Entity<QueryCompositionCustomerBase>();
-            _builder.EntitySet<QueryCompositionCustomer>("Customer");
-            _model = _builder.GetEdmModel();
-            _settings = new ODataValidationSettings();
-            _context = new ODataQueryContext(_model, typeof(QueryCompositionCustomer));
+            _context = ValidationTestHelper.CreateCustomerContext();
         }
 
         [Fact]
@@ -40,6 +34,45 @@ namespace System.Web.Http.OData.Query.Validators
         {
             Assert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new FilterQueryOption("Name eq 'abc'", _context), null));
+        }
+
+        [Fact]
+        public void ValidateThrowsIfSubStringIsNotAllowed()
+        {
+            Assert.DoesNotThrow(() =>
+                _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
+                new ODataValidationSettings() { AllowedFunctionNames = AllowedFunctionNames.Substring }));
+
+            Assert.Throws<ODataException>(() =>
+                 _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
+                new ODataValidationSettings() { AllowedFunctionNames = AllowedFunctionNames.AllMathFunctionNames }), 
+                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
+        [Fact]
+        public void ValidateThrowsIfNotIsNotAllowed()
+        {
+            Assert.DoesNotThrow(() =>
+                _validator.Validate(new FilterQueryOption("not (Name eq 'David')", _context),
+                new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Not | AllowedLogicalOperators.Equal }));
+
+            Assert.Throws<ODataException>(() =>
+                   _validator.Validate(new FilterQueryOption("not (Name eq 'David')", _context),
+                 new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
+                "Logical operator 'Not' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
+        [Fact]
+        public void ValidateThrowsIfModIsNotAllowed()
+        {
+            Assert.DoesNotThrow(() =>
+                _validator.Validate(new FilterQueryOption("Id mod 2 eq 0", _context),
+                new ODataValidationSettings() { AllowedArithmeticOperators = AllowedArithmeticOperators.All }));
+
+            Assert.Throws<ODataException>(() =>
+                   _validator.Validate(new FilterQueryOption("Id mod 2 eq 0", _context),
+                 new ODataValidationSettings() { AllowedArithmeticOperators = AllowedArithmeticOperators.Add }),
+                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings.");
         }
 
         // want to test if all the virtual methods are being invoked correctly

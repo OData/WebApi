@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -265,6 +266,21 @@ namespace System.Web.Http.OData.Query
 
             Assert.NotNull(aParameterType);
             Assert.Equal("a", aParameter.Name);
+        }
+
+        [Fact]
+        public void CanTurnOffValidationForFilter()
+        {
+            ODataValidationSettings settings = new ODataValidationSettings() { AllowedFunctionNames = AllowedFunctionNames.AllDateTimeFunctionNames };
+            ODataQueryContext context = ValidationTestHelper.CreateCustomerContext();
+            FilterQueryOption option = new FilterQueryOption("substring(Name,8,1) eq '7'", context);
+
+            Assert.Throws<ODataException>(() =>
+                option.Validate(settings),
+                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings.");
+
+            option.Validator = null;
+            Assert.DoesNotThrow(() => option.Validate(settings));
         }
 
         [Fact]

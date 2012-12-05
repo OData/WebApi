@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -132,6 +133,24 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(2, results.Length);
             Assert.Equal(4, results[0].CustomerId);
             Assert.Equal(3, results[1].CustomerId);
+        }
+
+        [Fact]
+        public void CanTurnOffValidationForTop()
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings()
+            {
+                MaxTop = 10
+            };
+            TopQueryOption option = new TopQueryOption("11", ValidationTestHelper.CreateCustomerContext());
+
+            // Act and Assert
+            Assert.Throws<ODataException>(() =>
+                option.Validate(settings),
+                "The limit of '10' for Top query has been exceeded. The value from the incoming request is '11'.");
+            option.Validator = null;
+            Assert.DoesNotThrow(() => option.Validate(settings));
         }
     }
 }

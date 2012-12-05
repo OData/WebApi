@@ -12,7 +12,7 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query
 {
     public class QueryCompositionCustomerController : ApiController
-    {
+    {   
         internal static List<QueryCompositionCustomer> CustomerList = new List<QueryCompositionCustomer>
             {  
                 new QueryCompositionCustomer 

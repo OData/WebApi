@@ -13,8 +13,7 @@ namespace System.Web.Http.OData.Query
     public class SkipQueryOption
     {
         private int? _value;
-        private SkipQueryValidator _validator;
-
+   
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and 
         /// an EdmModel from <see cref="ODataQueryContext"/>.
@@ -74,22 +73,7 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Gets or sets the Skip Query Validator
         /// </summary>
-        public SkipQueryValidator Validator
-        {
-            get
-            {
-                return _validator;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _validator = value;
-            }
-        }
+        public SkipQueryValidator Validator { get; set; }
 
         /// <summary>
         /// Apply the $skip query to the given IQueryable.
@@ -118,7 +102,10 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("validationSettings");
             }
 
-            Validator.Validate(this, validationSettings);
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
+            }
         }
 
         private IQueryable ApplyToCore(IQueryable query)

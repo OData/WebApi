@@ -18,7 +18,6 @@ namespace System.Web.Http.OData.Query
     {
         private OrderByClause _orderByClause;
         private ICollection<OrderByPropertyNode> _propertyNodes;
-        private OrderByQueryValidator _validator;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
@@ -75,23 +74,8 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Gets or sets the OrderBy Query Validator
         /// </summary>
-        public OrderByQueryValidator Validator
-        {
-            get
-            {
-                return _validator;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
-
-                _validator = value;
-            }
-        }
-
+        public OrderByQueryValidator Validator { get; set; }
+      
         /// <summary>
         /// Gets the parsed <see cref="OrderByClause"/> for this query option.
         /// </summary>
@@ -134,7 +118,10 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("validationSettings");
             }
 
-            Validator.Validate(this, validationSettings);
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
+            }
         }
 
         private IOrderedQueryable ApplyToCore(IQueryable query)

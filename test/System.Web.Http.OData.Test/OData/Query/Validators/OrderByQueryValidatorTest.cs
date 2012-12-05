@@ -10,17 +10,12 @@ namespace System.Web.Http.OData.Query.Validators
     public class OrderByQueryValidatorTest
     {
         private OrderByQueryValidator _validator;
-        private ODataConventionModelBuilder _builder;
-        private IEdmModel _model;
         private ODataQueryContext _context;
 
         public OrderByQueryValidatorTest()
         {
             _validator = new OrderByQueryValidator();
-            _builder = new ODataConventionModelBuilder();
-            _builder.EntitySet<QueryCompositionCustomer>("Customer");
-            _model = _builder.GetEdmModel();
-            _context = new ODataQueryContext(_model, typeof(QueryCompositionCustomer));
+            _context = ValidationTestHelper.CreateCustomerContext();
         }
 
         [Fact]
@@ -46,8 +41,24 @@ namespace System.Web.Http.OData.Query.Validators
             settings.AllowedOrderByProperties.Add("Id");
 
             // Act & Assert
-             Assert.Throws<ODataException>(() => _validator.Validate(option, settings),
-                 "Order by 'Name' is not allowed. To allow it, try setting the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings),
+                "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
+        [Fact]
+        public void ValidateWillNotAllowMultipleProperties()
+        {
+            // Arrange
+            OrderByQueryOption option = new OrderByQueryOption("Name desc, Id asc", _context);
+            ODataValidationSettings settings = new ODataValidationSettings();
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+
+            settings.AllowedOrderByProperties.Add("Address");
+            settings.AllowedOrderByProperties.Add("Name");
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings),
+                "Order by 'Id' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on QueryableAttribute or QueryValidationSettings.");
         }
 
         [Fact]
@@ -59,7 +70,7 @@ namespace System.Web.Http.OData.Query.Validators
             settings.AllowedOrderByProperties.Add("Id");
 
             // Act & Assert
-            Assert.DoesNotThrow(()=>_validator.Validate(option, settings));
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
     }
 }

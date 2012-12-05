@@ -169,6 +169,8 @@
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\EdmModelAsserts.cs" />
     <Compile Include="OData\Query\InlineCountQueryOptionTest.cs" />
+    <Compile Include="OData\Query\ODataValidationSettingsTest.cs" />
+    <Compile Include="OData\Query\QueryableAttributeTest.cs" />
     <Compile Include="OData\Query\QueryableFilterProviderTest.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethodsTest.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOptionHelperTest.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="OData\Query\ODataQuerySettingsTest.cs" />
     <Compile Include="OData\Query\OrderByPropertyNodeTest.cs" />
     <Compile Include="OData\Query\PartialTrustTest.cs" />
+    <Compile Include="OData\Query\Validators\ValidationTestHelper.cs" />
     <Compile Include="OData\Routing\ODataRoutingModel.cs" />
     <Compile Include="OData\Routing\ODataRoutingTest.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandlerTest.cs" />

@@ -10,17 +10,12 @@ namespace System.Web.Http.OData.Query.Validators
     public class TopQueryValidatorTest
     {
         private TopQueryValidator _validator;
-        private ODataConventionModelBuilder _builder;
-        private IEdmModel _model;
         private ODataQueryContext _context;
-           
+
         public TopQueryValidatorTest()
         {
             _validator = new TopQueryValidator();
-            _builder = new ODataConventionModelBuilder();
-            _builder.EntitySet<QueryCompositionCustomer>("Customer");
-            _model = _builder.GetEdmModel();
-            _context = new ODataQueryContext(_model, typeof(QueryCompositionCustomer));
+            _context = ValidationTestHelper.CreateCustomerContext();
         }
 
         [Fact]
@@ -46,7 +41,8 @@ namespace System.Web.Http.OData.Query.Validators
             };
 
             Assert.Throws<ODataException>(() =>
-                _validator.Validate(new TopQueryOption("11", _context), settings));
+                _validator.Validate(new TopQueryOption("11", _context), settings),
+                "The limit of '10' for Top query has been exceeded. The value from the incoming request is '11'.");
         }
 
         [Fact]
@@ -56,8 +52,8 @@ namespace System.Web.Http.OData.Query.Validators
             {
                 MaxTop = 10
             };
-            
-            _validator.Validate(new TopQueryOption("10", _context), settings);
+
+            Assert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("10", _context), settings));
         }
 
         [Fact]
@@ -68,7 +64,7 @@ namespace System.Web.Http.OData.Query.Validators
                 MaxTop = 10
             };
 
-            _validator.Validate(new TopQueryOption("9", _context), settings);
+            Assert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("9", _context), settings));
         }
     }
 }

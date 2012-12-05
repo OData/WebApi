@@ -10,6 +10,6 @@ namespace System.Web.Http.OData.Query
         Top = 0x2,
         Skip = 0x4,
         OrderBy = 0x8,
-        All = 0xF
+        All = Filter | Top | Skip | OrderBy
     }
 }

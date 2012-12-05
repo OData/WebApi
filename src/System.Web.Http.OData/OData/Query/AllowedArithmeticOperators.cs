@@ -11,6 +11,6 @@ namespace System.Web.Http.OData.Query
         Multiply = 0x4,
         Divide = 0x8,
         Modulo = 0x10,
-        All = 0x1F
+        All = Add | Subtract | Multiply | Divide | Modulo
     }
 }

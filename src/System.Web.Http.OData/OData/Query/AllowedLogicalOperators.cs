@@ -15,6 +15,6 @@ namespace System.Web.Http.OData.Query
         LessThan = 0x40,
         LessThanOrEqual = 0x80,
         Not = 0x100,
-        All = 0x1FF
+        All = Or | And | Equal | NotEqual | GreaterThan | GreaterThanOrEqual | LessThan | LessThanOrEqual | Not
     }
 }

@@ -35,9 +35,9 @@ namespace System.Web.Http.OData.Query
         IsOf = 0x4000000,
         Any = 0x8000000,
         All = 0x10000000,
-        AllStringFunctionNames = 0x2FF,
-        AllDateTimeFunctionNames = 0x4FF800,
-        AllMathFunctionNames = 0x2800000,
-        AllFunctionNames = 0x1FFFFFFF
+        AllStringFunctionNames = StartsWith | EndsWith | SubstringOf | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim,
+        AllDateTimeFunctionNames = Year | Years | Month | Months | Day | Days | Hour | Hours | Minute | Minutes | Second | Seconds,
+        AllMathFunctionNames = Round | Floor | Ceiling,
+        AllFunctionNames = AllStringFunctionNames | AllDateTimeFunctionNames | AllMathFunctionNames | Cast | IsOf | Any | All
     }
 }

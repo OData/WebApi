@@ -174,7 +174,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\WebApiHelpPage\packages.config">
+    <None Include="..\WebApiHelpPage.Test\packages.config">
       <Link>packages.config</Link>
       <SubType>Designer</SubType>
     </None>

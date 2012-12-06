@@ -979,6 +979,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only ordering by properties at the root level is supported for non-primitive collections. Nested properties and expressions are not supported..
+        /// </summary>
+        internal static string OrderByClauseNotSupported {
+            get {
+                return ResourceManager.GetString("OrderByClauseNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Multiple &apos;$it&apos; nodes are not supported in &apos;$orderby&apos;..
         /// </summary>
         internal static string OrderByDuplicateIt {
@@ -993,15 +1002,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string OrderByDuplicateProperty {
             get {
                 return ResourceManager.GetString("OrderByDuplicateProperty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to It is unsupported that the OrderByNode.Expression is not an instance of PropertyAccessQueryNode type..
-        /// </summary>
-        internal static string OrderByPropertyNotFound {
-            get {
-                return ResourceManager.GetString("OrderByPropertyNotFound", resourceCulture);
             }
         }
         

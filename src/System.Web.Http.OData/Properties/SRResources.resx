@@ -177,8 +177,8 @@
   <data name="ActionExecutedContextMustHaveRequest" xml:space="preserve">
     <value>The HttpExecutedActionContext.Request is null.</value>
   </data>
-  <data name="OrderByPropertyNotFound" xml:space="preserve">
-    <value>It is unsupported that the OrderByNode.Expression is not an instance of PropertyAccessQueryNode type.</value>
+  <data name="OrderByClauseNotSupported" xml:space="preserve">
+    <value>Only ordering by properties at the root level is supported for non-primitive collections. Nested properties and expressions are not supported.</value>
   </data>
   <data name="CanNotParseInteger" xml:space="preserve">
     <value>Failed to convert '{0}' to an integer.</value>

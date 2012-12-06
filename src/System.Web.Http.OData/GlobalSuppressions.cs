@@ -8,3 +8,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "type", Target = "System.Web.Http.OData.Formatter.EdmLibHelpers", Justification = "Mostly extension methods")]
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "member", Target = "System.Web.Http.OData.Formatter.EdmLibHelpers.#.cctor()", Justification = "Class coupling necessary in this class")]
 [assembly: SuppressMessage("Microsoft.Web.FxCop", "MW1000:UnusedResourceUsageRule", MessageId = "172567", Justification = "Resource used by framework")]
+[assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "inlinecount", Scope = "resource", Target = "System.Web.Http.OData.Properties.SRResources.resources", Justification = "spelled correctly")]

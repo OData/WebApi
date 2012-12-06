@@ -18,6 +18,8 @@ namespace System.Net.Http
     public static class HttpRequestMessageExtensions
     {
         private const string ODataPathKey = "MS_ODataPath";
+        private const string InlineCountPropertyKey = "MS_InlineCount";
+        private const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private const string MessageDetailKey = "MessageDetail";
 
         /// <summary>
@@ -145,6 +147,46 @@ namespace System.Net.Http
             }
 
             request.Properties[ODataPathKey] = odataPath;
+        }
+
+        /// <summary>
+        /// Gets the inline count to use in the OData response.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The inline count to send back, or <c>null</c> if one isn't set.</returns>
+        public static long? GetInlineCount(this HttpRequestMessage request)
+        {
+            object inlineCount;
+            if (request.Properties.TryGetValue(InlineCountPropertyKey, out inlineCount))
+            {
+                return inlineCount as long?;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the next page link to use in the OData response.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The next page link to send back, or <c>null</c> if one isn't set.</returns>
+        public static Uri GetNextPageLink(this HttpRequestMessage request)
+        {
+            object nextPageLink;
+            if (request.Properties.TryGetValue(NextPageLinkPropertyKey, out nextPageLink))
+            {
+                return nextPageLink as Uri;
+            }
+            return null;
+        }
+
+        internal static void SetInlineCount(this HttpRequestMessage request, long inlineCount)
+        {
+            request.Properties[InlineCountPropertyKey] = inlineCount;
+        }
+
+        internal static void SetNextPageLink(this HttpRequestMessage request, Uri nextPageLink)
+        {
+            request.Properties[NextPageLinkPropertyKey] = nextPageLink;
         }
     }
 }

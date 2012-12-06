@@ -201,7 +201,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpServer host = new HttpServer(_config))
             {
                 _client = new HttpClient(host);
-                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri(baseAddress + "People?$orderby=Name"));
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri(baseAddress + "People?$orderby=Name&$inlinecount=allpages"));
                 requestMessage.Headers.Accept.Add(_atomMediaType);
                 using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
                 {
@@ -213,11 +213,14 @@ namespace System.Web.Http.OData.Formatter
                     XElement nextPageLink = xml.Elements(XName.Get("link", "http://www.w3.org/2005/Atom"))
                         .Where(link => link.Attribute(XName.Get("rel")).Value == "next")
                         .SingleOrDefault();
+                    XElement count = xml.Element(XName.Get("count", "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"));
 
                     // Assert the ResultLimit correctly limits three results to two
                     Assert.Equal(2, entries.Length);
                     // Assert there is a next page link
                     Assert.NotNull(nextPageLink);
+                    // Assert the count is included with the number of entities (3)
+                    Assert.Equal("3", count.Value);
                 }
             }
         }

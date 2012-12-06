@@ -142,6 +142,8 @@
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatters.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypes.cs" />
+    <Compile Include="OData\Query\InlineCountValue.cs" />
+    <Compile Include="OData\Query\InlineCountQueryOption.cs" />
     <Compile Include="OData\Query\Validators\FilterQueryValidator.cs" />
     <Compile Include="OData\Query\AllowedArithmeticOperators.cs" />
     <Compile Include="OData\Query\AllowedFunctionNames.cs" />

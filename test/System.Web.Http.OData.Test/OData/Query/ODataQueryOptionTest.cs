@@ -56,7 +56,8 @@ namespace System.Web.Http.OData.Query
                     "$orderby",
                     "$filter",
                     "$top",
-                    "$skip"
+                    "$skip",
+                    "$inlinecount"
                 };
             }
         }
@@ -154,7 +155,6 @@ namespace System.Web.Http.OData.Query
                 return new TheoryDataSet<string>
                 {
                     "$select",
-                    "$inlinecount",
                     "$expand",
                     "$skiptoken"
                 };

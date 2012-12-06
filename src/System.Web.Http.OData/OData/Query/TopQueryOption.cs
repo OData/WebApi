@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Query
         private TopQueryValidator _validator;
 
         /// <summary>
-        /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $top value and 
+        /// Initialize a new instance of <see cref="TopQueryOption"/> based on the raw $top value and 
         /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
         /// <param name="rawValue">The raw value for $top query. It can be null or empty.</param>

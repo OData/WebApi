@@ -664,6 +664,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid value for $inlinecount..
+        /// </summary>
+        internal static string InvalidInlineCount {
+            get {
+                return ResourceManager.GetString("InvalidInlineCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid parameter type &apos;{0}&apos;. A non-binding parameter type must be either Primitive, Complex, Collection of Primitive or a Collection of Complex..
         /// </summary>
         internal static string InvalidParameterType {

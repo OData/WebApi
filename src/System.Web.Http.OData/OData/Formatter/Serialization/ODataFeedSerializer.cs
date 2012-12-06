@@ -127,14 +127,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
                 else
                 {
-                    object nextPageLinkPropertyValue;
                     HttpRequestMessage request = writeContext.Request;
-                    if (request != null && request.Properties.TryGetValue(ODataQueryOptions.NextPageLinkPropertyKey, out nextPageLinkPropertyValue))
+                    if (request != null)
                     {
-                        Uri nextPageLink = nextPageLinkPropertyValue as Uri;
+                        Uri nextPageLink = request.GetNextPageLink();
                         if (nextPageLink != null)
                         {
                             feed.NextPageLink = nextPageLink;
+                        }
+
+                        long? inlineCount = request.GetInlineCount();
+                        if (inlineCount.HasValue)
+                        {
+                            feed.Count = inlineCount.Value;
                         }
                     }
                 }

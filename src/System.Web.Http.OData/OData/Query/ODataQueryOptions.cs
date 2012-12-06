@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition. 
-    /// Currently this only supports $filter, $orderby, $top, $skip.
+    /// Currently this only supports $filter, $orderby, $top, $skip, and $inlinecount.
     /// </summary>
     [ODataQueryParameterBinding]
     public class ODataQueryOptions
@@ -28,7 +28,6 @@ namespace System.Web.Http.OData.Query
         private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
         private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
 
-        internal const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
@@ -96,6 +95,8 @@ namespace System.Web.Http.OData.Query
                         break;
                     case "$inlinecount":
                         RawValues.InlineCount = kvp.Value;
+                        ThrowIfEmpty(kvp.Value, "$inlinecount");
+                        InlineCount = new InlineCountQueryOption(kvp.Value, context);
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;
@@ -148,6 +149,11 @@ namespace System.Web.Http.OData.Query
         public TopQueryOption Top { get; private set; }
 
         /// <summary>
+        /// Gets the <see cref="InlineCountQueryOption"/>.
+        /// </summary>
+        public InlineCountQueryOption InlineCount { get; private set; }
+
+        /// <summary>
         /// Gets or sets the Filter Query Validator
         /// </summary>
         public ODataQueryValidator Validator
@@ -171,13 +177,14 @@ namespace System.Web.Http.OData.Query
         /// Check if the given query is supported by the built in ODataQueryOptions.
         /// </summary>
         /// <param name="queryName">The name of the given query parameter.</param>
-        /// <returns>returns true if the query parameter is one of the four that we support out of box.</returns>
+        /// <returns>returns true if the query parameter is one of the five that we support out of box.</returns>
         public static bool IsSupported(string queryName)
         {
             return (queryName == "$orderby" ||
                  queryName == "$filter" ||
                  queryName == "$top" ||
-                 queryName == "$skip");
+                 queryName == "$skip" ||
+                 queryName == "$inlinecount");
         }
 
         /// <summary>
@@ -222,6 +229,15 @@ namespace System.Web.Http.OData.Query
                 result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
+            if (InlineCount != null)
+            {
+                long? count = InlineCount.GetEntityCount(result);
+                if (count.HasValue)
+                {
+                    Request.SetInlineCount(count.Value);
+                }
+            }
+
             OrderByQueryOption orderBy = OrderBy;
 
             // $skip or $top require a stable sort for predictable results.
@@ -263,7 +279,7 @@ namespace System.Web.Http.OData.Query
                 if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri)
                 {
                     Uri nextPageLink = GetNextPageLink(Request, querySettings.ResultLimit.Value);
-                    Request.Properties.Add(NextPageLinkPropertyKey, nextPageLink);
+                    Request.SetNextPageLink(nextPageLink);
                 }
             }
 

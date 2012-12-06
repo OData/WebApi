@@ -10,6 +10,12 @@ namespace System.Web.Http.OData
 {
     internal class ExpressionHelpers
     {
+        public static long Count(IQueryable query, Type type)
+        {
+            MethodInfo countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(type);
+            return (long)countMethod.Invoke(null, new object[] { query });
+        }        
+
         public static IQueryable<TEntityType> Skip<TEntityType>(IQueryable<TEntityType> query, int count)
         {
             return Skip(query, count, typeof(TEntityType)) as IQueryable<TEntityType>;

@@ -154,5 +154,31 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
         }
+
+        [Fact]
+        public void WriteObjectInline_Writes_RequestCount()
+        {
+            // Arrange
+            var mockSerializerProvider = new Mock<ODataSerializerProvider>(_model);
+            var mockCustomerSerializer = new Mock<ODataSerializer>(ODataPayloadKind.Entry);
+            var mockWriter = new Mock<ODataWriter>();
+
+            long expectedCount = 12345;
+            _writeContext.Request = new HttpRequestMessage();
+            _writeContext.Request.Properties.Add("MS_InlineCount", expectedCount);
+
+            mockSerializerProvider
+                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
+                .Returns(mockCustomerSerializer.Object);
+            mockWriter
+                .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
+                .Callback((ODataFeed feed) =>
+                {
+                    Assert.Equal(expectedCount, feed.Count);
+                });
+            _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
+
+            _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
+        }
     }
 }

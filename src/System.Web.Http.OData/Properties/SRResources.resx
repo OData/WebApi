@@ -574,4 +574,7 @@
   <data name="UnableToDetermineMetadataUrl" xml:space="preserve">
     <value>The ODataMediaTypeFormatter must be able to determine the metadata URL for a request in order to serialize the response.</value>
   </data>
+  <data name="InvalidInlineCount" xml:space="preserve">
+    <value>'{0}' is not a valid value for $inlinecount.</value>
+  </data>
 </root>

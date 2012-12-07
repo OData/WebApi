@@ -55,6 +55,7 @@
     <Reference Include="Facebook, Version=6.0.10.0, Culture=neutral, PublicKeyToken=58cb4f2111d1e6de, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Facebook.6.1.4\lib\net45\Facebook.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -62,11 +63,10 @@
     <Reference Include="Moq">
       <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.4.5.6\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FacebookAuthorizeAttributeTest.cs" />
     <Compile Include="GlobalFacebookConfigurationTest.cs" />
     <Compile Include="FacebookAuthorizeFilterTest.cs" />
     <Compile Include="FacebookClientExtensionsTest.cs" />
@@ -121,8 +122,10 @@
     <Compile Include="FacebookContextModelBinderTest.cs" />
     <Compile Include="PreApplicationStartCodeTest.cs" />
     <Compile Include="FacebookRealtimeControllerTest.cs" />
-    <Compile Include="Helpers\ContextHelpers.cs" />
+    <Compile Include="Helpers\MockHelpers.cs" />
     <Compile Include="Helpers\LocalFacebookClient.cs" />
+    <Compile Include="Types\UserPhoto.cs" />
+    <Compile Include="Types\UserStatus.cs" />
     <Compile Include="Types\UserTypeWithFieldModifiers.cs" />
     <Compile Include="Types\UserTypeWithRenamedProperties.cs" />
     <Compile Include="Types\UserTypeWithIgnoredProperties.cs" />
@@ -132,7 +135,9 @@
     <Compile Include="Types\SimpleUser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

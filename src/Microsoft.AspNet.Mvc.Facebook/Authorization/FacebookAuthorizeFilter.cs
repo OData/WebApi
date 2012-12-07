@@ -12,10 +12,17 @@ using Microsoft.AspNet.Mvc.Facebook.Client;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Authorization
 {
+    /// <summary>
+    /// Authorization filter that verifies the signed requests and permissions from Facebook.
+    /// </summary>
     public class FacebookAuthorizeFilter : IAuthorizationFilter
     {
         private FacebookConfiguration _config;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FacebookAuthorizeFilter" /> class.
+        /// </summary>
+        /// <param name="config">The <see cref="FacebookConfiguration"/>.</param>
         public FacebookAuthorizeFilter(FacebookConfiguration config)
         {
             if (config == null)
@@ -26,6 +33,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
             _config = config;
         }
 
+        /// <summary>
+        /// Called when authorization is required.
+        /// </summary>
+        /// <param name="filterContext">The filter context.</param>
         public virtual void OnAuthorization(AuthorizationContext filterContext)
         {
             if (filterContext == null)
@@ -98,6 +109,11 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
             }
         }
 
+        /// <summary>
+        /// Called when authorization fails and need to create a redirect result.
+        /// </summary>
+        /// <param name="redirectUrl">The redirect URL.</param>
+        /// <returns>The <see cref="ActionResult"/>.</returns>
         public virtual ActionResult CreateRedirectResult(Uri redirectUrl)
         {
             if (redirectUrl == null)

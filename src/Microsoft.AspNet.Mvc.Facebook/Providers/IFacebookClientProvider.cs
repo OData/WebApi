@@ -4,8 +4,15 @@ using Facebook;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Providers
 {
+    /// <summary>
+    /// Provides an abstraction for creating <see cref="FacebookClient"/>.
+    /// </summary>
     public interface IFacebookClientProvider
     {
+        /// <summary>
+        /// Creates an instance of <see cref="FacebookClient"/>.
+        /// </summary>
+        /// <returns>The <see cref="FacebookClient"/> instance.</returns>
         FacebookClient CreateClient();
     }
 }

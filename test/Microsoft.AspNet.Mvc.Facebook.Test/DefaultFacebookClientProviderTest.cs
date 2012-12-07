@@ -11,11 +11,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
         [Fact]
         public void Constructor_ThrowsArgumentNullException()
         {
-            Assert.ThrowsArgumentNull(() =>
-            {
-                new DefaultFacebookClientProvider(null);
-            },
-            "configuration");
+            Assert.ThrowsArgumentNull(() => new DefaultFacebookClientProvider(null), "configuration");
         }
 
         [Fact]

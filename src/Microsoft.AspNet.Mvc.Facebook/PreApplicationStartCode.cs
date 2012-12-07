@@ -7,11 +7,17 @@ using System.Web;
 
 namespace Microsoft.AspNet.Mvc.Facebook
 {
+    /// <summary>
+    /// Code that will be executed before application start.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class PreApplicationStartCode
     {
         private static bool _startWasCalled;
 
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
         public static void Start()
         {
             if (!_startWasCalled)

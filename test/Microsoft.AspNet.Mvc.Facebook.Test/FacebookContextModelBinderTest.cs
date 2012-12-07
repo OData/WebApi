@@ -12,13 +12,19 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
     public class FacebookContextModelBinderTest
     {
         [Fact]
+        public void Constructor_ThrowsArgumentNullException()
+        {
+            Assert.ThrowsArgumentNull(() => new FacebookContextModelBinder(null), "config");
+        }
+
+        [Fact]
         public void BindModel_ReturnsExpectedFacebookContext_WhenSignedRequestComesFromForm()
         {
             FacebookConfiguration config = new FacebookConfiguration();
             config.AppSecret = "3e29b24f825e737d97aed5eb62df5076";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookContextModelBinder contextBinder = new FacebookContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext(new NameValueCollection
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext(new NameValueCollection
             {
                 {"signed_request", "x1yDEgacN3N5iu23Ji8NLYp9LGO1-cUXKHTJQrMqzVQ.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEzNTM5MTMyMDAsImlzc3VlZF9hdCI6MTM1MzkwNzQ5Miwib2F1dGhfdG9rZW4iOiJBQUFGUlJPcWtwZ01CQURBSjNQZk5vNldXMlJ5WkFSQ1hjU0daQlhpNTBLTG9wRzFwYmFwc2M2aThKY3h6WkFQN1pDSnlpcXVHYlc3WXlCam1aQjh0UWpyelZ2VTNrYm44b3N3WXR5czkzTWdaRFpEIiwidXNlciI6eyJjb3VudHJ5IjoidXMiLCJsb2NhbGUiOiJlbl9VUyIsImFnZSI6eyJtaW4iOjIxfX0sInVzZXJfaWQiOiIxNzgyNTkwMSJ9"}
             });
@@ -38,7 +44,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             config.AppSecret = "3e29b24f825e737d97aed5eb62df5076";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookContextModelBinder contextBinder = new FacebookContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext(
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext(
                 null,
                 new NameValueCollection
                 {
@@ -59,7 +65,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             config.AppSecret = "abcdef";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookContextModelBinder contextBinder = new FacebookContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext();
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext();
             ModelBindingContext modelBindingContext = new ModelBindingContext();
 
             object context = contextBinder.BindModel(controllerContext, modelBindingContext);

@@ -1,20 +1,114 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Specialized;
+using System.Web;
+using System.Web.Mvc;
+using Facebook;
 using Microsoft.AspNet.Mvc.Facebook.Authorization;
+using Microsoft.AspNet.Mvc.Facebook.Client;
+using Microsoft.AspNet.Mvc.Facebook.Providers;
+using Microsoft.AspNet.Mvc.Facebook.Test.Helpers;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Test
 {
     public class FacebookAuthorizeFilterTest
     {
         [Fact]
+        public void Constructor_ThrowsArgumentNullException()
+        {
+            Assert.ThrowsArgumentNull(
+                () => new FacebookAuthorizeFilter(null),
+                "config");
+        }
+
+        [Fact]
         public void OnAuthorization_ThrowsArgumentNullException()
         {
-            FacebookConfiguration config = new FacebookConfiguration();
+            FacebookConfiguration config = MockHelpers.CreateConfiguration();
             FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
             Assert.ThrowsArgumentNull(
                 () => authorizeFilter.OnAuthorization(null),
                 "filterContext");
+        }
+
+        [Fact]
+        public void CreateRedirectResult_StringEncodesTheRedirectUrl()
+        {
+            Uri uri = new Uri("http://example.com?query=4'; alert('hello world')");
+            FacebookConfiguration config = MockHelpers.CreateConfiguration();
+            FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
+
+            ContentResult result = Assert.IsType<ContentResult>(authorizeFilter.CreateRedirectResult(uri));
+            Assert.Equal("text/html", result.ContentType);
+            Assert.Contains("http://example.com/?query=4';%20alert('hello%20world')", result.Content);
+        }
+
+        [Fact]
+        public void OnAuthorization_RedirectsToOAuthDialog_WhenSignedRequestIsNull()
+        {
+            FacebookConfiguration config = MockHelpers.CreateConfiguration();
+            FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
+            AuthorizationContext context = new AuthorizationContext(
+                MockHelpers.CreateControllerContext(),
+                MockHelpers.CreateActionDescriptor(new[] { new FacebookAuthorizeAttribute("email") }));
+
+            authorizeFilter.OnAuthorization(context);
+
+            ContentResult result = Assert.IsType<ContentResult>(context.Result);
+            Assert.Equal("text/html", result.ContentType);
+            Assert.Equal(
+                "<script>window.top.location = 'https://www.facebook.com/dialog/oauth?redirect_uri=https%3A%2F%2Fapps.facebook.com%2FDefaultAppId%2F\\u0026client_id=DefaultAppId';</script>",
+                result.Content);
+        }
+
+        [Fact]
+        public void OnAuthorization_RedirectsToOAuthDialog_ForMissingPermissions()
+        {
+            FacebookClient client = MockHelpers.CreateFacebookClient();
+            IFacebookPermissionService permissionService = MockHelpers.CreatePermissionService(new[] { "" });
+            FacebookConfiguration config = MockHelpers.CreateConfiguration(client, permissionService);
+            FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
+            AuthorizationContext context = new AuthorizationContext(
+                MockHelpers.CreateControllerContext(new NameValueCollection
+                {
+                    {"signed_request", "exampleSignedRequest"}
+                }),
+                MockHelpers.CreateActionDescriptor(new[] { new FacebookAuthorizeAttribute("email", "user_likes") }));
+
+            authorizeFilter.OnAuthorization(context);
+
+            ContentResult result = Assert.IsType<ContentResult>(context.Result);
+            Assert.Equal("text/html", result.ContentType);
+            Assert.Equal(
+                "<script>window.top.location = 'https://www.facebook.com/dialog/oauth?redirect_uri=example.com';</script>",
+                result.Content);
+        }
+
+        [Fact]
+        public void OnAuthorization_RedirectsToAuthorizationRedirectPath_ForMissingPermissions_WhenThePathIsSet()
+        {
+            FacebookClient client = MockHelpers.CreateFacebookClient();
+            IFacebookPermissionService permissionService = MockHelpers.CreatePermissionService(new[] { "" });
+            FacebookConfiguration config = MockHelpers.CreateConfiguration(client, permissionService);
+            config.AuthorizationRedirectPath = "home/permissions";
+            FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
+            AuthorizationContext context = new AuthorizationContext(
+                MockHelpers.CreateControllerContext(new NameValueCollection
+                {
+                    {"signed_request", "exampleSignedRequest"}
+                }),
+                MockHelpers.CreateActionDescriptor(new[] { new FacebookAuthorizeAttribute("email") }));
+
+            authorizeFilter.OnAuthorization(context);
+
+            ContentResult result = Assert.IsType<ContentResult>(context.Result);
+            Assert.Equal("text/html", result.ContentType);
+            Assert.Equal(
+                "<script>window.top.location = 'https://apps.facebook.com/DefaultAppId/home/permissions?originUrl=https%3a%2f%2fapps.facebook.com%2fDefaultAppId%2f\\u0026permissions=email';</script>",
+                result.Content);
         }
     }
 }

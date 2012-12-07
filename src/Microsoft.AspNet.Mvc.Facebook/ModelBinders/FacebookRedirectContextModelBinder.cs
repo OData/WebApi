@@ -9,10 +9,17 @@ using Microsoft.AspNet.Mvc.Facebook.Client;
 
 namespace Microsoft.AspNet.Mvc.Facebook.ModelBinders
 {
+    /// <summary>
+    /// Model binds an action method parameter to a <see cref="FacebookRedirectContext"/>.
+    /// </summary>
     public class FacebookRedirectContextModelBinder : IModelBinder
     {
         private FacebookConfiguration _config;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FacebookRedirectContextModelBinder" /> class.
+        /// </summary>
+        /// <param name="config">The <see cref="FacebookConfiguration"/>.</param>
         public FacebookRedirectContextModelBinder(FacebookConfiguration config)
         {
             if (config == null)
@@ -23,6 +30,14 @@ namespace Microsoft.AspNet.Mvc.Facebook.ModelBinders
             _config = config;
         }
 
+        /// <summary>
+        /// Binds the model to a value by using the specified controller context and binding context.
+        /// </summary>
+        /// <param name="controllerContext">The controller context.</param>
+        /// <param name="bindingContext">The binding context.</param>
+        /// <returns>
+        /// The bound value.
+        /// </returns>
         public virtual object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
         {
             HttpRequestBase request = controllerContext.HttpContext.Request;

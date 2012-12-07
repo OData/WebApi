@@ -7,8 +7,16 @@ using System.Web.Mvc.Html;
 
 namespace Microsoft.AspNet.Mvc.Facebook
 {
+    /// <summary>
+    /// Facebook-related extension methods for <see cref="HtmlHelper"/>.
+    /// </summary>
     public static class FacebookHtmlHelperExtensions
     {
+        /// <summary>
+        /// Returns the signed_request in a hidden input element.
+        /// </summary>
+        /// <param name="htmlHelper">The <see cref="HtmlHelper"/>.</param>
+        /// <returns>The signed_request in a hidden input element.</returns>
         public static IHtmlString FacebookSignedRequest(this HtmlHelper htmlHelper)
         {
             string signedRequest = htmlHelper.ViewContext.HttpContext.Request.Params["signed_request"];

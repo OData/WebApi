@@ -12,13 +12,19 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
     public class FacebookRedirectContextModelBinderTest
     {
         [Fact]
+        public void Constructor_ThrowsArgumentNullException()
+        {
+            Assert.ThrowsArgumentNull(() => new FacebookContextModelBinder(null), "config");
+        }
+
+        [Fact]
         public void BindModel_ReturnsExpectedFacebookRedirectContext()
         {
             FacebookConfiguration config = new FacebookConfiguration();
             config.AppId = "123456";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookRedirectContextModelBinder redirectContextBinder = new FacebookRedirectContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext(
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext(
                 null,
                 new NameValueCollection
                 {
@@ -44,7 +50,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             config.AppId = "123456";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookRedirectContextModelBinder redirectContextBinder = new FacebookRedirectContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext(
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext(
                 null,
                 new NameValueCollection
                 {
@@ -63,7 +69,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             config.AppId = "123456";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookRedirectContextModelBinder redirectContextBinder = new FacebookRedirectContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext(
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext(
                 null,
                 new NameValueCollection
                 {
@@ -83,7 +89,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             config.AppId = "123456";
             config.ClientProvider = new DefaultFacebookClientProvider(config);
             FacebookRedirectContextModelBinder redirectContextBinder = new FacebookRedirectContextModelBinder(config);
-            ControllerContext controllerContext = ContextHelpers.CreateControllerContext(
+            ControllerContext controllerContext = MockHelpers.CreateControllerContext(
                 null,
                 new NameValueCollection
                 {

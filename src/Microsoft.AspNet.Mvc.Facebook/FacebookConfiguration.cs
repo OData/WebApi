@@ -8,20 +8,38 @@ using Microsoft.AspNet.Mvc.Facebook.Providers;
 
 namespace Microsoft.AspNet.Mvc.Facebook
 {
+    /// <summary>
+    /// Configuration for the Facebook application.
+    /// </summary>
     public class FacebookConfiguration
     {
         private static readonly string FacebookAppBaseUrl = "https://apps.facebook.com";
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
         private string _appUrl;
 
+        /// <summary>
+        /// Gets or sets the App ID.
+        /// </summary>
         public string AppId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the App Secret.
+        /// </summary>
         public string AppSecret { get; set; }
 
+        /// <summary>
+        /// Gets or sets the App Namespace.
+        /// </summary>
         public string AppNamespace { get; set; }
 
+        /// <summary>
+        /// Gets or sets the URL path that the <see cref="Microsoft.AspNet.Mvc.Facebook.Authorization.FacebookAuthorizeFilter"/> will redirect to when the user did not grant the required permissions.
+        /// </summary>
         public string AuthorizationRedirectPath { get; set; }
 
+        /// <summary>
+        /// Gets or sets the absolute URL for the Facebook App.
+        /// </summary>
         public string AppUrl
         {
             get
@@ -38,15 +56,35 @@ namespace Microsoft.AspNet.Mvc.Facebook
             }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="IFacebookClientProvider"/>.
+        /// </summary>
         public IFacebookClientProvider ClientProvider { get; set; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="IFacebookPermissionService"/>.
+        /// </summary>
         public IFacebookPermissionService PermissionService { get; set; }
 
+        /// <summary>
+        /// Gets the additional properties associated with this instance.
+        /// </summary>
         public ConcurrentDictionary<object, object> Properties
         {
             get { return _properties; }
         }
 
+        /// <summary>
+        /// Loads the configuration properties from app settings.
+        /// </summary>
+        /// <remarks>
+        /// It will map the following keys from appSettings to the corresponding properties:
+        /// Facebook:AppId = AppId,
+        /// Facebook:AppSecret = AppSecret,
+        /// Facebook:AppNamespace = AppNamespace,
+        /// Facebook:AppUrl = AppUrl,
+        /// Facebook:AuthorizationRedirectPath = AuthorizationRedirectPath.
+        /// </remarks>
         public virtual void LoadFromAppSettings()
         {
             AppId = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppId];

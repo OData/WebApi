@@ -55,6 +55,24 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
         }
 
         [Fact]
+        public void GetCurrentUserPhotosAsyncOfT_CallsGetTaskAsyncWithTheExpectedPath()
+        {
+            LocalFacebookClient client = new LocalFacebookClient();
+            client.GetCurrentUserPhotosAsync<UserPhoto>().Wait();
+
+            Assert.Equal("me/photos?fields=name,picture,source", client.Path);
+        }
+
+        [Fact]
+        public void GetCurrentUserStatusesAsyncOfT_CallsGetTaskAsyncWithTheExpectedPath()
+        {
+            LocalFacebookClient client = new LocalFacebookClient();
+            client.GetCurrentUserStatusesAsync<UserStatus>().Wait();
+
+            Assert.Equal("me/statuses?fields=message,time", client.Path);
+        }
+
+        [Fact]
         public void GetFacebookObjectAsyncOfT_CallsGetTaskAsyncWithTheExpectedPath()
         {
             LocalFacebookClient client = new LocalFacebookClient();

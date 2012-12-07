@@ -5,6 +5,9 @@ using Microsoft.AspNet.Mvc.Facebook.Providers;
 
 namespace Microsoft.AspNet.Mvc.Facebook
 {
+    /// <summary>
+    /// Provides a global <see cref="FacebookConfiguration"/> for ASP.NET applications.
+    /// </summary>
     public static class GlobalFacebookConfiguration
     {
         private static readonly Lazy<FacebookConfiguration> _configuration = new Lazy<FacebookConfiguration>(
@@ -16,6 +19,9 @@ namespace Microsoft.AspNet.Mvc.Facebook
             return config;
         });
 
+        /// <summary>
+        /// Gets the global <see cref="FacebookConfiguration"/>.
+        /// </summary>
         public static FacebookConfiguration Configuration
         {
             get

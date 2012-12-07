@@ -10,8 +10,16 @@ using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Client
 {
+    /// <summary>
+    /// Helper for constructing Facebook Graph API queries.
+    /// </summary>
     public class FacebookQueryHelper
     {
+        /// <summary>
+        /// Gets the appropriate "fields" query parameter for the Facebook Graph API based on the public properties of the model type.
+        /// </summary>
+        /// <param name="modelType">Type of the model.</param>
+        /// <returns>The "fields" query parameter.</returns>
         public static string GetFields(Type modelType)
         {
             IList<string> fieldNames = GetFieldNames(modelType, typesVisited: new HashSet<Type>());

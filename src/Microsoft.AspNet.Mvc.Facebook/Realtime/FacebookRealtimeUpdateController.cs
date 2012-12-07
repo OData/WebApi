@@ -13,13 +13,28 @@ using Microsoft.AspNet.Mvc.Facebook.Models;
 
 namespace Microsoft.AspNet.Mvc.Facebook.Realtime
 {
+    /// <summary>
+    /// <see cref="ApiController"/> for handling Facebook Realtime Update subscriptions.
+    /// </summary>
     public abstract class FacebookRealtimeUpdateController : ApiController
     {
         private static readonly string XHubSignatureHeaderName = "X-Hub-Signature";
         private FacebookConfiguration _facebookConfiguration;
 
+        /// <summary>
+        /// Gets the verify token.
+        /// </summary>
+        /// <value>
+        /// The verify token.
+        /// </value>
         public abstract string VerifyToken { get; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="FacebookConfiguration"/>.
+        /// </summary>
+        /// <value>
+        /// The <see cref="FacebookConfiguration"/>.
+        /// </value>
         public FacebookConfiguration FacebookConfiguration
         {
             get
@@ -36,9 +51,17 @@ namespace Microsoft.AspNet.Mvc.Facebook.Realtime
             }
         }
 
+        /// <summary>
+        /// Handles the update.
+        /// </summary>
+        /// <param name="notification">The notification.</param>
         [NonAction]
         public abstract Task HandleUpdateAsync(ChangeNotification notification);
 
+        /// <summary>
+        /// Handles the HTTP GET requests from Facebook for subscription verification.
+        /// </summary>
+        /// <param name="subscriptionVerification">The subscription verification.</param>
         public virtual HttpResponseMessage Get(SubscriptionVerification subscriptionVerification)
         {
             try
@@ -57,6 +80,9 @@ namespace Microsoft.AspNet.Mvc.Facebook.Realtime
             };
         }
 
+        /// <summary>
+        /// Handles the HTTP POST requests from Facebook for updates.
+        /// </summary>
         public virtual async Task<HttpResponseMessage> Post()
         {
             IEnumerable<string> headerValues;

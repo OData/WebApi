@@ -21,5 +21,17 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test.Helpers
             Path = path;
             return Task.FromResult(new object());
         }
+
+        public override object Get(string path)
+        {
+            Path = path;
+            return new object();
+        }
+
+        public override TResult Get<TResult>(string path)
+        {
+            Path = path;
+            return Activator.CreateInstance<TResult>();
+        }
     }
 }

@@ -69,6 +69,37 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void TestCreate_FormattersForFeed_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> feedFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(IEnumerable<SampleType>)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = feedFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/atom+xml;type=feed"),
+                MediaTypeHeaderValue.Parse("application/atom+xml"),
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
         public void TestCreate_FormattersForEntry_SupportedMediaTypes()
         {
             // Arrange
@@ -94,6 +125,188 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForProperty_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> propertyFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(int)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = propertyFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/xml"),
+                MediaTypeHeaderValue.Parse("text/xml"),
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForEntityReferenceLink_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> entityReferenceLinkFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(Uri)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = entityReferenceLinkFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/xml"),
+                MediaTypeHeaderValue.Parse("text/xml"),
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForCollection_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> collectionFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(IEnumerable<int>)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = collectionFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/xml"),
+                MediaTypeHeaderValue.Parse("text/xml"),
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForServiceDocument_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> serviceDocumentFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(ODataWorkspace)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = serviceDocumentFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/xml"),
+                MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForMetadataDocument_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> metadataDocumentFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(IEdmModel)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = metadataDocumentFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/xml")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForError_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> errorFormatters = formatters.Where(
+                f => f.CanWriteType(typeof(ODataError)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = errorFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/xml"),
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json")
+            };
+
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+        }
+
+        [Fact]
+        public void TestCreate_FormattersForParameter_SupportedMediaTypes()
+        {
+            // Arrange
+            IEdmModel model = CreateModelWithEntity<SampleType>();
+            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            Assert.NotNull(formatters); // Guard assertion
+            IEnumerable<ODataMediaTypeFormatter> parameterFormatters = formatters.Where(
+                f => f.CanReadType(typeof(ODataActionParameters)));
+
+            // Act
+            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = parameterFormatters.SelectMany(
+                f => f.SupportedMediaTypes).Distinct();
+
+            // Assert
+            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            {
+                MediaTypeHeaderValue.Parse("application/json;odata=verbose")
             };
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));

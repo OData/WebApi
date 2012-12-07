@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                     Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
 
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJson);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJsonVerbose);
                 }
             }
         }

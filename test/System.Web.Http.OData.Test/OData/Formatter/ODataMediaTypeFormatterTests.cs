@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -126,20 +127,36 @@ namespace System.Web.Http.OData.Formatter
                 });
         }
 
-        // TODO: Uncomment the attribute below once the test exists.
-        //[Fact]
+        [Theory]
+        [InlineData("Test content", "utf-8", true)]
+        [InlineData("Test content", "utf-16", true)]
         public override Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
-            // TODO: Tracked by Issue #339, Needs an implementation
-            throw new NotImplementedException();
+            // Arrange
+            MediaTypeFormatter formatter = CreateFormatterWithRequest();
+            formatter.SupportedEncodings.Add(CreateEncoding(encoding));
+            string formattedContent = CreateFormattedContent(content);
+            string mediaType = string.Format("application/json; odata=minimalmetadata; charset={0}", encoding);
+
+            // Act & assert
+            return ReadContentUsingCorrectCharacterEncodingHelper(
+                formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
-        // TODO: Uncomment the attribute below once the test exists.
-        //[Fact]
+        [Theory]
+        [InlineData("Test content", "utf-8", true)]
+        [InlineData("Test content", "utf-16", true)]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
         {
-            // TODO: Tracked by Issue #339, Needs an implementation
-            throw new NotImplementedException();
+            // Arrange
+            MediaTypeFormatter formatter = CreateFormatterWithRequest();
+            formatter.SupportedEncodings.Add(CreateEncoding(encoding));
+            string formattedContent = CreateFormattedContent(content);
+            string mediaType = string.Format("application/json; odata=minimalmetadata; charset={0}", encoding);
+
+            // Act & assert
+            return WriteContentUsingCorrectCharacterEncodingHelper(
+                formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
         [Fact]
@@ -152,6 +169,28 @@ namespace System.Web.Http.OData.Formatter
             Assert.Throws<NotSupportedException>(
                 () => formatter.WriteToStreamAsync(typeof(Customer), new Customer(), new MemoryStream(), content: null, transportContext: null),
                 "The OData formatter does not support writing client requests. This formatter instance must have an associated request.");
+        }
+
+        private static Encoding CreateEncoding(string name)
+        {
+            if (name == "utf-8")
+            {
+                return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+            }
+            else if (name == "utf-16")
+            {
+                return new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true);
+            }
+            else
+            {
+                throw new ArgumentException("name");
+            }
+        }
+
+        private static string CreateFormattedContent(string value)
+        {
+            return string.Format(CultureInfo.InvariantCulture,
+                "{{\r\n  \"odata.metadata\":\"http://dummy/#Edm.String\",\"value\":\"{0}\"\r\n}}", value);
         }
 
         protected override ODataMediaTypeFormatter CreateFormatter()

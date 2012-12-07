@@ -71,7 +71,31 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Equal(ODataTestUtil.GetDataServiceVersion(response.Content.Headers), ODataTestUtil.Version3NumberString);
 
                     // this request should be handled by OData Json
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJson);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJsonVerbose);
+                }
+            }
+        }
+
+        [Fact]
+        public void Get_Entry_In_OData_Json_Full_Metadata_Format()
+        {
+            using (HttpServer host = new HttpServer(_config))
+            {
+                _client = new HttpClient(host);
+                HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, new Uri(baseAddress + "People(10)"));
+                requestMessage.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=fullmetadata"));
+                requestMessage.Headers.Add("DataServiceVersion", "2.0");
+                requestMessage.Headers.Add("MaxDataServiceVersion", "3.0");
+
+                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                {
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(response.Content.Headers.ContentType.MediaType, _jsonMediaType.MediaType);
+                    Assert.Equal(ODataTestUtil.GetDataServiceVersion(response.Content.Headers), ODataTestUtil.Version3NumberString);
+
+                    // this request should be handled by OData Json
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJsonFullMetadata);
                 }
             }
         }
@@ -156,7 +180,7 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Equal(ODataTestUtil.Version3NumberString, ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
                     // this request should be handled by OData Json
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJson);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonODataJsonVerbose);
                 }
 
                 // when the query string is not present, request should be handled by the regular Json Formatter

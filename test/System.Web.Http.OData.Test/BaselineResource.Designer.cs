@@ -145,6 +145,19 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to %
+        ///&quot;odata.metadata&quot;:&quot;http://localhost:8081/$metadata#Default.Container.People/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid@odata.type&quot;:&quot;Edm.Guid&quot;,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:%
+        ///&quot;odata.type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterOrder&quot;,&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;
+        ///}
+        ///}.
+        /// </summary>
+        internal static string EntryTypePersonODataJsonFullMetadata {
+            get {
+                return ResourceManager.GetString("EntryTypePersonODataJsonFullMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to %
         ///  &quot;d&quot;:%
         ///    &quot;__metadata&quot;:%
         ///      &quot;id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;uri&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterPerson&quot;
@@ -156,9 +169,9 @@ namespace System.Web.Http.OData {
         ///  }
         ///}.
         /// </summary>
-        internal static string EntryTypePersonODataJson {
+        internal static string EntryTypePersonODataJsonVerbose {
             get {
-                return ResourceManager.GetString("EntryTypePersonODataJson", resourceCulture);
+                return ResourceManager.GetString("EntryTypePersonODataJsonVerbose", resourceCulture);
             }
         }
         

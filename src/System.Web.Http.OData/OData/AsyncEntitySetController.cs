@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
@@ -14,12 +15,12 @@ using Microsoft.Data.OData.Query;
 namespace System.Web.Http.OData
 {
     /// <summary>
-    /// Provides a convenient starting point for a controller that exposes an OData entity set. This is the synchronous version of <see cref="AsyncEntitySetController{TEntity, TKey}"/>.
+    /// Provides a convenient starting point for a controller that exposes an OData entity set. This is the asynchronous version of <see cref="EntitySetController{TEntity, TKey}"/>.
     /// </summary>
     /// <typeparam name="TEntity">The type associated with the exposed entity set's entity type.</typeparam>
     /// <typeparam name="TKey">The type associated with the entity key of the exposed entity set's entity type.</typeparam>
     [CLSCompliant(false)]
-    public abstract class EntitySetController<TEntity, TKey> : ApiController where TEntity : class
+    public abstract class AsyncEntitySetController<TEntity, TKey> : ApiController where TEntity : class
     {
         /// <summary>
         /// Gets the OData path of the current request.
@@ -44,11 +45,13 @@ namespace System.Web.Http.OData
         }
 
         /// <summary>
-        /// This method should be overridden to handle GET requests that attempt to retrieve entities from the entity set.
+        /// This method should be overridden to handle GET requests that attempt to retrieve entities from the entity set. This method should asynchronously compute the
+        /// matching entities by applying the request's query options.
         /// </summary>
-        /// <returns>The matching entities from the entity set.</returns>
+        /// <returns>A <see cref="Task"/> that contains the matching entities from the entity set when it completes.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions.")]
-        public virtual IQueryable<TEntity> Get()
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Using tasks")]
+        public virtual Task<IEnumerable<TEntity>> Get()
         {
             throw EntitySetControllerHelpers.GetNotImplementedResponse(Request);
         }
@@ -57,24 +60,23 @@ namespace System.Web.Http.OData
         /// Handles GET requests that attempt to retrieve an individual entity by key from the entity set.
         /// </summary>
         /// <param name="key">The entity key of the entity to retrieve.</param>
-        /// <returns>The response message to send back to the client.</returns>
+        /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions.")]
-        public virtual HttpResponseMessage Get([FromODataUri] TKey key)
+        public virtual Task<HttpResponseMessage> Get([FromODataUri] TKey key)
         {
-            TEntity entity = GetEntityByKey(key);
-            return EntitySetControllerHelpers.GetByKeyResponse(Request, entity);
+            return GetEntityByKeyAsync(key)
+                .Then(entity => EntitySetControllerHelpers.GetByKeyResponse<TEntity>(Request, entity), runSynchronously: true);
         }
 
         /// <summary>
         /// Handles POST requests that create new entities in the entity set.
         /// </summary>
         /// <param name="entity">The entity to insert into the entity set.</param>
-        /// <returns>The response message to send back to the client.</returns>
-        public virtual HttpResponseMessage Post([FromBody] TEntity entity)
+        /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
+        public virtual Task<HttpResponseMessage> Post([FromBody] TEntity entity)
         {
-            TEntity createdEntity = CreateEntity(entity);
-            TKey entityKey = GetKey(entity);
-            return EntitySetControllerHelpers.PostResponse(this, createdEntity, entityKey);
+            return CreateEntityAsync(entity)
+                .Then(createdEntity => EntitySetControllerHelpers.PostResponse<TEntity, TKey>(this, createdEntity, GetKey(createdEntity)), runSynchronously: true);
         }
 
         /// <summary>
@@ -82,11 +84,11 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="key">The entity key of the entity to replace.</param>
         /// <param name="update">The updated entity.</param>
-        /// <returns>The response message to send back to the client.</returns>
-        public virtual HttpResponseMessage Put([FromODataUri] TKey key, [FromBody] TEntity update)
+        /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
+        public virtual Task<HttpResponseMessage> Put([FromODataUri] TKey key, [FromBody] TEntity update)
         {
-            TEntity updatedEntity = UpdateEntity(key, update);
-            return EntitySetControllerHelpers.PutResponse(Request, updatedEntity);
+            return UpdateEntityAsync(key, update)
+                .Then(updatedEntity => EntitySetControllerHelpers.PutResponse<TEntity>(Request, updatedEntity), runSynchronously: true);
         }
 
         /// <summary>
@@ -94,20 +96,21 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="key">The entity key of the entity to update.</param>
         /// <param name="patch">The patch representing the partial update.</param>
-        /// <returns>The response message to send back to the client.</returns>
+        /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
         [AcceptVerbs("PATCH", "MERGE")]
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "1#", Justification = "Patch is the action name by WebAPI convention.")]
-        public virtual HttpResponseMessage Patch([FromODataUri] TKey key, Delta<TEntity> patch)
+        public virtual Task<HttpResponseMessage> Patch([FromODataUri] TKey key, Delta<TEntity> patch)
         {
-            TEntity patchedEntity = PatchEntity(key, patch);
-            return EntitySetControllerHelpers.PatchResponse(Request, patchedEntity);
+            return PatchEntityAsync(key, patch)
+                .Then(patchedEntity => EntitySetControllerHelpers.PatchResponse<TEntity>(Request, patchedEntity), runSynchronously: true);
         }
 
         /// <summary>
-        /// This method should be overriden to handle DELETE requests for deleting existing entities from the entity set.
+        /// This method should be overridden to handles DELETE requests for deleting existing entities from the entity set.
         /// </summary>
         /// <param name="key">The entity key of the entity to delete.</param>
-        public virtual void Delete([FromODataUri] TKey key)
+        /// <returns>A <see cref="Task"/> that completes when the entity has been successfully deleted.</returns>
+        public virtual Task Delete([FromODataUri] TKey key)
         {
             throw EntitySetControllerHelpers.DeleteEntityNotImplementedResponse(Request);
         }
@@ -118,8 +121,9 @@ namespace System.Web.Http.OData
         /// <param name="key">The key of the entity with the navigation property.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
         /// <param name="link">The URI of the entity to link.</param>
+        /// <returns>A <see cref="Task"/> that completes when the link has been successfully created.</returns>
         [AcceptVerbs("POST", "PUT")]
-        public virtual void CreateLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        public virtual Task CreateLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
             throw EntitySetControllerHelpers.CreateLinkNotImplementedResponse(Request, navigationProperty);
         }
@@ -130,7 +134,8 @@ namespace System.Web.Http.OData
         /// <param name="key">The key of the entity with the navigation property.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
         /// <param name="link">The URI of the entity to remove from the navigation property.</param>
-        public virtual void DeleteLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
+        /// <returns>A <see cref="Task"/> that completes when the link has been successfully deleted.</returns>
+        public virtual Task DeleteLink([FromODataUri] TKey key, string navigationProperty, [FromBody] Uri link)
         {
             throw EntitySetControllerHelpers.DeleteLinkNotImplementedResponse(Request, navigationProperty);
         }
@@ -141,7 +146,8 @@ namespace System.Web.Http.OData
         /// <param name="key">The key of the entity with the navigation property.</param>
         /// <param name="relatedKey">The key of the related entity.</param>
         /// <param name="navigationProperty">The name of the navigation property.</param>
-        public virtual void DeleteLink([FromODataUri] TKey key, string relatedKey, string navigationProperty)
+        /// <returns>A <see cref="Task"/> that completes when the link has been successfully deleted.</returns>
+        public virtual Task DeleteLink([FromODataUri] TKey key, string relatedKey, string navigationProperty)
         {
             throw EntitySetControllerHelpers.DeleteLinkNotImplementedResponse(Request, navigationProperty);
         }
@@ -150,10 +156,10 @@ namespace System.Web.Http.OData
         /// This method should be overridden to handle all unmapped OData requests.
         /// </summary>
         /// <param name="odataPath">The OData path of the request.</param>
-        /// <returns>The response message to send back to the client.</returns>
+        /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
         [AcceptVerbs("GET", "POST", "PUT", "PATCH", "MERGE", "DELETE")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly.")]
-        public virtual HttpResponseMessage HandleUnmappedRequest(ODataPath odataPath)
+        public virtual Task<HttpResponseMessage> HandleUnmappedRequest(ODataPath odataPath)
         {
             throw EntitySetControllerHelpers.UnmappedRequestResponse(Request, odataPath);
         }
@@ -172,8 +178,8 @@ namespace System.Web.Http.OData
         /// This method should be overridden to retrieve an entity by key from the entity set.
         /// </summary>
         /// <param name="key">The entity key of the entity to retrieve.</param>
-        /// <returns>The retrieved entity, or <c>null</c> if an entity with the specified entity key cannot be found in the entity set.</returns>
-        protected internal virtual TEntity GetEntityByKey(TKey key)
+        /// <returns>A <see cref="Task"/> that contains the retrieved entity when it completes, or <c>null</c> if an entity with the specified entity key cannot be found in the entity set.</returns>
+        protected internal virtual Task<TEntity> GetEntityByKeyAsync(TKey key)
         {
             throw EntitySetControllerHelpers.GetEntityByKeyNotImplementedResponse(Request);
         }
@@ -182,8 +188,8 @@ namespace System.Web.Http.OData
         /// This method should be overridden to create a new entity in the entity set.
         /// </summary>
         /// <param name="entity">The entity to add to the entity set.</param>
-        /// <returns>The created entity.</returns>
-        protected internal virtual TEntity CreateEntity(TEntity entity)
+        /// <returns>A <see cref="Task"/> that contains the created entity when it completes.</returns>
+        protected internal virtual Task<TEntity> CreateEntityAsync(TEntity entity)
         {
             throw EntitySetControllerHelpers.CreateEntityNotImplementedResponse(Request);
         }
@@ -193,8 +199,8 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="key">The entity key of the entity to update.</param>
         /// <param name="update">The updated entity.</param>
-        /// <returns>The updated entity.</returns>
-        protected internal virtual TEntity UpdateEntity(TKey key, TEntity update)
+        /// <returns>A <see cref="Task"/> that contains the updated entity when it completes.</returns>
+        protected internal virtual Task<TEntity> UpdateEntityAsync(TKey key, TEntity update)
         {
             throw EntitySetControllerHelpers.UpdateEntityNotImplementedResponse(Request);
         }
@@ -204,8 +210,8 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="key">The entity key of the entity to update.</param>
         /// <param name="patch">The patch representing the partial update.</param>
-        /// <returns>The updated entity.</returns>
-        protected internal virtual TEntity PatchEntity(TKey key, Delta<TEntity> patch)
+        /// <returns>A <see cref="Task"/> that contains the updated entity when it completes.</returns>
+        protected internal virtual Task<TEntity> PatchEntityAsync(TKey key, Delta<TEntity> patch)
         {
             throw EntitySetControllerHelpers.PatchEntityNotImplementedResponse(Request);
         }

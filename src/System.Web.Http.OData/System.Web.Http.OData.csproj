@@ -125,6 +125,8 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
+    <Compile Include="OData\AsyncEntitySetController.cs" />
+    <Compile Include="OData\EntitySetControllerHelpers.cs" />
     <Compile Include="OData\FromODataUriAttribute.cs" />
     <Compile Include="OData\ODataRouteConstants.cs" />
     <Compile Include="OData\EntitySetController.cs" />

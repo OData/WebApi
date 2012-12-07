@@ -34,9 +34,9 @@ namespace System.Web.Http.OData.Routing.Conventions
                 throw Error.ArgumentNull("request");
             }
             
-            if (odataPath.PathTemplate.StartsWith("~/entityset", StringComparison.Ordinal))
+            EntitySetPathSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetPathSegment;
+            if (entitySetSegment != null)
             {
-                EntitySetPathSegment entitySetSegment = odataPath.Segments[0] as EntitySetPathSegment;
                 return entitySetSegment.EntitySet.Name;
             }
 

@@ -71,14 +71,17 @@ namespace System.Web.Http.OData.Formatter
 
         private static ODataMediaTypeFormatter CreateApplicationJsonODataLight(IEdmModel model)
         {
-            // TODO: Feature #664 - Support the remaining payload kinds in JSON light.
-            // (Property, EntityReferenceLink(s), Collection, Parameter)
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
                 model,
                 ODataPayloadKind.Feed,
                 ODataPayloadKind.Entry,
+                ODataPayloadKind.Property,
+                ODataPayloadKind.EntityReferenceLink,
+                ODataPayloadKind.EntityReferenceLinks,
+                ODataPayloadKind.Collection,
                 ODataPayloadKind.ServiceDocument,
-                ODataPayloadKind.Error);
+                ODataPayloadKind.Error,
+                ODataPayloadKind.Parameter);
             // TODO: Feature #664 - Support reading for JSON light.
             formatter.WriteOnly = true;
             // TODO: Feature #664 - Support streaming=true for JSON light.
@@ -86,6 +89,7 @@ namespace System.Web.Http.OData.Formatter
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            // TODO: Feature #664 - Support nometadata for JSON light.
             // TODO: Bug #671 - Don't silently take over application/json globally.
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJson);

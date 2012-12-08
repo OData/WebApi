@@ -14,12 +14,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
     internal class ODataCollectionSerializer : ODataEntrySerializer
     {
         private readonly IEdmCollectionTypeReference _edmCollectionType;
+        private readonly IEdmTypeReference _edmItemType;
 
         public ODataCollectionSerializer(IEdmCollectionTypeReference edmCollectionType, ODataSerializerProvider serializerProvider)
             : base(edmCollectionType, ODataPayloadKind.Collection, serializerProvider)
         {
             Contract.Assert(edmCollectionType != null);
             _edmCollectionType = edmCollectionType;
+            IEdmTypeReference itemType = edmCollectionType.ElementType();
+            Contract.Assert(itemType != null);
+            _edmItemType = itemType;
         }
 
         /// <inheritdoc/>
@@ -35,8 +39,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            // TODO: Feature #664 - Support JSON light (pass type reference).
-            ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter();
+            ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter(_edmItemType);
             writer.WriteStart(
                 new ODataCollectionStart
                 {

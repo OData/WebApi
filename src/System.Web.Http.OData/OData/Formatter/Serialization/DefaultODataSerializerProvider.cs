@@ -80,6 +80,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 return new ODataMetadataSerializer();
             }
 
+            // TODO: Feature #694 - support Uri[] => EntityReferenceLinks
+
             // if it is not a special type, assume it has a corresponding EdmType.
             return _clrTypeMappingCache.GetOrAdd(type, (t) =>
             {

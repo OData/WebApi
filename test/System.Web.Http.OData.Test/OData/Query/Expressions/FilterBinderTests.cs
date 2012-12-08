@@ -1175,6 +1175,22 @@ namespace System.Web.Http.OData.Query.Expressions
                new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
         }
+
+        [Theory]
+        [InlineData("floor(FloatProp) eq floor(FloatProp)")]
+        [InlineData("round(FloatProp) eq round(FloatProp)")]
+        [InlineData("ceiling(FloatProp) eq ceiling(FloatProp)")]
+        [InlineData("floor(DoubleProp) eq floor(DoubleProp)")]
+        [InlineData("round(DoubleProp) eq round(DoubleProp)")]
+        [InlineData("ceiling(DoubleProp) eq ceiling(DoubleProp)")]
+        [InlineData("floor(DecimalProp) eq floor(DecimalProp)")]
+        [InlineData("round(DecimalProp) eq round(DecimalProp)")]
+        [InlineData("ceiling(DecimalProp) eq ceiling(DecimalProp)")]
+        public void MathFunctions_VariousTypes(string filter)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter);
+            RunFilters(filters, new DataTypes(), new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
         #endregion
 
         #region Data Types

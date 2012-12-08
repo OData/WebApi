@@ -642,7 +642,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            return MakeFunctionCall(ClrCanonicalFunctions.Ceiling, arguments);
+            MethodInfo ceiling = arguments[0].Type == typeof(double) ? ClrCanonicalFunctions.CeilingOfDouble : ClrCanonicalFunctions.CeilingOfDecimal;
+            return MakeFunctionCall(ceiling, arguments);
         }
 
         private Expression BindFloor(SingleValueFunctionCallNode node)
@@ -653,7 +654,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            return MakeFunctionCall(ClrCanonicalFunctions.Floor, arguments);
+            MethodInfo floor = arguments[0].Type == typeof(double) ? ClrCanonicalFunctions.FloorOfDouble : ClrCanonicalFunctions.FloorOfDecimal;
+            return MakeFunctionCall(floor, arguments);
         }
 
         private Expression BindRound(SingleValueFunctionCallNode node)
@@ -664,7 +666,8 @@ namespace System.Web.Http.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            return MakeFunctionCall(ClrCanonicalFunctions.Round, arguments);
+            MethodInfo round = arguments[0].Type == typeof(double) ? ClrCanonicalFunctions.RoundOfDouble : ClrCanonicalFunctions.RoundOfDecimal;
+            return MakeFunctionCall(round, arguments);
         }
 
         private Expression BindDateOrDateTimeOffsetProperty(SingleValueFunctionCallNode node)

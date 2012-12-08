@@ -55,9 +55,13 @@ namespace System.Web.Http.OData.Query.Expressions
         public static readonly MethodInfo Concat;
 
         // math functions
-        public static readonly MethodInfo Ceiling;
-        public static readonly MethodInfo Round;
-        public static readonly MethodInfo Floor;
+        public static readonly MethodInfo CeilingOfDouble;
+        public static readonly MethodInfo RoundOfDouble;
+        public static readonly MethodInfo FloorOfDouble;
+
+        public static readonly MethodInfo CeilingOfDecimal;
+        public static readonly MethodInfo RoundOfDecimal;
+        public static readonly MethodInfo FloorOfDecimal;
 
         // Date properties
         public static readonly Dictionary<string, PropertyInfo> DateProperties = new[]
@@ -111,9 +115,13 @@ namespace System.Web.Http.OData.Query.Expressions
             Trim = MethodOf(_ => _defaultString.Trim());
             Concat = MethodOf(_ => String.Concat(default(string), default(string)));
 
-            Ceiling = MethodOf(_ => Math.Ceiling(default(decimal)));
-            Round = MethodOf(_ => Math.Round(default(decimal)));
-            Floor = MethodOf(_ => Math.Floor(default(decimal)));
+            CeilingOfDecimal = MethodOf(_ => Math.Ceiling(default(decimal)));
+            RoundOfDecimal = MethodOf(_ => Math.Round(default(decimal)));
+            FloorOfDecimal = MethodOf(_ => Math.Floor(default(decimal)));
+
+            CeilingOfDouble = MethodOf(_ => Math.Ceiling(default(double)));
+            RoundOfDouble = MethodOf(_ => Math.Round(default(double)));
+            FloorOfDouble = MethodOf(_ => Math.Floor(default(double)));
         }
 
         private static MethodInfo MethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

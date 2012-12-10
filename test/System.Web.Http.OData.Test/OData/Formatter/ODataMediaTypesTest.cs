@@ -95,6 +95,20 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void ApplicationJsonODataFullMetadataStreamingTrue_Value()
+        {
+            Assert.Equal("application/json; odata=fullmetadata; streaming=true",
+                ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue.ToString());
+        }
+
+        [Fact]
+        public void ApplicationJsonODataFullMetadataStreamingTrue_ReturnsDifferentInstances()
+        {
+            Assert.NotSame(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue,
+                ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue);
+        }
+
+        [Fact]
         public void ApplicationJsonODataMinimalMetadata_Value()
         {
             Assert.Equal("application/json; odata=minimalmetadata",
@@ -123,6 +137,20 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void ApplicationJsonODataMinimalMetadataStreamingTrue_Value()
+        {
+            Assert.Equal("application/json; odata=minimalmetadata; streaming=true",
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue.ToString());
+        }
+
+        [Fact]
+        public void ApplicationJsonODataMinimalMetadataStreamingTrue_ReturnsDifferentInstances()
+        {
+            Assert.NotSame(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue);
+        }
+
+        [Fact]
         public void ApplicationJsonODataVerbose_Value()
         {
             Assert.Equal("application/json; odata=verbose",
@@ -147,6 +175,18 @@ namespace System.Web.Http.OData.Formatter
         {
             Assert.NotSame(ODataMediaTypes.ApplicationJsonStreamingFalse,
                 ODataMediaTypes.ApplicationJsonStreamingFalse);
+        }
+
+        [Fact]
+        public void ApplicationJsonStreamingTrue_Value()
+        {
+            Assert.Equal("application/json; streaming=true", ODataMediaTypes.ApplicationJsonStreamingTrue.ToString());
+        }
+
+        [Fact]
+        public void ApplicationJsonStreamingTrue_ReturnsDifferentInstances()
+        {
+            Assert.NotSame(ODataMediaTypes.ApplicationJsonStreamingTrue, ODataMediaTypes.ApplicationJsonStreamingTrue);
         }
 
         [Fact]

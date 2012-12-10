@@ -84,13 +84,15 @@ namespace System.Web.Http.OData.Formatter
                 ODataPayloadKind.Parameter);
             // TODO: Feature #664 - Support reading for JSON light.
             formatter.WriteOnly = true;
-            // TODO: Feature #664 - Support streaming=true for JSON light.
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
             // TODO: Feature #664 - Support nometadata for JSON light.
             // TODO: Bug #671 - Don't silently take over application/json globally.
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJson);
             return formatter;

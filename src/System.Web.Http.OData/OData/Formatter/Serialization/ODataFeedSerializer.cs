@@ -118,23 +118,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
                 feed.Id = FeedNamespace + _edmCollectionType.FullName();
 
+                // Compute and save the NextPageLink for JSON Light streaming support.
+                Uri nextPageLink = null;
+
                 // If we have more OData format specific information apply it now.
                 ODataResult odataFeedAnnotations = graph as ODataResult;
                 if (odataFeedAnnotations != null)
                 {
                     feed.Count = odataFeedAnnotations.Count;
-                    feed.NextPageLink = odataFeedAnnotations.NextPageLink;
+                    nextPageLink = odataFeedAnnotations.NextPageLink;
                 }
                 else
                 {
                     HttpRequestMessage request = writeContext.Request;
                     if (request != null)
                     {
-                        Uri nextPageLink = request.GetNextPageLink();
-                        if (nextPageLink != null)
-                        {
-                            feed.NextPageLink = nextPageLink;
-                        }
+                        nextPageLink = request.GetNextPageLink();
 
                         long? inlineCount = request.GetInlineCount();
                         if (inlineCount.HasValue)
@@ -162,6 +161,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Contract.Assert(entrySerializer.ODataPayloadKind == ODataPayloadKind.Entry);
 
                     entrySerializer.WriteObjectInline(entry, writer, writeContext);
+                }
+
+                // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
+                // the next page link will be written early in a manner not compatible with streaming=true. Instead, if
+                // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
+                // object before calling WriteEnd(), the next page link will be written at the end, as required for
+                // streaming=true support.
+
+                if (nextPageLink != null)
+                {
+                    feed.NextPageLink = nextPageLink;
                 }
 
                 writer.WriteEnd();

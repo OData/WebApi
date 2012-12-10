@@ -112,11 +112,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             mockCustomerSerializer
                 .Setup(s => s.WriteObjectInline(_customers[1], It.IsAny<ODataWriter>(), _writeContext))
                 .Verifiable();
+            ODataFeed actualFeed = null;
             mockWriter
                 .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
                 .Callback((ODataFeed feed) =>
                 {
-                    Assert.Equal(expectedNextLink, feed.NextPageLink);
+                    actualFeed = feed;
                     Assert.Equal(expectedInlineCount, feed.Count);
                 });
             _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
@@ -127,6 +128,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             mockSerializerProvider.Verify();
             mockCustomerSerializer.Verify();
             mockWriter.Verify();
+            Assert.Equal(expectedNextLink, actualFeed.NextPageLink);
         }
 
         [Fact]
@@ -144,15 +146,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
             mockSerializerProvider
                 .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
+            ODataFeed actualFeed = null;
             mockWriter
                 .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
                 .Callback((ODataFeed feed) =>
                 {
-                    Assert.Equal(expectedNextLink, feed.NextPageLink);
+                    actualFeed = feed;
                 });
             _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
 
             _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
+
+            Assert.Equal(expectedNextLink, actualFeed.NextPageLink);
         }
 
         [Fact]

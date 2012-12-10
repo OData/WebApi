@@ -57,10 +57,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
                 MediaTypeHeaderValue.Parse("text/xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -88,10 +91,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/atom+xml;type=feed"),
                 MediaTypeHeaderValue.Parse("application/atom+xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -119,10 +125,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/atom+xml;type=entry"),
                 MediaTypeHeaderValue.Parse("application/atom+xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -150,10 +159,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("text/xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -181,10 +193,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("text/xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -212,10 +227,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("text/xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -243,10 +261,13 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };
@@ -296,10 +317,13 @@ namespace System.Web.Http.OData.Formatter
             {
                 MediaTypeHeaderValue.Parse("application/xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=verbose"),
+                MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
             };

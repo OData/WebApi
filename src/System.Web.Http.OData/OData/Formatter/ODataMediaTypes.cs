@@ -22,14 +22,20 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
         private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingFalse =
             MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=false");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingTrue =
+            MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata;streaming=true");
         private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadata =
             MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata");
         private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingFalse =
             MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingTrue =
+            MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true");
         private static readonly MediaTypeHeaderValue _applicationJsonODataVerbose =
             MediaTypeHeaderValue.Parse("application/json;odata=verbose");
         private static readonly MediaTypeHeaderValue _applicationJsonStreamingFalse =
             MediaTypeHeaderValue.Parse("application/json;streaming=false");
+        private static readonly MediaTypeHeaderValue _applicationJsonStreamingTrue =
+            MediaTypeHeaderValue.Parse("application/json;streaming=true");
         private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
         private static readonly MediaTypeHeaderValue _textXml = new MediaTypeHeaderValue("text/xml");
 
@@ -68,6 +74,11 @@ namespace System.Web.Http.OData.Formatter
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataFullMetadataStreamingFalse).Clone(); }
         }
 
+        public static MediaTypeHeaderValue ApplicationJsonODataFullMetadataStreamingTrue
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataFullMetadataStreamingTrue).Clone(); }
+        }
+
         public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadata
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadata).Clone(); }
@@ -81,6 +92,14 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
+        public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadataStreamingTrue
+        {
+            get
+            {
+                return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadataStreamingTrue).Clone();
+            }
+        }
+
         public static MediaTypeHeaderValue ApplicationJsonODataVerbose
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataVerbose).Clone(); }
@@ -89,6 +108,11 @@ namespace System.Web.Http.OData.Formatter
         public static MediaTypeHeaderValue ApplicationJsonStreamingFalse
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonStreamingFalse).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonStreamingTrue
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonStreamingTrue).Clone(); }
         }
 
         public static MediaTypeHeaderValue ApplicationXml

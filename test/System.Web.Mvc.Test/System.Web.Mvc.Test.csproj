@@ -93,7 +93,6 @@
     <Compile Include="Ajax\Test\AjaxOptionsTest.cs" />
     <Compile Include="Async\Test\AsyncActionMethodSelectorTest.cs" />
     <Compile Include="Async\Test\AsyncControllerActionInvokerTest.cs" />
-    <Compile Include="Async\Test\AsyncUtilTest.cs" />
     <Compile Include="Async\Test\AsyncActionDescriptorTest.cs" />
     <Compile Include="Test\AsyncControllerTest.cs" />
     <Compile Include="Async\Test\SynchronousOperationExceptionTest.cs" />

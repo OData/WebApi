@@ -30,21 +30,21 @@ namespace System.Web.Mvc.Async
 
         public static IAsyncResult Begin<TResult>(AsyncCallback callback, object state, BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag = null, int timeout = Timeout.Infinite)
         {
-            WrappedAsyncResult<TResult> asyncResult = new WrappedAsyncResult<TResult>(beginDelegate, endDelegate, tag);
+            WrappedAsyncResult<TResult> asyncResult = new WrappedAsyncResult<TResult>(beginDelegate, endDelegate, tag, callbackSyncContext: null);
             asyncResult.Begin(callback, state, timeout);
             return asyncResult;
         }
 
-        public static IAsyncResult Begin<TResult, TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState invokeState, object tag = null, int timeout = Timeout.Infinite)
+        public static IAsyncResult Begin<TResult, TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState invokeState, object tag = null, int timeout = Timeout.Infinite, SynchronizationContext callbackSyncContext = null)
         {
-            WrappedAsyncResult<TResult, TState> asyncResult = new WrappedAsyncResult<TResult, TState>(beginDelegate, endDelegate, invokeState, tag);
+            WrappedAsyncResult<TResult, TState> asyncResult = new WrappedAsyncResult<TResult, TState>(beginDelegate, endDelegate, invokeState, tag, callbackSyncContext);
             asyncResult.Begin(callback, callbackState, timeout);
             return asyncResult;
         }
 
-        public static IAsyncResult Begin<TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeVoidDelegate<TState> endDelegate, TState invokeState, object tag = null, int timeout = Timeout.Infinite)
+        public static IAsyncResult Begin<TState>(AsyncCallback callback, object callbackState, BeginInvokeDelegate<TState> beginDelegate, EndInvokeVoidDelegate<TState> endDelegate, TState invokeState, object tag = null, int timeout = Timeout.Infinite, SynchronizationContext callbackSyncContext = null)
         {
-            WrappedAsyncVoid<TState> asyncResult = new WrappedAsyncVoid<TState>(beginDelegate, endDelegate, invokeState, tag);
+            WrappedAsyncVoid<TState> asyncResult = new WrappedAsyncVoid<TState>(beginDelegate, endDelegate, invokeState, tag, callbackSyncContext);
             asyncResult.Begin(callback, callbackState, timeout);
             return asyncResult;
         }
@@ -59,7 +59,7 @@ namespace System.Web.Mvc.Async
             BeginInvokeDelegate<TState> beginDelegate = CachedDelegates<TState>.CompletedBeginInvoke;
 
             // Pass in the blocking function as the End() method
-            WrappedAsyncResult<TResult, TState> asyncResult = new WrappedAsyncResult<TResult, TState>(beginDelegate, func, funcState, tag);
+            WrappedAsyncResult<TResult, TState> asyncResult = new WrappedAsyncResult<TResult, TState>(beginDelegate, func, funcState, tag, callbackSyncContext: null);
             asyncResult.Begin(callback, callbackState, Timeout.Infinite);
             return asyncResult;
         }
@@ -119,10 +119,12 @@ namespace System.Web.Mvc.Async
             private AsyncCallback _originalCallback;
             private volatile bool _timedOut;
             private Timer _timer;
+            private readonly SynchronizationContext _callbackSyncContext;
 
-            protected WrappedAsyncResultBase(object tag)
+            protected WrappedAsyncResultBase(object tag, SynchronizationContext callbackSyncContext)
             {
                 _tag = tag;
+                _callbackSyncContext = callbackSyncContext;
             }
 
             public object AsyncState
@@ -200,6 +202,11 @@ namespace System.Web.Mvc.Async
                 }
             }
 
+            private void CallbackUsingSyncContext()
+            {
+                _callbackSyncContext.Sync(() => _originalCallback(this));
+            }
+
             private void CreateTimer(int timeout)
             {
                 // this method should be called within a lock(_beginDelegateLockObj)
@@ -231,7 +238,14 @@ namespace System.Web.Mvc.Async
                     _timedOut = timedOut;
                     if (_originalCallback != null)
                     {
-                        _originalCallback(this);
+                        if (_callbackSyncContext != null)
+                        {
+                            CallbackUsingSyncContext();
+                        }
+                        else
+                        {
+                            _originalCallback(this);
+                        }
                     }
                 }
             }
@@ -277,7 +291,8 @@ namespace System.Web.Mvc.Async
             private readonly BeginInvokeDelegate _beginDelegate;
             private readonly EndInvokeDelegate<TResult> _endDelegate;
 
-            public WrappedAsyncResult(BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag) : base(tag)
+            public WrappedAsyncResult(BeginInvokeDelegate beginDelegate, EndInvokeDelegate<TResult> endDelegate, object tag, SynchronizationContext callbackSyncContext)
+                : base(tag, callbackSyncContext)
             {
                 _beginDelegate = beginDelegate;
                 _endDelegate = endDelegate;
@@ -300,8 +315,8 @@ namespace System.Web.Mvc.Async
             private readonly EndInvokeDelegate<TState, TResult> _endDelegate;
             private readonly TState _state;
 
-            public WrappedAsyncResult(BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState state, object tag)
-                : base(tag)
+            public WrappedAsyncResult(BeginInvokeDelegate<TState> beginDelegate, EndInvokeDelegate<TState, TResult> endDelegate, TState state, object tag, SynchronizationContext callbackSyncContext)
+                : base(tag, callbackSyncContext)
             {
                 _beginDelegate = beginDelegate;
                 _endDelegate = endDelegate;
@@ -325,8 +340,8 @@ namespace System.Web.Mvc.Async
             private readonly EndInvokeVoidDelegate<TState> _endDelegate;
             private readonly TState _state;
 
-            public WrappedAsyncVoid(BeginInvokeDelegate<TState> beginDelegate, EndInvokeVoidDelegate<TState> endDelegate, TState state, object tag)
-                : base(tag)
+            public WrappedAsyncVoid(BeginInvokeDelegate<TState> beginDelegate, EndInvokeVoidDelegate<TState> endDelegate, TState state, object tag, SynchronizationContext callbackSyncContext)
+                : base(tag, callbackSyncContext)
             {
                 _beginDelegate = beginDelegate;
                 _endDelegate = endDelegate;

@@ -174,6 +174,192 @@ namespace System.Web.Mvc.Async.Test
         }
 
         [Fact]
+        public void Begin_WithCallbackSyncContext_CallsSendIfOperationCompletedAsynchronously()
+        {
+            // Arrange
+            MockAsyncResult asyncResult = new MockAsyncResult()
+            {
+                CompletedSynchronously = false,
+                IsCompleted = false
+            };
+            bool originalCallbackCalled = false;
+            IAsyncResult passedAsyncResult = null;
+            AsyncCallback passedCallback = null;
+            AsyncCallback originalCallback = ar =>
+            {
+                originalCallbackCalled = true;
+                passedAsyncResult = ar;
+            };
+            object originalState = new object();
+            DummySynchronizationContext syncContext = new DummySynchronizationContext();
+
+            // Act
+            IAsyncResult outerResult = AsyncResultWrapper.Begin<object>(
+                 originalCallback,
+                 originalState,
+                 (callback, callbackState, state) =>
+                 {
+                     passedCallback = callback;
+                     asyncResult.AsyncState = callbackState;
+                     return asyncResult;
+                 },
+                 (ar, state) => {
+                     asyncResult.IsCompleted = true;
+                     passedCallback(ar); 
+                 },
+                 null,
+                 callbackSyncContext: syncContext);
+            AsyncResultWrapper.End(outerResult);
+
+            // Assert
+            Assert.True(originalCallbackCalled);
+            Assert.False(passedAsyncResult.CompletedSynchronously);
+            Assert.True(passedAsyncResult.IsCompleted);
+            Assert.Same(originalState, passedAsyncResult.AsyncState);
+            Assert.True(syncContext.SendCalled);
+        }
+
+        [Fact]
+        public void Begin_WithCallbackSyncContext_DoesNotCallSendIfOperationCompletedSynchronously()
+        {
+            // Arrange
+            MockAsyncResult asyncResult = new MockAsyncResult()
+            {
+                CompletedSynchronously = true,
+                IsCompleted = true
+            };
+            bool originalCallbackCalled = false;
+            IAsyncResult passedAsyncResult = null;
+            AsyncCallback originalCallback = ar =>
+            {
+                passedAsyncResult = ar;
+                originalCallbackCalled = true;
+            };
+            object originalState = new object();
+
+            DummySynchronizationContext syncContext = new DummySynchronizationContext();
+
+            // Act
+            IAsyncResult outerResult = AsyncResultWrapper.Begin<object>(
+                originalCallback,
+                originalState,
+                (callback, callbackState, state) =>
+                {
+                    asyncResult.AsyncState = callbackState;
+                    return asyncResult;
+                },
+                (ar, state) => { },
+                null,
+                callbackSyncContext: syncContext);
+
+            // Assert
+            Assert.True(originalCallbackCalled);
+            Assert.True(passedAsyncResult.CompletedSynchronously);
+            Assert.True(passedAsyncResult.IsCompleted);
+            Assert.Same(originalState, passedAsyncResult.AsyncState);
+            Assert.False(syncContext.SendCalled);
+        }
+
+        [Fact]
+        public void Begin_WithCallbackSyncContext_ThrowsAsyncEvenIfSendContextCaptures()
+        {
+            // Arrange
+            InvalidOperationException exception = new InvalidOperationException("Some exception text.");
+            CapturingSynchronizationContext capturingSyncContext = new CapturingSynchronizationContext();
+            MockAsyncResult asyncResult = new MockAsyncResult()
+            {
+                CompletedSynchronously = false,
+                IsCompleted = true
+            };
+
+            bool originalCallbackCalled = false;
+            IAsyncResult passedAsyncResult = null;
+            AsyncCallback passedCallback = null;
+            AsyncCallback originalCallback = ar =>
+            {
+                passedAsyncResult = ar;
+                originalCallbackCalled = true;
+                throw exception;
+            };
+
+            // Act & Assert
+            IAsyncResult outerResult = AsyncResultWrapper.Begin<object>(
+                 originalCallback,
+                 null,
+                 (callback, callbackState, state) =>
+                 {
+                     passedCallback = callback;
+                     asyncResult.AsyncState = callbackState;
+                     return asyncResult;
+                 },
+                 (ar, state) =>
+                 {
+                     asyncResult.IsCompleted = true;
+                     passedCallback(ar);
+                 },
+                 null,
+                 callbackSyncContext: capturingSyncContext);
+            SynchronousOperationException thrownException = Assert.Throws<SynchronousOperationException>(
+                delegate
+                {
+                    AsyncResultWrapper.End(outerResult);
+                },
+                @"An operation that crossed a synchronization context failed. See the inner exception for more information.");
+
+            // Assert
+            Assert.Equal(exception, thrownException.InnerException);
+            Assert.True(originalCallbackCalled);
+            Assert.False(passedAsyncResult.CompletedSynchronously);
+            Assert.True(capturingSyncContext.SendCalled);
+        }
+
+        [Fact]
+        public void Begin_WithCallbackSyncContext_ThrowsSynchronous()
+        {
+            // Arrange
+            InvalidOperationException exception = new InvalidOperationException("Some exception text.");
+            CapturingSynchronizationContext capturingSyncContext = new CapturingSynchronizationContext();
+            MockAsyncResult asyncResult = new MockAsyncResult()
+            {
+                CompletedSynchronously = true,
+                IsCompleted = true
+            };
+
+            bool originalCallbackCalled = false;
+            IAsyncResult passedAsyncResult = null;
+            AsyncCallback originalCallback = ar =>
+            {
+                passedAsyncResult = ar;
+                originalCallbackCalled = true;
+                throw exception;
+            };
+
+            // Act & Assert
+            InvalidOperationException thrownException = Assert.Throws<InvalidOperationException>(
+                delegate 
+                {
+                    AsyncResultWrapper.Begin<object>(
+                        originalCallback,
+                        null,
+                        (callback, callbackState, state) =>
+                        {
+                            asyncResult.AsyncState = callbackState;
+                            return asyncResult;
+                        },
+                        (ar, state) => { },
+                        null,
+                        callbackSyncContext: capturingSyncContext);
+                },
+                exception.Message);
+
+            // Assert
+            Assert.Equal(exception, thrownException);
+            Assert.True(originalCallbackCalled);
+            Assert.True(passedAsyncResult.CompletedSynchronously);
+            Assert.False(capturingSyncContext.SendCalled);
+        }
+
+        [Fact]
         public void BeginSynchronous_Action()
         {
             // Arrange
@@ -329,6 +515,35 @@ namespace System.Web.Mvc.Async.Test
             Assert.True(asyncResult.IsCompleted);
             Assert.Throws<TimeoutException>(
                 delegate { AsyncResultWrapper.End(asyncResult); });
+        }
+
+        private class DummySynchronizationContext : SynchronizationContext
+        {
+            public bool SendCalled { get; private set; }
+
+            public override void Send(SendOrPostCallback d, object state)
+            {
+                SendCalled = true;
+                base.Send(d, state);
+            }
+        }
+
+        private class CapturingSynchronizationContext : SynchronizationContext
+        {
+            public bool SendCalled { get; private set; }
+
+            public override void Send(SendOrPostCallback d, object state)
+            {
+                try
+                {
+                    SendCalled = true;
+                    d(state);
+                }
+                catch
+                {
+                    // swallow exceptions, just like AspNetSynchronizationContext
+                }
+            }
         }
     }
 }

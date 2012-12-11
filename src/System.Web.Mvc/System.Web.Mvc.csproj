@@ -188,7 +188,6 @@
     <Compile Include="Async\AsyncResultWrapper.cs" />
     <Compile Include="Async\AsyncVoid.cs" />
     <Compile Include="AsyncController.cs" />
-    <Compile Include="Async\AsyncUtil.cs" />
     <Compile Include="Async\IAsyncController.cs" />
     <Compile Include="Async\IAsyncActionInvoker.cs" />
     <Compile Include="Async\IAsyncManagerContainer.cs" />

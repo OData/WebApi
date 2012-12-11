@@ -107,10 +107,9 @@ namespace System.Web.Mvc
                 {
                     AsyncController = asyncController, Factory = factory, RequestContext = RequestContext
                 };
-
-                SynchronizationContext syncContext = SynchronizationContextUtil.GetSynchronizationContext();
-                AsyncCallback newCallback = AsyncUtil.WrapCallbackForSynchronizedExecution(callback, syncContext);
-                return AsyncResultWrapper.Begin(newCallback, state, beginDelegate, endDelegate, outerState, _processRequestTag);
+                
+                SynchronizationContext callbackSyncContext = SynchronizationContextUtil.GetSynchronizationContext();
+                return AsyncResultWrapper.Begin(callback, state, beginDelegate, endDelegate, outerState, _processRequestTag, callbackSyncContext: callbackSyncContext);
             }
             else
             {

@@ -151,6 +151,48 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void ApplicationJsonODataNoMetadata_Value()
+        {
+            Assert.Equal("application/json; odata=nometadata",
+                ODataMediaTypes.ApplicationJsonODataNoMetadata.ToString());
+        }
+
+        [Fact]
+        public void ApplicationJsonODataNoMetadata_ReturnsDifferentInstances()
+        {
+            Assert.NotSame(ODataMediaTypes.ApplicationJsonODataNoMetadata,
+                ODataMediaTypes.ApplicationJsonODataNoMetadata);
+        }
+
+        [Fact]
+        public void ApplicationJsonODataNoMetadataStreamingFalse_Value()
+        {
+            Assert.Equal("application/json; odata=nometadata; streaming=false",
+                ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse.ToString());
+        }
+
+        [Fact]
+        public void ApplicationJsonODataNoMetadataStreamingFalse_ReturnsDifferentInstances()
+        {
+            Assert.NotSame(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse,
+                ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse);
+        }
+
+        [Fact]
+        public void ApplicationJsonODataNoMetadataStreamingTrue_Value()
+        {
+            Assert.Equal("application/json; odata=nometadata; streaming=true",
+                ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue.ToString());
+        }
+
+        [Fact]
+        public void ApplicationJsonODataNoMetadataStreamingTrue_ReturnsDifferentInstances()
+        {
+            Assert.NotSame(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue,
+                ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue);
+        }
+
+        [Fact]
         public void ApplicationJsonODataVerbose_Value()
         {
             Assert.Equal("application/json; odata=verbose",

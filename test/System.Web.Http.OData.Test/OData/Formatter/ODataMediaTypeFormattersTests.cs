@@ -63,6 +63,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -97,6 +100,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -131,6 +137,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -165,6 +174,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -199,6 +211,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -233,6 +248,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -267,6 +285,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")
@@ -323,6 +344,9 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false"),
+                MediaTypeHeaderValue.Parse("application/json;odata=nometadata"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json")

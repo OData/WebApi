@@ -30,6 +30,12 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false");
         private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingTrue =
             MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadata =
+            MediaTypeHeaderValue.Parse("application/json;odata=nometadata");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadataStreamingFalse =
+            MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=false");
+        private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadataStreamingTrue =
+            MediaTypeHeaderValue.Parse("application/json;odata=nometadata;streaming=true");
         private static readonly MediaTypeHeaderValue _applicationJsonODataVerbose =
             MediaTypeHeaderValue.Parse("application/json;odata=verbose");
         private static readonly MediaTypeHeaderValue _applicationJsonStreamingFalse =
@@ -98,6 +104,21 @@ namespace System.Web.Http.OData.Formatter
             {
                 return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadataStreamingTrue).Clone();
             }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonODataNoMetadata
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadata).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonODataNoMetadataStreamingFalse
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadataStreamingFalse).Clone(); }
+        }
+
+        public static MediaTypeHeaderValue ApplicationJsonODataNoMetadataStreamingTrue
+        {
+            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadataStreamingTrue).Clone(); }
         }
 
         public static MediaTypeHeaderValue ApplicationJsonODataVerbose

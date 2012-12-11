@@ -21,6 +21,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
                 new ODataPayloadKind[] { ODataPayloadKind.Collection }, GetSampleRequest());
+            _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
         }
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ObjectContent<int[]> content = new ObjectContent<int[]>(new int[] { 10, 20, 30, 40, 50 }, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.ArrayOfInt32InAtom, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(BaselineResource.ArrayOfInt32InJsonLight, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -39,7 +40,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false }, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.ArrayOfBooleanInAtom, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(BaselineResource.ArrayOfBooleanInJsonLight, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -53,7 +54,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ObjectContent<List<string>> content = new ObjectContent<List<string>>(listOfStrings, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.ListOfStringInAtom, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(BaselineResource.ListOfStringInJsonLight, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -68,7 +69,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ObjectContent<IEnumerable<Person>> content = new ObjectContent<IEnumerable<Person>>(collectionOfPerson, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.CollectionOfPersonInAtom, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(BaselineResource.CollectionOfPersonInJsonLight, content.ReadAsStringAsync().Result);
         }
 
         private static HttpRequestMessage GetSampleRequest()

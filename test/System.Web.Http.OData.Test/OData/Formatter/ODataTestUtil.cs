@@ -35,17 +35,10 @@ namespace System.Web.Http.OData.Formatter
             Assert.Xml.Equal(expected, response);
         }
 
-        public static void VerifyJsonResponse(HttpContent responseContent, string expected)
+        public static void VerifyJsonResponse(HttpContent actualContent, string expected)
         {
-            string response = responseContent.ReadAsStringAsync().Result;
-
-            expected = expected.Trim();
-            response = response.Trim();
-
-            // compare line by line since odata json typically differs from baseline by spaces
-            string[] expectedLines = expected.Split('\n').ToList().ConvertAll((str) => str.Trim()).ToArray();
-            string[] responseLines = response.Split('\n').ToList().ConvertAll((str) => str.Trim()).ToArray();
-            Assert.Equal(expectedLines, responseLines);
+            string actual = actualContent.ReadAsStringAsync().Result;
+            JsonAssert.Equal(expected, actual);
         }
 
         public static HttpRequestMessage GenerateRequestMessage(Uri address, bool isAtom)

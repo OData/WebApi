@@ -61,16 +61,15 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;false&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns: [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Collection(Edm.Boolean)&quot;,&quot;value&quot;:[
+        ///    true,false,true,false
+        ///  ]
+        ///}.
         /// </summary>
-        internal static string ArrayOfBooleanInAtom {
+        internal static string ArrayOfBooleanInJsonLight {
             get {
-                return ResourceManager.GetString("ArrayOfBooleanInAtom", resourceCulture);
+                return ResourceManager.GetString("ArrayOfBooleanInJsonLight", resourceCulture);
             }
         }
         
@@ -85,16 +84,15 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;10&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;20&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;30&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schem [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Collection(Edm.Int32)&quot;,&quot;value&quot;:[
+        ///    10,20,30,40,50
+        ///  ]
+        ///}.
         /// </summary>
-        internal static string ArrayOfInt32InAtom {
+        internal static string ArrayOfInt32InJsonLight {
             get {
-                return ResourceManager.GetString("ArrayOfInt32InAtom", resourceCulture);
+                return ResourceManager.GetString("ArrayOfInt32InJsonLight", resourceCulture);
             }
         }
         
@@ -119,18 +117,19 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;element m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
-        ///    &lt;Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/Age&gt;
-        ///    &lt;Gender&gt;Male&lt;/Gender&gt;
-        ///    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
-        ///    &lt;Alias&gt;
-        ///      &lt;d:element xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/0 [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Collection(System.Web.Http.OData.TestCommon.Models.Person)&quot;,&quot;value&quot;:[
+        ///    {
+        ///      &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;,&quot;Age&quot;:20,&quot;Gender&quot;:&quot;Male&quot;,&quot;FirstName&quot;:&quot;Frank&quot;,&quot;Alias&quot;:[
+        ///        &quot;Alias0&quot;
+        ///      ],&quot;Address&quot;:{
+        ///        &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.Address&quot;,&quot;StreetAddress&quot;:&quot;StreetAddress1&quot;,&quot;City&quot;:&quot;City1&quot;,&quot;State&quot;:&quot;State1&quot;,&quot;ZipCode&quot;:1
+        ///      },&quot;HomeNumber&quot;:{
+        ///        &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Mo [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string CollectionOfPersonInAtom {
+        internal static string CollectionOfPersonInJsonLight {
             get {
-                return ResourceManager.GetString("CollectionOfPersonInAtom", resourceCulture);
+                return ResourceManager.GetString("CollectionOfPersonInJsonLight", resourceCulture);
             }
         }
         
@@ -165,30 +164,24 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;entry xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
-        ///  &lt;category term=&quot;System.Web.Http.OData.TestCommon.Models.Employee&quot; scheme=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/schem [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.employees/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;Manager@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/Manager&quot;,&quot;DirectReports@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/DirectReports&quot;,&quot;WorkItem@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/WorkItem&quot;,&quot;EmployeeId@odata.type&quot;:&quot;Edm.Int64&quot;,&quot;Empl [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string EmployeeEntryInAtom {
+        internal static string EmployeeEntryInJsonLight {
             get {
-                return ResourceManager.GetString("EmployeeEntryInAtom", resourceCulture);
+                return ResourceManager.GetString("EmployeeEntryInJsonLight", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;feed xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;id&gt;http://schemas.datacontract.org/2004/07/&lt;/id&gt;
-        ///  &lt;title /&gt;
-        ///  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-        ///  &lt;link rel=&quot;self&quot; href=&quot;http://localhost/employees&quot; /&gt;
-        ///  &lt;entry&gt;
-        ///    &lt;id&gt;htt [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.employees&quot;,&quot;value&quot;:[
+        ///    {
+        ///      &quot;odata.id&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;Manager@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/Manager&quot;,&quot;DirectReports@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/DirectReports&quot;,&quot;WorkItem@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/WorkItem&quot;,&quot;EmployeeId@odata.type&quot;:&quot;E [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string FeedOfEmployeeInAtom {
+        internal static string FeedOfEmployeeInJsonLight {
             get {
-                return ResourceManager.GetString("FeedOfEmployeeInAtom", resourceCulture);
+                return ResourceManager.GetString("FeedOfEmployeeInJsonLight", resourceCulture);
             }
         }
         
@@ -233,17 +226,15 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element&gt;Frank&lt;/element&gt;
-        ///  &lt;element&gt;Steve&lt;/element&gt;
-        ///  &lt;element&gt;Tom&lt;/element&gt;
-        ///  &lt;element&gt;Chandler&lt;/element&gt;
-        ///&lt;/root&gt;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Collection(Edm.String)&quot;,&quot;value&quot;:[
+        ///    &quot;Frank&quot;,&quot;Steve&quot;,&quot;Tom&quot;,&quot;Chandler&quot;
+        ///  ]
+        ///}.
         /// </summary>
-        internal static string ListOfStringInAtom {
+        internal static string ListOfStringInJsonLight {
             get {
-                return ResourceManager.GetString("ListOfStringInAtom", resourceCulture);
+                return ResourceManager.GetString("ListOfStringInJsonLight", resourceCulture);
             }
         }
         
@@ -268,19 +259,17 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:root xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
-        ///  &lt;d:Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/d:Age&gt;
-        ///  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-        ///  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-        ///  &lt;d:Alias&gt;
-        ///    &lt;d:element&gt;Alias0&lt;/d:element&gt;
-        ///  &lt;/d:Alias&gt;
-        ///  &lt;d:Address m:type [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#System.Web.Http.OData.TestCommon.Models.Person&quot;,&quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;,&quot;Age&quot;:20,&quot;Gender&quot;:&quot;Male&quot;,&quot;FirstName&quot;:&quot;Frank&quot;,&quot;Alias&quot;:[
+        ///    &quot;Alias0&quot;
+        ///  ],&quot;Address&quot;:{
+        ///    &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.Address&quot;,&quot;StreetAddress&quot;:&quot;StreetAddress1&quot;,&quot;City&quot;:&quot;City1&quot;,&quot;State&quot;:&quot;State1&quot;,&quot;ZipCode&quot;:1
+        ///  },&quot;HomeNumber&quot;:{
+        ///    &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.PhoneNumber&quot;,&quot;CountryCode&quot;:1,&quot;AreaCode&quot;:425,&quot;Number [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string PersonComplexTypeInAtom {
+        internal static string PersonComplexTypeInJsonLight {
             get {
-                return ResourceManager.GetString("PersonComplexTypeInAtom", resourceCulture);
+                return ResourceManager.GetString("PersonComplexTypeInJsonLight", resourceCulture);
             }
         }
         
@@ -461,14 +450,13 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;entry xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;id&gt;http://localhost/WorkItems(25)&lt;/id&gt;
-        ///  &lt;category term=&quot;System.Web.Http.OData.TestCommon.Models.WorkItem&quot; scheme=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/schem [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.WorkItems/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost/WorkItems(25)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost/WorkItems(25)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost/WorkItems(25)&quot;,&quot;ID&quot;:25,&quot;EmployeeID&quot;:0,&quot;IsCompleted&quot;:false,&quot;NumberOfHours@odata.type&quot;:&quot;Edm.Single&quot;,&quot;NumberOfHours&quot;:100
+        ///}.
         /// </summary>
-        internal static string WorkItemEntryInAtom {
+        internal static string WorkItemEntryInJsonLight {
             get {
-                return ResourceManager.GetString("WorkItemEntryInAtom", resourceCulture);
+                return ResourceManager.GetString("WorkItemEntryInJsonLight", resourceCulture);
             }
         }
     }

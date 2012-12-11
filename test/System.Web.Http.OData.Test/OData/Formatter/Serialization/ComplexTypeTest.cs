@@ -18,6 +18,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
                 new ODataPayloadKind[] { ODataPayloadKind.Property }, GetSampleRequest());
+            _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
         }
 
         [Fact]
@@ -25,7 +26,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)), _formatter);
 
-            Assert.Xml.Equal(BaselineResource.PersonComplexTypeInAtom, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(BaselineResource.PersonComplexTypeInJsonLight, content.ReadAsStringAsync().Result);
         }
 
         private static HttpRequestMessage GetSampleRequest()

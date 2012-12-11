@@ -23,14 +23,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Employee employee = (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee);
             ObjectContent<Employee> content = new ObjectContent<Employee>(employee, formatter);
 
-            RegexReplacement replaceUpdateTime = new RegexReplacement("<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-            Assert.Xml.Equal(BaselineResource.EmployeeEntryInAtom, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
+            JsonAssert.Equal(BaselineResource.EmployeeEntryInJsonLight, content.ReadAsStringAsync().Result);
         }
 
         private ODataMediaTypeFormatter CreateFormatter()
         {
-            return new ODataMediaTypeFormatter(_model,
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(_model,
                 new ODataPayloadKind[] { ODataPayloadKind.Entry }, GetSampleRequest());
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            return formatter;
         }
 
         private HttpRequestMessage GetSampleRequest()

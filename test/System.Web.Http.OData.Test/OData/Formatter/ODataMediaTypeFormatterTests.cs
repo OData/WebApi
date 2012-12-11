@@ -39,12 +39,11 @@ namespace System.Web.Http.OData.Formatter
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
             request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)");
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
 
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 
-            RegexReplacement replaceUpdateTime = new RegexReplacement("<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-            Assert.Xml.Equal(BaselineResource.WorkItemEntryInAtom, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
+            JsonAssert.Equal(BaselineResource.WorkItemEntryInJsonLight, content.ReadAsStringAsync().Result);
         }
 
         [Theory]
@@ -217,6 +216,14 @@ namespace System.Web.Http.OData.Formatter
         public ODataMediaTypeFormatter CreateFormatterWithoutRequest()
         {
             return CreateFormatter(CreateModel());
+        }
+
+        public ODataMediaTypeFormatter CreateFormatterWithJson(IEdmModel model, HttpRequestMessage request,
+            params ODataPayloadKind[] payloadKinds)
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            return formatter;
         }
 
         public ODataMediaTypeFormatter CreateFormatterWithRequest()

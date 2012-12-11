@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ObjectContent<Employee> content = new ObjectContent<Employee>(employee, formatter);
 
             RegexReplacement replaceUpdateTime = new RegexReplacement("<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-            Assert.Xml.Equal(BaselineResource.TestEntityTypeBasic, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
+            Assert.Xml.Equal(BaselineResource.EmployeeEntryInAtom, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
         }
 
         private ODataMediaTypeFormatter CreateFormatter()

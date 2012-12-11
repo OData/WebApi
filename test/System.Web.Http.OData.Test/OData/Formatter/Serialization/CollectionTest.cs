@@ -31,7 +31,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ObjectContent<int[]> content = new ObjectContent<int[]>(new int[] { 10, 20, 30, 40, 50 }, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.TestArrayOfInts, content.ReadAsStringAsync().Result);
+            Assert.Xml.Equal(BaselineResource.ArrayOfInt32InAtom, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false }, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.TestArrayOfBools, content.ReadAsStringAsync().Result);
+            Assert.Xml.Equal(BaselineResource.ArrayOfBooleanInAtom, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ObjectContent<List<string>> content = new ObjectContent<List<string>>(listOfStrings, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.TestListOfStrings, content.ReadAsStringAsync().Result);
+            Assert.Xml.Equal(BaselineResource.ListOfStringInAtom, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ObjectContent<IEnumerable<Person>> content = new ObjectContent<IEnumerable<Person>>(collectionOfPerson, _formatter);
 
-            Assert.Xml.Equal(BaselineResource.TestCollectionOfPerson, content.ReadAsStringAsync().Result);
+            Assert.Xml.Equal(BaselineResource.CollectionOfPersonInAtom, content.ReadAsStringAsync().Result);
         }
 
         private static HttpRequestMessage GetSampleRequest()

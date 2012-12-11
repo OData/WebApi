@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadFromStreamAsync()
         {
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
-            Product product = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.ProductInsertData), _edmModel), _readContext) as Product;
+            Product product = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.ProductRequestEntryInAtom), _edmModel), _readContext) as Product;
 
             Assert.Equal(product.ID, 0);
             Assert.Equal(product.Rating, 4);
@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmEntityType supplierEntityType = EdmTestHelpers.GetModel().FindType("ODataDemo.Supplier") as IEdmEntityType;
 
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
-            Supplier supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersInsertData), _edmModel), _readContext) as Supplier;
+            Supplier supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SupplierRequestEntryInAtom), _edmModel), _readContext) as Supplier;
 
             Assert.Equal(supplier.Name, "Supplier Name");
 
@@ -58,7 +58,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             _readContext.PatchEntityType = typeof(Delta<Supplier>);
 
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
-            Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersPatchData), _edmModel), _readContext) as Delta<Supplier>;
+            Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SupplierPatchInAtom), _edmModel), _readContext) as Delta<Supplier>;
 
             Assert.NotNull(supplier);
             Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "Name", "Address" });
@@ -76,7 +76,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
 
             Assert.Throws<ODataException>(
-                () => deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SuppliersInsertData), _edmModel), _readContext),
+                () => deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SupplierRequestEntryInAtom), _edmModel), _readContext),
                 "An entry with type 'ODataDemo.Supplier' was found, but it is not assignable to the expected type 'ODataDemo.Product'. The type specified in the entry must be equal to either the expected type or a derived type.");
         }
 

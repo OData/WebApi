@@ -21,22 +21,22 @@ namespace System.Web.Http.OData.Formatter
             {
                 return new TheoryDataSet<string, Type, object>
                 {
-                    {"String", typeof(string), "This is a Test String"},
-                    {"Bool",typeof(bool), true},
-                    {"Byte",typeof(byte), (byte)64},
-                    {"ByteArray",typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }},
-                    {"DateTime", typeof(DateTime), new DateTime(2010, 1, 1)},
-                    {"Decimal",typeof(decimal), 12345.99999M},
-                    {"Double",typeof(double), 99999.12345},
-                    {"Guid", typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d")},
-                    {"Int16", typeof(short), Int16.MinValue},
-                    {"Int32",typeof(int), Int32.MinValue},
-                    {"Int64", typeof(long), Int64.MinValue},
-                    {"SByte",typeof(sbyte), SByte.MinValue},
-                    {"Single",typeof(Single), Single.PositiveInfinity},
-                    {"TimeSpan", typeof(TimeSpan), TimeSpan.FromMinutes(60)},
-                    {"NullableBool",typeof(bool?), (bool?)false},
-                    {"NullableInt",typeof(int?), (int?)null},
+                    {"StringInXml", typeof(string), "This is a Test String"},
+                    {"BooleanInXml",typeof(bool), true},
+                    {"ByteInXml",typeof(byte), (byte)64},
+                    {"ArrayOfByteInXml",typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }},
+                    {"DateTimeInXml", typeof(DateTime), new DateTime(2010, 1, 1)},
+                    {"DecimalInXml",typeof(decimal), 12345.99999M},
+                    {"DoubleInXml",typeof(double), 99999.12345},
+                    {"GuidInXml", typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d")},
+                    {"Int16InXml", typeof(short), Int16.MinValue},
+                    {"Int32InXml",typeof(int), Int32.MinValue},
+                    {"Int64InXml", typeof(long), Int64.MinValue},
+                    {"SByteInXml",typeof(sbyte), SByte.MinValue},
+                    {"SingleInXml",typeof(Single), Single.PositiveInfinity},
+                    {"TimeSpanInXml", typeof(TimeSpan), TimeSpan.FromMinutes(60)},
+                    {"NullableBooleanInXml",typeof(bool?), (bool?)false},
+                    {"NullableInt32InXml",typeof(int?), (int?)null},
                 };
             }
         }
@@ -65,7 +65,7 @@ namespace System.Web.Http.OData.Formatter
             ObjectContent content = new ObjectContent(type, value, formatter);
 
             var result = content.ReadAsStringAsync().Result;
-            Assert.Xml.Equal(result, expected);
+            Assert.Xml.Equal(expected, result);
         }
 
         [Theory]

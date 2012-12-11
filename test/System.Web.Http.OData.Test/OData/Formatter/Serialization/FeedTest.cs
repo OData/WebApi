@@ -33,7 +33,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ObjectContent<IEnumerable<Employee>> content = new ObjectContent<IEnumerable<Employee>>(collectionOfPerson, formatter);
 
             RegexReplacement replaceUpdateTime = new RegexReplacement("<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-            Assert.Xml.Equal(BaselineResource.TestFeedOfEmployee, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
+            Assert.Xml.Equal(BaselineResource.FeedOfEmployeeInAtom, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
         }
 
         private ODataMediaTypeFormatter CreateFormatter()

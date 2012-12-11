@@ -39,9 +39,6 @@ namespace System.Web.Http.OData.Formatter
         {
             string response = responseContent.ReadAsStringAsync().Result;
 
-            // resource file complains if "{" is present in the value
-            Regex updatedRegEx = new Regex("{");
-            response = updatedRegEx.Replace(response, "%");
             expected = expected.Trim();
             response = response.Trim();
 

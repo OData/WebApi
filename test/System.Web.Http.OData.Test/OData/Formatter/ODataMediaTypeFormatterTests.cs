@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Formatter
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
 
             RegexReplacement replaceUpdateTime = new RegexReplacement("<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
-            Assert.Xml.Equal(BaselineResource.TestEntityWorkItem, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
+            Assert.Xml.Equal(BaselineResource.WorkItemEntryInAtom, content.ReadAsStringAsync().Result, regexReplacements: replaceUpdateTime);
         }
 
         [Theory]

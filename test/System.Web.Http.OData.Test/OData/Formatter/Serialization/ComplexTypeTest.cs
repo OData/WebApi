@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)), _formatter);
 
-            Assert.Xml.Equal(BaselineResource.TestComplexTypePerson, content.ReadAsStringAsync().Result);
+            Assert.Xml.Equal(BaselineResource.PersonComplexTypeInAtom, content.ReadAsStringAsync().Result);
         }
 
         private static HttpRequestMessage GetSampleRequest()

@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3AtomResponse(BaselineResource.EntryTypePersonAtom, response);
+                AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
             }
         }
 
@@ -50,7 +50,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3JsonResponse(BaselineResource.EntryTypePersonODataJsonVerbose, response);
+                AssertODataVersion3JsonResponse(BaselineResource.PersonEntryInJsonVerbose, response);
             }
         }
 
@@ -66,7 +66,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpResponseMessage response = client.SendAsync(request).Result)
             {
                 // Assert
-                AssertODataVersion3JsonResponse(BaselineResource.EntryTypePersonODataJsonFullMetadata, response);
+                AssertODataVersion3JsonResponse(BaselineResource.PersonEntryInJsonFullMetadata, response);
             }
         }
 
@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {
                     // Assert #1
-                    AssertODataVersion3AtomResponse(BaselineResource.EntryTypePersonAtom, response);
+                    AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
                 }
 
                 // Arrange #2
@@ -105,7 +105,7 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                         response.Content.Headers.ContentType.MediaType);
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonRegularJson);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInPlainOldJson);
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {
                     // Assert #1
-                    AssertODataVersion3AtomResponse(BaselineResource.EntryTypePersonAtom, response);
+                    AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
                 }
 
                 // Arrange #2: this request should return response in OData json format
@@ -142,7 +142,7 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
                 {
                     // Assert #2
-                    AssertODataVersion3JsonResponse(BaselineResource.EntryTypePersonODataJsonVerbose, response);
+                    AssertODataVersion3JsonResponse(BaselineResource.PersonEntryInJsonVerbose, response);
                 }
 
                 // Arrange #3: when the query string is not present, request should be handled by the regular Json
@@ -159,7 +159,7 @@ namespace System.Web.Http.OData.Formatter
                         response.Content.Headers.ContentType.MediaType);
                     Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.EntryTypePersonRegularJson);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInPlainOldJson);
                 }
             }
         }

@@ -117,34 +117,315 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AbsoluteUri" xml:space="preserve">
+  <data name="ArrayOfBooleanInAtom" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;http://www.tempuri.org:8000/AbsoluteUri&lt;/d:ID&gt;</value>
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
+  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
+&lt;/root&gt;</value>
   </data>
-  <data name="Bool" xml:space="preserve">
-    <value>&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;true&lt;/d:ID&gt;</value>
-  </data>
-  <data name="Byte" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Byte"&gt;64&lt;/d:ID&gt;</value>
-  </data>
-  <data name="ByteArray" xml:space="preserve">
+  <data name="ArrayOfByteInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Binary"&gt;AAIgQID/&lt;/d:ID&gt;</value>
   </data>
-  <data name="DateTime" xml:space="preserve">
+  <data name="ArrayOfInt32InAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;10&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;20&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;30&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;40&lt;/element&gt;
+  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;50&lt;/element&gt;
+&lt;/root&gt;</value>
+  </data>
+  <data name="BooleanInXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;true&lt;/d:ID&gt;</value>
+  </data>
+  <data name="ByteInXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Byte"&gt;64&lt;/d:ID&gt;</value>
+  </data>
+  <data name="CollectionOfPersonInAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
+    &lt;Age m:type="Edm.Int32"&gt;20&lt;/Age&gt;
+    &lt;Gender&gt;Male&lt;/Gender&gt;
+    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
+    &lt;Alias&gt;
+      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias0&lt;/d:element&gt;
+    &lt;/Alias&gt;
+    &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+      &lt;StreetAddress&gt;StreetAddress1&lt;/StreetAddress&gt;
+      &lt;City&gt;City1&lt;/City&gt;
+      &lt;State&gt;State1&lt;/State&gt;
+      &lt;ZipCode m:type="Edm.Int32"&gt;1&lt;/ZipCode&gt;
+    &lt;/Address&gt;
+    &lt;HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
+      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
+      &lt;Number m:type="Edm.Int32"&gt;9879089&lt;/Number&gt;
+      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
+    &lt;/HomeNumber&gt;
+    &lt;FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
+    &lt;/FavoriteHobby&gt;
+  &lt;/element&gt;
+  &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
+    &lt;Age m:type="Edm.Int32"&gt;21&lt;/Age&gt;
+    &lt;Gender&gt;Male&lt;/Gender&gt;
+    &lt;FirstName&gt;Steve&lt;/FirstName&gt;
+    &lt;Alias&gt;
+      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias1&lt;/d:element&gt;
+    &lt;/Alias&gt;
+    &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+      &lt;StreetAddress&gt;StreetAddress2&lt;/StreetAddress&gt;
+      &lt;City&gt;City2&lt;/City&gt;
+      &lt;State&gt;State2&lt;/State&gt;
+      &lt;ZipCode m:type="Edm.Int32"&gt;2&lt;/ZipCode&gt;
+    &lt;/Address&gt;
+    &lt;HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
+      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
+      &lt;Number m:type="Edm.Int32"&gt;9879090&lt;/Number&gt;
+      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
+    &lt;/HomeNumber&gt;
+    &lt;FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
+    &lt;/FavoriteHobby&gt;
+  &lt;/element&gt;
+  &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
+    &lt;Age m:type="Edm.Int32"&gt;22&lt;/Age&gt;
+    &lt;Gender&gt;Male&lt;/Gender&gt;
+    &lt;FirstName&gt;Tom&lt;/FirstName&gt;
+    &lt;Alias&gt;
+      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias2&lt;/d:element&gt;
+    &lt;/Alias&gt;
+    &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+      &lt;StreetAddress&gt;StreetAddress3&lt;/StreetAddress&gt;
+      &lt;City&gt;City3&lt;/City&gt;
+      &lt;State&gt;State3&lt;/State&gt;
+      &lt;ZipCode m:type="Edm.Int32"&gt;3&lt;/ZipCode&gt;
+    &lt;/Address&gt;
+    &lt;HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
+      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
+      &lt;Number m:type="Edm.Int32"&gt;9879091&lt;/Number&gt;
+      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
+    &lt;/HomeNumber&gt;
+    &lt;FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
+    &lt;/FavoriteHobby&gt;
+  &lt;/element&gt;
+&lt;/root&gt;</value>
+  </data>
+  <data name="DateTimeInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.DateTime"&gt;2010-01-01T00:00:00&lt;/d:ID&gt;</value>
   </data>
-  <data name="Decimal" xml:space="preserve">
+  <data name="DecimalInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Decimal"&gt;12345.99999&lt;/d:ID&gt;</value>
   </data>
-  <data name="Double" xml:space="preserve">
+  <data name="DoubleInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Double"&gt;99999.12345&lt;/d:ID&gt;</value>
   </data>
-  <data name="EntryTypePersonAtom" xml:space="preserve">
+  <data name="EmployeeEntryInAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
+  &lt;category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;link rel="edit" href="http://localhost/employees(0L)" /&gt;
+  &lt;link rel="self" href="http://localhost/employees(0L)" /&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0L)/Manager" /&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0L)/DirectReports" /&gt;
+  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0L)/WorkItem" /&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+      &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
+      &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+      &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+      &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+      &lt;d:Alias&gt;
+        &lt;d:element&gt;Alias0&lt;/d:element&gt;
+      &lt;/d:Alias&gt;
+      &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+        &lt;d:StreetAddress&gt;StreetAddress1&lt;/d:StreetAddress&gt;
+        &lt;d:City&gt;City1&lt;/d:City&gt;
+        &lt;d:State&gt;State1&lt;/d:State&gt;
+        &lt;d:ZipCode m:type="Edm.Int32"&gt;1&lt;/d:ZipCode&gt;
+      &lt;/d:Address&gt;
+      &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+        &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+        &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+        &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+        &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+      &lt;/d:HomeNumber&gt;
+      &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+        &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+      &lt;/d:FavoriteHobby&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="FeedOfEmployeeInAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;feed xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;id&gt;http://schemas.datacontract.org/2004/07/&lt;/id&gt;
+  &lt;title /&gt;
+  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+  &lt;link rel="self" href="http://localhost/employees" /&gt;
+  &lt;entry&gt;
+    &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
+    &lt;category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+    &lt;link rel="edit" href="http://localhost/employees(0L)" /&gt;
+    &lt;link rel="self" href="http://localhost/employees(0L)" /&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0L)/Manager" /&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0L)/DirectReports" /&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0L)/WorkItem" /&gt;
+    &lt;title /&gt;
+    &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+    &lt;author&gt;
+      &lt;name /&gt;
+    &lt;/author&gt;
+    &lt;content type="application/xml"&gt;
+      &lt;m:properties&gt;
+        &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
+        &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+        &lt;d:Alias&gt;
+          &lt;d:element&gt;Alias0&lt;/d:element&gt;
+        &lt;/d:Alias&gt;
+        &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+          &lt;d:StreetAddress&gt;StreetAddress1&lt;/d:StreetAddress&gt;
+          &lt;d:City&gt;City1&lt;/d:City&gt;
+          &lt;d:State&gt;State1&lt;/d:State&gt;
+          &lt;d:ZipCode m:type="Edm.Int32"&gt;1&lt;/d:ZipCode&gt;
+        &lt;/d:Address&gt;
+        &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+          &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+        &lt;/d:HomeNumber&gt;
+        &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+        &lt;/d:FavoriteHobby&gt;
+      &lt;/m:properties&gt;
+    &lt;/content&gt;
+  &lt;/entry&gt;
+  &lt;entry&gt;
+    &lt;id&gt;http://localhost/employees(1L)&lt;/id&gt;
+    &lt;category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+    &lt;link rel="edit" href="http://localhost/employees(1L)" /&gt;
+    &lt;link rel="self" href="http://localhost/employees(1L)" /&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(1L)/Manager" /&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(1L)/DirectReports" /&gt;
+    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(1L)/WorkItem" /&gt;
+    &lt;title /&gt;
+    &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+    &lt;author&gt;
+      &lt;name /&gt;
+    &lt;/author&gt;
+    &lt;content type="application/xml"&gt;
+      &lt;m:properties&gt;
+        &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
+        &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
+        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
+        &lt;d:Alias&gt;
+          &lt;d:element&gt;Alias1&lt;/d:element&gt;
+        &lt;/d:Alias&gt;
+        &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+          &lt;d:StreetAddress&gt;StreetAddress2&lt;/d:StreetAddress&gt;
+          &lt;d:City&gt;City2&lt;/d:City&gt;
+          &lt;d:State&gt;State2&lt;/d:State&gt;
+          &lt;d:ZipCode m:type="Edm.Int32"&gt;2&lt;/d:ZipCode&gt;
+        &lt;/d:Address&gt;
+        &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+          &lt;d:Number m:type="Edm.Int32"&gt;9879090&lt;/d:Number&gt;
+          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+        &lt;/d:HomeNumber&gt;
+        &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+        &lt;/d:FavoriteHobby&gt;
+      &lt;/m:properties&gt;
+    &lt;/content&gt;
+  &lt;/entry&gt;
+&lt;/feed&gt;</value>
+  </data>
+  <data name="GuidInXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Guid"&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int16InXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int16"&gt;-32768&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int32InXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int32"&gt;-2147483648&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int64InXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int64"&gt;-9223372036854775808&lt;/d:ID&gt;</value>
+  </data>
+  <data name="ListOfStringInAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
+  &lt;element&gt;Frank&lt;/element&gt;
+  &lt;element&gt;Steve&lt;/element&gt;
+  &lt;element&gt;Tom&lt;/element&gt;
+  &lt;element&gt;Chandler&lt;/element&gt;
+&lt;/root&gt;</value>
+  </data>
+  <data name="NullableBooleanInXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;false&lt;/d:ID&gt;</value>
+  </data>
+  <data name="NullableInt32InXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:null="true" /&gt;</value>
+  </data>
+  <data name="PersonComplexTypeInAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;d:root xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
+  &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
+  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+  &lt;d:Alias&gt;
+    &lt;d:element&gt;Alias0&lt;/d:element&gt;
+  &lt;/d:Alias&gt;
+  &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
+    &lt;d:StreetAddress&gt;StreetAddress1&lt;/d:StreetAddress&gt;
+    &lt;d:City&gt;City1&lt;/d:City&gt;
+    &lt;d:State&gt;State1&lt;/d:State&gt;
+    &lt;d:ZipCode m:type="Edm.Int32"&gt;1&lt;/d:ZipCode&gt;
+  &lt;/d:Address&gt;
+  &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
+    &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
+    &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
+    &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
+    &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
+  &lt;/d:HomeNumber&gt;
+  &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
+    &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
+  &lt;/d:FavoriteHobby&gt;
+&lt;/d:root&gt;</value>
+  </data>
+  <data name="PersonEntryInAtom" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;entry xml:base="http://localhost:8081/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
   &lt;id&gt;http://localhost:8081/People(10)&lt;/id&gt;
@@ -170,54 +451,30 @@
   &lt;/content&gt;
 &lt;/entry&gt;</value>
   </data>
-  <data name="EntryTypePersonODataJsonFullMetadata" xml:space="preserve">
-    <value>%
-"odata.metadata":"http://localhost:8081/$metadata#Default.Container.People/@Element","odata.id":"http://localhost:8081/People(10)","odata.editLink":"http://localhost:8081/People(10)","odata.readLink":"http://localhost:8081/People(10)","PerId":10,"Age":10,"MyGuid@odata.type":"Edm.Guid","MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":%
-"odata.type":"System.Web.Http.OData.Formatter.FormatterOrder","OrderAmount":235342,"OrderName":"FirstOrder"
-}
+  <data name="PersonEntryInJsonFullMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost:8081/$metadata#Default.Container.People/@Element","odata.id":"http://localhost:8081/People(10)","odata.editLink":"http://localhost:8081/People(10)","odata.readLink":"http://localhost:8081/People(10)","PerId":10,"Age":10,"MyGuid@odata.type":"Edm.Guid","MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":{
+    "odata.type":"System.Web.Http.OData.Formatter.FormatterOrder","OrderAmount":235342,"OrderName":"FirstOrder"
+  }
 }</value>
   </data>
-  <data name="EntryTypePersonODataJsonVerbose" xml:space="preserve">
-    <value>%
-  "d":%
-    "__metadata":%
+  <data name="PersonEntryInJsonVerbose" xml:space="preserve">
+    <value>{
+  "d":{
+    "__metadata":{
       "id":"http://localhost:8081/People(10)","uri":"http://localhost:8081/People(10)","type":"System.Web.Http.OData.Formatter.FormatterPerson"
-    },"PerId":10,"Age":10,"MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":%
-      "__metadata":%
+    },"PerId":10,"Age":10,"MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":{
+      "__metadata":{
         "type":"System.Web.Http.OData.Formatter.FormatterOrder"
       },"OrderAmount":235342,"OrderName":"FirstOrder"
     }
   }
 }</value>
   </data>
-  <data name="EntryTypePersonRegularJson" xml:space="preserve">
-    <value>%"Age":10,"MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":%"OrderAmount":235342,"OrderName":"FirstOrder"},"PerId":10}</value>
+  <data name="PersonEntryInPlainOldJson" xml:space="preserve">
+    <value>{"Age":10,"MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":{"OrderAmount":235342,"OrderName":"FirstOrder"},"PerId":10}</value>
   </data>
-  <data name="Guid" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Guid"&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;</value>
-  </data>
-  <data name="Int16" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int16"&gt;-32768&lt;/d:ID&gt;</value>
-  </data>
-  <data name="Int32" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Int32"&gt;-2147483648&lt;/d:ID&gt;</value>
-  </data>
-  <data name="Int64" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Int64"&gt;-9223372036854775808&lt;/d:ID&gt;</value>
-  </data>
-  <data name="NullableBool" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Boolean"&gt;false&lt;/d:ID&gt;</value>
-  </data>
-  <data name="NullableInt" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:null="true" /&gt;</value>
-  </data>
-  <data name="ODataJsonPersonRequest" xml:space="preserve">
+  <data name="PersonRequestEntryInPlainOldJson" xml:space="preserve">
     <value>{
   "PerId":10,
   "Age":10,
@@ -229,7 +486,7 @@
   }
 }</value>
   </data>
-  <data name="ProductInsertData" xml:space="preserve">
+  <data name="ProductRequestEntryInAtom" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
 &lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom"&gt;
   &lt;title type="text"&gt;Bread&lt;/title&gt;
@@ -322,23 +579,44 @@
   &lt;/edmx:DataServices&gt;
 &lt;/edmx:Edmx&gt;</value>
   </data>
-  <data name="RelativeUri" xml:space="preserve">
+  <data name="SByteInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:anyURI xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;RelativeUri&lt;/d:anyURI&gt;</value>
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.SByte"&gt;-128&lt;/d:ID&gt;</value>
   </data>
-  <data name="SByte" xml:space="preserve">
+  <data name="SingleInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.SByte"&gt;-128&lt;/d:ID&gt;</value>
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Single"&gt;INF&lt;/d:ID&gt;</value>
   </data>
-  <data name="Single" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Single"&gt;INF&lt;/d:ID&gt;</value>
-  </data>
-  <data name="String" xml:space="preserve">
+  <data name="StringInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;This is a Test String&lt;/d:ID&gt;</value>
   </data>
-  <data name="SuppliersInsertData" xml:space="preserve">
+  <data name="SupplierPatchInAtom" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:etag="W/&amp;quot;0&amp;quot;" xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
+  &lt;title type="text"&gt;Exotic Liquids&lt;/title&gt;
+  &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name /&gt;
+  &lt;/author&gt;  
+  &lt;category term="ODataDemo.Supplier" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;m:properties&gt;
+     &lt;d:ID&gt;123&lt;/d:ID&gt;      
+      &lt;d:Name&gt;Supplier Name&lt;/d:Name&gt;
+      &lt;d:Address m:type="ODataDemo.Address"&gt;
+        &lt;d:Street&gt;Supplier Street&lt;/d:Street&gt;
+        &lt;d:City&gt;Supplier City&lt;/d:City&gt;
+        &lt;d:State&gt;WA&lt;/d:State&gt;
+        &lt;d:ZipCode&gt;123456&lt;/d:ZipCode&gt;
+        &lt;d:Country&gt;USA&lt;/d:Country&gt;
+      &lt;/d:Address&gt;
+    &lt;/m:properties&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;</value>
+  </data>
+  <data name="SupplierRequestEntryInAtom" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
 &lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:etag="W/&amp;quot;0&amp;quot;" xmlns="http://www.w3.org/2005/Atom"&gt;
   &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
@@ -507,300 +785,11 @@
   &lt;/content&gt;
 &lt;/entry&gt;</value>
   </data>
-  <data name="SuppliersPatchData" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
-&lt;entry xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:etag="W/&amp;quot;0&amp;quot;" xmlns="http://www.w3.org/2005/Atom"&gt;
-  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
-  &lt;title type="text"&gt;Exotic Liquids&lt;/title&gt;
-  &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
-  &lt;author&gt;
-    &lt;name /&gt;
-  &lt;/author&gt;  
-  &lt;category term="ODataDemo.Supplier" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-  &lt;content type="application/xml"&gt;
-    &lt;m:properties&gt;
-     &lt;d:ID&gt;123&lt;/d:ID&gt;      
-      &lt;d:Name&gt;Supplier Name&lt;/d:Name&gt;
-      &lt;d:Address m:type="ODataDemo.Address"&gt;
-        &lt;d:Street&gt;Supplier Street&lt;/d:Street&gt;
-        &lt;d:City&gt;Supplier City&lt;/d:City&gt;
-        &lt;d:State&gt;WA&lt;/d:State&gt;
-        &lt;d:ZipCode&gt;123456&lt;/d:ZipCode&gt;
-        &lt;d:Country&gt;USA&lt;/d:Country&gt;
-      &lt;/d:Address&gt;
-    &lt;/m:properties&gt;
-  &lt;/content&gt;
-&lt;/entry&gt;</value>
-  </data>
-  <data name="TestArrayOfBools" xml:space="preserve">
+  <data name="TimeSpanInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
-  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
-  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
-  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;true&lt;/element&gt;
-  &lt;element m:type="Edm.Boolean" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;false&lt;/element&gt;
-&lt;/root&gt;</value>
+&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Time"&gt;PT1H&lt;/d:ID&gt;</value>
   </data>
-  <data name="TestArrayOfInts" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
-  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;10&lt;/element&gt;
-  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;20&lt;/element&gt;
-  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;30&lt;/element&gt;
-  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;40&lt;/element&gt;
-  &lt;element m:type="Edm.Int32" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;50&lt;/element&gt;
-&lt;/root&gt;</value>
-  </data>
-  <data name="TestCollectionOfPerson" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
-    &lt;Age m:type="Edm.Int32"&gt;20&lt;/Age&gt;
-    &lt;Gender&gt;Male&lt;/Gender&gt;
-    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
-    &lt;Alias&gt;
-      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias0&lt;/d:element&gt;
-    &lt;/Alias&gt;
-    &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-      &lt;StreetAddress&gt;StreetAddress1&lt;/StreetAddress&gt;
-      &lt;City&gt;City1&lt;/City&gt;
-      &lt;State&gt;State1&lt;/State&gt;
-      &lt;ZipCode m:type="Edm.Int32"&gt;1&lt;/ZipCode&gt;
-    &lt;/Address&gt;
-    &lt;HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
-      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
-      &lt;Number m:type="Edm.Int32"&gt;9879089&lt;/Number&gt;
-      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
-    &lt;/HomeNumber&gt;
-    &lt;FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
-    &lt;/FavoriteHobby&gt;
-  &lt;/element&gt;
-  &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
-    &lt;Age m:type="Edm.Int32"&gt;21&lt;/Age&gt;
-    &lt;Gender&gt;Male&lt;/Gender&gt;
-    &lt;FirstName&gt;Steve&lt;/FirstName&gt;
-    &lt;Alias&gt;
-      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias1&lt;/d:element&gt;
-    &lt;/Alias&gt;
-    &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-      &lt;StreetAddress&gt;StreetAddress2&lt;/StreetAddress&gt;
-      &lt;City&gt;City2&lt;/City&gt;
-      &lt;State&gt;State2&lt;/State&gt;
-      &lt;ZipCode m:type="Edm.Int32"&gt;2&lt;/ZipCode&gt;
-    &lt;/Address&gt;
-    &lt;HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
-      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
-      &lt;Number m:type="Edm.Int32"&gt;9879090&lt;/Number&gt;
-      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
-    &lt;/HomeNumber&gt;
-    &lt;FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
-    &lt;/FavoriteHobby&gt;
-  &lt;/element&gt;
-  &lt;element m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
-    &lt;Age m:type="Edm.Int32"&gt;22&lt;/Age&gt;
-    &lt;Gender&gt;Male&lt;/Gender&gt;
-    &lt;FirstName&gt;Tom&lt;/FirstName&gt;
-    &lt;Alias&gt;
-      &lt;d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;Alias2&lt;/d:element&gt;
-    &lt;/Alias&gt;
-    &lt;Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-      &lt;StreetAddress&gt;StreetAddress3&lt;/StreetAddress&gt;
-      &lt;City&gt;City3&lt;/City&gt;
-      &lt;State&gt;State3&lt;/State&gt;
-      &lt;ZipCode m:type="Edm.Int32"&gt;3&lt;/ZipCode&gt;
-    &lt;/Address&gt;
-    &lt;HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-      &lt;CountryCode m:type="Edm.Int32"&gt;1&lt;/CountryCode&gt;
-      &lt;AreaCode m:type="Edm.Int32"&gt;425&lt;/AreaCode&gt;
-      &lt;Number m:type="Edm.Int32"&gt;9879091&lt;/Number&gt;
-      &lt;PhoneType&gt;HomePhone&lt;/PhoneType&gt;
-    &lt;/HomeNumber&gt;
-    &lt;FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-      &lt;ActivityName&gt;Xbox Gaming&lt;/ActivityName&gt;
-    &lt;/FavoriteHobby&gt;
-  &lt;/element&gt;
-&lt;/root&gt;</value>
-  </data>
-  <data name="TestComplexTypePerson" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:root xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="System.Web.Http.OData.TestCommon.Models.Person"&gt;
-  &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
-  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-  &lt;d:Alias&gt;
-    &lt;d:element&gt;Alias0&lt;/d:element&gt;
-  &lt;/d:Alias&gt;
-  &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-    &lt;d:StreetAddress&gt;StreetAddress1&lt;/d:StreetAddress&gt;
-    &lt;d:City&gt;City1&lt;/d:City&gt;
-    &lt;d:State&gt;State1&lt;/d:State&gt;
-    &lt;d:ZipCode m:type="Edm.Int32"&gt;1&lt;/d:ZipCode&gt;
-  &lt;/d:Address&gt;
-  &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-    &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
-    &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
-    &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
-    &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
-  &lt;/d:HomeNumber&gt;
-  &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-    &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
-  &lt;/d:FavoriteHobby&gt;
-&lt;/d:root&gt;</value>
-  </data>
-  <data name="TestDictionary" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;ArrayOfKeyValueOfintstring xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
-  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
-    &lt;Key m:type="Edm.Int32"&gt;1&lt;/Key&gt;
-    &lt;Value&gt;Frank&lt;/Value&gt;
-  &lt;/element&gt;
-  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
-    &lt;Key m:type="Edm.Int32"&gt;2&lt;/Key&gt;
-    &lt;Value&gt;Steve&lt;/Value&gt;
-  &lt;/element&gt;
-  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
-    &lt;Key m:type="Edm.Int32"&gt;3&lt;/Key&gt;
-    &lt;Value&gt;Tom&lt;/Value&gt;
-  &lt;/element&gt;
-  &lt;element m:type="http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"&gt;
-    &lt;Key m:type="Edm.Int32"&gt;4&lt;/Key&gt;
-    &lt;Value&gt;Chandler&lt;/Value&gt;
-  &lt;/element&gt;
-&lt;/ArrayOfKeyValueOfintstring&gt;</value>
-  </data>
-  <data name="TestEntityTypeBasic" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
-  &lt;category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-  &lt;link rel="edit" href="http://localhost/employees(0L)" /&gt;
-  &lt;link rel="self" href="http://localhost/employees(0L)" /&gt;
-  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0L)/Manager" /&gt;
-  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0L)/DirectReports" /&gt;
-  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0L)/WorkItem" /&gt;
-  &lt;title /&gt;
-  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-  &lt;author&gt;
-    &lt;name /&gt;
-  &lt;/author&gt;
-  &lt;content type="application/xml"&gt;
-    &lt;m:properties&gt;
-      &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
-      &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
-      &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-      &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-      &lt;d:Alias&gt;
-        &lt;d:element&gt;Alias0&lt;/d:element&gt;
-      &lt;/d:Alias&gt;
-      &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-        &lt;d:StreetAddress&gt;StreetAddress1&lt;/d:StreetAddress&gt;
-        &lt;d:City&gt;City1&lt;/d:City&gt;
-        &lt;d:State&gt;State1&lt;/d:State&gt;
-        &lt;d:ZipCode m:type="Edm.Int32"&gt;1&lt;/d:ZipCode&gt;
-      &lt;/d:Address&gt;
-      &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-        &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
-        &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
-        &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
-        &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
-      &lt;/d:HomeNumber&gt;
-      &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-        &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
-      &lt;/d:FavoriteHobby&gt;
-    &lt;/m:properties&gt;
-  &lt;/content&gt;
-&lt;/entry&gt;</value>
-  </data>
-  <data name="TestEntityTypeWithMultipleKeys" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;entry xml:base="http://www.tempuri.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" type="application/atom+xml;type=entry" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')/CurrentWorkItem"&gt;
-    &lt;m:inline&gt;
-      &lt;entry&gt;
-        &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)&lt;/id&gt;
-        &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-        &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/WorkItem(25)" /&gt;
-        &lt;title /&gt;
-        &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-        &lt;author&gt;
-          &lt;name /&gt;
-        &lt;/author&gt;
-        &lt;content type="application/xml"&gt;
-          &lt;m:properties&gt;
-            &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
-            &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
-            &lt;d:NumberOfHours m:type="Edm.Single"&gt;16&lt;/d:NumberOfHours&gt;
-            &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
-          &lt;/m:properties&gt;
-        &lt;/content&gt;
-      &lt;/entry&gt;
-    &lt;/m:inline&gt;
-  &lt;/link&gt;
-  &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')/DirectReports"&gt;
-    &lt;m:inline&gt;
-      &lt;feed&gt;
-        &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee&lt;/id&gt;
-        &lt;title /&gt;
-        &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-        &lt;author&gt;
-          &lt;name /&gt;
-        &lt;/author&gt;
-      &lt;/feed&gt;
-    &lt;/m:inline&gt;
-  &lt;/link&gt;
-  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')&lt;/id&gt;
-  &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-  &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/MultipleKeyEmployee(EmployeeId=0,EmployeeGuid='844080c0-2f9e-472e-8c72-1a8ecd9f9037',UniqueStringId='Frank0')" /&gt;
-  &lt;title /&gt;
-  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-  &lt;author&gt;
-    &lt;name /&gt;
-  &lt;/author&gt;
-  &lt;content type="application/xml"&gt;
-    &lt;m:properties&gt;
-      &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
-      &lt;d:FavoriteHobby m:type="HobbyActivity"&gt;
-        &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
-      &lt;/d:FavoriteHobby&gt;
-      &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-      &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-      &lt;d:HomeAddress m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/Address"&gt;
-        &lt;d:City&gt;Redmond&lt;/d:City&gt;
-        &lt;d:State&gt;WA&lt;/d:State&gt;
-        &lt;d:StreetAddress&gt;4850 156th Ave NE&lt;/d:StreetAddress&gt;
-        &lt;d:ZipCode m:type="Edm.Int32"&gt;98052&lt;/d:ZipCode&gt;
-      &lt;/d:HomeAddress&gt;
-      &lt;d:HomeNumber m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.ComplexTypes/PhoneNumber"&gt;
-        &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
-        &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
-        &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
-        &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
-      &lt;/d:HomeNumber&gt;
-      &lt;d:OtherNames &gt;
-        &lt;d:element&gt;Alias0&lt;/d:element&gt;
-      &lt;/d:OtherNames&gt;
-      &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
-      &lt;d:Manager m:type="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/Employee"&gt;
-        &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
-        &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
-        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-        &lt;d:OtherNames &gt;
-          &lt;d:element&gt;Alias1&lt;/d:element&gt;
-        &lt;/d:OtherNames&gt;
-        
-        &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
-      &lt;/d:Manager&gt;
-      &lt;d:EmployeeGuid m:type="Edm.Guid"&gt;844080c0-2f9e-472e-8c72-1a8ecd9f9037&lt;/d:EmployeeGuid&gt;
-      &lt;d:UniqueStringId&gt;Frank0&lt;/d:UniqueStringId&gt;
-    &lt;/m:properties&gt;
-  &lt;/content&gt;
-&lt;/entry&gt;</value>
-  </data>
-  <data name="TestEntityWorkItem" xml:space="preserve">
+  <data name="WorkItemEntryInAtom" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;entry xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
   &lt;id&gt;http://localhost/WorkItems(25)&lt;/id&gt;
@@ -821,128 +810,5 @@
     &lt;/m:properties&gt;
   &lt;/content&gt;
 &lt;/entry&gt;</value>
-  </data>
-  <data name="TestEntityWorkItemWithExplictKeys" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;entry xml:base="http://www.tempuri.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem(EmployeeID=0,WorkItemID=25)&lt;/id&gt;
-  &lt;category term="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-  &lt;link rel="self" href="http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem(EmployeeID=0,WorkItemID=25)" /&gt;
-  &lt;title /&gt;
-  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-  &lt;author&gt;
-    &lt;name /&gt;
-  &lt;/author&gt;
-  &lt;content type="application/xml"&gt;
-    &lt;m:properties&gt;
-      &lt;d:EmployeeID m:type="Edm.Int32"&gt;0&lt;/d:EmployeeID&gt;
-      &lt;d:IsCompleted m:type="Edm.Boolean"&gt;false&lt;/d:IsCompleted&gt;
-      &lt;d:NumberOfHours m:type="Edm.Single"&gt;100&lt;/d:NumberOfHours&gt;
-      &lt;d:WorkItemID m:type="Edm.Int32"&gt;25&lt;/d:WorkItemID&gt;
-    &lt;/m:properties&gt;
-  &lt;/content&gt;
-&lt;/entry&gt;</value>
-  </data>
-  <data name="TestFeedOfEmployee" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;feed xml:base="http://localhost/" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;id&gt;http://schemas.datacontract.org/2004/07/&lt;/id&gt;
-  &lt;title /&gt;
-  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-  &lt;link rel="self" href="http://localhost/employees" /&gt;
-  &lt;entry&gt;
-    &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
-    &lt;category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-    &lt;link rel="edit" href="http://localhost/employees(0L)" /&gt;
-    &lt;link rel="self" href="http://localhost/employees(0L)" /&gt;
-    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(0L)/Manager" /&gt;
-    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(0L)/DirectReports" /&gt;
-    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(0L)/WorkItem" /&gt;
-    &lt;title /&gt;
-    &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-    &lt;author&gt;
-      &lt;name /&gt;
-    &lt;/author&gt;
-    &lt;content type="application/xml"&gt;
-      &lt;m:properties&gt;
-        &lt;d:EmployeeId m:type="Edm.Int64"&gt;0&lt;/d:EmployeeId&gt;
-        &lt;d:Age m:type="Edm.Int32"&gt;20&lt;/d:Age&gt;
-        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-        &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-        &lt;d:Alias&gt;
-          &lt;d:element&gt;Alias0&lt;/d:element&gt;
-        &lt;/d:Alias&gt;
-        &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-          &lt;d:StreetAddress&gt;StreetAddress1&lt;/d:StreetAddress&gt;
-          &lt;d:City&gt;City1&lt;/d:City&gt;
-          &lt;d:State&gt;State1&lt;/d:State&gt;
-          &lt;d:ZipCode m:type="Edm.Int32"&gt;1&lt;/d:ZipCode&gt;
-        &lt;/d:Address&gt;
-        &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
-          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
-          &lt;d:Number m:type="Edm.Int32"&gt;9879089&lt;/d:Number&gt;
-          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
-        &lt;/d:HomeNumber&gt;
-        &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
-        &lt;/d:FavoriteHobby&gt;
-      &lt;/m:properties&gt;
-    &lt;/content&gt;
-  &lt;/entry&gt;
-  &lt;entry&gt;
-    &lt;id&gt;http://localhost/employees(1L)&lt;/id&gt;
-    &lt;category term="System.Web.Http.OData.TestCommon.Models.Employee" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" /&gt;
-    &lt;link rel="edit" href="http://localhost/employees(1L)" /&gt;
-    &lt;link rel="self" href="http://localhost/employees(1L)" /&gt;
-    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Manager" type="application/atom+xml;type=entry" title="Manager" href="http://localhost/employees(1L)/Manager" /&gt;
-    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/DirectReports" type="application/atom+xml;type=feed" title="DirectReports" href="http://localhost/employees(1L)/DirectReports" /&gt;
-    &lt;link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/WorkItem" type="application/atom+xml;type=entry" title="WorkItem" href="http://localhost/employees(1L)/WorkItem" /&gt;
-    &lt;title /&gt;
-    &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-    &lt;author&gt;
-      &lt;name /&gt;
-    &lt;/author&gt;
-    &lt;content type="application/xml"&gt;
-      &lt;m:properties&gt;
-        &lt;d:EmployeeId m:type="Edm.Int64"&gt;1&lt;/d:EmployeeId&gt;
-        &lt;d:Age m:type="Edm.Int32"&gt;21&lt;/d:Age&gt;
-        &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-        &lt;d:FirstName&gt;Steve&lt;/d:FirstName&gt;
-        &lt;d:Alias&gt;
-          &lt;d:element&gt;Alias1&lt;/d:element&gt;
-        &lt;/d:Alias&gt;
-        &lt;d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address"&gt;
-          &lt;d:StreetAddress&gt;StreetAddress2&lt;/d:StreetAddress&gt;
-          &lt;d:City&gt;City2&lt;/d:City&gt;
-          &lt;d:State&gt;State2&lt;/d:State&gt;
-          &lt;d:ZipCode m:type="Edm.Int32"&gt;2&lt;/d:ZipCode&gt;
-        &lt;/d:Address&gt;
-        &lt;d:HomeNumber m:type="System.Web.Http.OData.TestCommon.Models.PhoneNumber"&gt;
-          &lt;d:CountryCode m:type="Edm.Int32"&gt;1&lt;/d:CountryCode&gt;
-          &lt;d:AreaCode m:type="Edm.Int32"&gt;425&lt;/d:AreaCode&gt;
-          &lt;d:Number m:type="Edm.Int32"&gt;9879090&lt;/d:Number&gt;
-          &lt;d:PhoneType&gt;HomePhone&lt;/d:PhoneType&gt;
-        &lt;/d:HomeNumber&gt;
-        &lt;d:FavoriteHobby m:type="System.Web.Http.OData.TestCommon.Models.IActivity"&gt;
-          &lt;d:ActivityName&gt;Xbox Gaming&lt;/d:ActivityName&gt;
-        &lt;/d:FavoriteHobby&gt;
-      &lt;/m:properties&gt;
-    &lt;/content&gt;
-  &lt;/entry&gt;
-&lt;/feed&gt;</value>
-  </data>
-  <data name="TestListOfStrings" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;root xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices"&gt;
-  &lt;element&gt;Frank&lt;/element&gt;
-  &lt;element&gt;Steve&lt;/element&gt;
-  &lt;element&gt;Tom&lt;/element&gt;
-  &lt;element&gt;Chandler&lt;/element&gt;
-&lt;/root&gt;</value>
-  </data>
-  <data name="TimeSpan" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:type="Edm.Time"&gt;PT1H&lt;/d:ID&gt;</value>
   </data>
 </root>

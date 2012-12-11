@@ -62,30 +62,15 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;http://www.tempuri.org:8000/AbsoluteUri&lt;/d:ID&gt;.
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
+        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
+        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;false&lt;/element&gt;
+        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
+        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns: [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string AbsoluteUri {
+        internal static string ArrayOfBooleanInAtom {
             get {
-                return ResourceManager.GetString("AbsoluteUri", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;true&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Bool {
-            get {
-                return ResourceManager.GetString("Bool", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Byte&quot;&gt;64&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Byte {
-            get {
-                return ResourceManager.GetString("Byte", resourceCulture);
+                return ResourceManager.GetString("ArrayOfBooleanInAtom", resourceCulture);
             }
         }
         
@@ -93,9 +78,59 @@ namespace System.Web.Http.OData {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Binary&quot;&gt;AAIgQID/&lt;/d:ID&gt;.
         /// </summary>
-        internal static string ByteArray {
+        internal static string ArrayOfByteInXml {
             get {
-                return ResourceManager.GetString("ByteArray", resourceCulture);
+                return ResourceManager.GetString("ArrayOfByteInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
+        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;10&lt;/element&gt;
+        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;20&lt;/element&gt;
+        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;30&lt;/element&gt;
+        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schem [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ArrayOfInt32InAtom {
+            get {
+                return ResourceManager.GetString("ArrayOfInt32InAtom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;true&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string BooleanInXml {
+            get {
+                return ResourceManager.GetString("BooleanInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Byte&quot;&gt;64&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string ByteInXml {
+            get {
+                return ResourceManager.GetString("ByteInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
+        ///  &lt;element m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
+        ///    &lt;Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/Age&gt;
+        ///    &lt;Gender&gt;Male&lt;/Gender&gt;
+        ///    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
+        ///    &lt;Alias&gt;
+        ///      &lt;d:element xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/0 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CollectionOfPersonInAtom {
+            get {
+                return ResourceManager.GetString("CollectionOfPersonInAtom", resourceCulture);
             }
         }
         
@@ -103,9 +138,9 @@ namespace System.Web.Http.OData {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.DateTime&quot;&gt;2010-01-01T00:00:00&lt;/d:ID&gt;.
         /// </summary>
-        internal static string DateTime {
+        internal static string DateTimeInXml {
             get {
-                return ResourceManager.GetString("DateTime", resourceCulture);
+                return ResourceManager.GetString("DateTimeInXml", resourceCulture);
             }
         }
         
@@ -113,9 +148,9 @@ namespace System.Web.Http.OData {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Decimal&quot;&gt;12345.99999&lt;/d:ID&gt;.
         /// </summary>
-        internal static string Decimal {
+        internal static string DecimalInXml {
             get {
-                return ResourceManager.GetString("Decimal", resourceCulture);
+                return ResourceManager.GetString("DecimalInXml", resourceCulture);
             }
         }
         
@@ -123,9 +158,129 @@ namespace System.Web.Http.OData {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Double&quot;&gt;99999.12345&lt;/d:ID&gt;.
         /// </summary>
-        internal static string Double {
+        internal static string DoubleInXml {
             get {
-                return ResourceManager.GetString("Double", resourceCulture);
+                return ResourceManager.GetString("DoubleInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;entry xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
+        ///  &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
+        ///  &lt;category term=&quot;System.Web.Http.OData.TestCommon.Models.Employee&quot; scheme=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/schem [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string EmployeeEntryInAtom {
+            get {
+                return ResourceManager.GetString("EmployeeEntryInAtom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;feed xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
+        ///  &lt;id&gt;http://schemas.datacontract.org/2004/07/&lt;/id&gt;
+        ///  &lt;title /&gt;
+        ///  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
+        ///  &lt;link rel=&quot;self&quot; href=&quot;http://localhost/employees&quot; /&gt;
+        ///  &lt;entry&gt;
+        ///    &lt;id&gt;htt [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string FeedOfEmployeeInAtom {
+            get {
+                return ResourceManager.GetString("FeedOfEmployeeInAtom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Guid&quot;&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string GuidInXml {
+            get {
+                return ResourceManager.GetString("GuidInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Int16&quot;&gt;-32768&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string Int16InXml {
+            get {
+                return ResourceManager.GetString("Int16InXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Int32&quot;&gt;-2147483648&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string Int32InXml {
+            get {
+                return ResourceManager.GetString("Int32InXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Int64&quot;&gt;-9223372036854775808&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string Int64InXml {
+            get {
+                return ResourceManager.GetString("Int64InXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
+        ///  &lt;element&gt;Frank&lt;/element&gt;
+        ///  &lt;element&gt;Steve&lt;/element&gt;
+        ///  &lt;element&gt;Tom&lt;/element&gt;
+        ///  &lt;element&gt;Chandler&lt;/element&gt;
+        ///&lt;/root&gt;.
+        /// </summary>
+        internal static string ListOfStringInAtom {
+            get {
+                return ResourceManager.GetString("ListOfStringInAtom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;false&lt;/d:ID&gt;.
+        /// </summary>
+        internal static string NullableBooleanInXml {
+            get {
+                return ResourceManager.GetString("NullableBooleanInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:null=&quot;true&quot; /&gt;.
+        /// </summary>
+        internal static string NullableInt32InXml {
+            get {
+                return ResourceManager.GetString("NullableInt32InXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;d:root xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
+        ///  &lt;d:Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/d:Age&gt;
+        ///  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
+        ///  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
+        ///  &lt;d:Alias&gt;
+        ///    &lt;d:element&gt;Alias0&lt;/d:element&gt;
+        ///  &lt;/d:Alias&gt;
+        ///  &lt;d:Address m:type [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string PersonComplexTypeInAtom {
+            get {
+                return ResourceManager.GetString("PersonComplexTypeInAtom", resourceCulture);
             }
         }
         
@@ -137,110 +292,50 @@ namespace System.Web.Http.OData {
         ///  &lt;link rel=&quot;edit&quot; href=&quot;http://localhost:8081/People(10)&quot; /&gt;
         ///  &lt;link [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string EntryTypePersonAtom {
+        internal static string PersonEntryInAtom {
             get {
-                return ResourceManager.GetString("EntryTypePersonAtom", resourceCulture);
+                return ResourceManager.GetString("PersonEntryInAtom", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %
-        ///&quot;odata.metadata&quot;:&quot;http://localhost:8081/$metadata#Default.Container.People/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid@odata.type&quot;:&quot;Edm.Guid&quot;,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:%
-        ///&quot;odata.type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterOrder&quot;,&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;
-        ///}
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost:8081/$metadata#Default.Container.People/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid@odata.type&quot;:&quot;Edm.Guid&quot;,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:{
+        ///    &quot;odata.type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterOrder&quot;,&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;
+        ///  }
         ///}.
         /// </summary>
-        internal static string EntryTypePersonODataJsonFullMetadata {
+        internal static string PersonEntryInJsonFullMetadata {
             get {
-                return ResourceManager.GetString("EntryTypePersonODataJsonFullMetadata", resourceCulture);
+                return ResourceManager.GetString("PersonEntryInJsonFullMetadata", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %
-        ///  &quot;d&quot;:%
-        ///    &quot;__metadata&quot;:%
+        ///   Looks up a localized string similar to {
+        ///  &quot;d&quot;:{
+        ///    &quot;__metadata&quot;:{
         ///      &quot;id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;uri&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterPerson&quot;
-        ///    },&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:%
-        ///      &quot;__metadata&quot;:%
+        ///    },&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:{
+        ///      &quot;__metadata&quot;:{
         ///        &quot;type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterOrder&quot;
         ///      },&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;
         ///    }
         ///  }
         ///}.
         /// </summary>
-        internal static string EntryTypePersonODataJsonVerbose {
+        internal static string PersonEntryInJsonVerbose {
             get {
-                return ResourceManager.GetString("EntryTypePersonODataJsonVerbose", resourceCulture);
+                return ResourceManager.GetString("PersonEntryInJsonVerbose", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to %&quot;Age&quot;:10,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:%&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;},&quot;PerId&quot;:10}.
+        ///   Looks up a localized string similar to {&quot;Age&quot;:10,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:{&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;},&quot;PerId&quot;:10}.
         /// </summary>
-        internal static string EntryTypePersonRegularJson {
+        internal static string PersonEntryInPlainOldJson {
             get {
-                return ResourceManager.GetString("EntryTypePersonRegularJson", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Guid&quot;&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Guid {
-            get {
-                return ResourceManager.GetString("Guid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Int16&quot;&gt;-32768&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Int16 {
-            get {
-                return ResourceManager.GetString("Int16", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:type=&quot;Edm.Int32&quot;&gt;-2147483648&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Int32 {
-            get {
-                return ResourceManager.GetString("Int32", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:type=&quot;Edm.Int64&quot;&gt;-9223372036854775808&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Int64 {
-            get {
-                return ResourceManager.GetString("Int64", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:type=&quot;Edm.Boolean&quot;&gt;false&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string NullableBool {
-            get {
-                return ResourceManager.GetString("NullableBool", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:null=&quot;true&quot; /&gt;.
-        /// </summary>
-        internal static string NullableInt {
-            get {
-                return ResourceManager.GetString("NullableInt", resourceCulture);
+                return ResourceManager.GetString("PersonEntryInPlainOldJson", resourceCulture);
             }
         }
         
@@ -256,9 +351,9 @@ namespace System.Web.Http.OData {
         ///  }
         ///}.
         /// </summary>
-        internal static string ODataJsonPersonRequest {
+        internal static string PersonRequestEntryInPlainOldJson {
             get {
-                return ResourceManager.GetString("ODataJsonPersonRequest", resourceCulture);
+                return ResourceManager.GetString("PersonRequestEntryInPlainOldJson", resourceCulture);
             }
         }
         
@@ -273,9 +368,9 @@ namespace System.Web.Http.OData {
         ///  &lt;/author&gt;
         ///  &lt;category term=&quot;ODataDemo.Product&quot; scheme=&quot;http [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string ProductInsertData {
+        internal static string ProductRequestEntryInAtom {
             get {
-                return ResourceManager.GetString("ProductInsertData", resourceCulture);
+                return ResourceManager.GetString("ProductRequestEntryInAtom", resourceCulture);
             }
         }
         
@@ -294,31 +389,21 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:anyURI xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;RelativeUri&lt;/d:anyURI&gt;.
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.SByte&quot;&gt;-128&lt;/d:ID&gt;.
         /// </summary>
-        internal static string RelativeUri {
+        internal static string SByteInXml {
             get {
-                return ResourceManager.GetString("RelativeUri", resourceCulture);
+                return ResourceManager.GetString("SByteInXml", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:type=&quot;Edm.SByte&quot;&gt;-128&lt;/d:ID&gt;.
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Single&quot;&gt;INF&lt;/d:ID&gt;.
         /// </summary>
-        internal static string SByte {
+        internal static string SingleInXml {
             get {
-                return ResourceManager.GetString("SByte", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:type=&quot;Edm.Single&quot;&gt;INF&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string Single {
-            get {
-                return ResourceManager.GetString("Single", resourceCulture);
+                return ResourceManager.GetString("SingleInXml", resourceCulture);
             }
         }
         
@@ -326,9 +411,25 @@ namespace System.Web.Http.OData {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;This is a Test String&lt;/d:ID&gt;.
         /// </summary>
-        internal static string String {
+        internal static string StringInXml {
             get {
-                return ResourceManager.GetString("String", resourceCulture);
+                return ResourceManager.GetString("StringInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
+        ///&lt;entry xml:base=&quot;http://services.odata.org/OData/OData.svc/&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:etag=&quot;W/&amp;quot;0&amp;quot;&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot;&gt;
+        ///  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
+        ///  &lt;title type=&quot;text&quot;&gt;Exotic Liquids&lt;/title&gt;
+        ///  &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
+        ///  &lt;author&gt;
+        ///    &lt;name /&gt;
+        ///  &lt;/author&gt;   [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SupplierPatchInAtom {
+            get {
+                return ResourceManager.GetString("SupplierPatchInAtom", resourceCulture);
             }
         }
         
@@ -343,124 +444,19 @@ namespace System.Web.Http.OData {
         ///  &lt;/author&gt;
         /// [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SuppliersInsertData {
+        internal static string SupplierRequestEntryInAtom {
             get {
-                return ResourceManager.GetString("SuppliersInsertData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
-        ///&lt;entry xml:base=&quot;http://services.odata.org/OData/OData.svc/&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:etag=&quot;W/&amp;quot;0&amp;quot;&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot;&gt;
-        ///  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
-        ///  &lt;title type=&quot;text&quot;&gt;Exotic Liquids&lt;/title&gt;
-        ///  &lt;updated&gt;2012-04-19T04:30:47Z&lt;/updated&gt;
-        ///  &lt;author&gt;
-        ///    &lt;name /&gt;
-        ///  &lt;/author&gt;   [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string SuppliersPatchData {
-            get {
-                return ResourceManager.GetString("SuppliersPatchData", resourceCulture);
+                return ResourceManager.GetString("SupplierRequestEntryInAtom", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;false&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;true&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Boolean&quot; xmlns: [rest of string was truncated]&quot;;.
+        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Time&quot;&gt;PT1H&lt;/d:ID&gt;.
         /// </summary>
-        internal static string TestArrayOfBools {
+        internal static string TimeSpanInXml {
             get {
-                return ResourceManager.GetString("TestArrayOfBools", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;10&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;20&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;30&lt;/element&gt;
-        ///  &lt;element m:type=&quot;Edm.Int32&quot; xmlns:m=&quot;http://schem [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestArrayOfInts {
-            get {
-                return ResourceManager.GetString("TestArrayOfInts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;element m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
-        ///    &lt;Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/Age&gt;
-        ///    &lt;Gender&gt;Male&lt;/Gender&gt;
-        ///    &lt;FirstName&gt;Frank&lt;/FirstName&gt;
-        ///    &lt;Alias&gt;
-        ///      &lt;d:element xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/0 [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestCollectionOfPerson {
-            get {
-                return ResourceManager.GetString("TestCollectionOfPerson", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:root xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;System.Web.Http.OData.TestCommon.Models.Person&quot;&gt;
-        ///  &lt;d:Age m:type=&quot;Edm.Int32&quot;&gt;20&lt;/d:Age&gt;
-        ///  &lt;d:Gender&gt;Male&lt;/d:Gender&gt;
-        ///  &lt;d:FirstName&gt;Frank&lt;/d:FirstName&gt;
-        ///  &lt;d:Alias&gt;
-        ///    &lt;d:element&gt;Alias0&lt;/d:element&gt;
-        ///  &lt;/d:Alias&gt;
-        ///  &lt;d:Address m:type [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestComplexTypePerson {
-            get {
-                return ResourceManager.GetString("TestComplexTypePerson", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;ArrayOfKeyValueOfintstring xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element m:type=&quot;http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;&gt;
-        ///    &lt;Key m:type=&quot;Edm.Int32&quot;&gt;1&lt;/Key&gt;
-        ///    &lt;Value&gt;Frank&lt;/Value&gt;
-        ///  &lt;/element&gt;
-        ///  &lt;element m:type=&quot;http://schemas.microsoft.com/2003/10/Serialization/Arrays/KeyValueOfintstring&quot; xmlns:m=&quot;http://schemas.microsof [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestDictionary {
-            get {
-                return ResourceManager.GetString("TestDictionary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;entry xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;id&gt;http://localhost/employees(0L)&lt;/id&gt;
-        ///  &lt;category term=&quot;System.Web.Http.OData.TestCommon.Models.Employee&quot; scheme=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/schem [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestEntityTypeBasic {
-            get {
-                return ResourceManager.GetString("TestEntityTypeBasic", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;entry xml:base=&quot;http://www.tempuri.org/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;link rel=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/related/http://schemas.microsoft.com/ado/2007/08/dataservices/related/CurrentWorkItem&quot; type=&quot;application/ [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestEntityTypeWithMultipleKeys {
-            get {
-                return ResourceManager.GetString("TestEntityTypeWithMultipleKeys", resourceCulture);
+                return ResourceManager.GetString("TimeSpanInXml", resourceCulture);
             }
         }
         
@@ -470,62 +466,9 @@ namespace System.Web.Http.OData {
         ///  &lt;id&gt;http://localhost/WorkItems(25)&lt;/id&gt;
         ///  &lt;category term=&quot;System.Web.Http.OData.TestCommon.Models.WorkItem&quot; scheme=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/schem [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string TestEntityWorkItem {
+        internal static string WorkItemEntryInAtom {
             get {
-                return ResourceManager.GetString("TestEntityWorkItem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;entry xml:base=&quot;http://www.tempuri.org/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;id&gt;http://schemas.datacontract.org/2004/07/System.Net.Http.Formatting.OData.Test.EntityTypes/DerivedWorkItem(EmployeeID=0,WorkItemID=25)&lt;/id&gt;
-        ///  &lt;category term=&quot;http://s [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestEntityWorkItemWithExplictKeys {
-            get {
-                return ResourceManager.GetString("TestEntityWorkItemWithExplictKeys", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;feed xml:base=&quot;http://localhost/&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot;&gt;
-        ///  &lt;id&gt;http://schemas.datacontract.org/2004/07/&lt;/id&gt;
-        ///  &lt;title /&gt;
-        ///  &lt;updated&gt;UpdatedTime&lt;/updated&gt;
-        ///  &lt;link rel=&quot;self&quot; href=&quot;http://localhost/employees&quot; /&gt;
-        ///  &lt;entry&gt;
-        ///    &lt;id&gt;htt [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string TestFeedOfEmployee {
-            get {
-                return ResourceManager.GetString("TestFeedOfEmployee", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;root xmlns=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;&gt;
-        ///  &lt;element&gt;Frank&lt;/element&gt;
-        ///  &lt;element&gt;Steve&lt;/element&gt;
-        ///  &lt;element&gt;Tom&lt;/element&gt;
-        ///  &lt;element&gt;Chandler&lt;/element&gt;
-        ///&lt;/root&gt;.
-        /// </summary>
-        internal static string TestListOfStrings {
-            get {
-                return ResourceManager.GetString("TestListOfStrings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:type=&quot;Edm.Time&quot;&gt;PT1H&lt;/d:ID&gt;.
-        /// </summary>
-        internal static string TimeSpan {
-            get {
-                return ResourceManager.GetString("TimeSpan", resourceCulture);
+                return ResourceManager.GetString("WorkItemEntryInAtom", resourceCulture);
             }
         }
     }

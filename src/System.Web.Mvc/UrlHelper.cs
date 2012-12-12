@@ -104,7 +104,7 @@ namespace System.Web.Mvc
 
             if (contentPath[0] == '~')
             {
-                return PathHelpers.GenerateClientUrl(httpContext, contentPath);
+                return UrlUtil.GenerateClientUrl(httpContext, contentPath);
             }
             else
             {
@@ -179,7 +179,7 @@ namespace System.Web.Mvc
                 return null;
             }
 
-            string modifiedUrl = PathHelpers.GenerateClientUrl(requestContext.HttpContext, vpd.VirtualPath);
+            string modifiedUrl = UrlUtil.GenerateClientUrl(requestContext.HttpContext, vpd.VirtualPath);
             return modifiedUrl;
         }
 

@@ -6,7 +6,7 @@ using Moq;
 
 namespace System.Web.Mvc.Test
 {
-    public class PathHelpersTest
+    public class UrlUtilTest
     {
         [Fact]
         public void GenerateClientUrlWithAbsoluteContentPathAndRewritingDisabled()
@@ -15,7 +15,7 @@ namespace System.Web.Mvc.Test
             Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: false);
 
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(mockHttpContext.Object, "should remain unchanged");
+            string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "should remain unchanged");
 
             // Assert
             Assert.Equal("should remain unchanged", returnedUrl);
@@ -24,7 +24,7 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void GenerateClientUrlWithAbsoluteContentPathAndRewritingEnabled()
         {
-            PathHelpers.ResetUrlRewriterHelper(); // Reset the "is URL rewriting enabled?" cache
+            UrlUtil.ResetUrlRewriterHelper(); // Reset the "is URL rewriting enabled?" cache
 
             // Arrange
             Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: true);
@@ -32,7 +32,7 @@ namespace System.Web.Mvc.Test
             mockHttpContext.Setup(c => c.Request.Path).Returns("/myapp/foo/bar/baz");
 
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(mockHttpContext.Object, "/myapp/some/absolute/path?alpha=bravo");
+            string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "/myapp/some/absolute/path?alpha=bravo");
 
             // Assert
             Assert.Equal("/quux/some/absolute/path?alpha=bravo", returnedUrl);
@@ -45,7 +45,7 @@ namespace System.Web.Mvc.Test
             Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: false);
 
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(mockHttpContext.Object, "~/foo/bar?alpha=bravo");
+            string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "~/foo/bar?alpha=bravo");
 
             // Assert
             Assert.Equal("/myapp/(S(session))/foo/bar?alpha=bravo", returnedUrl);
@@ -54,7 +54,7 @@ namespace System.Web.Mvc.Test
         [Fact]
         public void GenerateClientUrlWithAppRelativeContentPathAndRewritingEnabled()
         {
-            PathHelpers.ResetUrlRewriterHelper(); // Reset the "is URL rewriting enabled?" cache
+            UrlUtil.ResetUrlRewriterHelper(); // Reset the "is URL rewriting enabled?" cache
 
             // Arrange
             Mock<HttpContextBase> mockHttpContext = GetMockHttpContext(includeRewriterServerVar: true);
@@ -62,7 +62,7 @@ namespace System.Web.Mvc.Test
             mockHttpContext.Setup(c => c.Request.Path).Returns("/myapp/foo/baz");
 
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(mockHttpContext.Object, "~/foo/bar?alpha=bravo");
+            string returnedUrl = UrlUtil.GenerateClientUrl(mockHttpContext.Object, "~/foo/bar?alpha=bravo");
 
             // Assert
             Assert.Equal("/quux/foo/bar?alpha=bravo", returnedUrl);
@@ -72,7 +72,7 @@ namespace System.Web.Mvc.Test
         public void GenerateClientUrlWithEmptyContentPathReturnsEmptyString()
         {
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(null, "");
+            string returnedUrl = UrlUtil.GenerateClientUrl(null, "");
 
             // Assert
             Assert.Equal("", returnedUrl);
@@ -82,7 +82,7 @@ namespace System.Web.Mvc.Test
         public void GenerateClientUrlWithNullContentPathReturnsNull()
         {
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(null, null);
+            string returnedUrl = UrlUtil.GenerateClientUrl(null, null);
 
             // Assert
             Assert.Null(returnedUrl);
@@ -92,7 +92,7 @@ namespace System.Web.Mvc.Test
         public void GenerateClientUrlWithOnlyQueryStringForContentPathReturnsOriginalContentPath()
         {
             // Act
-            string returnedUrl = PathHelpers.GenerateClientUrl(null, "?foo=bar");
+            string returnedUrl = UrlUtil.GenerateClientUrl(null, "?foo=bar");
 
             // Assert
             Assert.Equal("?foo=bar", returnedUrl);
@@ -102,7 +102,7 @@ namespace System.Web.Mvc.Test
         public void MakeAbsoluteFromDirectoryToParent()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeAbsolute("/Account/Register", "../Account");
+            string returnedUrl = UrlUtil.MakeAbsolute("/Account/Register", "../Account");
 
             // Assert
             Assert.Equal("/Account", returnedUrl);
@@ -112,7 +112,7 @@ namespace System.Web.Mvc.Test
         public void MakeAbsoluteFromDirectoryToSelf()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeAbsolute("/foo/", "./");
+            string returnedUrl = UrlUtil.MakeAbsolute("/foo/", "./");
 
             // Assert
             Assert.Equal("/foo/", returnedUrl);
@@ -122,7 +122,7 @@ namespace System.Web.Mvc.Test
         public void MakeAbsoluteFromFileToFile()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeAbsolute("/foo", "bar");
+            string returnedUrl = UrlUtil.MakeAbsolute("/foo", "bar");
 
             // Assert
             Assert.Equal("/bar", returnedUrl);
@@ -132,7 +132,7 @@ namespace System.Web.Mvc.Test
         public void MakeAbsoluteFromFileWithQueryToFile()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeAbsolute("/foo/bar?alpha=bravo", "baz");
+            string returnedUrl = UrlUtil.MakeAbsolute("/foo/bar?alpha=bravo", "baz");
 
             // Assert
             Assert.Equal("/foo/baz", returnedUrl);
@@ -142,7 +142,7 @@ namespace System.Web.Mvc.Test
         public void MakeAbsoluteFromRootToSelf()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeAbsolute("/", "./");
+            string returnedUrl = UrlUtil.MakeAbsolute("/", "./");
 
             // Assert
             Assert.Equal("/", returnedUrl);
@@ -152,7 +152,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromFileToDirectory()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/foo/bar", "/foo/");
+            string returnedUrl = UrlUtil.MakeRelative("/foo/bar", "/foo/");
 
             // Assert
             Assert.Equal("./", returnedUrl);
@@ -162,7 +162,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromFileToDirectoryWithQueryString()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/foo/bar", "/foo/?alpha=bravo");
+            string returnedUrl = UrlUtil.MakeRelative("/foo/bar", "/foo/?alpha=bravo");
 
             // Assert
             Assert.Equal("./?alpha=bravo", returnedUrl);
@@ -172,7 +172,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromFileToFile()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/foo/bar", "/baz/quux");
+            string returnedUrl = UrlUtil.MakeRelative("/foo/bar", "/baz/quux");
 
             // Assert
             Assert.Equal("../baz/quux", returnedUrl);
@@ -182,7 +182,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromFileToFileWithQuery()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/foo/bar", "/baz/quux?alpha=bravo");
+            string returnedUrl = UrlUtil.MakeRelative("/foo/bar", "/baz/quux?alpha=bravo");
 
             // Assert
             Assert.Equal("../baz/quux?alpha=bravo", returnedUrl);
@@ -192,7 +192,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromFileWithQueryToFileWithQuery()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/foo/bar?charlie=delta", "/baz/quux?alpha=bravo");
+            string returnedUrl = UrlUtil.MakeRelative("/foo/bar?charlie=delta", "/baz/quux?alpha=bravo");
 
             // Assert
             Assert.Equal("../baz/quux?alpha=bravo", returnedUrl);
@@ -202,7 +202,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromRootToRoot()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/", "/");
+            string returnedUrl = UrlUtil.MakeRelative("/", "/");
 
             // Assert
             Assert.Equal("./", returnedUrl);
@@ -212,7 +212,7 @@ namespace System.Web.Mvc.Test
         public void MakeRelativeFromRootToRootWithQueryString()
         {
             // Act
-            string returnedUrl = PathHelpers.MakeRelative("/", "/?foo=bar");
+            string returnedUrl = UrlUtil.MakeRelative("/", "/?foo=bar");
 
             // Assert
             Assert.Equal("./?foo=bar", returnedUrl);

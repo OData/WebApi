@@ -272,7 +272,7 @@
     <Compile Include="Html\LabelExtensions.cs" />
     <Compile Include="Html\TemplateHelpers.cs" />
     <Compile Include="HttpPostAttribute.cs" />
-    <Compile Include="PathHelpers.cs" />
+    <Compile Include="UrlUtil.cs" />
     <Compile Include="ExceptionContext.cs" />
     <Compile Include="ResultExecutedContext.cs" />
     <Compile Include="ResultExecutingContext.cs" />

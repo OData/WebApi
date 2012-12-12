@@ -2,7 +2,7 @@
 
 namespace System.Web.Mvc
 {
-    internal static class PathHelpers
+    internal static class UrlUtil
     {
         private static UrlRewriterHelper _urlRewriterHelper = new UrlRewriterHelper();
 

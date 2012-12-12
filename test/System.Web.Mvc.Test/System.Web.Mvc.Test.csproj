@@ -205,7 +205,7 @@
     <Compile Include="Test\HttpPostAttributeTest.cs" />
     <Compile Include="Test\LinqBinaryModelBinderTest.cs" />
     <Compile Include="Test\MockHelpers.cs" />
-    <Compile Include="Test\PathHelpersTest.cs" />
+    <Compile Include="Test\UrlUtilTest.cs" />
     <Compile Include="Test\ExceptionContextTest.cs" />
     <Compile Include="Test\ModelBindingContextTest.cs" />
     <Compile Include="Test\ResultExecutedContextTest.cs" />

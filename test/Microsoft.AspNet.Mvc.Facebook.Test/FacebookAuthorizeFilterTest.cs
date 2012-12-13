@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
 
             ContentResult result = Assert.IsType<ContentResult>(authorizeFilter.CreateRedirectResult(uri));
             Assert.Equal("text/html", result.ContentType);
-            Assert.Contains("http://example.com/?query=4';%20alert('hello%20world')", result.Content);
+            Assert.Equal(@"<script>window.top.location = 'http://example.com/?query=4\u0027;%20alert(\u0027hello%20world\u0027)';</script>", result.Content);
         }
 
         [Fact]

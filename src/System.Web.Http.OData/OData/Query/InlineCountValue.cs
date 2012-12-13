@@ -11,6 +11,7 @@ namespace System.Web.Http.OData.Query
         /// Corresponds to the 'none' $inlinecount query option value.
         /// </summary>
         None = 0,
+
         /// <summary>
         /// Corresponds to the 'allpages' $inlinecount query option value.
         /// </summary>

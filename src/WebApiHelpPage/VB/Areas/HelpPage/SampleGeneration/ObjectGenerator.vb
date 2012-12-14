@@ -25,7 +25,7 @@ Namespace Areas.HelpPage
         ''' Tuples: <see cref="Tuple(Of T1)"/>, <see cref="Tuple(Of T1,T2)"/>, etc
         ''' Dictionaries: <see cref="IDictionary(Of TKey,TValue)"/> or anything deriving from <see cref="IDictionary(Of TKey,TValue)"/>.
         ''' Collections: <see cref="IList(Of T)"/>, <see cref="IEnumerable(Of T)"/>, <see cref="ICollection(Of T)"/>, <see cref="IList"/>, <see cref="IEnumerable"/>, <see cref="ICollection"/> or anything deriving from <see cref="ICollection(Of T)"/> or <see cref="IList"/>.
-        ''' Queryables: <see cref="IQueryabl"/>, <see cref="IQueryable(Of T)"/>.
+        ''' Queryables: <see cref="System.Linq.IQueryable"/>, <see cref="IQueryable(Of T)"/>.
         ''' </summary>
         ''' <param name="type">The type.</param>
         ''' <returns>An object of the given type.</returns>

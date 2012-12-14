@@ -40,6 +40,7 @@ namespace System.Web.Http
         public QueryableAttribute()
         {
             EnsureStableOrdering = true;
+            EnableConstantParameterization = true;
             _validationSettings = new ODataValidationSettings();
         }
 
@@ -74,6 +75,13 @@ namespace System.Web.Http
                 _handleNullPropagationOption = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether constants should be parameterized. Parameterizing constants 
+        /// would result in better performance with Entity framework.
+        /// </summary>
+        /// <value>The default value is <c>true</c>.</value>
+        public bool EnableConstantParameterization { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum depth of the Any or All elements nested inside the query.
@@ -360,7 +368,8 @@ namespace System.Web.Http
                 EnsureStableOrdering = EnsureStableOrdering,
                 HandleNullPropagation = HandleNullPropagation,
                 MaxAnyAllExpressionDepth = MaxAnyAllExpressionDepth,
-                PageSize = _pageSize
+                PageSize = _pageSize,
+                EnableConstantParameterization = EnableConstantParameterization
             };
 
             return queryOptions.ApplyTo(queryable, querySettings);

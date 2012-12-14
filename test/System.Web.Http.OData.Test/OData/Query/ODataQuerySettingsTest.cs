@@ -1,11 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Linq;
-using System.Web.Http.OData.Builder;
-using System.Web.Http.OData.Builder.TestModels;
-using Microsoft.Data.Edm;
-using Microsoft.Data.OData.Query;
-using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Query
@@ -70,6 +64,15 @@ namespace System.Web.Http.OData.Query
                 illegalLowerValue: 0,
                 illegalUpperValue: null,
                 roundTripTestValue: 2);
+        }
+
+        [Fact]
+        public void EnableConstantParameterization_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty<ODataQuerySettings>(
+                new ODataQuerySettings(),
+                o => o.EnableConstantParameterization,
+                expectedDefaultValue: true);
         }
     }
 }

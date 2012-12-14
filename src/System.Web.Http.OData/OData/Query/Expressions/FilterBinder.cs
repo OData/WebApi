@@ -313,12 +313,26 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             Contract.Assert(constantNode != null);
 
+            // no need to parameterize null's as there cannot be multiple values for null.
             if (constantNode.Value == null)
             {
                 return _nullConstant;
             }
 
-            return Expression.Constant(constantNode.Value, EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver));
+            Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver);
+
+            if (_querySettings.EnableConstantParameterization)
+            {
+                // () => new LinqParameterContainer(constant).Property
+                // instead of returning a constant expression node, wrap that constant in a class the way compiler 
+                // does a closure, so that EF can parameterize the constant (resulting in better performance due to expression translation caching).
+                LinqParameterContainer value = LinqParameterContainer.Create(constantType, constantNode.Value);
+                return Expression.Property(Expression.Constant(value), value.PropertyInfo);
+            }
+            else
+            {
+                return Expression.Constant(constantNode.Value, constantType);
+            }
         }
 
         private Expression BindConvertNode(ConvertNode convertNode)
@@ -1179,19 +1193,18 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)
         {
-            if (expression.NodeType == ExpressionType.Constant)
+            object parameterizedConstantValue = ExtractParameterizedConstant(expression);
+            if (parameterizedConstantValue != null)
             {
-                ConstantExpression constantExpression = expression as ConstantExpression;
-                Contract.Assert(constantExpression != null);
-                if (constantExpression.Value == null)
-                {
-                    return expression;
-                }
-                else
-                {
-                    Contract.Assert(constantExpression.Type == typeof(string));
-                    return Expression.Constant(Convert.ChangeType(Enum.Parse(enumType, constantExpression.Value as string), enumUnderlyingType, CultureInfo.InvariantCulture));
-                }
+                string enumStringValue = parameterizedConstantValue as string;
+                Contract.Assert(enumStringValue != null);
+                return Expression.Constant(Convert.ChangeType(Enum.Parse(enumType, enumStringValue), enumUnderlyingType, CultureInfo.InvariantCulture));
+            }
+            else if (expression.NodeType == ExpressionType.Constant)
+            {
+                // only null constants are not parameterized.
+                Contract.Assert((expression as ConstantExpression).Value == null);
+                return expression;
             }
             else if (expression.Type == enumType)
             {
@@ -1205,6 +1218,29 @@ namespace System.Web.Http.OData.Query.Expressions
             {
                 throw Error.NotSupported(SRResources.ConvertToEnumFailed, enumType, expression.Type);
             }
+        }
+
+        // Extract the constant that would have been encapsulated into LinqParameterContainer if this
+        // expression represents it else return null.
+        private static object ExtractParameterizedConstant(Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.MemberAccess)
+            {
+                MemberExpression memberAccess = expression as MemberExpression;
+                Contract.Assert(memberAccess != null);
+                if (memberAccess.Expression.NodeType == ExpressionType.Constant)
+                {
+                    ConstantExpression constant = memberAccess.Expression as ConstantExpression;
+                    Contract.Assert(constant != null);
+                    Contract.Assert(constant.Value != null);
+                    LinqParameterContainer value = constant.Value as LinqParameterContainer;
+                    Contract.Assert(value != null, "Constants are already embedded into LinqParameterContainer");
+
+                    return value.Property;
+                }
+            }
+
+            return null;
         }
 
         private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Query.Expressions;
 using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -588,7 +589,7 @@ namespace System.Web.Http.OData.Query
 
             IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
-            string queryExpression = finalQuery.Expression.ToString();
+            string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
 
             Assert.Equal(queryExpression, expectedExpression);
@@ -615,7 +616,7 @@ namespace System.Web.Http.OData.Query
             };
             IQueryable finalQuery = options.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
-            string queryExpression = finalQuery.Expression.ToString();
+            string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
 
             Assert.Equal(queryExpression, expectedExpression);

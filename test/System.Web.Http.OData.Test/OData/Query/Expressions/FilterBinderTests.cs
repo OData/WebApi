@@ -1003,7 +1003,8 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "concat('Food', 'Bar') eq 'FoodBar'",
-                "$it => (Concat(\"Food\", \"Bar\") == \"FoodBar\")");
+                "$it => (\"Food\".Concat(\"Bar\") == \"FoodBar\")",
+                NotTesting);
 
             RunFilters(filters,
               new Product { },
@@ -1015,8 +1016,8 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "floor(floor(UnitPrice)) eq 123m",
-                "$it => (Floor(Floor($it.UnitPrice.Value)) == 123)",
-                "$it => ((IIF((IIF(($it.UnitPrice == null), null, Convert(Floor($it.UnitPrice.Value))) == null), null, Convert(Floor(Floor($it.UnitPrice.Value)))) == Convert(123)) == True)");
+                "$it => ($it.UnitPrice.Value.Floor().Floor() == 123)",
+                NotTesting);
 
             RunFilters(filters,
               new Product { },
@@ -1136,7 +1137,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "round(UnitPrice) gt 5.00m",
-                Error.Format("$it => (Round($it.UnitPrice.Value) > {0:0.00})", 5.0),
+                Error.Format("$it => ($it.UnitPrice.Value.Round() > {0:0.00})", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -1152,7 +1153,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "floor(UnitPrice) eq 5m",
-                "$it => (Floor($it.UnitPrice.Value) == 5)",
+                "$it => ($it.UnitPrice.Value.Floor() == 5)",
                 NotTesting);
 
             RunFilters(filters,
@@ -1168,7 +1169,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "ceiling(UnitPrice) eq 5m",
-                "$it => (Ceiling($it.UnitPrice.Value) == 5)",
+                "$it => ($it.UnitPrice.Value.Ceiling() == 5)",
                 NotTesting);
 
             RunFilters(filters,
@@ -1441,7 +1442,7 @@ namespace System.Web.Http.OData.Query.Expressions
         [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == Convert(12))")]
         [InlineData("CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
         [InlineData("CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
-        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))")]
+        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])")]
         [InlineData("XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
         public void NonstandardEdmPrimtives(string filter, string expression)
         {
@@ -1462,13 +1463,13 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == value(System.Byte[]))", true, true)]
-        [InlineData("BinaryProp ne binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() != value(System.Byte[]))", false, false)]
-        [InlineData("ByteArrayProp eq binary'23ABFF'", "$it => ($it.ByteArrayProp == value(System.Byte[]))", true, true)]
-        [InlineData("ByteArrayProp ne binary'23ABFF'", "$it => ($it.ByteArrayProp != value(System.Byte[]))", false, false)]
-        [InlineData("binary'23ABFF' eq binary'23ABFF'", "$it => (value(System.Byte[]) == value(System.Byte[]))", true, true)]
-        [InlineData("binary'23ABFF' ne binary'23ABFF'", "$it => (value(System.Byte[]) != value(System.Byte[]))", false, false)]
-        [InlineData("ByteArrayPropWithNullValue ne binary'23ABFF'", "$it => ($it.ByteArrayPropWithNullValue != value(System.Byte[]))", true, true)]
+        [InlineData("BinaryProp eq binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])", true, true)]
+        [InlineData("BinaryProp ne binary'23ABFF'", "$it => ($it.BinaryProp.ToArray() != System.Byte[])", false, false)]
+        [InlineData("ByteArrayProp eq binary'23ABFF'", "$it => ($it.ByteArrayProp == System.Byte[])", true, true)]
+        [InlineData("ByteArrayProp ne binary'23ABFF'", "$it => ($it.ByteArrayProp != System.Byte[])", false, false)]
+        [InlineData("binary'23ABFF' eq binary'23ABFF'", "$it => (System.Byte[] == System.Byte[])", true, true)]
+        [InlineData("binary'23ABFF' ne binary'23ABFF'", "$it => (System.Byte[] != System.Byte[])", false, false)]
+        [InlineData("ByteArrayPropWithNullValue ne binary'23ABFF'", "$it => ($it.ByteArrayPropWithNullValue != System.Byte[])", true, true)]
         [InlineData("ByteArrayPropWithNullValue ne ByteArrayPropWithNullValue", "$it => ($it.ByteArrayPropWithNullValue != $it.ByteArrayPropWithNullValue)", false, false)]
         [InlineData("ByteArrayPropWithNullValue ne null", "$it => ($it.ByteArrayPropWithNullValue != null)", false, false)]
         [InlineData("ByteArrayPropWithNullValue eq null", "$it => ($it.ByteArrayPropWithNullValue == null)", true, true)]
@@ -1514,6 +1515,25 @@ namespace System.Web.Http.OData.Query.Expressions
             RunFilters(filters,
                 new DataTypes(),
                 new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
+        }
+
+        [Fact]
+        public void MultipleConstants_Are_Parameterized()
+        {
+            VerifyQueryDeserialization("ProductName eq '1' or ProductName eq '2' or ProductName eq '3' or ProductName eq '4'",
+                "$it => (((($it.ProductName == \"1\") OrElse ($it.ProductName == \"2\")) OrElse ($it.ProductName == \"3\")) OrElse ($it.ProductName == \"4\"))",
+                NotTesting);
+        }
+
+        [Fact]
+        public void Constants_Are_Not_Parameterized_IfDisabled()
+        {
+            var filters = VerifyQueryDeserialization("ProductName eq '1'", settingsCustomizer: (settings) =>
+                {
+                    settings.EnableConstantParameterization = false;
+                });
+
+            Assert.Equal("$it => ($it.ProductName == \"1\")", (filters.WithoutNullPropagation as Expression).ToString());
         }
 
         #region Negative Tests
@@ -1667,7 +1687,7 @@ namespace System.Web.Http.OData.Query.Expressions
         {
             // strip off the beginning part of the expression to get to the first
             // actual query operator
-            string resultExpression = filter.ToString();
+            string resultExpression = ExpressionStringBuilder.ToString(filter);
             Assert.True(resultExpression == expectedExpression,
                 String.Format("Expected expression '{0}' but the deserializer produced '{1}'", expectedExpression, resultExpression));
         }

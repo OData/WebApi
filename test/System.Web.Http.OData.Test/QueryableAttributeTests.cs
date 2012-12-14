@@ -108,6 +108,15 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
+        public void EnableConstantParameterization_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty(
+                new QueryableAttribute(),
+                o => o.EnableConstantParameterization,
+                expectedDefaultValue: true);
+        }
+
+        [Fact]
         public void OnActionExecuted_Throws_Null_Context()
         {
             Assert.ThrowsArgumentNull(() => new QueryableAttribute().OnActionExecuted(null), "actionExecutedContext");

@@ -147,7 +147,7 @@ namespace System.Web.Http.OData
             Collection<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
 
             Assert.Equal(1, filters.Count);
-            Assert.Equal(100, ((QueryableAttribute)filters[0].Instance).ResultLimit);
+            Assert.Equal(100, ((QueryableAttribute)filters[0].Instance).PageSize);
         }
 
         private static ODataMediaTypeFormatter CreateODataFormatter()

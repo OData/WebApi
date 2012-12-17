@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Formatter
 {
     public class PeopleController : ApiController
     {
-        [Queryable(ResultLimit=2)]
+        [Queryable(PageSize=2)]
         public IEnumerable<FormatterPerson> GetPeople()
         {
             return new FormatterPerson[]

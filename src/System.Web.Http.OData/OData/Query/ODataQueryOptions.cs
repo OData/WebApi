@@ -229,7 +229,7 @@ namespace System.Web.Http.OData.Query
             // If either is present in the query and we have permission,
             // generate an $orderby that will produce a stable sort.
             if (querySettings.EnsureStableOrdering && !Context.IsPrimitiveClrType &&
-                (Skip != null || Top != null || querySettings.ResultLimit.HasValue))
+                (Skip != null || Top != null || querySettings.PageSize.HasValue))
             {
                 // If there is no OrderBy present, we manufacture a default.
                 // If an OrderBy is already present, we add any missing
@@ -256,13 +256,13 @@ namespace System.Web.Http.OData.Query
                 result = Top.ApplyTo(result);
             }
 
-            if (querySettings.ResultLimit.HasValue)
+            if (querySettings.PageSize.HasValue)
             {
                 bool resultsLimited;
-                result = LimitResults(result, querySettings.ResultLimit.Value, Context, out resultsLimited);
+                result = LimitResults(result, querySettings.PageSize.Value, Context, out resultsLimited);
                 if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri)
                 {
-                    Uri nextPageLink = GetNextPageLink(Request, querySettings.ResultLimit.Value);
+                    Uri nextPageLink = GetNextPageLink(Request, querySettings.PageSize.Value);
                     Request.SetNextPageLink(nextPageLink);
                 }
             }
@@ -435,7 +435,7 @@ namespace System.Web.Http.OData.Query
             return list.AsQueryable();
         }
 
-        internal static Uri GetNextPageLink(HttpRequestMessage request, int resultLimit)
+        internal static Uri GetNextPageLink(HttpRequestMessage request, int pageSize)
         {
             Contract.Assert(request != null);
             Contract.Assert(request.RequestUri != null);
@@ -443,7 +443,7 @@ namespace System.Web.Http.OData.Query
 
             StringBuilder queryBuilder = new StringBuilder();
 
-            int nextPageSkip = resultLimit;
+            int nextPageSkip = pageSize;
 
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
             foreach (KeyValuePair<string, string> kvp in queryParameters)
@@ -456,17 +456,17 @@ namespace System.Web.Http.OData.Query
                         int top;
                         if (Int32.TryParse(value, out top))
                         {
-                            // There is no next page if the $top query option's value is less than or equal to the result limit.
-                            Contract.Assert(top > resultLimit);
-                            // We decrease top by the resultLimit because that's the number of results we're returning in the current page
-                            value = (top - resultLimit).ToString(CultureInfo.InvariantCulture);
+                            // There is no next page if the $top query option's value is less than or equal to the page size.
+                            Contract.Assert(top > pageSize);
+                            // We decrease top by the pageSize because that's the number of results we're returning in the current page
+                            value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                         }
                         break;
                     case "$skip":
                         int skip;
                         if (Int32.TryParse(value, out skip))
                         {
-                            // We increase skip by the resultLimit because that's the number of results we're returning in the current page
+                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
                             nextPageSkip += skip;
                         }
                         continue;

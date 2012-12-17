@@ -115,7 +115,7 @@ namespace System.Web.Http.OData.Query
             return null;
         }
 
-        [Queryable(ResultLimit = 100)]
+        [Queryable(PageSize = 100)]
         public IQueryable GetQueryableWithFilterAttribute()
         {
             return null;

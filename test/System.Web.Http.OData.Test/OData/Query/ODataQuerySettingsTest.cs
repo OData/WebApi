@@ -59,11 +59,11 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void ResultLimit_Property_RoundTrips()
+        public void PageSize_Property_RoundTrips()
         {
             Assert.Reflection.NullableIntegerProperty<ODataQuerySettings, int>(
                 new ODataQuerySettings(),
-                o => o.ResultLimit,
+                o => o.PageSize,
                 expectedDefaultValue: null,
                 minLegalValue: 1,
                 maxLegalValue: int.MaxValue,

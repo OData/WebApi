@@ -28,7 +28,7 @@ namespace System.Web.Http
 
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int _maxAnyAllExpressionDepth = 1;
-        private int? _resultLimit;
+        private int? _pageSize;
 
         private ODataValidationSettings _validationSettings;
         private string _allowedOrderByProperties;
@@ -106,11 +106,11 @@ namespace System.Web.Http
         /// <value>
         /// The maximum number of query results to send back to clients.
         /// </value>
-        public int ResultLimit
+        public int PageSize
         {
             get
             {
-                return _resultLimit ?? default(int);
+                return _pageSize ?? default(int);
             }
             set
             {
@@ -118,7 +118,7 @@ namespace System.Web.Http
                 {
                     throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
-                _resultLimit = value;
+                _pageSize = value;
             }
         }
 
@@ -269,9 +269,9 @@ namespace System.Web.Http
                 }
                 ValidateReturnType(responseContent.ObjectType, actionDescriptor);
 
-                // Apply the query if there are any query options or if there is a result limit set
+                // Apply the query if there are any query options or if there is a page size set
                 if (responseContent.Value != null && request.RequestUri != null &&
-                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _resultLimit.HasValue))
+                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _pageSize.HasValue))
                 {
                     try
                     {
@@ -359,7 +359,7 @@ namespace System.Web.Http
                 EnsureStableOrdering = EnsureStableOrdering,
                 HandleNullPropagation = HandleNullPropagation,
                 MaxAnyAllExpressionDepth = MaxAnyAllExpressionDepth,
-                ResultLimit = _resultLimit
+                PageSize = _pageSize
             };
 
             return queryOptions.ApplyTo(queryable, querySettings);

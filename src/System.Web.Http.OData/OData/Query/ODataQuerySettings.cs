@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Query
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int _maxAnyAllExpressionDepth = 1;
-        private int? _resultLimit;
+        private int? _pageSize;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataQuerySettings"/> class
@@ -84,11 +84,11 @@ namespace System.Web.Http.OData.Query
         /// <value>
         /// The maximum number of query results to return, or <c>null</c> if there is no limit.
         /// </value>
-        public int? ResultLimit
+        public int? PageSize
         {
             get
             {
-                return _resultLimit;
+                return _pageSize;
             }
             set
             {
@@ -97,7 +97,7 @@ namespace System.Web.Http.OData.Query
                     throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
 
-                _resultLimit = value;
+                _pageSize = value;
             }
         }
     }

@@ -101,11 +101,11 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void ResultLimit_Property_RoundTrips()
+        public void PageSize_Property_RoundTrips()
         {
             Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
                 new QueryableAttribute(),
-                o => o.ResultLimit,
+                o => o.PageSize,
                 expectedDefaultValue: 0,
                 minLegalValue: 1,
                 illegalLowerValue: 0,

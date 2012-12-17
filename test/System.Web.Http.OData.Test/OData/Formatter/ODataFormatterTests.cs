@@ -208,7 +208,7 @@ namespace System.Web.Http.OData.Formatter
                     .SingleOrDefault();
                 XElement count = xml.Element(XName.Get("count", "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"));
 
-                // Assert the ResultLimit correctly limits three results to two
+                // Assert the PageSize correctly limits three results to two
                 Assert.Equal(2, entries.Length);
                 // Assert there is a next page link
                 Assert.NotNull(nextPageLink);

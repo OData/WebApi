@@ -223,6 +223,19 @@ namespace System.Web.Http.OData
                 ((ODataError)((ObjectContent)exception.Response.Content).Value).Message);
         }
 
+        [Fact]
+        public void Controller_DoesNotAppear_InApiDescriptions()
+        {
+            var config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{action}");
+            config.EnableOData(new ODataConventionModelBuilder().GetEdmModel());
+            var explorer = config.Services.GetApiExplorer();
+
+            var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
+
+            Assert.DoesNotContain("Employees", apis);
+        }
+
         private static void SetupController(EntitySetController<FormatterPerson, int> controller)
         {
             var config = new HttpConfiguration();

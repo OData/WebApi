@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
+using System.Web.Http.Description;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -17,6 +18,7 @@ using Microsoft.Data.OData.Atom;
 namespace System.Web.Http.OData
 {
     [PerControllerConfiguration]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ODataMetadataController : ApiController
     {
         private static readonly Version _defaultEdmxVersion = new Version(1, 0);

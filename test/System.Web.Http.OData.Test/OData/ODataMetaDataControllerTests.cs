@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Web.Http.Description;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.Tracing;
@@ -85,6 +87,19 @@ namespace System.Web.Http.OData.Builder
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<workspace>", response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void Controller_DoesNotAppear_InApiDescriptions()
+        {
+            var config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("Default", "{controller}/{action}");
+            config.EnableOData(new ODataConventionModelBuilder().GetEdmModel());
+            var explorer = config.Services.GetApiExplorer();
+
+            var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
+
+            Assert.DoesNotContain("ODataMetadata", apis);
         }
     }
 }

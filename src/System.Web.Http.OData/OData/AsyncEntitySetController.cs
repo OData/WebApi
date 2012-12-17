@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http.Description;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
@@ -20,6 +21,7 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntity">The type associated with the exposed entity set's entity type.</typeparam>
     /// <typeparam name="TKey">The type associated with the entity key of the exposed entity set's entity type.</typeparam>
     [CLSCompliant(false)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public abstract class AsyncEntitySetController<TEntity, TKey> : ApiController where TEntity : class
     {
         /// <summary>

@@ -41,12 +41,12 @@ namespace System.Web.Http.OData.Query.Validators
         {
             Assert.DoesNotThrow(() =>
                 _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
-                new ODataValidationSettings() { AllowedFunctionNames = AllowedFunctionNames.Substring }));
+                new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.Substring }));
 
             Assert.Throws<ODataException>(() =>
                  _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
-                new ODataValidationSettings() { AllowedFunctionNames = AllowedFunctionNames.AllMathFunctionNames }), 
-                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings.");
+                new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.AllMathFunctions }), 
+                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
         }
 
         [Fact]

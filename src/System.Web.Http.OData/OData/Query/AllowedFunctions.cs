@@ -3,7 +3,7 @@
 namespace System.Web.Http.OData.Query
 {
     [Flags]
-    public enum AllowedFunctionNames
+    public enum AllowedFunctions
     {
         None = 0x0,
         StartsWith = 0x1,
@@ -35,9 +35,9 @@ namespace System.Web.Http.OData.Query
         IsOf = 0x4000000,
         Any = 0x8000000,
         All = 0x10000000,
-        AllStringFunctionNames = StartsWith | EndsWith | SubstringOf | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim,
-        AllDateTimeFunctionNames = Year | Years | Month | Months | Day | Days | Hour | Hours | Minute | Minutes | Second | Seconds,
-        AllMathFunctionNames = Round | Floor | Ceiling,
-        AllFunctionNames = AllStringFunctionNames | AllDateTimeFunctionNames | AllMathFunctionNames | Cast | IsOf | Any | All
+        AllStringFunctions = StartsWith | EndsWith | SubstringOf | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim,
+        AllDateTimeFunctions = Year | Years | Month | Months | Day | Days | Hour | Hours | Minute | Minutes | Second | Seconds,
+        AllMathFunctions = Round | Floor | Ceiling,
+        AllFunctions = AllStringFunctions | AllDateTimeFunctions | AllMathFunctions | Cast | IsOf | Any | All
     }
 }

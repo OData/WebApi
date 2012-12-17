@@ -541,7 +541,7 @@
   <data name="NotAllowedArithmeticOperator" xml:space="preserve">
     <value>Arithmetic operator '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
   </data>
-  <data name="NotAllowedFunctionName" xml:space="preserve">
+  <data name="NotAllowedFunction" xml:space="preserve">
     <value>Function '{0}' is not allowed. To allow it, set the '{1}' property on QueryableAttribute or QueryValidationSettings.</value>
   </data>
   <data name="NotAllowedLogicalOperator" xml:space="preserve">

@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(AllowedArithmeticOperators.All, querySettings.AllowedArithmeticOperators);
-            Assert.Equal(AllowedFunctionNames.AllFunctionNames, querySettings.AllowedFunctionNames);
+            Assert.Equal(AllowedFunctions.AllFunctions, querySettings.AllowedFunctions);
             Assert.Equal(AllowedLogicalOperators.All, querySettings.AllowedLogicalOperators);
             Assert.Equal(0, querySettings.AllowedOrderByProperties.Count);
             Assert.Equal(AllowedQueryOptions.All, querySettings.AllowedQueryOptions);
@@ -24,14 +24,14 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void AllowedFunctionNames_Property_RoundTrips()
+        public void AllowedFunctions_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedFunctionNames>(
+            Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedFunctions>(
                 new ODataValidationSettings(),
-                o => o.AllowedFunctionNames,
-                expectedDefaultValue: AllowedFunctionNames.AllFunctionNames,
-                illegalValue: AllowedFunctionNames.AllFunctionNames + 1,
-                roundTripTestValue: AllowedFunctionNames.AllMathFunctionNames);
+                o => o.AllowedFunctions,
+                expectedDefaultValue: AllowedFunctions.AllFunctions,
+                illegalValue: AllowedFunctions.AllFunctions + 1,
+                roundTripTestValue: AllowedFunctions.AllMathFunctions);
         }
 
         [Fact]

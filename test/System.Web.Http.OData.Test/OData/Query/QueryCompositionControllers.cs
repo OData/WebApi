@@ -103,7 +103,7 @@ namespace System.Web.Http.OData.Query
 
     public class QueryCompositionCustomerValidationController : ApiController
     {
-        [Queryable(MaxSkip = 1, MaxTop = 2, AllowedArithmeticOperators = AllowedArithmeticOperators.Modulo, AllowedFunctionNames = AllowedFunctionNames.Length,
+        [Queryable(MaxSkip = 1, MaxTop = 2, AllowedArithmeticOperators = AllowedArithmeticOperators.Modulo, AllowedFunctions = AllowedFunctions.Length,
             AllowedLogicalOperators = AllowedLogicalOperators.Equal, AllowedOrderByProperties = "Id,Name")]
         public IQueryable<QueryCompositionCustomer> Get()
         {

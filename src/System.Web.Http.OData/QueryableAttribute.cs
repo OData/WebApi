@@ -134,15 +134,15 @@ namespace System.Web.Http
             }
         }
 
-        public AllowedFunctionNames AllowedFunctionNames
+        public AllowedFunctions AllowedFunctions
         {
             get
             {
-                return _validationSettings.AllowedFunctionNames;
+                return _validationSettings.AllowedFunctions;
             }
             set
             {
-                _validationSettings.AllowedFunctionNames = value;
+                _validationSettings.AllowedFunctions = value;
             }
         }
 

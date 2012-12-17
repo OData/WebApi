@@ -161,7 +161,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializerTest.cs" />
     <Compile Include="OData\ODataResultOfTTest.cs" />
     <Compile Include="OData\Query\AllowedArithmeticOperatorsTest.cs" />
-    <Compile Include="OData\Query\AllowedFunctionNamesTest.cs" />
+    <Compile Include="OData\Query\AllowedFunctionsTest.cs" />
     <Compile Include="OData\Query\AllowedLogicalOperatorsTest.cs" />
     <Compile Include="OData\Query\AllowedQueryOptionsTest.cs" />
     <Compile Include="OData\Query\Controllers\PrimitiveController.cs" />

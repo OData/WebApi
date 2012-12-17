@@ -445,7 +445,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void AllowedFunctionNames_ThrowsOnNotAllowedFunctions()
+        public void AllowedFunctions_ThrowsOnNotAllowedFunctions()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerValidation", useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
@@ -462,7 +462,7 @@ namespace System.Web.Http.OData.Query
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Function 'endswith' is not allowed. To allow it, set the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings."));
+            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("Function 'endswith' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings."));
         }
 
         [Fact]

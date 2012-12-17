@@ -271,13 +271,13 @@ namespace System.Web.Http.OData.Query
         [Fact]
         public void CanTurnOffValidationForFilter()
         {
-            ODataValidationSettings settings = new ODataValidationSettings() { AllowedFunctionNames = AllowedFunctionNames.AllDateTimeFunctionNames };
+            ODataValidationSettings settings = new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.AllDateTimeFunctions };
             ODataQueryContext context = ValidationTestHelper.CreateCustomerContext();
             FilterQueryOption option = new FilterQueryOption("substring(Name,8,1) eq '7'", context);
 
             Assert.Throws<ODataException>(() =>
                 option.Validate(settings),
-                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctionNames' property on QueryableAttribute or QueryValidationSettings.");
+                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
 
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));

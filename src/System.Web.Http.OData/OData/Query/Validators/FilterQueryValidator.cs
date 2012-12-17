@@ -484,111 +484,111 @@ namespace System.Web.Http.OData.Query.Validators
 
         private static void ValidateFunction(string functionName, ODataValidationSettings settings)
         {
-            AllowedFunctionNames convertedFunctionName = ToODataFunctionNames(functionName);
-            if ((settings.AllowedFunctionNames & convertedFunctionName) != convertedFunctionName)
+            AllowedFunctions convertedFunction = ToODataFunction(functionName);
+            if ((settings.AllowedFunctions & convertedFunction) != convertedFunction)
             {
                 // this means the given function is not allowed
-                throw new ODataException(Error.Format(SRResources.NotAllowedFunctionName, functionName, "AllowedFunctionNames"));
+                throw new ODataException(Error.Format(SRResources.NotAllowedFunction, functionName, "AllowedFunctions"));
             }
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
-        private static AllowedFunctionNames ToODataFunctionNames(string functionName)
+        private static AllowedFunctions ToODataFunction(string functionName)
         {
-            AllowedFunctionNames result = AllowedFunctionNames.None;
+            AllowedFunctions result = AllowedFunctions.None;
 
             switch (functionName)
             {
                 case "any":
-                    result = AllowedFunctionNames.Any;
+                    result = AllowedFunctions.Any;
                     break;
                 case "all":
-                    result = AllowedFunctionNames.All;
+                    result = AllowedFunctions.All;
                     break;
                 case "cast":
-                    result = AllowedFunctionNames.Cast;
+                    result = AllowedFunctions.Cast;
                     break;
                 case ClrCanonicalFunctions.CeilingFunctionName:
-                    result = AllowedFunctionNames.Ceiling;
+                    result = AllowedFunctions.Ceiling;
                     break;
                 case ClrCanonicalFunctions.ConcatFunctionName:
-                    result = AllowedFunctionNames.Concat;
+                    result = AllowedFunctions.Concat;
                     break;
                 case ClrCanonicalFunctions.DayFunctionName:
-                    result = AllowedFunctionNames.Day;
+                    result = AllowedFunctions.Day;
                     break;
                 case ClrCanonicalFunctions.DaysFunctionName:
-                    result = AllowedFunctionNames.Days;
+                    result = AllowedFunctions.Days;
                     break;
                 case ClrCanonicalFunctions.EndswithFunctionName:
-                    result = AllowedFunctionNames.EndsWith;
+                    result = AllowedFunctions.EndsWith;
                     break;
                 case ClrCanonicalFunctions.FloorFunctionName:
-                    result = AllowedFunctionNames.Floor;
+                    result = AllowedFunctions.Floor;
                     break;
                 case ClrCanonicalFunctions.HourFunctionName:
-                    result = AllowedFunctionNames.Hour;
+                    result = AllowedFunctions.Hour;
                     break;
                 case ClrCanonicalFunctions.HoursFunctionName:
-                    result = AllowedFunctionNames.Hours;
+                    result = AllowedFunctions.Hours;
                     break;
                 case ClrCanonicalFunctions.IndexofFunctionName:
-                    result = AllowedFunctionNames.IndexOf;
+                    result = AllowedFunctions.IndexOf;
                     break;
                 case "IsOf":
-                    result = AllowedFunctionNames.IsOf;
+                    result = AllowedFunctions.IsOf;
                     break;
                 case ClrCanonicalFunctions.LengthFunctionName:
-                    result = AllowedFunctionNames.Length;
+                    result = AllowedFunctions.Length;
                     break;
                 case ClrCanonicalFunctions.MinuteFunctionName:
-                    result = AllowedFunctionNames.Minute;
+                    result = AllowedFunctions.Minute;
                     break;
                 case ClrCanonicalFunctions.MinutesFunctionName:
-                    result = AllowedFunctionNames.Minutes;
+                    result = AllowedFunctions.Minutes;
                     break;
                 case ClrCanonicalFunctions.MonthFunctionName:
-                    result = AllowedFunctionNames.Month;
+                    result = AllowedFunctions.Month;
                     break;
                 case ClrCanonicalFunctions.MonthsFunctionName:
-                    result = AllowedFunctionNames.Months;
+                    result = AllowedFunctions.Months;
                     break;
                 case ClrCanonicalFunctions.RoundFunctionName:
-                    result = AllowedFunctionNames.Round;
+                    result = AllowedFunctions.Round;
                     break;
                 case ClrCanonicalFunctions.SecondFunctionName:
-                    result = AllowedFunctionNames.Second;
+                    result = AllowedFunctions.Second;
                     break;
                 case ClrCanonicalFunctions.SecondsFunctionName:
-                    result = AllowedFunctionNames.Seconds;
+                    result = AllowedFunctions.Seconds;
                     break;
                 case ClrCanonicalFunctions.StartswithFunctionName:
-                    result = AllowedFunctionNames.StartsWith;
+                    result = AllowedFunctions.StartsWith;
                     break;
                 case ClrCanonicalFunctions.SubstringFunctionName:
-                    result = AllowedFunctionNames.Substring;
+                    result = AllowedFunctions.Substring;
                     break;
                 case ClrCanonicalFunctions.SubstringofFunctionName:
-                    result = AllowedFunctionNames.SubstringOf;
+                    result = AllowedFunctions.SubstringOf;
                     break;
                 case ClrCanonicalFunctions.TolowerFunctionName:
-                    result = AllowedFunctionNames.ToLower;
+                    result = AllowedFunctions.ToLower;
                     break;
                 case ClrCanonicalFunctions.ToupperFunctionName:
-                    result = AllowedFunctionNames.ToUpper;
+                    result = AllowedFunctions.ToUpper;
                     break;
                 case ClrCanonicalFunctions.TrimFunctionName:
-                    result = AllowedFunctionNames.Trim;
+                    result = AllowedFunctions.Trim;
                     break;
                 case ClrCanonicalFunctions.YearFunctionName:
-                    result = AllowedFunctionNames.Year;
+                    result = AllowedFunctions.Year;
                     break;
                 case ClrCanonicalFunctions.YearsFunctionName:
-                    result = AllowedFunctionNames.Years;
+                    result = AllowedFunctions.Years;
                     break;
                 default:
                     // should never be here
-                    Contract.Assert(true, "ToODataFunctionNames should never be here.");
+                    Contract.Assert(true, "ToODataFunction should never be here.");
                     break;
             }
 

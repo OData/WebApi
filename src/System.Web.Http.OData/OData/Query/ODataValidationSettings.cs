@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Query
         private const int MinMaxTop = 0;
 
         private AllowedArithmeticOperators _allowedArithmeticOperators;
-        private AllowedFunctionNames _allowedFunctionNames;
+        private AllowedFunctions _allowedFunctions;
         private AllowedLogicalOperators _allowedLogicalOperators;
         private AllowedQueryOptions _allowedQueryParameters;
         private Collection<string> _allowedOrderByProperties;
@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Query
         {
             // default it to all the operators
             _allowedArithmeticOperators = AllowedArithmeticOperators.All;
-            _allowedFunctionNames = AllowedFunctionNames.AllFunctionNames;
+            _allowedFunctions = AllowedFunctions.AllFunctions;
             _allowedLogicalOperators = AllowedLogicalOperators.All;
             _allowedQueryParameters = AllowedQueryOptions.All;
             _allowedOrderByProperties = new Collection<string>();
@@ -70,20 +70,20 @@ namespace System.Web.Http.OData.Query
         ///  any, all
         ///  
         /// </summary>
-        public AllowedFunctionNames AllowedFunctionNames
+        public AllowedFunctions AllowedFunctions
         {
             get
             {
-                return _allowedFunctionNames;
+                return _allowedFunctions;
             }
             set
             {
-                if (value > AllowedFunctionNames.All || value < AllowedFunctionNames.None)
+                if (value > AllowedFunctions.All || value < AllowedFunctions.None)
                 {
-                    throw Error.InvalidEnumArgument("value", (Int32)value, typeof(AllowedFunctionNames));
+                    throw Error.InvalidEnumArgument("value", (Int32)value, typeof(AllowedFunctions));
                 }
 
-                _allowedFunctionNames = value;
+                _allowedFunctions = value;
             }
         }
 

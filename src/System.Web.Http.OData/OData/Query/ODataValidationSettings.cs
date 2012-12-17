@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Query
             }
             set
             {
-                if (value > AllowedFunctions.All || value < AllowedFunctions.None)
+                if (value > AllowedFunctions.AllFunctions || value < AllowedFunctions.None)
                 {
                     throw Error.InvalidEnumArgument("value", (Int32)value, typeof(AllowedFunctions));
                 }

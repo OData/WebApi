@@ -35,6 +35,12 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void AllowedFunctions_SetToAllFunctions_DoesNotThrow()
+        {
+            Assert.DoesNotThrow(() => new ODataValidationSettings().AllowedFunctions = AllowedFunctions.AllFunctions);
+        }
+
+        [Fact]
         public void AllowedArithmeticOperators_Property_RoundTrips()
         {
             Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedArithmeticOperators>(

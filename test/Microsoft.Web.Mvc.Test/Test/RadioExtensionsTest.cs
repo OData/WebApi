@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -173,6 +174,49 @@ namespace Microsoft.Web.Mvc.Test
             Assert.Equal(@"<input attr1=""value1"" id=""FooList"" name=""FooList"" type=""radio"" value=""foo"" />", html[0].ToHtmlString());
             Assert.Equal(@"<input attr1=""value1"" id=""FooList"" name=""FooList"" type=""radio"" value=""bar"" />", html[1].ToHtmlString());
             Assert.Equal(@"<input attr1=""value1"" checked=""checked"" id=""FooList"" name=""FooList"" type=""radio"" value=""baz"" />", html[2].ToHtmlString());
+        }
+
+        [Fact]
+        public void RadioButtonListWithDictionaryAttributesWithWrongSelectListName()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetRadioButtonListViewData(true));
+
+            // Act / Assert
+            Assert.Throws<InvalidOperationException>(() => htmlHelper.RadioButtonList("WrongFooList", new RouteValueDictionary(new { attr1 = "value1" })));
+        }
+
+        [Fact]
+        public void RadioButtonListWithDictionaryAttributesWithInvalidSelectListFromViewData()
+        {
+            // Arrange
+            ViewDataDictionary viewData = new ViewDataDictionary();
+            viewData["FooList"] = "FOOBAR3";
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(viewData);
+
+            // Act / Assert
+            Assert.Throws<InvalidOperationException>(() => htmlHelper.RadioButtonList("FooList", new RouteValueDictionary(new { attr1 = "value1" })));
+        }
+
+        [Fact]
+        public void RadioButtonListWithDictionaryAttributesWithNullSelectListNameFromSelectList()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetRadioButtonListViewData(true));
+            SelectList selectList = GetRadioButtonListData(true);
+
+            // Act / Assert
+            Assert.Throws<ArgumentException>(() => htmlHelper.RadioButtonList("", selectList, new RouteValueDictionary(new { attr1 = "value1" })));
+        }
+
+        [Fact]
+        public void RadioButtonListWithDictionaryAttributesWithSelectListNameAndNullSelectList()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper(GetRadioButtonListViewData(true));
+
+            // Act / Assert
+            Assert.Throws<ArgumentNullException>(() => htmlHelper.RadioButtonList("FooBar", null, new RouteValueDictionary(new { attr1 = "value1" })));
         }
 
         private static SelectList GetRadioButtonListData(bool selectBaz)

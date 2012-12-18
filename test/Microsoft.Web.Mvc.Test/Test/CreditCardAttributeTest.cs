@@ -39,8 +39,7 @@ namespace Microsoft.Web.Mvc.Test
             Assert.True(attribute.IsValid("1234-5678-9012-3452")); // Good checksum, with dashes
             Assert.False(attribute.IsValid("0000000000000001")); // Bad checksum
             Assert.False(attribute.IsValid(0)); // Non-string
-
-            Assert.False(attribute.IsValid("000%000000000001")); // Non-string
+            Assert.False(attribute.IsValid("000%000000000001")); // Non-digit
         }
     }
 }

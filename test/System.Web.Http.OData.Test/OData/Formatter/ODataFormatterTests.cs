@@ -84,7 +84,7 @@ namespace System.Web.Http.OData.Formatter
             {
                 // Assert
                 AssertODataVersion3JsonResponse(
-                    BaselineResource.MainEntryFeedWithNoMatchingLinksInJsonFullMetadata, response);
+                    BaselineResource.MainEntryFeedInJsonFullMetadata, response);
             }
         }
 
@@ -152,7 +152,7 @@ namespace System.Web.Http.OData.Formatter
                 {
                     // Arrange #1 this request should return response in OData atom format
                     using (HttpRequestMessage request = ODataTestUtil.GenerateRequestMessage(
-                            CreateAbsoluteUri("People(10)?format=odata"), isAtom: true))
+                        CreateAbsoluteUri("People(10)?format=odata"), isAtom: true))
                     // Act #1
                     using (HttpResponseMessage response = client.SendAsync(request).Result)
                     {
@@ -162,7 +162,7 @@ namespace System.Web.Http.OData.Formatter
 
                     // Arrange #2: this request should return response in OData json format
                     using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                            CreateAbsoluteUri("People(10)?format=odata"), isAtom: false))
+                        CreateAbsoluteUri("People(10)?format=odata"), isAtom: false))
                     // Act #2
                     using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
                     {
@@ -173,7 +173,7 @@ namespace System.Web.Http.OData.Formatter
                     // Arrange #3: when the query string is not present, request should be handled by the regular Json
                     // Formatter
                     using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                            CreateAbsoluteUri("People(10)"), isAtom: false))
+                        CreateAbsoluteUri("People(10)"), isAtom: false))
                     // Act #3
                     using (HttpResponseMessage response = client.SendAsync(requestWithNonODataJsonHeader).Result)
                     {
@@ -365,8 +365,8 @@ namespace System.Web.Http.OData.Formatter
                 "MainEntity").HasActionLink((c) =>
                     CreateAbsoluteUri("/MainEntity/DoSometimes/" + ((MainEntity)(c.EntityInstance)).Id));
 
-            mainSet.HasNavigationPropertyLink(mainToRelated, (c, p) =>
-                new Uri("/MainEntity/RelatedEntity/" + c.EntityInstance.Id, UriKind.Relative), followsConventions: true);
+            mainSet.HasNavigationPropertyLink(mainToRelated, (c, p) => new Uri("/MainEntity/RelatedEntity/" +
+                c.EntityInstance.Id, UriKind.Relative), followsConventions: true);
 
             EntitySetConfiguration<RelatedEntity> related = builder.EntitySet<RelatedEntity>("RelatedEntity");
 
@@ -416,7 +416,7 @@ namespace System.Web.Http.OData.Formatter
                     Related = new RelatedEntity
                     {
                         Id = 101
-}
+                    }
                 },
                 new MainEntity
                 {

@@ -489,7 +489,7 @@
   ]
 }</value>
   </data>
-  <data name="MainEntryFeedWithNoMatchingLinksInJsonFullMetadata" xml:space="preserve">
+  <data name="MainEntryFeedInJsonFullMetadata" xml:space="preserve">
     <value>{
   "odata.metadata":"http://localhost:8081/$metadata#Default.Container.MainEntity","odata.count":"3","value":[
     {

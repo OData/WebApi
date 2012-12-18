@@ -344,9 +344,9 @@ namespace System.Web.Http.OData {
         ///      },&quot;#Container.DoSometimes&quot;:{
         ///         [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string MainEntryFeedWithNoMatchingLinksInJsonFullMetadata {
+        internal static string MainEntryFeedInJsonFullMetadata {
             get {
-                return ResourceManager.GetString("MainEntryFeedWithNoMatchingLinksInJsonFullMetadata", resourceCulture);
+                return ResourceManager.GetString("MainEntryFeedInJsonFullMetadata", resourceCulture);
             }
         }
         

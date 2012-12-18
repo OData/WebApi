@@ -162,19 +162,20 @@ namespace System.Web.Http.OData.Formatter
             }
 
             Contract.Assert(contentType.Parameters != null);
-            NameValueHeaderValue odataParameter = contentType.Parameters.FirstOrDefault((p) => p.Name == "odata");
+            NameValueHeaderValue odataParameter = contentType.Parameters.FirstOrDefault((p) => String.Equals("odata",
+                p.Name, StringComparison.OrdinalIgnoreCase));
 
             if (odataParameter != null)
             {
-                if (String.Equals("fullmetadata", odataParameter.Value, StringComparison.Ordinal))
+                if (String.Equals("fullmetadata", odataParameter.Value, StringComparison.OrdinalIgnoreCase))
                 {
                     return ODataMetadataLevel.FullMetadata;
                 }
-                if (String.Equals("nometadata", odataParameter.Value, StringComparison.Ordinal))
+                if (String.Equals("nometadata", odataParameter.Value, StringComparison.OrdinalIgnoreCase))
                 {
                     return ODataMetadataLevel.NoMetadata;
                 }
-                if (String.Equals("verbose", odataParameter.Value, StringComparison.Ordinal))
+                if (String.Equals("verbose", odataParameter.Value, StringComparison.OrdinalIgnoreCase))
                 {
                     return ODataMetadataLevel.Default;
                 }

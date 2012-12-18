@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Builder
 
 
             var customersSet = builder.EntitySet<Customer>("Customers");
-            customersSet.HasEditLink(o => new Uri(string.Format("Customers({0})", o.EntityInstance.CustomerId), UriKind.Relative));
+            customersSet.HasEditLink(o => new Uri(string.Format("Customers({0})", o.EntityInstance.CustomerId), UriKind.Relative), followsConventions: false);
             customersSet.FindBinding("Orders").HasLinkFactory(o => string.Format("Orders/ByCustomerId/{0}", ((Customer)o.EntityInstance).CustomerId));
 
             var model = builder.GetEdmModel();

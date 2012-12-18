@@ -2,25 +2,28 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
-    internal class EntitySetLinkBuilderAnnotation : IEntitySetLinkBuilder
+    internal class EntitySetLinkBuilderAnnotation
     {
         private readonly Func<FeedContext, Uri> _feedSelfLinkBuilder;
-        private readonly Func<EntityInstanceContext, string> _idLinkBuilder;
-        private readonly Func<EntityInstanceContext, Uri> _editLinkBuilder;
-        private readonly Func<EntityInstanceContext, Uri> _readLinkBuilder;
-        private readonly IDictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilderLookup;
+
+        private readonly SelfLinkBuilder<string> _idLinkBuilder;
+        private readonly SelfLinkBuilder<Uri> _editLinkBuilder;
+        private readonly SelfLinkBuilder<Uri> _readLinkBuilder;
+
+        private readonly Dictionary<IEdmNavigationProperty, NavigationLinkBuilder> _navigationPropertyLinkBuilderLookup;
         private readonly EntitySetConfiguration _entitySet;
 
-        /// <summary>
-        /// This constructor is used for unit testing purposes only
-        /// </summary>
+        // This constructor is used for unit testing purposes only
         public EntitySetLinkBuilderAnnotation()
         {
+            _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
         }
 
         public EntitySetLinkBuilderAnnotation(EntitySetConfiguration entitySet)
@@ -31,15 +34,15 @@ namespace System.Web.Http.OData.Builder
             }
 
             _entitySet = entitySet;
-
             _feedSelfLinkBuilder = entitySet.GetFeedSelfLink();
             _idLinkBuilder = entitySet.GetIdLink();
+
             _editLinkBuilder = entitySet.GetEditLink();
             _readLinkBuilder = entitySet.GetReadLink();
-            _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>();
+            _navigationPropertyLinkBuilderLookup = new Dictionary<IEdmNavigationProperty, NavigationLinkBuilder>();
         }
 
-        public void AddNavigationPropertyLinkBuilder(IEdmNavigationProperty navigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri> linkBuilder)
+        public void AddNavigationPropertyLinkBuilder(IEdmNavigationProperty navigationProperty, NavigationLinkBuilder linkBuilder)
         {
             _navigationPropertyLinkBuilderLookup[navigationProperty] = linkBuilder;
         }
@@ -59,56 +62,121 @@ namespace System.Web.Http.OData.Builder
             return _feedSelfLinkBuilder(context);
         }
 
-        public virtual string BuildIdLink(EntityInstanceContext context)
+        public virtual EntitySelfLinks BuildEntitySelfLinks(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
-            if (context == null)
+            EntitySelfLinks selfLinks = new EntitySelfLinks();
+            selfLinks.IdLink = BuildIdLink(instanceContext, metadataLevel);
+            selfLinks.EditLink = BuildEditLink(instanceContext, metadataLevel, selfLinks.IdLink);
+            selfLinks.ReadLink = BuildReadLink(instanceContext, metadataLevel, selfLinks.EditLink);
+            return selfLinks;
+        }
+
+        public virtual string BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
+        {
+            if (instanceContext == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("instanceContext");
             }
 
             if (_idLinkBuilder == null)
             {
-                return BuildEditLink(context).ToString();
+                throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _entitySet.Name);
             }
 
-            return _idLinkBuilder(context);
+            if (!_idLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+            {
+                return _idLinkBuilder.Factory(instanceContext);
+            }
+            else
+            {
+                // client can infer it and didn't ask for it.
+                return null;
+            }
         }
 
-        public virtual Uri BuildEditLink(EntityInstanceContext context)
+        public virtual Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, string idLink)
         {
-            if (context == null)
+            if (instanceContext == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("instanceContext");
             }
 
             if (_editLinkBuilder == null)
             {
-                throw Error.InvalidOperation(SRResources.NoEditLinkFactoryFound, _entitySet.Name);
+                // edit link is the same as id link. emit only in default metadata mode.
+                if (metadataLevel == ODataMetadataLevel.Default)
+                {
+                    return new Uri(idLink);
+                }
+            }
+            else
+            {
+                if (!_editLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+                {
+                    Uri generatedEditLink = _editLinkBuilder.Factory(instanceContext);
+                    if (generatedEditLink != null && generatedEditLink.Equals(new Uri(idLink)))
+                    {
+                        // edit link is the same as id link. emit only in default metadata mode.
+                        if (metadataLevel == ODataMetadataLevel.Default)
+                        {
+                            return new Uri(idLink);
+                        }
+                    }
+                    else
+                    {
+                        return generatedEditLink;
+                    }
+                }
             }
 
-            return _editLinkBuilder(context);
+            // client can infer it and didn't ask for it.
+            return null;
         }
 
-        public virtual Uri BuildReadLink(EntityInstanceContext context)
+        public virtual Uri BuildReadLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri editLink)
         {
-            if (context == null)
+            if (instanceContext == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("instanceContext");
             }
 
             if (_readLinkBuilder == null)
             {
-                return BuildEditLink(context);
+                // read link is the same as edit link. emit only in default metadata mode.
+                if (metadataLevel == ODataMetadataLevel.Default)
+                {
+                    return editLink;
+                }
+            }
+            else
+            {
+                if (!_readLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+                {
+                    Uri generatedReadLink = _readLinkBuilder.Factory(instanceContext);
+                    if (editLink == generatedReadLink)
+                    {
+                        // read link is the same as edit link. emit only in default metadata mode.
+                        if (metadataLevel == ODataMetadataLevel.Default)
+                        {
+                            return editLink;
+                        }
+                    }
+                    else
+                    {
+                        return generatedReadLink;
+                    }
+                }
             }
 
-            return _readLinkBuilder(context);
+            // client can infer it and didn't ask for it.
+            return null;
         }
 
-        public virtual Uri BuildNavigationLink(EntityInstanceContext context, IEdmNavigationProperty navigationProperty)
+        public virtual Uri BuildNavigationLink(EntityInstanceContext instanceContext, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
         {
-            if (context == null)
+            if (instanceContext == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("instanceContext");
             }
 
             if (navigationProperty == null)
@@ -116,14 +184,27 @@ namespace System.Web.Http.OData.Builder
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkBuilderFunc;
-            if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilderFunc))
+            NavigationLinkBuilder navigationLinkBuilder;
+            if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
             {
                 throw Error.InvalidOperation(SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySet.Name);
             }
+            Contract.Assert(navigationLinkBuilder != null);
 
-            Contract.Assert(navigationLinkBuilderFunc != null);
-            return navigationLinkBuilderFunc(context, navigationProperty);
+            if (!navigationLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+            {
+                return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
+            }
+            else
+            {
+                // client can infer it and didn't ask for it.
+                return null;
+            }
+        }
+
+        private static bool IsFullOrDefault(ODataMetadataLevel level)
+        {
+            return level == ODataMetadataLevel.Default || level == ODataMetadataLevel.FullMetadata;
         }
     }
 }

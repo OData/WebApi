@@ -898,11 +898,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No EditLink factory was found. Try calling HasEditLink on the EntitySetConfiguration for &apos;{0}&apos;..
+        ///   Looks up a localized string similar to No IdLink factory was found. Try calling HasIdLink on the EntitySetConfiguration for &apos;{0}&apos;..
         /// </summary>
-        internal static string NoEditLinkFactoryFound {
+        internal static string NoIdLinkFactoryFound {
             get {
-                return ResourceManager.GetString("NoEditLinkFactoryFound", resourceCulture);
+                return ResourceManager.GetString("NoIdLinkFactoryFound", resourceCulture);
             }
         }
         

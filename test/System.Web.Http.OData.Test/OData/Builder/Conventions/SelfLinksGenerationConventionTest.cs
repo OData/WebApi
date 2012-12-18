@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
@@ -68,7 +70,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
-            Uri uri =
+            string idLink =
                 SelfLinksGenerationConvention.GenerateSelfLink(
                 vehicles,
                 new EntityInstanceContext()
@@ -82,7 +84,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 },
                 includeCast: false);
 
-            Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')", idLink);
         }
 
         [Fact]
@@ -101,7 +103,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
-            Uri uri =
+            string idLink =
                 SelfLinksGenerationConvention.GenerateSelfLink(
                 vehicles,
                 new EntityInstanceContext()
@@ -115,7 +117,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 },
                 includeCast: true);
 
-            Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/cars(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", idLink);
         }
 
         [Fact]
@@ -135,9 +137,9 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
-            IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+            EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
-            Uri uri = linkBuilder.BuildEditLink(
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(
                 new EntityInstanceContext()
                 {
                     EdmModel = model,
@@ -146,9 +148,10 @@ namespace System.Web.Http.OData.Builder.Conventions
                     UrlHelper = request.GetUrlHelper(),
                     PathHandler = new DefaultODataPathHandler(model),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
-                });
+                },
+                ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.Http.OData.Builder.TestModels.Car", selfLinks.IdLink);
         }
 
         [Fact]
@@ -168,9 +171,9 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
-            IEntitySetLinkBuilder linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
+            EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
-            Uri uri = linkBuilder.BuildEditLink(
+            EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(
                 new EntityInstanceContext()
                 {
                     EdmModel = model,
@@ -178,10 +181,11 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityType = sportbikeType,
                     UrlHelper = request.GetUrlHelper(),
                     PathHandler = new DefaultODataPathHandler(model),
-                    EntityInstance = new Car { Model = 2009, Name = "Ninja" }                    
-                });
+                    EntityInstance = new Car { Model = 2009, Name = "Ninja" }
+                },
+                ODataMetadataLevel.Default);
 
-            Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/motorcycles(Model=2009,Name='Ninja')", selfLinks.IdLink);
         }
 
         class SelfLinkConventionTests_EntityType

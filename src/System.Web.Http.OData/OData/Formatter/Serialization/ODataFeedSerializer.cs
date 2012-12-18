@@ -99,7 +99,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 if (writeContext.EntitySet != null)
                 {
-                    IEntitySetLinkBuilder linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                    EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
                     FeedContext feedContext = new FeedContext
                     {
                         EntitySet = writeContext.EntitySet,

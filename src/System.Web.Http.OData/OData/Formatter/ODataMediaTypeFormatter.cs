@@ -54,7 +54,7 @@ namespace System.Web.Http.OData.Formatter
         {
         }
 
-        private ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
+        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
             ODataSerializerProvider serializerProvider,
             IEnumerable<ODataPayloadKind> payloadKinds,
             ODataVersion version,
@@ -349,9 +349,10 @@ namespace System.Web.Http.OData.Formatter
                     writerSettings.SetMetadataDocumentUri(new Uri(metadataLink));
                 }
 
+                MediaTypeHeaderValue contentType = null;
                 if (contentHeaders != null && contentHeaders.ContentType != null)
                 {
-                    MediaTypeHeaderValue contentType = contentHeaders.ContentType;
+                    contentType = contentHeaders.ContentType;
                     writerSettings.SetContentType(contentType.ToString(), contentType.CharSet);
                 }
 
@@ -364,7 +365,8 @@ namespace System.Web.Http.OData.Formatter
                         PathHandler = pathHandler,
                         RootElementName = GetRootElementName(path) ?? ElementNameDefault,
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
-                        Request = _request
+                        Request = _request,
+                        MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType)
                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);

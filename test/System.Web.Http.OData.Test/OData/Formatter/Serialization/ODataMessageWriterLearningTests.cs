@@ -220,8 +220,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             model.AddElement(customerType);
 
             // Add navigations
-            orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() {
-                Name = "Customer", Target = customerType, TargetMultiplicity = EdmMultiplicity.One });
+            orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo()
+            {
+                Name = "Customer",
+                Target = customerType,
+                TargetMultiplicity = EdmMultiplicity.One
+            });
 
             var container = new EdmEntityContainer("Default", "Container");
             var orderSet = container.AddEntitySet("Orders", orderType);

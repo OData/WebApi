@@ -8,7 +8,6 @@ using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -107,24 +106,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (writeContext.EntitySet != null)
             {
-                IEntitySetLinkBuilder linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, writeContext.MetadataLevel);
 
-                string idLink = linkBuilder.BuildIdLink(entityInstanceContext);
-                if (idLink != null)
+                if (selfLinks.IdLink != null)
                 {
-                    entry.Id = idLink;
+                    entry.Id = selfLinks.IdLink;
                 }
 
-                Uri readLink = linkBuilder.BuildReadLink(entityInstanceContext);
-                if (readLink != null)
+                if (selfLinks.ReadLink != null)
                 {
-                    entry.ReadLink = readLink;
+                    entry.ReadLink = selfLinks.ReadLink;
                 }
 
-                Uri editLink = linkBuilder.BuildEditLink(entityInstanceContext);
-                if (editLink != null)
+                if (selfLinks.EditLink != null)
                 {
-                    entry.EditLink = editLink;
+                    entry.EditLink = selfLinks.EditLink;
                 }
             }
 
@@ -142,17 +139,21 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 if (writeContext.EntitySet != null)
                 {
-                    IEntitySetLinkBuilder linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                    EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                    Uri navigationUrl = linkBuilder.BuildNavigationLink(context, navProperty, writeContext.MetadataLevel);
 
-                    ODataNavigationLink navigationLink = new ODataNavigationLink
+                    if (navigationUrl != null)
                     {
-                        IsCollection = propertyType.IsCollection(),
-                        Name = navProperty.Name,
-                        Url = linkBuilder.BuildNavigationLink(context, navProperty)
-                    };
+                        ODataNavigationLink navigationLink = new ODataNavigationLink
+                        {
+                            IsCollection = propertyType.IsCollection(),
+                            Name = navProperty.Name,
+                            Url = navigationUrl
+                        };
 
-                    writer.WriteStart(navigationLink);
-                    writer.WriteEnd();
+                        writer.WriteStart(navigationLink);
+                        writer.WriteEnd();
+                    }
                 }
             }
         }

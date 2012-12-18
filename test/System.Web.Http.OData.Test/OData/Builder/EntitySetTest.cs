@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
@@ -82,7 +83,7 @@ namespace System.Web.Http.OData.Builder
 
             var vehicles = builder.AddEntitySet("vehicles", vehicle);
             var binding = vehicles.AddBinding(navProperty, manufacturers);
-            vehicles.HasNavigationPropertyLink(navProperty, (ctxt, property) => new Uri("http://works/"));
+            vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false));
 
             IEdmModel model = builder.GetEdmModel();
             var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
@@ -92,7 +93,7 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(model.GetEntitySetLinkBuilder(vehiclesEdmSet));
             Assert.Equal(
                 "http://works/",
-                model.GetEntitySetLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty).AbsoluteUri);
+                model.GetEntitySetLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new EntityInstanceContext(), edmNavProperty, ODataMetadataLevel.Default).AbsoluteUri);
         }
 
         [Fact]
@@ -129,7 +130,7 @@ namespace System.Web.Http.OData.Builder
             var vehicles = builder.AddEntitySet("vehicles", vehicle);
 
             Assert.Throws<InvalidOperationException>(
-                () => vehicles.HasNavigationPropertyLink(navProperty, (ctxt, property) => new Uri("http://works/")),
+                () => vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
         }
 
@@ -214,7 +215,7 @@ namespace System.Web.Http.OData.Builder
 
             vehiclesSet.HasNavigationPropertyLink(
                 vehiclesSet.HasOptionalBinding((Motorcycle m) => m.Manufacturer, "manufacturers").NavigationProperty,
-                (ctxt, property) => new Uri(String.Format("http://localhost/vehicles/{0}/{1}/{2}", ctxt.EntityInstance.Model, ctxt.EntityInstance.Name, property.Name)));
+                (ctxt, property) => new Uri(String.Format("http://localhost/vehicles/{0}/{1}/{2}", ctxt.EntityInstance.Model, ctxt.EntityInstance.Name, property.Name)), followsConventions: false);
 
             IEdmModel model = builder.GetEdmModel();
             var vehicles = model.EntityContainers().Single().FindEntitySet("vehicles");
@@ -223,7 +224,8 @@ namespace System.Web.Http.OData.Builder
 
             Uri link = model.GetEntitySetLinkBuilder(vehicles).BuildNavigationLink(
                 new EntityInstanceContext { EntityInstance = new Motorcycle { Name = "Motorcycle1", Model = 2009 }, EdmModel = model, EntitySet = vehicles, EntityType = motorcycle },
-                motorcycleManufacturerProperty);
+                motorcycleManufacturerProperty,
+                ODataMetadataLevel.Default);
 
             Assert.Equal("http://localhost/vehicles/2009/Motorcycle1/Manufacturer", link.AbsoluteUri);
         }

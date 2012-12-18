@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -68,27 +66,27 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             bool customIdLinkbuilderCalled = false;
-            Mock<IEntitySetLinkBuilder> linkAnnotation = new Mock<IEntitySetLinkBuilder>();
-            linkAnnotation
-                .Setup(a => a.BuildIdLink(It.IsAny<EntityInstanceContext>()))
-                .Callback((EntityInstanceContext context) =>
+            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            {
+                IdLinkBuilder = new SelfLinkBuilder<string>((EntityInstanceContext context) =>
                 {
                     Assert.Equal(context.EdmModel, _model);
                     Assert.Equal(context.EntityInstance, _customer);
                     Assert.Equal(context.EntitySet, _customerSet);
                     Assert.Equal(context.EntityType, _customerSet.ElementType);
                     customIdLinkbuilderCalled = true;
-                })
-                .Returns("sample id link");
-
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation.Object);
+                    return "http://sample_id_link";
+                },
+                followsConventions: false)
+            };
+            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
 
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
             writer
                 .Setup(w => w.WriteStart(It.IsAny<ODataEntry>()))
                 .Callback((ODataEntry entry) =>
                 {
-                    Assert.Equal(entry.Id, "sample id link");
+                    Assert.Equal(entry.Id, "http://sample_id_link");
                 });
 
             // Act
@@ -103,20 +101,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             bool customEditLinkbuilderCalled = false;
-            Mock<IEntitySetLinkBuilder> linkAnnotation = new Mock<IEntitySetLinkBuilder>();
-            linkAnnotation
-                .Setup(a => a.BuildEditLink(It.IsAny<EntityInstanceContext>()))
-                .Callback((EntityInstanceContext context) =>
+            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            {
+                EditLinkBuilder = new SelfLinkBuilder<Uri>((EntityInstanceContext context) =>
                 {
                     Assert.Equal(context.EdmModel, _model);
                     Assert.Equal(context.EntityInstance, _customer);
                     Assert.Equal(context.EntitySet, _customerSet);
                     Assert.Equal(context.EntityType, _customerSet.ElementType);
                     customEditLinkbuilderCalled = true;
-                })
-                .Returns(new Uri("http://sample_edit_link"));
-
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation.Object);
+                    return new Uri("http://sample_edit_link");
+                },
+                followsConventions: false)
+            };
+            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
 
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
             writer
@@ -138,20 +136,21 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             bool customReadLinkbuilderCalled = false;
-            Mock<IEntitySetLinkBuilder> linkAnnotation = new Mock<IEntitySetLinkBuilder>();
-            linkAnnotation
-                .Setup(a => a.BuildReadLink(It.IsAny<EntityInstanceContext>()))
-                .Callback((EntityInstanceContext context) =>
+            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation
+            {
+                ReadLinkBuilder = new SelfLinkBuilder<Uri>((EntityInstanceContext context) =>
                 {
                     Assert.Equal(context.EdmModel, _model);
                     Assert.Equal(context.EntityInstance, _customer);
                     Assert.Equal(context.EntitySet, _customerSet);
                     Assert.Equal(context.EntityType, _customerSet.ElementType);
                     customReadLinkbuilderCalled = true;
-                })
-                .Returns(new Uri("http://sample_read_link"));
+                    return new Uri("http://sample_read_link");
+                },
+                followsConventions: false)
+            };
 
-            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation.Object);
+            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkAnnotation);
 
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
             writer
@@ -166,38 +165,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Assert
             Assert.True(customReadLinkbuilderCalled);
-        }
-
-        private IEdmModel SimpleCustomerOrderModel()
-        {
-            var model = new EdmModel();
-            var customerType = new EdmEntityType("Default", "Customer");
-            customerType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32);
-            customerType.AddStructuralProperty("FirstName", EdmPrimitiveTypeKind.String);
-            customerType.AddStructuralProperty("LastName", EdmPrimitiveTypeKind.String);
-            model.AddElement(customerType);
-
-            var orderType = new EdmEntityType("Default", "Order");
-            orderType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32);
-            orderType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
-            model.AddElement(orderType);
-
-            // Add navigations
-            customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Orders", Target = orderType, TargetMultiplicity = EdmMultiplicity.Many });
-            orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Customer", Target = customerType, TargetMultiplicity = EdmMultiplicity.One });
-
-            var container = new EdmEntityContainer("Default", "Container");
-            var customerSet = container.AddEntitySet("Customers", customerType);
-            var orderSet = container.AddEntitySet("Orders", orderType);
-            customerSet.AddNavigationTarget(customerType.NavigationProperties().Single(np => np.Name == "Orders"), orderSet);
-            orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"), customerSet);
-
-            Mock<IEntitySetLinkBuilder> linkAnnotation = new Mock<IEntitySetLinkBuilder>();
-            model.SetEntitySetLinkBuilderAnnotation(customerSet, linkAnnotation.Object);
-            model.SetEntitySetLinkBuilderAnnotation(orderSet, linkAnnotation.Object);
-
-            model.AddElement(container);
-            return model;
         }
 
         private class Customer

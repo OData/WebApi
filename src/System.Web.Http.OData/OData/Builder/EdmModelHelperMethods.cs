@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Builder
             {
                 EdmEntitySet entitySet = iter.EntitySet;
                 model.SetAnnotationValue<EntitySetUrlAnnotation>(entitySet, iter.Annotations.Url);
-                model.SetAnnotationValue<IEntitySetLinkBuilder>(entitySet, iter.Annotations.LinkBuilder);
+                model.SetAnnotationValue<EntitySetLinkBuilderAnnotation>(entitySet, iter.Annotations.LinkBuilder);
 
                 AddNavigationBindings(iter.Configuration, iter.EntitySet, iter.Annotations.LinkBuilder, builder, edmTypeMap, edmEntitySetMap);
             }
@@ -100,7 +100,7 @@ namespace System.Web.Http.OData.Builder
 
                         entitySet.AddNavigationTarget(edmNavigationProperty, edmEntitySetMap[binding.EntitySet.Name]);
 
-                        Func<EntityInstanceContext, IEdmNavigationProperty, Uri> linkBuilderFunc = configuration.GetNavigationPropertyLink(navigation);
+                        NavigationLinkBuilder linkBuilderFunc = configuration.GetNavigationPropertyLink(navigation);
                         if (linkBuilderFunc != null)
                         {
                             linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
@@ -268,9 +268,9 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        internal static IEntitySetLinkBuilder GetEntitySetLinkBuilder(this IEdmModel model, IEdmEntitySet entitySet)
+        internal static EntitySetLinkBuilderAnnotation GetEntitySetLinkBuilder(this IEdmModel model, IEdmEntitySet entitySet)
         {
-            IEntitySetLinkBuilder annotation = model.GetAnnotationValue<IEntitySetLinkBuilder>(entitySet);
+            EntitySetLinkBuilderAnnotation annotation = model.GetAnnotationValue<EntitySetLinkBuilderAnnotation>(entitySet);
             if (annotation == null)
             {
                 throw Error.NotSupported(SRResources.EntitySetHasNoBuildLinkAnnotation, entitySet.Name);
@@ -279,7 +279,7 @@ namespace System.Web.Http.OData.Builder
             return annotation;
         }
 
-        internal static void SetEntitySetLinkBuilderAnnotation(this IEdmModel model, IEdmEntitySet entitySet, IEntitySetLinkBuilder entitySetLinkBuilder)
+        internal static void SetEntitySetLinkBuilderAnnotation(this IEdmModel model, IEdmEntitySet entitySet, EntitySetLinkBuilderAnnotation entitySetLinkBuilder)
         {
             model.SetAnnotationValue(entitySet, entitySetLinkBuilder);
         }

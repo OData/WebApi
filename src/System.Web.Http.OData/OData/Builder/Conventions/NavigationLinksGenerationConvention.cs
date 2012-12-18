@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
@@ -26,7 +24,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     {
                         configuration.HasNavigationPropertyLink(
                                 property,
-                                (entityContext, navigationProperty) => GenerateNavigationPropertyLink(entityContext, navigationProperty, configuration, includeCast: false));
+                                new NavigationLinkBuilder((entityContext, navigationProperty) => GenerateNavigationPropertyLink(entityContext, navigationProperty, configuration, includeCast: false), followsConventions: true));
                     }
                 }
             }
@@ -40,7 +38,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     {
                         configuration.HasNavigationPropertyLink(
                                 property,
-                                (entityContext, navigationProperty) => GenerateNavigationPropertyLink(entityContext, navigationProperty, configuration, includeCast: true));
+                                new NavigationLinkBuilder((entityContext, navigationProperty) => GenerateNavigationPropertyLink(entityContext, navigationProperty, configuration, includeCast: true), followsConventions: true));
                     }
                 }
             }

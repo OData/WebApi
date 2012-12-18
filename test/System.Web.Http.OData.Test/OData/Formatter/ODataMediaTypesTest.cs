@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Net.Http.Headers;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
@@ -253,6 +254,26 @@ namespace System.Web.Http.OData.Formatter
         public void TextXml_ReturnsDifferentInstances()
         {
             Assert.NotSame(ODataMediaTypes.TextXml, ODataMediaTypes.TextXml);
+        }
+
+        [Theory]
+        [InlineData("application/xml", ODataMetadataLevel.Default)]
+        [InlineData("application/atom+xml", ODataMetadataLevel.Default)]
+        [InlineData("application/atom+xml;odata=entry", ODataMetadataLevel.Default)]
+        [InlineData("application/atom+xml;odata=feed", ODataMetadataLevel.Default)]
+        [InlineData("application/atom+xml;odata=feed;randomparameter=randomvalue", ODataMetadataLevel.Default)]
+        [InlineData("application/json;odata=verbose;randomparameter=randomvalue", ODataMetadataLevel.Default)]
+        [InlineData("application/json;odata=fullmetadata", ODataMetadataLevel.FullMetadata)]
+        [InlineData("application/json;odata=nometadata", ODataMetadataLevel.NoMetadata)]
+        [InlineData("application/json;odata=minimalmetadata", ODataMetadataLevel.MinimalMetadata)]
+        [InlineData("application/json", ODataMetadataLevel.MinimalMetadata)]
+        [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]
+        [InlineData("application/random", ODataMetadataLevel.Default)]
+        public void GetMetadataLevel_Returns_Correct_MetadataLevel(string contentType, object metadataLevel)
+        {
+            Assert.Equal(
+                metadataLevel,
+                ODataMediaTypes.GetMetadataLevel(MediaTypeHeaderValue.Parse(contentType)));
         }
     }
 }

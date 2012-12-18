@@ -9,7 +9,6 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.OData;
-using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Query;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.Routing.Conventions;

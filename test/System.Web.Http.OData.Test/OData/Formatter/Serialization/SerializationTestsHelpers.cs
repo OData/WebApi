@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
-using Moq;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -42,9 +41,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             customerSet.AddNavigationTarget(customerType.NavigationProperties().Single(np => np.Name == "Orders"), orderSet);
             orderSet.AddNavigationTarget(orderType.NavigationProperties().Single(np => np.Name == "Customer"), customerSet);
 
-            Mock<IEntitySetLinkBuilder> linkAnnotation = new Mock<IEntitySetLinkBuilder>();
-            model.SetEntitySetLinkBuilderAnnotation(customerSet, linkAnnotation.Object);
-            model.SetEntitySetLinkBuilderAnnotation(orderSet, linkAnnotation.Object);
+            EntitySetLinkBuilderAnnotation linkAnnotation = new MockEntitySetLinkBuilderAnnotation();
+            model.SetEntitySetLinkBuilderAnnotation(customerSet, linkAnnotation);
+            model.SetEntitySetLinkBuilderAnnotation(orderSet, linkAnnotation);
 
             model.AddElement(container);
             return model;

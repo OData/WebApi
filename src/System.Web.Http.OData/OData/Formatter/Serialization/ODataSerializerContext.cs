@@ -12,6 +12,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     public class ODataSerializerContext
     {
+        private ODataMetadataLevel _metadataLevel;
+
         /// <summary>
         /// Gets or sets the URL helper.
         /// </summary>
@@ -43,5 +45,21 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Get or sets whether expensive links should be calculated.
         /// </summary>
         public bool SkipExpensiveAvailabilityChecks { get; set; }
+
+        /// <summary>
+        /// Gets or sets the metadata level of the response.
+        /// </summary>
+        public ODataMetadataLevel MetadataLevel
+        {
+            get
+            {
+                return _metadataLevel;
+            }
+            set
+            {
+                ODataMetadataLevelHelper.Validate(value, "value");
+                _metadataLevel = value;
+            }
+        }
     }
 }

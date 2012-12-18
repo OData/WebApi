@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net.Http.Headers;
 
 namespace System.Web.Http.OData.Formatter
@@ -144,6 +146,41 @@ namespace System.Web.Http.OData.Formatter
         public static MediaTypeHeaderValue TextXml
         {
             get { return (MediaTypeHeaderValue)((ICloneable)_textXml).Clone(); }
+        }
+
+        public static ODataMetadataLevel GetMetadataLevel(MediaTypeHeaderValue contentType)
+        {
+            if (contentType == null)
+            {
+                return ODataMetadataLevel.Default;
+            }
+
+            if (!String.Equals(ODataMediaTypes.ApplicationJson.MediaType, contentType.MediaType,
+                StringComparison.Ordinal))
+            {
+                return ODataMetadataLevel.Default;
+            }
+
+            Contract.Assert(contentType.Parameters != null);
+            NameValueHeaderValue odataParameter = contentType.Parameters.FirstOrDefault((p) => p.Name == "odata");
+
+            if (odataParameter != null)
+            {
+                if (String.Equals("fullmetadata", odataParameter.Value, StringComparison.Ordinal))
+                {
+                    return ODataMetadataLevel.FullMetadata;
+                }
+                if (String.Equals("nometadata", odataParameter.Value, StringComparison.Ordinal))
+                {
+                    return ODataMetadataLevel.NoMetadata;
+                }
+                if (String.Equals("verbose", odataParameter.Value, StringComparison.Ordinal))
+                {
+                    return ODataMetadataLevel.Default;
+                }
+            }
+
+            return ODataMetadataLevel.MinimalMetadata;
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Http.OData.Builder;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -14,22 +16,13 @@ namespace System.Web.Http.OData.Formatter
     {
         private const string baseAddress = "http://localhost:8081/";
 
-        private readonly HttpConfiguration _config;
-
-        public ODataFormatterTests()
-        {
-            _config = new HttpConfiguration();
-            IEdmModel model = ODataTestUtil.GetEdmModel();
-            _config.EnableOData(model);
-            _config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));
-        }
-
         [Fact]
         [Trait("Description", "Demonstrates how to get the response from an Http GET in OData atom format when the accept header is application/atom+xml")]
-        public void Get_Entry_In_OData_Atom_Format()
+        public void GetEntryInODataAtomFormat()
         {
             // Arrange
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                 ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
@@ -42,10 +35,11 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        public void Get_Entry_In_OData_Json_Verbose_Format()
+        public void GetEntryInODataJsonVerboseFormat()
         {
             // Arrange
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                 MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose")))
@@ -58,10 +52,11 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        public void Get_Entry_In_OData_Json_Full_Metadata_Format()
+        public void GetEntryInODataJsonFullMetadataFormat()
         {
             // Arrange
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                 MediaTypeWithQualityHeaderValue.Parse("application/json;odata=fullmetadata")))
@@ -74,95 +69,123 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void GetFeedWithNoMatchingLinksInODataJsonFullMetadataFormat()
+        {
+            // Arrange
+            IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
+
+            using (HttpConfiguration configuration = CreateConfiguration(model))
+            using (HttpServer host = new HttpServer(configuration))
+            using (HttpClient client = new HttpClient(host))
+            using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
+                MediaTypeWithQualityHeaderValue.Parse("application/json;odata=fullmetadata")))
+            // Act
+            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            {
+                // Assert
+                AssertODataVersion3JsonResponse(
+                    BaselineResource.MainEntryFeedWithNoMatchingLinksInJsonFullMetadata, response);
+            }
+        }
+
+        [Fact]
         [Trait("Description", "Demonstrates how to get the ODataMediaTypeFormatter to only support application/atom+xml")]
-        public void Support_Only_OData_Atom_Format()
+        public void SupportOnlyODataAtomFormat()
         {
             // Arrange #1 and #2
-            foreach (ODataMediaTypeFormatter odataFormatter in _config.Formatters.OfType<ODataMediaTypeFormatter>())
+            using (HttpConfiguration configuration = CreateConfiguration())
             {
-                odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJsonODataVerbose);
-                odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJson);
-            }
-
-            using (HttpServer host = new HttpServer(_config))
-            using (HttpClient client = new HttpClient(host))
-            {
-                // Arrange #1
-                using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                    ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
-                // Act #1
-                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                foreach (ODataMediaTypeFormatter odataFormatter in
+                    configuration.Formatters.OfType<ODataMediaTypeFormatter>())
                 {
-                    // Assert #1
-                    AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
+                    odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJsonODataVerbose);
+                    odataFormatter.SupportedMediaTypes.Remove(ODataMediaTypes.ApplicationJson);
                 }
 
-                // Arrange #2
-                using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                    ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
-                // Act #2
-                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
                 {
-                    // Assert #2
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
-                        response.Content.Headers.ContentType.MediaType);
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInPlainOldJson);
+                    // Arrange #1
+                    using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
+                        ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
+                    // Act #1
+                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        // Assert #1
+                        AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
+                    }
+
+                    // Arrange #2
+                    using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
+                        ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
+                    // Act #2
+                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        // Assert #2
+                        Assert.NotNull(response);
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
+                            response.Content.Headers.ContentType.MediaType);
+                        ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInPlainOldJson);
+                    }
                 }
             }
         }
 
         [Fact]
         [Trait("Description", "Demonstrates how ODataMediaTypeFormatter would conditionally support application/atom+xml and application/json only if format=odata is present in the QueryString")]
-        public void Conditionally_Support_OData_If_Query_String_Present()
+        public void ConditionallySupportODataIfQueryStringPresent()
         {
             // Arrange #1, #2 and #3
-            foreach (ODataMediaTypeFormatter odataFormatter in _config.Formatters.OfType<ODataMediaTypeFormatter>())
+            using (HttpConfiguration configuration = CreateConfiguration())
             {
-                odataFormatter.SupportedMediaTypes.Clear();
-                odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationAtomMediaTypeWithQuality));
-                odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationJsonMediaTypeWithQuality));
-            }
-
-            using (HttpServer host = new HttpServer(_config))
-            using (HttpClient client = new HttpClient(host))
-            {
-                // Arrange #1 this request should return response in OData atom format
-                using (HttpRequestMessage request = ODataTestUtil.GenerateRequestMessage(
-                    CreateRequestUri("People(10)?format=odata"), isAtom: true))
-                // Act #1
-                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                foreach (ODataMediaTypeFormatter odataFormatter in
+                    configuration.Formatters.OfType<ODataMediaTypeFormatter>())
                 {
-                    // Assert #1
-                    AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
+                    odataFormatter.SupportedMediaTypes.Clear();
+                    odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationAtomMediaTypeWithQuality));
+                    odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationJsonMediaTypeWithQuality));
                 }
 
-                // Arrange #2: this request should return response in OData json format
-                using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                    CreateRequestUri("People(10)?format=odata"), isAtom: false))
-                // Act #2
-                using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
                 {
-                    // Assert #2
-                    AssertODataVersion3JsonResponse(BaselineResource.PersonEntryInJsonVerbose, response);
-                }
+                    // Arrange #1 this request should return response in OData atom format
+                    using (HttpRequestMessage request = ODataTestUtil.GenerateRequestMessage(
+                            CreateAbsoluteUri("People(10)?format=odata"), isAtom: true))
+                    // Act #1
+                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        // Assert #1
+                        AssertODataVersion3AtomResponse(BaselineResource.PersonEntryInAtom, response);
+                    }
 
-                // Arrange #3: when the query string is not present, request should be handled by the regular Json
-                // Formatter
-                using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                    CreateRequestUri("People(10)"), isAtom: false))
-                // Act #3
-                using (HttpResponseMessage response = client.SendAsync(requestWithNonODataJsonHeader).Result)
-                {
-                    // Assert #3
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
-                        response.Content.Headers.ContentType.MediaType);
-                    Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
+                    // Arrange #2: this request should return response in OData json format
+                    using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
+                            CreateAbsoluteUri("People(10)?format=odata"), isAtom: false))
+                    // Act #2
+                    using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
+                    {
+                        // Assert #2
+                        AssertODataVersion3JsonResponse(BaselineResource.PersonEntryInJsonVerbose, response);
+                    }
 
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInPlainOldJson);
+                    // Arrange #3: when the query string is not present, request should be handled by the regular Json
+                    // Formatter
+                    using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
+                            CreateAbsoluteUri("People(10)"), isAtom: false))
+                    // Act #3
+                    using (HttpResponseMessage response = client.SendAsync(requestWithNonODataJsonHeader).Result)
+                    {
+                        // Assert #3
+                        Assert.NotNull(response);
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
+                            response.Content.Headers.ContentType.MediaType);
+                        Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
+
+                        ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInPlainOldJson);
+                    }
                 }
             }
         }
@@ -171,7 +194,8 @@ namespace System.Web.Http.OData.Formatter
         public void GetFeedInODataAtomFormat_HasSelfLink()
         {
             // Arrange
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequest("People",
                 ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
@@ -193,7 +217,8 @@ namespace System.Web.Http.OData.Formatter
         public void GetFeedInODataAtomFormat_LimitsResults()
         {
             // Arrange
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequest("People?$orderby=Name&$inlinecount=allpages",
                     ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
@@ -215,8 +240,8 @@ namespace System.Web.Http.OData.Formatter
                 Assert.Equal(2, entries.Length);
                 // Assert there is a next page link
                 Assert.NotNull(nextPageLink);
-                    // Assert the count is included with the number of entities (3)
-                    Assert.Equal("3", count.Value);
+                // Assert the count is included with the number of entities (3)
+                Assert.Equal("3", count.Value);
             }
         }
 
@@ -224,27 +249,29 @@ namespace System.Web.Http.OData.Formatter
         public void HttpErrorInODataFormat_GetsSerializedCorrectly()
         {
             // Arrange
-            _config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-
-            using (HttpServer host = new HttpServer(_config))
-            using (HttpClient client = new HttpClient(host))
-            using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
-                ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
-            // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            using (HttpConfiguration configuration = CreateConfiguration())
             {
-                // Assert
-                Assert.NotNull(response);
-                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+                using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
+                    ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
+                // Act
+                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-                XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
+                    XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
 
-                Assert.Equal("error", xml.Name.LocalName);
-                Assert.Equal("The query specified in the URI is not valid.", xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
-                XElement innerErrorXml = xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}innererror"));
-                Assert.NotNull(innerErrorXml);
-                Assert.Equal("Type 'System.Web.Http.OData.Formatter.FormatterPerson' does not have a property 'abc'.", innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
-                Assert.Equal("Microsoft.Data.OData.ODataException", innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}type")).Value);
+                    Assert.Equal("error", xml.Name.LocalName);
+                    Assert.Equal("The query specified in the URI is not valid.", xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
+                    XElement innerErrorXml = xml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}innererror"));
+                    Assert.NotNull(innerErrorXml);
+                    Assert.Equal("Type 'System.Web.Http.OData.Formatter.FormatterPerson' does not have a property 'abc'.", innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}message")).Value);
+                    Assert.Equal("Microsoft.Data.OData.ODataException", innerErrorXml.Element(XName.Get("{http://schemas.microsoft.com/ado/2007/08/dataservices/metadata}type")).Value);
+                }
             }
         }
 
@@ -276,9 +303,79 @@ namespace System.Web.Http.OData.Formatter
             ODataTestUtil.VerifyJsonResponse(actual.Content, expectedContent);
         }
 
+        private static string CreateAbsoluteLink(string relativeUri)
+        {
+            return CreateAbsoluteUri(relativeUri).AbsoluteUri;
+        }
+
+        private static Uri CreateAbsoluteUri(string relativeUri)
+        {
+            return new Uri(new Uri(baseAddress), relativeUri);
+        }
+
+        private static HttpConfiguration CreateConfiguration()
+        {
+            IEdmModel model = ODataTestUtil.GetEdmModel();
+            return CreateConfiguration(model);
+        }
+
+        private static HttpConfiguration CreateConfiguration(IEdmModel model)
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.EnableOData(model);
+            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));
+            return configuration;
+        }
+
+        private static IEdmModel CreateModelForFullMetadata(bool sameLinksForIdAndEdit, bool sameLinksForEditAndRead)
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            EntitySetConfiguration<MainEntity> mainSet = builder.EntitySet<MainEntity>("MainEntity");
+
+            Func<EntityInstanceContext<MainEntity>, string> idLinkFactory = (e) =>
+                CreateAbsoluteLink("/MainEntity/id/" + e.EntityInstance.Id.ToString());
+            mainSet.HasIdLink(idLinkFactory, followsConventions: true);
+
+            Func<EntityInstanceContext<MainEntity>, string> editLinkFactory;
+
+            if (!sameLinksForIdAndEdit)
+            {
+                editLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/edit/" + e.EntityInstance.Id.ToString());
+                mainSet.HasEditLink(editLinkFactory, followsConventions: false);
+            }
+
+            Func<EntityInstanceContext<MainEntity>, string> readLinkFactory;
+
+            if (!sameLinksForEditAndRead)
+            {
+                readLinkFactory = (e) => CreateAbsoluteLink("/MainEntity/read/" + e.EntityInstance.Id.ToString());
+                mainSet.HasReadLink(readLinkFactory, followsConventions: false);
+            }
+
+            EntityTypeConfiguration<MainEntity> main = mainSet.EntityType;
+
+            main.HasKey<int>((e) => e.Id);
+            main.Property<short>((e) => e.Int16);
+            NavigationPropertyConfiguration mainToRelated = mainSet.EntityType.HasRequired((e) => e.Related);
+
+            main.Action("DoAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasActionLink((c) =>
+                CreateAbsoluteUri("/MainEntity/DoAlways/" + ((MainEntity)(c.EntityInstance)).Id));
+            main.TransientAction("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
+                "MainEntity").HasActionLink((c) =>
+                    CreateAbsoluteUri("/MainEntity/DoSometimes/" + ((MainEntity)(c.EntityInstance)).Id));
+
+            mainSet.HasNavigationPropertyLink(mainToRelated, (c, p) =>
+                new Uri("/MainEntity/RelatedEntity/" + c.EntityInstance.Id, UriKind.Relative), followsConventions: true);
+
+            EntitySetConfiguration<RelatedEntity> related = builder.EntitySet<RelatedEntity>("RelatedEntity");
+
+            return builder.GetEdmModel();
+        }
+
         private static HttpRequestMessage CreateRequest(string pathAndQuery, MediaTypeWithQualityHeaderValue accept)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, CreateRequestUri(pathAndQuery));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, CreateAbsoluteUri(pathAndQuery));
             request.Headers.Accept.Add(accept);
             return request;
         }
@@ -290,10 +387,49 @@ namespace System.Web.Http.OData.Formatter
             AddDataServiceVersionHeaders(request);
             return request;
         }
+    }
 
-        private static Uri CreateRequestUri(string pathAndQuery)
+    public class MainEntity
+    {
+        public int Id { get; set; }
+
+        public short Int16 { get; set; }
+
+        public RelatedEntity Related { get; set; }
+    }
+
+    public class RelatedEntity
+    {
+        public int Id { get; set; }
+    }
+
+    public class MainEntityController : ApiController
+    {
+        public IEnumerable<MainEntity> Get()
         {
-            return new Uri(baseAddress + pathAndQuery);
+            MainEntity[] entities = new MainEntity[]
+            {
+                new MainEntity
+                {
+                    Id = 1,
+                    Int16 = -1,
+                    Related = new RelatedEntity
+                    {
+                        Id = 101
+}
+                },
+                new MainEntity
+                {
+                    Id = 2,
+                    Int16 = -2,
+                    Related = new RelatedEntity
+                    {
+                        Id = 102
+                    }
+                }
+            };
+
+            return new ODataResult<MainEntity>(entities, new Uri("aa:b"), 3);
         }
     }
 }

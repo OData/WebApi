@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Net.Http;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -11,19 +12,19 @@ namespace System.Web.Http.OData.Builder
     public class EntitySetLinkConfigurationTest
     {
         [Fact]
-        public void CanConfigureAllLinksViaEditLink()
+        public void CanConfigureAllLinksViaIdLink()
         {
             // Arrange
             ODataModelBuilder builder = GetCommonModel();
             var expectedEditLink = "http://server/service/Products(15)";
 
             var products = builder.EntitySet<EntitySetLinkConfigurationTest_Product>("Products");
-            products.HasEditLink(c => new Uri(
+            products.HasIdLink(c =>
                 string.Format(
                     "http://server/service/Products({0})",
                     c.EntityInstance.ID
-                )
-            ));
+                ),
+                followsConventions: false);
 
             var actor = builder.EntitySets.Single();
             var model = builder.GetEdmModel();
@@ -34,17 +35,15 @@ namespace System.Web.Http.OData.Builder
             var entitySetLinkBuilderAnnotation = new EntitySetLinkBuilderAnnotation(actor);
 
             // Act
-            var editLinkUri = entitySetLinkBuilderAnnotation.BuildEditLink(entityContext);
-            var readLinkUri = entitySetLinkBuilderAnnotation.BuildReadLink(entityContext);
-            var idLink = entitySetLinkBuilderAnnotation.BuildIdLink(entityContext);
+            var selfLinks = entitySetLinkBuilderAnnotation.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.Default);
 
             // Assert
-            Assert.NotNull(editLinkUri);
-            Assert.Equal(expectedEditLink, editLinkUri.ToString());
-            Assert.NotNull(readLinkUri);
-            Assert.Equal(expectedEditLink, readLinkUri.ToString());
-            Assert.NotNull(idLink);
-            Assert.Equal(expectedEditLink, idLink);
+            Assert.NotNull(selfLinks.EditLink);
+            Assert.Equal(expectedEditLink, selfLinks.EditLink.ToString());
+            Assert.NotNull(selfLinks.ReadLink);
+            Assert.Equal(expectedEditLink, selfLinks.ReadLink.ToString());
+            Assert.NotNull(selfLinks.IdLink);
+            Assert.Equal(expectedEditLink, selfLinks.IdLink);
         }
 
         [Fact]
@@ -62,18 +61,21 @@ namespace System.Web.Http.OData.Builder
                     "http://server1/service/Products({0})",
                     c.EntityInstance.ID
                 )
-            ));
+            ),
+            followsConventions: false);
             products.HasReadLink(c => new Uri(
                 string.Format(
                     "http://server2/service/Products/15",
                     c.EntityInstance.ID
                 )
-            ));
+            ),
+            followsConventions: false);
             products.HasIdLink(c =>
                 string.Format(
                     "http://server3/service/Products({0})",
                     c.EntityInstance.ID
-                )
+                ),
+            followsConventions: false
             );
 
             var actor = builder.EntitySets.Single();
@@ -84,9 +86,9 @@ namespace System.Web.Http.OData.Builder
             var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance, UrlHelper = new UrlHelper(new HttpRequestMessage()) };
 
             // Act
-            var editLink = actor.GetEditLink()(entityContext);
-            var readLink = actor.GetReadLink()(entityContext);
-            var idLink = actor.GetIdLink()(entityContext);
+            var editLink = actor.GetEditLink().Factory(entityContext);
+            var readLink = actor.GetReadLink().Factory(entityContext);
+            var idLink = actor.GetIdLink().Factory(entityContext);
 
             // Assert
             Assert.NotNull(editLink);
@@ -125,7 +127,7 @@ namespace System.Web.Http.OData.Builder
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty),
+                () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty, ODataMetadataLevel.Default),
                 "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.Http.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set 'Products'. " +
                 "Try calling HasNavigationPropertyLink on the EntitySetConfiguration.");
         }

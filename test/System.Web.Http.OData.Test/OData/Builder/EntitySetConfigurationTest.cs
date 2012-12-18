@@ -6,6 +6,15 @@ namespace System.Web.Http.OData.Builder
 {
     public class EntitySetConfigurationTest
     {
+        private ODataModelBuilder _builder;
+        private EntitySetConfiguration _entityset;
+
+        public EntitySetConfigurationTest()
+        {
+            _builder = new ODataModelBuilder();
+            _entityset = new EntitySetConfiguration(_builder, typeof(EntitySetConfigurationTest), "entityset");
+        }
+
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_ModelBuilder()
         {
@@ -144,6 +153,45 @@ namespace System.Web.Http.OData.Builder
 
             // Assert
             Assert.Equal("entityset", entityset.Name);
+        }
+
+        [Fact]
+        public void HasIdLink_RoundTrips()
+        {
+            // Arrange
+            SelfLinkBuilder<string> idLinkBuilder = new SelfLinkBuilder<string>((ctxt) => null, followsConventions: true);
+
+            // Act
+            _entityset.HasIdLink(idLinkBuilder);
+
+            // Assert
+            Assert.Equal(idLinkBuilder, _entityset.GetIdLink());
+        }
+
+        [Fact]
+        public void HasEditLink_RoundTrips()
+        {
+            // Arrange
+            SelfLinkBuilder<Uri> editLinkBuilder = new SelfLinkBuilder<Uri>((ctxt) => null, followsConventions: true);
+
+            // Act
+            _entityset.HasEditLink(editLinkBuilder);
+
+            // Assert
+            Assert.Equal(editLinkBuilder, _entityset.GetEditLink());
+        }
+
+        [Fact]
+        public void HasReadLink_RoundTrips()
+        {
+            // Arrange
+            SelfLinkBuilder<Uri> readLinkBuilder = new SelfLinkBuilder<Uri>((ctxt) => null, followsConventions: true);
+
+            // Act
+            _entityset.HasReadLink(readLinkBuilder);
+
+            // Assert
+            Assert.Equal(readLinkBuilder, _entityset.GetReadLink());
         }
     }
 }

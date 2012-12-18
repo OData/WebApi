@@ -194,7 +194,7 @@
   </data>
   <data name="EmployeeEntryInJsonLight" xml:space="preserve">
     <value>{
-  "odata.metadata":"http://localhost/$metadata#Default.Container.employees/@Element","odata.id":"http://localhost/employees(0L)","odata.editLink":"http://localhost/employees(0L)","odata.readLink":"http://localhost/employees(0L)","Manager@odata.navigationLinkUrl":"http://localhost/employees(0L)/Manager","DirectReports@odata.navigationLinkUrl":"http://localhost/employees(0L)/DirectReports","WorkItem@odata.navigationLinkUrl":"http://localhost/employees(0L)/WorkItem","EmployeeId@odata.type":"Edm.Int64","EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
+  "odata.metadata":"http://localhost/$metadata#Default.Container.employees/@Element","EmployeeId@odata.type":"Edm.Int64","EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
     "Alias0"
   ],"Address":{
     "odata.type":"System.Web.Http.OData.TestCommon.Models.Address","StreetAddress":"StreetAddress1","City":"City1","State":"State1","ZipCode":1
@@ -209,7 +209,7 @@
     <value>{
   "odata.metadata":"http://localhost/$metadata#Default.Container.employees","value":[
     {
-      "odata.id":"http://localhost/employees(0L)","odata.editLink":"http://localhost/employees(0L)","odata.readLink":"http://localhost/employees(0L)","Manager@odata.navigationLinkUrl":"http://localhost/employees(0L)/Manager","DirectReports@odata.navigationLinkUrl":"http://localhost/employees(0L)/DirectReports","WorkItem@odata.navigationLinkUrl":"http://localhost/employees(0L)/WorkItem","EmployeeId@odata.type":"Edm.Int64","EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
+      "EmployeeId@odata.type":"Edm.Int64","EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
         "Alias0"
       ],"Address":{
         "odata.type":"System.Web.Http.OData.TestCommon.Models.Address","StreetAddress":"StreetAddress1","City":"City1","State":"State1","ZipCode":1
@@ -219,7 +219,7 @@
         "odata.type":"System.Web.Http.OData.TestCommon.Models.IActivity","ActivityName":"Xbox Gaming"
       }
     },{
-      "odata.id":"http://localhost/employees(1L)","odata.editLink":"http://localhost/employees(1L)","odata.readLink":"http://localhost/employees(1L)","Manager@odata.navigationLinkUrl":"http://localhost/employees(1L)/Manager","DirectReports@odata.navigationLinkUrl":"http://localhost/employees(1L)/DirectReports","WorkItem@odata.navigationLinkUrl":"http://localhost/employees(1L)/WorkItem","EmployeeId@odata.type":"Edm.Int64","EmployeeId":"1","Age":21,"Gender":"Male","FirstName":"Steve","Alias":[
+      "EmployeeId@odata.type":"Edm.Int64","EmployeeId":"1","Age":21,"Gender":"Male","FirstName":"Steve","Alias":[
         "Alias1"
       ],"Address":{
         "odata.type":"System.Web.Http.OData.TestCommon.Models.Address","StreetAddress":"StreetAddress2","City":"City2","State":"State2","ZipCode":2
@@ -253,6 +253,25 @@
   "odata.metadata":"http://localhost/#Collection(Edm.String)","value":[
     "Frank","Steve","Tom","Chandler"
   ]
+}</value>
+  </data>
+  <data name="MainEntryFeedWithNoMatchingLinksInJsonFullMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost:8081/$metadata#Default.Container.MainEntity","odata.count":"3","value":[
+    {
+      "odata.id":"http://localhost:8081/MainEntity/id/1","odata.editLink":"http://localhost:8081/MainEntity/edit/1","odata.readLink":"http://localhost:8081/MainEntity/read/1","Related@odata.navigationLinkUrl":"/MainEntity/RelatedEntity/1","#Container.DoAlways":{
+        "title":"DoAlways","target":"http://localhost:8081/MainEntity/DoAlways/1"
+      },"#Container.DoSometimes":{
+        "title":"DoSometimes","target":"http://localhost:8081/MainEntity/DoSometimes/1"
+      },"Id":1,"Int16@odata.type":"Edm.Int16","Int16":-1
+    },{
+      "odata.id":"http://localhost:8081/MainEntity/id/2","odata.editLink":"http://localhost:8081/MainEntity/edit/2","odata.readLink":"http://localhost:8081/MainEntity/read/2","Related@odata.navigationLinkUrl":"/MainEntity/RelatedEntity/2","#Container.DoAlways":{
+        "title":"DoAlways","target":"http://localhost:8081/MainEntity/DoAlways/2"
+      },"#Container.DoSometimes":{
+        "title":"DoSometimes","target":"http://localhost:8081/MainEntity/DoSometimes/2"
+      },"Id":2,"Int16@odata.type":"Edm.Int16","Int16":-2
+    }
+  ],"odata.nextLink":"aa:b"
 }</value>
   </data>
   <data name="NullableBooleanInXml" xml:space="preserve">
@@ -304,7 +323,7 @@
   </data>
   <data name="PersonEntryInJsonFullMetadata" xml:space="preserve">
     <value>{
-  "odata.metadata":"http://localhost:8081/$metadata#Default.Container.People/@Element","odata.id":"http://localhost:8081/People(10)","odata.editLink":"http://localhost:8081/People(10)","odata.readLink":"http://localhost:8081/People(10)","PerId":10,"Age":10,"MyGuid@odata.type":"Edm.Guid","MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":{
+  "odata.metadata":"http://localhost:8081/$metadata#Default.Container.People/@Element","odata.id":"http://localhost:8081/People(10)","PerId":10,"Age":10,"MyGuid@odata.type":"Edm.Guid","MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d","Name":"Asha","Order":{
     "odata.type":"System.Web.Http.OData.Formatter.FormatterOrder","OrderAmount":235342,"OrderName":"FirstOrder"
   }
 }</value>
@@ -642,7 +661,7 @@
   </data>
   <data name="WorkItemEntryInJsonLight" xml:space="preserve">
     <value>{
-  "odata.metadata":"http://localhost/$metadata#Default.Container.WorkItems/@Element","odata.id":"http://localhost/WorkItems(25)","odata.editLink":"http://localhost/WorkItems(25)","odata.readLink":"http://localhost/WorkItems(25)","ID":25,"EmployeeID":0,"IsCompleted":false,"NumberOfHours@odata.type":"Edm.Single","NumberOfHours":100
+  "odata.metadata":"http://localhost/$metadata#Default.Container.WorkItems/@Element","ID":25,"EmployeeID":0,"IsCompleted":false,"NumberOfHours@odata.type":"Edm.Single","NumberOfHours":100
 }</value>
   </data>
 </root>

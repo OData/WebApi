@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -19,10 +18,12 @@ namespace System.Web.Http.OData.Builder
 
         private string _url;
         private Func<FeedContext, Uri> _feedSelfLinkFactory;
-        private Func<EntityInstanceContext, Uri> _editLinkFactory;
-        private Func<EntityInstanceContext, Uri> _readLinkFactory;
-        private Func<EntityInstanceContext, string> _idLinkFactory;
-        private readonly IDictionary<NavigationPropertyConfiguration, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>> _navigationPropertyLinkBuilders;
+
+        private SelfLinkBuilder<Uri> _editLinkBuilder;
+        private SelfLinkBuilder<Uri> _readLinkBuilder;
+        private SelfLinkBuilder<string> _idLinkBuilder;
+
+        private readonly Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder> _navigationPropertyLinkBuilders;
 
         /// <summary>
         /// Initializes an instance of <see cref="EntitySetConfiguration"/>.
@@ -73,9 +74,9 @@ namespace System.Web.Http.OData.Builder
             ClrType = entityType.ClrType;
             _url = Name;
 
-            _editLinkFactory = null;
-            _readLinkFactory = null;
-            _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, Func<EntityInstanceContext, IEdmNavigationProperty, Uri>>();
+            _editLinkBuilder = null;
+            _readLinkBuilder = null;
+            _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder>();
             _entitySetBindings = new Dictionary<NavigationPropertyConfiguration, NavigationPropertyBinding>();
         }
 
@@ -106,9 +107,9 @@ namespace System.Web.Http.OData.Builder
         public virtual string Name { get; private set; }
 
         /// <summary>
-        /// Configures the entity set url.
+        /// Configures the entity set URL.
         /// </summary>
-        /// <param name="url">The entity set url.</param>
+        /// <param name="url">The entity set URL.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "This Url property is not required to be a valid Uri")]
         public virtual EntitySetConfiguration HasUrl(string url)
@@ -131,33 +132,48 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Configures the edit link for the entities from this entity set.
         /// </summary>
-        /// <param name="editLinkFactory">The builder used to generate the edit link.</param>
+        /// <param name="editLinkBuilder">The builder used to generate the edit link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual EntitySetConfiguration HasEditLink(Func<EntityInstanceContext, Uri> editLinkFactory)
+        public virtual EntitySetConfiguration HasEditLink(SelfLinkBuilder<Uri> editLinkBuilder)
         {
-            _editLinkFactory = editLinkFactory;
+            if (editLinkBuilder == null)
+            {
+                throw Error.ArgumentNull("editLinkBuilder");
+            }
+
+            _editLinkBuilder = editLinkBuilder;
             return this;
         }
 
         /// <summary>
         /// Configures the read link for the entities from this entity set.
         /// </summary>
-        /// <param name="readLinkFactory">The builder used to generate the read link.</param>
+        /// <param name="readLinkBuilder">The builder used to generate the read link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual EntitySetConfiguration HasReadLink(Func<EntityInstanceContext, Uri> readLinkFactory)
+        public virtual EntitySetConfiguration HasReadLink(SelfLinkBuilder<Uri> readLinkBuilder)
         {
-            _readLinkFactory = readLinkFactory;
+            if (readLinkBuilder == null)
+            {
+                throw Error.ArgumentNull("readLinkBuilder");
+            }
+
+            _readLinkBuilder = readLinkBuilder;
             return this;
         }
 
         /// <summary>
         /// Configures the ID for the entities from this entity set.
         /// </summary>
-        /// <param name="idLinkFactory">The builder used to generate the ID.</param>
+        /// <param name="idLinkBuilder">The builder used to generate the ID.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual EntitySetConfiguration HasIdLink(Func<EntityInstanceContext, string> idLinkFactory)
+        public virtual EntitySetConfiguration HasIdLink(SelfLinkBuilder<string> idLinkBuilder)
         {
-            _idLinkFactory = idLinkFactory;
+            if (idLinkBuilder == null)
+            {
+                throw Error.ArgumentNull("idLinkBuilder");
+            }
+
+            _idLinkBuilder = idLinkBuilder;
             return this;
         }
 
@@ -165,18 +181,18 @@ namespace System.Web.Http.OData.Builder
         /// Configures the navigation link for the given navigation property for entities from this entity set.
         /// </summary>
         /// <param name="navigationProperty">The navigation property for which the navigation link is being generated.</param>
-        /// <param name="navigationLinkFactory">The builder used to generate the navigation link.</param>
+        /// <param name="navigationLinkBuilder">The builder used to generate the navigation link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual EntitySetConfiguration HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty, Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory)
+        public virtual EntitySetConfiguration HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty, NavigationLinkBuilder navigationLinkBuilder)
         {
             if (navigationProperty == null)
             {
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            if (navigationLinkFactory == null)
+            if (navigationLinkBuilder == null)
             {
-                throw Error.ArgumentNull("navigationLinkFactory");
+                throw Error.ArgumentNull("navigationLinkBuilder");
             }
 
             EntityTypeConfiguration declaringEntityType = navigationProperty.DeclaringEntityType;
@@ -185,7 +201,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.InvalidOperation(SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
-            _navigationPropertyLinkBuilders.Add(navigationProperty, navigationLinkFactory);
+            _navigationPropertyLinkBuilders.Add(navigationProperty, navigationLinkBuilder);
             return this;
         }
 
@@ -193,23 +209,23 @@ namespace System.Web.Http.OData.Builder
         /// Configures the navigation link for the given navigation properties for entities from this entity set.
         /// </summary>
         /// <param name="navigationProperties">The navigation properties for which the navigation link is being generated.</param>
-        /// <param name="navigationLinkFactory">The builder used to generate the navigation link.</param>
+        /// <param name="navigationLinkBuilder">The builder used to generate the navigation link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual EntitySetConfiguration HasNavigationPropertiesLink(IEnumerable<NavigationPropertyConfiguration> navigationProperties, Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory)
+        public virtual EntitySetConfiguration HasNavigationPropertiesLink(IEnumerable<NavigationPropertyConfiguration> navigationProperties, NavigationLinkBuilder navigationLinkBuilder)
         {
             if (navigationProperties == null)
             {
                 throw Error.ArgumentNull("navigationProperties");
             }
 
-            if (navigationLinkFactory == null)
+            if (navigationLinkBuilder == null)
             {
-                throw Error.ArgumentNull("navigationLinkFactory");
+                throw Error.ArgumentNull("navigationLinkBuilder");
             }
 
             foreach (NavigationPropertyConfiguration navigationProperty in navigationProperties)
             {
-                HasNavigationPropertyLink(navigationProperty, navigationLinkFactory);
+                HasNavigationPropertyLink(navigationProperty, navigationLinkBuilder);
             }
 
             return this;
@@ -344,9 +360,9 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <returns>The link builder.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public virtual Func<EntityInstanceContext, Uri> GetEditLink()
+        public virtual SelfLinkBuilder<Uri> GetEditLink()
         {
-            return _editLinkFactory;
+            return _editLinkBuilder;
         }
 
         /// <summary>
@@ -354,9 +370,9 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <returns>The link builder.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public virtual Func<EntityInstanceContext, Uri> GetReadLink()
+        public virtual SelfLinkBuilder<Uri> GetReadLink()
         {
-            return _readLinkFactory;
+            return _readLinkBuilder;
         }
 
         /// <summary>
@@ -364,9 +380,9 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <returns>The builder.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public virtual Func<EntityInstanceContext, string> GetIdLink()
+        public virtual SelfLinkBuilder<string> GetIdLink()
         {
-            return _idLinkFactory;
+            return _idLinkBuilder;
         }
 
         /// <summary>
@@ -374,14 +390,14 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="navigationProperty">The navigation property.</param>
         /// <returns>The link builder.</returns>
-        public virtual Func<EntityInstanceContext, IEdmNavigationProperty, Uri> GetNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty)
+        public virtual NavigationLinkBuilder GetNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty)
         {
             if (navigationProperty == null)
             {
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationPropertyLinkBuilder;
+            NavigationLinkBuilder navigationPropertyLinkBuilder;
             _navigationPropertyLinkBuilders.TryGetValue(navigationProperty, out navigationPropertyLinkBuilder);
             return navigationPropertyLinkBuilder;
         }

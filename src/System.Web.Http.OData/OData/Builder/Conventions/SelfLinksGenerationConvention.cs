@@ -2,10 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
@@ -33,43 +30,43 @@ namespace System.Web.Http.OData.Builder.Conventions
                 });
             }
 
-            // We only need to configure the EditLink by convention, ReadLink and IdLink both delegate to EditLink
-            if (configuration.GetEditLink() == null)
+            // We only need to configure the IdLink by convention, ReadLink and EditLink both delegate to IdLink
+            if (configuration.GetIdLink() == null)
             {
                 bool derivedTypesDefineNavigationProperty = model.DerivedTypes(configuration.EntityType).Any(e => e.NavigationProperties.Any());
 
                 // generate links with cast if any of the derived types define a navigation property
                 if (derivedTypesDefineNavigationProperty)
                 {
-                    configuration.HasEditLink((entityContext) => GenerateSelfLink(configuration, entityContext, includeCast: true));
+                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => GenerateSelfLink(configuration, entityContext, includeCast: true), followsConventions: true));
                 }
                 else
                 {
-                    configuration.HasEditLink((entityContext) => GenerateSelfLink(configuration, entityContext, includeCast: false));
+                    configuration.HasIdLink(new SelfLinkBuilder<string>((entityContext) => GenerateSelfLink(configuration, entityContext, includeCast: false), followsConventions: true));
                 }
             }
         }
 
-        internal static Uri GenerateSelfLink(EntitySetConfiguration configuration, EntityInstanceContext entityContext, bool includeCast)
+        internal static string GenerateSelfLink(EntitySetConfiguration configuration, EntityInstanceContext entityContext, bool includeCast)
         {
-            List<ODataPathSegment> editLinkPathSegments = new List<ODataPathSegment>();
+            List<ODataPathSegment> idLinkPathSegments = new List<ODataPathSegment>();
 
-            editLinkPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
-            editLinkPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)));
+            idLinkPathSegments.Add(new EntitySetPathSegment(entityContext.EntitySet));
+            idLinkPathSegments.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext, configuration.EntityType)));
 
             if (includeCast)
             {
-                editLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
+                idLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string editLink = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, editLinkPathSegments);
+            string idLink = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, idLinkPathSegments);
 
-            if (editLink == null)
+            if (idLink == null)
             {
                 return null;
             }
 
-            return new Uri(editLink);
+            return idLink;
         }
     }
 }

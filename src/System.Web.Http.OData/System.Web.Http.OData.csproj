@@ -128,7 +128,12 @@
     <Compile Include="OData\AsyncEntitySetController.cs" />
     <Compile Include="OData\ODataFormattingAttribute.cs" />
     <Compile Include="OData\ODataController.cs" />
+    <Compile Include="OData\Builder\SelfLinkBuilder.cs" />
+    <Compile Include="OData\Builder\NavigationLinkBuilder.cs" />
     <Compile Include="OData\EntitySetControllerHelpers.cs" />
+    <Compile Include="OData\Formatter\ODataMetadataLevel.cs" />
+    <Compile Include="OData\Formatter\ODataMetadataLevelHelper.cs" />
+    <Compile Include="OData\Formatter\Serialization\EntitySelfLinks.cs" />
     <Compile Include="OData\FromODataUriAttribute.cs" />
     <Compile Include="OData\ODataRouteConstants.cs" />
     <Compile Include="OData\EntitySetController.cs" />
@@ -281,7 +286,6 @@
     <Compile Include="OData\Builder\EdmModelHelperMethods.cs" />
     <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotation.cs" />
     <Compile Include="OData\Builder\EntitySetUrlAnnotation.cs" />
-    <Compile Include="OData\Builder\IEntitySetLinkBuilder.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapper.cs" />
     <Compile Include="OData\Formatter\Deserialization\ClrTypeAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />

@@ -165,7 +165,12 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.employees/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;Manager@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/Manager&quot;,&quot;DirectReports@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/DirectReports&quot;,&quot;WorkItem@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/WorkItem&quot;,&quot;EmployeeId@odata.type&quot;:&quot;Edm.Int64&quot;,&quot;Empl [rest of string was truncated]&quot;;.
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.employees/@Element&quot;,&quot;EmployeeId@odata.type&quot;:&quot;Edm.Int64&quot;,&quot;EmployeeId&quot;:&quot;0&quot;,&quot;Age&quot;:20,&quot;Gender&quot;:&quot;Male&quot;,&quot;FirstName&quot;:&quot;Frank&quot;,&quot;Alias&quot;:[
+        ///    &quot;Alias0&quot;
+        ///  ],&quot;Address&quot;:{
+        ///    &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.Address&quot;,&quot;StreetAddress&quot;:&quot;StreetAddress1&quot;,&quot;City&quot;:&quot;City1&quot;,&quot;State&quot;:&quot;State1&quot;,&quot;ZipCode&quot;:1
+        ///  },&quot;HomeNumber&quot;:{
+        ///    &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.PhoneNumber&quot;,&quot;CountryCode&quot;:1,&quot;AreaCode&quot;:425,&quot;Number&quot;:9879089, [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string EmployeeEntryInJsonLight {
             get {
@@ -177,7 +182,12 @@ namespace System.Web.Http.OData {
         ///   Looks up a localized string similar to {
         ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.employees&quot;,&quot;value&quot;:[
         ///    {
-        ///      &quot;odata.id&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost/employees(0L)&quot;,&quot;Manager@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/Manager&quot;,&quot;DirectReports@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/DirectReports&quot;,&quot;WorkItem@odata.navigationLinkUrl&quot;:&quot;http://localhost/employees(0L)/WorkItem&quot;,&quot;EmployeeId@odata.type&quot;:&quot;E [rest of string was truncated]&quot;;.
+        ///      &quot;EmployeeId@odata.type&quot;:&quot;Edm.Int64&quot;,&quot;EmployeeId&quot;:&quot;0&quot;,&quot;Age&quot;:20,&quot;Gender&quot;:&quot;Male&quot;,&quot;FirstName&quot;:&quot;Frank&quot;,&quot;Alias&quot;:[
+        ///        &quot;Alias0&quot;
+        ///      ],&quot;Address&quot;:{
+        ///        &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.Address&quot;,&quot;StreetAddress&quot;:&quot;StreetAddress1&quot;,&quot;City&quot;:&quot;City1&quot;,&quot;State&quot;:&quot;State1&quot;,&quot;ZipCode&quot;:1
+        ///      },&quot;HomeNumber&quot;:{
+        ///        &quot;odata.type&quot;:&quot;System.Web.Http.OData.TestCommon.Models.PhoneNumber&quot;,&quot;CountryCode&quot; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string FeedOfEmployeeInJsonLight {
             get {
@@ -239,6 +249,21 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost:8081/$metadata#Default.Container.MainEntity&quot;,&quot;odata.count&quot;:&quot;3&quot;,&quot;value&quot;:[
+        ///    {
+        ///      &quot;odata.id&quot;:&quot;http://localhost:8081/MainEntity/id/1&quot;,&quot;odata.editLink&quot;:&quot;http://localhost:8081/MainEntity/edit/1&quot;,&quot;odata.readLink&quot;:&quot;http://localhost:8081/MainEntity/read/1&quot;,&quot;Related@odata.navigationLinkUrl&quot;:&quot;/MainEntity/RelatedEntity/1&quot;,&quot;#Container.DoAlways&quot;:{
+        ///        &quot;title&quot;:&quot;DoAlways&quot;,&quot;target&quot;:&quot;http://localhost:8081/MainEntity/DoAlways/1&quot;
+        ///      },&quot;#Container.DoSometimes&quot;:{
+        ///         [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string MainEntryFeedWithNoMatchingLinksInJsonFullMetadata {
+            get {
+                return ResourceManager.GetString("MainEntryFeedWithNoMatchingLinksInJsonFullMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;false&lt;/d:ID&gt;.
         /// </summary>
@@ -289,7 +314,7 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;odata.metadata&quot;:&quot;http://localhost:8081/$metadata#Default.Container.People/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid@odata.type&quot;:&quot;Edm.Guid&quot;,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:{
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost:8081/$metadata#Default.Container.People/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost:8081/People(10)&quot;,&quot;PerId&quot;:10,&quot;Age&quot;:10,&quot;MyGuid@odata.type&quot;:&quot;Edm.Guid&quot;,&quot;MyGuid&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;,&quot;Name&quot;:&quot;Asha&quot;,&quot;Order&quot;:{
         ///    &quot;odata.type&quot;:&quot;System.Web.Http.OData.Formatter.FormatterOrder&quot;,&quot;OrderAmount&quot;:235342,&quot;OrderName&quot;:&quot;FirstOrder&quot;
         ///  }
         ///}.
@@ -451,7 +476,7 @@ namespace System.Web.Http.OData {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.WorkItems/@Element&quot;,&quot;odata.id&quot;:&quot;http://localhost/WorkItems(25)&quot;,&quot;odata.editLink&quot;:&quot;http://localhost/WorkItems(25)&quot;,&quot;odata.readLink&quot;:&quot;http://localhost/WorkItems(25)&quot;,&quot;ID&quot;:25,&quot;EmployeeID&quot;:0,&quot;IsCompleted&quot;:false,&quot;NumberOfHours@odata.type&quot;:&quot;Edm.Single&quot;,&quot;NumberOfHours&quot;:100
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/$metadata#Default.Container.WorkItems/@Element&quot;,&quot;ID&quot;:25,&quot;EmployeeID&quot;:0,&quot;IsCompleted&quot;:false,&quot;NumberOfHours@odata.type&quot;:&quot;Edm.Single&quot;,&quot;NumberOfHours&quot;:100
         ///}.
         /// </summary>
         internal static string WorkItemEntryInJsonLight {

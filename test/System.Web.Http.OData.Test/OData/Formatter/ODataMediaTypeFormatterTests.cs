@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
@@ -170,6 +172,36 @@ namespace System.Web.Http.OData.Formatter
                 "The OData formatter does not support writing client requests. This formatter instance must have an associated request.");
         }
 
+        [Fact]
+        public void WriteToStreamAsync_Passes_MetadataLevelToSerializerContext()
+        {
+            // Arrange
+            var model = CreateModel();
+
+            Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
+            serializer
+                .Setup(s => s.WriteObject(42, It.IsAny<ODataMessageWriter>(), It.IsAny<ODataSerializerContext>()))
+                .Callback((object i, ODataMessageWriter writer, ODataSerializerContext context) => Assert.Equal(context.MetadataLevel, ODataMetadataLevel.FullMetadata))
+                .Verifiable();
+
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(model);
+            serializerProvider
+                .Setup(p => p.GetODataPayloadSerializer(typeof(int)))
+                .Returns(serializer.Object);
+
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(model);
+
+            var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>(), ODataVersion.V3, CreateFakeODataRequest(model));
+            HttpContent content = new StringContent("42");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+
+            // Act
+            formatter.WriteToStreamAsync(typeof(int), 42, new MemoryStream(), content, transportContext: null);
+
+            // Assert
+            serializer.Verify();
+        }
+
         private static Encoding CreateEncoding(string name)
         {
             if (name == "utf-8")
@@ -228,14 +260,20 @@ namespace System.Web.Http.OData.Formatter
 
         public ODataMediaTypeFormatter CreateFormatterWithRequest()
         {
+            var model = CreateModel();
+            var request = CreateFakeODataRequest(model);
+            return CreateFormatter(model, request);
+        }
+
+        public HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
+        {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.AddFakeODataRoute();
             request.Properties["MS_HttpConfiguration"] = configuration;
-            IEdmModel model = CreateModel();
             request.Properties["MS_ODataPath"] = new ODataPath(new EntitySetPathSegment(
                 model.EntityContainers().Single().EntitySets().Single()));
-            return CreateFormatter(model, request);
+            return request;
         }
 
         private static IEdmModel CreateModel()

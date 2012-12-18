@@ -120,6 +120,8 @@
     <Compile Include="HttpErrorExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
+    <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotationTest.cs" />
+    <Compile Include="OData\Builder\MockEntitySetLinkBuilderAnnotation.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConventionTest.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="UrlHelperExtensionsTest.cs" />
     <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />
+    <Compile Include="OData\Formatter\ODataMetadataLevelHelperTest.cs" />
     <Compile Include="OData\FromODataUriTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataMessageReaderLearningTests.cs" />
     <Compile Include="OData\Formatter\HttpConfigurationExtensions.cs" />

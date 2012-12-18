@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
@@ -273,10 +272,10 @@ namespace System.Web.Http.OData.Formatter
                 .DerivesFrom<Vehicle>()
                 .Property(c => c.SeatingCapacity);
 
-            builder.EntitySet<Vehicle>("vehicles").HasEditLink(
-                (v) => "http://localhost/vehicles/" + v.EntityInstance.Name);
-            builder.EntitySet<Motorcycle>("motorcycles").HasEditLink(
-                (m) => "http://localhost/motorcycles/" + m.EntityInstance.Name);
+            builder.EntitySet<Vehicle>("vehicles").HasIdLink(
+                (v) => "http://localhost/vehicles/" + v.EntityInstance.Name, followsConventions: false);
+            builder.EntitySet<Motorcycle>("motorcycles").HasIdLink(
+                (m) => "http://localhost/motorcycles/" + m.EntityInstance.Name, followsConventions: false);
             builder.EntitySet<Car>("cars");
 
             new ActionConfiguration(builder, "GetCarAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");

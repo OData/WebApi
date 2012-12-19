@@ -83,7 +83,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.InvalidOperation(SRResources.NoIdLinkFactoryFound, _entitySet.Name);
             }
 
-            if (!_idLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+            if (IsDefaultOrFull(metadataLevel) || (IsMinimal(metadataLevel) && !_idLinkBuilder.FollowsConventions))
             {
                 return _idLinkBuilder.Factory(instanceContext);
             }
@@ -111,7 +111,8 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                if (!_editLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+                if (IsDefaultOrFull(metadataLevel) ||
+                    (IsMinimal(metadataLevel) && !_editLinkBuilder.FollowsConventions))
                 {
                     Uri generatedEditLink = _editLinkBuilder.Factory(instanceContext);
                     if (generatedEditLink != null && generatedEditLink.Equals(new Uri(idLink)))
@@ -150,7 +151,8 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                if (!_readLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+                if (IsDefaultOrFull(metadataLevel) ||
+                    (IsMinimal(metadataLevel) && !_readLinkBuilder.FollowsConventions))
                 {
                     Uri generatedReadLink = _readLinkBuilder.Factory(instanceContext);
                     if (editLink == generatedReadLink)
@@ -191,7 +193,8 @@ namespace System.Web.Http.OData.Builder
             }
             Contract.Assert(navigationLinkBuilder != null);
 
-            if (!navigationLinkBuilder.FollowsConventions || IsFullOrDefault(metadataLevel))
+            if (IsDefaultOrFull(metadataLevel) ||
+                (IsMinimal(metadataLevel) && !navigationLinkBuilder.FollowsConventions))
             {
                 return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
             }
@@ -202,9 +205,14 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
-        private static bool IsFullOrDefault(ODataMetadataLevel level)
+        private static bool IsDefaultOrFull(ODataMetadataLevel level)
         {
             return level == ODataMetadataLevel.Default || level == ODataMetadataLevel.FullMetadata;
+        }
+
+        private static bool IsMinimal(ODataMetadataLevel level)
+        {
+            return level == ODataMetadataLevel.MinimalMetadata;
         }
     }
 }

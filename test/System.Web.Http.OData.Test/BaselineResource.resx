@@ -508,6 +508,17 @@
   ],"odata.nextLink":"aa:b"
 }</value>
   </data>
+  <data name="MainEntryFeedInJsonNoMetadata" xml:space="preserve">
+    <value>{
+  "odata.count":"3","value":[
+    {
+      "Id":1,"Int16":-1
+    },{
+      "Id":2,"Int16":-2
+    }
+  ],"odata.nextLink":"aa:b"
+}</value>
+  </data>
   <data name="NullableBooleanInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;false&lt;/d:ID&gt;</value>

@@ -42,13 +42,46 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNullOrEmpty("elementName");
             }
 
-            ODataValue value = CreatePrimitive(graph);
+            ODataMetadataLevel metadataLevel = writeContext != null ?
+                writeContext.MetadataLevel : ODataMetadataLevel.Default;
+
+            ODataValue value = CreatePrimitive(graph, metadataLevel);
 
             // TODO: Bug 467598: validate the type of the object being passed in here with the underlying primitive type. 
             return new ODataProperty() { Name = elementName, Value = value };
         }
 
-        private static ODataValue CreatePrimitive(object value)
+        internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive,
+            ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(primitive != null);
+
+            object value = primitive.Value;
+
+            // Don't add a type name annotation for Atom or JSON verbose.
+            if (metadataLevel != ODataMetadataLevel.Default)
+            {
+                string typeName;
+
+                // In JSON light, don't put an odata.type annotation on the wire if in no metadata mode or if the type
+                // of the value can be inferred.
+                if (metadataLevel == ODataMetadataLevel.NoMetadata || CanTypeBeInferredInJson(value))
+                {
+                    typeName = null;
+                }
+                else
+                {
+                    typeName = GetTypeName(value);
+                }
+
+                primitive.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+                {
+                    TypeName = typeName
+                });
+            }
+        }
+
+        internal static ODataValue CreatePrimitive(object value, ODataMetadataLevel metadataLevel)
         {
             if (value == null)
             {
@@ -57,27 +90,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             object supportedValue = ConvertUnsupportedPrimitives(value);
             ODataPrimitiveValue primitive = new ODataPrimitiveValue(supportedValue);
-
-            // Required to support JSON light full metadata mode.
-            if (!CanTypeBeInferredInJson(supportedValue))
-            {
-                Contract.Assert(supportedValue != null); // Null values can be inferred
-                Type valueType = supportedValue.GetType();
-                Contract.Assert(valueType != null);
-                IEdmPrimitiveType primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(valueType);
-
-                if (primitiveType == null)
-                {
-                    throw new SerializationException(Error.Format(SRResources.UnsupportedPrimitiveType,
-                        valueType.FullName));
-                }
-
-                string typeName = primitiveType.FullName();
-                Contract.Assert(typeName != null);
-                primitive.SetAnnotation<SerializationTypeNameAnnotation>(
-                    new SerializationTypeNameAnnotation { TypeName = typeName });
-            }
-
+            AddTypeNameAnnotationAsNeeded(primitive, metadataLevel);
             return primitive;
         }
 
@@ -127,12 +140,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return value;
         }
 
-        private static bool CanTypeBeInferredInJson(object value)
+        internal static bool CanTypeBeInferredInJson(object value)
         {
-            if (value == null)
-            {
-                return true;
-            }
+            Contract.Assert(value != null);
 
             TypeCode typeCode = Type.GetTypeCode(value.GetType());
 
@@ -158,6 +168,26 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 default:
                     return false;
             }
+        }
+
+        private static string GetTypeName(object value)
+        {
+            // Null values can be inferred, so we'd never call GetTypeName for them.
+            Contract.Assert(value != null);
+
+            Type valueType = value.GetType();
+            Contract.Assert(valueType != null);
+            IEdmPrimitiveType primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(valueType);
+
+            if (primitiveType == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.UnsupportedPrimitiveType,
+                    valueType.FullName));
+            }
+
+            string typeName = primitiveType.FullName();
+            Contract.Assert(typeName != null);
+            return typeName;
         }
     }
 }

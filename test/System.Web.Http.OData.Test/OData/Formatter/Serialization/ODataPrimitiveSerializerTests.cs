@@ -136,6 +136,66 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.DoesNotThrow(() => serializer.WriteObject(graph, writer, new ODataSerializerContext() { RootElementName = "PropertyName" }));
         }
 
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
+        {
+            // Arrange
+            ODataPrimitiveValue primitive = new ODataPrimitiveValue(0);
+
+            // Act
+            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Null(primitive.GetAnnotation<SerializationTypeNameAnnotation>());
+        }
+
+        [Theory]
+        [InlineData(0, ODataMetadataLevel.FullMetadata, null)] // Inferrable
+        [InlineData((short)1, ODataMetadataLevel.NoMetadata, null)] // Non-inferrable
+        [InlineData((short)1, ODataMetadataLevel.FullMetadata, "Edm.Int16")] // Non-inferrable
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation(object value, ODataMetadataLevel metadataLevel,
+            string expectedTypeName)
+        {
+            // Arrange
+            ODataPrimitiveValue primitive = new ODataPrimitiveValue(value);
+
+            // Act
+            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, metadataLevel);
+
+            // Assert
+            SerializationTypeNameAnnotation annotation = primitive.GetAnnotation<SerializationTypeNameAnnotation>();
+            Assert.NotNull(annotation); // Guard
+            Assert.Equal(expectedTypeName, annotation.TypeName);
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(0, true)]
+        [InlineData("", true)]
+        [InlineData(0.1D, true)]
+        [InlineData(double.PositiveInfinity, false)]
+        [InlineData(double.NegativeInfinity, false)]
+        [InlineData(double.NaN, false)]
+        [InlineData((short)1, false)]
+        public void CanTypeBeInferredInJson(object value, bool expectedResult)
+        {
+            // Act
+            bool actualResult = ODataPrimitiveSerializer.CanTypeBeInferredInJson(value);
+
+            // Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void CreatePrimitive_ReturnsODataNullProperty_ForNullValue()
+        {
+            // Act
+            ODataValue value = ODataPrimitiveSerializer.CreatePrimitive(null, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.IsType<ODataNullValue>(value);
+        }
+
         [Theory]
         [PropertyData("EdmPrimitiveData")]
         public void ConvertUnsupportedPrimitives_DoesntChangeStandardEdmPrimitives(object graph)

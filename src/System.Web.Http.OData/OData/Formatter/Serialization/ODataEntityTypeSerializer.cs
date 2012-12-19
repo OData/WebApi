@@ -85,6 +85,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private void WriteEntry(object graph, IEnumerable<ODataProperty> propertyBag, ODataWriter writer, ODataSerializerContext writeContext)
         {
+            Contract.Assert(writeContext != null);
+
             IEdmEntityType entityType = _edmEntityTypeReference.EntityDefinition();
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext
             {
@@ -101,7 +103,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 TypeName = _edmEntityTypeReference.FullName(),
                 Properties = propertyBag,
-                Actions = CreateActions(entityInstanceContext)
+                Actions = CreateActions(entityInstanceContext, writeContext)
             };
 
             if (writeContext.EntitySet != null)
@@ -133,6 +135,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private void WriteNavigationLinks(EntityInstanceContext context, ODataWriter writer, ODataSerializerContext writeContext)
         {
+            Contract.Assert(writeContext != null);
+
             foreach (IEdmNavigationProperty navProperty in _edmEntityTypeReference.NavigationProperties())
             {
                 IEdmTypeReference propertyType = navProperty.Type;
@@ -142,18 +146,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
                     Uri navigationUrl = linkBuilder.BuildNavigationLink(context, navProperty, writeContext.MetadataLevel);
 
+                    ODataNavigationLink navigationLink = new ODataNavigationLink
+                    {
+                        IsCollection = propertyType.IsCollection(),
+                        Name = navProperty.Name,
+                    };
+
                     if (navigationUrl != null)
                     {
-                        ODataNavigationLink navigationLink = new ODataNavigationLink
-                        {
-                            IsCollection = propertyType.IsCollection(),
-                            Name = navProperty.Name,
-                            Url = navigationUrl
-                        };
-
-                        writer.WriteStart(navigationLink);
-                        writer.WriteEnd();
+                        navigationLink.Url = navigationUrl;
                     }
+
+                    writer.WriteStart(navigationLink);
+                    writer.WriteEnd();
                 }
             }
         }
@@ -179,8 +184,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return properties;
         }
 
-        private static IEnumerable<ODataAction> CreateActions(EntityInstanceContext context)
+        private static IEnumerable<ODataAction> CreateActions(EntityInstanceContext context,
+            ODataSerializerContext writeContext)
         {
+            Contract.Assert(writeContext != null);
+
+            if (writeContext.MetadataLevel == ODataMetadataLevel.NoMetadata)
+            {
+                return Enumerable.Empty<ODataAction>();
+            }
+
             return context.EdmModel.GetAvailableProcedures(context.EntityType)
                 .Select(action => CreateODataAction(action, context))
                 .Where(action => action != null);

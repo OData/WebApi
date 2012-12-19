@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        public void GetFeedWithNoMatchingLinksInODataJsonFullMetadataFormat()
+        public void GetFeedInODataJsonFullMetadataFormat()
         {
             // Arrange
             IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
@@ -85,6 +85,25 @@ namespace System.Web.Http.OData.Formatter
                 // Assert
                 AssertODataVersion3JsonResponse(
                     BaselineResource.MainEntryFeedInJsonFullMetadata, response);
+            }
+        }
+
+        [Fact]
+        public void GetFeedInODataJsonNoMetadataFormat()
+        {
+            // Arrange
+            IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
+
+            using (HttpConfiguration configuration = CreateConfiguration(model))
+            using (HttpServer host = new HttpServer(configuration))
+            using (HttpClient client = new HttpClient(host))
+            using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
+                MediaTypeWithQualityHeaderValue.Parse("application/json;odata=nometadata")))
+            // Act
+            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            {
+                // Assert
+                AssertODataVersion3JsonResponse(BaselineResource.MainEntryFeedInJsonNoMetadata, response);
             }
         }
 

@@ -57,7 +57,7 @@ namespace System.Web.Http.OData.Builder
         [InlineData(false, ODataMetadataLevel.Default, true)]
         [InlineData(false, ODataMetadataLevel.FullMetadata, true)]
         [InlineData(false, ODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData(false, ODataMetadataLevel.NoMetadata, true)]
+        [InlineData(false, ODataMetadataLevel.NoMetadata, false)]
         public void BuildIdLink(bool followsConventions, object metadataLevel, bool linkEmitted)
         {
             _entitySet.HasIdLink(new SelfLinkBuilder<string>((context) => "http://selflink", followsConventions));
@@ -136,7 +136,7 @@ namespace System.Web.Http.OData.Builder
         [InlineData(false, ODataMetadataLevel.Default, true)]
         [InlineData(false, ODataMetadataLevel.FullMetadata, true)]
         [InlineData(false, ODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData(false, ODataMetadataLevel.NoMetadata, true)]
+        [InlineData(false, ODataMetadataLevel.NoMetadata, false)]
         public void BuildEditLink_WhenEditLinkIsNotSameAsIdLink(bool followsConventions, object metadataLevel, bool linkEmitted)
         {
             _entitySet.HasEditLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://editlink/"), followsConventions));
@@ -216,7 +216,7 @@ namespace System.Web.Http.OData.Builder
         [InlineData(false, ODataMetadataLevel.Default, true)]
         [InlineData(false, ODataMetadataLevel.FullMetadata, true)]
         [InlineData(false, ODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData(false, ODataMetadataLevel.NoMetadata, true)]
+        [InlineData(false, ODataMetadataLevel.NoMetadata, false)]
         public void BuildReadLink_WhenReadLinkIsNotSameAsEditLink(bool followsConventions, object metadataLevel, bool linkEmitted)
         {
             _entitySet.HasReadLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://readlink/"), followsConventions));
@@ -242,7 +242,7 @@ namespace System.Web.Http.OData.Builder
         [InlineData(false, ODataMetadataLevel.Default, true)]
         [InlineData(false, ODataMetadataLevel.FullMetadata, true)]
         [InlineData(false, ODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData(false, ODataMetadataLevel.NoMetadata, true)]
+        [InlineData(false, ODataMetadataLevel.NoMetadata, false)]
         public void BuildNavigationLink(bool followsConventions, object metadataLevel, bool linkEmitted)
         {
             var navigationProperty = _entitySet.EntityType.AddNavigationProperty(typeof(Customer).GetProperty("Orders"), EdmMultiplicity.Many);

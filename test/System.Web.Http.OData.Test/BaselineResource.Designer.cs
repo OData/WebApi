@@ -351,6 +351,23 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.count&quot;:&quot;3&quot;,&quot;value&quot;:[
+        ///    {
+        ///      &quot;Id&quot;:1,&quot;Int16&quot;:-1
+        ///    },{
+        ///      &quot;Id&quot;:2,&quot;Int16&quot;:-2
+        ///    }
+        ///  ],&quot;odata.nextLink&quot;:&quot;aa:b&quot;
+        ///}.
+        /// </summary>
+        internal static string MainEntryFeedInJsonNoMetadata {
+            get {
+                return ResourceManager.GetString("MainEntryFeedInJsonNoMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;false&lt;/d:ID&gt;.
         /// </summary>

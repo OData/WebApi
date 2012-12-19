@@ -166,7 +166,7 @@ namespace System.Web.Http.OData.Query
         }
     }
 
-    public class CustomerLowLevelController : ApiController
+    public class CustomerLowLevelController : ODataController
     {
         public IQueryable<Customer> Get(ODataQueryOptions options)
         {

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace System.Web.Http.OData.Query.Controllers
 {
-    public class PrimitiveController : ApiController
+    public class PrimitiveController : ODataController
     {
         [Queryable]
         public IQueryable<int> Get()

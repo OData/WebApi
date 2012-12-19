@@ -8,7 +8,7 @@ using System.Web.Http.OData.TestCommon.Models;
 
 namespace System.Web.Http.OData.Query.Controllers
 {
-    public class CustomerHighLevelController : ApiController
+    public class CustomerHighLevelController : ODataController
     {
         [Queryable]
         public IQueryable<Customer> Get()

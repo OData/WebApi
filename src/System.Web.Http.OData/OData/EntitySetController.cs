@@ -20,8 +20,7 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntity">The type associated with the exposed entity set's entity type.</typeparam>
     /// <typeparam name="TKey">The type associated with the entity key of the exposed entity set's entity type.</typeparam>
     [CLSCompliant(false)]
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public abstract class EntitySetController<TEntity, TKey> : ApiController where TEntity : class
+    public abstract class EntitySetController<TEntity, TKey> : ODataController where TEntity : class
     {
         /// <summary>
         /// Gets the OData path of the current request.

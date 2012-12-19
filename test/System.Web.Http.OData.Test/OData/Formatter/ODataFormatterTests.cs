@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Xml.Linq;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Formatter
@@ -18,7 +19,9 @@ namespace System.Web.Http.OData.Formatter
         public ODataFormatterTests()
         {
             _config = new HttpConfiguration();
-            _config.EnableOData(ODataTestUtil.GetEdmModel());
+            IEdmModel model = ODataTestUtil.GetEdmModel();
+            _config.EnableOData(model);
+            _config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));
         }
 
         [Fact]

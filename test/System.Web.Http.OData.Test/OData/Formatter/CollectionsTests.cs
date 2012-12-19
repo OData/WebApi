@@ -112,7 +112,7 @@ namespace System.Web.Http.OData.Formatter
         }
     }
 
-    public class CollectionsTestsController : ApiController
+    public class CollectionsTestsController : ODataController
     {
         public CollectionsTestsModel Post(CollectionsTestsModel model)
         {

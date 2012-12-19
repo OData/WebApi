@@ -73,7 +73,7 @@ namespace System.Web.Http.OData.Routing
         }
     }
 
-    public class RoutingCustomersController : ApiController
+    public class RoutingCustomersController : ODataController
     {
         public string GetRoutingCustomers()
         {
@@ -163,7 +163,7 @@ namespace System.Web.Http.OData.Routing
         }
     }
 
-    public class ProductsController : ApiController
+    public class ProductsController : ODataController
     {
         public string Get()
         {

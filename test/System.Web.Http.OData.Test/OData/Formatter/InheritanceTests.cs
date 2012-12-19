@@ -303,7 +303,7 @@ namespace System.Web.Http.OData.Formatter
         }
     }
 
-    public class InheritanceController : ApiController
+    public class InheritanceController : ODataController
     {
         private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true };
         private Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };

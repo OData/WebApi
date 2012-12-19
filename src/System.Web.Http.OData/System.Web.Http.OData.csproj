@@ -126,6 +126,8 @@
     </Compile>
     <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
+    <Compile Include="OData\ODataFormattingAttribute.cs" />
+    <Compile Include="OData\ODataController.cs" />
     <Compile Include="OData\EntitySetControllerHelpers.cs" />
     <Compile Include="OData\FromODataUriAttribute.cs" />
     <Compile Include="OData\ODataRouteConstants.cs" />

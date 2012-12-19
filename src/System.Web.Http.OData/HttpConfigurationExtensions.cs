@@ -173,7 +173,7 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Enables OData support by adding an OData route and enabling OData controller and action selection, querying, and formatter support for OData.
+        /// Enables OData support by adding an OData route and enabling OData querying and OData controller and action selection.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
         /// <param name="model">The EDM model to use for the service.</param>
@@ -207,9 +207,6 @@ namespace System.Web.Http
             IHttpActionSelector actionSelector = new ODataActionSelector(routingConventions, configuration.Services.GetActionSelector());
             configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
             configuration.Services.Replace(typeof(IHttpActionSelector), actionSelector);
-
-            // Formatter
-            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ using System.Net.Http;
 
 namespace System.Web.Http.OData.Formatter
 {
-    public class PeopleController : ApiController
+    public class PeopleController : ODataController
     {
         [Queryable(PageSize=2)]
         public IEnumerable<FormatterPerson> GetPeople()

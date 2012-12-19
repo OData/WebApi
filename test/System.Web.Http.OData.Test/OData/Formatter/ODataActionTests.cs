@@ -103,7 +103,7 @@ namespace System.Web.Http.OData.Formatter
         }
     }
 
-    public class CustomersController : ApiController
+    public class CustomersController : ODataController
     {
         [HttpGet]
         public ODataActionTests.Customer Get(int key)

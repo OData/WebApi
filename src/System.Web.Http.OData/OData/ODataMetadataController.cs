@@ -6,8 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Web.Http.Controllers;
-using System.Web.Http.Description;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -17,9 +15,7 @@ using Microsoft.Data.OData.Atom;
 
 namespace System.Web.Http.OData
 {
-    [PerControllerConfiguration]
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class ODataMetadataController : ApiController
+    public class ODataMetadataController : ODataController
     {
         private static readonly Version _defaultEdmxVersion = new Version(1, 0);
         private static readonly Version _defaultDataServiceVersion = new Version(1, 0);
@@ -82,38 +78,6 @@ namespace System.Web.Http.OData
             model.SetEdmxVersion(_defaultEdmxVersion);
             model.SetDataServiceVersion(_defaultDataServiceVersion);
             return model;
-        }
-
-        private sealed class PerControllerConfigurationAttribute : Attribute, IControllerConfiguration
-        {
-            public void Initialize(HttpControllerSettings controllerSettings,
-                HttpControllerDescriptor controllerDescriptor)
-            {
-                if (controllerSettings == null)
-                {
-                    throw Error.ArgumentNull("controllerSettings");
-                }
-
-                if (controllerDescriptor == null)
-                {
-                    throw Error.ArgumentNull("controllerDescriptor");
-                }
-
-                MediaTypeFormatterCollection formatters = controllerSettings.Formatters;
-                Contract.Assert(formatters != null);
-
-                // Only remove the non-OData formatters if at least one OData formatter exists. Otherwise, nothing will
-                // be left to serialize error messages (like the error message indicating that no OData formatter
-                // exists).
-                bool hasODataFormatter = formatters.Any(f => f != null && f.IsODataFormatter());
-
-                if (hasODataFormatter)
-                {
-                    IEnumerable<MediaTypeFormatter> nonODataFormatters = formatters.Where(
-                        f => f == null || !f.IsODataFormatter());
-                    formatters.RemoveRange(nonODataFormatters);
-                }
-            }
         }
     }
 }

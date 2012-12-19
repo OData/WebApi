@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Query
         }
     }
 
-    public class FilterProviderTestController : ApiController
+    public class FilterProviderTestController : ODataController
     {
         public IEnumerable GetEnumerable()
         {

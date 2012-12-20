@@ -61,7 +61,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Delta<Supplier> supplier = deserializer.Read(GetODataMessageReader(GetODataMessage(BaselineResource.SupplierPatchInAtom), _edmModel), _readContext) as Delta<Supplier>;
 
             Assert.NotNull(supplier);
-            Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "Name", "Address" });
+            Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "ID", "Name", "Address" });
 
             Assert.Equal((supplier as dynamic).Name, "Supplier Name");
             Assert.Equal("Supplier City", (supplier as dynamic).Address.City);

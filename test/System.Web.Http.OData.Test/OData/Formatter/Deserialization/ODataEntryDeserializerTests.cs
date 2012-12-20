@@ -154,7 +154,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void ApplyProperty_IgnoresKeyProperty()
+        public void ApplyProperty_DoesNotIgnoreKeyProperty()
         {
             // Arrange
             ODataProperty property = new ODataProperty { Name = "Key1", Value = "Value1" };
@@ -165,7 +165,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             var resource = new Mock<IDelta>(MockBehavior.Strict);
             Type propertyType = typeof(string);
-            resource.Setup(r => r.TryGetPropertyType("Key1", out propertyType)).Returns(true);
+            resource.Setup(r => r.TryGetPropertyType("Key1", out propertyType)).Returns(true).Verifiable();
+            resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
 
             // Act
             ODataEntryDeserializer.ApplyProperty(property, entityTypeReference, resource.Object, provider, new ODataDeserializerContext { IsPatchMode = true });

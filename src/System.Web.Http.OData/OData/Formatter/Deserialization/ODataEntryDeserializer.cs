@@ -97,11 +97,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // If we are in patch mode and we are deserializing an entity object then we are updating Delta<T> and not T.
             bool isDelta = readContext.IsPatchMode && resourceType.IsEntity();
 
-            if (isDelta && resourceType.AsEntity().Key().Select(key => key.Name).Contains(propertyName))
-            {
-                return;
-            }
-
             EdmTypeKind propertyKind;
             object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
 

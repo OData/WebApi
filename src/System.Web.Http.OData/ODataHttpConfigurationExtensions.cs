@@ -18,7 +18,7 @@ using Microsoft.Data.Edm;
 namespace System.Web.Http
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class HttpConfigurationExtensions
+    public static class ODataHttpConfigurationExtensions
     {
         private const string EdmModelKey = "MS_EdmModel";
         private const string ODataPathHandlerKey = "MS_ODataPathHandler";

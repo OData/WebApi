@@ -124,7 +124,7 @@
     <Compile Include="..\Common\Error.cs">
       <Link>Common\Error.cs</Link>
     </Compile>
-    <Compile Include="MediaTypeFormatterCollectionExtensions.cs" />
+    <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
     <Compile Include="OData\ODataFormattingAttribute.cs" />
     <Compile Include="OData\ODataController.cs" />
@@ -140,8 +140,8 @@
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
     <Compile Include="MediaTypeFormatterExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="HttpErrorExtensions.cs" />
-    <Compile Include="HttpRequestMessageExtensions.cs" />
+    <Compile Include="ODataHttpErrorExtensions.cs" />
+    <Compile Include="ODataHttpRequestMessageExtensions.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilder.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinder.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConvention.cs" />
@@ -322,8 +322,8 @@
     <Compile Include="OData\Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializer.cs" />
     <Compile Include="QueryableAttribute.cs" />
-    <Compile Include="HttpConfigurationExtensions.cs" />
-    <Compile Include="UrlHelperExtensions.cs" />
+    <Compile Include="ODataHttpConfigurationExtensions.cs" />
+    <Compile Include="ODataUrlHelperExtensions.cs" />
     <Compile Include="TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinder.cs" />

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using Microsoft.Data.OData;
 
@@ -8,7 +9,8 @@ namespace System.Web.Http
     /// <summary>
     /// Provides extension methods for the <see cref="HttpError"/> class.
     /// </summary>
-    public static class HttpErrorExtensions
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static class ODataHttpErrorExtensions
     {
         private const string MessageKey = "Message";
         private const string MessageDetailKey = "MessageDetail";

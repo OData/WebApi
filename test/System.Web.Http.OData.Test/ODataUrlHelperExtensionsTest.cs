@@ -6,7 +6,7 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Http
 {
-    public class UrlHelperExtensionsTest
+    public class ODataUrlHelperExtensionsTest
     {
         [Fact]
         public void GenerateLinkDirectly_ReturnsNull_IfHelperRequestHasNoConfiguration()

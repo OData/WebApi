@@ -6,8 +6,8 @@ using Microsoft.TestCommon;
 
 namespace System.Net.Http
 {
-    public class HttpRequestMessageExtensionTests
-    {        
+    public class ODataHttpRequestMessageExtensionTests
+    {
         [Theory]
         [InlineData(IncludeErrorDetailPolicy.Default, null, null, false)]
         [InlineData(IncludeErrorDetailPolicy.Default, null, true, true)]

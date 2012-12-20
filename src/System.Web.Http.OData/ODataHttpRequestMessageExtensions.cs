@@ -4,9 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 using System.Web.Http.Hosting;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 
 namespace System.Net.Http
@@ -15,7 +13,7 @@ namespace System.Net.Http
     /// Provides extension methods for the <see cref="HttpRequestMessage"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class HttpRequestMessageExtensions
+    public static class ODataHttpRequestMessageExtensions
     {
         private const string ODataPathKey = "MS_ODataPath";
         private const string InlineCountPropertyKey = "MS_InlineCount";

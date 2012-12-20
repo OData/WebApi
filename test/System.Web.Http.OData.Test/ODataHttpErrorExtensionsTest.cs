@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.IO;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.Http
 {
-    public class HttpErrorsExtensionTest
+    public class ODataHttpErrorExtensionsTest
     {
         [Fact]
         public void ToODataError_CopiesAllErrorProperties()

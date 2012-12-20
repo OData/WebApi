@@ -116,8 +116,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BaselineResource.resx</DependentUpon>
     </Compile>
-    <Compile Include="HttpRequestMessageExtensionsTest.cs" />
-    <Compile Include="HttpErrorExtensionsTest.cs" />
+    <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
+    <Compile Include="ODataHttpErrorExtensionsTest.cs" />
+    <Compile Include="ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
     <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotationTest.cs" />
@@ -132,7 +133,6 @@
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
     <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
-    <Compile Include="UrlHelperExtensionsTest.cs" />
     <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />
     <Compile Include="OData\Formatter\ODataMetadataLevelHelperTest.cs" />
@@ -247,7 +247,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializerTests.cs" />
     <Compile Include="TestCommon\EdmTestHelpers.cs" />
     <Compile Include="OData\Query\HttpActionDescriptorExtensionTests.cs" />
-    <Compile Include="HttpConfigurationExtensionTests.cs" />
+    <Compile Include="ODataHttpConfigurationExtensionTest.cs" />
     <Compile Include="QueryableAttributeTests.cs" />
     <Compile Include="OData\Query\ODataQueryParameterBindingAttributeTests.cs" />
     <Compile Include="OData\Query\Expressions\DataModel.cs" />

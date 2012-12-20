@@ -19,7 +19,7 @@ using Moq;
 
 namespace System.Web.Http.OData
 {
-    public class HttpConfigurationExtensionTests
+    public class ODataHttpConfigurationExtensionTest
     {
         [Fact]
         public void GetEdmModelReturnsNullByDefault()

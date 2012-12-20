@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Formatting;
@@ -10,7 +11,8 @@ namespace System.Web.Http
     /// <summary>
     /// Provides extension methods for the <see cref="MediaTypeFormatterCollection"/> class.
     /// </summary>
-    public static class MediaTypeFormatterCollectionExtensions
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static class ODataMediaTypeFormatterCollectionExtensions
     {
         /// <summary>
         /// Adds the elements of the specified collection to the end of the <see cref="MediaTypeFormatterCollection"/>.

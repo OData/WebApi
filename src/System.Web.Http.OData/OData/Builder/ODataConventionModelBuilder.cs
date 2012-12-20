@@ -306,11 +306,8 @@ namespace System.Web.Http.OData.Builder
             {
                 RemoveStructuralType(misconfiguredEntityType.ClrType);
 
+                // this is a wrongly inferred type. so just ignore any pending configuration from it.
                 ComplexTypeConfiguration newComplexType = AddComplexType(misconfiguredEntityType.ClrType);
-                foreach (PropertyInfo ignoredProperty in misconfiguredEntityType.IgnoredProperties)
-                {
-                    newComplexType.RemoveProperty(ignoredProperty);
-                }
 
                 foreach (EntityTypeConfiguration entityToBePatched in actualEntityTypes)
                 {

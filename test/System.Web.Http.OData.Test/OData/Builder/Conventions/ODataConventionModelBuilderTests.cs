@@ -650,7 +650,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             MockType baseType =
                   new MockType("BaseType")
-                  .Property(typeof(int), "ID");
+                  .Property(typeof(int), "BaseTypeID");
 
             MockType derivedType =
                 new MockType("DerivedType")
@@ -1034,6 +1034,39 @@ namespace System.Web.Http.OData.Builder.Conventions
             var entityEdmType = model.AssertHasEntitySet("entityset", type);
             model.AssertHasComplexType(typeof(object));
             entityEdmType.AssertHasCollectionProperty(model, "Collection", typeof(object), isNullable: true);
+        }
+
+        [Fact]
+        public void ComplexTypes_In_Inheritance_AreFlattened()
+        {
+            MockType complexBase =
+                new MockType("ComplexBase")
+                .Property<int>("BaseProperty");
+
+            MockType complexDerived =
+                new MockType("ComplexBase")
+                .BaseType(complexBase)
+                .Property<int>("DerivedProperty");
+
+            MockType entity =
+                new MockType("entity")
+                .Property<int>("ID")
+                .Property(complexBase, "ComplexBase")
+                .Property(complexDerived, "ComplexDerived");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            var entityType = builder.AddEntity(entity);
+
+            IEdmModel model = builder.GetEdmModel();
+            Assert.Equal(4, model.SchemaElements.Count());
+            var entityEdmType = model.AssertHasEntityType(entity);
+
+            var complexBaseEdmType = model.AssertHasComplexType(complexBase);
+            complexBaseEdmType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var complexDerivedEdmType = model.AssertHasComplexType(complexDerived);
+            complexDerivedEdmType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            complexDerivedEdmType.AssertHasPrimitiveProperty(model, "DerivedProperty", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
     }
 

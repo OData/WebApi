@@ -16,6 +16,7 @@ namespace System.Web.Http.OData
         }
 
         private readonly List<MockPropertyInfo> _propertyInfos = new List<MockPropertyInfo>();
+        private MockType _baseType;
 
         public MockType()
             : this("T")
@@ -27,7 +28,8 @@ namespace System.Web.Http.OData
             SetupGet(t => t.Name).Returns(typeName);
             SetupGet(t => t.BaseType).Returns(typeof(Object));
             SetupGet(t => t.Assembly).Returns(typeof(object).Assembly);
-            Setup(t => t.GetProperties(It.IsAny<BindingFlags>())).Returns(() => _propertyInfos.Select(p => p.Object).ToArray());
+            Setup(t => t.GetProperties(It.IsAny<BindingFlags>()))
+                .Returns(() => _propertyInfos.Union(_baseType != null ? _baseType._propertyInfos : Enumerable.Empty<MockPropertyInfo>()).Select(p => p.Object).ToArray());
             Setup(t => t.Equals(It.IsAny<object>())).Returns<Type>(t => ReferenceEquals(Object, t));
             Setup(t => t.ToString()).Returns(typeName);
             Setup(t => t.Namespace).Returns(@namespace);
@@ -62,6 +64,7 @@ namespace System.Web.Http.OData
 
         public MockType BaseType(MockType mockBaseType)
         {
+            _baseType = mockBaseType;
             SetupGet(t => t.BaseType).Returns(mockBaseType);
             Setup(t => t.IsSubclassOf(mockBaseType)).Returns(true);
 

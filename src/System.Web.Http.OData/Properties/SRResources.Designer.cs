@@ -106,6 +106,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No IActionValueBinder service could be found for controller &apos;{0}&apos;..
+        /// </summary>
+        internal static string ActionValueBinderMissing {
+            get {
+                return ResourceManager.GetString("ActionValueBinderMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The argument must be of type &apos;{0}&apos;..
         /// </summary>
         internal static string ArgumentMustBeOfType {
@@ -484,7 +493,16 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The related entity set could not be found. The related entity set is required to serialize the payload..
+        ///   Looks up a localized string similar to The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload..
+        /// </summary>
+        internal static string EntitySetMissingDuringDeserialization {
+            get {
+                return ResourceManager.GetString("EntitySetMissingDuringDeserialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The related entity set could not be found from the OData path. The related entity set is required to serialize the payload..
         /// </summary>
         internal static string EntitySetMissingDuringSerialization {
             get {
@@ -817,7 +835,16 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The related navigation property could not be found. The related navigation property is required to serialize the payload..
+        ///   Looks up a localized string similar to The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload..
+        /// </summary>
+        internal static string NavigationPropertyMissingDuringDeserialization {
+            get {
+                return ResourceManager.GetString("NavigationPropertyMissingDuringDeserialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload..
         /// </summary>
         internal static string NavigationPropertyMissingDuringSerialization {
             get {
@@ -885,15 +912,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string NoODataFormatterForMetadata {
             get {
                 return ResourceManager.GetString("NoODataFormatterForMetadata", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The ODataParameterBindingAttribute requires that an ODataMediaTypeFormatter be registered with the HttpConfiguration..
-        /// </summary>
-        internal static string NoODataMediaTypeFormatterFound {
-            get {
-                return ResourceManager.GetString("NoODataMediaTypeFormatterFound", resourceCulture);
             }
         }
         
@@ -1164,6 +1182,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string QueryParameterNotSupported {
             get {
                 return ResourceManager.GetString("QueryParameterNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OData formatter requires an attached request in order to deserialize. Controller classes must derive from ODataController or be marked with ODataFormattingAttribute. Custom parameter bindings must call GetPerRequestFormatterInstance on each formatter and use these per-request instances..
+        /// </summary>
+        internal static string ReadFromStreamAsyncMustHaveRequest {
+            get {
+                return ResourceManager.GetString("ReadFromStreamAsyncMustHaveRequest", resourceCulture);
             }
         }
         

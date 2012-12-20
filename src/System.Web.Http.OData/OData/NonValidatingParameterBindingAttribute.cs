@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 
 namespace System.Web.Http.OData
@@ -12,7 +14,23 @@ namespace System.Web.Http.OData
     {
         public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
         {
-            return parameter.BindWithFormatter(parameter.Configuration.Formatters, bodyModelValidator: null);
+            IEnumerable<MediaTypeFormatter> formatters = parameter.Configuration.Formatters;
+
+            return new NonValidatingParameterBinding(parameter, formatters);
+        }
+
+        private sealed class NonValidatingParameterBinding : PerRequestParameterBinding
+        {
+            public NonValidatingParameterBinding(HttpParameterDescriptor descriptor,
+                IEnumerable<MediaTypeFormatter> formatters)
+                : base(descriptor, formatters)
+            {
+            }
+
+            protected override HttpParameterBinding CreateInnerBinding(IEnumerable<MediaTypeFormatter> perRequestFormatters)
+            {
+                return Descriptor.BindWithFormatter(perRequestFormatters, bodyModelValidator: null);
+            }
         }
     }
 }

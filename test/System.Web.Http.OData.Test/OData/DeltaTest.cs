@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
@@ -332,13 +334,24 @@ namespace System.Web.Http.OData
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.Entity<DeltaModel>();
+            builder.EntitySet<DeltaModel>("ignored");
             IEdmModel model = builder.GetEdmModel();
-            var odataFormatters = ODataMediaTypeFormatters.Create(model);
-            HttpContent content = new StringContent(String.Format("{{ '{0}' : {1} }}", propertyName, propertyJsonValue));
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(model);
+            Delta<DeltaModel> delta;
 
-            // Act
-            Delta<DeltaModel> delta = content.ReadAsAsync<Delta<DeltaModel>>(odataFormatters).Result;
+            using (HttpRequestMessage request = new HttpRequestMessage())
+            {
+                IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+                request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
+                IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
+                    (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModel>), request, null));
+
+                HttpContent content = new StringContent(String.Format("{{ '{0}' : {1} }}", propertyName, propertyJsonValue));
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+
+                // Act
+                delta = content.ReadAsAsync<Delta<DeltaModel>>(perRequestFormatters).Result;
+            }
 
             // Assert
             Assert.Equal(delta.GetChangedPropertyNames(), new[] { propertyName });

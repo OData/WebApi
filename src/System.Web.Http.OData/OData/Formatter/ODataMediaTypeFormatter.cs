@@ -93,7 +93,6 @@ namespace System.Web.Http.OData.Formatter
             _model = formatter._model;
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
-            WriteOnly = formatter.WriteOnly;
 
             // Parameter 1B: Copy the base class's properties.
             foreach (MediaTypeMapping mediaTypeMapping in formatter.MediaTypeMappings)
@@ -136,12 +135,6 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether to support serialization only (whether to disable deserialization
-        /// support).
-        /// </summary>
-        internal bool WriteOnly { get; set; }
-
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
         {
@@ -175,12 +168,6 @@ namespace System.Web.Http.OData.Formatter
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
-            }
-
-            // TODO: Feature #664 - Remove this logic (and property) once JSON light read support is available.
-            if (WriteOnly)
-            {
-                return false;
             }
 
             TryGetInnerTypeForDelta(ref type);
@@ -223,6 +210,11 @@ namespace System.Web.Http.OData.Formatter
             if (readStream == null)
             {
                 throw Error.ArgumentNull("readStream");
+            }
+
+            if (_request == null)
+            {
+                throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
 
             return TaskHelpers.RunSynchronously<object>(() =>
@@ -307,7 +299,7 @@ namespace System.Web.Http.OData.Formatter
 
             if (_request == null)
             {
-                throw Error.NotSupported(SRResources.WriteToStreamAsyncMustHaveRequest);
+                throw Error.InvalidOperation(SRResources.WriteToStreamAsyncMustHaveRequest);
             }
 
             HttpContentHeaders contentHeaders = content == null ? null : content.Headers;

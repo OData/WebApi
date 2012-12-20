@@ -1,26 +1,27 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.Http.OData
 {
     /// <summary>
     /// A special HttpParameterBinding that uses a Per Request formatter instance with access to the Request.
-    /// <remarks>
-    /// This class is needed by some of the ODataDeserializers, since they actually need access to more than just the Request body,
-    /// they also need to interrogate the RequestUri etc.
-    /// </remarks>
     /// </summary>
-    public class ODataFormatterParameterBinding : HttpParameterBinding
+    /// <remarks>
+    /// This class is needed by the OData deserializers, since they actually need access to more than just the Request
+    /// body; they also need to interrogate the RequestUri etc.
+    /// </remarks>
+    internal class PerRequestParameterBinding : HttpParameterBinding
     {
         private IEnumerable<MediaTypeFormatter> _formatters;
 
-        public ODataFormatterParameterBinding(HttpParameterDescriptor descriptor,
+        public PerRequestParameterBinding(HttpParameterDescriptor descriptor,
             IEnumerable<MediaTypeFormatter> formatters)
             : base(descriptor)
         {
@@ -42,7 +43,15 @@ namespace System.Web.Http.OData.Formatter
                 perRequestFormatters.Add(perRequestFormatter);
             }
 
-            return Descriptor.BindWithFormatter(perRequestFormatters).ExecuteBindingAsync(metadataProvider, actionContext, cancellationToken);
+            HttpParameterBinding innerBinding = CreateInnerBinding(perRequestFormatters);
+            Contract.Assert(innerBinding != null);
+
+            return innerBinding.ExecuteBindingAsync(metadataProvider, actionContext, cancellationToken);
+        }
+
+        protected virtual HttpParameterBinding CreateInnerBinding(IEnumerable<MediaTypeFormatter> perRequestFormatters)
+        {
+            return Descriptor.BindWithFormatter(perRequestFormatters);
         }
     }
 }

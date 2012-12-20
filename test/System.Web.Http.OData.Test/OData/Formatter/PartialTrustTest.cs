@@ -36,7 +36,30 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        public void PostEntry_InODataJsonFormat()
+        public void PostEntry_InODataJsonLightFormat()
+        {
+            var _config = new HttpConfiguration();
+            _config.EnableOData(ODataTestUtil.GetEdmModel());
+
+            using (HttpServer host = new HttpServer(_config))
+            {
+                var _client = new HttpClient(host);
+                HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, new Uri(baseAddress + "People"));
+                requestMessage.Content = new StringContent(BaselineResource.PersonRequestEntryInPlainOldJson);
+                requestMessage.Content.Headers.ContentType = ODataMediaTypes.ApplicationJsonODataFullMetadata;
+                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                {
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                    Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+
+                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInJsonFullMetadata);
+                }
+            }
+        }
+
+        [Fact]
+        public void PostEntry_InODataJsonVerboseFormat()
         {
             var _config = new HttpConfiguration();
             _config.EnableOData(ODataTestUtil.GetEdmModel());

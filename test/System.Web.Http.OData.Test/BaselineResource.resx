@@ -133,6 +133,11 @@
   ]
 }</value>
   </data>
+  <data name="ArrayOfByteInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Binary","odata.type":"Edm.Binary","value":"AAIgQID/"
+}</value>
+  </data>
   <data name="ArrayOfByteInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Binary"&gt;AAIgQID/&lt;/d:ID&gt;</value>
@@ -154,9 +159,19 @@
   ]
 }</value>
   </data>
+  <data name="BooleanInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Boolean","value":true
+}</value>
+  </data>
   <data name="BooleanInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;true&lt;/d:ID&gt;</value>
+  </data>
+  <data name="ByteInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Byte","odata.type":"Edm.Byte","value":64
+}</value>
   </data>
   <data name="ByteInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -273,13 +288,28 @@
   ]
 }</value>
   </data>
+  <data name="DateTimeInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.DateTime","odata.type":"Edm.DateTime","value":"2010-01-01T00:00:00"
+}</value>
+  </data>
   <data name="DateTimeInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.DateTime"&gt;2010-01-01T00:00:00&lt;/d:ID&gt;</value>
   </data>
+  <data name="DecimalInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Decimal","odata.type":"Edm.Decimal","value":"12345.99999"
+}</value>
+  </data>
   <data name="DecimalInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Decimal"&gt;12345.99999&lt;/d:ID&gt;</value>
+  </data>
+  <data name="DoubleInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Double","value":99999.12345
+}</value>
   </data>
   <data name="DoubleInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -457,17 +487,37 @@
   ]
 }</value>
   </data>
+  <data name="GuidInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Guid","odata.type":"Edm.Guid","value":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d"
+}</value>
+  </data>
   <data name="GuidInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Guid"&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int16InJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Int16","odata.type":"Edm.Int16","value":-32768
+}</value>
   </data>
   <data name="Int16InXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int16"&gt;-32768&lt;/d:ID&gt;</value>
   </data>
+  <data name="Int32InJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Int32","value":-2147483648
+}</value>
+  </data>
   <data name="Int32InXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Int32"&gt;-2147483648&lt;/d:ID&gt;</value>
+  </data>
+  <data name="Int64InJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Int64","odata.type":"Edm.Int64","value":"-9223372036854775808"
+}</value>
   </data>
   <data name="Int64InXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -519,9 +569,24 @@
   ],"odata.nextLink":"aa:b"
 }</value>
   </data>
+  <data name="NullableBooleanInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Boolean","value":false
+}</value>
+  </data>
   <data name="NullableBooleanInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Boolean"&gt;false&lt;/d:ID&gt;</value>
+  </data>
+  <data name="NullableInt32InJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Null","odata.null":true
+}</value>
+  </data>
+  <data name="NullableInt32InJsonNoMetadata" xml:space="preserve">
+    <value>{
+  "odata.null":true
+}</value>
   </data>
   <data name="NullableInt32InXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -648,6 +713,17 @@
   &lt;/content&gt;
 &lt;/entry&gt;</value>
   </data>
+  <data name="ProductRequestEntryInPlainOldJson" xml:space="preserve">
+    <value>{
+    "ID":0,
+    "Name":"Bread",
+    "Description":"Whole grain bread",
+    "ReleaseDate":"1992-01-01T00:00:00",
+    "DiscontinuedDate":null,
+    "Rating":4,
+    "Price":"2.5"
+}</value>
+  </data>
   <data name="ProductsCSDL" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
 &lt;edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"&gt;
@@ -720,13 +796,33 @@
   &lt;/edmx:DataServices&gt;
 &lt;/edmx:Edmx&gt;</value>
   </data>
+  <data name="SByteInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.SByte","odata.type":"Edm.SByte","value":-128
+}</value>
+  </data>
   <data name="SByteInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.SByte"&gt;-128&lt;/d:ID&gt;</value>
   </data>
+  <data name="SingleInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Single","odata.type":"Edm.Single","value":"Infinity"
+}</value>
+  </data>
   <data name="SingleInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;d:ID xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="Edm.Single"&gt;INF&lt;/d:ID&gt;</value>
+  </data>
+  <data name="StringInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.String","value":"This is a Test String"
+}</value>
+  </data>
+  <data name="StringInJsonNoMetadata" xml:space="preserve">
+    <value>{
+  "value":"This is a Test String"
+}</value>
   </data>
   <data name="StringInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -756,6 +852,20 @@
     &lt;/m:properties&gt;
   &lt;/content&gt;
 &lt;/entry&gt;</value>
+  </data>
+  <data name="SupplierPatchInPlainOldJson" xml:space="preserve">
+    <value>{
+    "ID":123,
+    "Name":"Supplier Name",
+    "Address":
+    {
+        "Street":"Supplier Street",
+        "City":"Supplier City",
+        "State":"WA",
+        "ZipCode":"123456",
+        "Country":"USA"
+    }
+}</value>
   </data>
   <data name="SupplierRequestEntryInAtom" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
@@ -925,6 +1035,83 @@
     &lt;/m:properties&gt;
   &lt;/content&gt;
 &lt;/entry&gt;</value>
+  </data>
+  <data name="SupplierRequestEntryInPlainOldJson" xml:space="preserve">
+    <value>{
+    "ID":0,
+    "Name":"Supplier Name",
+    "Concurrency":0,
+    "Address":
+    {
+        "Street":"Supplier Street",
+        "City":"Supplier City",
+        "State":"WA",
+        "ZipCode":"123456",
+        "Country":"USA"
+    },
+    Products:
+    [
+        {
+            "ID":1,
+            "Name":"Milk",
+            "Description":"Low fat milk",
+            "ReleaseDate":"1995-10-01T00:00:00",
+            "DiscontinuedDate":null,
+            "Rating":3,
+            "Price":"3.5"
+        },
+        {
+            "ID":2,
+            "Name":"soda",
+            "Description":"sample summary",
+            "ReleaseDate":"1995-10-01T00:00:00",
+            "DiscontinuedDate":null,
+            "Rating":3,
+            "Price":"20.9"
+        },
+        {
+            "ID":3,
+            "Name":"Product3",
+            "Description":"Product3 Summary",
+            "ReleaseDate":"1995-10-01T00:00:00",
+            "DiscontinuedDate":null,
+            "Rating":3,
+            "Price":"19.9"
+        },
+        {
+            "ID":4,
+            "Name":"Product4",
+            "Description":"Product4 Summary",
+            "ReleaseDate":"1995-10-01T00:00:00",
+            "DiscontinuedDate":null,
+            "Rating":3,
+            "Price":"22.9"
+        },
+        {
+            "ID":5,
+            "Name":"Product5",
+            "Description":"Product5 Summary",
+            "ReleaseDate":"1995-10-01T00:00:00",
+            "DiscontinuedDate":null,
+            "Rating":3,
+            "Price":"22.8"
+        },
+        {
+            "ID":6,
+            "Name":"Product6",
+            "Description":"Product6 Summary",
+            "ReleaseDate":"1995-10-01T00:00:00",
+            "DiscontinuedDate":null,
+            "Rating":3,
+            "Price":"18.8"
+        }
+    ]
+}</value>
+  </data>
+  <data name="TimeSpanInJsonMinimalMetadata" xml:space="preserve">
+    <value>{
+  "odata.metadata":"http://localhost/#Edm.Time","odata.type":"Edm.Time","value":"PT1H"
+}</value>
   </data>
   <data name="TimeSpanInXml" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;

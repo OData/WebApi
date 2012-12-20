@@ -169,6 +169,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Car");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
 
@@ -186,6 +187,7 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Car");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
+            AddODataPath(request);
             request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
@@ -248,8 +250,8 @@ namespace System.Web.Http.OData.Formatter
 
         private void AddODataPath(HttpRequestMessage request)
         {
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(_model).Parse(
-                GetODataPath(request.RequestUri.AbsoluteUri));
+            request.SetODataPath(new DefaultODataPathHandler(_model).Parse(GetODataPath(
+                request.RequestUri.AbsoluteUri)));
         }
 
         private static IEdmModel GetEdmModel()
@@ -286,6 +288,10 @@ namespace System.Web.Http.OData.Formatter
                 .ReturnsFromEntitySet<Motorcycle>("motorcycles");
             new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Motorcycle")
                 .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Car")
+                .ReturnsFromEntitySet<Car>("cars");
+            new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Car")
+                .ReturnsFromEntitySet<Car>("cars");
             new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Vehicle")
                 .ReturnsFromEntitySet<Vehicle>("vehicles");
             new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Vehicle")

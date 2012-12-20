@@ -2,8 +2,8 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
@@ -75,7 +75,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             config.EnableOData(GetSampleModel());
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(_model).Parse("employees");
+            IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
+            request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
             return request;
         }
 

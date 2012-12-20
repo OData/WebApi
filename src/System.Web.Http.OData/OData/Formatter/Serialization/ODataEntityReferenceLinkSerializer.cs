@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
@@ -41,7 +42,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
-            IEdmNavigationProperty navigationProperty = GetNavigationPropertyOrDefault(writeContext.Path);
+            IEdmNavigationProperty navigationProperty = GetNavigationProperty(writeContext.Path);
 
             if (navigationProperty == null)
             {
@@ -52,22 +53,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 navigationProperty);
         }
 
-        private static IEdmNavigationProperty GetNavigationPropertyOrDefault(ODataPath path)
+        private static IEdmNavigationProperty GetNavigationProperty(ODataPath path)
         {
             if (path == null)
             {
                 throw new SerializationException(SRResources.ODataPathMissing);
             }
 
-            Contract.Assert(path.Segments != null);
-            NavigationPathSegment navigationSegment = path.Segments.LastOrDefault() as NavigationPathSegment;
-
-            if (navigationSegment == null)
-            {
-                return null;
-            }
-
-            return navigationSegment.NavigationProperty;
+            return path.GetNavigationProperty();
         }
     }
 }

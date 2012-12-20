@@ -27,8 +27,7 @@ namespace System.Web.Http.OData.Formatter
                 CreateApplicationXml(model),
                 CreateApplicationAtomSvcXml(model),
                 CreateTextXml(model),
-                CreateApplicationJsonODataVerbose(model),
-                CreateApplicationJsonODataLight(model)
+                CreateApplicationJson(model)
             };
         }
 
@@ -69,7 +68,7 @@ namespace System.Web.Http.OData.Formatter
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationJsonODataLight(IEdmModel model)
+        private static ODataMediaTypeFormatter CreateApplicationJson(IEdmModel model)
         {
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
                 model,
@@ -82,8 +81,6 @@ namespace System.Web.Http.OData.Formatter
                 ODataPayloadKind.ServiceDocument,
                 ODataPayloadKind.Error,
                 ODataPayloadKind.Parameter);
-            // TODO: Feature #664 - Support reading for JSON light.
-            formatter.WriteOnly = true;
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
@@ -93,27 +90,10 @@ namespace System.Web.Http.OData.Formatter
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadata);
-            // TODO: Bug #671 - Don't silently take over application/json globally.
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataVerbose);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJson);
-            return formatter;
-        }
-
-        private static ODataMediaTypeFormatter CreateApplicationJsonODataVerbose(IEdmModel model)
-        {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
-                model,
-                ODataPayloadKind.Feed,
-                ODataPayloadKind.Entry,
-                ODataPayloadKind.Property,
-                ODataPayloadKind.EntityReferenceLink,
-                ODataPayloadKind.EntityReferenceLinks,
-                ODataPayloadKind.Collection,
-                ODataPayloadKind.ServiceDocument,
-                ODataPayloadKind.Error,
-                ODataPayloadKind.Parameter);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataVerbose);
             return formatter;
         }
 

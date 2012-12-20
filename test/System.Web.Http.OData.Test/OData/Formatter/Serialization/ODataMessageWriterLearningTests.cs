@@ -37,10 +37,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
-                // Act
-                writer.CreateODataCollectionWriter(itemTypeReference);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => writer.CreateODataCollectionWriter(itemTypeReference));
             }
         }
 
@@ -70,10 +68,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
-                // Act
-                writer.CreateODataEntryWriter(entitySet);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => writer.CreateODataEntryWriter(entitySet));
             }
         }
 
@@ -103,10 +99,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
-                // Act
-                writer.CreateODataFeedWriter(entitySet);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => writer.CreateODataFeedWriter(entitySet));
             }
         }
 
@@ -187,10 +181,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
-                // Act
-                writer.WriteEntityReferenceLink(link, entitySet, navigationProperty);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => writer.WriteEntityReferenceLink(link, entitySet, navigationProperty));
             }
         }
 

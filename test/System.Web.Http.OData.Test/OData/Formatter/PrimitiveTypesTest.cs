@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
@@ -15,80 +18,138 @@ namespace System.Web.Http.OData.Formatter
 {
     public class PrimitiveTypesTest
     {
-        public static TheoryDataSet<string, Type, object> PrimitiveTypesToTest
+        public static TheoryDataSet<Type, object, MediaTypeHeaderValue, string> PrimitiveTypesToTest
         {
             get
             {
-                return new TheoryDataSet<string, Type, object>
+                MediaTypeHeaderValue minimalMetadata = ODataMediaTypes.ApplicationJsonODataMinimalMetadata;
+                MediaTypeHeaderValue noMetadata = ODataMediaTypes.ApplicationJsonODataNoMetadata;
+                MediaTypeHeaderValue xml = ODataMediaTypes.ApplicationXml;
+
+                return new TheoryDataSet<Type, object, MediaTypeHeaderValue, string>
                 {
-                    {"StringInXml", typeof(string), "This is a Test String"},
-                    {"BooleanInXml",typeof(bool), true},
-                    {"ByteInXml",typeof(byte), (byte)64},
-                    {"ArrayOfByteInXml",typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }},
-                    {"DateTimeInXml", typeof(DateTime), new DateTime(2010, 1, 1)},
-                    {"DecimalInXml",typeof(decimal), 12345.99999M},
-                    {"DoubleInXml",typeof(double), 99999.12345},
-                    {"GuidInXml", typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d")},
-                    {"Int16InXml", typeof(short), Int16.MinValue},
-                    {"Int32InXml",typeof(int), Int32.MinValue},
-                    {"Int64InXml", typeof(long), Int64.MinValue},
-                    {"SByteInXml",typeof(sbyte), SByte.MinValue},
-                    {"SingleInXml",typeof(Single), Single.PositiveInfinity},
-                    {"TimeSpanInXml", typeof(TimeSpan), TimeSpan.FromMinutes(60)},
-                    {"NullableBooleanInXml",typeof(bool?), (bool?)false},
-                    {"NullableInt32InXml",typeof(int?), (int?)null},
+                    {typeof(string), "This is a Test String", minimalMetadata, "StringInJsonMinimalMetadata"},
+                    {typeof(string), "This is a Test String", noMetadata, "StringInJsonNoMetadata"},
+                    {typeof(string), "This is a Test String", xml, "StringInXml"},
+                    {typeof(bool), true, minimalMetadata, "BooleanInJsonMinimalMetadata"},
+                    {typeof(bool), true, xml, "BooleanInXml"},
+                    {typeof(byte), (byte)64, minimalMetadata, "ByteInJsonMinimalMetadata"},
+                    {typeof(byte), (byte)64, xml, "ByteInXml"},
+                    {typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }, minimalMetadata,
+                        "ArrayOfByteInJsonMinimalMetadata"},
+                    {typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }, xml, "ArrayOfByteInXml"},
+                    {typeof(DateTime), new DateTime(2010, 1, 1), minimalMetadata, "DateTimeInJsonMinimalMetadata"},
+                    {typeof(DateTime), new DateTime(2010, 1, 1), xml, "DateTimeInXml"},
+                    {typeof(decimal), 12345.99999M, minimalMetadata, "DecimalInJsonMinimalMetadata"},
+                    {typeof(decimal), 12345.99999M, xml, "DecimalInXml"},
+                    {typeof(double), 99999.12345, minimalMetadata, "DoubleInJsonMinimalMetadata"},
+                    {typeof(double), 99999.12345, xml, "DoubleInXml"},
+                    {typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), minimalMetadata,
+                        "GuidInJsonMinimalMetadata"},
+                    {typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), xml, "GuidInXml"},
+                    {typeof(short), Int16.MinValue, minimalMetadata, "Int16InJsonMinimalMetadata"},
+                    {typeof(short), Int16.MinValue, xml, "Int16InXml"},
+                    {typeof(int), Int32.MinValue, minimalMetadata, "Int32InJsonMinimalMetadata"},
+                    {typeof(int), Int32.MinValue, xml, "Int32InXml"},
+                    {typeof(long), Int64.MinValue, minimalMetadata, "Int64InJsonMinimalMetadata"},
+                    {typeof(long), Int64.MinValue, xml, "Int64InXml"},
+                    {typeof(sbyte), SByte.MinValue, minimalMetadata, "SByteInJsonMinimalMetadata"},
+                    {typeof(sbyte), SByte.MinValue, xml, "SByteInXml"},
+                    {typeof(Single), Single.PositiveInfinity, minimalMetadata, "SingleInJsonMinimalMetadata"},
+                    {typeof(Single), Single.PositiveInfinity, xml, "SingleInXml"},
+                    {typeof(TimeSpan), TimeSpan.FromMinutes(60), minimalMetadata, "TimeSpanInJsonMinimalMetadata"},
+                    {typeof(TimeSpan), TimeSpan.FromMinutes(60), xml, "TimeSpanInXml"},
+                    {typeof(bool?), (bool?)false, minimalMetadata, "NullableBooleanInJsonMinimalMetadata"},
+                    {typeof(bool?), (bool?)false, xml, "NullableBooleanInXml"},
+                    {typeof(int?), (int?)null, minimalMetadata, "NullableInt32InJsonMinimalMetadata"},
+                    {typeof(int?), (int?)null, noMetadata, "NullableInt32InJsonNoMetadata"},
+                    {typeof(int?), (int?)null, xml, "NullableInt32InXml"},
                 };
             }
         }
 
         [Theory]
         [PropertyData("PrimitiveTypesToTest")]
-        public void PrimitiveTypesSerializeAsOData(string typeString, Type valueType, object value)
+        public void PrimitiveTypesSerializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
+            string resourceName)
         {
-            string expected = BaselineResource.ResourceManager.GetString(typeString);
-            Assert.NotNull(expected);
+            string expectedEntity = BaselineResource.ResourceManager.GetString(resourceName);
+            Assert.NotNull(expectedEntity);
 
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.AddFakeODataRoute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)/ID");
+            string actualEntity;
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/WorkItems(10)/ID"))
+            {
+                request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+                IEdmProperty property =
+                    model.EntityContainers().Single().EntitySets().Single().ElementType.Properties().First();
+                request.SetODataPath(new ODataPath(new PropertyAccessPathSegment(property)));
 
-            Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
+                ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
+                formatter.SupportedMediaTypes.Add(mediaType);
 
-            ObjectContent content = new ObjectContent(type, value, formatter);
+                Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
 
-            var result = content.ReadAsStringAsync().Result;
-            Assert.Xml.Equal(expected, result);
+                using (ObjectContent content = new ObjectContent(type, value, formatter))
+                {
+                    actualEntity = content.ReadAsStringAsync().Result;
+                }
+            }
+
+            Assert.Equal(expectedEntity, actualEntity);
         }
 
         [Theory]
         [PropertyData("PrimitiveTypesToTest")]
-        public void PrimitiveTypesDeserializeAsOData(string typeString, Type type, object value)
+        public void PrimitiveTypesDeserializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
+            string resourceName)
         {
-            HttpConfiguration configuration = new HttpConfiguration();
+            string entity = BaselineResource.ResourceManager.GetString(resourceName);
+            Assert.NotNull(entity);
+
+            object expectedValue = value;
 
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
+            object actualValue;
+
+            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/WorkItems(10)/ID"))
+            {
+                request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+
+                ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
+                formatter.SupportedMediaTypes.Add(mediaType);
+
+                using (StringContent content = new StringContent(entity))
+                {
+                    content.Headers.ContentType = mediaType;
+
+                    using (Stream stream = content.ReadAsStreamAsync().Result)
+                    {
+                        actualValue = formatter.ReadFromStreamAsync(valueType, stream, content,
+                            new Mock<IFormatterLogger>().Object).Result;
+                    }
+                }
+            }
+
+            Assert.Equal(expectedValue, actualValue);
+        }
+
+        private static HttpConfiguration CreateConfiguration()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
             configuration.AddFakeODataRoute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
-            ObjectContent content = new ObjectContent(type, value, formatter, "application/xml");
-
-            var stream = content.ReadAsStreamAsync().Result;
-            Assert.Equal(
-                value,
-                formatter.ReadFromStreamAsync(type, stream, content, new Mock<IFormatterLogger>().Object).Result);
+            return configuration;
         }
 
         private ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request)

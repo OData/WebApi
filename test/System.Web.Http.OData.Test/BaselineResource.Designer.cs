@@ -88,6 +88,17 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Binary&quot;,&quot;odata.type&quot;:&quot;Edm.Binary&quot;,&quot;value&quot;:&quot;AAIgQID/&quot;
+        ///}.
+        /// </summary>
+        internal static string ArrayOfByteInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("ArrayOfByteInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Binary&quot;&gt;AAIgQID/&lt;/d:ID&gt;.
         /// </summary>
@@ -125,12 +136,34 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Boolean&quot;,&quot;value&quot;:true
+        ///}.
+        /// </summary>
+        internal static string BooleanInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("BooleanInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;true&lt;/d:ID&gt;.
         /// </summary>
         internal static string BooleanInXml {
             get {
                 return ResourceManager.GetString("BooleanInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Byte&quot;,&quot;odata.type&quot;:&quot;Edm.Byte&quot;,&quot;value&quot;:64
+        ///}.
+        /// </summary>
+        internal static string ByteInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("ByteInJsonMinimalMetadata", resourceCulture);
             }
         }
         
@@ -178,6 +211,17 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.DateTime&quot;,&quot;odata.type&quot;:&quot;Edm.DateTime&quot;,&quot;value&quot;:&quot;2010-01-01T00:00:00&quot;
+        ///}.
+        /// </summary>
+        internal static string DateTimeInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("DateTimeInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.DateTime&quot;&gt;2010-01-01T00:00:00&lt;/d:ID&gt;.
         /// </summary>
@@ -188,12 +232,34 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Decimal&quot;,&quot;odata.type&quot;:&quot;Edm.Decimal&quot;,&quot;value&quot;:&quot;12345.99999&quot;
+        ///}.
+        /// </summary>
+        internal static string DecimalInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("DecimalInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Decimal&quot;&gt;12345.99999&lt;/d:ID&gt;.
         /// </summary>
         internal static string DecimalInXml {
             get {
                 return ResourceManager.GetString("DecimalInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Double&quot;,&quot;value&quot;:99999.12345
+        ///}.
+        /// </summary>
+        internal static string DoubleInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("DoubleInJsonMinimalMetadata", resourceCulture);
             }
         }
         
@@ -268,12 +334,34 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Guid&quot;,&quot;odata.type&quot;:&quot;Edm.Guid&quot;,&quot;value&quot;:&quot;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&quot;
+        ///}.
+        /// </summary>
+        internal static string GuidInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("GuidInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Guid&quot;&gt;f99080c0-2f9e-472e-8c72-1a8ecd9f902d&lt;/d:ID&gt;.
         /// </summary>
         internal static string GuidInXml {
             get {
                 return ResourceManager.GetString("GuidInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Int16&quot;,&quot;odata.type&quot;:&quot;Edm.Int16&quot;,&quot;value&quot;:-32768
+        ///}.
+        /// </summary>
+        internal static string Int16InJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("Int16InJsonMinimalMetadata", resourceCulture);
             }
         }
         
@@ -288,12 +376,34 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Int32&quot;,&quot;value&quot;:-2147483648
+        ///}.
+        /// </summary>
+        internal static string Int32InJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("Int32InJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Int32&quot;&gt;-2147483648&lt;/d:ID&gt;.
         /// </summary>
         internal static string Int32InXml {
             get {
                 return ResourceManager.GetString("Int32InXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Int64&quot;,&quot;odata.type&quot;:&quot;Edm.Int64&quot;,&quot;value&quot;:&quot;-9223372036854775808&quot;
+        ///}.
+        /// </summary>
+        internal static string Int64InJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("Int64InJsonMinimalMetadata", resourceCulture);
             }
         }
         
@@ -368,12 +478,45 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Boolean&quot;,&quot;value&quot;:false
+        ///}.
+        /// </summary>
+        internal static string NullableBooleanInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("NullableBooleanInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Boolean&quot;&gt;false&lt;/d:ID&gt;.
         /// </summary>
         internal static string NullableBooleanInXml {
             get {
                 return ResourceManager.GetString("NullableBooleanInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Null&quot;,&quot;odata.null&quot;:true
+        ///}.
+        /// </summary>
+        internal static string NullableInt32InJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("NullableInt32InJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.null&quot;:true
+        ///}.
+        /// </summary>
+        internal static string NullableInt32InJsonNoMetadata {
+            get {
+                return ResourceManager.GetString("NullableInt32InJsonNoMetadata", resourceCulture);
             }
         }
         
@@ -510,6 +653,23 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///    &quot;ID&quot;:0,
+        ///    &quot;Name&quot;:&quot;Bread&quot;,
+        ///    &quot;Description&quot;:&quot;Whole grain bread&quot;,
+        ///    &quot;ReleaseDate&quot;:&quot;1992-01-01T00:00:00&quot;,
+        ///    &quot;DiscontinuedDate&quot;:null,
+        ///    &quot;Rating&quot;:4,
+        ///    &quot;Price&quot;:&quot;2.5&quot;
+        ///}.
+        /// </summary>
+        internal static string ProductRequestEntryInPlainOldJson {
+            get {
+                return ResourceManager.GetString("ProductRequestEntryInPlainOldJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;edmx:Edmx Version=&quot;1.0&quot; xmlns:edmx=&quot;http://schemas.microsoft.com/ado/2007/06/edmx&quot;&gt;
         ///  &lt;edmx:DataServices xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:DataServiceVersion=&quot;2.0&quot;&gt;
@@ -519,6 +679,17 @@ namespace System.Web.Http.OData {
         internal static string ProductsCSDL {
             get {
                 return ResourceManager.GetString("ProductsCSDL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.SByte&quot;,&quot;odata.type&quot;:&quot;Edm.SByte&quot;,&quot;value&quot;:-128
+        ///}.
+        /// </summary>
+        internal static string SByteInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("SByteInJsonMinimalMetadata", resourceCulture);
             }
         }
         
@@ -533,12 +704,45 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Single&quot;,&quot;odata.type&quot;:&quot;Edm.Single&quot;,&quot;value&quot;:&quot;Infinity&quot;
+        ///}.
+        /// </summary>
+        internal static string SingleInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("SingleInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;d:ID xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; xmlns:georss=&quot;http://www.georss.org/georss&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; m:type=&quot;Edm.Single&quot;&gt;INF&lt;/d:ID&gt;.
         /// </summary>
         internal static string SingleInXml {
             get {
                 return ResourceManager.GetString("SingleInXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.String&quot;,&quot;value&quot;:&quot;This is a Test String&quot;
+        ///}.
+        /// </summary>
+        internal static string StringInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("StringInJsonMinimalMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;value&quot;:&quot;This is a Test String&quot;
+        ///}.
+        /// </summary>
+        internal static string StringInJsonNoMetadata {
+            get {
+                return ResourceManager.GetString("StringInJsonNoMetadata", resourceCulture);
             }
         }
         
@@ -569,6 +773,26 @@ namespace System.Web.Http.OData {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///    &quot;ID&quot;:123,
+        ///    &quot;Name&quot;:&quot;Supplier Name&quot;,
+        ///    &quot;Address&quot;:
+        ///    {
+        ///        &quot;Street&quot;:&quot;Supplier Street&quot;,
+        ///        &quot;City&quot;:&quot;Supplier City&quot;,
+        ///        &quot;State&quot;:&quot;WA&quot;,
+        ///        &quot;ZipCode&quot;:&quot;123456&quot;,
+        ///        &quot;Country&quot;:&quot;USA&quot;
+        ///    }
+        ///}.
+        /// </summary>
+        internal static string SupplierPatchInPlainOldJson {
+            get {
+                return ResourceManager.GetString("SupplierPatchInPlainOldJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;entry xml:base=&quot;http://services.odata.org/OData/OData.svc/&quot; xmlns:d=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot; xmlns:m=&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot; m:etag=&quot;W/&amp;quot;0&amp;quot;&quot; xmlns=&quot;http://www.w3.org/2005/Atom&quot;&gt;
         ///  &lt;id&gt;http://services.odata.org/OData/OData.svc/Suppliers(0)&lt;/id&gt;
@@ -582,6 +806,48 @@ namespace System.Web.Http.OData {
         internal static string SupplierRequestEntryInAtom {
             get {
                 return ResourceManager.GetString("SupplierRequestEntryInAtom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///    &quot;ID&quot;:0,
+        ///    &quot;Name&quot;:&quot;Supplier Name&quot;,
+        ///    &quot;Concurrency&quot;:0,
+        ///    &quot;Address&quot;:
+        ///    {
+        ///        &quot;Street&quot;:&quot;Supplier Street&quot;,
+        ///        &quot;City&quot;:&quot;Supplier City&quot;,
+        ///        &quot;State&quot;:&quot;WA&quot;,
+        ///        &quot;ZipCode&quot;:&quot;123456&quot;,
+        ///        &quot;Country&quot;:&quot;USA&quot;
+        ///    },
+        ///    Products:
+        ///    [
+        ///        {
+        ///            &quot;ID&quot;:1,
+        ///            &quot;Name&quot;:&quot;Milk&quot;,
+        ///            &quot;Description&quot;:&quot;Low fat milk&quot;,
+        ///            &quot;ReleaseDate&quot;:&quot;1995-10-01T00:00:00&quot;,
+        ///            &quot;DiscontinuedDate&quot;:null,
+        ///            &quot;Rating&quot;:3,
+        ///            &quot;Price&quot;:&quot;3.5&quot;
+        ///   [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SupplierRequestEntryInPlainOldJson {
+            get {
+                return ResourceManager.GetString("SupplierRequestEntryInPlainOldJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;odata.metadata&quot;:&quot;http://localhost/#Edm.Time&quot;,&quot;odata.type&quot;:&quot;Edm.Time&quot;,&quot;value&quot;:&quot;PT1H&quot;
+        ///}.
+        /// </summary>
+        internal static string TimeSpanInJsonMinimalMetadata {
+            get {
+                return ResourceManager.GetString("TimeSpanInJsonMinimalMetadata", resourceCulture);
             }
         }
         

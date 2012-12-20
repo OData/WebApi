@@ -50,7 +50,8 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)");
+            IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+            request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10")));
 
             ODataMediaTypeFormatter formatter;
 
@@ -193,13 +194,25 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        public void WriteToStreamAsync_ThrowsNotSupported_WithoutRequest()
+        public void ReadFromStreamAsync_ThrowsInvalidOperation_WithoutRequest()
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
             var formatter = CreateFormatter(builder.GetEdmModel());
 
-            Assert.Throws<NotSupportedException>(
+            Assert.Throws<InvalidOperationException>(
+                () => formatter.ReadFromStreamAsync(typeof(Customer), new MemoryStream(), content: null, formatterLogger: null),
+                "The OData formatter requires an attached request in order to deserialize. Controller classes must derive from ODataController or be marked with ODataFormattingAttribute. Custom parameter bindings must call GetPerRequestFormatterInstance on each formatter and use these per-request instances.");
+        }
+
+        [Fact]
+        public void WriteToStreamAsync_ThrowsInvalidOperation_WithoutRequest()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            var formatter = CreateFormatter(builder.GetEdmModel());
+
+            Assert.Throws<InvalidOperationException>(
                 () => formatter.WriteToStreamAsync(typeof(Customer), new Customer(), new MemoryStream(), content: null, transportContext: null),
                 "The OData formatter does not support writing client requests. This formatter instance must have an associated request.");
         }
@@ -303,8 +316,8 @@ namespace System.Web.Http.OData.Formatter
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.AddFakeODataRoute();
             request.Properties["MS_HttpConfiguration"] = configuration;
-            request.Properties["MS_ODataPath"] = new ODataPath(new EntitySetPathSegment(
-                model.EntityContainers().Single().EntitySets().Single()));
+            request.SetODataPath(new ODataPath(new EntitySetPathSegment(
+                model.EntityContainers().Single().EntitySets().Single())));
             return request;
         }
 

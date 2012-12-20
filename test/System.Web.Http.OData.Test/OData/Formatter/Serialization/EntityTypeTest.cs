@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
@@ -65,7 +66,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             config.EnableOData(_model);
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(_model).Parse("employees");
+            IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
+            request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
             return request;
         }
 

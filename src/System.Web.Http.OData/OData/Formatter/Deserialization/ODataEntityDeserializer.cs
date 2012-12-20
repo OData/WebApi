@@ -3,8 +3,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -35,8 +37,15 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
-            // TODO: Feature #664 - Support JSON light (pass entity set).
-            ODataReader odataReader = messageReader.CreateODataEntryReader(EdmEntityType.EntityDefinition());
+            IEdmEntitySet entitySet = GetEntitySet(readContext.Path);
+
+            if (entitySet == null)
+            {
+                throw new SerializationException(SRResources.EntitySetMissingDuringDeserialization);
+            }
+
+            ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet,
+                EdmEntityType.EntityDefinition());
             ODataEntry topLevelEntry = ReadEntryOrFeed(odataReader, readContext) as ODataEntry;
             Contract.Assert(topLevelEntry != null);
 
@@ -330,6 +339,16 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 ApplyProperty(property, entityType, entityResource, DeserializerProvider, readContext);
             }
+        }
+
+        private static IEdmEntitySet GetEntitySet(ODataPath path)
+        {
+            if (path == null)
+            {
+                throw new SerializationException(SRResources.ODataPathMissing);
+            }
+
+            return path.EntitySet;
         }
     }
 }

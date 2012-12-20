@@ -41,10 +41,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
-                // Act
-                reader.CreateODataCollectionReader(expectedItemTypeReference);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.CreateODataCollectionReader(expectedItemTypeReference));
             }
         }
 
@@ -90,10 +88,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
-                // Act
-                reader.CreateODataEntryReader(entitySet, null);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.CreateODataEntryReader(entitySet, null));
             }
         }
 
@@ -139,10 +135,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
-                // Act
-                reader.CreateODataFeedReader(entitySet, null);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.CreateODataFeedReader(entitySet, null));
             }
         }
 
@@ -173,25 +167,23 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
-                // Act
-                reader.ReadEntityReferenceLink(navigationProperty);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.ReadEntityReferenceLink(navigationProperty));
             }
         }
 
         [Fact]
-        public void TestReadProperty_InJsonLight_WithoutStructuralPropertyOrTypeReference_Throws()
+        public void TestReadProperty_InJsonLight_WithoutStructuralPropertyOrTypeReference_DoesNotThrows()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"value\":[]}");
+            IODataRequestMessage request = CreateJsonLightRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.ReadProperty());
+                Assert.DoesNotThrow(() => reader.ReadProperty());
             }
         }
 
@@ -206,10 +198,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
-                // Act
-                reader.ReadProperty(property);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.ReadProperty(property));
             }
         }
 
@@ -225,10 +215,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
-                // Act
-                reader.ReadProperty(expectedPropertyTypeReference);
-
-                // No assert (just ensuring this kind of call does not throw).
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.ReadProperty(expectedPropertyTypeReference));
             }
         }
 

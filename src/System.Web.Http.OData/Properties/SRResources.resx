@@ -360,9 +360,6 @@
   <data name="ActionResolutionFailed" xml:space="preserve">
     <value>Action resolution failed. Multiple actions matching the action identifier '{0}' were found. The matching actions are: {1}.</value>
   </data>
-  <data name="NoODataMediaTypeFormatterFound" xml:space="preserve">
-    <value>The ODataParameterBindingAttribute requires that an ODataMediaTypeFormatter be registered with the HttpConfiguration.</value>
-  </data>
   <data name="ValueIsInvalid" xml:space="preserve">
     <value>The value '{0}' is invalid. {1}</value>
   </data>
@@ -530,10 +527,10 @@
     <value>Type '{0}' is not a valid EDM primitive. The [FromODataUri] attribute can only be used on parameters with types that correspond to EDM primitives.</value>
   </data>
   <data name="EntitySetMissingDuringSerialization" xml:space="preserve">
-    <value>The related entity set could not be found. The related entity set is required to serialize the payload.</value>
+    <value>The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.</value>
   </data>
   <data name="NavigationPropertyMissingDuringSerialization" xml:space="preserve">
-    <value>The related navigation property could not be found. The related navigation property is required to serialize the payload.</value>
+    <value>The related navigation property could not be found from the OData path. The related navigation property is required to serialize the payload.</value>
   </data>
   <data name="UnsupportedPrimitiveType" xml:space="preserve">
     <value>The type '{0}' is not a supported primitive type.</value>
@@ -552,5 +549,17 @@
   </data>
   <data name="ClrTypeNotInModel" xml:space="preserve">
     <value>The given model does not contain the type '{0}'.</value>
+  </data>
+  <data name="ReadFromStreamAsyncMustHaveRequest" xml:space="preserve">
+    <value>The OData formatter requires an attached request in order to deserialize. Controller classes must derive from ODataController or be marked with ODataFormattingAttribute. Custom parameter bindings must call GetPerRequestFormatterInstance on each formatter and use these per-request instances.</value>
+  </data>
+  <data name="EntitySetMissingDuringDeserialization" xml:space="preserve">
+    <value>The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload.</value>
+  </data>
+  <data name="NavigationPropertyMissingDuringDeserialization" xml:space="preserve">
+    <value>The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload.</value>
+  </data>
+  <data name="ActionValueBinderMissing" xml:space="preserve">
+    <value>No IActionValueBinder service could be found for controller '{0}'.</value>
   </data>
 </root>

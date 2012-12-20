@@ -24,7 +24,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
-            // TODO: Feature #664 - Support JSON light (passing the structural property or type reference parameter).
             ODataProperty property = messageReader.ReadProperty();
             return ReadInline(property, readContext);
         }

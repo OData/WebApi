@@ -2,6 +2,7 @@
 
 using System.Diagnostics.Contracts;
 using System.Net.Http;
+using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -27,23 +28,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public Type PatchEntityType { get; set; }
 
         /// <summary>
-        /// Gets or sets the HttpRequestMessage. 
-        /// The HttpRequestMessage can then be used by ODataDeserializers to learn more about the Request that triggered the deserialization
+        /// Gets or sets the <see cref="ODataPath"/> of the request.
         /// </summary>
-        public HttpRequestMessage Request
-        {
-            get;
-            set;
-        }
+        public ODataPath Path { get; set; }
 
         /// <summary>
-        /// Gets or set the EdmModel associated with the Request.
+        /// Gets or set the EdmModel associated with the request.
         /// </summary>
-        public IEdmModel Model
-        {
-            get;
-            set;
-        }
+        public IEdmModel Model { get; set; }
 
         /// <summary>
         /// Increments the current reference depth.

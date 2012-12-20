@@ -286,15 +286,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The ODataDeserializerContext must have a non null Request and RequestUri..
-        /// </summary>
-        internal static string DeserializerContextRequirementsNotSatisfied {
-            get {
-                return ResourceManager.GetString("DeserializerContextRequirementsNotSatisfied", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; does not support Read..
         /// </summary>
         internal static string DeserializerDoesNotSupportRead {
@@ -1033,6 +1024,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The operation cannot be completed because no ODataPath is available for the request..
+        /// </summary>
+        internal static string ODataPathMissing {
+            get {
+                return ResourceManager.GetString("ODataPathMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only $skip and $top OData query options are supported for this type..
         /// </summary>
         internal static string OnlySkipAndTopSupported {
@@ -1249,15 +1249,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request could not be found. The request is required to serialize the payload..
-        /// </summary>
-        internal static string RequestMissingDuringSerialization {
-            get {
-                return ResourceManager.GetString("RequestMissingDuringSerialization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Request message does not contain an HttpConfiguration object..
         /// </summary>
         internal static string RequestMustContainConfiguration {
@@ -1272,15 +1263,6 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestNotActionInvocation {
             get {
                 return ResourceManager.GetString("RequestNotActionInvocation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The request URI &apos;{0}&apos; was not recognized as an OData path..
-        /// </summary>
-        internal static string RequestNotODataPath {
-            get {
-                return ResourceManager.GetString("RequestNotODataPath", resourceCulture);
             }
         }
         

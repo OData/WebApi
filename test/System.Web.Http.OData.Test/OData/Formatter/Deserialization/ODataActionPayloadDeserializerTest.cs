@@ -34,10 +34,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/Customers(10)/" + actionName;
-            HttpRequestMessage request = GetPostRequest(url);
-
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
+            ODataPath path = CreatePath(model, actionName);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
@@ -60,9 +58,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/Customers(10)/" + actionName;
-            HttpRequestMessage request = GetPostRequest(url);
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
+            ODataPath path = CreatePath(model, actionName);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
@@ -90,9 +87,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/Customers(10)/" + actionName;
-            HttpRequestMessage request = GetPostRequest(url);
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
+            ODataPath path = CreatePath(model, actionName);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
@@ -116,9 +112,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/Customers(10)/" + actionName;
-            HttpRequestMessage request = GetPostRequest(url);
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
+            ODataPath path = CreatePath(model, actionName);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
@@ -147,13 +142,19 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
-            string url = "http://server/service/Customers(10)/Primitive";
-            HttpRequestMessage request = GetPostRequest(url);
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = request, Model = model };
+            ODataPath path = CreatePath(model, "Primitive");
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             Assert.Throws<ODataException>(() =>
             {
                 ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
             }, "The parameter 'MissingParameter' in the request payload is not a valid parameter for the function import 'Primitive'.");
+        }
+
+        private static ODataPath CreatePath(IEdmModel model, string actionName)
+        {
+            IEdmFunctionImport functionImport =
+                model.EntityContainers().Single().FindFunctionImports(actionName).Single();
+            return new ODataPath(new ActionPathSegment(functionImport));
         }
 
         private IEdmModel GetModel()
@@ -184,35 +185,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 _model = builder.GetEdmModel();
             }
             return _model;
-        }
-
-        private HttpRequestMessage GetPostRequest(string url)
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-            HttpConfiguration config = new HttpConfiguration();
-            IEdmModel model = GetModel();
-            config.SetEdmModel(model);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
-            IHttpRoute route = new Mock<IHttpRoute>().Object;
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse(GetODataPath(url));
-            return request;
-        }
-
-        private static string GetODataPath(string url)
-        {
-            string serverServiceBaseUri = "http://server/service/";
-            string serverBaseUri = "http://server/";
-            if (url.StartsWith(serverServiceBaseUri))
-            {
-                return url.Substring(serverServiceBaseUri.Length);
-            }
-
-            if (url.StartsWith(serverBaseUri))
-            {
-                return url.Substring(serverBaseUri.Length);
-            }
-
-            return null;
         }
 
         private static Stream GetStringAsStream(string body)

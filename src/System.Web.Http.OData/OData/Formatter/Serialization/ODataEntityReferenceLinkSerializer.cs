@@ -41,7 +41,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
-            IEdmNavigationProperty navigationProperty = GetNavigationPropertyOrDefault(writeContext.Request);
+            IEdmNavigationProperty navigationProperty = GetNavigationPropertyOrDefault(writeContext.Path);
 
             if (navigationProperty == null)
             {
@@ -52,18 +52,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 navigationProperty);
         }
 
-        private static IEdmNavigationProperty GetNavigationPropertyOrDefault(HttpRequestMessage request)
+        private static IEdmNavigationProperty GetNavigationPropertyOrDefault(ODataPath path)
         {
-            if (request == null)
-            {
-                throw new SerializationException(SRResources.RequestMissingDuringSerialization);
-            }
-
-            ODataPath path = request.GetODataPath();
-
             if (path == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestNotODataPath, request.RequestUri);
+                throw new SerializationException(SRResources.ODataPathMissing);
             }
 
             Contract.Assert(path.Segments != null);

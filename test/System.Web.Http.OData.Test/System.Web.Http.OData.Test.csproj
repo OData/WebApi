@@ -133,6 +133,7 @@
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
     <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
+    <Compile Include="OData\Routing\ODataPathTest.cs" />
     <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />
     <Compile Include="OData\Formatter\ODataMetadataLevelHelperTest.cs" />

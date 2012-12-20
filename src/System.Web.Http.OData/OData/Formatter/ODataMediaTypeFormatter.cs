@@ -250,7 +250,16 @@ namespace System.Web.Http.OData.Formatter
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, _deserializerProvider.EdmModel);
-                        ODataDeserializerContext readContext = new ODataDeserializerContext { IsPatchMode = isPatchMode, Request = _request, Model = _model };
+
+                        ODataPath path = _request == null ? null : _request.GetODataPath();
+
+                        ODataDeserializerContext readContext = new ODataDeserializerContext
+                        {
+                            IsPatchMode = isPatchMode,
+                            Path = path,
+                            Model = _model
+                        };
+
                         if (isPatchMode)
                         {
                             readContext.PatchEntityType = originalType;
@@ -365,8 +374,10 @@ namespace System.Web.Http.OData.Formatter
                         PathHandler = pathHandler,
                         RootElementName = GetRootElementName(path) ?? ElementNameDefault,
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
-                        Request = _request,
-                        MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType)
+                        Path = path,
+                        MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
+                        NextPageLink = _request.GetNextPageLink(),
+                        InlineCount = _request.GetInlineCount()
                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);

@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-         private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             IEnumerable enumerable = graph as IEnumerable; // Data to serialize
             if (enumerable != null)
@@ -130,16 +130,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
                 else
                 {
-                    HttpRequestMessage request = writeContext.Request;
-                    if (request != null)
-                    {
-                        nextPageLink = request.GetNextPageLink();
+                    nextPageLink = writeContext.NextPageLink;
 
-                        long? inlineCount = request.GetInlineCount();
-                        if (inlineCount.HasValue)
-                        {
-                            feed.Count = inlineCount.Value;
-                        }
+                    long? inlineCount = writeContext.InlineCount;
+                    if (inlineCount.HasValue)
+                    {
+                        feed.Count = inlineCount.Value;
                     }
                 }
 

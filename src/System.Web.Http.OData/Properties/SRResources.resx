@@ -384,9 +384,6 @@
   <data name="ActionResolutionFailed" xml:space="preserve">
     <value>Action resolution failed. Multiple actions matching the action identifier '{0}' were found. The matching actions are: {1}.</value>
   </data>
-  <data name="DeserializerContextRequirementsNotSatisfied" xml:space="preserve">
-    <value>The ODataDeserializerContext must have a non null Request and RequestUri.</value>
-  </data>
   <data name="NoODataMediaTypeFormatterFound" xml:space="preserve">
     <value>The ODataParameterBindingAttribute requires that an ODataMediaTypeFormatter be registered with the HttpConfiguration.</value>
   </data>
@@ -470,9 +467,6 @@
   </data>
   <data name="RequestNotActionInvocation" xml:space="preserve">
     <value>The last segment of the request URI '{0}' was not recognized as an OData action.</value>
-  </data>
-  <data name="RequestNotODataPath" xml:space="preserve">
-    <value>The request URI '{0}' was not recognized as an OData path.</value>
   </data>
   <data name="NoMatchingResource" xml:space="preserve">
     <value>No HTTP resource was found that matches the request URI '{0}'.</value>
@@ -565,9 +559,6 @@
   <data name="NavigationPropertyMissingDuringSerialization" xml:space="preserve">
     <value>The related navigation property could not be found. The related navigation property is required to serialize the payload.</value>
   </data>
-  <data name="RequestMissingDuringSerialization" xml:space="preserve">
-    <value>The request could not be found. The request is required to serialize the payload.</value>
-  </data>
   <data name="UnsupportedPrimitiveType" xml:space="preserve">
     <value>The type '{0}' is not a supported primitive type.</value>
   </data>
@@ -576,5 +567,8 @@
   </data>
   <data name="InvalidInlineCount" xml:space="preserve">
     <value>'{0}' is not a valid value for $inlinecount.</value>
+  </data>
+  <data name="ODataPathMissing" xml:space="preserve">
+    <value>The operation cannot be completed because no ODataPath is available for the request.</value>
   </data>
 </root>

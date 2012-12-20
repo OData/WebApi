@@ -140,8 +140,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var mockWriter = new Mock<ODataWriter>();
 
             Uri expectedNextLink = new Uri("http://nextlink.com");
-            _writeContext.Request = new HttpRequestMessage();
-            _writeContext.Request.Properties.Add("MS_NextPageLink", expectedNextLink);
+            _writeContext.NextPageLink = expectedNextLink;
 
             mockSerializerProvider
                 .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
@@ -169,8 +168,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             var mockWriter = new Mock<ODataWriter>();
 
             long expectedCount = 12345;
-            _writeContext.Request = new HttpRequestMessage();
-            _writeContext.Request.Properties.Add("MS_InlineCount", expectedCount);
+            _writeContext.InlineCount = expectedCount;
 
             mockSerializerProvider
                 .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))

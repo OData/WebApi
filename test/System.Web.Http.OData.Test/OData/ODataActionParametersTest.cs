@@ -19,21 +19,18 @@ namespace System.Web.Http.OData
         private IEdmModel _model;
 
         [Theory]
-        [InlineData("Drive", "http://server/Vehicles(6)/Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/Container.Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/org.odata.Container.Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles(6)/Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles(6)/Container.Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles(6)/org.odata.Container.Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Container.Drive")]
-        [InlineData("Drive", "http://server/Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Container.Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(6)/Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(6)/Container.Drive")]
-        [InlineData("Drive", "http://server/service/Vehicles/System.Web.Http.OData.Builder.TestModels.Car(6)/org.odata.Container.Drive")]
+        [InlineData("Drive", "Vehicles(6)/Drive")]
+        [InlineData("Drive", "Vehicles(6)/Container.Drive")]
+        [InlineData("Drive", "Vehicles(6)/org.odata.Container.Drive")]
+        [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/Container.Drive")]
+        [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Container.Drive")]
         public void Can_find_action(string actionName, string url)
         {
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(url), Model = GetModel() };
+            IEdmModel model = GetModel();
+            ODataPath path = new DefaultODataPathHandler(model).Parse(url);
+            Assert.NotNull(path); // Guard
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
@@ -42,8 +39,11 @@ namespace System.Web.Http.OData
         [Fact]
         public void Can_find_action_overload_using_bindingparameter_type()
         {
-            string url = "http://server/service/Vehicles(8)/System.Web.Http.OData.Builder.TestModels.Car/Wash";
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest(url), Model = GetModel() };
+            IEdmModel model = GetModel();
+            string url = "Vehicles(8)/System.Web.Http.OData.Builder.TestModels.Car/Wash";
+            ODataPath path = new DefaultODataPathHandler(model).Parse(url);
+            Assert.NotNull(path); // Guard
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
 
             IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
 
@@ -55,11 +55,11 @@ namespace System.Web.Http.OData
         [Fact]
         public void Throws_InvalidOperation_when_action_not_found()
         {
-            ODataDeserializerContext context = new ODataDeserializerContext { Request = GetPostRequest("http://server/service/MissingOperation"), Model = GetModel() };
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = null };
             Assert.Throws<InvalidOperationException>(() =>
             {
                 IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
-            }, "The request URI 'http://server/service/MissingOperation' was not recognized as an OData path.");
+            }, "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
         [Fact]
@@ -89,32 +89,6 @@ namespace System.Web.Http.OData
                 _model = builder.GetEdmModel();
             }
             return _model;
-        }
-
-        private HttpRequestMessage GetPostRequest(string url)
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-            HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
-            request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(GetModel()).Parse(GetODataPath(url));
-            return request;
-        }
-
-        private static string GetODataPath(string url)
-        {
-            string serverServiceBaseUri = "http://server/service/";
-            string serverBaseUri = "http://server/";
-            if (url.StartsWith(serverServiceBaseUri))
-            {
-                return url.Substring(serverServiceBaseUri.Length);
-            }
-
-            if (url.StartsWith(serverBaseUri))
-            {
-                return url.Substring(serverBaseUri.Length);
-            }
-
-            return null;
         }
     }
 }

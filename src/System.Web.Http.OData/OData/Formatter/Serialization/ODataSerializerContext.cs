@@ -30,16 +30,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public IEdmEntitySet EntitySet { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="ODataPath"/> of the request.
+        /// </summary>
+        public ODataPath Path { get; set; }
+
+        /// <summary>
         /// Gets or sets the root element name which is used when writing primitive types
         /// and complex types.
         /// </summary>
         public string RootElementName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the HttpRequestMessage. 
-        /// The HttpRequestMessage can then be used by ODataSerializers to learn more about the Request that triggered the serialization
-        /// </summary>
-        public HttpRequestMessage Request { get; set; }
 
         /// <summary>
         /// Get or sets whether expensive links should be calculated.
@@ -61,5 +60,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 _metadataLevel = value;
             }
         }
+
+        /// <summary>
+        /// The next page link, if any, to use when serializing a feed.
+        /// </summary>
+        public Uri NextPageLink { get; set; }
+
+        /// <summary>
+        /// The inline count, if any, to use when serializing a feed.
+        /// </summary>
+        public long? InlineCount { get; set; }
     }
 }

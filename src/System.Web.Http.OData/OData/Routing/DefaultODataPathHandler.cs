@@ -461,31 +461,7 @@ namespace System.Web.Http.OData.Routing
         /// </returns>
         public virtual string Link(ODataPath path)
         {
-            bool firstSegment = true;
-            StringBuilder pathBuilder = new StringBuilder();
-            foreach (ODataPathSegment segment in path.Segments)
-            {
-                KeyValuePathSegment keyValueSegment = segment as KeyValuePathSegment;
-                if (keyValueSegment == null)
-                {
-                    if (firstSegment)
-                    {
-                        firstSegment = false;
-                    }
-                    else
-                    {
-                        pathBuilder.Append('/');
-                    }
-                    pathBuilder.Append(segment);
-                }
-                else
-                {
-                    pathBuilder.Append('(');
-                    pathBuilder.Append(keyValueSegment);
-                    pathBuilder.Append(')');
-                }
-            }
-            return pathBuilder.ToString();
-        }
+            return path.ToString();
+       }
     }
 }

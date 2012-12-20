@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using Microsoft.Data.Edm;
@@ -101,6 +102,49 @@ namespace System.Web.Http.OData.Routing
             {
                 return _segments;
             }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            Contract.Assert(_segments != null);
+
+            bool first = true;
+
+            foreach (ODataPathSegment segment in _segments)
+            {
+                if (segment == null)
+                {
+                    continue;
+                }
+
+                bool isKeyValueSegment = segment is KeyValuePathSegment;
+
+                if (!first)
+                {
+                    if (!isKeyValueSegment)
+                    {
+                        builder.Append('/');
+                    }
+                }
+                else
+                {
+                    first = false;
+                }
+
+                if (isKeyValueSegment)
+                {
+                    builder.Append('(');
+                    builder.Append(segment.ToString());
+                    builder.Append(')');
+                }
+                else
+                {
+                    builder.Append(segment.ToString());
+                }
+            }
+
+            return builder.ToString();
         }
     }
 }

@@ -30,21 +30,17 @@ namespace System.Web.Http.OData
             {
                 throw Error.ArgumentNull("context");
             }
-            if (context.Request == null || context.Request.RequestUri == null)
-            {
-                throw Error.InvalidOperation(SRResources.DeserializerContextRequirementsNotSatisfied);
-            }
 
-            ODataPath path = context.Request.GetODataPath();
+            ODataPath path = context.Path;
             if (path == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestNotODataPath, context.Request.RequestUri);
+                throw Error.InvalidOperation(SRResources.ODataPathMissing);
             }
 
             ActionPathSegment lastSegment = path.Segments.Last() as ActionPathSegment;
             if (lastSegment == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, context.Request.RequestUri);
+                throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, path.ToString());
             }
             return lastSegment.Action;
         }

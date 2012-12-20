@@ -19,6 +19,6 @@ Imports System.Runtime.InteropServices
 ' Version numbers are automatically generated based on regular expressions.
 ' ===========================================================================
 
-<Assembly: AssemblyVersion("0.2.0.0")>  'ASPNETMVCEXTENSIONS
-<Assembly: AssemblyFileVersion("0.2.0.0")>  'ASPNETMVCEXTENSIONS
+<Assembly: AssemblyVersion("4.0.0.0")>  'ASPNETMVCEXTENSIONS
+<Assembly: AssemblyFileVersion("4.0.0.0")>  'ASPNETMVCEXTENSIONS
 <Assembly: AssemblyProduct("Microsoft ASP.NET MVC")> 

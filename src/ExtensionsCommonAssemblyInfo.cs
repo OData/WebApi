@@ -19,6 +19,6 @@ using System.Runtime.InteropServices;
 //  Version numbers are automatically generated based on regular expressions.
 // ===========================================================================
 
-[assembly: AssemblyVersion("0.3.0.0")] // ASPNETMVCEXTENSIONS
-[assembly: AssemblyFileVersion("0.3.0.0")] // ASPNETMVCEXTENSIONS
+[assembly: AssemblyVersion("4.0.0.0")] // ASPNETMVCEXTENSIONS
+[assembly: AssemblyFileVersion("4.0.0.0")] // ASPNETMVCEXTENSIONS
 [assembly: AssemblyProduct("Microsoft ASP.NET MVC")]

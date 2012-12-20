@@ -280,8 +280,8 @@
     <EmbeddedResource Include="BaselineResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
-      <LastGenOutput>BaselineResource.Designer.cs</LastGenOutput>
       <CustomToolNamespace>System.Web.Http.OData</CustomToolNamespace>
+      <LastGenOutput>BaselineResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

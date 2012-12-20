@@ -19,14 +19,28 @@ namespace System.Web.Http.OData.Formatter.Serialization
             _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
                 new ODataPayloadKind[] { ODataPayloadKind.Property }, GetSampleRequest());
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
         }
 
         [Fact]
-        public void ComplexTypeSerializesAsOData()
+        public void ComplexTypeSerializesAsODataForJsonLight()
         {
-            ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)), _formatter);
+            ComplexTypeSerializesAsOData(BaselineResource.PersonComplexTypeInJsonLight, true);
+        }
 
-            JsonAssert.Equal(BaselineResource.PersonComplexTypeInJsonLight, content.ReadAsStringAsync().Result);
+        [Fact]
+        public void ComplexTypeSerializesAsODataForAtom()
+        {
+            ComplexTypeSerializesAsOData(BaselineResource.PersonComplexTypeInAtom, false);
+        }
+
+        private void ComplexTypeSerializesAsOData(string expectedContent, bool json)
+        {
+            ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)),
+                _formatter, CollectionTest.GetMediaType(json));
+
+
+            CollectionTest.AssertEqual(json, expectedContent, content.ReadAsStringAsync().Result);
         }
 
         private static HttpRequestMessage GetSampleRequest()

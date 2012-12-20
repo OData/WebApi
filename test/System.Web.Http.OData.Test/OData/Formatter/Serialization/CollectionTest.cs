@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
@@ -22,29 +23,62 @@ namespace System.Web.Http.OData.Formatter.Serialization
             _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
                 new ODataPayloadKind[] { ODataPayloadKind.Collection }, GetSampleRequest());
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
         }
 
-        /// <summary>
-        /// Arrays the of ints serializes as O data.
-        /// </summary>
         [Fact]
-        public void ArrayOfIntsSerializesAsOData()
+        public void ArrayOfIntsSerializesAsODataForJsonLight()
         {
-            ObjectContent<int[]> content = new ObjectContent<int[]>(new int[] { 10, 20, 30, 40, 50 }, _formatter);
-
-            JsonAssert.Equal(BaselineResource.ArrayOfInt32InJsonLight, content.ReadAsStringAsync().Result);
+            ArrayOfIntsSerializesAsOData(BaselineResource.ArrayOfInt32InJsonLight, true);
         }
 
         [Fact]
-        public void ArrayOfBoolsSerializesAsOData()
+        public void ArrayOfIntsSerializesAsODataForAtom()
         {
-            ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false }, _formatter);
+            ArrayOfIntsSerializesAsOData(BaselineResource.ArrayOfInt32InAtom, false);
+        }
 
-            JsonAssert.Equal(BaselineResource.ArrayOfBooleanInJsonLight, content.ReadAsStringAsync().Result);
+        private void ArrayOfIntsSerializesAsOData(string expectedContent, bool json)
+        {
+            ObjectContent<int[]> content = new ObjectContent<int[]>(new int[] { 10, 20, 30, 40, 50 }, _formatter,
+                GetMediaType(json));
+
+            AssertEqual(json, expectedContent, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
-        public void ListOfStringsSerializesAsOData()
+        public void ArrayOfBoolsSerializesAsODataForJsonLight()
+        {
+            ArrayOfBoolsSerializesAsOData(BaselineResource.ArrayOfBooleanInJsonLight, true);
+        }
+
+        [Fact]
+        public void ArrayOfBoolsSerializesAsODataForAtom()
+        {
+            ArrayOfBoolsSerializesAsOData(BaselineResource.ArrayOfBooleanInAtom, false);
+        }
+
+        private void ArrayOfBoolsSerializesAsOData(string expectedContet, bool json)
+        {
+            ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false },
+                _formatter, GetMediaType(json));
+
+            AssertEqual(json, expectedContet, content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ListOfStringsSerializesAsODataForJsonLight()
+        {
+            ListOfStringsSerializesAsOData(BaselineResource.ListOfStringInJsonLight, true);
+        }
+
+        [Fact]
+        public void ListOfStringsSerializesAsODataForAtom()
+        {
+            ListOfStringsSerializesAsOData(BaselineResource.ListOfStringInAtom, false);
+        }
+
+        private void ListOfStringsSerializesAsOData(string expectedContent, bool json)
         {
             List<string> listOfStrings = new List<string>();
             listOfStrings.Add("Frank");
@@ -52,13 +86,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
             listOfStrings.Add("Tom");
             listOfStrings.Add("Chandler");
 
-            ObjectContent<List<string>> content = new ObjectContent<List<string>>(listOfStrings, _formatter);
+            ObjectContent<List<string>> content = new ObjectContent<List<string>>(listOfStrings, _formatter,
+                GetMediaType(json));
 
-            JsonAssert.Equal(BaselineResource.ListOfStringInJsonLight, content.ReadAsStringAsync().Result);
+            AssertEqual(json, expectedContent, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
-        public void CollectionOfComplexTypeSerializesAsOData()
+        public void CollectionOfComplexTypeSerializesAsODataForJsonLight()
+        {
+            CollectionOfComplexTypeSerializesAsOData(BaselineResource.CollectionOfPersonInJsonLight, true);
+        }
+
+        [Fact]
+        public void CollectionOfComplexTypeSerializesAsODataForAtom()
+        {
+            CollectionOfComplexTypeSerializesAsOData(BaselineResource.CollectionOfPersonInAtom, false);
+        }
+
+        private void CollectionOfComplexTypeSerializesAsOData(string expectedContent, bool json)
         {
             IEnumerable<Person> collectionOfPerson = new Collection<Person>() 
             {
@@ -67,9 +113,27 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 (Person)TypeInitializer.GetInstance(SupportedTypes.Person, 2)
             };
 
-            ObjectContent<IEnumerable<Person>> content = new ObjectContent<IEnumerable<Person>>(collectionOfPerson, _formatter);
+            ObjectContent<IEnumerable<Person>> content = new ObjectContent<IEnumerable<Person>>(collectionOfPerson,
+                _formatter, GetMediaType(json));
 
-            JsonAssert.Equal(BaselineResource.CollectionOfPersonInJsonLight, content.ReadAsStringAsync().Result);
+            AssertEqual(json, expectedContent, content.ReadAsStringAsync().Result);
+        }
+
+        internal static void AssertEqual(bool json, string expected, string actual)
+        {
+            if (json)
+            {
+                JsonAssert.Equal(expected, actual);
+            }
+            else
+            {
+                Assert.Xml.Equal(expected, actual);
+            }
+        }
+
+        internal static MediaTypeHeaderValue GetMediaType(bool json)
+        {
+            return json ? ODataMediaTypes.ApplicationJsonODataMinimalMetadata : ODataMediaTypes.ApplicationXml;
         }
 
         private static HttpRequestMessage GetSampleRequest()

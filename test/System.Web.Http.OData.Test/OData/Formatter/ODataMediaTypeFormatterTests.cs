@@ -27,7 +27,18 @@ namespace System.Web.Http.OData.Formatter
     public class ODataMediaTypeFormatterTests : MediaTypeFormatterTestBase<ODataMediaTypeFormatter>
     {
         [Fact]
-        public void WriteToStreamAsyncReturnsODataRepresentation()
+        public void WriteToStreamAsyncReturnsODataRepresentationForJsonLight()
+        {
+            WriteToStreamAsyncReturnsODataRepresentation(BaselineResource.WorkItemEntryInJsonLight, true);
+        }
+
+        [Fact]
+        public void WriteToStreamAsyncReturnsODataRepresentationForAtom()
+        {
+            WriteToStreamAsyncReturnsODataRepresentation(BaselineResource.WorkItemEntryInAtom, false);
+        }
+
+        private static void WriteToStreamAsyncReturnsODataRepresentation(string expectedContent, bool json)
         {
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
@@ -41,11 +52,32 @@ namespace System.Web.Http.OData.Formatter
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
             request.Properties["MS_ODataPath"] = new DefaultODataPathHandler(model).Parse("WorkItems(10)");
 
-            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
+            ODataMediaTypeFormatter formatter;
 
-            ObjectContent<WorkItem> content = new ObjectContent<WorkItem>((WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
+            if (json)
+            {
+                formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
+            }
+            else
+            {
+                formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+            }
 
-            JsonAssert.Equal(BaselineResource.WorkItemEntryInJsonLight, content.ReadAsStringAsync().Result);
+            ObjectContent<WorkItem> content = new ObjectContent<WorkItem>(
+                (WorkItem)TypeInitializer.GetInstance(SupportedTypes.WorkItem), formatter);
+
+            string actualContent = content.ReadAsStringAsync().Result;
+
+            if (json)
+            {
+                JsonAssert.Equal(expectedContent, actualContent);
+            }
+            else
+            {
+                RegexReplacement replaceUpdateTime = new RegexReplacement(
+                    "<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
+                Assert.Xml.Equal(expectedContent, actualContent, replaceUpdateTime);
+            }
         }
 
         [Theory]
@@ -234,23 +266,23 @@ namespace System.Web.Http.OData.Formatter
             return new MediaTypeHeaderValue("application/atom+xml");
         }
 
-        private ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
+        private static ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
         {
             return new ODataMediaTypeFormatter(model, new ODataPayloadKind[0]);
         }
 
-        public ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request,
+        private static ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request,
             params ODataPayloadKind[] payloadKinds)
         {
             return new ODataMediaTypeFormatter(model, payloadKinds, request);
         }
 
-        public ODataMediaTypeFormatter CreateFormatterWithoutRequest()
+        private static ODataMediaTypeFormatter CreateFormatterWithoutRequest()
         {
             return CreateFormatter(CreateModel());
         }
 
-        public ODataMediaTypeFormatter CreateFormatterWithJson(IEdmModel model, HttpRequestMessage request,
+        private static ODataMediaTypeFormatter CreateFormatterWithJson(IEdmModel model, HttpRequestMessage request,
             params ODataPayloadKind[] payloadKinds)
         {
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
@@ -258,14 +290,14 @@ namespace System.Web.Http.OData.Formatter
             return formatter;
         }
 
-        public ODataMediaTypeFormatter CreateFormatterWithRequest()
+        private static ODataMediaTypeFormatter CreateFormatterWithRequest()
         {
             var model = CreateModel();
             var request = CreateFakeODataRequest(model);
             return CreateFormatter(model, request);
         }
 
-        public HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
+        private static HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             HttpConfiguration configuration = new HttpConfiguration();

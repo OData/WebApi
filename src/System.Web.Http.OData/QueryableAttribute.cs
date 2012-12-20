@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.OData;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 using Microsoft.Data.Edm;
@@ -329,9 +330,9 @@ namespace System.Web.Http
         private IQueryable ExecuteQuery(IEnumerable query, HttpRequestMessage request, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
         {
             Type originalQueryType = query.GetType();
-            Type entityClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
+            Type elementClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
 
-            if (entityClrType == null)
+            if (elementClrType == null)
             {
                 // The element type cannot be determined because the type of the content
                 // is not IEnumerable<T> or IQueryable<T>.
@@ -343,7 +344,7 @@ namespace System.Web.Http
                     originalQueryType.FullName);
             }
 
-            ODataQueryContext queryContext = CreateQueryContext(entityClrType, configuration, actionDescriptor);
+            ODataQueryContext queryContext = CreateQueryContext(elementClrType, configuration, actionDescriptor);
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
             ValidateQuery(request, queryOptions);
 
@@ -365,21 +366,21 @@ namespace System.Web.Http
             return queryOptions.ApplyTo(queryable, querySettings);
         }
 
-        private static ODataQueryContext CreateQueryContext(Type entityClrType, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
+        internal static ODataQueryContext CreateQueryContext(Type elementClrType, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
         {
             // Get model for the entire app
             IEdmModel model = configuration.GetEdmModel();
 
-            if (model == null)
+            if (model == null || model.GetEdmType(elementClrType) == null)
             {
-                // user has not configured anything, now let's create one just for this type
-                // and cache it in the action descriptor
-                model = actionDescriptor.GetEdmModel(entityClrType);
+                // user has not configured anything or has registered a model without the element type
+                // let's create one just for this type and cache it in the action descriptor
+                model = actionDescriptor.GetEdmModel(elementClrType);
                 Contract.Assert(model != null);
             }
 
             // parses the query from request uri
-            return new ODataQueryContext(model, entityClrType);
+            return new ODataQueryContext(model, elementClrType);
         }
 
         /// <summary>

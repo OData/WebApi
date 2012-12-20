@@ -11,6 +11,7 @@ namespace System.Web.Http
     public static class HttpErrorExtensions
     {
         private const string MessageKey = "Message";
+        private const string MessageDetailKey = "MessageDetail";
         private const string MessageLanguageKey = "MessageLanguage";
         private const string ErrorCodeKey = "ErrorCode";
         private const string ExceptionMessageKey = "ExceptionMessage";
@@ -44,7 +45,10 @@ namespace System.Web.Http
             string innerErrorMessage = httpError.GetPropertyValue<string>(ExceptionMessageKey);
             if (innerErrorMessage == null)
             {
-                return null;
+                innerErrorMessage = httpError.GetPropertyValue<string>(MessageDetailKey);
+                return innerErrorMessage == null ?
+                    null :
+                    new ODataInnerError() { Message = innerErrorMessage };
             }
             else
             {

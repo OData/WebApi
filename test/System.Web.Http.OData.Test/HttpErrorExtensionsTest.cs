@@ -46,5 +46,19 @@ namespace System.Web.Http
             Assert.Equal("innerException", oDataError.InnerError.InnerError.Message);
             Assert.Equal("System.ArgumentException", oDataError.InnerError.InnerError.TypeName);
         }
+
+        [Fact]
+        public void ToODataError_CopiesMessageDetailToInnerError()
+        {
+            var error = new HttpError();
+            error["Message"] = "error";
+            error["MessageDetail"] = "messagedetail";
+
+            ODataError oDataError = error.ToODataError();
+
+            Assert.Equal("error", oDataError.Message);
+            Assert.Equal("messagedetail", oDataError.InnerError.Message);
+            Assert.Null(oDataError.InnerError.InnerError);
+        }
     }
 }

@@ -39,7 +39,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
-            Assert.Same(model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Primitive"), payload.GetFunctionImport(context));
+            Assert.Same(
+                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Primitive"),
+                ODataActionPayloadDeserializer.GetFunctionImport(context));
             Assert.True(payload.ContainsKey("Quantity"));
             Assert.Equal(quantity, payload["Quantity"]);
             Assert.True(payload.ContainsKey("ProductCode"));
@@ -63,7 +65,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
-            Assert.Same(model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Complex"), payload.GetFunctionImport(context));
+            Assert.Same(
+                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "Complex"),
+                ODataActionPayloadDeserializer.GetFunctionImport(context));
             Assert.True(payload.ContainsKey("Quantity"));
             Assert.Equal(1, payload["Quantity"]);
             Assert.True(payload.ContainsKey("Address"));
@@ -92,7 +96,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
 
             Assert.NotNull(payload);
-            Assert.Same(model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "PrimitiveCollection"), payload.GetFunctionImport(context));
+            Assert.Same(
+                model.EntityContainers().Single().FunctionImports().SingleOrDefault(f => f.Name == "PrimitiveCollection"),
+                ODataActionPayloadDeserializer.GetFunctionImport(context));
             Assert.True(payload.ContainsKey("Name"));
             Assert.Equal("Avatar", payload["Name"]);
             Assert.True(payload.ContainsKey("Ratings"));

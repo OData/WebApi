@@ -2,13 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Net.Http;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Formatter.Deserialization;
-using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Routing;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData
 {
@@ -21,28 +15,5 @@ namespace System.Web.Http.OData
     [SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable", Justification = "Pending, will remove once class has appropriate base type.")]
     public class ODataActionParameters : Dictionary<string, object>
     {
-        /// <summary>
-        /// Gets the IEdmFunctionImport that describes the payload.
-        /// </summary>
-        public virtual IEdmFunctionImport GetFunctionImport(ODataDeserializerContext context)
-        {
-            if (context == null)
-            {
-                throw Error.ArgumentNull("context");
-            }
-
-            ODataPath path = context.Path;
-            if (path == null)
-            {
-                throw Error.InvalidOperation(SRResources.ODataPathMissing);
-            }
-
-            ActionPathSegment lastSegment = path.Segments.Last() as ActionPathSegment;
-            if (lastSegment == null)
-            {
-                throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, path.ToString());
-            }
-            return lastSegment.Action;
-        }
     }
 }

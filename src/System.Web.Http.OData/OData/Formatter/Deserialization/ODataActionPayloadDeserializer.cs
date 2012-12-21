@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -29,7 +31,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // Create the correct resource type;
             ODataActionParameters payload = CreateNewPayload();
 
-            IEdmFunctionImport action = payload.GetFunctionImport(readContext);
+            IEdmFunctionImport action = GetFunctionImport(readContext);
             ODataParameterReader reader = messageReader.CreateODataParameterReader(action);
 
             while (reader.Read())
@@ -111,6 +113,27 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 }
             }
             return list;
+        }
+
+        internal static IEdmFunctionImport GetFunctionImport(ODataDeserializerContext context)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            ODataPath path = context.Path;
+            if (path == null)
+            {
+                throw Error.InvalidOperation(SRResources.ODataPathMissing);
+            }
+
+            ActionPathSegment lastSegment = path.Segments.Last() as ActionPathSegment;
+            if (lastSegment == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, path.ToString());
+            }
+            return lastSegment.Action;
         }
     }
 }

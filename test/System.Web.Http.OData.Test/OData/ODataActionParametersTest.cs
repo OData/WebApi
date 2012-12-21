@@ -31,7 +31,7 @@ namespace System.Web.Http.OData
             ODataPath path = new DefaultODataPathHandler(model).Parse(url);
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
-            IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
+            IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
         }
@@ -45,7 +45,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(path); // Guard
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
 
-            IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
+            IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
 
             Assert.NotNull(action);
             Assert.Equal("Wash", action.Name);
@@ -53,12 +53,12 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void Throws_InvalidOperation_when_action_not_found()
+        public void Throws_InvalidOperation_WhenPathNotFound()
         {
             ODataDeserializerContext context = new ODataDeserializerContext { Path = null };
             Assert.Throws<InvalidOperationException>(() =>
             {
-                IEdmFunctionImport action = new ODataActionParameters().GetFunctionImport(context);
+                IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
             }, "The operation cannot be completed because no ODataPath is available for the request.");
         }
 

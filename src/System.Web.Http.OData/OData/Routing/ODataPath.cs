@@ -106,10 +106,10 @@ namespace System.Web.Http.OData.Routing
 
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder pathBuilder = new StringBuilder();
             Contract.Assert(_segments != null);
 
-            bool first = true;
+            bool firstSegment = true;
 
             foreach (ODataPathSegment segment in _segments)
             {
@@ -118,33 +118,26 @@ namespace System.Web.Http.OData.Routing
                     continue;
                 }
 
-                bool isKeyValueSegment = segment is KeyValuePathSegment;
-
-                if (!first)
+                if (segment is KeyValuePathSegment)
                 {
-                    if (!isKeyValueSegment)
+                    pathBuilder.Append('(');
+                    pathBuilder.Append(segment.ToString());
+                    pathBuilder.Append(')');
+                }
+                else
+                {
+                    if (!firstSegment)
                     {
-                        builder.Append('/');
+                        pathBuilder.Append('/');
                     }
-                }
-                else
-                {
-                    first = false;
+
+                    pathBuilder.Append(segment.ToString());
                 }
 
-                if (isKeyValueSegment)
-                {
-                    builder.Append('(');
-                    builder.Append(segment.ToString());
-                    builder.Append(')');
-                }
-                else
-                {
-                    builder.Append(segment.ToString());
-                }
+                firstSegment = false;
             }
 
-            return builder.ToString();
+            return pathBuilder.ToString();
         }
     }
 }

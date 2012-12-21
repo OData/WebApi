@@ -100,6 +100,9 @@ namespace System.Web.Http.OData.Query
                     case "$expand":
                         RawValues.Expand = kvp.Value;
                         break;
+                    case "$format":
+                        RawValues.Format = kvp.Value;
+                        break;
                     case "$skiptoken":
                         RawValues.SkipToken = kvp.Value;
                         break;
@@ -153,22 +156,26 @@ namespace System.Web.Http.OData.Query
         public InlineCountQueryOption InlineCount { get; private set; }
 
         /// <summary>
-        /// Gets or sets the Filter Query Validator
+        /// Gets or sets the query validator.
         /// </summary>
         public ODataQueryValidator Validator { get; set; }
 
         /// <summary>
-        /// Check if the given query is supported by the built in ODataQueryOptions.
+        /// Check if the given query option is an OData system query option.
         /// </summary>
-        /// <param name="queryName">The name of the given query parameter.</param>
-        /// <returns>returns true if the query parameter is one of the five that we support out of box.</returns>
-        public static bool IsSupported(string queryName)
+        /// <param name="queryOptionName">The name of the query option.</param>
+        /// <returns>Returns <c>true</c> if the query option is an OData system query option.</returns>
+        public static bool IsSystemQueryOption(string queryOptionName)
         {
-            return (queryName == "$orderby" ||
-                 queryName == "$filter" ||
-                 queryName == "$top" ||
-                 queryName == "$skip" ||
-                 queryName == "$inlinecount");
+            return queryOptionName == "$orderby" ||
+                 queryOptionName == "$filter" ||
+                 queryOptionName == "$top" ||
+                 queryOptionName == "$skip" ||
+                 queryOptionName == "$inlinecount" ||
+                 queryOptionName == "$expand" ||
+                 queryOptionName == "$select" ||
+                 queryOptionName == "$format" ||
+                 queryOptionName == "$skiptoken";
         }
 
         /// <summary>

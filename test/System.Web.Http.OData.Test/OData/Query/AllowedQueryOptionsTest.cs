@@ -12,6 +12,27 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(AllowedQueryOptions.None, AllowedQueryOptions.All & AllowedQueryOptions.None);
         }
 
+        [Theory]
+        [InlineData(AllowedQueryOptions.Filter)]
+        [InlineData(AllowedQueryOptions.OrderBy)]
+        [InlineData(AllowedQueryOptions.Skip)]
+        [InlineData(AllowedQueryOptions.Top)]
+        [InlineData(AllowedQueryOptions.InlineCount)]
+        public void Supported_Contains_SupportedQueryOptions(AllowedQueryOptions queryOption)
+        {
+            Assert.Equal(queryOption, AllowedQueryOptions.Supported & queryOption);
+        }
+
+        [Theory]
+        [InlineData(AllowedQueryOptions.Select)]
+        [InlineData(AllowedQueryOptions.Expand)]
+        [InlineData(AllowedQueryOptions.Format)]
+        [InlineData(AllowedQueryOptions.SkipToken)]
+        public void Supported_DoesNotContain_UnsupportedQueryOptions(AllowedQueryOptions queryOption)
+        {
+            Assert.Equal(AllowedQueryOptions.None, AllowedQueryOptions.Supported & queryOption);
+        }
+
         [Fact]
         public void All_Contains_AllQueryOptions()
         {

@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Query
             _allowedArithmeticOperators = AllowedArithmeticOperators.All;
             _allowedFunctions = AllowedFunctions.AllFunctions;
             _allowedLogicalOperators = AllowedLogicalOperators.All;
-            _allowedQueryParameters = AllowedQueryOptions.All;
+            _allowedQueryParameters = AllowedQueryOptions.Supported;
             _allowedOrderByProperties = new Collection<string>();
         }
 

@@ -40,6 +40,11 @@ namespace System.Web.Http.OData.Query
         public string InlineCount { get; internal set; }
 
         /// <summary>
+        ///  Gets the raw $format query value from the incoming request Uri if exists.
+        /// </summary>
+        public string Format { get; internal set; }
+
+        /// <summary>
         ///  Gets the raw $skiptoken query value from the incoming request Uri if exists.
         /// </summary>
         public string SkipToken { get; internal set; }

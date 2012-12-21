@@ -43,16 +43,9 @@ namespace System.Web.Http.OData
             }
         }
 
-        // Move items to this list from UnsupportedQueryNames as they become supported
-        public static TheoryDataSet<string> SupportedQueryNames
+        public static TheoryDataSet<string> SystemQueryOptionNames
         {
-            get { return ODataQueryOptionTest.SupportedQueryNames; }
-        }
-
-        // Move items from this list to SupportedQueryNames as they become supported
-        public static TheoryDataSet<string> UnsupportedQueryNames
-        {
-            get { return ODataQueryOptionTest.UnsupportedQueryNames; }
+            get { return ODataQueryOptionTest.SystemQueryOptionNames; }
         }
 
         [Fact]
@@ -200,7 +193,7 @@ namespace System.Web.Http.OData
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$select");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$custom");
             HttpConfiguration config = new HttpConfiguration();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -391,23 +384,6 @@ namespace System.Web.Http.OData
 
             // Act & Assert
             attribute.ValidateQuery(request, options);
-        }
-
-        [Theory]
-        [PropertyData("UnsupportedQueryNames")]
-        public void ValidateQuery_Sends_BadRequest_For_Unsupported_QueryNames(string queryName)
-        {
-            // Arrange
-            QueryableAttribute attribute = new QueryableAttribute();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + queryName);
-            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer), "Customers"), request);
-
-            // Act & Assert
-            HttpResponseException responseException = Assert.Throws<HttpResponseException>(
-                                                                () => attribute.ValidateQuery(request, options));
-
-            Assert.Equal(HttpStatusCode.BadRequest, responseException.Response.StatusCode);
         }
 
         [Fact]

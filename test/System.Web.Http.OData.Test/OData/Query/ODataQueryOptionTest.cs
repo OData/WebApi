@@ -48,8 +48,7 @@ namespace System.Web.Http.OData.Query
             }
         }
 
-        // Move items to this list from UnsupportedQueryNames as they become supported
-        public static TheoryDataSet<string> SupportedQueryNames
+        public static TheoryDataSet<string> SystemQueryOptionNames
         {
             get
             {
@@ -59,7 +58,11 @@ namespace System.Web.Http.OData.Query
                     "$filter",
                     "$top",
                     "$skip",
-                    "$inlinecount"
+                    "$inlinecount",
+                    "$expand",
+                    "$select",
+                    "$format",
+                    "$skiptoken"
                 };
             }
         }
@@ -145,20 +148,6 @@ namespace System.Web.Http.OData.Query
                     // All properties present, extraneous whitespace, non-alphabetic order, no modification
                     { "$orderby= \t Name \t , \t SharePrice \t , \t CustomerId \t , \t Website \t , \t ShareSymbol \t &$skip=1", true,  "OrderBy(p1 => p1.Name).ThenBy(p1 => p1.SharePrice).ThenBy(p1 => p1.CustomerId).ThenBy(p1 => p1.Website).ThenBy(p1 => p1.ShareSymbol).Skip(1)" },
 
-                };
-            }
-        }
-
-        // Move items from this list to SupportedQueryNames as they become supported
-        public static TheoryDataSet<string> UnsupportedQueryNames
-        {
-            get
-            {
-                return new TheoryDataSet<string>
-                {
-                    "$select",
-                    "$expand",
-                    "$skiptoken"
                 };
             }
         }
@@ -631,26 +620,18 @@ namespace System.Web.Http.OData.Query
         }
 
         [Theory]
-        [PropertyData("SupportedQueryNames")]
-        public void IsSupported_Returns_True_For_All_Supported_Query_Names(string queryName)
+        [PropertyData("SystemQueryOptionNames")]
+        public void IsSystemQueryOption_Returns_True_For_All_Supported_Query_Names(string queryName)
         {
             // Arrange & Act & Assert
-            Assert.True(ODataQueryOptions.IsSupported(queryName));
-        }
-
-        [Theory]
-        [PropertyData("UnsupportedQueryNames")]
-        public void IsSupported_Returns_False_For_All_Unsupported_Query_Names(string queryName)
-        {
-            // Arrange & Act & Assert
-            Assert.False(ODataQueryOptions.IsSupported(queryName));
+            Assert.True(ODataQueryOptions.IsSystemQueryOption(queryName));
         }
 
         [Fact]
-        public void IsSupported_Returns_False_For_Unrecognized_Query_Name()
+        public void IsSystemQueryOption_Returns_False_For_Unrecognized_Query_Name()
         {
             // Arrange & Act & Assert
-            Assert.False(ODataQueryOptions.IsSupported("$invalidqueryname"));
+            Assert.False(ODataQueryOptions.IsSystemQueryOption("$invalidqueryname"));
         }
 
         [Theory]

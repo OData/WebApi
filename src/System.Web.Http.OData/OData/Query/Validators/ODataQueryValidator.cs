@@ -36,42 +36,59 @@ namespace System.Web.Http.OData.Query.Validators
             // Validate each query options
             if (options.Skip != null)
             {
-                if ((validationSettings.AllowedQueryOptions & AllowedQueryOptions.Skip) == AllowedQueryOptions.None)
-                {
-                    throw new ODataException(Error.Format(SRResources.NotAllowedQueryOption, AllowedQueryOptions.Skip, "AllowedQueryOptions"));
-                }
-
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Skip, validationSettings.AllowedQueryOptions);
                 options.Skip.Validate(validationSettings);
             }
 
             if (options.Top != null)
             {
-                if ((validationSettings.AllowedQueryOptions & AllowedQueryOptions.Top) == AllowedQueryOptions.None)
-                {
-                    throw new ODataException(Error.Format(SRResources.NotAllowedQueryOption, AllowedQueryOptions.Top, "AllowedQueryOptions"));
-                }
-
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Top, validationSettings.AllowedQueryOptions);
                 options.Top.Validate(validationSettings);
             }
 
             if (options.OrderBy != null)
             {
-                if ((validationSettings.AllowedQueryOptions & AllowedQueryOptions.OrderBy) == AllowedQueryOptions.None)
-                {
-                    throw new ODataException(Error.Format(SRResources.NotAllowedQueryOption, AllowedQueryOptions.OrderBy, "AllowedQueryOptions"));
-                }
-
+                ValidateQueryOptionAllowed(AllowedQueryOptions.OrderBy, validationSettings.AllowedQueryOptions);
                 options.OrderBy.Validate(validationSettings);
             }
 
             if (options.Filter != null)
             {
-                if ((validationSettings.AllowedQueryOptions & AllowedQueryOptions.Filter) == AllowedQueryOptions.None)
-                {
-                    throw new ODataException(Error.Format(SRResources.NotAllowedQueryOption, AllowedQueryOptions.Filter, "AllowedQueryOptions"));
-                }
-
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Filter, validationSettings.AllowedQueryOptions);
                 options.Filter.Validate(validationSettings);
+            }
+
+            if (options.InlineCount != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.InlineCount, validationSettings.AllowedQueryOptions);
+            }
+
+            if (options.RawValues.Expand != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Expand, validationSettings.AllowedQueryOptions);
+            }
+
+            if (options.RawValues.Select != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Select, validationSettings.AllowedQueryOptions);
+            }
+
+            if (options.RawValues.Format != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Format, validationSettings.AllowedQueryOptions);
+            }
+
+            if (options.RawValues.SkipToken != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.SkipToken, validationSettings.AllowedQueryOptions);
+            }
+        }
+
+        private static void ValidateQueryOptionAllowed(AllowedQueryOptions queryOption, AllowedQueryOptions allowed)
+        {
+            if ((queryOption & allowed) == AllowedQueryOptions.None)
+            {
+                throw new ODataException(Error.Format(SRResources.NotAllowedQueryOption, queryOption, "AllowedQueryOptions"));
             }
         }
     }

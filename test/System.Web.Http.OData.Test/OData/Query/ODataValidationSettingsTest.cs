@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(AllowedFunctions.AllFunctions, querySettings.AllowedFunctions);
             Assert.Equal(AllowedLogicalOperators.All, querySettings.AllowedLogicalOperators);
             Assert.Equal(0, querySettings.AllowedOrderByProperties.Count);
-            Assert.Equal(AllowedQueryOptions.All, querySettings.AllowedQueryOptions);
+            Assert.Equal(AllowedQueryOptions.Supported, querySettings.AllowedQueryOptions);
             Assert.Null(querySettings.MaxSkip);
             Assert.Null(querySettings.MaxTop);
         }
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Query
             Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedQueryOptions>(
                 new ODataValidationSettings(),
                 o => o.AllowedQueryOptions,
-                expectedDefaultValue: AllowedQueryOptions.All,
+                expectedDefaultValue: AllowedQueryOptions.Supported,
                 illegalValue: AllowedQueryOptions.All + 1,
                 roundTripTestValue: AllowedQueryOptions.Filter);
         }

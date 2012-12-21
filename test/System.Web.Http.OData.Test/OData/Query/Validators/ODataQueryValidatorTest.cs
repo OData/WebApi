@@ -33,37 +33,58 @@ namespace System.Web.Http.OData.Query.Validators
                 _validator.Validate(new ODataQueryOptions(_context, new HttpRequestMessage()), null));
         }
 
-        [Fact]
-        public void ValidateDisallowFilter()
+        [Theory]
+        [InlineData("filter", "Name eq 'abc'", AllowedQueryOptions.Filter)]
+        [InlineData("orderby", "Name", AllowedQueryOptions.OrderBy)]
+        [InlineData("skip", "5", AllowedQueryOptions.Skip)]
+        [InlineData("top", "5", AllowedQueryOptions.Top)]
+        [InlineData("inlinecount", "none", AllowedQueryOptions.InlineCount)]
+        [InlineData("select", "Name", AllowedQueryOptions.Select)]
+        [InlineData("expand", "Contacts", AllowedQueryOptions.Expand)]
+        [InlineData("format", "json", AllowedQueryOptions.Format)]
+        [InlineData("skiptoken", "token", AllowedQueryOptions.SkipToken)]
+        public void Validate_Throws_ForDisallowedQueryOptions(string queryOptionName, string queryValue, AllowedQueryOptions queryOption)
         {
             // Arrange
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://localhost/?$filter=Name eq 'abc'")
+                new Uri("http://localhost/?$" + queryOptionName + "=" + queryValue)
             );
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
-                AllowedQueryOptions = AllowedQueryOptions.OrderBy
+                AllowedQueryOptions = AllowedQueryOptions.All & ~queryOption
             };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings),
-                "Query option 'Filter' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.");
+            var exception = Assert.Throws<ODataException>(() => _validator.Validate(option, settings));
+            Assert.Equal(
+                "Query option '" + queryOptionName + "' is not allowed. To allow it, set the 'AllowedQueryOptions' property on QueryableAttribute or QueryValidationSettings.",
+                exception.Message,
+                StringComparer.OrdinalIgnoreCase);
         }
 
-        [Fact]
-        public void ValidateAllowOrderBy()
+        [Theory]
+        [InlineData("filter", "Name eq 'abc'", AllowedQueryOptions.Filter)]
+        [InlineData("orderby", "Name", AllowedQueryOptions.OrderBy)]
+        [InlineData("skip", "5", AllowedQueryOptions.Skip)]
+        [InlineData("top", "5", AllowedQueryOptions.Top)]
+        [InlineData("inlinecount", "none", AllowedQueryOptions.InlineCount)]
+        [InlineData("select", "Name", AllowedQueryOptions.Select)]
+        [InlineData("expand", "Contacts", AllowedQueryOptions.Expand)]
+        [InlineData("format", "json", AllowedQueryOptions.Format)]
+        [InlineData("skiptoken", "token", AllowedQueryOptions.SkipToken)]
+        public void Validate_DoesNotThrow_ForAllowedQueryOptions(string queryOptionName, string queryValue, AllowedQueryOptions queryOption)
         {
             // Arrange
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://localhost/?$orderby=Name")
+                new Uri("http://localhost/?$" + queryOptionName + "=" + queryValue)
             );
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
-                AllowedQueryOptions = AllowedQueryOptions.OrderBy
+                AllowedQueryOptions = queryOption
             };
 
             // Act & Assert

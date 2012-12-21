@@ -415,10 +415,10 @@ namespace System.Web.Http
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                if (!ODataQueryOptions.IsSupported(kvp.Key) &&
+                if (!ODataQueryOptions.IsSystemQueryOption(kvp.Key) &&
                      kvp.Key.StartsWith("$", StringComparison.Ordinal))
                 {
-                    // we don't allow any query parameters that starts with $ but we don't understand
+                    // we don't support any custom query options that start with $
                     throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.BadRequest,
                         Error.Format(SRResources.QueryParameterNotSupported, kvp.Key)));
                 }

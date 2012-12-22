@@ -150,7 +150,7 @@ namespace System.Web.Http.OData.Query
                     }
                     propertiesSoFar.Add(property);
 
-                    querySoFar = ExpressionHelpers.OrderBy(querySoFar, property, direction, Context.ElementClrType, alreadyOrdered);
+                    querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, property, direction, Context.ElementClrType, alreadyOrdered);
                     alreadyOrdered = true;
                 }
                 else

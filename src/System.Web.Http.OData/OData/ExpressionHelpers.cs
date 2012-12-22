@@ -40,26 +40,19 @@ namespace System.Web.Http.OData
 
         public static IQueryable<TEntityType> OrderBy<TEntityType>(IQueryable<TEntityType> query, IEdmProperty property, OrderByDirection direction, bool alreadyOrdered = false)
         {
-            return OrderBy(query, property, direction, typeof(TEntityType), alreadyOrdered) as IQueryable<TEntityType>;
+            return OrderByProperty(query, property, direction, typeof(TEntityType), alreadyOrdered) as IQueryable<TEntityType>;
         }
 
         public static IQueryable OrderByIt(IQueryable query, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
-            LambdaExpression orderByLambda;
-
             ParameterExpression odataItParameter = Expression.Parameter(type, "$it");
-            orderByLambda = Expression.Lambda(odataItParameter, odataItParameter);
-
+            LambdaExpression orderByLambda = Expression.Lambda(odataItParameter, odataItParameter);
             return OrderBy(query, orderByLambda, direction, type, alreadyOrdered);
         }
 
-        public static IQueryable OrderBy(IQueryable query, IEdmProperty property, OrderByDirection direction, Type type, bool alreadyOrdered = false)
+        public static IQueryable OrderByProperty(IQueryable query, IEdmProperty property, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
-            LambdaExpression orderByLambda;
-
-            PropertyInfo propertyInfo = type.GetProperty(property.Name);
-            orderByLambda = GetPropertyAccessLambda(type, property.Name);
-
+            LambdaExpression orderByLambda = GetPropertyAccessLambda(type, property.Name);
             return OrderBy(query, orderByLambda, direction, type, alreadyOrdered);
         }
 

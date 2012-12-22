@@ -1068,6 +1068,34 @@ namespace System.Web.Http.OData.Builder.Conventions
             complexDerivedEdmType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.Int32, isNullable: false);
             complexDerivedEdmType.AssertHasPrimitiveProperty(model, "DerivedProperty", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
+
+        [Fact]
+        public void OnModelCreating_IsInvoked_AfterConventionsAreRun()
+        {
+            // Arrange
+            MockType entity =
+                new MockType("entity")
+                .Property<int>("ID");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntitySet("entities", builder.AddEntity(entity));
+            builder.OnModelCreating = (modelBuilder) =>
+                {
+                    var entityConfiguration = modelBuilder.StructuralTypes.OfType<EntityTypeConfiguration>().Single();
+                    Assert.Equal(1, entityConfiguration.Keys.Count());
+                    var key = entityConfiguration.Keys.Single();
+                    Assert.Equal("ID", key.Name);
+
+                    // mark the key as optional just to verify later.
+                    key.OptionalProperty = true;
+                };
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.True(model.SchemaElements.OfType<IEdmEntityType>().Single().Key().Single().Type.IsNullable);
+        }
     }
 
     public class Product

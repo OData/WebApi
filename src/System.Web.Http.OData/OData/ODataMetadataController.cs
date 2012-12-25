@@ -18,7 +18,6 @@ namespace System.Web.Http.OData
     public class ODataMetadataController : ODataController
     {
         private static readonly Version _defaultEdmxVersion = new Version(1, 0);
-        private static readonly Version _defaultDataServiceVersion = new Version(1, 0);
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Property not appropriate")]
@@ -76,7 +75,6 @@ namespace System.Web.Http.OData
             IEdmModel model = firstODataFormatter.GetODataModel();
             Contract.Assert(model != null);
             model.SetEdmxVersion(_defaultEdmxVersion);
-            model.SetDataServiceVersion(_defaultDataServiceVersion);
             return model;
         }
     }

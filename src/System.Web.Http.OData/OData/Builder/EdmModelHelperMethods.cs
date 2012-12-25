@@ -7,6 +7,7 @@ using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Expressions;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.Edm.Library.Expressions;
@@ -38,6 +39,10 @@ namespace System.Web.Http.OData.Builder
 
             // build the map from IEdmEntityType to IEdmFunctionImport
             model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
+
+            // set the data service version annotations.
+            model.SetDataServiceVersion(builder.DataServiceVersion);
+            model.SetMaxDataServiceVersion(builder.MaxDataServiceVersion);
 
             return model;
         }
@@ -169,7 +174,7 @@ namespace System.Web.Http.OData.Builder
             model.AddClrTypeAnnotations(edmTypes);
             return edmTypes;
         }
-        
+
         private static void AddType(this EdmModel model, IEdmStructuredType type)
         {
             if (type.TypeKind == EdmTypeKind.Complex)

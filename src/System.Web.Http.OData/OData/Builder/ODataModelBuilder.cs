@@ -20,24 +20,69 @@ namespace System.Web.Http.OData.Builder
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
         private List<ProcedureConfiguration> _procedures = new List<ProcedureConfiguration>();
 
+        private Version _dataServiceVersion;
+        private Version _maxDataServiceVersion;
+
         public ODataModelBuilder()
         {
             Namespace = "Default";
             ContainerName = "Container";
+            DataServiceVersion = new Version(3, 0);
+            MaxDataServiceVersion = new Version(3, 0);
         }
 
         /// <summary>
-        /// The namespace that will be used for the resulting model
+        /// Gets or sets the namespace that will be used for the resulting model
         /// </summary>
         public string Namespace { get; set; }
 
         /// <summary>
-        /// The name of the container that will hold all the EntitySets, Actions and Functions
+        /// Gets or sets the name of the container that will hold all the EntitySets, Actions and Functions
         /// </summary>
         public string ContainerName { get; set; }
 
         /// <summary>
-        /// The collection of EDM entity sets in the model to be built.
+        /// Gets or sets the data service version of the model. The default value is 3.0.
+        /// </summary>
+        public Version DataServiceVersion
+        {
+            get
+            {
+                return _dataServiceVersion;
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+                _dataServiceVersion = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum data service version of the model. The default value is 3.0.
+        /// </summary>
+        public Version MaxDataServiceVersion
+        {
+            get
+            {
+                return _maxDataServiceVersion;
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+                _maxDataServiceVersion = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the collection of EDM entity sets in the model to be built.
         /// </summary>
         public virtual IEnumerable<EntitySetConfiguration> EntitySets
         {
@@ -45,7 +90,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// The collection of EDM types in the model to be built.
+        /// Gets the collection of EDM types in the model to be built.
         /// </summary>
         public virtual IEnumerable<StructuralTypeConfiguration> StructuralTypes
         {
@@ -53,7 +98,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// The collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built
+        /// Gets the collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built
         /// </summary>
         public virtual IEnumerable<ProcedureConfiguration> Procedures
         {

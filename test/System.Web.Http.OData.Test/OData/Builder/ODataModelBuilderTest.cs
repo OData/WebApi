@@ -3,6 +3,7 @@
 using System.Linq;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Csdl;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -97,6 +98,44 @@ namespace System.Web.Http.OData.Builder
             Assert.NotNull(finder);
             Assert.NotNull(finder.FindProcedures(customerType).SingleOrDefault());
             Assert.Equal("Reward", finder.FindProcedures(customerType).SingleOrDefault().Name);
+        }
+
+        [Fact]
+        public void DataServiceVersion_RoundTrips()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            Assert.Reflection.Property(builder, b => b.DataServiceVersion, new Version(3, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
+        }
+
+        [Fact]
+        public void MaxDataServiceVersion_RoundTrips()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            Assert.Reflection.Property(builder, b => b.MaxDataServiceVersion, new Version(3, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
+        }
+
+        [Fact]
+        public void DataServiceVersion_Is_AppliedToTheResultingModel()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.DataServiceVersion = new Version(2, 2);
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(new Version(2, 2), model.GetDataServiceVersion());
+        }
+
+        [Fact]
+        public void MaxDataServiceVersion_Is_AppliedToTheResultingModel()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.MaxDataServiceVersion = new Version(2, 2);
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.Equal(new Version(2, 2), model.GetMaxDataServiceVersion());
         }
     }
 }

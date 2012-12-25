@@ -3,11 +3,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Description;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.Tracing;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
@@ -100,6 +100,26 @@ namespace System.Web.Http.OData.Builder
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
 
             Assert.DoesNotContain("ODataMetadata", apis);
+        }
+
+        [Fact]
+        public void GetMetadata_Doesnot_Change_DataServiceVersion()
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            IEdmModel model = new EdmModel();
+            model.SetDataServiceVersion(new Version(0, 42));
+            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create(model));
+
+            ODataMetadataController controller = new ODataMetadataController();
+            controller.Request = new HttpRequestMessage();
+            controller.Request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+
+            // Act
+            IEdmModel controllerModel = controller.GetMetadata();
+
+            // Assert
+            Assert.Equal(new Version(0, 42), controllerModel.GetDataServiceVersion());
         }
     }
 }

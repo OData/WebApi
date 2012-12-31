@@ -381,7 +381,8 @@ Namespace Areas.HelpPage
             End Function
 
             Public Function GenerateObject(type As Type) As Object
-                Return DefaultGenerators(type)(++_index)
+                _index += 1
+                Return DefaultGenerators(type)(_index)
             End Function
         End Class
     End Class

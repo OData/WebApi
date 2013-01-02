@@ -42,8 +42,9 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Func<Attribute, bool> filter = attribute => attribute.GetType() == typeof(SampleAttribute);
             AttributeConvention convention = new Mock<AttributeConvention>(filter, false).Object;
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => convention.GetAttributes(GetType().GetMethod("GetAttributes_Throws_IfMultipleAttributesPresentAndAllowMultipleIsFalse")),
+                "member",
                 "The member 'GetAttributes_Throws_IfMultipleAttributesPresentAndAllowMultipleIsFalse' on type 'AttributeConventionTests' contains multiple instances of the attribute 'SampleAttribute'.");
         }
 

@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -58,7 +59,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                 if (entityType.IsAbstract)
                 {
-                    throw Error.InvalidOperation(SRResources.CannotInstantiateAbstractEntityType, entry.TypeName);
+                    string message = Error.Format(SRResources.CannotInstantiateAbstractEntityType, entry.TypeName);
+                    throw new SerializationException(message);
                 }
 
                 ODataEntityDeserializer deserializer = DeserializerProvider.GetODataDeserializer(new EdmEntityTypeReference(entityType, isNullable: false)) as ODataEntityDeserializer;
@@ -298,7 +300,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (readContext.IsPatchMode)
             {
-                throw Error.InvalidOperation(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
+                string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
+                throw new SerializationException(message);
             }
 
             SetProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
@@ -314,7 +317,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (readContext.IsPatchMode)
             {
-                throw Error.InvalidOperation(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
+                string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
+                throw new SerializationException(message);
             }
 
             SetCollectionProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);

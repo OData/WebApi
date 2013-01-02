@@ -22,7 +22,7 @@ namespace System.Web.Http.OData.Formatter
 
             if (formatters.Count() == 0)
             {
-                throw Error.InvalidOperation(SRResources.NoODataMediaTypeFormatterFound);
+                throw Error.Argument("parameter", SRResources.NoODataMediaTypeFormatterFound);
             }
 
             return new ODataFormatterParameterBinding(parameter, formatters);

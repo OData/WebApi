@@ -270,11 +270,12 @@ namespace System.Web.Http.OData.Builder
                 .Entity<Vehicle>()
                 .Property(v => v.WheelCount);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => builder
                         .Entity<Motorcycle>()
                         .DerivesFrom<Vehicle>()
                         .Property(m => m.WheelCount),
+                "propertyInfo",
                 "Cannot redefine property 'WheelCount' already defined on the base type 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
         }
 
@@ -288,10 +289,11 @@ namespace System.Web.Http.OData.Builder
                 .DerivesFrom<Vehicle>()
                 .Property(m => m.Model);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => builder
                         .Entity<Vehicle>()
                         .Property(v => v.Model),
+                "propertyInfo",
                 "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' already defines it.");
         }
 
@@ -313,10 +315,11 @@ namespace System.Web.Http.OData.Builder
         {
             var builder = new ODataModelBuilder();
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => builder
                         .Entity<string>()
                         .DerivesFrom<Vehicle>(),
+                "baseType",
                 "'System.String' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
         }
 
@@ -333,8 +336,9 @@ namespace System.Web.Http.OData.Builder
                             .Entity<Motorcycle>();
             motorcycle.Property(m => m.Model);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => motorcycle.DerivesFrom<Vehicle>(),
+                "propertyInfo",
                 "Cannot redefine property 'Model' already defined on the base type 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
         }
 
@@ -352,10 +356,11 @@ namespace System.Web.Http.OData.Builder
                 .DerivesFrom<Motorcycle>()
                 .Property(c => c.Model);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => builder
                     .Entity<Motorcycle>()
                     .DerivesFrom<Vehicle>(),
+                "propertyInfo",
                 "Cannot define property 'Model' in the base entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.Http.OData.Builder.TestModels.SportBike' already defines it.");
         }
 
@@ -364,10 +369,11 @@ namespace System.Web.Http.OData.Builder
         {
             var builder = new ODataModelBuilder();
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
             () => builder
                 .Entity<Vehicle>()
                 .DerivesFrom<Vehicle>(),
+            "baseType",
             "'System.Web.Http.OData.Builder.TestModels.Vehicle' does not inherit from 'System.Web.Http.OData.Builder.TestModels.Vehicle'.");
         }
 

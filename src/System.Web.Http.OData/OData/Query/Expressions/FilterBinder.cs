@@ -112,7 +112,7 @@ namespace System.Web.Http.OData.Query.Expressions
             Type expectedFilterType = typeof(Func<,>).MakeGenericType(filterType, typeof(bool));
             if (filter.Type != expectedFilterType)
             {
-                throw Error.InvalidOperation(SRResources.CannotCastFilter, filter.Type.FullName, expectedFilterType.FullName);
+                throw Error.Argument("filterType", SRResources.CannotCastFilter, filter.Type.FullName, expectedFilterType.FullName);
             }
 
             return filter;

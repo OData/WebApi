@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.OData;
 
@@ -30,7 +31,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 HttpError httpError = graph as HttpError;
                 if (httpError == null)
                 {
-                    throw Error.InvalidOperation(SRResources.ErrorTypeMustBeODataErrorOrHttpError, graph.GetType().FullName);
+                    string message = Error.Format(SRResources.ErrorTypeMustBeODataErrorOrHttpError, graph.GetType().FullName);
+                    throw new SerializationException(message);
                 }
                 else
                 {

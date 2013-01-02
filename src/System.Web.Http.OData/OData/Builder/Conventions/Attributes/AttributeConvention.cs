@@ -53,7 +53,8 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
 
             if (!AllowMultiple && attributes.Length > 1)
             {
-                throw Error.InvalidOperation(
+                throw Error.Argument(
+                    "member",
                     SRResources.MultipleAttributesFound,
                     member.Name,
                     member.ReflectedType.Name,

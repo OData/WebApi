@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Spatial;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -297,7 +298,8 @@ namespace System.Web.Http.OData.Formatter
 
             if (matches.Length > 1)
             {
-                throw Error.InvalidOperation(
+                throw Error.Argument(
+                    "actionIdentifier",
                     SRResources.ActionResolutionFailed,
                     actionIdentifier,
                     String.Join(", ", matches.Select(match => match.Container.FullName() + "." + match.Name)));
@@ -333,7 +335,8 @@ namespace System.Web.Http.OData.Formatter
             {
                 IEdmEntityType elementType = collectionType.ElementType as IEdmEntityType;
                 Contract.Assert(elementType != null);
-                throw Error.InvalidOperation(
+                throw Error.Argument(
+                    "actionIdentifier",
                     SRResources.ActionResolutionFailed,
                     actionIdentifier,
                     String.Join(", ", matches.Select(match => match.Container.FullName() + "." + match.Name)));
@@ -381,7 +384,7 @@ namespace System.Web.Http.OData.Formatter
 
                 if (matchingTypes.Count() > 1)
                 {
-                    throw Error.InvalidOperation(SRResources.MultipleMatchingClrTypesForEdmType,
+                    throw Error.Argument("edmTypeReference", SRResources.MultipleMatchingClrTypesForEdmType,
                         edmTypeReference.FullName(), String.Join(",", matchingTypes.Select(type => type.AssemblyQualifiedName)));
                 }
 

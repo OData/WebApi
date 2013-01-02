@@ -122,7 +122,7 @@ namespace System.Web.Http.OData.Builder
 
             if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
             // Remove from the ignored properties
@@ -164,12 +164,12 @@ namespace System.Web.Http.OData.Builder
 
             if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
             if (propertyInfo.PropertyType == ClrType)
             {
-                throw Error.InvalidOperation(SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
+                throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
             }
 
             // Remove from the ignored properties
@@ -269,7 +269,7 @@ namespace System.Web.Http.OData.Builder
 
             if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
             if (ExplicitProperties.ContainsKey(propertyInfo))

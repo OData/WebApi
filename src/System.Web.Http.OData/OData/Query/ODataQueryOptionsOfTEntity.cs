@@ -61,7 +61,7 @@ namespace System.Web.Http.OData.Query
 
             if (!typeof(TEntity).IsAssignableFrom(query.ElementType))
             {
-                throw Error.InvalidOperation(SRResources.CannotApplyODataQueryOptionsOfT, typeof(ODataQueryOptions).Name, typeof(TEntity).FullName, typeof(IQueryable).Name, query.ElementType.FullName);
+                throw Error.Argument("query", SRResources.CannotApplyODataQueryOptionsOfT, typeof(ODataQueryOptions).Name, typeof(TEntity).FullName, typeof(IQueryable).Name, query.ElementType.FullName);
             }
         }
     }

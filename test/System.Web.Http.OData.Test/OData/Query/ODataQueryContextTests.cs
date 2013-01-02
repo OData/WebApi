@@ -107,8 +107,9 @@ namespace System.Web.Http.OData.Query
             IEdmModel model = odataModel.GetEdmModel();
 
             // Act && Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => new ODataQueryContext(model, elementType),
+                "elementClrType",
                 Error.Format("The given model does not contain the type '{0}'.", elementType.FullName));
         }
     }

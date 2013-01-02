@@ -177,7 +177,7 @@ namespace System.Web.Http.OData.Builder
 
             if (!baseType.ClrType.IsAssignableFrom(ClrType) || baseType.ClrType == ClrType)
             {
-                throw Error.InvalidOperation(SRResources.TypeDoesNotInheritFromBaseType, ClrType.FullName, baseType.ClrType.FullName);
+                throw Error.Argument("baseType", SRResources.TypeDoesNotInheritFromBaseType, ClrType.FullName, baseType.ClrType.FullName);
             }
 
             if (Keys.Any())
@@ -252,7 +252,7 @@ namespace System.Web.Http.OData.Builder
 
             if (!navigationProperty.ReflectedType.IsAssignableFrom(ClrType))
             {
-                throw Error.InvalidOperation(SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
+                throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }
 
             ValidatePropertyNotAlreadyDefinedInBaseTypes(navigationProperty);
@@ -296,7 +296,7 @@ namespace System.Web.Http.OData.Builder
             PropertyConfiguration baseProperty = this.DerivedProperties().Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
             if (baseProperty != null)
             {
-                throw Error.InvalidOperation(SRResources.CannotRedefineBaseTypeProperty, propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
+                throw Error.Argument("propertyInfo", SRResources.CannotRedefineBaseTypeProperty, propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
             }
         }
 
@@ -307,7 +307,7 @@ namespace System.Web.Http.OData.Builder
                 PropertyConfiguration propertyInDerivedType = derivedEntity.Properties.Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
                 if (propertyInDerivedType != null)
                 {
-                    throw Error.InvalidOperation(SRResources.PropertyAlreadyDefinedInDerivedType, propertyInfo.Name, FullName, derivedEntity.FullName);
+                    throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType, propertyInfo.Name, FullName, derivedEntity.FullName);
                 }
             }
         }

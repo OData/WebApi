@@ -233,7 +233,7 @@ namespace System.Web.Http.OData
 
             if (!_entityType.IsAssignableFrom(original.GetType()))
             {
-                throw Error.InvalidOperation(SRResources.DeltaTypeMismatch, _entityType, original.GetType());
+                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
             PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();
@@ -257,7 +257,7 @@ namespace System.Web.Http.OData
 
             if (!_entityType.IsAssignableFrom(original.GetType()))
             {
-                throw Error.InvalidOperation(SRResources.DeltaTypeMismatch, _entityType, original.GetType());
+                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
             PropertyAccessor<TEntityType>[] propertiesToCopy = GetUnchangedPropertyNames().Select(s => _propertiesThatExist[s]).ToArray();

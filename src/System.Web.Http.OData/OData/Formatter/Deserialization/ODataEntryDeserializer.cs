@@ -3,8 +3,8 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
@@ -67,7 +67,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             if (!readContext.IncrementCurrentReferenceDepth())
             {
-                throw Error.InvalidOperation(SRResources.RecursionLimitExceeded);
+                throw new SerializationException(SRResources.RecursionLimitExceeded);
             }
         }
 
@@ -128,7 +128,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 Type elementType;
                 if (!propertyType.IsCollection(out elementType))
                 {
-                    throw Error.InvalidOperation(SRResources.PropertyIsNotCollection, propertyType.FullName, propertyName, resourceType.FullName);
+                    string message = Error.Format(SRResources.PropertyIsNotCollection, propertyType.FullName, propertyName, resourceType.FullName);
+                    throw new SerializationException(message);
                 }
 
                 IEnumerable newCollection;
@@ -150,7 +151,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     newCollection = GetProperty(resource, propertyName, isDelta) as IEnumerable;
                     if (newCollection == null)
                     {
-                        throw Error.InvalidOperation(SRResources.CannotAddToNullCollection, propertyName, resourceType.FullName);
+                        string message = Error.Format(SRResources.CannotAddToNullCollection, propertyName, resourceType.FullName);
+                        throw new SerializationException(message);
                     }
 
                     collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);

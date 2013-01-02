@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -125,13 +126,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataPath path = context.Path;
             if (path == null)
             {
-                throw Error.InvalidOperation(SRResources.ODataPathMissing);
+                throw new SerializationException(SRResources.ODataPathMissing);
             }
 
             ActionPathSegment lastSegment = path.Segments.Last() as ActionPathSegment;
             if (lastSegment == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestNotActionInvocation, path.ToString());
+                string message = Error.Format(SRResources.RequestNotActionInvocation, path.ToString());
+                throw new SerializationException(message);
             }
             return lastSegment.Action;
         }

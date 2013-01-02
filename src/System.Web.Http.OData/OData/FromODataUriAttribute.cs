@@ -34,7 +34,7 @@ namespace System.Web.Http.OData
             IModelBinder binder = _provider.GetBinder(parameter.Configuration, parameter.ParameterType);
             if (binder == null)
             {
-                throw Error.InvalidOperation(SRResources.FromODataUriRequiresPrimitive, parameter.ParameterType.FullName);
+                throw Error.Argument("parameter", SRResources.FromODataUriRequiresPrimitive, parameter.ParameterType.FullName);
             }
 
             IEnumerable<ValueProviderFactory> valueProviderFactories = GetValueProviderFactories(parameter.Configuration);

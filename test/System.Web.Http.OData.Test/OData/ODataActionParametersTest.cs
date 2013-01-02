@@ -1,16 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Linq;
-using System.Net.Http;
-using System.Web.Http.Hosting;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.Http.OData
 {
@@ -53,22 +49,22 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void Throws_InvalidOperation_WhenPathNotFound()
+        public void Throws_Serialization_WhenPathNotFound()
         {
             ODataDeserializerContext context = new ODataDeserializerContext { Path = null };
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<SerializationException>(() =>
             {
                 IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
             }, "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
         [Fact]
-        public void ParserThrows_InvalidOperation_when_multiple_overloads_found()
+        public void ParserThrows_InvalidArgument_when_multiple_overloads_found()
         {
-            InvalidOperationException ioe = Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsArgument(() =>
             {
                 new DefaultODataPathHandler(GetModel()).Parse("Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
-            }, "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
+            }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
         }
 
         private IEdmModel GetModel()

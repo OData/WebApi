@@ -32,7 +32,7 @@ namespace System.Web.Http.OData.Routing
             int containerCount = containers.Count();
             if (containerCount != 1)
             {
-                throw Error.InvalidOperation(SRResources.ParserModelMustHaveOneContainer, containerCount);
+                throw Error.Argument("model", SRResources.ParserModelMustHaveOneContainer, containerCount);
             }
             Model = model;
             Container = containers.Single();

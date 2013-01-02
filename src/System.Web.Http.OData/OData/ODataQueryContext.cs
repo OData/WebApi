@@ -32,7 +32,7 @@ namespace System.Web.Http.OData
 
             if (ElementType == null)
             {
-                throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, elementClrType.FullName);
+                throw Error.Argument("elementClrType", SRResources.ClrTypeNotInModel, elementClrType.FullName);
             }
 
             ElementClrType = elementClrType;

@@ -198,7 +198,7 @@ namespace System.Web.Http.OData.Builder
             EntityTypeConfiguration declaringEntityType = navigationProperty.DeclaringEntityType;
             if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
             {
-                throw Error.InvalidOperation(SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
+                throw Error.Argument("navigationProperty", SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
             _navigationPropertyLinkBuilders.Add(navigationProperty, navigationLinkBuilder);
@@ -252,7 +252,7 @@ namespace System.Web.Http.OData.Builder
             EntityTypeConfiguration declaringEntityType = navigationConfiguration.DeclaringEntityType;
             if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
             {
-                throw Error.InvalidOperation(SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
+                throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
             NavigationPropertyBinding navigationPropertyBinding = null;

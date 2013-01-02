@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -49,7 +50,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             object value = new SampleClassWithSettableCollectionProperties();
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<SerializationException>(
                 () => ODataEntityDeserializer.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
                 String.Format("The property '{0}' on type 'System.Web.Http.OData.Formatter.Deserialization.ODataEntryDeserializerTests+SampleClassWithSettableCollectionProperties' returned a null value. " +
                 "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
@@ -79,7 +80,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             object value = new SampleClassWithNonSettableCollectionProperties();
             Type propertyType = typeof(SampleClassWithNonSettableCollectionProperties).GetProperty(propertyName).PropertyType;
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<SerializationException>(
                 () => ODataEntityDeserializer.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
                 String.Format("The value of the property '{0}' on type 'System.Web.Http.OData.Formatter.Deserialization.ODataEntryDeserializerTests+SampleClassWithNonSettableCollectionProperties' is an array. " +
                 "Consider adding a setter for the property.", propertyName));
@@ -91,7 +92,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             object value = new SampleClassWithNonSettableCollectionProperties();
             Type propertyType = typeof(SampleClassWithNonSettableCollectionProperties).GetProperty(propertyName).PropertyType;
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<SerializationException>(
                 () => ODataEntityDeserializer.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
                 String.Format("The type '{0}' of the property '{1}' on type 'System.Web.Http.OData.Formatter.Deserialization.ODataEntryDeserializerTests+SampleClassWithNonSettableCollectionProperties' does not have an Add method. " +
                 "Consider using a collection type that does have an Add method - for example IList<T> or ICollection<T>.", propertyType.FullName, propertyName));
@@ -111,7 +112,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             object value = new SampleClassWithNonSettableCollectionProperties();
             value.GetType().GetProperty(propertyName).SetValue(value, null, null);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<SerializationException>(
                  () => ODataEntityDeserializer.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
                  String.Format("The property '{0}' on type 'System.Web.Http.OData.Formatter.Deserialization.ODataEntryDeserializerTests+SampleClassWithNonSettableCollectionProperties' returned a null value. " +
                  "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
@@ -140,12 +141,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Theory]
         [InlineData("NonCollectionString")]
         [InlineData("NonCollectionInt")]
-        public void SetCollectionProperty_OnNonCollection_ThrowsInvalidOp(string propertyName)
+        public void SetCollectionProperty_OnNonCollection_ThrowsSerialization(string propertyName)
         {
             object value = new SampleClassWithDifferentCollectionProperties();
             Type propertyType = typeof(SampleClassWithDifferentCollectionProperties).GetProperty(propertyName).PropertyType;
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.Throws<SerializationException>(
             () => ODataEntityDeserializer.SetCollectionProperty(value, propertyName, isDelta: false, value: new List<int> { 1, 2, 3 }),
             Error.Format(
             "The type '{0}' of the property '{1}' on type 'System.Web.Http.OData.Formatter.Deserialization.ODataEntryDeserializerTests+SampleClassWithDifferentCollectionProperties' must be a collection.",

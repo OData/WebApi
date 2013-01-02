@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -14,7 +15,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
     {
         // cache the clrtype to ODataSerializer mappings as we might have to crawl the 
         // inheritance hirerachy to find the mapping.
-        private ConcurrentDictionary<Type, ODataSerializer> _clrTypeMappingCache = new ConcurrentDictionary<Type, ODataSerializer>();
+        private ConcurrentDictionary<Type, ODataSerializer> _clrTypeMappingCache =
+            new ConcurrentDictionary<Type, ODataSerializer>();
 
         public DefaultODataSerializerProvider(IEdmModel edmModel)
             : base(edmModel)
@@ -51,7 +53,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     return new ODataEntityTypeSerializer(edmType.AsEntity(), this);
 
                 default:
-                    throw Error.InvalidOperation(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataMediaTypeFormatter).Name);
+                    string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(),
+                        typeof(ODataMediaTypeFormatter).Name);
+                    throw new SerializationException(message);
             }
         }
 

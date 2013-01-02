@@ -266,7 +266,7 @@ namespace System.Web.Http
                 ObjectContent responseContent = response.Content as ObjectContent;
                 if (responseContent == null)
                 {
-                    throw Error.InvalidOperation(SRResources.QueryingRequiresObjectContent, response.Content.GetType().FullName);
+                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent, response.Content.GetType().FullName);
                 }
                 ValidateReturnType(responseContent.ObjectType, actionDescriptor);
 

@@ -110,8 +110,9 @@ namespace System.Web.Http.OData.Builder
 
             var vehicles = builder.AddEntitySet("vehicles", vehicle);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => vehicles.AddBinding(navProperty, manufacturers),
+                "navigationConfiguration",
                 "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
         }
 
@@ -129,8 +130,9 @@ namespace System.Web.Http.OData.Builder
 
             var vehicles = builder.AddEntitySet("vehicles", vehicle);
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
+                "navigationProperty",
                 "The declaring entity type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' of the given navigation property is not a part of the entity type 'System.Web.Http.OData.Builder.TestModels.Vehicle' hierarchy of the entity set 'vehicles'.");
         }
 

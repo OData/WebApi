@@ -235,7 +235,7 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void NonObjectContentResponse_ThrowsInvalidOperationException()
+        public void NonObjectContentResponse_ThrowsArgumentException()
         {
             // Arrange
             QueryableAttribute attribute = new QueryableAttribute();
@@ -251,8 +251,9 @@ namespace System.Web.Http.OData
             context.Response.Content = new StreamContent(new MemoryStream());
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => attribute.OnActionExecuted(context),
+                "actionExecutedContext",
                 "Queries can not be applied to a response content of type 'System.Net.Http.StreamContent'. The response content must be an ObjectContent.");
         }
 

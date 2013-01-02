@@ -189,7 +189,7 @@ namespace System.Web.Http.OData.Builder
             NavigationLinkBuilder navigationLinkBuilder;
             if (!_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
             {
-                throw Error.InvalidOperation(SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySet.Name);
+                throw Error.Argument("navigationProperty", SRResources.NoNavigationLinkFactoryFound, navigationProperty.Name, navigationProperty.DeclaringEntityType(), _entitySet.Name);
             }
             Contract.Assert(navigationLinkBuilder != null);
 

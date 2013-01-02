@@ -249,54 +249,58 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void Patch_UnRelatedType_Throws_InvalidOp()
+        public void Patch_UnRelatedType_Throws_Argument()
         {
             // Arrange
             Delta<Base> delta = new Delta<Base>(typeof(Derived));
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => delta.Patch(unrelatedEntity),
+                "original",
                 "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
-        public void Put_UnRelatedType_Throws_InvalidOp()
+        public void Put_UnRelatedType_Throws_Argument()
         {
             // Arrange
             Delta<Base> delta = new Delta<Base>(typeof(Derived));
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => delta.Put(unrelatedEntity),
+                "original",
                 "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
-        public void CopyChangedValues_UnRelatedType_Throws_InvalidOp()
+        public void CopyChangedValues_UnRelatedType_Throws_Argument()
         {
             // Arrange
             Delta<Base> delta = new Delta<Base>(typeof(Derived));
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => delta.CopyChangedValues(unrelatedEntity),
+                "original",
                 "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
-        public void CopyUnchangedValues_UnRelatedType_Throws_InvalidOp()
+        public void CopyUnchangedValues_UnRelatedType_Throws_Argument()
         {
             // Arrange
             Delta<Base> delta = new Delta<Base>(typeof(Derived));
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => delta.CopyUnchangedValues(unrelatedEntity),
+                "original",
                 "Cannot use Delta of type 'System.Web.Http.OData.DeltaTest+Derived' on an entity of type 'System.Web.Http.OData.DeltaTest+AnotherDerived'.");
         }
 

@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.OData.Formatter.Deserialization;
@@ -317,7 +318,8 @@ namespace System.Web.Http.OData.Formatter
                 ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
                 if (serializer == null)
                 {
-                    throw Error.InvalidOperation(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);
+                    string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);
+                    throw new SerializationException(message);
                 }
 
                 UrlHelper urlHelper = _request.GetUrlHelper();
@@ -352,7 +354,7 @@ namespace System.Web.Http.OData.Formatter
 
                     if (metadataLink == null)
                     {
-                        throw Error.InvalidOperation(SRResources.UnableToDetermineMetadataUrl);
+                        throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
                     }
 
                     writerSettings.SetMetadataDocumentUri(new Uri(metadataLink));

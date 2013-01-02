@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
@@ -30,12 +31,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 addMethod = collection.GetType().GetMethod("Add", new Type[] { elementType });
                 if (addMethod == null)
                 {
-                    throw Error.InvalidOperation(SRResources.CollectionShouldHaveAddMethod, propertyType.FullName, propertyName, resourceType.FullName);
+                    string message = Error.Format(SRResources.CollectionShouldHaveAddMethod, propertyType.FullName, propertyName, resourceType.FullName);
+                    throw new SerializationException(message);
                 }
             }
             else if (list.GetType().IsArray)
             {
-                throw Error.InvalidOperation(SRResources.GetOnlyCollectionCannotBeArray, propertyName, resourceType.FullName);
+                string message = Error.Format(SRResources.GetOnlyCollectionCannotBeArray, propertyName, resourceType.FullName);
+                throw new SerializationException(message);
             }
 
             bool isNonstandardEdmPrimitiveCollection;

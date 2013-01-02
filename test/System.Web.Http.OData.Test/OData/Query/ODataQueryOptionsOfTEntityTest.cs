@@ -36,7 +36,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void ApplyTo_ThrowsInvalidOp_If_QueryTypeDoesnotMatch()
+        public void ApplyTo_ThrowsArgument_If_QueryTypeDoesnotMatch()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
@@ -45,8 +45,9 @@ namespace System.Web.Http.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, new HttpRequestMessage(HttpMethod.Get, "http://server/?$top=10"));
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
+                "query",
                 "Cannot apply ODataQueryOptions of 'System.Web.Http.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
@@ -79,7 +80,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void ApplyTo_WithQuerySettings_ThrowsInvalidOp_If_QueryTypeDoesnotMatch()
+        public void ApplyTo_WithQuerySettings_ThrowsArgument_If_QueryTypeDoesnotMatch()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
@@ -88,8 +89,9 @@ namespace System.Web.Http.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, new HttpRequestMessage(HttpMethod.Get, "http://server/?$top=10"));
 
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable(), new ODataQuerySettings()),
+                "query",
                 "Cannot apply ODataQueryOptions of 'System.Web.Http.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 

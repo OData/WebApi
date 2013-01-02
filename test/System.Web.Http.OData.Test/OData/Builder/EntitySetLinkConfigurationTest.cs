@@ -114,7 +114,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
-        public void FailingToConfigureNavigationLinks_Results_In_InvalidOperationException_When_BuildingNavigationLink()
+        public void FailingToConfigureNavigationLinks_Results_In_ArgumentException_When_BuildingNavigationLink()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -126,8 +126,9 @@ namespace System.Web.Http.OData.Builder
             var linkBuilder = model.GetEntitySetLinkBuilder(products);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            Assert.ThrowsArgument(
                 () => linkBuilder.BuildNavigationLink(new EntityInstanceContext(), ordersProperty, ODataMetadataLevel.Default),
+                "navigationProperty",
                 "No NavigationLink factory was found for the navigation property 'Orders' from entity type 'System.Web.Http.OData.Builder.EntitySetLinkConfigurationTest_Product' on entity set 'Products'. " +
                 "Try calling HasNavigationPropertyLink on the EntitySetConfiguration.");
         }

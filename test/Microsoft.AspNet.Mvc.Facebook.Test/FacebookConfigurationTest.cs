@@ -55,8 +55,15 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             Assert.Equal("123456", config.AppId);
             Assert.Equal("abcdefg", config.AppSecret);
             Assert.Equal("MyApp", config.AppNamespace);
-            Assert.Equal("/Authorize/Index", config.AuthorizationRedirectPath);
+            Assert.Equal("~/Authorize/Index", config.AuthorizationRedirectPath);
             Assert.Equal("https://apps.newfacebook.example.com/myapp", config.AppUrl);
+        }
+
+        [Fact]
+        public void AuthorizationRedirectPath_ThrowsArgumentException()
+        {
+            FacebookConfiguration config = new FacebookConfiguration();
+            Assert.ThrowsArgument(() => config.AuthorizationRedirectPath = "Home/Permissions", "value");
         }
     }
 }

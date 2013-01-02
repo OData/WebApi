@@ -88,6 +88,15 @@ namespace Microsoft.AspNet.Mvc.Facebook {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid AuthorizationRedirectPath. The AuthorizationRedirectPath can only be set relative to the AppUrl. Prefix the path with &apos;~/&apos;..
+        /// </summary>
+        internal static string InvalidAuthorizationRedirectPath {
+            get {
+                return ResourceManager.GetString("InvalidAuthorizationRedirectPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The required header &apos;{0}&apos; is missing..
         /// </summary>
         internal static string MissingRequiredHeader {

@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
                         if (!String.IsNullOrEmpty(_config.AuthorizationRedirectPath))
                         {
                             UriBuilder authorizationUrlBuilder = new UriBuilder(_config.AppUrl);
-                            authorizationUrlBuilder.Path += "/" + _config.AuthorizationRedirectPath.TrimStart('/');
+                            authorizationUrlBuilder.Path += _config.AuthorizationRedirectPath.Substring(1);
                             authorizationUrlBuilder.Query = String.Format(CultureInfo.InvariantCulture,
                                 "originUrl={0}&permissions={1}",
                                 HttpUtility.UrlEncode(redirectUrl),

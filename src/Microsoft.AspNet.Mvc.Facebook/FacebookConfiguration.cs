@@ -16,6 +16,7 @@ namespace Microsoft.AspNet.Mvc.Facebook
         private static readonly string FacebookAppBaseUrl = "https://apps.facebook.com";
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
         private string _appUrl;
+        private string _authorizationRedirectPath;
 
         /// <summary>
         /// Gets or sets the App ID.
@@ -35,7 +36,22 @@ namespace Microsoft.AspNet.Mvc.Facebook
         /// <summary>
         /// Gets or sets the URL path that the <see cref="Microsoft.AspNet.Mvc.Facebook.Authorization.FacebookAuthorizeFilter"/> will redirect to when the user did not grant the required permissions.
         /// </summary>
-        public string AuthorizationRedirectPath { get; set; }
+        public string AuthorizationRedirectPath
+        {
+            get
+            {
+                return _authorizationRedirectPath;
+            }
+            set
+            {
+                // Check for '~/' prefix while allowing null or empty value to be set.
+                if (!String.IsNullOrEmpty(value) && !value.StartsWith("~/"))
+                {
+                    throw new ArgumentException(Resources.InvalidAuthorizationRedirectPath, "value");
+                }
+                _authorizationRedirectPath = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the absolute URL for the Facebook App.

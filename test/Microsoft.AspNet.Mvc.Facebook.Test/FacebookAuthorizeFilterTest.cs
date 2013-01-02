@@ -93,7 +93,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             FacebookClient client = MockHelpers.CreateFacebookClient();
             IFacebookPermissionService permissionService = MockHelpers.CreatePermissionService(new[] { "" });
             FacebookConfiguration config = MockHelpers.CreateConfiguration(client, permissionService);
-            config.AuthorizationRedirectPath = "home/permissions";
+            config.AuthorizationRedirectPath = "~/home/permissions";
             FacebookAuthorizeFilter authorizeFilter = new FacebookAuthorizeFilter(config);
             AuthorizationContext context = new AuthorizationContext(
                 MockHelpers.CreateControllerContext(new NameValueCollection

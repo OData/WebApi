@@ -33,7 +33,8 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
-                new EntityInstanceContext() {
+                new EntityInstanceContext()
+                {
                     EdmModel = model,
                     EntitySet = carsEdmSet,
                     EntityType = carsEdmSet.ElementType,
@@ -156,7 +157,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             var vehicles = builder.EntitySet<Vehicle>("vehicles");
-            var paintAction = new ActionConfiguration(builder, "Paint");
+            var paintAction = builder.Action("Paint");
 
             _convention.Apply(paintAction, builder);
 

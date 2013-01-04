@@ -2,7 +2,6 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Routing;
@@ -24,7 +23,7 @@ namespace System.Web.Http.OData.Builder
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.Namespace = "MyNamespace";
             builder.ContainerName = "MyContainer";
-            ActionConfiguration action = new ActionConfiguration(builder, "Format");
+            ActionConfiguration action = builder.Action("Format");
 
             // Assert
             Assert.Equal("Format", action.Name);
@@ -48,7 +47,7 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
             ODataModelBuilder builder2 = new ODataModelBuilder();
-            ProcedureConfiguration toRemove = new ActionConfiguration(builder2, "ToRemove");
+            ProcedureConfiguration toRemove = builder2.Action("ToRemove");
 
             // Act
             bool removedByName = builder.RemoveProcedure("ToRemove");
@@ -65,7 +64,7 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = new ActionConfiguration(builder, "CreateMessage");
+            ActionConfiguration action = builder.Action("CreateMessage");
             action.Returns<string>();
 
             // Assert
@@ -79,7 +78,7 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = new ActionConfiguration(builder, "CreateMessages");
+            ActionConfiguration action = builder.Action("CreateMessages");
             action.ReturnsCollection<string>();
 
             // Assert
@@ -94,11 +93,8 @@ namespace System.Web.Http.OData.Builder
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            ActionConfiguration createAddress = new ActionConfiguration(builder, "CreateAddress");
-            createAddress.Returns<Address>();
-
-            ActionConfiguration createAddresses = new ActionConfiguration(builder, "CreateAddresses");
-            createAddresses.ReturnsCollection<Address>();
+            ActionConfiguration createAddress = builder.Action("CreateAddress").Returns<Address>();
+            ActionConfiguration createAddresses = builder.Action("CreateAddresses").ReturnsCollection<Address>();
 
             // Assert
             ComplexTypeConfiguration address = createAddress.ReturnType as ComplexTypeConfiguration;
@@ -122,11 +118,8 @@ namespace System.Web.Http.OData.Builder
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            ActionConfiguration createGoodCustomer = new ActionConfiguration(builder, "CreateGoodCustomer");
-            createGoodCustomer.ReturnsFromEntitySet<Customer>("GoodCustomers");
-
-            ActionConfiguration createBadCustomers = new ActionConfiguration(builder, "CreateBadCustomers");
-            createBadCustomers.ReturnsCollectionFromEntitySet<Customer>("BadCustomers");
+            ActionConfiguration createGoodCustomer = builder.Action("CreateGoodCustomer").ReturnsFromEntitySet<Customer>("GoodCustomers");
+            ActionConfiguration createBadCustomers = builder.Action("CreateBadCustomers").ReturnsCollectionFromEntitySet<Customer>("BadCustomers");
 
             // Assert
             EntityTypeConfiguration customer = createGoodCustomer.ReturnType as EntityTypeConfiguration;
@@ -200,7 +193,7 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = new ActionConfiguration(builder, "MyAction");
+            ActionConfiguration action = builder.Action("MyAction");
             action.Parameter<string>("p0");
             action.Parameter<int>("p1");
             action.Parameter<Address>("p2");
@@ -264,7 +257,7 @@ namespace System.Web.Http.OData.Builder
             ODataModelBuilder builder = new ODataModelBuilder();
 
             // Act
-            ActionConfiguration actionConfiguration = new ActionConfiguration(builder, "ActionName");
+            ActionConfiguration actionConfiguration = builder.Action("ActionName");
             actionConfiguration.ReturnsFromEntitySet<Customer>("Customers");
 
             IEdmModel model = builder.GetEdmModel();

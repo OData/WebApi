@@ -25,11 +25,10 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="builder">The ODataModelBuilder to which this ActionConfiguration should be added.</param>
         /// <param name="name">The name of this ActionConfiguration.</param>
-        public ActionConfiguration(ODataModelBuilder builder, string name)
+        internal ActionConfiguration(ODataModelBuilder builder, string name)
         {
             Name = name;
             ModelBuilder = builder;
-            builder.AddProcedure(this);
         }
 
         /// <summary>

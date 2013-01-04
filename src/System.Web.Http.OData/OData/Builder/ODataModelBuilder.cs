@@ -141,6 +141,18 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Adds a non-bindable action to the builder.
+        /// </summary>
+        /// <param name="name">The name of the action.</param>
+        /// <returns>The configuration object for the specified action.</returns>
+        public virtual ActionConfiguration Action(string name)
+        {
+            ActionConfiguration action = new ActionConfiguration(this, name);
+            _procedures.Add(action);
+            return action;
+        }
+
+        /// <summary>
         /// Registers an entity type as part of the model and returns an object that can be used to configure the entity.
         /// This method can be called multiple times for the same entity to perform multiple lines of configuration.
         /// </summary>

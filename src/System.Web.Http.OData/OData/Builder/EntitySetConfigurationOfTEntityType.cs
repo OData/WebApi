@@ -13,12 +13,12 @@ namespace System.Web.Http.OData.Builder
         private EntityTypeConfiguration<TEntityType> _entityType;
         private ODataModelBuilder _modelBuilder;
 
-        public EntitySetConfiguration(ODataModelBuilder modelBuilder, string name)
+        internal EntitySetConfiguration(ODataModelBuilder modelBuilder, string name)
             : this(modelBuilder, new EntitySetConfiguration(modelBuilder, typeof(TEntityType), name))
         {
         }
 
-        public EntitySetConfiguration(ODataModelBuilder modelBuilder, EntitySetConfiguration configuration)
+        internal EntitySetConfiguration(ODataModelBuilder modelBuilder, EntitySetConfiguration configuration)
         {
             if (modelBuilder == null)
             {

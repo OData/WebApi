@@ -280,22 +280,36 @@ namespace System.Web.Http.OData.Formatter
                 (m) => "http://localhost/motorcycles/" + m.EntityInstance.Name, followsConventions: false);
             builder.EntitySet<Car>("cars");
 
-            new ActionConfiguration(builder, "GetCarAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");
-            new ActionConfiguration(builder, "GetMotorcycleAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");
-            new ActionConfiguration(builder, "GetSportBikeAsVehicle").ReturnsFromEntitySet<Vehicle>("vehicles");
-            new ActionConfiguration(builder, "GetVehicles").ReturnsFromEntitySet<Vehicle>("vehicles");
-            new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Motorcycle")
-                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
-            new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Motorcycle")
-                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
-            new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Car")
-                .ReturnsFromEntitySet<Car>("cars");
-            new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Car")
-                .ReturnsFromEntitySet<Car>("cars");
-            new ActionConfiguration(builder, "PatchMotorcycle_When_Expecting_Vehicle")
+            builder
+                .Action("GetCarAsVehicle")
                 .ReturnsFromEntitySet<Vehicle>("vehicles");
-            new ActionConfiguration(builder, "PostMotorcycle_When_Expecting_Vehicle")
+            builder
+                .Action("GetMotorcycleAsVehicle")
                 .ReturnsFromEntitySet<Vehicle>("vehicles");
+            builder
+                .Action("GetSportBikeAsVehicle")
+                .ReturnsFromEntitySet<Vehicle>("vehicles");
+            builder
+                .Action("GetVehicles")
+                .ReturnsFromEntitySet<Vehicle>("vehicles");
+            builder
+                .Action("PatchMotorcycle_When_Expecting_Motorcycle")
+                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            builder
+                .Action("PostMotorcycle_When_Expecting_Motorcycle")
+                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            builder
+                .Action("PatchMotorcycle_When_Expecting_Vehicle")
+                .ReturnsFromEntitySet<Vehicle>("vehicles");
+            builder
+                .Action("PostMotorcycle_When_Expecting_Vehicle")
+                .ReturnsFromEntitySet<Vehicle>("vehicles");
+            builder
+                .Action("PostMotorcycle_When_Expecting_Car")
+                .ReturnsFromEntitySet<Car>("cars");
+            builder
+                .Action("PatchMotorcycle_When_Expecting_Car")
+                .ReturnsFromEntitySet<Car>("cars");
 
             return builder.GetEdmModel();
         }

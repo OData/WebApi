@@ -28,15 +28,15 @@ namespace System.Web.Http.OData.Builder
             customer.Action("InCache1_CustomerAction");
             customer.Action("InCache2_CustomerAction");
             movie.Action("InCache3_MovieAction");
-            ActionConfiguration incache4_MovieAction = new ActionConfiguration(builder, "InCache4_MovieAction");
+            ActionConfiguration incache4_MovieAction = builder.Action("InCache4_MovieAction");
             incache4_MovieAction.SetBindingParameter("bindingParameter", movieConfiguration, true);
             blockBuster.Action("InCache5_BlockbusterAction");
 
             // build actions that are either: bindable to a collection of entities, have no parameter, have only complex parameter 
             customer.Collection.Action("NotInCache1_CustomersAction");
             movie.Collection.Action("NotInCache2_MoviesAction");
-            ActionConfiguration notInCache3_NoParameters = new ActionConfiguration(builder, "NotInCache3_NoParameters");
-            ActionConfiguration notInCache4_AddressParameter = new ActionConfiguration(builder, "NotInCache4_AddressParameter");
+            ActionConfiguration notInCache3_NoParameters = builder.Action("NotInCache3_NoParameters");
+            ActionConfiguration notInCache4_AddressParameter = builder.Action("NotInCache4_AddressParameter");
             notInCache4_AddressParameter.Parameter<Address>("address");
 
             IEdmModel model = builder.GetEdmModel();

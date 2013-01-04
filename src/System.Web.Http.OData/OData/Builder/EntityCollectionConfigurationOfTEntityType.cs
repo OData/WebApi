@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -23,7 +24,8 @@ namespace System.Web.Http.OData.Builder
         /// <returns>An ActionConfiguration to allow further configuration of the Action.</returns>
         public ActionConfiguration Action(string name)
         {
-            ActionConfiguration configuration = new ActionConfiguration(ElementType.ModelBuilder, name);
+            Contract.Assert(ModelBuilder != null);
+            ActionConfiguration configuration = ModelBuilder.Action(name);
             configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this, alwaysBindable: true);
             return configuration;
         }
@@ -35,7 +37,8 @@ namespace System.Web.Http.OData.Builder
         /// <returns>An ActionConfiguration to allow further configuration of the Action.</returns>
         public ActionConfiguration TransientAction(string name)
         {
-            ActionConfiguration configuration = new ActionConfiguration(ElementType.ModelBuilder, name);
+            Contract.Assert(ModelBuilder != null);
+            ActionConfiguration configuration = ModelBuilder.Action(name);
             configuration.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, this, alwaysBindable: false);
             return configuration;
         }

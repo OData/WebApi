@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Builder
         /// Initializes a new instance of <see cref="EntityTypeConfiguration"/>.
         /// </summary>
         /// <param name="modelBuilder">The <see cref="ODataModelBuilder"/> being used.</param>
-        public EntityTypeConfiguration(ODataModelBuilder modelBuilder)
+        internal EntityTypeConfiguration(ODataModelBuilder modelBuilder)
             : this(modelBuilder, new EntityTypeConfiguration(modelBuilder, typeof(TEntityType)))
         {
         }
@@ -165,7 +165,9 @@ namespace System.Web.Http.OData.Builder
         /// <returns>The ActionConfiguration to allow further configuration of the new Action.</returns>
         public ActionConfiguration Action(string name)
         {
-            ActionConfiguration action = new ActionConfiguration(_configuration.ModelBuilder, name);
+            Contract.Assert(_configuration != null && _configuration.ModelBuilder != null);
+
+            ActionConfiguration action = _configuration.ModelBuilder.Action(name);
             action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: true);
             return action;
         }
@@ -177,7 +179,9 @@ namespace System.Web.Http.OData.Builder
         /// <returns>The ActionConfiguration to allow further configuration of the new 'transient' Action.</returns>
         public ActionConfiguration TransientAction(string name)
         {
-            ActionConfiguration action = new ActionConfiguration(_configuration.ModelBuilder, name);
+            Contract.Assert(_configuration != null && _configuration.ModelBuilder != null);
+
+            ActionConfiguration action = _configuration.ModelBuilder.Action(name);
             action.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration, alwaysBindable: false);
             return action;
         }

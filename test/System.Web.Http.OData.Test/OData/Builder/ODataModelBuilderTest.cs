@@ -40,7 +40,7 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = new ActionConfiguration(builder, "Format");
+            ActionConfiguration action = builder.Action("Format");
             bool removed = builder.RemoveProcedure("Format");
 
             // Assert      
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = new ActionConfiguration(builder, "Format");
+            ActionConfiguration action = builder.Action("Format");
             ProcedureConfiguration procedure = builder.Procedures.SingleOrDefault();
             bool removed = builder.RemoveProcedure(procedure);
 
@@ -69,8 +69,8 @@ namespace System.Web.Http.OData.Builder
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            ActionConfiguration action1 = new ActionConfiguration(builder, "Format");
-            ActionConfiguration action2 = new ActionConfiguration(builder, "Format");
+            ActionConfiguration action1 = builder.Action("Format");
+            ActionConfiguration action2 = builder.Action("Format");
             action2.Parameter<int>("SegmentSize");
 
             Assert.Throws<InvalidOperationException>(() =>

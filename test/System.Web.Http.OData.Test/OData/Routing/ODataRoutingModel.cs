@@ -5,8 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Http.OData.Builder;
 using Microsoft.Data.Edm;
-using Microsoft.Data.OData;
-using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -21,15 +19,15 @@ namespace System.Web.Http.OData.Routing
             builder.EntitySet<EmailAddress>("EmailAddresses");
             builder.EntitySet<üCategory>("üCategories");
 
-            ActionConfiguration getRoutingCustomerById = new ActionConfiguration(builder, "GetRoutingCustomerById");
+            ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
             getRoutingCustomerById.ReturnsFromEntitySet<RoutingCustomer>("RoutingCustomers");
 
-            ActionConfiguration getSalesPersonById = new ActionConfiguration(builder, "GetSalesPersonById");
+            ActionConfiguration getSalesPersonById = builder.Action("GetSalesPersonById");
             getSalesPersonById.Parameter<int>("salesPersonId");
             getSalesPersonById.ReturnsFromEntitySet<SalesPerson>("SalesPeople");
 
-            ActionConfiguration getAllVIPs = new ActionConfiguration(builder, "GetAllVIPs");
+            ActionConfiguration getAllVIPs = builder.Action("GetAllVIPs");
             ActionReturnsCollectionFromEntitySet<VIP>(builder, getAllVIPs, "RoutingCustomers");
 
             builder.Entity<RoutingCustomer>().ComplexProperty<Address>(c => c.Address);

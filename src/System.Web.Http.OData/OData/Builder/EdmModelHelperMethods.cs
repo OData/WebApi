@@ -36,6 +36,7 @@ namespace System.Web.Http.OData.Builder
 
             // finish up
             model.AddElement(container);
+            model.SetIsDefaultEntityContainer(container, isDefaultContainer: true);
 
             // build the map from IEdmEntityType to IEdmFunctionImport
             model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));

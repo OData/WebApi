@@ -1,5 +1,5 @@
 ﻿{
-  "odata.metadata":"http://localhost/$metadata#Default.Container.employees","value":[
+  "odata.metadata":"http://localhost/$metadata#employees","value":[
     {
       "EmployeeId@odata.type":"Edm.Int64","EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
         "Alias0"

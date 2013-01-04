@@ -123,6 +123,7 @@
     <Compile Include="OData\Builder\Conventions\NavigationLinksGenerationConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConventionTest.cs" />
     <Compile Include="OData\Builder\EntitySetConfigurationTest.cs" />
+    <Compile Include="OData\Builder\ODataUtilsLearningTests.cs" />
     <Compile Include="OData\Builder\ParameterConfigurationTest.cs" />
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />

@@ -1,5 +1,5 @@
 ﻿{
-  "odata.metadata":"http://localhost:8081/$metadata#Default.Container.MainEntity","odata.count":"3","value":[
+  "odata.metadata":"http://localhost:8081/$metadata#MainEntity","odata.count":"3","value":[
     {
       "odata.id":"http://localhost:8081/MainEntity/id/1","odata.editLink":"http://localhost:8081/MainEntity/edit/1","odata.readLink":"http://localhost:8081/MainEntity/read/1","Related@odata.navigationLinkUrl":"/MainEntity/RelatedEntity/1","#Container.DoAlways":{
         "title":"DoAlways","target":"http://localhost:8081/MainEntity/DoAlways/1"

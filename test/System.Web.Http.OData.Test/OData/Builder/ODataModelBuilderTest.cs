@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -136,6 +137,16 @@ namespace System.Web.Http.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             Assert.Equal(new Version(2, 2), model.GetMaxDataServiceVersion());
+        }
+
+        [Fact]
+        public void EntityContainer_Is_Default()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            Assert.True(model.IsDefaultEntityContainer(model.SchemaElements.OfType<IEdmEntityContainer>().Single()));
         }
     }
 }

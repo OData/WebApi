@@ -69,6 +69,10 @@ namespace System.Web.Http.OData.Formatter
             _payloadKinds = payloadKinds;
             _version = version;
             _request = request;
+
+            // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
+            MessageReaderQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
+            MessageWriterQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
         }
 
         private ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version,
@@ -88,6 +92,8 @@ namespace System.Web.Http.OData.Formatter
             _serializerProvider = formatter._serializerProvider;
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
+            MessageReaderQuotas = formatter.MessageReaderQuotas;
+            MessageWriterQuotas = formatter.MessageWriterQuotas;
 
             // Parameter 1B: Copy the base class's properties.
             foreach (MediaTypeMapping mediaTypeMapping in formatter.MediaTypeMappings)
@@ -118,6 +124,22 @@ namespace System.Web.Http.OData.Formatter
             // Parameter 3: request
             _request = request;
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ODataMessageQuotas"/> that this formatter uses on the read side.
+        /// </summary>
+        public ODataMessageQuotas MessageReaderQuotas { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ODataMessageQuotas"/> that this formatter uses on the write side.
+        /// </summary>
+        public ODataMessageQuotas MessageWriterQuotas { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to support serialization only (whether to disable deserialization
+        /// support).
+        /// </summary>
+        internal bool WriteOnly { get; set; }
 
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
@@ -249,7 +271,7 @@ namespace System.Web.Http.OData.Formatter
                     }
 
                     ODataMessageReader oDataMessageReader = null;
-                    ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings { DisableMessageStreamDisposal = true };
+                    ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings { DisableMessageStreamDisposal = true, MessageQuotas = MessageReaderQuotas };
                     try
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
@@ -347,7 +369,8 @@ namespace System.Web.Http.OData.Formatter
                     BaseUri = baseAddress,
                     Version = _version,
                     Indent = true,
-                    DisableMessageStreamDisposal = true
+                    DisableMessageStreamDisposal = true,
+                    MessageQuotas = MessageWriterQuotas
                 };
 
                 IODataPathHandler pathHandler = _request.GetODataPathHandler();

@@ -248,6 +248,45 @@ namespace System.Web.Http.OData.Formatter
             serializer.Verify();
         }
 
+        [Fact]
+        public void MessageReaderQuotas_Property_RoundTrip()
+        {
+            var formatter = CreateFormatter();
+            formatter.MessageReaderQuotas.MaxNestingDepth = 42;
+
+            Assert.Equal(42, formatter.MessageReaderQuotas.MaxNestingDepth);
+        }
+
+        [Fact]
+        public void MessageWriterQuotas_Property_RoundTrip()
+        {
+            var formatter = CreateFormatter();
+            formatter.MessageWriterQuotas.MaxNestingDepth = 42;
+
+            Assert.Equal(42, formatter.MessageWriterQuotas.MaxNestingDepth);
+        }
+
+        [Fact]
+        public void Default_ReceiveMessageSize_Is_MaxedOut()
+        {
+            var formatter = CreateFormatter();
+            Assert.Equal(Int64.MaxValue, formatter.MessageReaderQuotas.MaxReceivedMessageSize);
+        }
+
+        [Fact]
+        public void MessageReaderQuotas_Is_Passed_To_ODataLib()
+        {
+            ODataMediaTypeFormatter formatter = CreateFormatter();
+            formatter.MessageReaderQuotas.MaxReceivedMessageSize = 1;
+
+            HttpContent content = new StringContent("{ 'Number' : '42' }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            Assert.Throws<ODataException>(
+                () => formatter.ReadFromStreamAsync(typeof(int), content.ReadAsStreamAsync().Result, content, formatterLogger: null).Result,
+                "The maximum number of bytes allowed to be read from the stream has been exceeded. After the last read operation, a total of 19 bytes has been read from the stream; however a maximum of 1 bytes is allowed.");
+        }
+
         private static Encoding CreateEncoding(string name)
         {
             if (name == "utf-8")

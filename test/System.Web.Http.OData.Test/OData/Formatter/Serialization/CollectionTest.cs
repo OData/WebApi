@@ -29,13 +29,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void ArrayOfIntsSerializesAsODataForJsonLight()
         {
-            ArrayOfIntsSerializesAsOData(BaselineResource.ArrayOfInt32InJsonLight, true);
+            ArrayOfIntsSerializesAsOData(Resources.ArrayOfInt32InJsonLight, true);
         }
 
         [Fact]
         public void ArrayOfIntsSerializesAsODataForAtom()
         {
-            ArrayOfIntsSerializesAsOData(BaselineResource.ArrayOfInt32InAtom, false);
+            ArrayOfIntsSerializesAsOData(Resources.ArrayOfInt32InAtom, false);
         }
 
         private void ArrayOfIntsSerializesAsOData(string expectedContent, bool json)
@@ -49,13 +49,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void ArrayOfBoolsSerializesAsODataForJsonLight()
         {
-            ArrayOfBoolsSerializesAsOData(BaselineResource.ArrayOfBooleanInJsonLight, true);
+            ArrayOfBoolsSerializesAsOData(Resources.ArrayOfBooleanInJsonLight, true);
         }
 
         [Fact]
         public void ArrayOfBoolsSerializesAsODataForAtom()
         {
-            ArrayOfBoolsSerializesAsOData(BaselineResource.ArrayOfBooleanInAtom, false);
+            ArrayOfBoolsSerializesAsOData(Resources.ArrayOfBooleanInAtom, false);
         }
 
         private void ArrayOfBoolsSerializesAsOData(string expectedContet, bool json)
@@ -69,13 +69,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void ListOfStringsSerializesAsODataForJsonLight()
         {
-            ListOfStringsSerializesAsOData(BaselineResource.ListOfStringInJsonLight, true);
+            ListOfStringsSerializesAsOData(Resources.ListOfStringInJsonLight, true);
         }
 
         [Fact]
         public void ListOfStringsSerializesAsODataForAtom()
         {
-            ListOfStringsSerializesAsOData(BaselineResource.ListOfStringInAtom, false);
+            ListOfStringsSerializesAsOData(Resources.ListOfStringInAtom, false);
         }
 
         private void ListOfStringsSerializesAsOData(string expectedContent, bool json)
@@ -95,13 +95,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void CollectionOfComplexTypeSerializesAsODataForJsonLight()
         {
-            CollectionOfComplexTypeSerializesAsOData(BaselineResource.CollectionOfPersonInJsonLight, true);
+            CollectionOfComplexTypeSerializesAsOData(Resources.CollectionOfPersonInJsonLight, true);
         }
 
         [Fact]
         public void CollectionOfComplexTypeSerializesAsODataForAtom()
         {
-            CollectionOfComplexTypeSerializesAsOData(BaselineResource.CollectionOfPersonInAtom, false);
+            CollectionOfComplexTypeSerializesAsOData(Resources.CollectionOfPersonInAtom, false);
         }
 
         private void CollectionOfComplexTypeSerializesAsOData(string expectedContent, bool json)

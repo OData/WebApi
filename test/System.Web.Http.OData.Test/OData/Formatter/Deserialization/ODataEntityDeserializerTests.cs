@@ -35,13 +35,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void ReadFromStreamAsync_ForJsonLight()
         {
-            ReadFromStreamAsync(BaselineResource.ProductRequestEntryInPlainOldJson, true);
+            ReadFromStreamAsync(Resources.ProductRequestEntryInPlainOldJson, true);
         }
 
         [Fact]
         public void ReadFromStreamAsync_ForAtom()
         {
-            ReadFromStreamAsync(BaselineResource.ProductRequestEntryInAtom, false);
+            ReadFromStreamAsync(Resources.ProductRequestEntryInAtom, false);
         }
 
         private void ReadFromStreamAsync(string content, bool json)
@@ -60,13 +60,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void ReadFromStreamAsync_ComplexTypeAndInlineData_ForJsonLight()
         {
-            ReadFromStreamAsync_ComplexTypeAndInlineData(BaselineResource.SupplierRequestEntryInPlainOldJson, true);
+            ReadFromStreamAsync_ComplexTypeAndInlineData(Resources.SupplierRequestEntryInPlainOldJson, true);
         }
 
         [Fact]
         public void ReadFromStreamAsync_ComplexTypeAndInlineData_ForAtom()
         {
-            ReadFromStreamAsync_ComplexTypeAndInlineData(BaselineResource.SupplierRequestEntryInAtom, false);
+            ReadFromStreamAsync_ComplexTypeAndInlineData(Resources.SupplierRequestEntryInAtom, false);
         }
 
         private void ReadFromStreamAsync_ComplexTypeAndInlineData(string content, bool json)
@@ -92,13 +92,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void Read_PatchMode_ForJsonLight()
         {
-            Read_PatchMode(BaselineResource.SupplierPatchInPlainOldJson, true);
+            Read_PatchMode(Resources.SupplierPatchInPlainOldJson, true);
         }
 
         [Fact]
         public void Read_PatchMode_ForAtom()
         {
-            Read_PatchMode(BaselineResource.SupplierPatchInAtom, false);
+            Read_PatchMode(Resources.SupplierPatchInAtom, false);
         }
 
         private void Read_PatchMode(string content, bool json)
@@ -124,14 +124,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void Read_ThrowsOnUnknownEntityType_ForJsonLight()
         {
-            Read_ThrowsOnUnknownEntityType(BaselineResource.SupplierRequestEntryInPlainOldJson, true,
+            Read_ThrowsOnUnknownEntityType(Resources.SupplierRequestEntryInPlainOldJson, true,
                 "The property 'Concurrency' does not exist on type 'ODataDemo.Product'. Make sure to only use property names that are defined by the type.");
         }
 
         [Fact]
         public void Read_ThrowsOnUnknownEntityType_ForAtom()
         {
-            Read_ThrowsOnUnknownEntityType(BaselineResource.SupplierRequestEntryInAtom, false,
+            Read_ThrowsOnUnknownEntityType(Resources.SupplierRequestEntryInAtom, false,
                 "An entry with type 'ODataDemo.Supplier' was found, but it is not assignable to the expected type 'ODataDemo.Product'. The type specified in the entry must be equal to either the expected type or a derived type.");
         }
         

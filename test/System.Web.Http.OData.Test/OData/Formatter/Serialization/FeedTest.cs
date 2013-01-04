@@ -22,13 +22,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void IEnumerableOfEntityTypeSerializesAsODataFeedForJsonLight()
         {
-            IEnumerableOfEntityTypeSerializesAsODataFeed(BaselineResource.FeedOfEmployeeInJsonLight, true);
+            IEnumerableOfEntityTypeSerializesAsODataFeed(Resources.FeedOfEmployeeInJsonLight, true);
         }
 
         [Fact]
         public void IEnumerableOfEntityTypeSerializesAsODataFeedForAtom()
         {
-            IEnumerableOfEntityTypeSerializesAsODataFeed(BaselineResource.FeedOfEmployeeInAtom, false);
+            IEnumerableOfEntityTypeSerializesAsODataFeed(Resources.FeedOfEmployeeInAtom, false);
         }
 
         private void IEnumerableOfEntityTypeSerializesAsODataFeed(string expectedContent, bool json)

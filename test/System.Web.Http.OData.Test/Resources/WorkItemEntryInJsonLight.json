@@ -1,0 +1,3 @@
+﻿{
+  "odata.metadata":"http://localhost/$metadata#Default.Container.WorkItems/@Element","ID":25,"EmployeeID":0,"IsCompleted":false,"NumberOfHours@odata.type":"Edm.Single","NumberOfHours":100
+}

@@ -25,13 +25,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void ComplexTypeSerializesAsODataForJsonLight()
         {
-            ComplexTypeSerializesAsOData(BaselineResource.PersonComplexTypeInJsonLight, true);
+            ComplexTypeSerializesAsOData(Resources.PersonComplexTypeInJsonLight, true);
         }
 
         [Fact]
         public void ComplexTypeSerializesAsODataForAtom()
         {
-            ComplexTypeSerializesAsOData(BaselineResource.PersonComplexTypeInAtom, false);
+            ComplexTypeSerializesAsOData(Resources.PersonComplexTypeInAtom, false);
         }
 
         private void ComplexTypeSerializesAsOData(string expectedContent, bool json)

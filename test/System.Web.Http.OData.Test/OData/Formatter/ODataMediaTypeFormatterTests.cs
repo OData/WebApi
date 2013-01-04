@@ -29,13 +29,13 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void WriteToStreamAsyncReturnsODataRepresentationForJsonLight()
         {
-            WriteToStreamAsyncReturnsODataRepresentation(BaselineResource.WorkItemEntryInJsonLight, true);
+            WriteToStreamAsyncReturnsODataRepresentation(Resources.WorkItemEntryInJsonLight, true);
         }
 
         [Fact]
         public void WriteToStreamAsyncReturnsODataRepresentationForAtom()
         {
-            WriteToStreamAsyncReturnsODataRepresentation(BaselineResource.WorkItemEntryInAtom, false);
+            WriteToStreamAsyncReturnsODataRepresentation(Resources.WorkItemEntryInAtom, false);
         }
 
         private static void WriteToStreamAsyncReturnsODataRepresentation(string expectedContent, bool json)

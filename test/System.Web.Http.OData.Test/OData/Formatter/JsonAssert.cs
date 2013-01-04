@@ -9,13 +9,8 @@ namespace System.Web.Http.OData.Formatter
     {
         public static void Equal(string expected, string actual)
         {
-            expected = expected.Trim();
-            actual = actual.Trim();
-
-            // compare line by line since odata json typically differs from baseline by spaces
-            string[] expectedLines = expected.Split('\n').ToList().ConvertAll((str) => str.Trim()).ToArray();
-            string[] actualLines = actual.Split('\n').ToList().ConvertAll((str) => str.Trim()).ToArray();
-            Assert.Equal(expectedLines, actualLines);
+            // For now, simply compare the exact strings. Note that this approach requires whitespace to match exactly.
+            Assert.Equal(expected, actual);
         }
     }
 }

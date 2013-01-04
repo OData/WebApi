@@ -20,13 +20,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [Fact]
         public void EntityTypeSerializesAsODataEntryForJsonLight()
         {
-            EntityTypeSerializesAsODataEntry(BaselineResource.EmployeeEntryInJsonLight, true);
+            EntityTypeSerializesAsODataEntry(Resources.EmployeeEntryInJsonLight, true);
         }
 
         [Fact]
         public void EntityTypeSerializesAsODataEntryForAtom()
         {
-            EntityTypeSerializesAsODataEntry(BaselineResource.EmployeeEntryInAtom, false);
+            EntityTypeSerializesAsODataEntry(Resources.EmployeeEntryInAtom, false);
         }
 
         private void EntityTypeSerializesAsODataEntry(string expectedContent, bool json)

@@ -57,7 +57,7 @@ namespace System.Web.Http.OData
 
         public static string GetEdmx()
         {
-            return BaselineResource.ProductsCSDL;
+            return Resources.ProductsCsdl;
         }
 
         public static EdmStructuralProperty StructuralProperty<TObject, TProperty>(IEdmStructuredType declaringType, Expression<Func<TObject, TProperty>> property, IEdmTypeReference propertyType = null)

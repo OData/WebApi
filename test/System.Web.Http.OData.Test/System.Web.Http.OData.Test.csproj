@@ -111,11 +111,6 @@
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\MediaTypeFormatterTestBase.cs">
       <Link>OData\Formatter\MediaTypeFormatterTestBase.cs</Link>
     </Compile>
-    <Compile Include="BaselineResource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>BaselineResource.resx</DependentUpon>
-    </Compile>
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
     <Compile Include="ODataUrlHelperExtensionsTest.cs" />
@@ -194,6 +189,7 @@
     <Compile Include="OData\Query\Validators\SkipQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
+    <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />
     <Compile Include="TestCommon\MockType.cs" />
@@ -278,17 +274,52 @@
     <Compile Include="TypeHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="BaselineResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <CustomToolNamespace>System.Web.Http.OData</CustomToolNamespace>
-      <LastGenOutput>BaselineResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="Resources\SByteInXml.xml" />
+    <EmbeddedResource Include="Resources\SingleInXml.xml" />
+    <EmbeddedResource Include="Resources\StringInXml.xml" />
+    <EmbeddedResource Include="Resources\SupplierPatchInAtom.xml" />
+    <EmbeddedResource Include="Resources\SupplierRequestEntryInAtom.xml" />
+    <EmbeddedResource Include="Resources\TimeSpanInXml.xml" />
+    <EmbeddedResource Include="Resources\WorkItemEntryInAtom.xml" />
     <None Include="App.config" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeEdmPropertyConventionTests.cs" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\ArrayOfBooleanInJsonLight.json" />
+    <EmbeddedResource Include="Resources\ArrayOfByteInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\ArrayOfInt32InJsonLight.json" />
+    <EmbeddedResource Include="Resources\BooleanInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\ByteInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\CollectionOfPersonInJsonLight.json" />
+    <EmbeddedResource Include="Resources\DateTimeInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\DecimalInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\DoubleInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\EmployeeEntryInJsonLight.json" />
+    <EmbeddedResource Include="Resources\FeedOfEmployeeInJsonLight.json" />
+    <EmbeddedResource Include="Resources\GuidInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\Int16InJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\Int32InJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\Int64InJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\ListOfStringInJsonLight.json" />
+    <EmbeddedResource Include="Resources\MainEntryFeedInJsonFullMetadata.json" />
+    <EmbeddedResource Include="Resources\MainEntryFeedInJsonNoMetadata.json" />
+    <EmbeddedResource Include="Resources\NullableBooleanInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\NullableInt32InJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\NullableInt32InJsonNoMetadata.json" />
+    <EmbeddedResource Include="Resources\PersonComplexTypeInJsonLight.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInJsonFullMetadata.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInJsonVerbose.json" />
+    <EmbeddedResource Include="Resources\PersonEntryInPlainOldJson.json" />
+    <EmbeddedResource Include="Resources\PersonRequestEntryInPlainOldJson.json" />
+    <EmbeddedResource Include="Resources\ProductRequestEntryInPlainOldJson.json" />
+    <EmbeddedResource Include="Resources\ProductsCsdl.xml" />
+    <EmbeddedResource Include="Resources\SByteInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\SingleInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\StringInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\StringInJsonNoMetadata.json" />
+    <EmbeddedResource Include="Resources\SupplierPatchInPlainOldJson.json" />
+    <EmbeddedResource Include="Resources\SupplierRequestEntryInPlainOldJson.json" />
+    <EmbeddedResource Include="Resources\TimeSpanInJsonMinimalMetadata.json" />
+    <EmbeddedResource Include="Resources\WorkItemEntryInJsonLight.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Web.Http.OData\System.Web.Http.OData.csproj">
@@ -302,6 +333,29 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ArrayOfBooleanInAtom.xml" />
+    <EmbeddedResource Include="Resources\ArrayOfByteInXml.xml" />
+    <EmbeddedResource Include="Resources\ArrayOfInt32InAtom.xml" />
+    <EmbeddedResource Include="Resources\BooleanInXml.xml" />
+    <EmbeddedResource Include="Resources\ByteInXml.xml" />
+    <EmbeddedResource Include="Resources\CollectionOfPersonInAtom.xml" />
+    <EmbeddedResource Include="Resources\DateTimeInXml.xml" />
+    <EmbeddedResource Include="Resources\DecimalInXml.xml" />
+    <EmbeddedResource Include="Resources\DoubleInXml.xml" />
+    <EmbeddedResource Include="Resources\EmployeeEntryInAtom.xml" />
+    <EmbeddedResource Include="Resources\FeedOfEmployeeInAtom.xml" />
+    <EmbeddedResource Include="Resources\GuidInXml.xml" />
+    <EmbeddedResource Include="Resources\Int16InXml.xml" />
+    <EmbeddedResource Include="Resources\Int32InXml.xml" />
+    <EmbeddedResource Include="Resources\Int64InXml.xml" />
+    <EmbeddedResource Include="Resources\ListOfStringInAtom.xml" />
+    <EmbeddedResource Include="Resources\NullableBooleanInXml.xml" />
+    <EmbeddedResource Include="Resources\NullableInt32InXml.xml" />
+    <EmbeddedResource Include="Resources\PersonComplexTypeInAtom.xml" />
+    <EmbeddedResource Include="Resources\PersonEntryInAtom.xml" />
+    <EmbeddedResource Include="Resources\ProductRequestEntryInAtom.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

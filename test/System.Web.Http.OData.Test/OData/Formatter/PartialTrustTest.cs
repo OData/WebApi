@@ -23,14 +23,14 @@ namespace System.Web.Http.OData.Formatter
             {
                 var _client = new HttpClient(host);
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, new Uri(baseAddress + "People"));
-                requestMessage.Content = new StringContent(BaselineResource.PersonEntryInAtom, Encoding.UTF8, "application/atom+xml");
+                requestMessage.Content = new StringContent(Resources.PersonEntryInAtom, Encoding.UTF8, "application/atom+xml");
                 using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                     Assert.Equal("application/atom+xml", response.Content.Headers.ContentType.MediaType);
 
-                    ODataTestUtil.VerifyResponse(response.Content, BaselineResource.PersonEntryInAtom);
+                    ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInAtom);
                 }
             }
         }
@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Formatter
             {
                 var _client = new HttpClient(host);
                 HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, new Uri(baseAddress + "People"));
-                requestMessage.Content = new StringContent(BaselineResource.PersonRequestEntryInPlainOldJson);
+                requestMessage.Content = new StringContent(Resources.PersonRequestEntryInPlainOldJson);
                 requestMessage.Content.Headers.ContentType = ODataMediaTypes.ApplicationJsonODataFullMetadata;
                 using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
                 {
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                     Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
 
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInJsonFullMetadata);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, Resources.PersonEntryInJsonFullMetadata);
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Formatter
             {
                 var _client = new HttpClient(host);
                 HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, new Uri(baseAddress + "People"));
-                requestMessage.Content = new StringContent(BaselineResource.PersonRequestEntryInPlainOldJson);
+                requestMessage.Content = new StringContent(Resources.PersonRequestEntryInPlainOldJson);
                 requestMessage.Content.Headers.ContentType = ODataTestUtil.ApplicationJsonMediaType;
                 using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
                 {
@@ -76,7 +76,7 @@ namespace System.Web.Http.OData.Formatter
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                     Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
 
-                    ODataTestUtil.VerifyJsonResponse(response.Content, BaselineResource.PersonEntryInJsonVerbose);
+                    ODataTestUtil.VerifyJsonResponse(response.Content, Resources.PersonEntryInJsonVerbose);
                 }
             }
         }

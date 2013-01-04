@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carsEdmSet = model.EntityContainers().Single().FindEntitySet("cars");
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -39,7 +39,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = carsEdmSet,
                     EntityType = carsEdmSet.ElementType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 paintAction);
@@ -58,7 +58,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carsEdmSet = model.EntityContainers().Single().FindEntitySet("cars");
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -71,7 +71,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = carsEdmSet,
                     EntityType = carsEdmSet.ElementType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 paintAction);
@@ -92,7 +92,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carEdmType = model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType;
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -105,7 +105,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmSet,
                     EntityType = carEdmType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 paintAction);
@@ -130,7 +130,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var paintEdmAction = model.GetAvailableProcedures(model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType).Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -144,7 +144,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 EntitySet = vehiclesEdmSet,
                 EntityType = carEdmType,
                 UrlHelper = request.GetUrlHelper(),
-                PathHandler = new DefaultODataPathHandler(model),
+                PathHandler = new DefaultODataPathHandler(),
                 EntityInstance = new Car { Model = 2009, Name = "Accord" }
             });
             Assert.Equal(

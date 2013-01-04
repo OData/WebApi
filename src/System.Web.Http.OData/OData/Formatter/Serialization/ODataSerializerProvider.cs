@@ -10,23 +10,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     public abstract class ODataSerializerProvider
     {
-        private ConcurrentDictionary<IEdmTypeReference, ODataSerializer> _serializerCache;
-
-        protected ODataSerializerProvider(IEdmModel edmModel)
-        {
-            if (edmModel == null)
-            {
-                throw Error.ArgumentNull("edmModel");
-            }
-
-            EdmModel = edmModel;
-            _serializerCache = new ConcurrentDictionary<IEdmTypeReference, ODataSerializer>(new EdmTypeReferenceEqualityComparer());
-        }
-
-        /// <summary>
-        /// Gets or Sets the <see cref="IEdmModel" />
-        /// </summary>
-        public IEdmModel EdmModel { get; private set; }
+        private readonly ConcurrentDictionary<IEdmTypeReference, ODataSerializer> _serializerCache =
+            new ConcurrentDictionary<IEdmTypeReference, ODataSerializer>(new EdmTypeReferenceEqualityComparer());
 
         /// <summary>
         /// Gets an <see cref="ODataSerializer" /> for the given edmType.
@@ -43,11 +28,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Gets an <see cref="ODataSerializer" /> for the given clr <see cref="Type" />.
+        /// Gets an <see cref="ODataSerializer" /> for the given <paramref name="model"/> and <paramref name="type"/>.
         /// </summary>
+        /// <param name="model">The EDM model associated with the request.</param>
         /// <param name="type">The <see cref="Type" /></param>
         /// <returns>The <see cref="ODataSerializer" /></returns>
-        public abstract ODataSerializer GetODataPayloadSerializer(Type type);
+        public abstract ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type);
 
         /// <summary>
         /// Sets the ODataSerializer for the given edmType in the serializer cache.

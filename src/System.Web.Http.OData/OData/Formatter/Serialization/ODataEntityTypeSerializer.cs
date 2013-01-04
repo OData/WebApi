@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityType entityType = _edmEntityTypeReference.EntityDefinition();
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext
             {
-                EdmModel = SerializerProvider.EdmModel,
+                EdmModel = writeContext.Model,
                 EntitySet = writeContext.EntitySet,
                 EntityType = entityType,
                 UrlHelper = writeContext.UrlHelper,
@@ -112,7 +112,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (writeContext.EntitySet != null)
             {
-                EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                IEdmModel model = writeContext.Model;
+                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
                 EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityInstanceContext, writeContext.MetadataLevel);
 
                 if (selfLinks.IdLink != null)
@@ -147,7 +148,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 if (writeContext.EntitySet != null)
                 {
-                    EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                    IEdmModel model = writeContext.Model;
+                    EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
                     Uri navigationUrl = linkBuilder.BuildNavigationLink(context, navProperty, writeContext.MetadataLevel);
 
                     ODataNavigationLink navigationLink = new ODataNavigationLink

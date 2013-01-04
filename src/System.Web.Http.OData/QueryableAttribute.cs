@@ -338,7 +338,7 @@ namespace System.Web.Http
                     {
                         IEnumerable query = responseContent.Value as IEnumerable;
                         Contract.Assert(query != null, "ValidateResponseContent should have ensured the responseContent implements IEnumerable");
-                        IQueryable queryResults = ExecuteQuery(query, request, configuration, actionDescriptor);
+                        IQueryable queryResults = ExecuteQuery(query, request, actionDescriptor);
                         responseContent.Value = queryResults;
                     }
                     catch (ODataException e)
@@ -448,7 +448,7 @@ namespace System.Web.Http
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
-        private IQueryable ExecuteQuery(IEnumerable query, HttpRequestMessage request, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
+        private IQueryable ExecuteQuery(IEnumerable query, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
             Type originalQueryType = query.GetType();
             Type elementClrType = TypeHelper.GetImplementedIEnumerableType(originalQueryType);
@@ -465,7 +465,13 @@ namespace System.Web.Http
                     originalQueryType.FullName);
             }
 
-            ODataQueryContext queryContext = CreateQueryContext(elementClrType, configuration, actionDescriptor);
+            IEdmModel model = GetModel(elementClrType, request, actionDescriptor);
+            if (model == null)
+            {
+                throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
+            }
+
+            ODataQueryContext queryContext = new ODataQueryContext(model, elementClrType);
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
             ValidateQuery(request, queryOptions);
 
@@ -479,21 +485,30 @@ namespace System.Web.Http
             return ApplyQuery(queryable, queryOptions);
         }
 
-        internal static ODataQueryContext CreateQueryContext(Type elementClrType, HttpConfiguration configuration, HttpActionDescriptor actionDescriptor)
+        /// <summary>
+        /// Gets the EDM model for the given type and request.
+        /// </summary>
+        /// <param name="elementClrType">The CLR type to retrieve a model for.</param>
+        /// <param name="request">The request message to retrieve a model for.</param>
+        /// <param name="actionDescriptor">The action descriptor for the action being queried on.</param>
+        /// <returns>The EDM model for the given type and request.</returns>
+        /// <remarks>
+        /// Override this method to customize the EDM model used for querying.
+        /// </remarks>
+        public virtual IEdmModel GetModel(Type elementClrType, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
-            // Get model for the entire app
-            IEdmModel model = configuration.GetEdmModel();
+            // Get model for the request
+            IEdmModel model = request.GetEdmModel();
 
             if (model == null || model.GetEdmType(elementClrType) == null)
             {
                 // user has not configured anything or has registered a model without the element type
                 // let's create one just for this type and cache it in the action descriptor
                 model = actionDescriptor.GetEdmModel(elementClrType);
-                Contract.Assert(model != null);
             }
 
-            // parses the query from request uri
-            return new ODataQueryContext(model, elementClrType);
+            Contract.Assert(model != null);
+            return model;
         }
     }
 }

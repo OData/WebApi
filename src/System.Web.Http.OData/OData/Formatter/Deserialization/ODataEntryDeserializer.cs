@@ -39,14 +39,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// </summary>
         public IEdmTypeReference EdmType { get; private set; }
 
-        public IEdmModel EdmModel
-        {
-            get
-            {
-                return DeserializerProvider != null ? DeserializerProvider.EdmModel : null;
-            }
-        }
-
         /// <summary>
         /// The <see cref="ODataDeserializerProvider"/> to use for deserializing inner items.
         /// </summary>
@@ -228,7 +220,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 // open complex property
                 Contract.Assert(!String.IsNullOrEmpty(complexValue.TypeName), "ODataLib should have verified that open complex value has a type name since we provided metadata.");
-                IEdmType edmType = deserializerProvider.EdmModel.FindType(complexValue.TypeName);
+                IEdmModel model = readContext.Model;
+                IEdmType edmType = model.FindType(complexValue.TypeName);
                 Contract.Assert(edmType.TypeKind == EdmTypeKind.Complex, "ODataLib should have verified that complex value has a complex resource type.");
                 edmComplexType = new EdmComplexTypeReference(edmType as IEdmComplexType, isNullable: true);
             }

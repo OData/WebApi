@@ -29,10 +29,9 @@ namespace System.Web.Http.OData.Formatter
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
         private const string ElementNameDefault = "root";
-        internal const string EdmModelKey = "MS_EdmModel";
+        internal const string IsODataKey = "MS_IsOData";
 
         private readonly ODataDeserializerProvider _deserializerProvider;
-        private readonly IEdmModel _model;
         private readonly ODataVersion _version;
 
         /// <summary>
@@ -43,14 +42,14 @@ namespace System.Web.Http.OData.Formatter
         private readonly HttpRequestMessage _request;
         private readonly ODataSerializerProvider _serializerProvider;
 
-        internal ODataMediaTypeFormatter(IEdmModel model, IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(model, payloadKinds, request: null)
+        internal ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
+            : this(payloadKinds, request: null)
         {
         }
 
-        internal ODataMediaTypeFormatter(IEdmModel model, IEnumerable<ODataPayloadKind> payloadKinds,
+        internal ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds,
             HttpRequestMessage request)
-            : this(new DefaultODataDeserializerProvider(model), new DefaultODataSerializerProvider(model),
+            : this(new DefaultODataDeserializerProvider(), new DefaultODataSerializerProvider(),
                 payloadKinds, ODataFormatterConstants.DefaultODataVersion, request)
         {
         }
@@ -62,12 +61,10 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request)
         {
             Contract.Assert(deserializerProvider != null);
-            Contract.Assert(deserializerProvider.EdmModel != null);
             Contract.Assert(serializerProvider != null);
             Contract.Assert(payloadKinds != null);
 
             _deserializerProvider = deserializerProvider;
-            _model = deserializerProvider.EdmModel;
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
             _version = version;
@@ -78,7 +75,6 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request)
         {
             Contract.Assert(formatter._serializerProvider != null);
-            Contract.Assert(formatter._model != null);
             Contract.Assert(formatter._deserializerProvider != null);
             Contract.Assert(formatter._payloadKinds != null);
             Contract.Assert(request != null);
@@ -90,7 +86,6 @@ namespace System.Web.Http.OData.Formatter
 
             // Parameter 1A: Copy this class's private fields and internal properties.
             _serializerProvider = formatter._serializerProvider;
-            _model = formatter._model;
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
 
@@ -124,32 +119,29 @@ namespace System.Web.Http.OData.Formatter
             _request = request;
         }
 
-        /// <summary>
-        /// The <see cref="IEdmModel"/> used by this formatter.
-        /// </summary>
-        public IEdmModel Model
-        {
-            get
-            {
-                return _model;
-            }
-        }
-
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
         {
             // call base to validate parameters
             base.GetPerRequestFormatterInstance(type, request, mediaType);
 
-            // Adds model information to allow callers to identify the ODataMediaTypeFormatter through the tracing wrapper
-            // This is a workaround until tracing provides information about the wrapped inner formatter
-            if (type == typeof(IEdmModel))
+            if (_request != null && _request == request)
             {
-                request.Properties.Add(EdmModelKey, _model);
+                // If the request is already set on this formatter, return itself.
+                return this;
             }
+            else
+            {
+                // Adds information to allow callers to identify the ODataMediaTypeFormatter through the tracing wrapper
+                // This is a workaround until tracing provides information about the wrapped inner formatter
+                if (type == typeof(IEdmModel))
+                {
+                    request.Properties[IsODataKey] = true;
+                }
 
-            ODataVersion version = GetResponseODataVersion(request);
-            return new ODataMediaTypeFormatter(this, version, request);
+                ODataVersion version = GetResponseODataVersion(request);
+                return new ODataMediaTypeFormatter(this, version, request);
+            }
         }
 
         /// <inheritdoc/>
@@ -170,15 +162,22 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("type");
             }
 
-            TryGetInnerTypeForDelta(ref type);
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type);
-
-            if (deserializer == null)
+            if (_request != null)
             {
-                return false;
+                IEdmModel model = _request.GetEdmModel();
+                if (model != null)
+                {
+                    TryGetInnerTypeForDelta(ref type);
+                    ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(model, type);
+
+                    if (deserializer != null)
+                    {
+                        return _payloadKinds.Contains(deserializer.ODataPayloadKind);
+                    }
+                }
             }
 
-            return _payloadKinds.Contains(deserializer.ODataPayloadKind);
+            return false;
         }
 
         /// <inheritdoc/>
@@ -189,14 +188,20 @@ namespace System.Web.Http.OData.Formatter
                 throw Error.ArgumentNull("type");
             }
 
-            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
-
-            if (serializer == null)
+            if (_request != null)
             {
-                return false;
+                IEdmModel model = _request.GetEdmModel();
+                if (model != null)
+                {
+                    ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
+                    if (serializer != null)
+                    {
+                        return _payloadKinds.Contains(serializer.ODataPayloadKind);
+                    }
+                }
             }
 
-            return _payloadKinds.Contains(serializer.ODataPayloadKind);
+            return false;
         }
 
         /// <inheritdoc/>
@@ -223,15 +228,21 @@ namespace System.Web.Http.OData.Formatter
 
                 HttpContentHeaders contentHeaders = content == null ? null : content.Headers;
                 // If content length is 0 then return default value for this type
-                if (contentHeaders != null && contentHeaders.ContentLength == 0)
+                if (contentHeaders == null || contentHeaders.ContentLength == 0)
                 {
                     result = GetDefaultValueForType(type);
                 }
                 else
                 {
+                    IEdmModel model = _request.GetEdmModel();
+                    if (model == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+                    }
+
                     Type originalType = type;
                     bool isPatchMode = TryGetInnerTypeForDelta(ref type);
-                    ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type);
+                    ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(model, type);
                     if (deserializer == null)
                     {
                         throw Error.Argument("type", SRResources.FormatterReadIsNotSupportedForType, type.FullName, GetType().FullName);
@@ -242,7 +253,7 @@ namespace System.Web.Http.OData.Formatter
                     try
                     {
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
-                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, _deserializerProvider.EdmModel);
+                        oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
                         ODataPath path = _request == null ? null : _request.GetODataPath();
 
@@ -250,7 +261,7 @@ namespace System.Web.Http.OData.Formatter
                         {
                             IsPatchMode = isPatchMode,
                             Path = path,
-                            Model = _model
+                            Model = model
                         };
 
                         if (isPatchMode)
@@ -306,8 +317,14 @@ namespace System.Web.Http.OData.Formatter
             return TaskHelpers.RunSynchronously(() =>
             {
                 // get the most appropriate serializer given that we support inheritance.
+                IEdmModel model = _request.GetEdmModel();
+                if (model == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+                }
+
                 type = value == null ? type : value.GetType();
-                ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type);
+                ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);
@@ -333,8 +350,8 @@ namespace System.Web.Http.OData.Formatter
                     DisableMessageStreamDisposal = true
                 };
 
-                IODataPathHandler pathHandler = configuration.GetODataPathHandler() ??
-                    new DefaultODataPathHandler(_model);
+                IODataPathHandler pathHandler = _request.GetODataPathHandler();
+                Contract.Assert(pathHandler != null);
 
                 // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
                 // for errors, such as when routing itself fails. In that case, the route data property is not
@@ -359,11 +376,12 @@ namespace System.Web.Http.OData.Formatter
                     writerSettings.SetContentType(contentType.ToString(), contentType.CharSet);
                 }
 
-                using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, _deserializerProvider.EdmModel))
+                using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
                 {
                     ODataSerializerContext writeContext = new ODataSerializerContext()
                     {
                         EntitySet = targetEntitySet,
+                        Model = model,
                         UrlHelper = urlHelper,
                         PathHandler = pathHandler,
                         RootElementName = GetRootElementName(path) ?? ElementNameDefault,

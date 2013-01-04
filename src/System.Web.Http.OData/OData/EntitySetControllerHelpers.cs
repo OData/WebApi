@@ -30,7 +30,7 @@ namespace System.Web.Http.OData
 
         public static ODataQueryOptions<TEntity> CreateQueryOptions<TEntity>(ApiController controller)
         {
-            ODataQueryContext context = new ODataQueryContext(controller.Configuration.GetEdmModel(), typeof(TEntity));
+            ODataQueryContext context = new ODataQueryContext(controller.Request.GetEdmModel(), typeof(TEntity));
             return new ODataQueryOptions<TEntity>(context, controller.Request);
         }
 
@@ -78,7 +78,7 @@ namespace System.Web.Http.OData
 
             string controllerName = controller.ControllerContext.ControllerDescriptor.ControllerName;
             response.Headers.Location = new Uri(controller.Url.ODataLink(
-                                                    controller.Configuration.GetODataPathHandler(),
+                                                    controller.Request.GetODataPathHandler(),
                                                     new EntitySetPathSegment(controllerName),
                                                     new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
             return response;

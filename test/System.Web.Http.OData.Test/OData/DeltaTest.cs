@@ -336,12 +336,13 @@ namespace System.Web.Http.OData
             builder.Entity<DeltaModel>();
             builder.EntitySet<DeltaModel>("ignored");
             IEdmModel model = builder.GetEdmModel();
-            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create(model);
+            IEnumerable<ODataMediaTypeFormatter> odataFormatters = ODataMediaTypeFormatters.Create();
             Delta<DeltaModel> delta;
 
             using (HttpRequestMessage request = new HttpRequestMessage())
             {
                 IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
+                request.SetEdmModel(model);
                 request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModel>), request, null));

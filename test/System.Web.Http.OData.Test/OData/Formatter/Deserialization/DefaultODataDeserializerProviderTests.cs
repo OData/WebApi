@@ -11,27 +11,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         IEdmModel _edmModel = EdmTestHelpers.GetModel();
 
         [Fact]
-        public void Constructor_Throw_ArgumentNull_edmModel()
-        {
-            Assert.ThrowsArgumentNull(() =>
-            {
-                var deserializerProvider = new DefaultODataDeserializerProvider(edmModel: null);
-            }, "edmModel");
-        }
-
-        [Fact]
-        public void Constructor()
-        {
-            var deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-
-            Assert.Equal(_edmModel, deserializerProvider.EdmModel);
-        }
-
-        [Fact]
         public void GetODataDeserializer_Uri()
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(typeof(Uri));
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel, typeof(Uri));
 
             Assert.NotNull(deserializer);
             var referenceLinkDeserializer = Assert.IsType<ODataEntityReferenceLinkDeserializer>(deserializer);
@@ -49,8 +32,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [InlineData(typeof(int?), EdmPrimitiveTypeKind.Int32)]
         public void GetODataDeserializer_Primitive(Type type, EdmPrimitiveTypeKind primitiveKind)
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(type);
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel, type);
 
             Assert.NotNull(deserializer);
             ODataPrimitiveDeserializer rawValueDeserializer = Assert.IsType<ODataPrimitiveDeserializer>(deserializer);
@@ -61,40 +44,38 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void GetODataDeserializer_Entity()
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(typeof(ODataEntityDeserializerTests.Product));
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel, typeof(ODataEntityDeserializerTests.Product));
 
             Assert.NotNull(deserializer);
             ODataEntityDeserializer entityDeserializer = Assert.IsType<ODataEntityDeserializer>(deserializer);
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Entry);
             Assert.Equal(entityDeserializer.DeserializerProvider, deserializerProvider);
             Assert.True(entityDeserializer.EdmEntityType.IsEquivalentTo(_edmModel.GetEdmTypeReference(typeof(ODataEntityDeserializerTests.Product))));
-            Assert.Equal(entityDeserializer.EdmModel, _edmModel);
             Assert.Equal(entityDeserializer.EdmType, entityDeserializer.EdmEntityType);
         }
 
         [Fact]
         public void GetODataDeserializer_Complex()
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(typeof(ODataEntityDeserializerTests.Address));
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel, typeof(ODataEntityDeserializerTests.Address));
 
             Assert.NotNull(deserializer);
             ODataComplexTypeDeserializer complexDeserializer = Assert.IsType<ODataComplexTypeDeserializer>(deserializer);
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Property);
             Assert.Equal(complexDeserializer.DeserializerProvider, deserializerProvider);
             Assert.True(complexDeserializer.EdmComplexType.IsEquivalentTo(_edmModel.GetEdmTypeReference(typeof(ODataEntityDeserializerTests.Address))));
-            Assert.Equal(complexDeserializer.EdmModel, _edmModel);
             Assert.Equal(complexDeserializer.EdmType, complexDeserializer.EdmComplexType);
         }
 
         [Fact]
         public void GetODataSerializer_ReturnsSameSerializer_ForSameType()
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
-            ODataDeserializer firstCallDeserializer = deserializerProvider.GetODataDeserializer(typeof(ODataEntityDeserializerTests.Supplier));
-            ODataDeserializer secondCallDeserializer = deserializerProvider.GetODataDeserializer(typeof(ODataEntityDeserializerTests.Supplier));
+            ODataDeserializer firstCallDeserializer = deserializerProvider.GetODataDeserializer(_edmModel, typeof(ODataEntityDeserializerTests.Supplier));
+            ODataDeserializer secondCallDeserializer = deserializerProvider.GetODataDeserializer(_edmModel, typeof(ODataEntityDeserializerTests.Supplier));
 
             Assert.Same(firstCallDeserializer, secondCallDeserializer);
         }
@@ -102,8 +83,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void GetODataSerializer_ActionPayload()
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-            ODataActionPayloadDeserializer basicActionPayload = deserializerProvider.GetODataDeserializer(typeof(ODataActionParameters)) as ODataActionPayloadDeserializer;
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataActionPayloadDeserializer basicActionPayload = deserializerProvider.GetODataDeserializer(_edmModel, typeof(ODataActionParameters)) as ODataActionPayloadDeserializer;
 
             Assert.NotNull(basicActionPayload);
         }
@@ -111,8 +92,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void GetODataSerializer_Derived_ActionPayload()
         {
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(_edmModel);
-            ODataActionPayloadDeserializer derivedActionPayload = deserializerProvider.GetODataDeserializer(typeof(MyActionPayload)) as ODataActionPayloadDeserializer;
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataActionPayloadDeserializer derivedActionPayload = deserializerProvider.GetODataDeserializer(_edmModel, typeof(MyActionPayload)) as ODataActionPayloadDeserializer;
 
             Assert.NotNull(derivedActionPayload);
         }

@@ -15,11 +15,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void Constructor_Succeeds_ForValidComplexType()
         {
-            var deserializerProvider = new Mock<ODataDeserializerProvider>(EdmTestHelpers.GetModel()).Object;
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
             var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
 
             Assert.Equal(deserializer.DeserializerProvider, deserializerProvider);
-            Assert.Equal(deserializer.EdmModel, deserializerProvider.EdmModel);
             Assert.Equal(deserializer.EdmComplexType.Definition, EdmTestHelpers.GetEdmType("ODataDemo.Address"));
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Property);
         }
@@ -27,12 +26,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void ReadInline_Throws_ForNonODataComplexValues()
         {
-            var deserializerProvider = new Mock<ODataDeserializerProvider>(EdmTestHelpers.GetModel()).Object;
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
             var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
 
             Assert.ThrowsArgument(() =>
             {
-                deserializer.ReadInline(10, new ODataDeserializerContext());
+                deserializer.ReadInline(10, new ODataDeserializerContext() { Model = _edmModel });
             }, "item");
         }
 
@@ -40,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadInline()
         {
             // Arrange
-            var deserializerProvider = new Mock<ODataDeserializerProvider>(EdmTestHelpers.GetModel()).Object;
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
             var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
 
             ODataComplexValue complexValue = new ODataComplexValue
@@ -57,7 +56,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataEntityDeserializerTests.Address address =
                 deserializer.ReadInline(
                 complexValue,
-                new ODataDeserializerContext()) as ODataEntityDeserializerTests.Address;
+                new ODataDeserializerContext() { Model = _edmModel }) as ODataEntityDeserializerTests.Address;
 
             // Assert
             Assert.NotNull(address);

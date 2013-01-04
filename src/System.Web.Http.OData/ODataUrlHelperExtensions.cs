@@ -37,8 +37,9 @@ namespace System.Web.Http
         public static string ODataLink(this UrlHelper urlHelper, IODataPathHandler pathHandler, IList<ODataPathSegment> segments)
         {
             string odataPath = pathHandler.Link(new ODataPath(segments));
+            string linkRouteName = urlHelper.Request.GetODataRouteName() ?? ODataRouteConstants.DefaultRouteName;
 
-            string directLink = urlHelper.GenerateLinkDirectly(odataPath);
+            string directLink = urlHelper.GenerateLinkDirectly(linkRouteName, odataPath);
             if (directLink != null)
             {
                 return directLink;
@@ -46,7 +47,7 @@ namespace System.Web.Http
 
             // Slow path : use urlHelper.Link because the fast path failed
             return urlHelper.Link(
-                ODataRouteConstants.RouteName,
+                linkRouteName,
                 new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, odataPath } });
         }
 
@@ -56,14 +57,14 @@ namespace System.Web.Http
         // The right long-term fix is to remove this code and introduce an ODataRoute class that computes GetVirtualPath much faster
         // But the long-term fix cannot be implemented because of a critical bug in WebAPI routing that affects custom routes in WebHost
         // Removing this fast path is tracked by Issue 713
-        internal static string GenerateLinkDirectly(this UrlHelper urlHelper, string odataPath)
+        internal static string GenerateLinkDirectly(this UrlHelper urlHelper, string linkRouteName, string odataPath)
         {
             HttpRequestMessage request = urlHelper.Request;
             HttpConfiguration config = request.GetConfiguration();
             if (config != null)
             {
                 IHttpRoute odataRoute;
-                if (config.Routes.TryGetValue(ODataRouteConstants.RouteName, out odataRoute))
+                if (config.Routes.TryGetValue(linkRouteName, out odataRoute))
                 {
                     string routeTemplate = odataRoute.RouteTemplate;
                     if (routeTemplate.EndsWith(ODataRouteConstants.ODataPathTemplate, StringComparison.Ordinal))

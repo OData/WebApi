@@ -2,10 +2,9 @@
 
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.OData.Formatter;
-using System.Web.Http.OData.Properties;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData
 {
@@ -34,8 +33,7 @@ namespace System.Web.Http.OData
         /// cref="T:System.Web.Http.Controllers.HttpControllerDescriptor" /> can be associated with the derived
         /// controller type given that <see cref="T:System.Web.Http.Controllers.IControllerConfiguration" /> is
         /// inherited.</param>
-        public void Initialize(HttpControllerSettings controllerSettings,
-            HttpControllerDescriptor controllerDescriptor)
+        public void Initialize(HttpControllerSettings controllerSettings, HttpControllerDescriptor controllerDescriptor)
         {
             if (controllerSettings == null)
             {
@@ -50,26 +48,22 @@ namespace System.Web.Http.OData
             // If any OData formatters are registered globally, do nothing and use those instead
             if (!controllerSettings.Formatters.Where(f => f != null && f.IsODataFormatter()).Any())
             {
-                IEdmModel model = controllerDescriptor.Configuration.GetEdmModel();
-                if (model != null)
-                {
-                    controllerSettings.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));
-                }
+                controllerSettings.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             }
 
-            // Replace the action value binder with one that attaches the request to the formatter.
             ServicesContainer services = controllerSettings.Services;
             Contract.Assert(services != null);
+
+            // Replace the action value binder with one that attaches the request to the formatter.
             IActionValueBinder originalActionValueBinder = services.GetActionValueBinder();
-
-            if (originalActionValueBinder == null)
-            {
-                throw Error.Argument("controllerSettings", SRResources.ActionValueBinderMissing,
-                    controllerDescriptor.ControllerName);
-            }
-
             IActionValueBinder actionValueBinder = new PerRequestActionValueBinder(originalActionValueBinder);
             controllerSettings.Services.Replace(typeof(IActionValueBinder), actionValueBinder);
+
+            // Replace the content negotiator with one that uses the per-request formatters.
+            // This negotiator is required to allow CanReadType to have access to the model.
+            IContentNegotiator originalContentNegotiator = services.GetContentNegotiator();
+            IContentNegotiator contentNegotiator = new PerRequestContentNegotiator(originalContentNegotiator);
+            controllerSettings.Services.Replace(typeof(IContentNegotiator), contentNegotiator);
         }
     }
 }

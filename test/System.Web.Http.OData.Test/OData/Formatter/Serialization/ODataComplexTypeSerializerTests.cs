@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             _addressType = _model.FindDeclaredType("Default.Address") as IEdmComplexType;
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider(_model);
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             _serializer = new ODataComplexTypeSerializer(new EdmComplexTypeReference(_addressType, isNullable: false), serializerProvider);
         }
 

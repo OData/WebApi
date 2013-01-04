@@ -61,8 +61,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         private ODataMediaTypeFormatter CreateFormatter()
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(_model,
-                new ODataPayloadKind[] { ODataPayloadKind.Feed }, GetSampleRequest());
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Feed }, GetSampleRequest());
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeFeed);
             return formatter;
@@ -72,10 +71,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableOData(GetSampleModel());
+            config.MapODataRoute(GetSampleModel());
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
+            request.SetEdmModel(_model);
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
             return request;
         }

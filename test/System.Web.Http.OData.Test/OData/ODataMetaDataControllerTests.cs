@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.EnableOData(ODataTestUtil.GetEdmModel());
+            server.Configuration.MapODataRoute(ODataTestUtil.GetEdmModel());
 
             HttpClient client = new HttpClient(server);
             var response = client.GetAsync("http://localhost/$metadata").Result;
@@ -31,39 +31,35 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
-        public void GetMetadata_Returns_EdmModelFromSetODataFormatter()
+        public void GetMetadata_Returns_EdmModelFromRequest()
         {
             IEdmModel model = new EdmModel();
-            IEnumerable<ODataMediaTypeFormatter> oDataFormatters = ODataMediaTypeFormatters.Create(model);
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Formatters.InsertRange(0, oDataFormatters);
 
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
-            controller.Request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            controller.Request.SetEdmModel(model);
 
             IEdmModel responseModel = controller.GetMetadata();
             Assert.Equal(model, responseModel);
         }
 
         [Fact]
-        public void GetMetadata_Throws_IfModelIsNotSetOnConfiguration_And_ODataFormatterIsNotPresent()
+        public void GetMetadata_Throws_IfModelIsNotSetOnRequest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
-            controller.Request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
 
             Assert.Throws<InvalidOperationException>(
                 () => controller.GetMetadata(),
-                "No OData formatter was found to write the OData metadata. Consider registering an appropriate ODataMediaTypeFormatter on the configuration's formatter collection.");
+                "The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataRoute to register a route that parses the OData URI and attaches the model information.");
         }
 
         [Fact]
-        public void DollarMetaDataWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
+        public void DollarMetaDataWorks_AfterTracingIsEnabled()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.EnableOData(ODataTestUtil.GetEdmModel());
+            server.Configuration.MapODataRoute(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -78,7 +74,7 @@ namespace System.Web.Http.OData.Builder
         public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.EnableOData(ODataTestUtil.GetEdmModel());
+            server.Configuration.MapODataRoute(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -94,7 +90,7 @@ namespace System.Web.Http.OData.Builder
         {
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.EnableOData(new ODataConventionModelBuilder().GetEdmModel());
+            config.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
@@ -106,14 +102,12 @@ namespace System.Web.Http.OData.Builder
         public void GetMetadata_Doesnot_Change_DataServiceVersion()
         {
             // Arrange
-            HttpConfiguration configuration = new HttpConfiguration();
             IEdmModel model = new EdmModel();
             model.SetDataServiceVersion(new Version(0, 42));
-            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create(model));
 
             ODataMetadataController controller = new ODataMetadataController();
             controller.Request = new HttpRequestMessage();
-            controller.Request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+            controller.Request.SetEdmModel(model);
 
             // Act
             IEdmModel controllerModel = controller.GetMetadata();

@@ -14,7 +14,7 @@ namespace System.Web.Http
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
             UrlHelper urlHelper = new UrlHelper(request);
 
-            Assert.Null(urlHelper.GenerateLinkDirectly("odataPath"));
+            Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace System.Web.Http
             request.Properties["MS_HttpConfiguration"] = config;
             UrlHelper urlHelper = new UrlHelper(request);
 
-            Assert.Null(urlHelper.GenerateLinkDirectly("odataPath"));
+            Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace System.Web.Http
             request.Properties["MS_HttpConfiguration"] = config;
             UrlHelper urlHelper = new UrlHelper(request);
 
-            Assert.Null(urlHelper.GenerateLinkDirectly("odataPath"));
+            Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace System.Web.Http
             request.Properties["MS_HttpConfiguration"] = config;
             UrlHelper urlHelper = new UrlHelper(request);
 
-            Assert.Null(urlHelper.GenerateLinkDirectly("odataPath"));
+            Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace System.Web.Http
             request.Properties["MS_HttpRouteData"] = new HttpRouteData(new HttpRoute());
             UrlHelper urlHelper = new UrlHelper(request);
 
-            Assert.Equal("http://localhost/vpath/prefix/odataPath", urlHelper.GenerateLinkDirectly("odataPath"));
+            Assert.Equal("http://localhost/vpath/prefix/odataPath", urlHelper.GenerateLinkDirectly("OData", "odataPath"));
         }
     }
 }

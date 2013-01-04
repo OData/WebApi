@@ -345,7 +345,7 @@ namespace System.Web.Http.OData.Builder
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             UrlHelper urlHelper = new UrlHelper(request);
@@ -361,7 +361,7 @@ namespace System.Web.Http.OData.Builder
                 EntitySet = entitySet,
                 EntityType = movieType,
                 UrlHelper = urlHelper,
-                PathHandler = new DefaultODataPathHandler(model),
+                PathHandler = new DefaultODataPathHandler(),
                 EntityInstance = new Movie { ID = 1, Name = "Avatar" },
                 SkipExpensiveAvailabilityChecks = false
             };

@@ -68,12 +68,12 @@ namespace System.Web.Http.OData.Formatter
                 ODataModelBuilder model = new ODataModelBuilder();
 
                 var people = model.EntitySet<FormatterPerson>("People");
-                people.HasFeedSelfLink(context => new Uri(context.UrlHelper.Link(ODataRouteConstants.RouteName, new { })));
+                people.HasFeedSelfLink(context => new Uri(context.UrlHelper.Link(ODataRouteConstants.DefaultRouteName, new { })));
                 people.HasIdLink(context =>
                     {
                         string selfLink = context.EntitySet.Name + "(" + (context.EntityInstance as FormatterPerson).PerId.ToString() + ")";
                         return context.UrlHelper.Link(
-                            ODataRouteConstants.RouteName,
+                            ODataRouteConstants.DefaultRouteName,
                             new HttpRouteValueDictionary() { { "odataPath", selfLink } });
                     },
                     followsConventions: false);

@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Routing;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
 namespace System.Net.Http
@@ -15,10 +16,137 @@ namespace System.Net.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataHttpRequestMessageExtensions
     {
+        private const string EdmModelKey = "MS_EdmModel";
+        private const string ODataRouteNameKey = "MS_ODataRouteName";
         private const string ODataPathKey = "MS_ODataPath";
+        private const string ODataPathHandlerKey = "MS_ODataPathHandler";
         private const string InlineCountPropertyKey = "MS_InlineCount";
         private const string NextPageLinkPropertyKey = "MS_NextPageLink";
         private const string MessageDetailKey = "MessageDetail";
+
+        /// <summary>
+        /// Retrieves the EDM model associated with the request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The EDM model associated with this request, or <c>null</c> if there isn't one.</returns>
+        public static IEdmModel GetEdmModel(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object model;
+            if (request.Properties.TryGetValue(EdmModelKey, out model))
+            {
+                return model as IEdmModel;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Associates the given EDM model with the request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="model">The EDM model to associate with the request.</param>
+        public static void SetEdmModel(this HttpRequestMessage request, IEdmModel model)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            request.Properties.Add(EdmModelKey, model);
+        }
+
+        /// <summary>
+        /// Retrieves the route name to use for generating OData links.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The route name to use for generating OData links associated with this request, or <c>null</c> if there isn't one.</returns>
+        public static string GetODataRouteName(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object routeName;
+            if (request.Properties.TryGetValue(ODataRouteNameKey, out routeName))
+            {
+                return routeName as string;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Sets the given route name to be used for generating OData links.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="routeName">The route name to use for generating OData links.</param>
+        public static void SetODataRouteName(this HttpRequestMessage request, string routeName)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (routeName == null)
+            {
+                throw Error.ArgumentNull("routeName");
+            }
+
+            request.Properties.Add(ODataRouteNameKey, routeName);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IODataPathHandler"/> to use for generating links.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="IODataPathHandler"/> to use for generating links.</returns>
+        public static IODataPathHandler GetODataPathHandler(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object pathHandler;
+            if (!request.Properties.TryGetValue(ODataPathHandlerKey, out pathHandler))
+            {
+                IODataPathHandler defaultPathHandler = new DefaultODataPathHandler();
+                request.SetODataPathHandler(defaultPathHandler);
+                return defaultPathHandler;
+            }
+            return pathHandler as IODataPathHandler;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="IODataPathHandler"/> to use for generating links.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="pathHandler">The <see cref="IODataPathHandler"/> to use for generating links.</param>
+        public static void SetODataPathHandler(this HttpRequestMessage request, IODataPathHandler pathHandler)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (pathHandler == null)
+            {
+                throw Error.ArgumentNull("pathHandler");
+            }
+
+            request.Properties[ODataPathHandlerKey] = pathHandler;
+        }
 
         /// <summary>
         /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 

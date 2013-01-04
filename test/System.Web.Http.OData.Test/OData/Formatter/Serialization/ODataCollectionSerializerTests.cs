@@ -29,7 +29,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 ID = 10,
             };
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider(_model);
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             _serializer = new ODataCollectionSerializer(
                 new EdmCollectionTypeReference(
                     new EdmCollectionType(

@@ -57,23 +57,12 @@ namespace System.Web.Http.OData
 
         private IEdmModel GetModel()
         {
-            HttpConfiguration configuration = Request.GetConfiguration();
-
-            if (configuration == null)
+            IEdmModel model = Request.GetEdmModel();
+            if (model == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+                throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
             }
 
-            MediaTypeFormatter firstODataFormatter = configuration.Formatters.FirstOrDefault(
-                f => f != null && f.IsODataFormatter());
-
-            if (firstODataFormatter == null)
-            {
-                throw Error.InvalidOperation(SRResources.NoODataFormatterForMetadata);
-            }
-
-            IEdmModel model = firstODataFormatter.GetODataModel();
-            Contract.Assert(model != null);
             model.SetEdmxVersion(_defaultEdmxVersion);
             return model;
         }

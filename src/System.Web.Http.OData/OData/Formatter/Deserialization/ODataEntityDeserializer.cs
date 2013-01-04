@@ -63,7 +63,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 // received a derived type in a base type deserializer.
                 // delegate it to the appropriate derived type deserializer.
-                IEdmEntityType entityType = EdmModel.FindType(entry.TypeName) as IEdmEntityType;
+                IEdmModel model = readContext.Model;
+                IEdmEntityType entityType = model.FindType(entry.TypeName) as IEdmEntityType;
                 Contract.Assert(entityType != null, "edmlib should have already validated that it knows the edm type and is the same as or derives from EdmEntityType");
 
                 if (entityType.IsAbstract)
@@ -223,9 +224,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return topLevelItem;
         }
 
-        private void CreateEntityResource(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
+        private static void CreateEntityResource(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
         {
-            Type clrType = EdmLibHelpers.GetClrType(entityType, EdmModel);
+            IEdmModel model = readContext.Model;
+            Type clrType = EdmLibHelpers.GetClrType(entityType, model);
             if (clrType == null)
             {
                 throw Error.Argument("entityType", SRResources.MappingDoesNotContainEntityType, entityType.FullName());

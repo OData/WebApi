@@ -16,8 +16,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         public ComplexTypeTest()
         {
-            _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
-                new ODataPayloadKind[] { ODataPayloadKind.Property }, GetSampleRequest());
+            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, GetSampleRequest());
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
         }
@@ -46,6 +45,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
+            request.SetEdmModel(GetSampleModel());
             HttpConfiguration config = new HttpConfiguration();
             config.AddFakeODataRoute();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;

@@ -45,11 +45,12 @@ namespace System.Web.Http.OData.Formatter
             IEdmModel model = modelBuilder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
+            request.SetEdmModel(model);
             IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10")));
 
@@ -229,12 +230,12 @@ namespace System.Web.Http.OData.Formatter
                 .Callback((object i, ODataMessageWriter writer, ODataSerializerContext context) => Assert.Equal(context.MetadataLevel, ODataMetadataLevel.FullMetadata))
                 .Verifiable();
 
-            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(model);
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             serializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(typeof(int)))
+                .Setup(p => p.GetODataPayloadSerializer(model, typeof(int)))
                 .Returns(serializer.Object);
 
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider(model);
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
             var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>(), ODataVersion.V3, CreateFakeODataRequest(model));
             HttpContent content = new StringContent("42");
@@ -281,13 +282,13 @@ namespace System.Web.Http.OData.Formatter
 
         private static ODataMediaTypeFormatter CreateFormatter(IEdmModel model)
         {
-            return new ODataMediaTypeFormatter(model, new ODataPayloadKind[0]);
+            return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
         }
 
         private static ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request,
             params ODataPayloadKind[] payloadKinds)
         {
-            return new ODataMediaTypeFormatter(model, payloadKinds, request);
+            return new ODataMediaTypeFormatter(payloadKinds, request);
         }
 
         private static ODataMediaTypeFormatter CreateFormatterWithoutRequest()
@@ -313,6 +314,7 @@ namespace System.Web.Http.OData.Formatter
         private static HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
+            request.SetEdmModel(model);
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.AddFakeODataRoute();
             request.Properties["MS_HttpConfiguration"] = configuration;

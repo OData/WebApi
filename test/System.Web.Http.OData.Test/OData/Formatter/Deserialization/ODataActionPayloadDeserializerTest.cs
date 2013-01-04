@@ -33,7 +33,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
-            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
+            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
-            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
+            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
-            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
+            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -117,7 +117,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
-            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
+            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, actionName);
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             ODataActionParameters payload = deserializer.Read(reader, context) as ODataActionParameters;
@@ -147,7 +147,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmModel model = GetModel();
             ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), model);
 
-            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider(model));
+            ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(typeof(ODataActionParameters), new DefaultODataDeserializerProvider());
             ODataPath path = CreatePath(model, "Primitive");
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             Assert.Throws<ODataException>(() =>

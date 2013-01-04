@@ -121,7 +121,7 @@ namespace System.Web.Http.OData.Query
 
         // low level api
         [MyQueryable]
-        public IQueryable<QueryCompositionCustomer> Get(int id)
+        public IQueryable<QueryCompositionCustomer> Get(int key)
         {
             return QueryCompositionCustomerController.CustomerList.AsQueryable();
         }
@@ -182,7 +182,7 @@ namespace System.Web.Http.OData.Query
         }
 
         [Queryable(AllowedOrderByProperties = "Id")]
-        public IQueryable<QueryCompositionCategory> Get(int id)
+        public IQueryable<QueryCompositionCategory> Get(int key)
         {
             return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
         }

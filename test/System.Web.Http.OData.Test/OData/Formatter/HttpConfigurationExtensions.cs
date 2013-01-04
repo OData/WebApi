@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Formatter
             mockRoute.Setup(v => v.GetVirtualPath(
                 It.IsAny<HttpRequestMessage>(), It.IsAny<Dictionary<string, object>>())).Returns(
                 mockVirtualPath.Object);
-            configuration.Routes.Add(ODataRouteConstants.RouteName, mockRoute.Object);
+            configuration.Routes.Add(ODataRouteConstants.DefaultRouteName, mockRoute.Object);
         }
     }
 }

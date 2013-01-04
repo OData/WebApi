@@ -22,60 +22,6 @@ namespace System.Web.Http.OData
     public class ODataHttpConfigurationExtensionTest
     {
         [Fact]
-        public void GetEdmModelReturnsNullByDefault()
-        {
-            HttpConfiguration config = new HttpConfiguration();
-            IEdmModel model = config.GetEdmModel();
-
-            Assert.Null(model);
-        }
-
-        [Fact]
-        public void SetEdmModelThenGetReturnsWhatYouSet()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
-            IEdmModel model = modelBuilder.GetEdmModel();
-
-            // Act
-            config.SetEdmModel(model);
-            IEdmModel newModel = config.GetEdmModel();
-
-            // Assert
-            Assert.Same(model, newModel);
-        }
-
-        [Fact]
-        public void GetODataPathHandlerReturnsDefaultPathHandlerByDefault()
-        {
-            HttpConfiguration config = new HttpConfiguration();
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
-            IEdmModel model = modelBuilder.GetEdmModel();
-            config.SetEdmModel(model);
-
-            var pathHandler = config.GetODataPathHandler();
-
-            Assert.NotNull(pathHandler);
-            Assert.IsType<DefaultODataPathHandler>(pathHandler);
-        }
-
-        [Fact]
-        public void SetODataPathHandlerThenGetReturnsWhatYouSet()
-        {
-            HttpConfiguration config = new HttpConfiguration();
-            IODataPathHandler parser = new Mock<IODataPathHandler>().Object;
-
-            // Act
-            config.SetODataPathHandler(parser);
-
-            // Assert
-            Assert.Same(parser, config.GetODataPathHandler());
-        }
-
-        [Fact]
         public void SetODataFormatter_AddsFormatterToTheFormatterCollection()
         {
             // Arrange
@@ -90,7 +36,7 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void GetODataFormatters_ReturnsFormatter_IfSet()
+        public void IsODataFormatter_ReturnsTrue_ForODataFormatters()
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
@@ -100,7 +46,7 @@ namespace System.Web.Http.OData
             configuration.Formatters.Add(formatter2);
 
             // Act
-            IEnumerable<MediaTypeFormatter> result = configuration.GetODataFormatters();
+            IEnumerable<MediaTypeFormatter> result = configuration.Formatters.Where(f => f != null && f.IsODataFormatter());
 
             // Assert
             IEnumerable<MediaTypeFormatter> expectedFormatters = new MediaTypeFormatter[]
@@ -152,7 +98,7 @@ namespace System.Web.Http.OData
 
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
-            return new ODataMediaTypeFormatter(EdmCoreModel.Instance, new ODataPayloadKind[0]);
+            return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
         }
     }
 }

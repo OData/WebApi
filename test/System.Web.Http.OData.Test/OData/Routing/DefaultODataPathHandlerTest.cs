@@ -12,7 +12,8 @@ namespace System.Web.Http.OData.Routing
 {
     public class DefaultODataPathHandlerTest
     {
-        private static DefaultODataPathHandler _parser = new DefaultODataPathHandler(ODataRoutingModel.GetModel());
+        private static DefaultODataPathHandler _parser = new DefaultODataPathHandler();
+        private static IEdmModel _model = ODataRoutingModel.GetModel();
 
         public static TheoryDataSet<string, string[]> ParseSegmentsData
         {
@@ -49,7 +50,7 @@ namespace System.Web.Http.OData.Routing
         {
             string odataPath = "üCategories";
 
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             Assert.NotNull(path);
@@ -63,7 +64,7 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.Product";
 
             Assert.Throws<ODataException>(
-                () => _parser.Parse(odataPath),
+                () => _parser.Parse(_model, odataPath),
                 "Invalid cast encountered. Cast type 'System.Web.Http.OData.Routing.Product' must be the same as or derive from the previous segment's type 'System.Web.Http.OData.Routing.RoutingCustomer'.");
         }
 
@@ -73,7 +74,7 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "$metadata/foo";
 
             Assert.Throws<ODataException>(
-                () => _parser.Parse(odataPath),
+                () => _parser.Parse(_model, odataPath),
                 "The URI segment 'foo' is invalid after the segment '$metadata'.");
         }
 
@@ -94,7 +95,7 @@ namespace System.Web.Http.OData.Routing
         [InlineData("Products(1)/RoutingCustomers/System.Web.Http.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "~/entityset/key/navigation/cast/key/navigation/navigation")]
         public void Parse_ReturnsPath_WithCorrectTemplate(string odataPath, string template)
         {
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
 
             Assert.NotNull(path);
             Assert.Equal(template, path.PathTemplate);
@@ -107,7 +108,7 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "1/2()/3/4()/5";
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
 
             // Assert
             Assert.Null(path);
@@ -118,7 +119,7 @@ namespace System.Web.Http.OData.Routing
         {
             string odataPath = "$metadata";
 
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -135,7 +136,7 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "$batch";
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -152,10 +153,10 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers";
             string expectedText = "RoutingCustomers";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -172,10 +173,10 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(112)";
             string expectedText = "112";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -192,11 +193,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.VIP";
             string expectedText = "System.Web.Http.OData.Routing.VIP";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
-            IEdmEntityType expectedType = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+            IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -212,11 +213,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(100)/System.Web.Http.OData.Routing.VIP";
             string expectedText = "System.Web.Http.OData.Routing.VIP";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
-            IEdmEntityType expectedType = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+            IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -232,11 +233,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(100)/Products";
             string expectedText = "Products";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
-            IEdmNavigationProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "RoutingCustomer").NavigationProperties().SingleOrDefault(n => n.Name == "Products");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
+            IEdmNavigationProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "RoutingCustomer").NavigationProperties().SingleOrDefault(n => n.Name == "Products");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -254,11 +255,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(100)/System.Web.Http.OData.Routing.VIP/RelationshipManager";
             string expectedText = "RelationshipManager";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "SalesPeople");
-            IEdmNavigationProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP").NavigationProperties().SingleOrDefault(n => n.Name == "RelationshipManager");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "SalesPeople");
+            IEdmNavigationProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP").NavigationProperties().SingleOrDefault(n => n.Name == "RelationshipManager");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -276,11 +277,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "GetRoutingCustomerById()";
             string expectedText = "Default.Container.GetRoutingCustomerById";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
-            IEdmFunctionImport expectedEdmElement = _parser.Model.EntityContainers().First().FunctionImports().SingleOrDefault(s => s.Name == "GetRoutingCustomerById");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+            IEdmFunctionImport expectedEdmElement = _model.EntityContainers().First().FunctionImports().SingleOrDefault(s => s.Name == "GetRoutingCustomerById");
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -298,11 +299,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(112)/Name";
             string expectedText = "Name";
-            IEdmProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(e => e.Name == "RoutingCustomer").Properties().SingleOrDefault(p => p.Name == "Name");
+            IEdmProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(e => e.Name == "RoutingCustomer").Properties().SingleOrDefault(p => p.Name == "Name");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -319,11 +320,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(112)/Address";
             string expectedText = "Address";
-            IEdmProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(e => e.Name == "RoutingCustomer").Properties().SingleOrDefault(p => p.Name == "Address");
+            IEdmProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(e => e.Name == "RoutingCustomer").Properties().SingleOrDefault(p => p.Name == "Address");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -341,11 +342,11 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(112)/Address/Street";
             string expectedText = "Street";
-            IEdmProperty expectedEdmElement = _parser.Model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(e => e.Name == "Address").Properties().SingleOrDefault(p => p.Name == "Street");
+            IEdmProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(e => e.Name == "Address").Properties().SingleOrDefault(p => p.Name == "Street");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -364,7 +365,7 @@ namespace System.Web.Http.OData.Routing
             string odataPath = "RoutingCustomers(1)/Name/$value";
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -380,11 +381,11 @@ namespace System.Web.Http.OData.Routing
         {
             // Arrange
             string odataPath = "RoutingCustomers(1)/$links/Products";
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(s => s.Name == "Products");
             IEdmEntityType expectedType = expectedSet.ElementType;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -400,12 +401,12 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers(112)/GetRelatedRoutingCustomers";
             string expectedText = "Default.Container.GetRelatedRoutingCustomers";
-            IEdmFunctionImport expectedEdmElement = _parser.Model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetRelatedRoutingCustomers");
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "RoutingCustomers");
+            IEdmFunctionImport expectedEdmElement = _model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetRelatedRoutingCustomers");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "RoutingCustomers");
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -423,12 +424,12 @@ namespace System.Web.Http.OData.Routing
             // Arrange
             string odataPath = "RoutingCustomers/System.Web.Http.OData.Routing.VIP/GetMostProfitable";
             string expectedText = "Default.Container.GetMostProfitable";
-            IEdmFunctionImport expectedEdmElement = _parser.Model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetMostProfitable");
-            IEdmEntitySet expectedSet = _parser.Model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "RoutingCustomers");
+            IEdmFunctionImport expectedEdmElement = _model.EntityContainers().First().FunctionImports().SingleOrDefault(p => p.Name == "GetMostProfitable");
+            IEdmEntitySet expectedSet = _model.EntityContainers().First().EntitySets().SingleOrDefault(e => e.Name == "RoutingCustomers");
             IEdmType expectedType = expectedEdmElement.ReturnType.Definition;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -449,12 +450,12 @@ namespace System.Web.Http.OData.Routing
         public void CanResolveSetAndTypeViaSimpleEntitySetSegment(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
             // Arrange
-            var model = _parser.Model;
+            var model = _model;
             var expectedSet = model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
             var expectedType = model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -544,12 +545,11 @@ namespace System.Web.Http.OData.Routing
         private static void AssertTypeMatchesExpectedType(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
             // Arrange
-            var model = _parser.Model;
-            var expectedSet = model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
-            var expectedType = model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
+            var expectedSet = _model.FindDeclaredEntityContainer("Container").FindEntitySet(expectedSetName);
+            var expectedType = _model.FindDeclaredType("System.Web.Http.OData.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
-            ODataPath path = _parser.Parse(odataPath);
+            ODataPath path = _parser.Parse(_model, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert

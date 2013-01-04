@@ -30,6 +30,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public IEdmEntitySet EntitySet { get; set; }
 
         /// <summary>
+        /// Gets or sets the EDM model associated with the request.
+        /// </summary>
+        public IEdmModel Model { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="ODataPath"/> of the request.
         /// </summary>
         public ODataPath Path { get; set; }

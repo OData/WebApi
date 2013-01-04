@@ -106,15 +106,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No IActionValueBinder service could be found for controller &apos;{0}&apos;..
-        /// </summary>
-        internal static string ActionValueBinderMissing {
-            get {
-                return ResourceManager.GetString("ActionValueBinderMissing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The argument must be of type &apos;{0}&apos;..
         /// </summary>
         internal static string ArgumentMustBeOfType {
@@ -907,29 +898,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No OData formatter was found to write the OData metadata. Consider registering an appropriate ODataMediaTypeFormatter on the configuration&apos;s formatter collection..
-        /// </summary>
-        internal static string NoODataFormatterForMetadata {
-            get {
-                return ResourceManager.GetString("NoODataFormatterForMetadata", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No routing convention was found to select an action for the OData path with template &apos;{0}&apos;..
         /// </summary>
         internal static string NoRoutingHandlerToSelectAction {
             get {
                 return ResourceManager.GetString("NoRoutingHandlerToSelectAction", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No routing convention was found to select a controller for the OData path with template &apos;{0}&apos;..
-        /// </summary>
-        internal static string NoRoutingHandlerToSelectController {
-            get {
-                return ResourceManager.GetString("NoRoutingHandlerToSelectController", resourceCulture);
             }
         }
         
@@ -1159,6 +1132,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A model is required for querying. Consider implementing the QueryableAttribute.GetModel method never to return a null value..
+        /// </summary>
+        internal static string QueryGetModelMustNotReturnNull {
+            get {
+                return ResourceManager.GetString("QueryGetModelMustNotReturnNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Queries can not be applied to a response content of type &apos;{0}&apos;. The response content must be an ObjectContent..
         /// </summary>
         internal static string QueryingRequiresObjectContent {
@@ -1227,6 +1209,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestMustContainConfiguration {
             get {
                 return ResourceManager.GetString("RequestMustContainConfiguration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataRoute to register a route that parses the OData URI and attaches the model information..
+        /// </summary>
+        internal static string RequestMustHaveModel {
+            get {
+                return ResourceManager.GetString("RequestMustHaveModel", resourceCulture);
             }
         }
         

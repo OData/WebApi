@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Http.Controllers;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Routing;
@@ -26,7 +27,7 @@ namespace System.Web.Http.OData.Formatter
         {
             _configuration = new HttpConfiguration();
             _model = GetEdmModel();
-            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create(_model);
+            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create();
 
             _configuration.Formatters.Clear();
             _configuration.Formatters.AddRange(formatters);
@@ -93,7 +94,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Motorcycle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
 
@@ -111,7 +112,7 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             request.Content = new StringContent("{ 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
@@ -131,7 +132,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
 
@@ -149,7 +150,7 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
@@ -169,7 +170,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Car");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             request.Content = new StreamContent(body);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
 
@@ -187,7 +188,7 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Car");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
 
@@ -204,7 +205,7 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
-            AddODataPath(request);
+            AddRequestInfo(request);
             HttpResponseMessage response = _client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
             Stream stream = response.Content.ReadAsStreamAsync().Result;
@@ -244,14 +245,14 @@ namespace System.Web.Http.OData.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddODataPath(request);
+            AddRequestInfo(request);
             return request;
         }
 
-        private void AddODataPath(HttpRequestMessage request)
+        private void AddRequestInfo(HttpRequestMessage request)
         {
-            request.SetODataPath(new DefaultODataPathHandler(_model).Parse(GetODataPath(
-                request.RequestUri.AbsoluteUri)));
+            request.SetODataPath(new DefaultODataPathHandler().Parse(_model, GetODataPath(request.RequestUri.AbsoluteUri)));
+            request.SetEdmModel(_model);
         }
 
         private static IEdmModel GetEdmModel()
@@ -322,7 +323,8 @@ namespace System.Web.Http.OData.Formatter
         }
     }
 
-    public class InheritanceController : ODataController
+    [ODataFormatting]
+    public class InheritanceController : ApiController
     {
         private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true };
         private Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };

@@ -28,7 +28,7 @@ namespace System.Web.Http.OData
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EmployeesController.Employee>("AsyncEmployees");
             IEdmModel model = builder.GetEdmModel();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
@@ -53,7 +53,7 @@ namespace System.Web.Http.OData
             var request = new HttpRequestMessage();
             var configuration = new HttpConfiguration();
             var model = ODataTestUtil.GetEdmModel();
-            configuration.SetEdmModel(model);
+            request.SetEdmModel(model);
             controller.Request = request;
             controller.Configuration = configuration;
 
@@ -229,7 +229,7 @@ namespace System.Web.Http.OData
         {
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.EnableOData(new ODataConventionModelBuilder().GetEdmModel());
+            config.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
@@ -240,7 +240,7 @@ namespace System.Web.Http.OData
         private static void SetupController(AsyncEntitySetController<FormatterPerson, int> controller)
         {
             var config = new HttpConfiguration();
-            config.EnableOData(ODataTestUtil.GetEdmModel());
+            config.MapODataRoute(ODataTestUtil.GetEdmModel());
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/FormatterPeople");
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;

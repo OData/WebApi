@@ -126,6 +126,8 @@
     </Compile>
     <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
+    <Compile Include="OData\ODataRoutingAttribute.cs" />
+    <Compile Include="OData\PerRequestContentNegotiator.cs" />
     <Compile Include="OData\Routing\ODataPathExtensions.cs" />
     <Compile Include="OData\ODataFormattingAttribute.cs" />
     <Compile Include="OData\ODataController.cs" />
@@ -179,7 +181,6 @@
     <Compile Include="OData\Routing\Conventions\EntitySetRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\IODataRoutingConvention.cs" />
     <Compile Include="OData\Routing\ODataActionSelector.cs" />
-    <Compile Include="OData\Routing\ODataControllerSelector.cs" />
     <Compile Include="OData\Routing\IODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPath.cs" />
     <Compile Include="OData\Routing\ODataPathRouteConstraint.cs" />

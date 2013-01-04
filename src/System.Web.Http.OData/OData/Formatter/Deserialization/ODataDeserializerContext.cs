@@ -33,7 +33,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public ODataPath Path { get; set; }
 
         /// <summary>
-        /// Gets or set the EdmModel associated with the request.
+        /// Gets or sets the EDM model associated with the request.
         /// </summary>
         public IEdmModel Model { get; set; }
 

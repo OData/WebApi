@@ -99,7 +99,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 if (writeContext.EntitySet != null)
                 {
-                    EntitySetLinkBuilderAnnotation linkBuilder = SerializerProvider.EdmModel.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                    IEdmModel model = writeContext.Model;
+                    EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
                     FeedContext feedContext = new FeedContext
                     {
                         EntitySet = writeContext.EntitySet,
@@ -148,7 +149,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         throw Error.NotSupported(SRResources.NullElementInCollection);
                     }
 
-                    ODataSerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(entry.GetType());
+                    ODataSerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType());
                     if (entrySerializer == null)
                     {
                         throw Error.NotSupported(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name);

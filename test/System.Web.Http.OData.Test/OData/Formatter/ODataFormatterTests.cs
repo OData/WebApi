@@ -341,8 +341,8 @@ namespace System.Web.Http.OData.Formatter
         private static HttpConfiguration CreateConfiguration(IEdmModel model)
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
-            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(model));
+            configuration.MapODataRoute(model);
+            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             return configuration;
         }
 
@@ -422,7 +422,7 @@ namespace System.Web.Http.OData.Formatter
         public int Id { get; set; }
     }
 
-    public class MainEntityController : ApiController
+    public class MainEntityController : ODataController
     {
         public IEnumerable<MainEntity> Get()
         {

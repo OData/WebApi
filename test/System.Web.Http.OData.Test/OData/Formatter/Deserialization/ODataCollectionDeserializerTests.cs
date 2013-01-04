@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     public class ODataCollectionDeserializerTests
     {
         private static IEdmModel _model = GetEdmModel();
-        private static ODataDeserializerProvider _deserializerProvider = new DefaultODataDeserializerProvider(_model);
+        private static ODataDeserializerProvider _deserializerProvider = new DefaultODataDeserializerProvider();
         private static IEdmTypeReference _addressType = _model.GetEdmTypeReference(typeof(Address)).AsComplex();
         private static IEdmCollectionTypeReference _addressCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(_addressType), isNullable: false);
         private static IEdmCollectionTypeReference _intCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(_model.GetEdmTypeReference(typeof(int))), isNullable: false);
@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     new Address { City ="Redmond", ZipCode ="1", Street ="A", State ="123"},
                     new Address { City ="Seattle", ZipCode ="2", Street ="S", State ="321"}
                 };
-            ODataCollectionSerializer serializer = new ODataCollectionSerializer(_addressCollectionType, new DefaultODataSerializerProvider(_model));
+            ODataCollectionSerializer serializer = new ODataCollectionSerializer(_addressCollectionType, new DefaultODataSerializerProvider());
             ODataCollectionDeserializer deserializer = new ODataCollectionDeserializer(_addressCollectionType, _deserializerProvider);
 
 
@@ -39,7 +39,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             serializer.WriteObject(addresses, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { RootElementName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
-            IEnumerable readAddresses = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
+            IEnumerable readAddresses = deserializer.Read(
+                new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model),
+                new ODataDeserializerContext() { Model = _model }) as IEnumerable;
 
             Assert.Equal(addresses, readAddresses.Cast<Address>(), new AddressComparer());
         }
@@ -49,7 +51,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             int[] numbers = Enumerable.Range(0, 100).ToArray();
 
-            ODataCollectionSerializer serializer = new ODataCollectionSerializer(_intCollectionType, new DefaultODataSerializerProvider(_model));
+            ODataCollectionSerializer serializer = new ODataCollectionSerializer(_intCollectionType, new DefaultODataSerializerProvider());
             ODataCollectionDeserializer deserializer = new ODataCollectionDeserializer(_intCollectionType, _deserializerProvider);
 
             MemoryStream stream = new MemoryStream();
@@ -57,7 +59,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             serializer.WriteObject(numbers, new ODataMessageWriter(message as IODataResponseMessage, new ODataMessageWriterSettings(), _model), new ODataSerializerContext { RootElementName = "Property" });
             stream.Seek(0, SeekOrigin.Begin);
-            IEnumerable readnumbers = deserializer.Read(new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model), new ODataDeserializerContext()) as IEnumerable;
+            IEnumerable readnumbers = deserializer.Read(
+                new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model),
+                new ODataDeserializerContext() { Model = _model }) as IEnumerable;
 
             Assert.Equal(numbers, readnumbers.Cast<int>());
         }

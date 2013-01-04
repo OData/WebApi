@@ -162,7 +162,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             EdmEntityType entityType = new EdmEntityType("namespace", "name");
             entityType.AddKeys(new EdmStructuralProperty(entityType, "Key1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
             EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
-            ODataDeserializerProvider provider = new DefaultODataDeserializerProvider(EdmCoreModel.Instance);
+            ODataDeserializerProvider provider = new DefaultODataDeserializerProvider();
 
             var resource = new Mock<IDelta>(MockBehavior.Strict);
             Type propertyType = typeof(string);

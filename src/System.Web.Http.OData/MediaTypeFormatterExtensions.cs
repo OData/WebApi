@@ -13,22 +13,9 @@ namespace System.Web.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal static class MediaTypeFormatterExtensions
     {
-        public static IEdmModel GetODataModel(this MediaTypeFormatter formatter)
-        {
-            IEdmModel model;
-            IsODataFormatter(formatter, out model);
-            return model;
-        }
-
-        public static bool IsODataFormatter(this MediaTypeFormatter formatter)
-        {
-            IEdmModel ignore;
-            return IsODataFormatter(formatter, out ignore);
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "Calling the formatter only to identify the ODataFormatter; exceptions can be ignored")]
-        private static bool IsODataFormatter(this MediaTypeFormatter formatter, out IEdmModel edmModel)
+        internal static bool IsODataFormatter(this MediaTypeFormatter formatter)
         {
             Contract.Assert(formatter != null);
 
@@ -36,7 +23,6 @@ namespace System.Web.Http
 
             if (odataFormatter != null)
             {
-                edmModel = odataFormatter.Model;
                 return true;
             }
 
@@ -48,26 +34,14 @@ namespace System.Web.Http
                 try
                 {
                     formatter.GetPerRequestFormatterInstance(typeof(IEdmModel), request, mediaType: null);
-                    object model;
-
-                    if (request.Properties.TryGetValue(ODataMediaTypeFormatter.EdmModelKey, out model))
-                    {
-                        edmModel = model as IEdmModel;
-
-                        if (edmModel != null)
-                        {
-                            return true;
-                        }
-                    }
+                    return request.Properties.ContainsKey(ODataMediaTypeFormatter.IsODataKey);
                 }
                 catch
                 {
                     // Ignore exceptions - it isn't the OData formatter we're looking for
+                    return false;
                 }
             }
-
-            edmModel = null;
-            return false;
         }
     }
 }

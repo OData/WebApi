@@ -8,9 +8,9 @@ namespace System.Web.Http.OData
     public static class ODataRouteConstants
     {
         /// <summary>
-        /// Route name for the OData route
+        /// The default route name for the OData route.
         /// </summary>
-        public static readonly string RouteName = "OData";
+        public static readonly string DefaultRouteName = "OData";
 
         /// <summary>
         /// Route variable name for the OData path.

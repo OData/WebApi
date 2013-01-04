@@ -14,14 +14,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
     internal class DefaultODataSerializerProvider : ODataSerializerProvider
     {
         // cache the clrtype to ODataSerializer mappings as we might have to crawl the 
-        // inheritance hirerachy to find the mapping.
-        private ConcurrentDictionary<Type, ODataSerializer> _clrTypeMappingCache =
-            new ConcurrentDictionary<Type, ODataSerializer>();
-
-        public DefaultODataSerializerProvider(IEdmModel edmModel)
-            : base(edmModel)
-        {
-        }
+        // inheritance hierarchy to find the mapping.
+        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataSerializer> _clrTypeMappingCache =
+            new ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataSerializer>();
 
         public override ODataSerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
         {
@@ -59,7 +54,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
         }
 
-        public override ODataSerializer GetODataPayloadSerializer(Type type)
+        public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type)
         {
             if (type == null)
             {
@@ -87,9 +82,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // TODO: Feature #694 - support Uri[] => EntityReferenceLinks
 
             // if it is not a special type, assume it has a corresponding EdmType.
-            return _clrTypeMappingCache.GetOrAdd(type, (t) =>
+            Tuple<IEdmModel, Type> cacheKey = Tuple.Create(model, type);
+            return _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
             {
-                IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(t);
+                IEdmModel m = key.Item1;
+                Type t = key.Item2;
+                IEdmTypeReference edmType = m.GetEdmTypeReference(t);
                 if (edmType != null)
                 {
                     return GetEdmTypeSerializer(edmType);

@@ -7,20 +7,8 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 {
     public abstract class ODataDeserializerProvider
     {
-        private ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer> _deserializerCache;
-
-        protected ODataDeserializerProvider(IEdmModel edmModel)
-        {
-            if (edmModel == null)
-            {
-                throw Error.ArgumentNull("edmModel");
-            }
-
-            _deserializerCache = new ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer>(new EdmTypeReferenceEqualityComparer());
-            EdmModel = edmModel;
-        }
-
-        public IEdmModel EdmModel { get; private set; }
+        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer> _deserializerCache =
+            new ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer>(new EdmTypeReferenceEqualityComparer());
 
         public ODataEntryDeserializer GetODataDeserializer(IEdmTypeReference edmType)
         {
@@ -34,6 +22,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         protected abstract ODataEntryDeserializer CreateDeserializer(IEdmTypeReference type);
 
-        public abstract ODataDeserializer GetODataDeserializer(Type type);
+        public abstract ODataDeserializer GetODataDeserializer(IEdmModel model, Type type);
     }
 }

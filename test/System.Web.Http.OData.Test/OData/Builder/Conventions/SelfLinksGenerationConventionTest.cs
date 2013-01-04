@@ -64,7 +64,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = carsEdmEntitySet,
                     EntityType = carsEdmEntitySet.ElementType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 includeCast: false);
@@ -97,7 +97,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -112,7 +112,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = carsEdmEntitySet,
                     EntityType = carsEdmEntitySet.ElementType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 includeCast: true);
@@ -131,7 +131,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -146,7 +146,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 ODataMetadataLevel.Default);
@@ -165,7 +165,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -180,7 +180,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = sportbikeType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Ninja" }
                 },
                 ODataMetadataLevel.Default);

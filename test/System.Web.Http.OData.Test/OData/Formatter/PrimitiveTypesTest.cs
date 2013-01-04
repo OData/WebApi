@@ -89,9 +89,10 @@ namespace System.Web.Http.OData.Formatter
                 request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
                 IEdmProperty property =
                     model.EntityContainers().Single().EntitySets().Single().ElementType.Properties().First();
+                request.SetEdmModel(model);
                 request.SetODataPath(new ODataPath(new PropertyAccessPathSegment(property)));
 
-                ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
+                ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);
 
                 Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
@@ -135,8 +136,9 @@ namespace System.Web.Http.OData.Formatter
                 "http://localhost/WorkItems(10)/ID"))
             {
                 request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+                request.SetEdmModel(model);
 
-                ODataMediaTypeFormatter formatter = CreateFormatter(model, request);
+                ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);
 
                 using (StringContent content = new StringContent(entity))
@@ -161,9 +163,9 @@ namespace System.Web.Http.OData.Formatter
             return configuration;
         }
 
-        private ODataMediaTypeFormatter CreateFormatter(IEdmModel model, HttpRequestMessage request)
+        private ODataMediaTypeFormatter CreateFormatter(HttpRequestMessage request)
         {
-            return new ODataMediaTypeFormatter(model, new ODataPayloadKind[] { ODataPayloadKind.Property }, request);
+            return new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request);
         }
     }
 }

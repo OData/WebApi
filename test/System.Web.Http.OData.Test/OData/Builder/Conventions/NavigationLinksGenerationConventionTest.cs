@@ -77,7 +77,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -92,7 +92,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 carManufacturerProperty,
@@ -142,7 +142,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -157,7 +157,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 carManufacturerProperty,
@@ -179,7 +179,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty motorcycleManufacturerProperty = sportbikeType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -194,7 +194,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = sportbikeType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Ninja" }
                 },
                 motorcycleManufacturerProperty,
@@ -213,7 +213,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
@@ -227,7 +227,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = edmEntitySet,
                     EntityType = edmEntitySet.ElementType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(model)
+                    PathHandler = new DefaultODataPathHandler()
                 },
                 edmEntitySet.ElementType.NavigationProperties().Single(),
                 orders,
@@ -246,7 +246,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableOData(model);
+            configuration.MapODataRoute(model);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute(), new HttpRouteValueDictionary(new { controller = "Customers" }));
@@ -259,7 +259,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
                     EntitySet = edmEntitySet,
                     EntityType = edmEntitySet.ElementType,
-                    PathHandler = new DefaultODataPathHandler(model),
+                    PathHandler = new DefaultODataPathHandler(),
                     UrlHelper = request.GetUrlHelper()
                 },
                 edmEntitySet.ElementType.NavigationProperties().Single(),

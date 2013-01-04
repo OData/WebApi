@@ -8,13 +8,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     internal class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
         // cache the clrtype to ODataDeserializer mappings as we might have to crawl the 
-        // inheritance hirerachy to find the mapping.
-        private ConcurrentDictionary<Type, ODataDeserializer> _clrTypeMappingCache = new ConcurrentDictionary<Type, ODataDeserializer>();
-
-        public DefaultODataDeserializerProvider(IEdmModel edmModel)
-            : base(edmModel)
-        {
-        }
+        // inheritance hierarchy to find the mapping.
+        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataDeserializer> _clrTypeMappingCache =
+            new ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataDeserializer>();
 
         protected override ODataEntryDeserializer CreateDeserializer(IEdmTypeReference edmType)
         {
@@ -47,7 +43,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return null;
         }
 
-        public override ODataDeserializer GetODataDeserializer(Type type)
+        public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type)
         {
             if (type == null)
             {
@@ -64,9 +60,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return new ODataActionPayloadDeserializer(type, this);
             }
 
-            return _clrTypeMappingCache.GetOrAdd(type, (t) =>
+            Tuple<IEdmModel, Type> cacheKey = Tuple.Create(model, type);
+            return _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
             {
-                IEdmTypeReference edmType = EdmModel.GetEdmTypeReference(t);
+                IEdmModel m = key.Item1;
+                Type t = key.Item2;
+                IEdmTypeReference edmType = m.GetEdmTypeReference(t);
                 if (edmType == null)
                 {
                     return null;

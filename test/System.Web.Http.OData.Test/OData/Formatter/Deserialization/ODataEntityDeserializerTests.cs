@@ -25,11 +25,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmEntitySet entitySet = _edmModel.EntityContainers().Single().FindEntitySet("Products");
             _readContext = new ODataDeserializerContext
             {
-                Path = new ODataPath(new EntitySetPathSegment(entitySet))
+                Path = new ODataPath(new EntitySetPathSegment(entitySet)),
+                Model = _edmModel
             };
-            _productEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(Product)).AsEntity();
-            _supplierEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(Supplier)).AsEntity();
-            _deserializerProvider = new DefaultODataDeserializerProvider(EdmTestHelpers.GetModel());
+            _productEdmType = _edmModel.GetEdmTypeReference(typeof(Product)).AsEntity();
+            _supplierEdmType = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
+            _deserializerProvider = new DefaultODataDeserializerProvider();
         }
 
         [Fact]

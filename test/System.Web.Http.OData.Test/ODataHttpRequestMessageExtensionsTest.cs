@@ -1,13 +1,72 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http;
+using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.OData.TestCommon.Models;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Net.Http
 {
     public class ODataHttpRequestMessageExtensionTests
     {
+        [Fact]
+        public void GetEdmModelReturnsNullByDefault()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            IEdmModel model = request.GetEdmModel();
+
+            Assert.Null(model);
+        }
+
+        [Fact]
+        public void SetEdmModelThenGetReturnsWhatYouSet()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
+            IEdmModel model = modelBuilder.GetEdmModel();
+
+            // Act
+            request.SetEdmModel(model);
+            IEdmModel newModel = request.GetEdmModel();
+
+            // Assert
+            Assert.Same(model, newModel);
+        }
+
+        [Fact]
+        public void GetODataPathHandlerReturnsDefaultPathHandlerByDefault()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
+            IEdmModel model = modelBuilder.GetEdmModel();
+            request.SetEdmModel(model);
+
+            var pathHandler = request.GetODataPathHandler();
+
+            Assert.NotNull(pathHandler);
+            Assert.IsType<DefaultODataPathHandler>(pathHandler);
+        }
+
+        [Fact]
+        public void SetODataPathHandlerThenGetReturnsWhatYouSet()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            IODataPathHandler parser = new Mock<IODataPathHandler>().Object;
+
+            // Act
+            request.SetODataPathHandler(parser);
+
+            // Assert
+            Assert.Same(parser, request.GetODataPathHandler());
+        }
+
         [Theory]
         [InlineData(IncludeErrorDetailPolicy.Default, null, null, false)]
         [InlineData(IncludeErrorDetailPolicy.Default, null, true, true)]

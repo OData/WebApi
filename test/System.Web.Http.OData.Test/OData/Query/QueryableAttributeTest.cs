@@ -557,56 +557,56 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
-        public void CreateQueryContext_ReturnsQueryContext_ForNoModelOnConfiguration()
+        public void GetModel_ReturnsModel_ForNoModelOnRequest()
         {
             var entityClrType = typeof(QueryCompositionCustomer);
             var config = new HttpConfiguration();
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             var descriptor = new ReflectedHttpActionDescriptor();
             descriptor.Configuration = config;
 
-            var context = QueryableAttribute.CreateQueryContext(entityClrType, config, descriptor);
+            var queryModel = new QueryableAttribute().GetModel(entityClrType, request, descriptor);
 
-            Assert.NotNull(context);
-            Assert.Equal(typeof(QueryCompositionCustomer), context.ElementClrType);
-            Assert.Same(descriptor.Properties["MS_EdmModelSystem.Web.Http.OData.Query.QueryCompositionCustomer"], context.Model);
+            Assert.NotNull(queryModel);
+            Assert.Same(descriptor.Properties["MS_EdmModelSystem.Web.Http.OData.Query.QueryCompositionCustomer"], queryModel);
         }
 
         [Fact]
-        public void CreateQueryContext_ReturnsQueryContext_ForNonMatchingModelOnConfiguration()
+        public void CreateQueryContext_ReturnsQueryContext_ForNonMatchingModelOnRequest()
         {
             var builder = new ODataConventionModelBuilder();
             var model = builder.GetEdmModel();
             var entityClrType = typeof(QueryCompositionCustomer);
             var config = new HttpConfiguration();
-            config.SetEdmModel(model);
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            request.SetEdmModel(model);
             var descriptor = new ReflectedHttpActionDescriptor();
             descriptor.Configuration = config;
 
-            var context = QueryableAttribute.CreateQueryContext(entityClrType, config, descriptor);
+            var queryModel = new QueryableAttribute().GetModel(entityClrType, request, descriptor);
 
-            Assert.NotNull(context);
-            Assert.Equal(typeof(QueryCompositionCustomer), context.ElementClrType);
-            Assert.Same(descriptor.Properties["MS_EdmModelSystem.Web.Http.OData.Query.QueryCompositionCustomer"], context.Model);
+            Assert.NotNull(queryModel);
+            Assert.Same(descriptor.Properties["MS_EdmModelSystem.Web.Http.OData.Query.QueryCompositionCustomer"], queryModel);
         }
 
 
         [Fact]
-        public void CreateQueryContext_ReturnsQueryContext_ForMatchingModelOnConfiguration()
+        public void CreateQueryContext_ReturnsQueryContext_ForMatchingModelOnRequest()
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<QueryCompositionCustomer>("customers");
             var model = builder.GetEdmModel();
             var entityClrType = typeof(QueryCompositionCustomer);
             var config = new HttpConfiguration();
-            config.SetEdmModel(model);
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            request.SetEdmModel(model);
             var descriptor = new ReflectedHttpActionDescriptor();
             descriptor.Configuration = config;
 
-            var context = QueryableAttribute.CreateQueryContext(entityClrType, config, descriptor);
+            var queryModel = new QueryableAttribute().GetModel(entityClrType, request, descriptor);
 
-            Assert.NotNull(context);
-            Assert.Equal(typeof(QueryCompositionCustomer), context.ElementClrType);
-            Assert.Same(model, context.Model);
+            Assert.NotNull(queryModel);
+            Assert.Same(model, queryModel);
             Assert.False(descriptor.Properties.ContainsKey("MS_EdmModelSystem.Web.Http.OData.Query.QueryCompositionCustomer"));
         }
     }

@@ -4,9 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.Http.Filters;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Routing;
+using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -258,7 +262,7 @@ namespace System.Web.Http.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel));
             HttpClient client = new HttpClient(server);
 
-            // unsupported operator starting with $ - throws
+            // unsupported operator starting wih $ - throws
             HttpResponseMessage response = client.GetAsync(string.Format("http://localhost:8080/{0}/?$filter={1}", controllerName, filter)).Result;
 
             // using low level api works fine
@@ -278,7 +282,6 @@ namespace System.Web.Http.OData.Query
             model.SetAnnotationValue<ClrTypeAnnotation>(model.FindType("System.Web.Http.OData.Query.QueryCompositionCustomer"), null);
 
             HttpConfiguration configuration = InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: false);
-            configuration.SetEdmModel(model);
 
             bool called = false;
             Mock<IAssembliesResolver> assembliesResolver = new Mock<IAssembliesResolver>();
@@ -600,7 +603,7 @@ namespace System.Web.Http.OData.Query
         private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
         {
             HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapHttpRoute("default", "{controller}/{id}", new { id = RouteParameter.Optional });
+            config.Routes.MapHttpRoute("default", "{controller}/{key}", new { key = RouteParameter.Optional });
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             if (controllerName == "QueryCompositionCustomerGlobal")
@@ -616,7 +619,7 @@ namespace System.Web.Http.OData.Query
                     modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
                     _queryCompositionCustomerModel = modelBuilder.GetEdmModel();
                 }
-                config.SetEdmModel(_queryCompositionCustomerModel);
+                config.Filters.Add(new SetModelFilter(_queryCompositionCustomerModel));
             }
 
             return config;
@@ -642,6 +645,21 @@ namespace System.Web.Http.OData.Query
             Assert.NotNull(actual);
 
             Assert.True(expected.Name == actual.Name && expected.Id == actual.Id);
+        }
+
+        private class SetModelFilter : ActionFilterAttribute
+        {
+            private IEdmModel _model;
+
+            public SetModelFilter(IEdmModel model)
+            {
+                _model = model;
+            }
+
+            public override void OnActionExecuting(HttpActionContext actionContext)
+            {
+                actionContext.Request.SetEdmModel(_model);
+            }
         }
     }
 }

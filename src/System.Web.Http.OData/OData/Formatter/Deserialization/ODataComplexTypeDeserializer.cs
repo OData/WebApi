@@ -30,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             RecurseEnter(readContext);
 
-            object complexResource = CreateResource(EdmComplexType.ComplexDefinition(), EdmModel);
+            object complexResource = CreateResource(EdmComplexType.ComplexDefinition(), readContext.Model);
             foreach (ODataProperty complexProperty in complexValue.Properties)
             {
                 ApplyProperty(complexProperty, EdmComplexType, complexResource, DeserializerProvider, readContext);

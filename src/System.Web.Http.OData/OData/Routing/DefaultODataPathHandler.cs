@@ -18,51 +18,18 @@ namespace System.Web.Http.OData.Routing
     public class DefaultODataPathHandler : IODataPathHandler
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultODataPathHandler" /> class.
+        /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
         /// </summary>
-        /// <param name="model">The model to use for segment parsing.</param>
-        public DefaultODataPathHandler(IEdmModel model)
+        /// <param name="model">The model to use for path parsing.</param>
+        /// <param name="odataPath">The OData path to parse.</param>
+        /// <returns>A parsed representation of the path, or <c>null</c> if the path does not match the model.</returns>
+        public virtual ODataPath Parse(IEdmModel model, string odataPath)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
-            IEnumerable<IEdmEntityContainer> containers = model.EntityContainers();
-            int containerCount = containers.Count();
-            if (containerCount != 1)
-            {
-                throw Error.Argument("model", SRResources.ParserModelMustHaveOneContainer, containerCount);
-            }
-            Model = model;
-            Container = containers.Single();
-        }
-
-        /// <summary>
-        /// Gets the model used for segment parsing.
-        /// </summary>
-        public IEdmModel Model
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the container used to resolve procedures and entity sets.
-        /// </summary>
-        public IEdmEntityContainer Container
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
-        /// </summary>
-        /// <param name="odataPath">The OData path to parse.</param>
-        /// <returns>A parsed representation of the path, or <c>null</c> if the path does not match the model.</returns>
-        public virtual ODataPath Parse(string odataPath)
-        {
             if (odataPath == null)
             {
                 throw Error.ArgumentNull("odataPath");
@@ -73,7 +40,7 @@ namespace System.Web.Http.OData.Routing
             IEdmType previousEdmType = null;
             foreach (string segment in ParseSegments(odataPath))
             {
-                pathSegment = ParseNextSegment(pathSegment, previousEdmType, segment);
+                pathSegment = ParseNextSegment(model, pathSegment, previousEdmType, segment);
 
                 // If the Uri stops matching the model at any point, return null
                 if (pathSegment == null)
@@ -144,11 +111,12 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the next OData path segment.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="previous">The previous path segment.</param>
         /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseNextSegment(ODataPathSegment previous, IEdmType previousEdmType, string segment)
+        protected virtual ODataPathSegment ParseNextSegment(IEdmModel model, ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (String.IsNullOrEmpty(segment))
             {
@@ -158,7 +126,7 @@ namespace System.Web.Http.OData.Routing
             if (previous == null)
             {
                 // Parse entry node
-                return ParseEntrySegment(segment);
+                return ParseEntrySegment(model, segment);
             }
             else
             {
@@ -171,16 +139,16 @@ namespace System.Web.Http.OData.Routing
                 switch (previousEdmType.TypeKind)
                 {
                     case EdmTypeKind.Collection:
-                        return ParseAtCollection(previous, previousEdmType, segment);
+                        return ParseAtCollection(model, previous, previousEdmType, segment);
 
                     case EdmTypeKind.Entity:
-                        return ParseAtEntity(previous, previousEdmType, segment);
+                        return ParseAtEntity(model, previous, previousEdmType, segment);
 
                     case EdmTypeKind.Complex:
-                        return ParseAtComplex(previous, previousEdmType, segment);
+                        return ParseAtComplex(model, previous, previousEdmType, segment);
 
                     case EdmTypeKind.Primitive:
-                        return ParseAtPrimitiveProperty(previous, previousEdmType, segment);
+                        return ParseAtPrimitiveProperty(model, previous, previousEdmType, segment);
 
                     default:
                         throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
@@ -191,9 +159,10 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the first OData segment following the service base URI.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseEntrySegment(string segment)
+        protected virtual ODataPathSegment ParseEntrySegment(IEdmModel model, string segment)
         {
             if (String.IsNullOrEmpty(segment))
             {
@@ -209,13 +178,14 @@ namespace System.Web.Http.OData.Routing
                 return new BatchPathSegment();
             }
 
-            IEdmEntitySet entitySet = Container.FindEntitySet(segment);
+            IEdmEntityContainer container = ExtractEntityContainer(model);
+            IEdmEntitySet entitySet = container.FindEntitySet(segment);
             if (entitySet != null)
             {
                 return new EntitySetPathSegment(entitySet);
             }
 
-            IEdmFunctionImport function = Container.FunctionImports().SingleOrDefault(fi => fi.Name == segment && fi.IsBindable == false);
+            IEdmFunctionImport function = container.FunctionImports().SingleOrDefault(fi => fi.Name == segment && fi.IsBindable == false);
             if (function != null)
             {
                 return new ActionPathSegment(function);
@@ -228,11 +198,12 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the next OData path segment following a collection.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="previous">The previous path segment.</param>
         /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtCollection(ODataPathSegment previous, IEdmType previousEdmType, string segment)
+        protected virtual ODataPathSegment ParseAtCollection(IEdmModel model, ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -257,7 +228,7 @@ namespace System.Web.Http.OData.Routing
             switch (collection.ElementType.Definition.TypeKind)
             {
                 case EdmTypeKind.Entity:
-                    return ParseAtEntityCollection(previous, previousEdmType, segment);
+                    return ParseAtEntityCollection(model, previous, previousEdmType, segment);
 
                 default:
                     throw new ODataException(Error.Format(SRResources.InvalidPathSegment, segment, previous));
@@ -267,11 +238,12 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the next OData path segment following a complex-typed segment.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="previous">The previous path segment.</param>
         /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtComplex(ODataPathSegment previous, IEdmType previousEdmType, string segment)
+        protected virtual ODataPathSegment ParseAtComplex(IEdmModel model, ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -302,11 +274,12 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the next OData path segment following an entity collection.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="previous">The previous path segment.</param>
         /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEntityCollection(ODataPathSegment previous, IEdmType previousEdmType, string segment)
+        protected virtual ODataPathSegment ParseAtEntityCollection(IEdmModel model, ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -341,7 +314,7 @@ namespace System.Web.Http.OData.Routing
             }
 
             // next look for casts
-            IEdmEntityType castType = Model.FindDeclaredType(segment) as IEdmEntityType;
+            IEdmEntityType castType = model.FindDeclaredType(segment) as IEdmEntityType;
             if (castType != null)
             {
                 IEdmType previousElementType = collectionType.ElementType.Definition;
@@ -353,7 +326,8 @@ namespace System.Web.Http.OData.Routing
             }
 
             // now look for bindable actions
-            IEdmFunctionImport procedure = Container.FunctionImports().FindBindableAction(collectionType, segment);
+            IEdmEntityContainer container = ExtractEntityContainer(model);
+            IEdmFunctionImport procedure = container.FunctionImports().FindBindableAction(collectionType, segment);
             if (procedure != null)
             {
                 return new ActionPathSegment(procedure);
@@ -365,11 +339,12 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the next OData path segment following a primitive property.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="previous">The previous path segment.</param>
         /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtPrimitiveProperty(ODataPathSegment previous, IEdmType previousEdmType, string segment)
+        protected virtual ODataPathSegment ParseAtPrimitiveProperty(IEdmModel model, ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -391,11 +366,12 @@ namespace System.Web.Http.OData.Routing
         /// <summary>
         /// Parses the next OData path segment following an entity.
         /// </summary>
+        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="previous">The previous path segment.</param>
         /// <param name="previousEdmType">The EDM type of the OData path up to the previous segment.</param>
         /// <param name="segment">The value of the segment to parse.</param>
         /// <returns>A parsed representation of the segment.</returns>
-        protected virtual ODataPathSegment ParseAtEntity(ODataPathSegment previous, IEdmType previousEdmType, string segment)
+        protected virtual ODataPathSegment ParseAtEntity(IEdmModel model, ODataPathSegment previous, IEdmType previousEdmType, string segment)
         {
             if (previous == null)
             {
@@ -431,7 +407,7 @@ namespace System.Web.Http.OData.Routing
             }
 
             // next look for type casts
-            IEdmEntityType castType = Model.FindDeclaredType(segment) as IEdmEntityType;
+            IEdmEntityType castType = model.FindDeclaredType(segment) as IEdmEntityType;
             if (castType != null)
             {
                 if (!castType.IsOrInheritsFrom(previousType))
@@ -442,7 +418,8 @@ namespace System.Web.Http.OData.Routing
             }
 
             // finally look for bindable procedures
-            IEdmFunctionImport procedure = Container.FunctionImports().FindBindableAction(previousType, segment);
+            IEdmEntityContainer container = ExtractEntityContainer(model);
+            IEdmFunctionImport procedure = container.FunctionImports().FindBindableAction(previousType, segment);
             if (procedure != null)
             {
                 return new ActionPathSegment(procedure);
@@ -450,6 +427,17 @@ namespace System.Web.Http.OData.Routing
 
             // Treating as an open property
             return new UnresolvedPathSegment(segment);
+        }
+
+        private static IEdmEntityContainer ExtractEntityContainer(IEdmModel model)
+        {
+            IEnumerable<IEdmEntityContainer> containers = model.EntityContainers();
+            int containerCount = containers.Count();
+            if (containerCount != 1)
+            {
+                throw Error.Argument("model", SRResources.ParserModelMustHaveOneContainer, containerCount);
+            }
+            return containers.Single();
         }
 
         /// <summary>

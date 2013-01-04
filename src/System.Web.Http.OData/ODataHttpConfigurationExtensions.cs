@@ -2,9 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
@@ -20,122 +18,7 @@ namespace System.Web.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataHttpConfigurationExtensions
     {
-        private const string EdmModelKey = "MS_EdmModel";
-        private const string ODataPathHandlerKey = "MS_ODataPathHandler";
         private const string ODataRoutingConventionsKey = "MS_ODataRoutingConventions";
-
-        /// <summary>
-        /// Retrieve the EdmModel from the configuration Properties collection. Null if user has not set it.
-        /// </summary>
-        /// <param name="configuration">Configuration to look into.</param>
-        /// <returns>Returns an EdmModel for this configuration</returns>
-        public static IEdmModel GetEdmModel(this HttpConfiguration configuration)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            // returns one if user sets one, null otherwise
-            object result;
-            if (configuration.Properties.TryGetValue(EdmModelKey, out result))
-            {
-                return result as IEdmModel;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Sets the given EdmModel with the configuration.
-        /// </summary>
-        /// <param name="configuration">Configuration to be updated.</param>
-        /// <param name="model">The EdmModel to update.</param>
-        public static void SetEdmModel(this HttpConfiguration configuration, IEdmModel model)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            configuration.Properties.AddOrUpdate(EdmModelKey, model, (a, b) =>
-                {
-                    return model;
-                });
-        }
-
-        /// <summary>
-        /// Retrieve the OData <see cref="MediaTypeFormatter" />s from the configuration. An empty list if user has not
-        /// set it.
-        /// </summary>
-        /// <param name="configuration">Configuration to look into.</param>
-        /// <returns>
-        /// Returns a list of all OData <see cref="MediaTypeFormatter" />s for this configuration.
-        /// </returns>
-        internal static IEnumerable<MediaTypeFormatter> GetODataFormatters(this HttpConfiguration configuration)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            Contract.Assert(configuration.Formatters != null);
-            return configuration.Formatters.Where(f => f != null && f.IsODataFormatter());
-        }
-
-        /// <summary>
-        /// Gets the <see cref="IODataPathHandler"/> from the configuration.
-        /// </summary>
-        /// <param name="configuration">The server's configuration.</param>
-        /// <returns>The <see cref="IODataPathHandler"/> for the configuration.</returns>
-        public static IODataPathHandler GetODataPathHandler(this HttpConfiguration configuration)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            object pathHandler;
-            if (!configuration.Properties.TryGetValue(ODataPathHandlerKey, out pathHandler))
-            {
-                IEdmModel model = configuration.GetEdmModel();
-                if (model == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    IODataPathHandler defaultPathHandler = new DefaultODataPathHandler(model);
-                    configuration.SetODataPathHandler(defaultPathHandler);
-                    return defaultPathHandler;
-                }
-            }
-            return pathHandler as IODataPathHandler;
-        }
-
-        /// <summary>
-        /// Sets the <see cref="IODataPathHandler"/> on the configuration.
-        /// </summary>
-        /// <param name="configuration">The server's configuration.</param>
-        /// <param name="parser">The <see cref="IODataPathHandler"/> this configuration should use.</param>
-        public static void SetODataPathHandler(this HttpConfiguration configuration, IODataPathHandler parser)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-            if (parser == null)
-            {
-                throw Error.ArgumentNull("parser");
-            }
-
-            configuration.Properties[ODataPathHandlerKey] = parser;
-        }
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
@@ -162,50 +45,49 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Enables OData support by adding an OData route and enabling OData controller and action selection, querying, and formatter support for OData.
+        /// Maps the specified OData route without a route prefix and with the default OData route name.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="model">The EDM model to use for the service.</param>
-        public static void EnableOData(this HttpConfiguration configuration, IEdmModel model)
+        /// <param name="model">The EDM model to use for parsing OData paths.</param>
+        public static void MapODataRoute(this HttpConfiguration configuration, IEdmModel model)
         {
-            configuration.EnableOData(model, routePrefix: null);
+            configuration.MapODataRoute(ODataRouteConstants.DefaultRouteName, routePrefix: null, model: model, pathHandler: new DefaultODataPathHandler());
         }
 
         /// <summary>
-        /// Enables OData support by adding an OData route and enabling OData querying and OData controller and action selection.
+        /// Maps the specified OData route.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="model">The EDM model to use for the service.</param>
+        /// <param name="routeName">The name of the route to map.</param>
         /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
-        public static void EnableOData(this HttpConfiguration configuration, IEdmModel model, string routePrefix)
+        /// <param name="model">The EDM model to use for parsing OData paths.</param>
+        public static void MapODataRoute(this HttpConfiguration configuration, string routeName, string routePrefix, IEdmModel model)
+        {
+            configuration.MapODataRoute(routeName, routePrefix, model, pathHandler: new DefaultODataPathHandler());
+        }
+
+        /// <summary>
+        /// Maps the specified OData route.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="routeName">The name of the route to map.</param>
+        /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
+        /// <param name="model">The EDM model to use for parsing OData paths.</param>
+        /// <param name="pathHandler">The <see cref="IODataPathHandler"/> to use for parsing the OData path.</param>
+        public static void MapODataRoute(this HttpConfiguration configuration, string routeName, string routePrefix, IEdmModel model, IODataPathHandler pathHandler)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            // Querying
-            configuration.SetEdmModel(model);
-            configuration.EnableQuerySupport();
-
             // Routing
             string routeTemplate = String.IsNullOrEmpty(routePrefix) ?
                 ODataRouteConstants.ODataPathTemplate :
                 routePrefix + "/" + ODataRouteConstants.ODataPathTemplate;
-            IODataPathHandler pathHandler = configuration.GetODataPathHandler() ?? new DefaultODataPathHandler(model);
-            IHttpRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler);
-            configuration.Routes.MapHttpRoute(ODataRouteConstants.RouteName, routeTemplate, null, new HttpRouteValueDictionary() { { ODataRouteConstants.ConstraintName, routeConstraint } });
-
-            IEnumerable<IODataRoutingConvention> routingConventions = configuration.GetODataRoutingConventions();
-            IHttpControllerSelector controllerSelector = new ODataControllerSelector(routingConventions, configuration.Services.GetHttpControllerSelector());
-            IHttpActionSelector actionSelector = new ODataActionSelector(routingConventions, configuration.Services.GetActionSelector());
-            configuration.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
-            configuration.Services.Replace(typeof(IHttpActionSelector), actionSelector);
+            IHttpRouteConstraint routeConstraint = new ODataPathRouteConstraint(pathHandler, model, routeName, configuration.GetODataRoutingConventions());
+            HttpRouteValueDictionary constraintDictionary = new HttpRouteValueDictionary() { { ODataRouteConstants.ConstraintName, routeConstraint } };
+            configuration.Routes.MapHttpRoute(routeName, routeTemplate, defaults: null, constraints: constraintDictionary);
         }
 
         /// <summary>

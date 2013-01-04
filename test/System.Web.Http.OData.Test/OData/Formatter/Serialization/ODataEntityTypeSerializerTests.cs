@@ -37,12 +37,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 ID = 10,
             };
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider(_model);
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             _serializer = new ODataEntityTypeSerializer(
                 new EdmEntityTypeReference(_customerSet.ElementType, isNullable: false),
                 serializerProvider);
             _urlHelper = new Mock<UrlHelper>(new HttpRequestMessage()).Object;
-            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, UrlHelper = _urlHelper };
+            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, UrlHelper = _urlHelper, Model = _model };
         }
 
         [Fact]

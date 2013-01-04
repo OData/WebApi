@@ -20,8 +20,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         public CollectionTest()
         {
-            _formatter = new ODataMediaTypeFormatter(GetSampleModel(),
-                new ODataPayloadKind[] { ODataPayloadKind.Collection }, GetSampleRequest());
+            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Collection }, GetSampleRequest());
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
             _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
         }
@@ -58,12 +57,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ArrayOfBoolsSerializesAsOData(Resources.ArrayOfBooleanInAtom, false);
         }
 
-        private void ArrayOfBoolsSerializesAsOData(string expectedContet, bool json)
+        private void ArrayOfBoolsSerializesAsOData(string expectedContent, bool json)
         {
             ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false },
                 _formatter, GetMediaType(json));
 
-            AssertEqual(json, expectedContet, content.ReadAsStringAsync().Result);
+            AssertEqual(json, expectedContent, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -139,6 +138,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private static HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
+            request.SetEdmModel(GetSampleModel());
             HttpConfiguration config = new HttpConfiguration();
             config.AddFakeODataRoute();
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;

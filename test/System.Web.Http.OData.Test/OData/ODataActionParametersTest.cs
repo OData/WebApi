@@ -12,7 +12,7 @@ namespace System.Web.Http.OData
 {
     public class ODataActionParametersTest
     {
-        private IEdmModel _model;
+        private IEdmModel _model = GetModel();
 
         [Theory]
         [InlineData("Drive", "Vehicles(6)/Drive")]
@@ -23,10 +23,9 @@ namespace System.Web.Http.OData
         [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Container.Drive")]
         public void Can_find_action(string actionName, string url)
         {
-            IEdmModel model = GetModel();
-            ODataPath path = new DefaultODataPathHandler(model).Parse(url);
+            ODataPath path = new DefaultODataPathHandler().Parse(_model, url);
             Assert.NotNull(path); // Guard
-            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model };
             IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
@@ -37,9 +36,9 @@ namespace System.Web.Http.OData
         {
             IEdmModel model = GetModel();
             string url = "Vehicles(8)/System.Web.Http.OData.Builder.TestModels.Car/Wash";
-            ODataPath path = new DefaultODataPathHandler(model).Parse(url);
+            ODataPath path = new DefaultODataPathHandler().Parse(_model, url);
             Assert.NotNull(path); // Guard
-            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model };
 
             IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
 
@@ -63,28 +62,24 @@ namespace System.Web.Http.OData
         {
             Assert.ThrowsArgument(() =>
             {
-                new DefaultODataPathHandler(GetModel()).Parse("Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
+                new DefaultODataPathHandler().Parse(_model, "Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
             }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
         }
 
-        private IEdmModel GetModel()
+        private static IEdmModel GetModel()
         {
-            if (_model == null)
-            {
-                ODataModelBuilder builder = new ODataConventionModelBuilder();
-                builder.ContainerName = "Container";
-                builder.Namespace = "org.odata";
-                // Action with no overloads
-                builder.EntitySet<Vehicle>("Vehicles").EntityType.Action("Drive");
-                // Valid overloads of "Wash" bound to different entities
-                builder.Entity<Motorcycle>().Action("Wash");
-                builder.Entity<Car>().Action("Wash");
-                // Invalid overloads of "Park"
-                builder.Entity<Car>().Action("Park");
-                builder.Entity<Car>().Action("Park").Parameter<string>("mood");
-                _model = builder.GetEdmModel();
-            }
-            return _model;
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ContainerName = "Container";
+            builder.Namespace = "org.odata";
+            // Action with no overloads
+            builder.EntitySet<Vehicle>("Vehicles").EntityType.Action("Drive");
+            // Valid overloads of "Wash" bound to different entities
+            builder.Entity<Motorcycle>().Action("Wash");
+            builder.Entity<Car>().Action("Wash");
+            // Invalid overloads of "Park"
+            builder.Entity<Car>().Action("Park");
+            builder.Entity<Car>().Action("Park").Parameter<string>("mood");
+            return builder.GetEdmModel();
         }
     }
 }

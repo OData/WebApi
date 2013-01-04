@@ -15,7 +15,6 @@ namespace System.Web.Http.OData
         public void Initialize_RegistersODataFormatters()
         {
             var config = new HttpConfiguration();
-            config.SetEdmModel(EdmCoreModel.Instance);
             var controllerSettings = new HttpControllerSettings(config);
             var controllerDescriptor = new HttpControllerDescriptor();
             controllerDescriptor.Configuration = config;
@@ -26,23 +25,10 @@ namespace System.Web.Http.OData
         }
 
         [Fact]
-        public void Initialize_DoesNotChangeFormatters_IfNoModelRegistered()
-        {
-            var config = new HttpConfiguration();
-            var controllerSettings = new HttpControllerSettings(config);
-            var controllerDescriptor = new HttpControllerDescriptor();
-            controllerDescriptor.Configuration = config;
-
-            new ODataFormattingAttribute().Initialize(controllerSettings, controllerDescriptor);
-
-            Assert.Empty(controllerSettings.Formatters.OfType<ODataMediaTypeFormatter>());
-        }
-
-        [Fact]
         public void Initialize_DoesNotChangeFormatters_IfODataFormatterAlreadyRegistered()
         {
             var config = new HttpConfiguration();
-            var odataFormatter = new ODataMediaTypeFormatter(EdmCoreModel.Instance, Enumerable.Empty<ODataPayloadKind>());
+            var odataFormatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>());
             config.Formatters.Add(odataFormatter);
             int formatterCount = config.Formatters.Count;
             var controllerSettings = new HttpControllerSettings(config);

@@ -503,7 +503,9 @@ namespace System.Web.Http.OData.Formatter
 
         private static IEnumerable<ODataMediaTypeFormatter> CreateProductUnderTest(IEdmModel model)
         {
-            return ODataMediaTypeFormatters.Create(model);
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetEdmModel(model);
+            return ODataMediaTypeFormatters.Create().Select(f => f.GetPerRequestFormatterInstance(typeof(void), request, null) as ODataMediaTypeFormatter);
         }
     }
 }

@@ -48,19 +48,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     isNullable: false);
 
             _urlHelper = new Mock<UrlHelper>(new HttpRequestMessage()).Object;
-            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, UrlHelper = _urlHelper };
+            _writeContext = new ODataSerializerContext() { EntitySet = _customerSet, UrlHelper = _urlHelper, Model = _model };
         }
 
         [Fact]
         public void WriteObjectInline_WritesEachEntityInstance()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict, _model);
+            var mockSerializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
             var mockCustomerSerializer = new Mock<ODataSerializer>(MockBehavior.Strict, ODataPayloadKind.Entry);
             var mockWriter = new Mock<ODataWriter>();
 
             mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
+                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
             mockCustomerSerializer
                 .Setup(s => s.WriteObjectInline(_customers[0], It.IsAny<ODataWriter>(), _writeContext))
@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Writes_InlineCountAndNextLink()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict, _model);
+            var mockSerializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
             var mockCustomerSerializer = new Mock<ODataSerializer>(MockBehavior.Strict, ODataPayloadKind.Entry);
             var mockWriter = new Mock<ODataWriter>();
 
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 expectedInlineCount
             );
             mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
+                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
             mockCustomerSerializer
                 .Setup(s => s.WriteObjectInline(_customers[0], It.IsAny<ODataWriter>(), _writeContext))
@@ -135,7 +135,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Writes_RequestNextPageLink()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>(_model);
+            var mockSerializerProvider = new Mock<ODataSerializerProvider>();
             var mockCustomerSerializer = new Mock<ODataSerializer>(ODataPayloadKind.Entry);
             var mockWriter = new Mock<ODataWriter>();
 
@@ -143,7 +143,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             _writeContext.NextPageLink = expectedNextLink;
 
             mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
+                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
             ODataFeed actualFeed = null;
             mockWriter
@@ -163,7 +163,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Writes_RequestCount()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>(_model);
+            var mockSerializerProvider = new Mock<ODataSerializerProvider>();
             var mockCustomerSerializer = new Mock<ODataSerializer>(ODataPayloadKind.Entry);
             var mockWriter = new Mock<ODataWriter>();
 
@@ -171,7 +171,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             _writeContext.InlineCount = expectedCount;
 
             mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(typeof(Customer)))
+                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
                 .Returns(mockCustomerSerializer.Object);
             mockWriter
                 .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))

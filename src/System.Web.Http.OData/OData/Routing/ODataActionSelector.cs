@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Routing
                 string actionName = routingConvention.SelectAction(odataPath, controllerContext, actionMap);
                 if (actionName != null)
                 {
-                    controllerContext.RouteData.Values.Add(ODataRouteConstants.Action, actionName);
+                    controllerContext.RouteData.Values[ODataRouteConstants.Action] = actionName;
                     return _innerSelector.SelectAction(controllerContext);
                 }
             }

@@ -12,7 +12,7 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// This defines a $orderby OData query option that can be used to perform query composition. 
+    /// This defines a $orderby OData query option for querying.
     /// </summary>
     public class OrderByQueryOption
     {
@@ -72,7 +72,7 @@ namespace System.Web.Http.OData.Query
         public string RawValue { get; private set; }
 
         /// <summary>
-        /// Gets or sets the OrderBy Query Validator
+        /// Gets or sets the OrderBy Query Validator.
         /// </summary>
         public OrderByQueryValidator Validator { get; set; }
 
@@ -111,6 +111,10 @@ namespace System.Web.Http.OData.Query
             return ApplyToCore(query);
         }
 
+        /// <summary>
+        /// Validate the orderby query based on the given <paramref name="validationSettings"/>. It throws ODataException if validation failed.
+        /// </summary>
+        /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public void Validate(ODataValidationSettings validationSettings)
         {
             if (validationSettings == null)

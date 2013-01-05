@@ -10,6 +10,9 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Query
 {
+    /// <summary>
+    /// This defines a $top OData query option for querying.
+    /// </summary>
     public class TopQueryOption
     {
         private int? _value;
@@ -71,7 +74,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets the Top Query Validator
+        /// Gets or sets the Top Query Validator.
         /// </summary>
         public TopQueryValidator Validator { get; set; }
  
@@ -95,6 +98,10 @@ namespace System.Web.Http.OData.Query
             return ApplyToCore(query);
         }
 
+        /// <summary>
+        /// Validate the top query based on the given <paramref name="validationSettings"/>. It throws ODataException if validation failed.
+        /// </summary>
+        /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public void Validate(ODataValidationSettings validationSettings)
         {
             if (validationSettings == null)

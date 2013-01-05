@@ -4,6 +4,9 @@ using System.Collections.ObjectModel;
 
 namespace System.Web.Http.OData.Query
 {
+    /// <summary>
+    /// This class describes the validation settings for querying.
+    /// </summary>
     public class ODataValidationSettings
     {
         private const int MinMaxSkip = 0;
@@ -17,6 +20,10 @@ namespace System.Web.Http.OData.Query
         private int? _maxSkip;
         private int? _maxTop;
 
+        /// <summary>
+        /// Instantiates a new instance of the <see cref="ODataValidationSettings"/> class
+        /// and initializes the default settings.
+        /// </summary>
         public ODataValidationSettings()
         {
             // default it to all the operators
@@ -28,7 +35,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets/Sets a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'
+        /// Gets or sets a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
         /// </summary>
         public AllowedArithmeticOperators AllowedArithmeticOperators
         {
@@ -48,26 +55,23 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Returns a list of allowed functions as follows.
+        /// Gets or sets a list of allowed functions used in the $filter query. 
         /// 
-        /// Against edm.string (11)
-        ///  substringof, endswith, startswith, length, indexof, replace, substring, tolower, toupper, trim, concat
+        /// The allowed functions include the following:
+        /// 
+        /// String related: substringof, endswith, startswith, length, indexof, substring, tolower, toupper, trim, concat
         ///
         /// e.g. ~/Customers?$filter=length(CompanyName) eq 19
         ///
-        /// Against edm.DateTime/DateTimeOffset (12)
-        ///  year, years, month, months, day, days, hour, hours, minute, minutes, second, seconds
+        /// DateTime related: year, years, month, months, day, days, hour, hours, minute, minutes, second, seconds
         ///
         /// e.g. ~/Employees?$filter=year(BirthDate) eq 1971
         ///
-        /// Math related (3) 
-        ///  round, floor, ceiling
+        /// Math related: round, floor, ceiling
         ///
-        /// Against Type (2)
-        ///  isof, cast, 
+        /// Type related:isof, cast, 
         ///
-        /// Against Collection (2)
-        ///  any, all
+        /// Collection related: any, all
         ///  
         /// </summary>
         public AllowedFunctions AllowedFunctions
@@ -88,7 +92,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Returns a list of allowed logical Operators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or', 'not'.
+        /// Gets or sets a list of allowed logical operators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or', 'not'.
         /// </summary>
         public AllowedLogicalOperators AllowedLogicalOperators
         {
@@ -108,8 +112,11 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Returns a list of properties one can orderby the result with. Note, by default if the list is empty, 
+        /// Gets a list of properties one can orderby the result with. Note, by default this list is empty, 
         /// it actually means it can be ordered by any properties.
+        /// 
+        /// For example, having an empty collection means client can order the queryable result by any properties.  
+        /// Adding "Name" to this list means we only allow queryable result to be ordered by Name property.
         /// </summary>
         public Collection<string> AllowedOrderByProperties
         {
@@ -120,7 +127,8 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Returns the query parameters that you allowed, the default is all four query options, including $filter, $skip, $top, $orderby
+        /// Gets or sets the query parameters that are allowed inside query. The default is all query options, 
+        /// including $filter, $skip, $top, $orderby, $expand, $select, $inlineCount, $format and $skipToken
         /// </summary>
         public AllowedQueryOptions AllowedQueryOptions
         {
@@ -140,7 +148,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets/Sets the max skip value that client can request
+        /// Gets or sets the max value of $skip that a client can request.
         /// </summary>
         public int? MaxSkip
         {
@@ -160,7 +168,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets/Sets the max top value that client can request 
+        /// Gets or sets the max value of $top that a client can request.
         /// </summary>
         public int? MaxTop
         {

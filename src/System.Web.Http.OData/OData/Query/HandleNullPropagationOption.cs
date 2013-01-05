@@ -2,6 +2,9 @@
 
 namespace System.Web.Http.OData.Query
 {
+    /// <summary>
+    /// This enum defines how to handle null propagation in queryable support.
+    /// </summary>
     public enum HandleNullPropagationOption
     {
         /// <summary>

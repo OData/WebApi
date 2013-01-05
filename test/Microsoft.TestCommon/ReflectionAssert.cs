@@ -168,7 +168,7 @@ namespace Microsoft.TestCommon
         }
 
         public void StringProperty<T>(T instance, Expression<Func<T, string>> propertyGetter, string expectedDefaultValue,
-                                      bool allowNullAndEmpty = true, string nullAndEmptyReturnValue = "")
+                                      bool allowNullAndEmpty = true, bool treatNullAsEmpty = true)
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
             Func<T, string> getFunc = (obj) => (string)property.GetValue(obj, index: null);
@@ -179,10 +179,10 @@ namespace Microsoft.TestCommon
             if (allowNullAndEmpty)
             {
                 // Assert get/set works for null
-                TestPropertyValue(instance, getFunc, setFunc, null, nullAndEmptyReturnValue);
+                TestPropertyValue(instance, getFunc, setFunc, null, treatNullAsEmpty ? String.Empty : null);
 
                 // Assert get/set works for String.Empty
-                TestPropertyValue(instance, getFunc, setFunc, String.Empty, nullAndEmptyReturnValue);
+                TestPropertyValue(instance, getFunc, setFunc, String.Empty, String.Empty);
             }
             else
             {

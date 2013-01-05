@@ -14,7 +14,7 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// This defines a $filter OData query option that can be used to perform query composition. 
+    /// This defines a $filter OData query option for querying.
     /// </summary>
     public class FilterQueryOption
     {
@@ -126,6 +126,10 @@ namespace System.Web.Http.OData.Query
             return query;
         }
 
+        /// <summary>
+        /// Validate the filter query based on the given <paramref name="validationSettings"/>. It throws ODataException if validation failed.
+        /// </summary>
+        /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public void Validate(ODataValidationSettings validationSettings)
         {
             if (validationSettings == null)

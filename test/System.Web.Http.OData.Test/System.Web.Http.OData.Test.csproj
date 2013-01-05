@@ -247,7 +247,6 @@
     <Compile Include="TestCommon\EdmTestHelpers.cs" />
     <Compile Include="OData\Query\HttpActionDescriptorExtensionTests.cs" />
     <Compile Include="ODataHttpConfigurationExtensionTest.cs" />
-    <Compile Include="QueryableAttributeTests.cs" />
     <Compile Include="OData\Query\ODataQueryParameterBindingAttributeTests.cs" />
     <Compile Include="OData\Query\Expressions\DataModel.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinderTests.cs" />

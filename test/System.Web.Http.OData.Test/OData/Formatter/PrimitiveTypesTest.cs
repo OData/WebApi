@@ -103,7 +103,16 @@ namespace System.Web.Http.OData.Formatter
                 }
             }
 
-            Assert.Equal(expectedEntity, actualEntity);
+            bool isJson = resourceName.EndsWith(".json");
+
+            if (isJson)
+            {
+                JsonAssert.Equal(expectedEntity, actualEntity);
+            }
+            else
+            {
+                Assert.Xml.Equal(expectedEntity, actualEntity);
+            }
         }
 
         [Theory]

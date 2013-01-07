@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Microsoft.AspNet.WebApi.HelpPage</id>
-    <version>0.3.0-rc-0</version>
+    <version>4.0.0-rtm-0</version>
     <title>Microsoft ASP.NET Web API Help Page</title>
     <authors>Microsoft</authors>
     <owners>Microsoft</owners>

@@ -8,7 +8,6 @@ namespace System.Web.Http.OData.Query
     public class ODataQuerySettings
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
-        private int _maxAnyAllExpressionDepth = 1;
         private int? _pageSize;
 
         /// <summary>
@@ -19,6 +18,18 @@ namespace System.Web.Http.OData.Query
         {
             EnsureStableOrdering = true;
             EnableConstantParameterization = true;
+        }
+
+        /// <summary>
+        /// Initialize a new instance of the <see cref="ODataQuerySettings"/> class based on an existing one. 
+        /// </summary>
+        /// <param name="settings">The setting to copy from.</param>
+        public ODataQuerySettings(ODataQuerySettings settings)
+        {
+            EnsureStableOrdering = settings.EnsureStableOrdering;
+            EnableConstantParameterization = settings.EnableConstantParameterization;
+            HandleNullPropagation = settings.HandleNullPropagation;
+            PageSize = settings.PageSize;
         }
 
         /// <summary>
@@ -59,32 +70,6 @@ namespace System.Web.Http.OData.Query
         /// </summary>
         /// <value>The default value is <c>true</c>.</value>
         public bool EnableConstantParameterization { get; set; }
-
-        /// <summary>
-        /// Gets or sets the maximum depth of the Any or All elements nested inside the query.
-        /// </summary>
-        /// <remarks>
-        /// This limit helps prevent Denial of Service attacks. The default value is 1.
-        /// </remarks>
-        /// <value>
-        /// The maxiumum depth of the Any or All elements nested inside the query.
-        /// </value>
-        public int MaxAnyAllExpressionDepth
-        {
-            get
-            {
-                return _maxAnyAllExpressionDepth;
-            }
-            set
-            {
-                if (value <= 0)
-                {
-                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
-                }
-
-                _maxAnyAllExpressionDepth = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the maximum number of query results to return.

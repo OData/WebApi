@@ -24,10 +24,6 @@ namespace System.Web.Http.OData.Query
     [ODataQueryParameterBinding]
     public class ODataQueryOptions
     {
-        private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
-        private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
-        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
-
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
@@ -206,12 +202,6 @@ namespace System.Web.Http.OData.Query
                 throw Error.ArgumentNull("querySettings");
             }
 
-            // Ensure we have decided how to handle null propagation
-            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                querySettings.HandleNullPropagation = GetDefaultHandleNullPropagationOption(query);
-            }
-
             IQueryable result = query;
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
@@ -293,35 +283,6 @@ namespace System.Web.Http.OData.Query
             {
                 Validator.Validate(this, validationSettings);
             }
-        }
-
-        private static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)
-        {
-            Contract.Assert(query != null);
-
-            HandleNullPropagationOption options;
-
-            string queryProviderNamespace = query.Provider.GetType().Namespace;
-            switch (queryProviderNamespace)
-            {
-                case EntityFrameworkQueryProviderNamespace:
-                    options = HandleNullPropagationOption.False;
-                    break;
-
-                case Linq2SqlQueryProviderNamespace:
-                    options = HandleNullPropagationOption.False;
-                    break;
-
-                case Linq2ObjectsQueryProviderNamespace:
-                    options = HandleNullPropagationOption.True;
-                    break;
-
-                default:
-                    options = HandleNullPropagationOption.True;
-                    break;
-            }
-
-            return options;
         }
 
         private static void ThrowIfEmpty(string queryValue, string queryName)

@@ -18,6 +18,10 @@ namespace System.Web.Http.OData.Query
     /// </summary>
     public class FilterQueryOption
     {
+        private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
+        private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
+        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
+
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private FilterClause _filterClause;
     
@@ -121,7 +125,15 @@ namespace System.Web.Http.OData.Query
             FilterClause filterClause = FilterClause;
             Contract.Assert(filterClause != null);
 
-            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, assembliesResolver, querySettings);
+            // Ensure we have decided how to handle null propagation
+            ODataQuerySettings updatedSettings = querySettings;
+            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
+            {
+                updatedSettings = new ODataQuerySettings(updatedSettings);
+                updatedSettings.HandleNullPropagation = GetDefaultHandleNullPropagationOption(query);
+            }
+
+            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, assembliesResolver, updatedSettings);
             query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
             return query;
         }
@@ -141,6 +153,29 @@ namespace System.Web.Http.OData.Query
             {
                 Validator.Validate(this, validationSettings);
             }
+        }
+
+        private static HandleNullPropagationOption GetDefaultHandleNullPropagationOption(IQueryable query)
+        {
+            Contract.Assert(query != null);
+
+            HandleNullPropagationOption options;
+
+            string queryProviderNamespace = query.Provider.GetType().Namespace;
+            switch (queryProviderNamespace)
+            {
+                case EntityFrameworkQueryProviderNamespace:
+                case Linq2SqlQueryProviderNamespace:
+                    options = HandleNullPropagationOption.False;
+                    break;
+
+                case Linq2ObjectsQueryProviderNamespace:
+                default:
+                    options = HandleNullPropagationOption.True;
+                    break;
+            }
+
+            return options;
         }
     }
 }

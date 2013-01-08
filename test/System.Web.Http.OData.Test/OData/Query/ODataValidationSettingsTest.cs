@@ -18,6 +18,8 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(AllowedLogicalOperators.All, querySettings.AllowedLogicalOperators);
             Assert.Equal(0, querySettings.AllowedOrderByProperties.Count);
             Assert.Equal(AllowedQueryOptions.Supported, querySettings.AllowedQueryOptions);
+            Assert.Equal(1, querySettings.MaxAnyAllExpressionDepth);
+            Assert.Equal(100, querySettings.MaxNodeCount);
             Assert.Null(querySettings.MaxSkip);
             Assert.Null(querySettings.MaxTop);
         }
@@ -85,6 +87,34 @@ namespace System.Web.Http.OData.Query
             Assert.Equal(2, settings.AllowedOrderByProperties.Count);
             Assert.Equal("Id", settings.AllowedOrderByProperties[0]);
             Assert.Equal("Name", settings.AllowedOrderByProperties[1]);
+        }
+
+        [Fact]
+        public void MaxAnyAllExpressionDepth_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<ODataValidationSettings, int>(
+                new ODataValidationSettings(),
+                o => o.MaxAnyAllExpressionDepth,
+                expectedDefaultValue: 1,
+                minLegalValue: 1,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                roundTripTestValue: 2);
+        }
+
+        [Fact]
+        public void MaxNodeCount_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<ODataValidationSettings, int>(
+                new ODataValidationSettings(),
+                o => o.MaxNodeCount,
+                expectedDefaultValue: 100,
+                minLegalValue: 1,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                roundTripTestValue: 2);
         }
 
         [Fact]

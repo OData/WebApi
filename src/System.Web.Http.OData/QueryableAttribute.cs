@@ -114,11 +114,29 @@ namespace System.Web.Http
         {
             get
             {
-                return _querySettings.MaxAnyAllExpressionDepth;
+                return _validationSettings.MaxAnyAllExpressionDepth;
             }
             set
             {
-               _querySettings.MaxAnyAllExpressionDepth = value;
+                _validationSettings.MaxAnyAllExpressionDepth = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of nodes inside the $filter syntax tree.
+        /// </summary>
+        /// <remarks>
+        /// The default value is 100.
+        /// </remarks>
+        public int MaxNodeCount
+        {
+            get
+            {
+                return _validationSettings.MaxNodeCount;
+            }
+            set
+            {
+                _validationSettings.MaxNodeCount = value;
             }
         }
 

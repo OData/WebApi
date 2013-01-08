@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http.OData.Builder;
+using System.Linq;
+using System.Web.Http.OData.Query.Expressions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -15,11 +16,43 @@ namespace System.Web.Http.OData.Query.Validators
         private MyFilterValidator _validator;
         private ODataValidationSettings _settings = new ODataValidationSettings();
         private ODataQueryContext _context;
+        private ODataQueryContext _productContext;
+
+        public static TheoryDataSet<string> LongInputs
+        {
+            get
+            {
+                return GetLongInputsTestData(100);
+            }
+        }
+
+        public static TheoryDataSet<string> CloseToLongInputs
+        {
+            get
+            {
+                return GetLongInputsTestData(95);
+            }
+        }
+
+        public static TheoryDataSet<string> NestedAnyAllInputs
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
+                    "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))",
+                    "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))",
+                    "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
+                };
+            }
+        }
 
         public FilterQueryValidatorTest()
         {
             _validator = new MyFilterValidator();
             _context = ValidationTestHelper.CreateCustomerContext();
+            _productContext = ValidationTestHelper.CreateProductContext();
         }
 
         [Fact]
@@ -116,6 +149,80 @@ namespace System.Web.Http.OData.Query.Validators
             Assert.Equal(2, _validator.Times["ValidateParameterQueryNode"]); // $it, t
         }
 
+        [Theory]
+        [PropertyData("NestedAnyAllInputs")]
+        public void MaxAnyAllExpressionDepthLimitExceeded(string filter)
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.MaxAnyAllExpressionDepth = 1;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
+        }
+
+        [Theory]
+        [PropertyData("NestedAnyAllInputs")]
+        public void IncreaseMaxAnyAllExpressionDepthWillAllowNestedAnyAllInputs(string filter)
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings();
+            settings.MaxAnyAllExpressionDepth = 2;
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings));
+        }
+
+        [Theory]
+        [PropertyData("LongInputs")]
+        public void LongInputs_CauseMaxNodeCountExceededException(string filter)
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                MaxAnyAllExpressionDepth = Int32.MaxValue
+            };
+
+            FilterQueryOption option = new FilterQueryOption(filter, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), "The node count limit of '100' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on QueryableAttribute or ODataValidationSettings.");
+        }
+
+        [Theory]
+        [PropertyData("LongInputs")]
+        public void IncreaseMaxNodeCountWillAllowLongInputs(string filter)
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                MaxAnyAllExpressionDepth = Int32.MaxValue,
+                MaxNodeCount = 105,
+            };
+
+            FilterQueryOption option = new FilterQueryOption(filter, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+       
+        [Theory]
+        [PropertyData("CloseToLongInputs")]
+        public void AlmostLongInputs_DonotCauseMaxNodeCountExceededExceptionOrTimeoutDuringCompilation(string filter)
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                MaxAnyAllExpressionDepth = Int32.MaxValue
+            };
+
+            FilterQueryOption option = new FilterQueryOption(filter, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(()=> _validator.Validate(option, settings));
+            Assert.DoesNotThrow(() => option.ApplyTo(new List<Product>().AsQueryable(), new ODataQuerySettings()));
+        }
+
         [Fact]
         public void ValidateVisitLogicalOperatorEqual()
         {
@@ -177,6 +284,20 @@ namespace System.Web.Http.OData.Query.Validators
 
             // Act & Assert
             Assert.DoesNotThrow(() => _validator.Validate(option, _settings));
+        }
+
+        private static TheoryDataSet<string> GetLongInputsTestData(int maxCount)
+        {
+            return new TheoryDataSet<string>
+                {
+                    "" + String.Join(" and ", Enumerable.Range(1, (maxCount/5) + 1).Select(_ => "SupplierID eq 1")),
+                    "" + String.Join(" ", Enumerable.Range(1, maxCount).Select(_ => "not")) + " Discontinued",
+                    "" + String.Join(" add ", Enumerable.Range(1, maxCount/2)) + " eq 5050",
+                    "" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/ProductID eq 1",
+                    "" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/UnsignedReorderLevel eq 1",
+                    "" + Enumerable.Range(1,maxCount).Aggregate("'abc'", (prev,i) => String.Format("trim({0})", prev)) + " eq '123'",
+                    " Category/Products/any(" + Enumerable.Range(1,maxCount/4).Aggregate("", (prev,i) => String.Format("p{1}: p{1}/Category/Products/any({0})", prev, i)) +")"
+                };
         }
 
         private class MyFilterValidator : FilterQueryValidator

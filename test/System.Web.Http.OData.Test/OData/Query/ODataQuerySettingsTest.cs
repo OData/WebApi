@@ -15,7 +15,6 @@ namespace System.Web.Http.OData.Query
             // Assert
             Assert.Equal(HandleNullPropagationOption.Default, querySettings.HandleNullPropagation);
             Assert.True(querySettings.EnsureStableOrdering);
-            Assert.Equal(1, querySettings.MaxAnyAllExpressionDepth);
         }
 
         [Fact]
@@ -36,20 +35,6 @@ namespace System.Web.Http.OData.Query
                 HandleNullPropagationOption.Default,
                 HandleNullPropagationOption.Default - 1,
                 HandleNullPropagationOption.True);
-        }
-
-        [Fact]
-        public void LambdaNestingLimit_Property_RoundTrips()
-        {
-            Assert.Reflection.IntegerProperty<ODataQuerySettings, int>(
-                new ODataQuerySettings(),
-                o => o.MaxAnyAllExpressionDepth,
-                expectedDefaultValue: 1,
-                minLegalValue: 1,
-                maxLegalValue: int.MaxValue,
-                illegalLowerValue: 0,
-                illegalUpperValue: null,
-                roundTripTestValue: 2);
         }
 
         [Fact]

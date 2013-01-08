@@ -24,22 +24,6 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private static Dictionary<Type, IEdmModel> _modelCache = new Dictionary<Type, IEdmModel>();
 
-        public static TheoryDataSet<string> LongInputs
-        {
-            get
-            {
-                return GetLongInputsTestData(100);
-            }
-        }
-
-        public static TheoryDataSet<string> CloseToLongInputs
-        {
-            get
-            {
-                return GetLongInputsTestData(95);
-            }
-        }
-
         #region Inequalities
         [Theory]
         [InlineData(null, true, true)]
@@ -402,33 +386,6 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Theory]
-        [PropertyData("LongInputs")]
-        public void LongInputs_CauseRecursionLimitExceededException(string filter)
-        {
-            ODataQuerySettings settings = new ODataQuerySettings
-            {
-                HandleNullPropagation = HandleNullPropagationOption.True,
-                MaxAnyAllExpressionDepth = Int32.MaxValue
-            };
-
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The recursion limit has been exceeded.");
-        }
-
-        [Theory]
-        [PropertyData("CloseToLongInputs")]
-        public void AlmostLongInputs_DonotCauseRecursionLimitExceededExceptionOrTimeoutDuringCompilation(string filter)
-        {
-            ODataQuerySettings settings = new ODataQuerySettings
-            {
-                HandleNullPropagation = HandleNullPropagationOption.True,
-                MaxAnyAllExpressionDepth = Int32.MaxValue
-            };
-
-            Expression<Func<Product, bool>> expression = Bind(filter, settings);
-            RunFilter(expression, new Product());
-        }
-
-        [Theory]
         [InlineData(null, null, true, true)]
         [InlineData("not doritos", 0, true, true)]
         [InlineData("Doritos", 1, false, false)]
@@ -664,66 +621,6 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Fact]
-        public void RecursiveAllAny()
-        {
-            Action<ODataQuerySettings> customizeSettings = (settings) => settings.MaxAnyAllExpressionDepth = 2;
-
-            VerifyQueryDeserialization(
-               "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
-               "$it => $it.Category.QueryableProducts.All(P => P.Category.EnumerableProducts.Any(PP => (PP.ProductName == \"Snacks\")))",
-               NotTesting,
-               customizeSettings);
-        }
-
-        [Fact]
-        public void AnyAnyNestedBeyondLimit()
-        {
-            // Arrange
-            var filter = "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))";
-            ODataQuerySettings settings = CreateSettings();
-            settings.MaxAnyAllExpressionDepth = 1;
-
-            // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
-        }
-
-        [Fact]
-        public void AllAllNestedBeyondLimit()
-        {
-            // Arrange
-            var filter = "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))";
-            ODataQuerySettings settings = CreateSettings();
-            settings.MaxAnyAllExpressionDepth = 1;
-
-            // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
-        }
-
-        [Fact]
-        public void AnyAllNestedBeyondLimit()
-        {
-            // Arrange
-            var filter = "Category/QueryableProducts/any(P: P/Category/EnumerableProducts/all(PP: PP/ProductName eq 'Snacks'))";
-            ODataQuerySettings settings = CreateSettings();
-            settings.MaxAnyAllExpressionDepth = 1;
-
-            // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
-        }
-
-        [Fact]
-        public void AllAnyNestedBeyondLimit()
-        {
-            // Arrange
-            var filter = "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))";
-            ODataQuerySettings settings = CreateSettings();
-            settings.MaxAnyAllExpressionDepth = 1;
-
-            // Act & Assert
-            Assert.Throws<ODataException>(() => Bind(filter, settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or QueryableAttribute.");
-        }
-
-        [Fact]
         public void AnyInSequenceNotNested()
         {
             VerifyQueryDeserialization(
@@ -796,6 +693,16 @@ namespace System.Web.Http.OData.Query.Expressions
                "$it => $it.AlternateAddresses.All(address => (address.City == \"Redmond\"))",
                NotTesting);
         }
+
+        [Fact]
+        public void RecursiveAllAny()
+        {
+            VerifyQueryDeserialization(
+               "Category/QueryableProducts/all(P: P/Category/EnumerableProducts/any(PP: PP/ProductName eq 'Snacks'))",
+               "$it => $it.Category.QueryableProducts.All(P => P.Category.EnumerableProducts.Any(PP => (PP.ProductName == \"Snacks\")))",
+               NotTesting);
+        }
+
         #endregion
 
         #region String Functions
@@ -1589,20 +1496,6 @@ namespace System.Web.Http.OData.Query.Expressions
             };
         }
 
-        private static TheoryDataSet<string> GetLongInputsTestData(int maxCount)
-        {
-            return new TheoryDataSet<string>
-                {
-                    "" + String.Join(" and ", Enumerable.Range(1, (maxCount/5) + 1).Select(_ => "SupplierID eq 1")),
-                    "" + String.Join(" ", Enumerable.Range(1, maxCount).Select(_ => "not")) + " Discontinued",
-                    "" + String.Join(" add ", Enumerable.Range(1, maxCount/2)) + " eq 5050",
-                    "" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/ProductID eq 1",
-                    "" + String.Join("/", Enumerable.Range(1, maxCount/2).Select(_ => "Category/Product")) + "/UnsignedReorderLevel eq 1",
-                    "" + Enumerable.Range(1,maxCount).Aggregate("'abc'", (prev,i) => String.Format("trim({0})", prev)) + " eq '123'",
-                    " Category/Products/any(" + Enumerable.Range(1,maxCount/4).Aggregate("", (prev,i) => String.Format("p{1}: p{1}/Category/Products/any({0})", prev, i)) +")"
-                };
-        }
-
         private void RunFilters<T>(dynamic filters, T product, dynamic expectedValue)
         {
             var filterWithNullPropagation = filters.WithNullPropagation as Expression<Func<T, bool>>;
@@ -1691,7 +1584,6 @@ namespace System.Web.Http.OData.Query.Expressions
             Assert.True(resultExpression == expectedExpression,
                 String.Format("Expected expression '{0}' but the deserializer produced '{1}'", expectedExpression, resultExpression));
         }
-
 
         private IEdmModel GetModel<T>() where T : class
         {

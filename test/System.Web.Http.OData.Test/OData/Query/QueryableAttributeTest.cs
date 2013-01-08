@@ -161,6 +161,20 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void MaxNodeCount_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty<QueryableAttribute, int>(
+                new QueryableAttribute(),
+                o => o.MaxNodeCount,
+                expectedDefaultValue: 100,
+                minLegalValue: 1,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: 0,
+                illegalUpperValue: null,
+                roundTripTestValue: 2);
+        }
+
+        [Fact]
         public void PageSize_Property_RoundTrips()
         {
             Assert.Reflection.IntegerProperty<QueryableAttribute, int>(

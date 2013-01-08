@@ -27,14 +27,7 @@ namespace System.Web.Http.OData.Query.Expressions
     internal class FilterBinder
     {
         private const string ODataItParameterName = "$it";
-
-        /// <summary>
-        /// restrict the maximum number of expressions that we generate to prevent DoS attacks.
-        /// </summary>
-        private const int MaxBindCount = 100;
-        private int _currentBindCount;
-        private int _currentLambdaNestingCount;
-
+        
         private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
         private static readonly Expression _nullConstant = Expression.Constant(null);
@@ -127,8 +120,6 @@ namespace System.Web.Http.OData.Query.Expressions
 
             CollectionNode collectionNode = node as CollectionNode;
             SingleValueNode singleValueNode = node as SingleValueNode;
-
-            IncrementBindCount();
 
             if (collectionNode != null)
             {
@@ -894,94 +885,68 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression BindAllNode(AllNode allNode)
         {
-            EnterLambda();
+            ParameterExpression allIt = HandleLambdaParameters(allNode.RangeVariables);
 
-            Expression returnValue;
+            Expression source;
+            Contract.Assert(allNode.Source != null);
+            source = Bind(allNode.Source);
 
-            try
+            Expression body = source;
+            Contract.Assert(allNode.Body != null);
+
+            body = Bind(allNode.Body);
+            body = ApplyNullPropagationForFilterBody(body);
+            body = Expression.Lambda(body, allIt);
+
+            Expression all = All(source, body);
+
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
             {
-                ParameterExpression allIt = HandleLambdaParameters(allNode.RangeVariables);
-
-                Expression source;
-                Contract.Assert(allNode.Source != null);
-                source = Bind(allNode.Source);
-
-                Expression body = source;
-                Contract.Assert(allNode.Body != null);
-
-                body = Bind(allNode.Body);
-                body = ApplyNullPropagationForFilterBody(body);
-                body = Expression.Lambda(body, allIt);
-
-                Expression all = All(source, body);
-
-                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
-                {
-                    // IFF(source == null) null; else Any(body);
-                    all = ToNullable(all);
-                    returnValue = Expression.Condition(
-                        test: Expression.Equal(source, _nullConstant),
-                        ifTrue: Expression.Constant(null, all.Type),
-                        ifFalse: all);
-                }
-                else
-                {
-                    returnValue = all;
-                }
+                // IFF(source == null) null; else Any(body);
+                all = ToNullable(all);
+                return Expression.Condition(
+                    test: Expression.Equal(source, _nullConstant),
+                    ifTrue: Expression.Constant(null, all.Type),
+                    ifFalse: all);
             }
-            finally
+            else
             {
-                ExitLambda();
+                return all;
             }
-
-            return returnValue;
         }
 
         private Expression BindAnyNode(AnyNode anyNode)
         {
-            EnterLambda();
+            ParameterExpression anyIt = HandleLambdaParameters(anyNode.RangeVariables);
 
-            Expression returnValue;
+            Expression source;
+            Contract.Assert(anyNode.Source != null);
+            source = Bind(anyNode.Source);
 
-            try
+            Expression body = null;
+            // uri parser places an Constant node with value true for empty any() body
+            if (anyNode.Body != null && anyNode.Body.Kind != QueryNodeKind.Constant)
             {
-                ParameterExpression anyIt = HandleLambdaParameters(anyNode.RangeVariables);
-
-                Expression source;
-                Contract.Assert(anyNode.Source != null);
-                source = Bind(anyNode.Source);
-
-                Expression body = null;
-                // uri parser places an Constant node with value true for empty any() body
-                if (anyNode.Body != null && anyNode.Body.Kind != QueryNodeKind.Constant)
-                {
-                    body = Bind(anyNode.Body);
-                    body = ApplyNullPropagationForFilterBody(body);
-                    body = Expression.Lambda(body, anyIt);
-                }
-
-                Expression any = Any(source, body);
-
-                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
-                {
-                    // IFF(source == null) null; else Any(body);
-                    any = ToNullable(any);
-                    returnValue = Expression.Condition(
-                        test: Expression.Equal(source, _nullConstant),
-                        ifTrue: Expression.Constant(null, any.Type),
-                        ifFalse: any);
-                }
-                else
-                {
-                    returnValue = any;
-                }
-            }
-            finally
-            {
-                ExitLambda();
+                body = Bind(anyNode.Body);
+                body = ApplyNullPropagationForFilterBody(body);
+                body = Expression.Lambda(body, anyIt);
             }
 
-            return returnValue;
+            Expression any = Any(source, body);
+
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
+            {
+                // IFF(source == null) null; else Any(body);
+                any = ToNullable(any);
+                return Expression.Condition(
+                    test: Expression.Equal(source, _nullConstant),
+                    ifTrue: Expression.Constant(null, any.Type),
+                    ifFalse: any);
+            }
+            else
+            {
+                return any;
+            }
         }
 
         private ParameterExpression HandleLambdaParameters(IEnumerable<RangeVariable> rangeVariables)
@@ -1020,32 +985,6 @@ namespace System.Web.Http.OData.Query.Expressions
 
             _lambdaParameters = newParameters;
             return lambdaIt;
-        }
-
-        private void IncrementBindCount()
-        {
-            if (_currentBindCount >= MaxBindCount)
-            {
-                throw new ODataException(SRResources.RecursionLimitExceeded);
-            }
-
-            _currentBindCount++;
-        }
-
-        private void EnterLambda()
-        {
-            if (_currentLambdaNestingCount >= _querySettings.MaxAnyAllExpressionDepth)
-            {
-                throw new ODataException(Error.Format(SRResources.MaxAnyAllExpressionLimitExceeded, _querySettings.MaxAnyAllExpressionDepth, "MaxAnyAllExpressionDepth"));
-            }
-
-            _currentLambdaNestingCount++;
-        }
-
-        private void ExitLambda()
-        {
-            Contract.Assert(_currentLambdaNestingCount > 0);
-            _currentLambdaNestingCount--;
         }
 
         // If the expression is of non-standard edm primitive type (like uint), convert the expression to its standard edm type.

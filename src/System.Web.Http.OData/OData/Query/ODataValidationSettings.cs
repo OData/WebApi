@@ -12,27 +12,15 @@ namespace System.Web.Http.OData.Query
         private const int MinMaxSkip = 0;
         private const int MinMaxTop = 0;
 
-        private AllowedArithmeticOperators _allowedArithmeticOperators;
-        private AllowedFunctions _allowedFunctions;
-        private AllowedLogicalOperators _allowedLogicalOperators;
-        private AllowedQueryOptions _allowedQueryParameters;
-        private Collection<string> _allowedOrderByProperties;
+        private AllowedArithmeticOperators _allowedArithmeticOperators = AllowedArithmeticOperators.All;
+        private AllowedFunctions _allowedFunctions = AllowedFunctions.AllFunctions;
+        private AllowedLogicalOperators _allowedLogicalOperators = AllowedLogicalOperators.All;
+        private AllowedQueryOptions _allowedQueryParameters = AllowedQueryOptions.Supported;
+        private Collection<string> _allowedOrderByProperties = new Collection<string>();
         private int? _maxSkip;
         private int? _maxTop;
-
-        /// <summary>
-        /// Instantiates a new instance of the <see cref="ODataValidationSettings"/> class
-        /// and initializes the default settings.
-        /// </summary>
-        public ODataValidationSettings()
-        {
-            // default it to all the operators
-            _allowedArithmeticOperators = AllowedArithmeticOperators.All;
-            _allowedFunctions = AllowedFunctions.AllFunctions;
-            _allowedLogicalOperators = AllowedLogicalOperators.All;
-            _allowedQueryParameters = AllowedQueryOptions.Supported;
-            _allowedOrderByProperties = new Collection<string>();
-        }
+        private int _maxAnyAllExpressionDepth = 1;
+        private int _maxNodeCount = 100;
 
         /// <summary>
         /// Gets or sets a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
@@ -144,6 +132,55 @@ namespace System.Web.Http.OData.Query
                 }
 
                 _allowedQueryParameters = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum depth of the Any or All elements nested inside the query.
+        /// </summary>
+        /// <remarks>
+        /// The default value is 1.
+        /// </remarks>
+        /// <value>
+        /// The maximum depth of the Any or All elements nested inside the query.
+        /// </value>
+        public int MaxAnyAllExpressionDepth
+        {
+            get
+            {
+                return _maxAnyAllExpressionDepth;
+            }
+            set
+            {
+                if (value <= 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                }
+
+                _maxAnyAllExpressionDepth = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of the nodes inside the $filter syntax tree.
+        /// </summary>
+        /// <remarks>
+        /// The default value is 100.
+        /// </remarks>
+        public int MaxNodeCount
+        {
+            get
+            {
+                return _maxNodeCount;
+            }
+            set
+            {
+                if (value <= 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                }
+
+                _maxNodeCount = value;
             }
         }
 

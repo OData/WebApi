@@ -12,13 +12,22 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query.Validators
 {
     /// <summary>
-    /// Define a validator class used to validate a FilterQueryOption based on the settings
+    /// Define a validator class used to validate a FilterQueryOption based on the settings. 
     /// </summary>
+    /// <remarks>
+    /// Please note this class is not thread safe. 
+    /// </remarks>
     public class FilterQueryValidator
     {
+        private int _currentAnyAllExpressionDepth;
+        private int _currentNodeCount;
+
         /// <summary>
         /// The entry point of this validator class. Use this method to validate the FilterQueryOption
         /// </summary>
+        /// <remarks>
+        /// Please note this method is not thread safe. 
+        /// </remarks>
         public virtual void Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings)
         {
             if (filterQueryOption == null)
@@ -31,12 +40,18 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            _currentAnyAllExpressionDepth = 0;
+            _currentNodeCount = 0;
+
             ValidateQueryNode(filterQueryOption.FilterClause.Expression, settings);
         }
 
         /// <summary>
         /// Override this method to restrict the 'all' query inside the filter query
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="allNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateAllNode(AllNode allNode, ODataValidationSettings settings)
@@ -51,14 +66,26 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            ValidateQueryNode(allNode.Source, settings);
+            EnterLambda(settings);
 
-            ValidateQueryNode(allNode.Body, settings);
+            try
+            {
+                ValidateQueryNode(allNode.Source, settings);
+
+                ValidateQueryNode(allNode.Body, settings);
+            }
+            finally
+            {
+                ExitLambda();
+            }
         }
 
         /// <summary>
         /// Override this method to restrict the 'any' query inside the filter query
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance. 
+        /// </remarks>
         /// <param name="anyNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateAnyNode(AnyNode anyNode, ODataValidationSettings settings)
@@ -73,17 +100,29 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            ValidateQueryNode(anyNode.Source, settings);
+            EnterLambda(settings);
 
-            if (anyNode.Body != null && anyNode.Body.Kind != QueryNodeKind.Constant)
+            try
             {
-                ValidateQueryNode(anyNode.Body, settings);
+                ValidateQueryNode(anyNode.Source, settings);
+
+                if (anyNode.Body != null && anyNode.Body.Kind != QueryNodeKind.Constant)
+                {
+                    ValidateQueryNode(anyNode.Body, settings);
+                }
+            }
+            finally
+            {
+                ExitLambda();
             }
         }
 
         /// <summary>
         /// override this method to restrict the binary operators inside the filter query. That includes all the logical operators except 'not' and all math operators.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="binaryOperatorNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateBinaryOperatorNode(BinaryOperatorNode binaryOperatorNode, ODataValidationSettings settings)
@@ -124,6 +163,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// 
         /// Please note that 'not' is not included here. Please override ValidateUnaryOperatorNode to customize 'not'.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="binaryNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateLogicalOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)
@@ -154,6 +196,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method for the Arithmetic operators, including add, sub, mul, div, mod
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="binaryNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateArithmeticOperator(BinaryOperatorNode binaryNode, ODataValidationSettings settings)
@@ -184,6 +229,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to restrict the 'constant' inside the filter query.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="constantNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateConstantNode(ConstantNode constantNode, ODataValidationSettings settings)
@@ -204,6 +252,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to restrict the 'cast' inside the filter query.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="convertNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateConvertNode(ConvertNode convertNode, ODataValidationSettings settings)
@@ -225,6 +276,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method for the navigation property node
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="sourceNode"></param>
         /// <param name="navigationProperty"></param>
         /// <param name="settings"></param>
@@ -247,6 +301,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate the parameter used in the filter query
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="rangeVariable"></param>
         /// <param name="settings"></param>
         public virtual void ValidateRangeVariable(RangeVariable rangeVariable, ODataValidationSettings settings)
@@ -267,6 +324,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate property accessor
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="propertyAccessNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateSingleValuePropertyAccessNode(SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
@@ -288,6 +348,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate collection property accessor
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="propertyAccessNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateCollectionPropertyAccessNode(CollectionPropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
@@ -309,6 +372,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate Function calls, such as 'length', 'years', etc.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="node"></param>
         /// <param name="settings"></param>
         public virtual void ValidateSingleValueFunctionCallNode(SingleValueFunctionCallNode node, ODataValidationSettings settings)
@@ -334,6 +400,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method to validate the Not operator
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="unaryOperatorNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateUnaryOperatorNode(UnaryOperatorNode unaryOperatorNode, ODataValidationSettings settings)
@@ -355,6 +424,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method if you want to visit each query node. 
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="node"></param>
         /// <param name="settings"></param>
         public virtual void ValidateQueryNode(QueryNode node, ODataValidationSettings settings)
@@ -364,6 +436,8 @@ namespace System.Web.Http.OData.Query.Validators
 
             SingleValueNode singleNode = node as SingleValueNode;
             CollectionNode collectionNode = node as CollectionNode;
+
+            IncrementNodeCount(settings);
 
             if (singleNode != null)
             {
@@ -378,6 +452,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method if you want to validate casts on entity collections.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="entityCollectionCastNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateEntityCollectionCastNode(EntityCollectionCastNode entityCollectionCastNode, ODataValidationSettings settings)
@@ -393,6 +470,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <summary>
         /// Override this method if you want to validate casts on single entities.
         /// </summary>
+        /// <remarks>
+        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
         /// <param name="singleEntityCastNode"></param>
         /// <param name="settings"></param>
         public virtual void ValidateSingleEntityCastNode(SingleEntityCastNode singleEntityCastNode, ODataValidationSettings settings)
@@ -403,6 +483,32 @@ namespace System.Web.Http.OData.Query.Validators
             }
 
             ValidateQueryNode(singleEntityCastNode.Source, settings);
+        }
+
+        private void EnterLambda(ODataValidationSettings validationSettings)
+        {
+            if (_currentAnyAllExpressionDepth >= validationSettings.MaxAnyAllExpressionDepth)
+            {
+                throw new ODataException(Error.Format(SRResources.MaxAnyAllExpressionLimitExceeded, validationSettings.MaxAnyAllExpressionDepth, "MaxAnyAllExpressionDepth"));
+            }
+
+            _currentAnyAllExpressionDepth++;
+        }
+
+        private void ExitLambda()
+        {
+            Contract.Assert(_currentAnyAllExpressionDepth > 0);
+            _currentAnyAllExpressionDepth--;
+        }
+
+        private void IncrementNodeCount(ODataValidationSettings validationSettings)
+        {
+            if (_currentNodeCount >= validationSettings.MaxNodeCount)
+            {
+                throw new ODataException(Error.Format(SRResources.MaxNodeLimitExceeded, validationSettings.MaxNodeCount, "MaxNodeCount"));
+            }
+
+            _currentNodeCount++;
         }
 
         private void ValidateCollectionNode(CollectionNode node, ODataValidationSettings settings)

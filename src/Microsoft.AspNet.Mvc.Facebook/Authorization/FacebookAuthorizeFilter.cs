@@ -85,11 +85,13 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
                     // redirect to the specified redirect path or to the Facebook OAuth dialog.
                     if (currentPermissions == null || !requiredPermissions.IsSubsetOf(currentPermissions))
                     {
-                        string redirectUrl = GetRedirectUrl(request);
+                        NameValueCollection parsedQueries = HttpUtility.ParseQueryString(request.Url.Query);
+                        bool hasError = !String.IsNullOrEmpty(parsedQueries["error"]);
+                        string redirectUrl = GetRedirectUrl(request, parsedQueries);
                         string requiredPermissionString = String.Join(",", requiredPermissions);
                         Uri authorizationUrl;
 
-                        if (!String.IsNullOrEmpty(_config.AuthorizationRedirectPath))
+                        if (!String.IsNullOrEmpty(_config.AuthorizationRedirectPath) && hasError)
                         {
                             UriBuilder authorizationUrlBuilder = new UriBuilder(_config.AppUrl);
                             authorizationUrlBuilder.Path += _config.AuthorizationRedirectPath.Substring(1);
@@ -134,7 +136,11 @@ namespace Microsoft.AspNet.Mvc.Facebook.Authorization
         private string GetRedirectUrl(HttpRequestBase request)
         {
             NameValueCollection queryNameValuePair = HttpUtility.ParseQueryString(request.Url.Query);
+            return GetRedirectUrl(request, queryNameValuePair);
+        }
 
+        private string GetRedirectUrl(HttpRequestBase request, NameValueCollection queryNameValuePair)
+        {
             // Don't propagate query strings added by Facebook OAuth Dialog
             queryNameValuePair.Remove("code");
             queryNameValuePair.Remove("error");

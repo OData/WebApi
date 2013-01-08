@@ -87,8 +87,10 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
                 result.Content);
         }
 
-        [Fact]
-        public void OnAuthorization_RedirectsToAuthorizationRedirectPath_ForMissingPermissions_WhenThePathIsSet()
+        [Theory]
+        [InlineData("http://example.com", "https://www.facebook.com/dialog/oauth?redirect_uri=example.com")]
+        [InlineData("http://example.com?error=access_denied", "https://apps.facebook.com/DefaultAppId/home/permissions?originUrl=https%3a%2f%2fapps.facebook.com%2fDefaultAppId%2f\\u0026permissions=email")]
+        public void OnAuthorization_RedirectsToAuthorizationRedirectPath_OnlyWhenUserDeniedGrantingPermissions(string requestUrl, string expectedRedirectUrl)
         {
             FacebookClient client = MockHelpers.CreateFacebookClient();
             IFacebookPermissionService permissionService = MockHelpers.CreatePermissionService(new[] { "" });
@@ -99,7 +101,9 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
                 MockHelpers.CreateControllerContext(new NameValueCollection
                 {
                     {"signed_request", "exampleSignedRequest"}
-                }),
+                },
+                null,
+                new Uri(requestUrl)),
                 MockHelpers.CreateActionDescriptor(new[] { new FacebookAuthorizeAttribute("email") }));
 
             authorizeFilter.OnAuthorization(context);
@@ -107,7 +111,7 @@ namespace Microsoft.AspNet.Mvc.Facebook.Test
             ContentResult result = Assert.IsType<ContentResult>(context.Result);
             Assert.Equal("text/html", result.ContentType);
             Assert.Equal(
-                "<script>window.top.location = 'https://apps.facebook.com/DefaultAppId/home/permissions?originUrl=https%3a%2f%2fapps.facebook.com%2fDefaultAppId%2f\\u0026permissions=email';</script>",
+                String.Format("<script>window.top.location = '{0}';</script>", expectedRedirectUrl),
                 result.Content);
         }
     }

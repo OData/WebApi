@@ -57,7 +57,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
 
-            string link = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, navigationPathSegments);
+            string link = entityContext.UrlHelper.ODataLink(navigationPathSegments);
 
             if (link == null)
             {

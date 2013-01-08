@@ -361,7 +361,6 @@ namespace System.Web.Http.OData.Builder
                 EntitySet = entitySet,
                 EntityType = movieType,
                 UrlHelper = urlHelper,
-                PathHandler = new DefaultODataPathHandler(),
                 EntityInstance = new Movie { ID = 1, Name = "Avatar" },
                 SkipExpensiveAvailabilityChecks = false
             };

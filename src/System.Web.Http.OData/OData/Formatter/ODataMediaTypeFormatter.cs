@@ -359,7 +359,7 @@ namespace System.Web.Http.OData.Formatter
                 // to generate a metadata link.
                 if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
                 {
-                    string metadataLink = urlHelper.ODataLink(pathHandler, new MetadataPathSegment());
+                    string metadataLink = urlHelper.ODataLink(new MetadataPathSegment());
 
                     if (metadataLink == null)
                     {

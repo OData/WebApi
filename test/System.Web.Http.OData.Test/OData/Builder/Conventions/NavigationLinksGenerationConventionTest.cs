@@ -92,7 +92,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 carManufacturerProperty,
@@ -157,7 +156,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = carType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 carManufacturerProperty,
@@ -194,7 +192,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = sportbikeType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler(),
                     EntityInstance = new Car { Model = 2009, Name = "Ninja" }
                 },
                 motorcycleManufacturerProperty,
@@ -227,7 +224,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntitySet = edmEntitySet,
                     EntityType = edmEntitySet.ElementType,
                     UrlHelper = request.GetUrlHelper(),
-                    PathHandler = new DefaultODataPathHandler()
                 },
                 edmEntitySet.ElementType.NavigationProperties().Single(),
                 orders,
@@ -259,7 +255,6 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EntityInstance = new NavigationLinksGenerationConventionTest_Order { ID = 100 },
                     EntitySet = edmEntitySet,
                     EntityType = edmEntitySet.ElementType,
-                    PathHandler = new DefaultODataPathHandler(),
                     UrlHelper = request.GetUrlHelper()
                 },
                 edmEntitySet.ElementType.NavigationProperties().Single(),

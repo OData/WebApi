@@ -26,10 +26,5 @@ namespace System.Web.Http.OData
         /// Gets the value of this feed instance.
         /// </summary>
         public object FeedInstance { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="IODataPathHandler"/> to be used for generating OData paths while serializing this feed.
-        /// </summary>
-        public IODataPathHandler PathHandler { get; set; }
     }
 }

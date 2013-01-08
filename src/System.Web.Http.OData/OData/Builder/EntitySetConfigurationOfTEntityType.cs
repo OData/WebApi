@@ -394,7 +394,6 @@ namespace System.Web.Http.OData.Builder
                 EntitySet = context.EntitySet,
                 EntityType = context.EntityType,
                 UrlHelper = context.UrlHelper,
-                PathHandler = context.PathHandler,
                 EntityInstance = context.EntityInstance as TEntityType
             };
         }

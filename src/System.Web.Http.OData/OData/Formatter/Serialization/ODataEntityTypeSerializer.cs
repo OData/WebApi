@@ -94,7 +94,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 EntitySet = writeContext.EntitySet,
                 EntityType = entityType,
                 UrlHelper = writeContext.UrlHelper,
-                PathHandler = writeContext.PathHandler,
                 EntityInstance = graph,
                 SkipExpensiveAvailabilityChecks = writeContext.SkipExpensiveAvailabilityChecks
             };
@@ -213,7 +212,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 Uri target = builder.BuildActionLink(context);
                 if (target != null)
                 {
-                    Uri baseUri = new Uri(context.UrlHelper.ODataLink(context.PathHandler, new MetadataPathSegment()));
+                    Uri baseUri = new Uri(context.UrlHelper.ODataLink(new MetadataPathSegment()));
                     Uri metadata = new Uri(baseUri, "#" + action.Container.Name + "." + action.Name);
 
                     return new ODataAction

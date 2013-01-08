@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Routing;
@@ -16,30 +17,60 @@ namespace System.Web.Http
     public static class ODataUrlHelperExtensions
     {
         /// <summary>
-        /// Generates an OData link using the default OData route name.
+        /// Generates an OData link using the request's OData route name and path handler.
         /// </summary>
         /// <param name="urlHelper">The URL helper.</param>
-        /// <param name="pathHandler">The path handler to use for generating the link.</param>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public static string ODataLink(this UrlHelper urlHelper, IODataPathHandler pathHandler, params ODataPathSegment[] segments)
+        public static string ODataLink(this UrlHelper urlHelper, params ODataPathSegment[] segments)
         {
-            return urlHelper.ODataLink(pathHandler, segments as IList<ODataPathSegment>);
+            return urlHelper.ODataLink(segments as IList<ODataPathSegment>);
         }
 
         /// <summary>
-        /// Generates an OData link using the default OData route name.
+        /// Generates an OData link using the request's OData route name and path handler.
         /// </summary>
         /// <param name="urlHelper">The URL helper.</param>
+        /// <param name="segments">The OData path segments.</param>
+        /// <returns>The generated OData link.</returns>
+        public static string ODataLink(this UrlHelper urlHelper, IList<ODataPathSegment> segments)
+        {
+            if (urlHelper == null)
+            {
+                throw Error.ArgumentNull("urlHelper");
+            }
+
+            HttpRequestMessage request = urlHelper.Request;
+            Contract.Assert(request != null);
+
+            string routeName = request.GetODataRouteName() ?? ODataRouteConstants.DefaultRouteName;
+            IODataPathHandler pathHandler = request.GetODataPathHandler();
+            return urlHelper.ODataLink(routeName, pathHandler, segments);
+        }
+
+        /// <summary>
+        /// Generates an OData link using the given OData route name and path handler.
+        /// </summary>
+        /// <param name="urlHelper">The URL helper.</param>
+        /// <param name="routeName">The name of the OData route.</param>
         /// <param name="pathHandler">The path handler to use for generating the link.</param>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public static string ODataLink(this UrlHelper urlHelper, IODataPathHandler pathHandler, IList<ODataPathSegment> segments)
+        public static string ODataLink(this UrlHelper urlHelper, string routeName, IODataPathHandler pathHandler, IList<ODataPathSegment> segments)
         {
-            string odataPath = pathHandler.Link(new ODataPath(segments));
-            string linkRouteName = urlHelper.Request.GetODataRouteName() ?? ODataRouteConstants.DefaultRouteName;
+            if (urlHelper == null)
+            {
+                throw Error.ArgumentNull("urlHelper");
+            }
 
-            string directLink = urlHelper.GenerateLinkDirectly(linkRouteName, odataPath);
+            if (pathHandler == null)
+            {
+                throw Error.ArgumentNull("pathHandler");
+            }
+
+            string odataPath = pathHandler.Link(new ODataPath(segments));
+
+            string directLink = urlHelper.GenerateLinkDirectly(routeName, odataPath);
             if (directLink != null)
             {
                 return directLink;
@@ -47,7 +78,7 @@ namespace System.Web.Http
 
             // Slow path : use urlHelper.Link because the fast path failed
             return urlHelper.Link(
-                linkRouteName,
+                routeName,
                 new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, odataPath } });
         }
 

@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             actionPathSegments.Add(new ActionPathSegment(action.Name));
 
-            string actionLink = entityContext.UrlHelper.ODataLink(entityContext.PathHandler, actionPathSegments);
+            string actionLink = entityContext.UrlHelper.ODataLink(actionPathSegments);
 
             if (actionLink == null)
             {

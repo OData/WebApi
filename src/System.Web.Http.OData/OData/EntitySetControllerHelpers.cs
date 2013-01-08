@@ -78,7 +78,6 @@ namespace System.Web.Http.OData
 
             string controllerName = controller.ControllerContext.ControllerDescriptor.ControllerName;
             response.Headers.Location = new Uri(controller.Url.ODataLink(
-                                                    controller.Request.GetODataPathHandler(),
                                                     new EntitySetPathSegment(controllerName),
                                                     new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
             return response;

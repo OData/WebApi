@@ -105,7 +105,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     {
                         EntitySet = writeContext.EntitySet,
                         UrlHelper = writeContext.UrlHelper,
-                        PathHandler = writeContext.PathHandler,
                         FeedInstance = graph
                     };
 

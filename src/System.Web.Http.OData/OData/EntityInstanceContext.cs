@@ -38,11 +38,6 @@ namespace System.Web.Http.OData
         public UrlHelper UrlHelper { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IODataPathHandler"/> to be used for generating OData paths while serializing this entity instance.
-        /// </summary>
-        public IODataPathHandler PathHandler { get; set; }
-
-        /// <summary>
         /// Gets whether ActionAvailabilityChecks should be performed or not.
         /// This is used to tell the formatter whether to check availability of an action before including a link to it.
         /// When in a feed we skip this check.

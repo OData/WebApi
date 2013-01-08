@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http.Controllers;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Routing;

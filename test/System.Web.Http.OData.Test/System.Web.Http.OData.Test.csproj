@@ -129,6 +129,7 @@
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
     <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
+    <Compile Include="OData\PerRequestActionValueBinderTest.cs" />
     <Compile Include="OData\Routing\ODataPathTest.cs" />
     <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="OData\Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
     <Compile Include="Resources.cs" />
+    <Compile Include="TestCommon\TestAssemblyResolver.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />
     <Compile Include="TestCommon\MockType.cs" />

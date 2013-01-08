@@ -9,6 +9,11 @@ namespace System.Web.Http.OData
     {
         Type[] _types;
 
+        public MockAssembly(params Type[] types)
+        {
+            _types = types;
+        }
+
         public MockAssembly(params MockType[] types)
         {
             foreach (var type in types)

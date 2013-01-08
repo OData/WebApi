@@ -6,9 +6,11 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.Tracing;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -16,12 +18,13 @@ namespace System.Web.Http.OData.Formatter
     {
         private const string baseAddress = "http://localhost:8081/";
 
-        [Fact]
-        [Trait("Description", "Demonstrates how to get the response from an Http GET in OData atom format when the accept header is application/atom+xml")]
-        public void GetEntryInODataAtomFormat()
+        [Theory]
+        // [InlineData(true)]. (Issue 756)
+        [InlineData(false)]
+        public void GetEntryInODataAtomFormat(bool tracingEnabled)
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpConfiguration configuration = CreateConfiguration(tracingEnabled))
             using (HttpServer host = new HttpServer(configuration))
             using (HttpClient client = new HttpClient(host))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
@@ -31,6 +34,29 @@ namespace System.Web.Http.OData.Formatter
             {
                 // Assert
                 AssertODataVersion3AtomResponse(Resources.PersonEntryInAtom, response);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void PostEntryInODataAtomFormat(bool tracingEnabled)
+        {
+            // Arrange
+            using (HttpConfiguration configuration = CreateConfiguration(tracingEnabled))
+            using (HttpServer host = new HttpServer(configuration))
+            using (HttpClient client = new HttpClient(host))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, baseAddress + "People"))
+            {
+                request.Content = new StringContent(Resources.PersonEntryInAtom);
+                request.Content.Headers.ContentType = ODataTestUtil.ApplicationAtomMediaTypeWithQuality;
+
+                // Act
+                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                {
+                    // Assert
+                    AssertODataVersion3AtomResponse(Resources.PersonEntryInAtom, response, HttpStatusCode.Created);
+                }
             }
         }
 
@@ -108,7 +134,6 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        [Trait("Description", "Demonstrates how to get the ODataMediaTypeFormatter to only support application/atom+xml")]
         public void SupportOnlyODataAtomFormat()
         {
             // Arrange #1 and #2
@@ -152,7 +177,6 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
-        [Trait("Description", "Demonstrates how ODataMediaTypeFormatter would conditionally support application/atom+xml and application/json only if format=odata is present in the QueryString")]
         public void ConditionallySupportODataIfQueryStringPresent()
         {
             // Arrange #1, #2 and #3
@@ -302,8 +326,13 @@ namespace System.Web.Http.OData.Formatter
 
         private static void AssertODataVersion3AtomResponse(string expectedContent, HttpResponseMessage actual)
         {
+            AssertODataVersion3AtomResponse(expectedContent, actual, HttpStatusCode.OK);
+        }
+
+        private static void AssertODataVersion3AtomResponse(string expectedContent, HttpResponseMessage actual, HttpStatusCode statusCode)
+        {
             Assert.NotNull(actual);
-            Assert.Equal(HttpStatusCode.OK, actual.StatusCode);
+            Assert.Equal(statusCode, actual.StatusCode);
             Assert.Equal(ODataTestUtil.ApplicationAtomMediaTypeWithQuality.MediaType,
                 actual.Content.Headers.ContentType.MediaType);
             Assert.Equal(ODataTestUtil.GetDataServiceVersion(actual.Content.Headers),
@@ -332,10 +361,17 @@ namespace System.Web.Http.OData.Formatter
             return new Uri(new Uri(baseAddress), relativeUri);
         }
 
-        private static HttpConfiguration CreateConfiguration()
+        private static HttpConfiguration CreateConfiguration(bool tracingEnabled = false)
         {
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            return CreateConfiguration(model);
+            HttpConfiguration configuration = CreateConfiguration(model);
+
+            if (tracingEnabled)
+            {
+                configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
+            }
+
+            return configuration;
         }
 
         private static HttpConfiguration CreateConfiguration(IEdmModel model)

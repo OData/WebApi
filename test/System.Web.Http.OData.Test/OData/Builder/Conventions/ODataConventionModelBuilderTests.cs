@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -1203,19 +1204,5 @@ namespace System.Web.Http.OData.Builder.Conventions
         public string[] Aliases { get; set; }
     }
 
-    internal class TestAssemblyResolver : IAssembliesResolver
-    {
-        List<Assembly> _assemblies;
 
-        public TestAssemblyResolver(MockAssembly assembly)
-        {
-            _assemblies = new List<Assembly>();
-            _assemblies.Add(assembly);
-        }
-
-        public ICollection<Assembly> GetAssemblies()
-        {
-            return _assemblies;
-        }
-    }
 }

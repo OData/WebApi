@@ -49,7 +49,7 @@ namespace System.Web.Http.OData
                     // attach the request may fail when using with OData (and the exception retured in that instance
                     // will explain the necessity of providing this behavior when implementing HttpParameterBinding for
                     // OData).
-                    if (parameterBinding != null && parameterBinding.GetType() == typeof(FormatterParameterBinding))
+                    if (parameterBinding != null && parameterBinding is FormatterParameterBinding)
                     {
                         Contract.Assert(parameterBinding.Descriptor != null);
                         Contract.Assert(actionDescriptor.Configuration != null);

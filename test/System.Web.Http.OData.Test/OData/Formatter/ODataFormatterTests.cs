@@ -448,7 +448,7 @@ namespace System.Web.Http.OData.Formatter
                 }
             };
 
-            return new ODataResult<MainEntity>(entities, new Uri("aa:b"), 3);
+            return new PageResult<MainEntity>(entities, new Uri("aa:b"), 3);
         }
     }
 }

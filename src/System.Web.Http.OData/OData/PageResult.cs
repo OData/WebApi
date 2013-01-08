@@ -5,11 +5,11 @@ using System.Runtime.Serialization;
 namespace System.Web.Http.OData
 {
     [DataContract]
-    public abstract class ODataResult
+    public abstract class PageResult
     {
         private long? _count;
 
-        protected ODataResult(Uri nextPageLink, long? count)
+        protected PageResult(Uri nextPageLink, long? count)
         {
             NextPageLink = nextPageLink;
             Count = count;
@@ -31,9 +31,9 @@ namespace System.Web.Http.OData
             }
             private set
             {
-                if (value.HasValue && value.Value <= 0)
+                if (value.HasValue && value.Value < 0)
                 {
-                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value.Value, 1);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value.Value, 0);
                 }
                 _count = value;
             }

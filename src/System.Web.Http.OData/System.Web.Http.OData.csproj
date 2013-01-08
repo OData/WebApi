@@ -263,7 +263,7 @@
     <Compile Include="OData\Formatter\ODataModelBinderProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataErrorSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializer.cs" />
-    <Compile Include="OData\ODataResultOfT.cs" />
+    <Compile Include="OData\PageResultOfT.cs" />
     <Compile Include="OData\Query\Expressions\ClrSafeFunctions.cs" />
     <Compile Include="OData\Query\Expressions\Linq2ObjectsComparisonMethods.cs" />
     <Compile Include="OData\Query\HandleNullPropagationOption.cs" />
@@ -272,7 +272,7 @@
     <Compile Include="OData\Query\ODataQuerySettings.cs" />
     <Compile Include="OData\Query\ODataRawQueryOptions.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelper.cs" />
-    <Compile Include="OData\ODataResult.cs" />
+    <Compile Include="OData\PageResult.cs" />
     <Compile Include="OData\Query\QueryFilterProvider.cs" />
     <Compile Include="OData\Query\TopQueryOption.cs" />
     <Compile Include="OData\Delta.cs" />

@@ -123,7 +123,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 Uri nextPageLink = null;
 
                 // If we have more OData format specific information apply it now.
-                ODataResult odataFeedAnnotations = graph as ODataResult;
+                PageResult odataFeedAnnotations = graph as PageResult;
                 if (odataFeedAnnotations != null)
                 {
                     feed.Count = odataFeedAnnotations.Count;

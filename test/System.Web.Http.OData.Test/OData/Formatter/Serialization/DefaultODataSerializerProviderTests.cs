@@ -84,7 +84,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         [InlineData(typeof(ICollection<ODataEntityDeserializerTests.Supplier>))]
         [InlineData(typeof(IList<ODataEntityDeserializerTests.Supplier>))]
         [InlineData(typeof(List<ODataEntityDeserializerTests.Supplier>))]
-        [InlineData(typeof(ODataResult<ODataEntityDeserializerTests.Supplier>))]
+        [InlineData(typeof(PageResult<ODataEntityDeserializerTests.Supplier>))]
         public void GetODataSerializer_Feed(Type collectionType)
         {
             var serializerProvider = new DefaultODataSerializerProvider();

@@ -98,7 +98,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Uri expectedNextLink = new Uri("http://nextlink.com");
             long expectedInlineCount = 1000;
 
-            var result = new ODataResult<Customer>(
+            var result = new PageResult<Customer>(
                 _customers,
                 expectedNextLink,
                 expectedInlineCount

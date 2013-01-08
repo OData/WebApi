@@ -10,16 +10,27 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public class PrimitivePropertyConfiguration : StructuralPropertyConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PrimitivePropertyConfiguration"/> class.
+        /// </summary>
+        /// <param name="property">The name of the property.</param>
+        /// <param name="declaringType">The declaring EDM type of the property.</param>
         public PrimitivePropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
         }
 
+        /// <summary>
+        /// Gets the type of this property.
+        /// </summary>
         public override PropertyKind Kind
         {
             get { return PropertyKind.Primitive; }
         }
 
+        /// <summary>
+        /// Gets the backing CLR type of this property type.
+        /// </summary>
         public override Type RelatedClrType
         {
             get { return PropertyInfo.PropertyType; }

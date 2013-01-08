@@ -2,10 +2,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -15,10 +13,17 @@ using Microsoft.Data.OData.Atom;
 
 namespace System.Web.Http.OData
 {
+    /// <summary>
+    /// Represents an <see cref="ApiController"/> for generating OData servicedoc and metadata document ($metadata).
+    /// </summary>
     public class ODataMetadataController : ODataController
     {
         private static readonly Version _defaultEdmxVersion = new Version(1, 0);
 
+        /// <summary>
+        /// Generates the OData $metadata document.
+        /// </summary>
+        /// <returns>The <see cref="IEdmModel"/> representing $metadata.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Property not appropriate")]
         public IEdmModel GetMetadata()
@@ -26,6 +31,10 @@ namespace System.Web.Http.OData
             return GetModel();
         }
 
+        /// <summary>
+        /// Generates the OData service document.
+        /// </summary>
+        /// <returns>The service document for the service.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Property not appropriate")]
         public ODataWorkspace GetServiceDocument()

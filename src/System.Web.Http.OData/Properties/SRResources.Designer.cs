@@ -268,15 +268,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Creating Links by convention is not supported..
-        /// </summary>
-        internal static string CreatingLinksByConventionNotSupported {
-            get {
-                return ResourceManager.GetString("CreatingLinksByConventionNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The entity type &apos;{0}&apos; is not assignable to the Delta type &apos;{1}&apos;..
         /// </summary>
         internal static string DeltaEntityTypeNotAssignable {

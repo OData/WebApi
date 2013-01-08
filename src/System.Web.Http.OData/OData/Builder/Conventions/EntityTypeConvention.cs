@@ -6,7 +6,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// An <see cref="EntityTypeConvention"/> is used to configure an <see cref="EntityTypeConfiguration"/> in the 
     /// <see cref="ODataConventionModelBuilder"/>.
     /// </summary>
-    public abstract class EntityTypeConvention : IEdmTypeConvention
+    internal abstract class EntityTypeConvention : IEdmTypeConvention
     {
         protected EntityTypeConvention()
         {

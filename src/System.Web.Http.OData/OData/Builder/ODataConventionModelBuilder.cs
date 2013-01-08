@@ -128,6 +128,7 @@ namespace System.Web.Http.OData.Builder
             return this;
         }
 
+        /// <inheritdoc />
         public override EntityTypeConfiguration AddEntity(Type type)
         {
             EntityTypeConfiguration entityTypeConfiguration = base.AddEntity(type);
@@ -139,6 +140,7 @@ namespace System.Web.Http.OData.Builder
             return entityTypeConfiguration;
         }
 
+        /// <inheritdoc />
         public override ComplexTypeConfiguration AddComplexType(Type type)
         {
             ComplexTypeConfiguration complexTypeConfiguration = base.AddComplexType(type);
@@ -150,6 +152,7 @@ namespace System.Web.Http.OData.Builder
             return complexTypeConfiguration;
         }
 
+        /// <inheritdoc />
         public override EntitySetConfiguration AddEntitySet(string name, EntityTypeConfiguration entityType)
         {
             EntitySetConfiguration entitySetConfiguration = base.AddEntitySet(name, entityType);
@@ -161,6 +164,7 @@ namespace System.Web.Http.OData.Builder
             return entitySetConfiguration;
         }
 
+        /// <inheritdoc />
         public override IEdmModel GetEdmModel()
         {
             if (_isModelBeingBuilt)

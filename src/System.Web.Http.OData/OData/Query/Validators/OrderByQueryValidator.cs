@@ -6,8 +6,16 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Query.Validators
 {
+    /// <summary>
+    /// Represents a validator used to validate an <see cref="OrderByQueryOption"/> based on the <see cref="ODataValidationSettings"/>.
+    /// </summary>
     public class OrderByQueryValidator
     {
+        /// <summary>
+        /// Validates an <see cref="OrderByQueryOption" />.
+        /// </summary>
+        /// <param name="orderByOption">The $orderby query.</param>
+        /// <param name="validationSettings">The validation settings.</param>
         public virtual void Validate(OrderByQueryOption orderByOption, ODataValidationSettings validationSettings)
         {
             if (orderByOption == null)

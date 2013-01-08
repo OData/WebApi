@@ -1,37 +1,32 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.OData.Properties;
-
 namespace System.Web.Http.OData.Builder
 {
+    /// <summary>
+    /// Used to configure the binding for a navigation property for an entity set.
+    /// This configuration functionality is exposed by the model builder Fluent API, see <see cref="ODataModelBuilder"/>.
+    /// </summary>
     public class NavigationPropertyBinding
     {
-        private Func<EntityInstanceContext, string> _linkFactory;
-
-        public NavigationPropertyBinding(NavigationPropertyConfiguration navigationProperty, EntitySetConfiguration entitySet) 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NavigationPropertyBinding"/> class.
+        /// </summary>
+        /// <param name="navigationProperty">The navigation property for the binding.</param>
+        /// <param name="entitySet">The target entity set of the binding.</param>
+        public NavigationPropertyBinding(NavigationPropertyConfiguration navigationProperty, EntitySetConfiguration entitySet)
         {
             NavigationProperty = navigationProperty;
             EntitySet = entitySet;
-            _linkFactory = null;
         }
 
-        public NavigationPropertyConfiguration NavigationProperty { get; private set; } 
-        
+        /// <summary>
+        /// Gets the navigation property of the binding.
+        /// </summary>
+        public NavigationPropertyConfiguration NavigationProperty { get; private set; }
+
+        /// <summary>
+        /// Gets the target entity set of the binding.
+        /// </summary>
         public EntitySetConfiguration EntitySet { get; private set; }
-       
-        public void HasLinkFactory(Func<EntityInstanceContext, string> linkFactoryParameter)
-        {
-            _linkFactory = linkFactoryParameter;
-        }
-
-        public string GetLink(EntityInstanceContext entityContext)
-        {
-            if (_linkFactory == null)
-            {
-                throw Error.NotSupported(SRResources.CreatingLinksByConventionNotSupported);
-            }
-
-            return _linkFactory(entityContext);
-        }
     }
 }

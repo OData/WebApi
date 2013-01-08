@@ -23,6 +23,9 @@ namespace System.Web.Http.OData.Builder
         private Version _dataServiceVersion;
         private Version _maxDataServiceVersion;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataModelBuilder"/> class.
+        /// </summary>
         public ODataModelBuilder()
         {
             Namespace = "Default";

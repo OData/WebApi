@@ -17,6 +17,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// </summary>
     public abstract class ODataEntryDeserializer : ODataDeserializer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataEntryDeserializer"/> class.
+        /// </summary>
+        /// <param name="edmType">The EDM type.</param>
+        /// <param name="payloadKind">The kind of OData payload that this deserializer reads.</param>
         protected ODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
             : base(payloadKind)
         {
@@ -28,6 +33,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             EdmType = edmType;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataEntryDeserializer"/> class.
+        /// </summary>
+        /// <param name="edmType">The EDM type.</param>
+        /// <param name="payloadKind">The kind of OData payload this deserializer handles.</param>
+        /// <param name="deserializerProvider">The <see cref="ODataDeserializerProvider"/>.</param>
         protected ODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
             : this(edmType, payloadKind)
         {
@@ -35,7 +46,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// The edm type.
+        /// Gets the EDM type that this deserializer reads.
         /// </summary>
         public IEdmTypeReference EdmType { get; private set; }
 

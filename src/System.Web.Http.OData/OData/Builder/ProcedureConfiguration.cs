@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Web.Http.OData.Builder
-{  
+{
     /// <summary>
     /// Represents a Procedure that is exposed in the model
     /// </summary>
@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Builder
         /// The parameters the procedure takes
         /// </summary>
         public abstract IEnumerable<ParameterConfiguration> Parameters { get; }
-        
+
         /// <summary>
         /// The type returned when the procedure is invoked.
         /// </summary>
@@ -34,13 +34,13 @@ namespace System.Web.Http.OData.Builder
         /// The Kind of procedure, which can be either Action, Function or ServiceOperation
         /// </summary>
         public abstract ProcedureKind Kind { get; }
-        
+
         /// <summary>
         /// The qualified name of the procedure when used in OData urls.
         /// Qualification is required to distinguish the procedure from other possible single part identifiers.
         /// </summary>
-        public string ContainerQualifiedName 
-        { 
+        public string ContainerQualifiedName
+        {
             get { return ModelBuilder.ContainerName + "." + Name; }
         }
 
@@ -48,17 +48,17 @@ namespace System.Web.Http.OData.Builder
         /// The FullyQualifiedName is the ContainerQualifiedName further qualified using the Namespace.
         /// Typically this is not required, because most services have at most one container with the same name.
         /// </summary>
-        public string FullyQualifiedName 
-        { 
-            get { return ModelBuilder.Namespace + "." + ContainerQualifiedName; } 
+        public string FullyQualifiedName
+        {
+            get { return ModelBuilder.Namespace + "." + ContainerQualifiedName; }
         }
 
         /// <summary>
         /// The FullName is the ContainerQualifiedName.
         /// </summary>
-        public string FullName 
-        { 
-            get { return ContainerQualifiedName; } 
+        public string FullName
+        {
+            get { return ContainerQualifiedName; }
         }
 
         /// <summary>
@@ -97,6 +97,9 @@ namespace System.Web.Http.OData.Builder
             get { return true; }
         }
 
+        /// <summary>
+        /// Gets or sets the associated <see cref="ODataModelBuilder"/>.
+        /// </summary>
         protected ODataModelBuilder ModelBuilder { get; set; }
     }
 }

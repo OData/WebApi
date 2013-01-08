@@ -17,6 +17,7 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataModelBinderProvider : ModelBinderProvider
     {
+        /// <inheritdoc />
         public override IModelBinder GetBinder(HttpConfiguration configuration, Type modelType)
         {
             if (configuration == null)

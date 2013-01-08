@@ -26,7 +26,7 @@ namespace System.Web.Http.OData.Builder
         private readonly Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder> _navigationPropertyLinkBuilders;
 
         /// <summary>
-        /// Initializes an instance of <see cref="EntitySetConfiguration"/>.
+        /// Initializes a new instance of the <see cref="EntitySetConfiguration"/> class.
         /// </summary>
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         public EntitySetConfiguration()
@@ -34,7 +34,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="EntitySetConfiguration"/>.
+        /// Initializes a new instance of the <see cref="EntitySetConfiguration"/> class.
         /// <param name="modelBuilder">The <see cref="ODataModelBuilder"/>.</param>
         /// <param name="entityType">The CLR <see cref="Type"/> of the entity type contained in this entity set.</param>
         /// <param name="name">The name of the entity set.</param>
@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="EntitySetConfiguration"/>.
+        /// Initializes a new instance of the <see cref="EntitySetConfiguration"/> class.
         /// </summary>
         /// <param name="modelBuilder">The <see cref="ODataModelBuilder"/>.</param>
         /// <param name="entityType">The entity type contained in this entity set.</param>
@@ -338,6 +338,10 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets the entity set URL.
+        /// </summary>
+        /// <returns>The entity set URL.</returns>
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "This Url property is not required to be a valid Uri")]
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
         public virtual string GetUrl()

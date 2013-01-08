@@ -2,7 +2,7 @@
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
-    public interface IEntitySetConvention : IConvention
+    internal interface IEntitySetConvention : IConvention
     {
         void Apply(EntitySetConfiguration configuration, ODataModelBuilder model);
     }

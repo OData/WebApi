@@ -26,6 +26,11 @@ namespace System.Web.Http.OData.Builder
             _actionLinkFactory = actionLinkFactory;
         }
 
+        /// <summary>
+        /// Builds the action link for the given entity.
+        /// </summary>
+        /// <param name="context">An instance context wrapping the entity instance.</param>
+        /// <returns>The generated action link.</returns>
         public virtual Uri BuildActionLink(EntityInstanceContext context)
         {
             return _actionLinkFactory(context);

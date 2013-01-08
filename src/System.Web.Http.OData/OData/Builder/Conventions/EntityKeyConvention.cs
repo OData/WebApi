@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// <see cref="EntityTypeConvention"/> for figuring out the entity keys.
     /// <remarks>This convention configures properties that are named 'ID' (case-insensitive) or {EntityName}+ID (case-insensitive) as the key.</remarks>
     /// </summary>
-    public class EntityKeyConvention : EntityTypeConvention
+    internal class EntityKeyConvention : EntityTypeConvention
     {
         /// <summary>
         /// Figures out the key properties and marks them as Keys in the EDM model.

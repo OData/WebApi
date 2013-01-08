@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
-
 namespace System.Web.Http.OData
 {
     /// <summary>
@@ -12,6 +9,9 @@ namespace System.Web.Http.OData
     /// <typeparam name="TEntityType">The entity type</typeparam>
     public class EntityInstanceContext<TEntityType> : EntityInstanceContext
     {
+        /// <summary>
+        /// Gets or sets the entity instance.
+        /// </summary>
         public new TEntityType EntityInstance
         {
             get

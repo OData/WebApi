@@ -5,8 +5,16 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Query.Validators
 {
+    /// <summary>
+    /// Represents a validator used to validate a <see cref="TopQueryOption"/> based on the <see cref="ODataValidationSettings"/>.
+    /// </summary>
     public class TopQueryValidator
     {
+        /// <summary>
+        /// Validates a <see cref="TopQueryOption" />.
+        /// </summary>
+        /// <param name="topQueryOption">The $top query.</param>
+        /// <param name="validationSettings">The validation settings.</param>
         public virtual void Validate(TopQueryOption topQueryOption, ODataValidationSettings validationSettings)
         {
             if (topQueryOption == null)

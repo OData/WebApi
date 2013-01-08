@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures properties that have the <see cref="KeyAttribute"/> as keys in the <see cref="IEdmEntityType"/>.
     /// </summary>
-    public class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration>
+    internal class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration>
     {
         public KeyAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(KeyAttribute), allowMultiple: false)

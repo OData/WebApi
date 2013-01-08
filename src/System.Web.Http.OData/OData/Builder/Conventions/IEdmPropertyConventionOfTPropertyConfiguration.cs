@@ -6,7 +6,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// Convention to process properties of <see cref="StructuralTypeConfiguration"/>.
     /// </summary>
     /// <typeparam name="TPropertyConfiguration"></typeparam>
-    public interface IEdmPropertyConvention<TPropertyConfiguration> : IEdmPropertyConvention where TPropertyConfiguration : PropertyConfiguration
+    internal interface IEdmPropertyConvention<TPropertyConfiguration> : IEdmPropertyConvention where TPropertyConfiguration : PropertyConfiguration
     {
         /// <summary>
         /// Applies the convention.

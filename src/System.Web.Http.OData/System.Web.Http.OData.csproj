@@ -311,7 +311,6 @@
     <Compile Include="OData\Formatter\EdmLibHelpers.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntrySerializer.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataQueryProjectionNode.cs" />
     <Compile Include="HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />

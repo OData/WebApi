@@ -8,12 +8,14 @@ using Newtonsoft.Json;
 
 namespace System.Web.Http.OData
 {
-    /// <summary>
-    /// PageResult is a feed of Entities that include additional information that OData Formats support
-    /// Currently limited to: 
-    ///     the Count of all matching entities on the server (requested using $inlinecount=allpages) 
-    ///     the NextLink to retrieve the next page of results (added if the server enforces Server Driven Paging)
-    /// </summary>
+    /// <summary>Represents a feed of entities that includes additional information that OData formats support.</summary>
+    /// <remarks>
+    /// Currently limited to:
+    /// <list type="bullet">
+    /// <item><description>The Count of all matching entities on the server (requested using $inlinecount=allpages).</description></item>
+    /// <item><description>The NextLink to retrieve the next page of results (added if the server enforces Server Driven Paging).</description></item>
+    /// </list>
+    /// </remarks>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Collection suffix not appropriate")]
     [DataContract]
     [JsonObject]
@@ -36,14 +38,25 @@ namespace System.Web.Http.OData
             Items = items;
         }
 
+        /// <summary>
+        /// Gets the collection of entities for this feed.
+        /// </summary>
         [DataMember]
         public IEnumerable<T> Items { get; private set; }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
         public IEnumerator<T> GetEnumerator()
         {
             return Items.GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return Items.GetEnumerator();

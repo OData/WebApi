@@ -2,7 +2,7 @@
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
-    public interface IEdmTypeConvention : IConvention
+    internal interface IEdmTypeConvention : IConvention
     {
         void Apply(IEdmTypeConfiguration edmTypeConfiguration, ODataModelBuilder model);
     }

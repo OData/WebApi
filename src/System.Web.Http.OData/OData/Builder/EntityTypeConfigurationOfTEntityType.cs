@@ -123,7 +123,7 @@ namespace System.Web.Http.OData.Builder
         /// Configures a many relationship from this entity type.
         /// </summary>
         /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
-        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship. For example, in C# t => t.MyProperty and in Visual Basic .Net Function(t) t.MyProperty.</param>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship. For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
         /// <returns>A configuration object that can be used to further configure the relationship.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]
@@ -136,7 +136,7 @@ namespace System.Web.Http.OData.Builder
         /// Configures an optional relationship from this entity type.
         /// </summary>
         /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
-        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship. For example, in C# t => t.MyProperty and in Visual Basic .Net Function(t) t.MyProperty.</param>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship. For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
         /// <returns>A configuration object that can be used to further configure the relationship.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]
@@ -149,7 +149,7 @@ namespace System.Web.Http.OData.Builder
         /// Configures a required relationship from this entity type.
         /// </summary>
         /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
-        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship. For example, in C# t => t.MyProperty and in Visual Basic .Net Function(t) t.MyProperty.</param>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship. For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
         /// <returns>A configuration object that can be used to further configure the relationship.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]

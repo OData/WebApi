@@ -40,6 +40,7 @@ namespace System.Web.Http.OData.Builder
             get { return _bindingParameter; }
         }
 
+        /// <inheritdoc />
         public override IEnumerable<ParameterConfiguration> Parameters
         {
             get
@@ -55,11 +56,13 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <inheritdoc />
         public override ProcedureKind Kind
         {
             get { return ProcedureKind.Action; }
         }
 
+        /// <inheritdoc />
         public override bool IsBindable
         {
             get

@@ -9,6 +9,11 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     public abstract class AttributeEdmPropertyConvention<TPropertyConfiguration> : AttributeConvention, IEdmPropertyConvention<TPropertyConfiguration>
         where TPropertyConfiguration : PropertyConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttributeEdmPropertyConvention{TPropertyConfiguration}"/> class.
+        /// </summary>
+        /// <param name="attributeFilter">A function to test whether this convention applies to an attribute or not.</param>
+        /// <param name="allowMultiple"><see langword="true"/> if the convention allows multiple attributes; otherwise, <see langword="false"/>.</param>
         protected AttributeEdmPropertyConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
             : base(attributeFilter, allowMultiple)
         {

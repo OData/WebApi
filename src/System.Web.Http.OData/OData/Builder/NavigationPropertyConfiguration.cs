@@ -6,10 +6,20 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder
 {
+    /// <summary>
+    /// Represents the configuration for a navigation property of an entity type.
+    /// </summary>
+    /// <remarks>This configuration functionality is exposed by the model builder Fluent API, see <see cref="ODataModelBuilder"/>.</remarks>
     public class NavigationPropertyConfiguration : PropertyConfiguration
     {
         private readonly Type _relatedType = null;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NavigationPropertyConfiguration"/> class.
+        /// </summary>
+        /// <param name="property">The backing CLR property.</param>
+        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
+        /// <param name="declaringType">The declaring entity type.</param>
         public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, EntityTypeConfiguration declaringType)
             : base(property, declaringType)
         {
@@ -33,6 +43,9 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets the declaring entity type.
+        /// </summary>
         public EntityTypeConfiguration DeclaringEntityType
         {
             get
@@ -41,13 +54,22 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="EdmMultiplicity"/> of this navigation property.
+        /// </summary>
         public EdmMultiplicity Multiplicity { get; private set; }
 
+        /// <summary>
+        /// Gets the backing CLR type of this property type.
+        /// </summary>
         public override Type RelatedClrType
         {
             get { return _relatedType; }
         }
 
+        /// <summary>
+        /// Gets the <see cref="PropertyKind"/> of this property.
+        /// </summary>
         public override PropertyKind Kind
         {
             get { return PropertyKind.Navigation; }

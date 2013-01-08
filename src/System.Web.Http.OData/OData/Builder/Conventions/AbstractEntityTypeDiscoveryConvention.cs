@@ -4,9 +4,9 @@ namespace System.Web.Http.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="EntityTypeConvention"/> to figure out if an entity is abstract or not.
-    /// <remarks>This convention configures all entity types backed by an abstract clr type as abstract entities.</remarks>
+    /// <remarks>This convention configures all entity types backed by an abstract CLR type as abstract entities.</remarks>
     /// </summary>
-    public class AbstractEntityTypeDiscoveryConvention : EntityTypeConvention
+    internal class AbstractEntityTypeDiscoveryConvention : EntityTypeConvention
     {
         public override void Apply(EntityTypeConfiguration entity, ODataModelBuilder model)
         {

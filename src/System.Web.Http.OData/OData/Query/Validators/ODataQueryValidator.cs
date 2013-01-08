@@ -5,14 +5,16 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Query.Validators
 {
+    /// <summary>
+    /// Represents a validator used to validate OData queries based on the <see cref="ODataValidationSettings"/>.
+    /// </summary>
     public class ODataQueryValidator
     {
         /// <summary>
-        /// Validate if the given ODataQueryOption follows what is in the AllowedQueryOptions. By default, 
-        /// we allow all four operators.
+        /// Validates the OData query.
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="validationSettings"></param>
+        /// <param name="options">The OData query to validate.</param>
+        /// <param name="validationSettings">The validation settings.</param>
         public virtual void Validate(ODataQueryOptions options, ODataValidationSettings validationSettings)
         {
             if (options == null)

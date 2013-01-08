@@ -240,9 +240,6 @@
   <data name="ManyToManyNavigationPropertyMustReturnCollection" xml:space="preserve">
     <value>The property '{0}' on the type '{1}' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.</value>
   </data>
-  <data name="CreatingLinksByConventionNotSupported" xml:space="preserve">
-    <value>Creating Links by convention is not supported.</value>
-  </data>
   <data name="DoesNotSupportReadInLine" xml:space="preserve">
     <value>Type '{0}' does not support ReadInline.</value>
   </data>

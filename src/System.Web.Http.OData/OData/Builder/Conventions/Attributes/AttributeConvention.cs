@@ -11,6 +11,11 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// </summary>
     public abstract class AttributeConvention : IConvention
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttributeConvention"/> class.
+        /// </summary>
+        /// <param name="attributeFilter">A function to test whether this convention applies to an attribute or not.</param>
+        /// <param name="allowMultiple"><see langword="true"/> if the convention allows multiple attribues; otherwise, <see langword="false"/>.</param>
         protected AttributeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
         {
             if (attributeFilter == null)

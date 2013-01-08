@@ -21,7 +21,7 @@ namespace System.Web.Http.OData.Builder
         private bool _baseTypeConfigured;
 
         /// <summary>
-        /// Initializes an instance of <see cref="EntityTypeConfiguration"/>.
+        /// Initializes a new instance of the <see cref="EntityTypeConfiguration"/> class.
         /// </summary>
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         public EntityTypeConfiguration()
@@ -29,7 +29,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="EntityTypeConfiguration"/>.
+        /// Initializes a new instance of the <see cref="EntityTypeConfiguration"/> class.
         /// </summary>
         /// <param name="modelBuilder">The <see cref="ODataModelBuilder"/> being used.</param>
         /// <param name="clrType">The backing CLR type for this entity type.</param>
@@ -89,6 +89,9 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets a value that represents whether the base type is explicitly configured or inferred.
+        /// </summary>
         public virtual bool BaseTypeConfigured
         {
             get
@@ -285,6 +288,10 @@ namespace System.Web.Http.OData.Builder
             return navigationPropertyConfig;
         }
 
+        /// <summary>
+        /// Removes the property from the entity.
+        /// </summary>
+        /// <param name="propertyInfo">The <see cref="PropertyInfo"/> of the property to be removed.</param>
         public override void RemoveProperty(PropertyInfo propertyInfo)
         {
             base.RemoveProperty(propertyInfo);

@@ -9,6 +9,11 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public abstract class PropertyConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PropertyConfiguration"/> class.
+        /// </summary>
+        /// <param name="property">The name of the property.</param>
+        /// <param name="declaringType">The declaring EDM type of the property.</param>
         protected PropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
         {
             if (property == null)
@@ -33,6 +38,9 @@ namespace System.Web.Http.OData.Builder
             get { return PropertyInfo.Name; }
         }
 
+        /// <summary>
+        /// Gets the declaring type.
+        /// </summary>
         public StructuralTypeConfiguration DeclaringType { get; private set; }
 
         /// <summary>

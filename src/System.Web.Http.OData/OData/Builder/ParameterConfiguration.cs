@@ -7,6 +7,11 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public abstract class ParameterConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParameterConfiguration"/> class.
+        /// </summary>
+        /// <param name="name">The name of the parameter.</param>
+        /// <param name="parameterType">The EDM type of the paramter.</param>
         protected ParameterConfiguration(string name, IEdmTypeConfiguration parameterType)
         {
             if (name == null)

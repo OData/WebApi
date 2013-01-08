@@ -6,7 +6,7 @@ using System.Web.Http.OData.Routing;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
-    public class SelfLinksGenerationConvention : IEntitySetConvention
+    internal class SelfLinksGenerationConvention : IEntitySetConvention
     {
         public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
         {

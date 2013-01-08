@@ -23,6 +23,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ODataPayloadKind = payloadKind;
         }
 
+        /// <summary>
+        /// Gets the <see cref="ODataPayloadKind"/> that this serializer generates.
+        /// </summary>
         public ODataPayloadKind ODataPayloadKind { get; private set; }
 
         /// <summary>

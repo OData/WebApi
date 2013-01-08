@@ -7,7 +7,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Marks properties that have <see cref="RequiredAttribute"/> as non-optional on their edm type.
     /// </summary>
-    public class RequiredAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration>
+    internal class RequiredAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration>
     {
         public RequiredAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(RequiredAttribute), allowMultiple: false)

@@ -5,7 +5,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// <summary>
     /// Convention to process properties of <see cref="StructuralTypeConfiguration"/>.
     /// </summary>
-    public interface IEdmPropertyConvention : IConvention
+    internal interface IEdmPropertyConvention : IConvention
     {
         /// <summary>
         /// Applies the convention.

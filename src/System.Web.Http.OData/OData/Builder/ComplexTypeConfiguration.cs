@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Builder
     public class ComplexTypeConfiguration : StructuralTypeConfiguration
     {
         /// <summary>
-        /// Initializes an instance of <see cref="ComplexTypeConfiguration"/>.
+        /// Initializes a new instance of the <see cref="ComplexTypeConfiguration"/> class.
         /// </summary>
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         public ComplexTypeConfiguration()
@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="ComplexTypeConfiguration"/>.
+        /// Initializes a new instance of the <see cref="ComplexTypeConfiguration"/> class.
         /// <param name="modelBuilder">The <see cref="ODataModelBuilder"/> being used.</param>
         /// <param name="clrType">The backing CLR type for this entity type.</param>
         /// </summary>
@@ -27,6 +27,7 @@ namespace System.Web.Http.OData.Builder
         {
         }
 
+        /// <inheritdoc />
         public override EdmTypeKind Kind
         {
             get

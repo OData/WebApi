@@ -2,9 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Text;
 using Microsoft.Data.Edm;
 
@@ -104,6 +102,7 @@ namespace System.Web.Http.OData.Routing
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             StringBuilder pathBuilder = new StringBuilder();

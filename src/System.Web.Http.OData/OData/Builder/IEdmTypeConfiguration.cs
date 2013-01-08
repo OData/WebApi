@@ -11,34 +11,34 @@ namespace System.Web.Http.OData.Builder
     public interface IEdmTypeConfiguration
     {
         /// <summary>
-        /// The .NET type associated with the EdmType
+        /// The CLR type associated with the EdmType.
         /// </summary>
         Type ClrType { get; }
 
         /// <summary>
-        /// The fullname (including namespace) of the EdmType
+        /// The fullname (including namespace) of the EdmType.
         /// </summary>
         string FullName { get; }
 
         /// <summary>
-        /// The namespace of the EdmType
+        /// The namespace of the EdmType.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace", Justification = "Namespace matches the EF naming scheme")]
         string Namespace { get; }
 
         /// <summary>
-        /// The name of the EdmType
+        /// The name of the EdmType.
         /// </summary>
         string Name { get; }
 
         /// <summary>
         /// The kind of the EdmType.
-        /// Examples include EntityType, ComplexType, PrimitiveType, CollectionType
+        /// Examples include EntityType, ComplexType, PrimitiveType, CollectionType.
         /// </summary>
         EdmTypeKind Kind { get; }
 
         /// <summary>
-        /// The ODataModelBuilder used to create this IEdmType
+        /// The ODataModelBuilder used to create this IEdmType.
         /// </summary>
         ODataModelBuilder ModelBuilder { get; }
     }

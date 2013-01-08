@@ -13,6 +13,10 @@ namespace System.Web.Http.OData.Query
     /// </summary>
     public abstract class OrderByNode
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderByNode"/> class.
+        /// </summary>
+        /// <param name="direction">The direction of the sort order.</param>
         protected OrderByNode(OrderByDirection direction)
         {
             Direction = direction;

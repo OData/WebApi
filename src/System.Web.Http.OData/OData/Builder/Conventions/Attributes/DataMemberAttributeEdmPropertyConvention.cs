@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures properties that have <see cref="DataMemberAttribute"/> as optional or required on their edm type.
     /// </summary>
-    public class DataMemberAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration>
+    internal class DataMemberAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration>
     {
         public DataMemberAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(DataMemberAttribute), allowMultiple: false)

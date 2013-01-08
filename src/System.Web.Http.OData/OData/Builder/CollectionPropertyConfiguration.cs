@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
-using System.Web.Http.OData.Builder.Conventions;
 using System.Web.Http.OData.Properties;
 
 namespace System.Web.Http.OData.Builder
@@ -25,11 +24,13 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <inheritdoc />
         public override PropertyKind Kind
         {
             get { return PropertyKind.Collection; }
         }
 
+        /// <inheritdoc />
         public override Type RelatedClrType
         {
             get { return ElementType; }

@@ -9,6 +9,11 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     public abstract class AttributeEdmTypeConvention<TEdmTypeConfiguration> : AttributeConvention, IEdmTypeConvention
         where TEdmTypeConfiguration : StructuralTypeConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttributeEdmTypeConvention{TEdmTypeConfiguration}"/> class.
+        /// </summary>
+        /// <param name="attributeFilter">A function to test whether this convention applies to an attribute or not.</param>
+        /// <param name="allowMultiple"><see langword="true"/> if the convention allows multiple attributes; otherwise, <see langword="false"/>.</param>
         protected AttributeEdmTypeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
             : base(attributeFilter, allowMultiple)
         {

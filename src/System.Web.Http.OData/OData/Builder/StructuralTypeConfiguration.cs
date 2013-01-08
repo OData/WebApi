@@ -18,13 +18,18 @@ namespace System.Web.Http.OData.Builder
         private const string DefaultNamespace = "Default";
 
         /// <summary>
-        /// Initializes an instance of <see cref="StructuralTypeConfiguration"/>.
+        /// Initializes a new instance of the <see cref="StructuralTypeConfiguration"/> class.
         /// </summary>
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         protected StructuralTypeConfiguration()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StructuralTypeConfiguration"/> class.
+        /// </summary>
+        /// <param name="clrType">The backing CLR type for this EDM structural type.</param>
+        /// <param name="modelBuilder">The associated <see cref="ODataModelBuilder"/>.</param>
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "The virtual property setters are only to support mocking frameworks, in which case this constructor shouldn't be called anyway.")]
         protected StructuralTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
         {
@@ -104,8 +109,14 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         public virtual ODataModelBuilder ModelBuilder { get; private set; }
 
+        /// <summary>
+        /// Gets the collection of explicitly removed properties.
+        /// </summary>
         protected virtual ICollection<PropertyInfo> RemovedProperties { get; private set; }
 
+        /// <summary>
+        /// Gets the collection of explicitly added properties.
+        /// </summary>
         protected virtual Dictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
 
         /// <summary>

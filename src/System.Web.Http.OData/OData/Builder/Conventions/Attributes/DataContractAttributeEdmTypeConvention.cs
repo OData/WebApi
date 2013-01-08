@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures classes that have the <see cref="DataContractAttribute"/> to follow DataContract serialization/deserialization rules.
     /// </summary>
-    public class DataContractAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
+    internal class DataContractAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
     {
         public DataContractAttributeEdmTypeConvention()
             : base(attribute => attribute.GetType() == typeof(DataContractAttribute), allowMultiple: false)

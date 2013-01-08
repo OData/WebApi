@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Data.Edm;
@@ -32,6 +31,12 @@ namespace System.Web.Http.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Finds procedures that can be invoked on the given entity type. This would include all the procedures that are bound
+        /// to the given type and its base types.
+        /// </summary>
+        /// <param name="entityType">The EDM entity type.</param>
+        /// <returns>A collection of procedures bound to the entity type.</returns>
         public virtual IEnumerable<IEdmFunctionImport> FindProcedures(IEdmEntityType entityType)
         {
             return GetTypeHierarchy(entityType).SelectMany(e => FindDeclaredProcedures(e));

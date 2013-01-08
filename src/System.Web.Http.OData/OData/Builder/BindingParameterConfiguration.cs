@@ -22,6 +22,9 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public class BindingParameterConfiguration : ParameterConfiguration
     {
+        /// <summary>
+        /// The default parameter name for an action's binding parameter.
+        /// </summary>
         public const string DefaultBindingParameterName = "bindingParameter";
 
         private bool _alwaysBindable;

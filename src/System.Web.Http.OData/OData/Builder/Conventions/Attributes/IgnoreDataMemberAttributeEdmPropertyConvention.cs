@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Removes properties that have <see cref="IgnoreDataMemberAttribute"/> from their edm type.
     /// </summary>
-    public class IgnoreDataMemberAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
+    internal class IgnoreDataMemberAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
     {
         public IgnoreDataMemberAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(IgnoreDataMemberAttribute), allowMultiple: false)

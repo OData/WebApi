@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
@@ -12,7 +11,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// The ActionLinkGenerationConvention calls action.HasActionLink(..) for all actions that bind to a single entity if they have not previously been configured.
     /// The convention uses the <see cref="ODataRouteConstants"/>.InvokeBoundAction route to build a link that invokes the action.
     /// </summary>
-    public class ActionLinkGenerationConvention : IProcedureConvention
+    internal class ActionLinkGenerationConvention : IProcedureConvention
     {
         public void Apply(ProcedureConfiguration configuration, ODataModelBuilder model)
         {

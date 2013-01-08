@@ -7,6 +7,9 @@ using System.Web.Http.OData.Query;
 
 namespace System.Web.Http
 {
+    /// <summary>
+    /// Provides extension methods for the <see cref="HttpConfiguration"/> class.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataHttpConfigurationExtensions
     {

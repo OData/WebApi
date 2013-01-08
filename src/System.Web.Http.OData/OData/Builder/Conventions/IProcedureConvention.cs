@@ -5,7 +5,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// <summary>
     /// Convention to apply to <see cref="ProcedureConfiguration"/> instances in the model
     /// </summary>
-    public interface IProcedureConvention : IConvention
+    internal interface IProcedureConvention : IConvention
     {
         void Apply(ProcedureConfiguration configuration, ODataModelBuilder model);
     }

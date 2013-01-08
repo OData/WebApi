@@ -217,7 +217,6 @@
     <Compile Include="OData\Builder\ODataModelBuilderTest.cs" />
     <Compile Include="OData\Builder\PrimitiveTypeTest.cs" />
     <Compile Include="OData\Builder\ProgrammableBuilderApiTest.cs" />
-    <Compile Include="OData\Builder\RoutingTest.cs" />
     <Compile Include="OData\Builder\TestModels\Address.cs" />
     <Compile Include="OData\Builder\TestModels\Customer.cs" />
     <Compile Include="OData\Builder\TestModels\Order.cs" />

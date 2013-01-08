@@ -12,7 +12,7 @@ using Microsoft.Data.OData.Query.SemanticAst;
 namespace System.Web.Http.OData.Query.Validators
 {
     /// <summary>
-    /// Define a validator class used to validate a FilterQueryOption based on the settings. 
+    /// Represents a validator used to validate a <see cref="FilterQueryOption" /> based on the <see cref="ODataValidationSettings"/>.
     /// </summary>
     /// <remarks>
     /// Please note this class is not thread safe. 
@@ -23,8 +23,10 @@ namespace System.Web.Http.OData.Query.Validators
         private int _currentNodeCount;
 
         /// <summary>
-        /// The entry point of this validator class. Use this method to validate the FilterQueryOption
+        /// Validates a <see cref="FilterQueryOption" />.
         /// </summary>
+        /// <param name="filterQueryOption">The $filter query.</param>
+        /// <param name="settings">The validation settings.</param>
         /// <remarks>
         /// Please note this method is not thread safe. 
         /// </remarks>

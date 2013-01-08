@@ -6,7 +6,7 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
-    public class NavigationLinksGenerationConvention : IEntitySetConvention
+    internal class NavigationLinksGenerationConvention : IEntitySetConvention
     {
         public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
         {

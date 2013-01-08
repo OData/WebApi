@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Builder.Conventions
     /// The default entity set for an entity type is the entity set that contains entries of that entity type. If more than one entity sets match, the default entity set is none.
     /// If no entity sets match the default entity set is the default entity set of the base type.</remarks>
     /// </summary>
-    public class AssociationSetDiscoveryConvention : IEntitySetConvention
+    internal class AssociationSetDiscoveryConvention : IEntitySetConvention
     {
         public void Apply(EntitySetConfiguration configuration, ODataModelBuilder model)
         {

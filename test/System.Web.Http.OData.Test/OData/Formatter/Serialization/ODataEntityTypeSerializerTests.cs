@@ -167,6 +167,83 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.True(customReadLinkbuilderCalled);
         }
 
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
+        {
+            // Arrange
+            ODataEntry entry = new ODataEntry();
+
+            // Act
+            ODataEntityTypeSerializer.AddTypeNameAnnotationAsNeeded(entry, null, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Null(entry.GetAnnotation<SerializationTypeNameAnnotation>());
+        }
+
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_InJsonLightMetadataMode()
+        {
+            // Arrange
+            string expectedTypeName = "TypeName";
+            ODataEntry entry = new ODataEntry
+            {
+                TypeName = expectedTypeName
+            };
+
+            // Act
+            ODataEntityTypeSerializer.AddTypeNameAnnotationAsNeeded(entry, null, ODataMetadataLevel.MinimalMetadata);
+
+            // Assert
+            SerializationTypeNameAnnotation annotation = entry.GetAnnotation<SerializationTypeNameAnnotation>();
+            Assert.NotNull(annotation); // Guard
+            Assert.Equal(expectedTypeName, annotation.TypeName);
+        }
+
+        [Theory]
+        [InlineData(ODataMetadataLevel.Default, false)]
+        [InlineData(ODataMetadataLevel.FullMetadata, false)]
+        [InlineData(ODataMetadataLevel.MinimalMetadata, true)]
+        [InlineData(ODataMetadataLevel.NoMetadata, true)]
+        public void ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel, bool expectedResult)
+        {
+            // Act
+            bool actualResult = ODataEntityTypeSerializer.ShouldAddTypeNameAnnotation(metadataLevel);
+
+            // Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Theory]
+        [InlineData("MatchingType", "MatchingType", ODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData("DoesNotMatch1", "DoesNotMatch2", ODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData("IgnoredEntryType", "IgnoredEntitySetType", ODataMetadataLevel.NoMetadata, true)]
+        public void ShouldSuppressTypeNameSerialization(string entryType, string entitySetType,
+            ODataMetadataLevel metadataLevel, bool expectedResult)
+        {
+            // Arrange
+            ODataEntry entry = new ODataEntry
+            {
+                TypeName = entryType
+            };
+            IEdmEntitySet entitySet = CreateEntitySetWithElementTypeName(entitySetType);
+
+            // Act
+            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, null, metadataLevel);
+
+            // Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        private static IEdmEntitySet CreateEntitySetWithElementTypeName(string typeName)
+        {
+            Mock<IEdmEntityType> entityTypeMock = new Mock<IEdmEntityType>();
+            entityTypeMock.Setup<string>(o => o.Name).Returns(typeName);
+            IEdmEntityType entityType = entityTypeMock.Object;
+            Mock<IEdmEntitySet> entitySetMock = new Mock<IEdmEntitySet>();
+            entitySetMock.Setup<IEdmEntityType>(o => o.ElementType).Returns(entityType);
+            return entitySetMock.Object;
+        }
+
         private class Customer
         {
             public Customer()

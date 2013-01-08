@@ -61,5 +61,63 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.NotNull(property);
             Assert.Null(property.Value);
         }
+
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
+        {
+            // Arrange
+            ODataComplexValue value = new ODataComplexValue();
+
+            // Act
+            ODataComplexTypeSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.Default);
+
+            // Assert
+            Assert.Null(value.GetAnnotation<SerializationTypeNameAnnotation>());
+        }
+
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_InJsonLightMetadataMode()
+        {
+            // Arrange
+            string expectedTypeName = "TypeName";
+            ODataComplexValue value = new ODataComplexValue
+            {
+                TypeName = expectedTypeName
+            };
+
+            // Act
+            ODataComplexTypeSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.FullMetadata);
+
+            // Assert
+            SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
+            Assert.NotNull(annotation); // Guard
+            Assert.Equal(expectedTypeName, annotation.TypeName);
+        }
+
+        [Theory]
+        [InlineData(ODataMetadataLevel.Default, false)]
+        [InlineData(ODataMetadataLevel.FullMetadata, true)]
+        [InlineData(ODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData(ODataMetadataLevel.NoMetadata, true)]
+        public void ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel, bool expectedResult)
+        {
+            // Act
+            bool actualResult = ODataComplexTypeSerializer.ShouldAddTypeNameAnnotation(metadataLevel);
+
+            // Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Theory]
+        [InlineData(ODataMetadataLevel.FullMetadata, false)]
+        [InlineData(ODataMetadataLevel.NoMetadata, true)]
+        public void ShouldSuppressTypeNameSerialization(ODataMetadataLevel metadataLevel, bool expectedResult)
+        {
+            // Act
+            bool actualResult = ODataComplexTypeSerializer.ShouldSuppressTypeNameSerialization(metadataLevel);
+
+            // Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
     }
 }

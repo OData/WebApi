@@ -4,7 +4,7 @@
     <Age m:type="Edm.Int32">20</Age>
     <Gender>Male</Gender>
     <FirstName>Frank</FirstName>
-    <Alias>
+    <Alias m:type="Collection(Edm.String)">
       <d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices">Alias0</d:element>
     </Alias>
     <Address m:type="System.Web.Http.OData.TestCommon.Models.Address">
@@ -27,7 +27,7 @@
     <Age m:type="Edm.Int32">21</Age>
     <Gender>Male</Gender>
     <FirstName>Steve</FirstName>
-    <Alias>
+    <Alias m:type="Collection(Edm.String)">
       <d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices">Alias1</d:element>
     </Alias>
     <Address m:type="System.Web.Http.OData.TestCommon.Models.Address">
@@ -50,7 +50,7 @@
     <Age m:type="Edm.Int32">22</Age>
     <Gender>Male</Gender>
     <FirstName>Tom</FirstName>
-    <Alias>
+    <Alias m:type="Collection(Edm.String)">
       <d:element xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices">Alias2</d:element>
     </Alias>
     <Address m:type="System.Web.Http.OData.TestCommon.Models.Address">

@@ -99,12 +99,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 SkipExpensiveAvailabilityChecks = writeContext.SkipExpensiveAvailabilityChecks
             };
 
+            string typeName = _edmEntityTypeReference.FullName();
+
             ODataEntry entry = new ODataEntry
             {
-                TypeName = _edmEntityTypeReference.FullName(),
+                TypeName = typeName,
                 Properties = propertyBag,
                 Actions = CreateActions(entityInstanceContext, writeContext)
             };
+
+            AddTypeNameAnnotationAsNeeded(entry, writeContext.EntitySet, writeContext.MetadataLevel);
 
             if (writeContext.EntitySet != null)
             {
@@ -219,6 +223,82 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 }
             }
             return null;
+        }
+
+        internal static void AddTypeNameAnnotationAsNeeded(ODataEntry entry, IEdmEntitySet entitySet,
+            ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(entry != null);
+
+            if (ShouldAddTypeNameAnnotation(metadataLevel))
+            {
+                string typeName;
+
+                if (ShouldSuppressTypeNameSerialization(entry, entitySet, metadataLevel))
+                {
+                    typeName = null;
+                }
+                else
+                {
+                    typeName = entry.TypeName;
+                }
+
+                entry.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+                {
+                    TypeName = typeName
+                });
+            }
+        }
+
+        internal static bool ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel)
+        {
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.Default:
+                case ODataMetadataLevel.FullMetadata:
+                    return false;
+                case ODataMetadataLevel.MinimalMetadata:
+                case ODataMetadataLevel.NoMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return true;
+            }
+        }
+
+        internal static bool ShouldSuppressTypeNameSerialization(ODataEntry entry, IEdmEntitySet entitySet,
+            ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(entry != null);
+
+            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
+            Contract.Assert(metadataLevel != ODataMetadataLevel.FullMetadata);
+
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.NoMetadata:
+                    return true;
+                case ODataMetadataLevel.MinimalMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    string entitySetTypeName = GetElementTypeName(entitySet);
+                    string entryTypeName = entry.TypeName;
+                    return String.Equals(entryTypeName, entitySetTypeName, StringComparison.Ordinal);
+            }
+        }
+
+        private static string GetElementTypeName(IEdmEntitySet entitySet)
+        {
+            if (entitySet == null)
+            {
+                return null;
+            }
+
+            IEdmEntityType elementType = entitySet.ElementType;
+
+            if (elementType == null)
+            {
+                return null;
+            }
+
+            return elementType.FullName();
         }
     }
 }

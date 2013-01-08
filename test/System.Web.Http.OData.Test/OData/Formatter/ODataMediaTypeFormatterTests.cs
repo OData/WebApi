@@ -37,7 +37,7 @@ namespace System.Web.Http.OData.Formatter
         {
             WriteToStreamAsyncReturnsODataRepresentation(Resources.WorkItemEntryInAtom, false);
         }
-
+        
         private static void WriteToStreamAsyncReturnsODataRepresentation(string expectedContent, bool json)
         {
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();

@@ -105,15 +105,67 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 TypeName = typeName
             };
 
-            // Required to support JSON light full metadata mode.
-            value.SetAnnotation<SerializationTypeNameAnnotation>(
-                new SerializationTypeNameAnnotation { TypeName = typeName });
+            AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
 
             return new ODataProperty()
             {
                 Name = elementName,
                 Value = value
             };
+        }
+
+        internal static void AddTypeNameAnnotationAsNeeded(ODataCollectionValue value,
+            ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(value != null);
+
+            if (ShouldAddTypeNameAnnotation(metadataLevel))
+            {
+                string typeName;
+
+                if (ShouldSuppressTypeNameSerialization(metadataLevel))
+                {
+                    typeName = null;
+                }
+                else
+                {
+                    typeName = value.TypeName;
+                }
+
+                value.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+                {
+                    TypeName = typeName
+                });
+            }
+        }
+
+        internal static bool ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel)
+        {
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.Default:
+                case ODataMetadataLevel.MinimalMetadata:
+                    return false;
+                case ODataMetadataLevel.FullMetadata:
+                case ODataMetadataLevel.NoMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return true;
+            }
+        }
+
+        internal static bool ShouldSuppressTypeNameSerialization(ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
+            Contract.Assert(metadataLevel != ODataMetadataLevel.MinimalMetadata);
+
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.NoMetadata:
+                    return true;
+                case ODataMetadataLevel.FullMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return false;
+            }
         }
     }
 }

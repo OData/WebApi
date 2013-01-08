@@ -23,7 +23,7 @@
         <d:Age m:type="Edm.Int32">20</d:Age>
         <d:Gender>Male</d:Gender>
         <d:FirstName>Frank</d:FirstName>
-        <d:Alias>
+        <d:Alias m:type="Collection(Edm.String)">
           <d:element>Alias0</d:element>
         </d:Alias>
         <d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address">
@@ -63,7 +63,7 @@
         <d:Age m:type="Edm.Int32">21</d:Age>
         <d:Gender>Male</d:Gender>
         <d:FirstName>Steve</d:FirstName>
-        <d:Alias>
+        <d:Alias m:type="Collection(Edm.String)">
           <d:element>Alias1</d:element>
         </d:Alias>
         <d:Address m:type="System.Web.Http.OData.TestCommon.Models.Address">

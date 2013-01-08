@@ -63,9 +63,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 string typeName;
 
-                // In JSON light, don't put an odata.type annotation on the wire if in no metadata mode or if the type
-                // of the value can be inferred.
-                if (metadataLevel == ODataMetadataLevel.NoMetadata || CanTypeBeInferredInJson(value))
+                if (ShouldSuppressTypeNameSerialization(value, metadataLevel))
                 {
                     typeName = null;
                 }
@@ -188,6 +186,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
             string typeName = primitiveType.FullName();
             Contract.Assert(typeName != null);
             return typeName;
+        }
+
+        internal static bool ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
+
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.NoMetadata:
+                    return true;
+                case ODataMetadataLevel.MinimalMetadata:
+                    // Currently open properties are not supported, so the type for each property always appears in
+                    // metadata.
+                    const bool PropertyTypeAppearsInMetadata = true;
+                    return PropertyTypeAppearsInMetadata;
+                case ODataMetadataLevel.FullMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return CanTypeBeInferredInJson(value);
+            }
         }
     }
 }

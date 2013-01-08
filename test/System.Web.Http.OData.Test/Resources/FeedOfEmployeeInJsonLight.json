@@ -1,24 +1,24 @@
 ﻿{
   "odata.metadata":"http://localhost/$metadata#employees","value":[
     {
-      "EmployeeId@odata.type":"Edm.Int64","EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
+      "EmployeeId":"0","Age":20,"Gender":"Male","FirstName":"Frank","Alias":[
         "Alias0"
       ],"Address":{
-        "odata.type":"System.Web.Http.OData.TestCommon.Models.Address","StreetAddress":"StreetAddress1","City":"City1","State":"State1","ZipCode":1
+        "StreetAddress":"StreetAddress1","City":"City1","State":"State1","ZipCode":1
       },"HomeNumber":{
-        "odata.type":"System.Web.Http.OData.TestCommon.Models.PhoneNumber","CountryCode":1,"AreaCode":425,"Number":9879089,"PhoneType":"HomePhone"
+        "CountryCode":1,"AreaCode":425,"Number":9879089,"PhoneType":"HomePhone"
       },"FavoriteHobby":{
-        "odata.type":"System.Web.Http.OData.TestCommon.Models.IActivity","ActivityName":"Xbox Gaming"
+        "ActivityName":"Xbox Gaming"
       }
     },{
-      "EmployeeId@odata.type":"Edm.Int64","EmployeeId":"1","Age":21,"Gender":"Male","FirstName":"Steve","Alias":[
+      "EmployeeId":"1","Age":21,"Gender":"Male","FirstName":"Steve","Alias":[
         "Alias1"
       ],"Address":{
-        "odata.type":"System.Web.Http.OData.TestCommon.Models.Address","StreetAddress":"StreetAddress2","City":"City2","State":"State2","ZipCode":2
+        "StreetAddress":"StreetAddress2","City":"City2","State":"State2","ZipCode":2
       },"HomeNumber":{
-        "odata.type":"System.Web.Http.OData.TestCommon.Models.PhoneNumber","CountryCode":1,"AreaCode":425,"Number":9879090,"PhoneType":"HomePhone"
+        "CountryCode":1,"AreaCode":425,"Number":9879090,"PhoneType":"HomePhone"
       },"FavoriteHobby":{
-        "odata.type":"System.Web.Http.OData.TestCommon.Models.IActivity","ActivityName":"Xbox Gaming"
+        "ActivityName":"Xbox Gaming"
       }
     }
   ]

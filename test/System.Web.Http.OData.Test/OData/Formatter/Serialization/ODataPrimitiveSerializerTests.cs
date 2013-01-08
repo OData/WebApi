@@ -149,23 +149,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Null(primitive.GetAnnotation<SerializationTypeNameAnnotation>());
         }
 
-        [Theory]
-        [InlineData(0, ODataMetadataLevel.FullMetadata, null)] // Inferrable
-        [InlineData((short)1, ODataMetadataLevel.NoMetadata, null)] // Non-inferrable
-        [InlineData((short)1, ODataMetadataLevel.FullMetadata, "Edm.Int16")] // Non-inferrable
-        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation(object value, ODataMetadataLevel metadataLevel,
-            string expectedTypeName)
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotation_InJsonLightMetadataMode()
         {
             // Arrange
-            ODataPrimitiveValue primitive = new ODataPrimitiveValue(value);
+            ODataPrimitiveValue primitive = new ODataPrimitiveValue((short)1);
 
             // Act
-            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, metadataLevel);
+            ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, ODataMetadataLevel.FullMetadata);
 
             // Assert
             SerializationTypeNameAnnotation annotation = primitive.GetAnnotation<SerializationTypeNameAnnotation>();
             Assert.NotNull(annotation); // Guard
-            Assert.Equal(expectedTypeName, annotation.TypeName);
+            Assert.Equal("Edm.Int16", annotation.TypeName);
         }
 
         [Theory]
@@ -212,6 +208,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Equal(
                 result,
                 ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+        }
+
+        [Theory]
+        [InlineData(0, ODataMetadataLevel.FullMetadata, true)]
+        [InlineData((short)1, ODataMetadataLevel.FullMetadata, false)]
+        [InlineData((short)1, ODataMetadataLevel.MinimalMetadata, true)]
+        [InlineData((short)1, ODataMetadataLevel.NoMetadata, true)]
+        public void ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel, bool expectedResult)
+        {
+            // Act
+            bool actualResult = ODataPrimitiveSerializer.ShouldSuppressTypeNameSerialization(value, metadataLevel);
+
+            // Assert
+            Assert.Equal(expectedResult, actualResult);
         }
 
         public static TheoryDataSet<EdmPrimitiveTypeKind> EdmPrimitiveKinds

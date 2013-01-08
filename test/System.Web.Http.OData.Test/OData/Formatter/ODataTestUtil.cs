@@ -18,9 +18,9 @@ namespace System.Web.Http.OData.Formatter
     {
         private static IEdmModel _model;
 
-        public const string Version1NumberString = "1.0;";
-        public const string Version2NumberString = "2.0;";
-        public const string Version3NumberString = "3.0;";
+        public const string Version1NumberString = "1.0";
+        public const string Version2NumberString = "2.0";
+        public const string Version3NumberString = "3.0";
         public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
         public static MediaTypeHeaderValue ApplicationAtomMediaType = MediaTypeHeaderValue.Parse("application/atom+xml");
         public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");

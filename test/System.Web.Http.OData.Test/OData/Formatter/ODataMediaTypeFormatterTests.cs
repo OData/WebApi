@@ -113,7 +113,7 @@ namespace System.Web.Http.OData.Formatter
 
             IEnumerable<string> headervalues;
             Assert.True(contentHeaders.TryGetValues("DataServiceVersion", out headervalues));
-            Assert.Equal(headervalues, new string[] { expectedDataServiceVersion + ";" });
+            Assert.Equal(new string[] { expectedDataServiceVersion }, headervalues);
         }
 
         [Fact]

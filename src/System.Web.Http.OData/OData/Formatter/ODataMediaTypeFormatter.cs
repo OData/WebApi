@@ -28,7 +28,10 @@ namespace System.Web.Http.OData.Formatter
     /// </summary>
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
-        private const string ElementNameDefault = "root";
+        private const ODataVersion DefaultODataVersion = ODataVersion.V3;
+        private const string ODataMaxServiceVersion = "MaxDataServiceVersion";
+        private const string ODataServiceVersion = "DataServiceVersion";
+
         internal const string IsODataKey = "MS_IsOData";
 
         private readonly ODataDeserializerProvider _deserializerProvider;
@@ -50,7 +53,7 @@ namespace System.Web.Http.OData.Formatter
         internal ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds,
             HttpRequestMessage request)
             : this(new DefaultODataDeserializerProvider(), new DefaultODataSerializerProvider(),
-                payloadKinds, ODataFormatterConstants.DefaultODataVersion, request)
+                payloadKinds, DefaultODataVersion, request)
         {
         }
 
@@ -172,8 +175,7 @@ namespace System.Web.Http.OData.Formatter
             // call base to validate parameters and set Content-Type header based on mediaType parameter.
             base.SetDefaultContentHeaders(type, headers, mediaType);
 
-            headers.TryAddWithoutValidation(ODataFormatterConstants.ODataServiceVersion,
-                ODataUtils.ODataVersionToString(_version) + ";");
+            headers.TryAddWithoutValidation(ODataServiceVersion, ODataUtils.ODataVersionToString(_version));
         }
 
         /// <inheritdoc/>
@@ -407,7 +409,7 @@ namespace System.Web.Http.OData.Formatter
                         Model = model,
                         UrlHelper = urlHelper,
                         PathHandler = pathHandler,
-                        RootElementName = GetRootElementName(path) ?? ElementNameDefault,
+                        RootElementName = GetRootElementName(path) ?? "root",
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                         Path = path,
                         MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
@@ -427,8 +429,7 @@ namespace System.Web.Http.OData.Formatter
             // generating the response. So if the requestMessage has a MaxDataServiceVersion, tell the client that our response is of the same version; Else use
             // the DataServiceVersionHeader. Our response might require a higher version of the client and it might fail.
             // If the client doesn't send these headers respond with the default version (V3).
-            return GetODataVersion(request.Headers, ODataFormatterConstants.ODataMaxServiceVersion, ODataFormatterConstants.ODataServiceVersion) ??
-                ODataFormatterConstants.DefaultODataVersion;
+            return GetODataVersion(request.Headers, ODataMaxServiceVersion, ODataServiceVersion) ?? DefaultODataVersion;
         }
 
         private static ODataVersion? GetODataVersion(HttpHeaders headers, params string[] headerNames)

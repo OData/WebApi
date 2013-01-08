@@ -91,7 +91,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 foreach (object item in enumerable)
                 {
-                    valueCollection.Add(itemSerializer.CreateProperty(item, ODataFormatterConstants.Element, writeContext).Value);
+                    valueCollection.Add(itemSerializer.CreateProperty(item, "element", writeContext).Value);
                 }
             }
 

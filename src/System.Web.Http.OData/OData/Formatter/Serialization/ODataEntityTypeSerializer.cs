@@ -18,6 +18,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     internal class ODataEntityTypeSerializer : ODataEntrySerializer
     {
+        private const string Entry = "entry";
+
         private readonly IEdmEntityTypeReference _edmEntityTypeReference;
 
         public ODataEntityTypeSerializer(IEdmEntityTypeReference edmEntityType, ODataSerializerProvider serializerProvider)
@@ -41,8 +43,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (graph == null)
             {
-                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull,
-                    ODataFormatterConstants.Entry));
+                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Entry));
             }
 
             IEdmEntitySet entitySet = writeContext.EntitySet;
@@ -79,7 +80,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
             else
             {
-                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, ODataFormatterConstants.Entry));
+                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Entry));
             }
         }
 

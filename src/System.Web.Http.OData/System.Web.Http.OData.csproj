@@ -320,7 +320,6 @@
     <Compile Include="OData\Formatter\Serialization\ODataSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataCollectionSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataComplexTypeSerializer.cs" />
-    <Compile Include="OData\Formatter\ODataFormatterConstants.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityTypeSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataFeedSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializer.cs" />

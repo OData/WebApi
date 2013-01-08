@@ -18,9 +18,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     internal class ODataFeedSerializer : ODataEntrySerializer
     {
-        private const string FeedNamespace = "http://schemas.datacontract.org/2004/07/";
-        private const string SelfLinkRelation = "self";
-
         private readonly IEdmCollectionTypeReference _edmCollectionType;
         private readonly IEdmEntityType _edmElementType;
 
@@ -86,7 +83,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
             else
             {
-                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ODataFormatterConstants.Feed));
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, "feed"));
             }
         }
 
@@ -111,12 +108,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(feedContext);
                     if (feedSelfLink != null)
                     {
-                        feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = SelfLinkRelation, Href = feedSelfLink } });
+                        feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = "self", Href = feedSelfLink } });
                     }
                 }
 
                 // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
-                feed.Id = FeedNamespace + _edmCollectionType.FullName();
+                feed.Id = "http://schemas.datacontract.org/2004/07/" + _edmCollectionType.FullName();
 
                 // Compute and save the NextPageLink for JSON Light streaming support.
                 Uri nextPageLink = null;

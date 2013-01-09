@@ -60,7 +60,6 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("routes");
             }
 
-            // Routing
             string routeTemplate = String.IsNullOrEmpty(routePrefix) ?
                 ODataRouteConstants.ODataPathTemplate :
                 routePrefix + "/" + ODataRouteConstants.ODataPathTemplate;

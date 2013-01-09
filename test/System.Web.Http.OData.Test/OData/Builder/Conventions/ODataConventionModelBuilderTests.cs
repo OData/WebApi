@@ -1096,6 +1096,37 @@ namespace System.Web.Http.OData.Builder.Conventions
             // Assert
             Assert.True(model.SchemaElements.OfType<IEdmEntityType>().Single().Key().Single().Type.IsNullable);
         }
+
+        [Fact]
+        public void IgnoredPropertyOnBaseType_DoesnotShowupOnDerivedType()
+        {
+            // Arrange
+            var baseType =
+                new MockType("BaseType")
+                .Property<int>("BaseTypeProperty");
+
+            var derivedType =
+                new MockType("DerivedType")
+                .BaseType(baseType)
+                .Property<int>("DerivedTypeProperty");
+
+            var mockAssembly = new MockAssembly(baseType, derivedType);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            var builder = new ODataConventionModelBuilder(configuration);
+
+            // Act
+            var baseEntity = builder.AddEntity(baseType);
+            baseEntity.RemoveProperty(baseType.GetProperty("BaseTypeProperty"));
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType baseEntityType = model.AssertHasEntityType(derivedType);
+            Assert.DoesNotContain("BaseTypeProperty", baseEntityType.Properties().Select(p => p.Name));
+            IEdmEntityType derivedEntityType = model.AssertHasEntityType(derivedType);
+            Assert.DoesNotContain("BaseTypeProperty", derivedEntityType.Properties().Select(p => p.Name));
+        }
     }
 
     public class Product

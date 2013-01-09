@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             return type
                 .ClrType
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties.Contains(p))
+                .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties().Any(p1 => p1.Name == p.Name))
                 .ToArray();
         }
 
@@ -86,6 +86,25 @@ namespace System.Web.Http.OData.Builder.Conventions
                 }
             }
             return false;
+        }
+
+        // Gets the ignored properties from this type and the base types.
+        public static IEnumerable<PropertyInfo> IgnoredProperties(this StructuralTypeConfiguration structuralType)
+        {
+            if (structuralType == null)
+            {
+                return Enumerable.Empty<PropertyInfo>();
+            }
+
+            EntityTypeConfiguration entityType = structuralType as EntityTypeConfiguration;
+            if (entityType != null)
+            {
+                return entityType.IgnoredProperties.Concat(entityType.BaseType.IgnoredProperties());
+            }
+            else
+            {
+                return structuralType.IgnoredProperties;
+            }
         }
 
         public static bool IsValidStructuralPropertyType(this Type type)

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Reflection;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -107,6 +108,24 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             Assert.Equal(1, properties.Count());
             Assert.Equal("NestProperty", properties.First());
+        }
+
+        [Fact]
+        public void IgnoredProperties_ReturnsPropertiesFromBaseTypes()
+        {
+            // Arrange
+            Mock<EntityTypeConfiguration> baseEntity = new Mock<EntityTypeConfiguration>();
+            baseEntity.Setup(e => e.IgnoredProperties).Returns(new PropertyInfo[] { new MockPropertyInfo(typeof(int), "IgnoredBaseProperty") });
+
+            Mock<EntityTypeConfiguration> derivedEntity = new Mock<EntityTypeConfiguration>();
+            derivedEntity.Setup(e => e.BaseType).Returns(baseEntity.Object);
+
+            // Act
+            var ignoredProperties = derivedEntity.Object.IgnoredProperties();
+
+            // Assert
+            Assert.Equal(1, ignoredProperties.Count());
+            Assert.Contains("IgnoredBaseProperty", ignoredProperties.Select(p => p.Name));
         }
 
         [Fact]

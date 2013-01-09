@@ -292,6 +292,18 @@ namespace System.Web.Http.OData.Builder
                     }
                 }
             }
+
+            foreach (PropertyInfo ignoredProperty in baseEntity.IgnoredProperties())
+            {
+                foreach (EntityTypeConfiguration entity in typesToLift)
+                {
+                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.Where(p => p.Name == ignoredProperty.Name).SingleOrDefault();
+                    if (derivedPropertyToRemove != null)
+                    {
+                        entity.RemoveProperty(derivedPropertyToRemove.PropertyInfo);
+                    }
+                }
+            }
         }
 
         private void RediscoverComplexTypes()

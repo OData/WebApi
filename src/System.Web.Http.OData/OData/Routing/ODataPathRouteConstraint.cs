@@ -128,6 +128,7 @@ namespace System.Web.Http.OData.Routing
                         request.SetODataPathHandler(PathHandler);
                         request.SetODataPath(path);
                         request.SetODataRouteName(RouteName);
+                        request.SetODataRoutingConventions(RoutingConventions);
 
                         // Select controller name using the routing conventions
                         string controllerName = SelectControllerName(path, request);

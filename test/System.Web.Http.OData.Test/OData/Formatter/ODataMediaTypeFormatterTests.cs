@@ -45,7 +45,7 @@ namespace System.Web.Http.OData.Formatter
             IEdmModel model = modelBuilder.GetEdmModel();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;

@@ -341,7 +341,7 @@ namespace System.Web.Http.OData.Formatter
         private static HttpConfiguration CreateConfiguration(IEdmModel model)
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
             configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             return configuration;
         }

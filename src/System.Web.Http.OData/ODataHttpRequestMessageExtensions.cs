@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Routing;
+using System.Web.Http.OData.Routing.Conventions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -18,6 +20,7 @@ namespace System.Net.Http
     {
         private const string EdmModelKey = "MS_EdmModel";
         private const string ODataRouteNameKey = "MS_ODataRouteName";
+        private const string ODataRoutingConventionsKey = "MS_ODataRoutingConventions";
         private const string ODataPathKey = "MS_ODataPath";
         private const string ODataPathHandlerKey = "MS_ODataPathHandler";
         private const string InlineCountPropertyKey = "MS_InlineCount";
@@ -57,12 +60,7 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            request.Properties.Add(EdmModelKey, model);
+            request.Properties[EdmModelKey] = model;
         }
 
         /// <summary>
@@ -98,12 +96,44 @@ namespace System.Net.Http
                 throw Error.ArgumentNull("request");
             }
 
-            if (routeName == null)
+            request.Properties[ODataRouteNameKey] = routeName;
+        }
+
+        /// <summary>
+        /// Gets the OData routing conventions to use for controller and action selection.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The OData routing conventions to use for controller and action selection associated with this request,
+        /// or <c>null</c> if there aren't any.</returns>
+        public static IEnumerable<IODataRoutingConvention> GetODataRoutingConventions(this HttpRequestMessage request)
+        {
+            if (request == null)
             {
-                throw Error.ArgumentNull("routeName");
+                throw Error.ArgumentNull("request");
             }
 
-            request.Properties.Add(ODataRouteNameKey, routeName);
+            object routingConventions;
+            if (request.Properties.TryGetValue(ODataRoutingConventionsKey, out routingConventions))
+            {
+                return routingConventions as IEnumerable<IODataRoutingConvention>;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Sets the OData routing conventions to use for controller and action selection.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="routingConventions">The OData routing conventions to use for controller and action selection.</param>
+        public static void SetODataRoutingConventions(this HttpRequestMessage request, IEnumerable<IODataRoutingConvention> routingConventions)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            request.Properties[ODataRoutingConventionsKey] = routingConventions;
         }
 
         /// <summary>
@@ -138,11 +168,6 @@ namespace System.Net.Http
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
-            }
-
-            if (pathHandler == null)
-            {
-                throw Error.ArgumentNull("pathHandler");
             }
 
             request.Properties[ODataPathHandlerKey] = pathHandler;
@@ -282,6 +307,11 @@ namespace System.Net.Http
         /// <returns>The inline count to send back, or <c>null</c> if one isn't set.</returns>
         public static long? GetInlineCount(this HttpRequestMessage request)
         {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             object inlineCount;
             if (request.Properties.TryGetValue(InlineCountPropertyKey, out inlineCount))
             {
@@ -291,12 +321,32 @@ namespace System.Net.Http
         }
 
         /// <summary>
+        /// Sets the inline count to use in the OData response.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="inlineCount">The inline count to send back to the client.</param>
+        public static void SetInlineCount(this HttpRequestMessage request, long inlineCount)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            request.Properties[InlineCountPropertyKey] = inlineCount;
+        }
+
+        /// <summary>
         /// Gets the next page link to use in the OData response.
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns>The next page link to send back, or <c>null</c> if one isn't set.</returns>
         public static Uri GetNextPageLink(this HttpRequestMessage request)
         {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             object nextPageLink;
             if (request.Properties.TryGetValue(NextPageLinkPropertyKey, out nextPageLink))
             {
@@ -305,13 +355,18 @@ namespace System.Net.Http
             return null;
         }
 
-        internal static void SetInlineCount(this HttpRequestMessage request, long inlineCount)
+        /// <summary>
+        /// Sets the next page link to use in the OData response.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="nextPageLink">The next page link to send back to the client.</param>
+        public static void SetNextPageLink(this HttpRequestMessage request, Uri nextPageLink)
         {
-            request.Properties[InlineCountPropertyKey] = inlineCount;
-        }
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
 
-        internal static void SetNextPageLink(this HttpRequestMessage request, Uri nextPageLink)
-        {
             request.Properties[NextPageLinkPropertyKey] = nextPageLink;
         }
     }

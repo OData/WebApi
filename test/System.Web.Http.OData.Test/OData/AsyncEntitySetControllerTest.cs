@@ -28,7 +28,7 @@ namespace System.Web.Http.OData
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EmployeesController.Employee>("AsyncEmployees");
             IEdmModel model = builder.GetEdmModel();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
@@ -229,7 +229,7 @@ namespace System.Web.Http.OData
         {
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
+            config.Routes.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
@@ -240,7 +240,7 @@ namespace System.Web.Http.OData
         private static void SetupController(AsyncEntitySetController<FormatterPerson, int> controller)
         {
             var config = new HttpConfiguration();
-            config.MapODataRoute(ODataTestUtil.GetEdmModel());
+            config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/FormatterPeople");
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;

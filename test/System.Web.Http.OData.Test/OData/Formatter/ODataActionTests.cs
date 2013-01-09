@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Formatter
             _configuration = new HttpConfiguration();
             _model = GetModel();
             _configuration.Formatters.Clear();
-            _configuration.MapODataRoute(_model);
+            _configuration.Routes.MapODataRoute(_model);
 
             _server = new HttpServer(_configuration);
             _client = new HttpClient(_server);

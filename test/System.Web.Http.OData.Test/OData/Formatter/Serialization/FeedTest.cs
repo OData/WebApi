@@ -71,7 +71,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             HttpConfiguration config = new HttpConfiguration();
-            config.MapODataRoute(GetSampleModel());
+            config.Routes.MapODataRoute(GetSampleModel());
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");

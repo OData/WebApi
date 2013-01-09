@@ -345,7 +345,7 @@ namespace System.Web.Http.OData.Builder
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
             UrlHelper urlHelper = new UrlHelper(request);

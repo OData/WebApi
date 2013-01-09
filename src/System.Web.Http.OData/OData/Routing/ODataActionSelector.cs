@@ -17,27 +17,19 @@ namespace System.Web.Http.OData.Routing
     /// </summary>
     public class ODataActionSelector : IHttpActionSelector
     {
-        private readonly IEnumerable<IODataRoutingConvention> _routingConventions;
         private readonly IHttpActionSelector _innerSelector;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
-        /// <param name="routingConventions">The OData routing conventions to use for OData requests.</param>
         /// <param name="innerSelector">The inner controller selector to call.</param>
-        public ODataActionSelector(IEnumerable<IODataRoutingConvention> routingConventions, IHttpActionSelector innerSelector)
+        public ODataActionSelector(IHttpActionSelector innerSelector)
         {
-            if (routingConventions == null)
-            {
-                throw Error.ArgumentNull("routingConventions");
-            }
-
             if (innerSelector == null)
             {
                 throw Error.ArgumentNull("innerSelector");
             }
 
-            _routingConventions = routingConventions;
             _innerSelector = innerSelector;
         }
 
@@ -71,13 +63,15 @@ namespace System.Web.Http.OData.Routing
 
             HttpRequestMessage request = controllerContext.Request;
             ODataPath odataPath = request.GetODataPath();
-            if (odataPath == null)
+            IEnumerable<IODataRoutingConvention> routingConventions = request.GetODataRoutingConventions();
+
+            if (odataPath == null || routingConventions == null)
             {
                 return _innerSelector.SelectAction(controllerContext);
             }
 
             ILookup<string, HttpActionDescriptor> actionMap = _innerSelector.GetActionMapping(controllerContext.ControllerDescriptor);
-            foreach (IODataRoutingConvention routingConvention in _routingConventions)
+            foreach (IODataRoutingConvention routingConvention in routingConventions)
             {
                 string actionName = routingConvention.SelectAction(odataPath, controllerContext, actionMap);
                 if (actionName != null)

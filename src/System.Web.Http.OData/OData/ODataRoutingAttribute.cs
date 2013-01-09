@@ -39,8 +39,7 @@ namespace System.Web.Http.OData
             
             // Replace the action selector with one that is based on the OData routing conventions
             IHttpActionSelector originalActionSelector = services.GetActionSelector();
-            IEnumerable<IODataRoutingConvention> routingConventions = controllerDescriptor.Configuration.GetODataRoutingConventions();
-            IHttpActionSelector actionSelector = new ODataActionSelector(routingConventions, originalActionSelector);
+            IHttpActionSelector actionSelector = new ODataActionSelector(originalActionSelector);
             controllerSettings.Services.Replace(typeof(IHttpActionSelector), actionSelector);
         }
     }

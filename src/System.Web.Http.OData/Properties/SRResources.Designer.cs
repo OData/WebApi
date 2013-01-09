@@ -1213,7 +1213,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataRoute to register a route that parses the OData URI and attaches the model information..
+        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information..
         /// </summary>
         internal static string RequestMustHaveModel {
             get {

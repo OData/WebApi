@@ -64,7 +64,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -97,7 +97,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntitySet carsEdmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -131,7 +131,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
@@ -165,7 +165,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(model);
+            configuration.Routes.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;

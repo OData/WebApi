@@ -554,7 +554,7 @@
     <value>The related navigation property could not be found from the OData path. The related navigation property is required to deserialize the payload.</value>
   </data>
   <data name="RequestMustHaveModel" xml:space="preserve">
-    <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataRoute to register a route that parses the OData URI and attaches the model information.</value>
+    <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information.</value>
   </data>
   <data name="QueryGetModelMustNotReturnNull" xml:space="preserve">
     <value>A model is required for querying. Consider implementing the QueryableAttribute.GetModel method never to return a null value.</value>

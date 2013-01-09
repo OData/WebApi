@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Routing
         public ODataRoutingTest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataRoute(ODataRoutingModel.GetModel());
+            configuration.Routes.MapODataRoute(ODataRoutingModel.GetModel());
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);

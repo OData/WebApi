@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder
         public void DollarMetaData_Works_WithoutAcceptHeader()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
 
             HttpClient client = new HttpClient(server);
             var response = client.GetAsync("http://localhost/$metadata").Result;
@@ -52,14 +52,14 @@ namespace System.Web.Http.OData.Builder
 
             Assert.Throws<InvalidOperationException>(
                 () => controller.GetMetadata(),
-                "The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataRoute to register a route that parses the OData URI and attaches the model information.");
+                "The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataRoute to register a route that parses the OData URI and attaches the model information.");
         }
 
         [Fact]
         public void DollarMetaDataWorks_AfterTracingIsEnabled()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -74,7 +74,7 @@ namespace System.Web.Http.OData.Builder
         public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer();
-            server.Configuration.MapODataRoute(ODataTestUtil.GetEdmModel());
+            server.Configuration.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
@@ -90,7 +90,7 @@ namespace System.Web.Http.OData.Builder
         {
             var config = new HttpConfiguration();
             config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
+            config.Routes.MapODataRoute(new ODataConventionModelBuilder().GetEdmModel());
             var explorer = config.Services.GetApiExplorer();
 
             var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);

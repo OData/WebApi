@@ -19,7 +19,7 @@ namespace System.Web.Http.OData.Formatter
         private const string baseAddress = "http://localhost:8081/";
 
         [Theory]
-        // [InlineData(true)]. (Issue 756)
+        [InlineData(true)]
         [InlineData(false)]
         public void GetEntryInODataAtomFormat(bool tracingEnabled)
         {

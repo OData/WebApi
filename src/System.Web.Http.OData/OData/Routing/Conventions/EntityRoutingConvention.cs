@@ -67,7 +67,7 @@ namespace System.Web.Http.OData.Routing.Conventions
                 Contract.Assert(httpMethodName != null);
 
                 KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                controllerContext.RouteData.Values.Add(ODataRouteConstants.Key, keyValueSegment.Value);
+                controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
 
                 IEdmEntityType entityType = odataPath.EdmType as IEdmEntityType;
 

@@ -56,7 +56,7 @@ namespace System.Web.Http.OData.Routing.Conventions
                         if (bindingParameterType != null)
                         {
                             KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                            controllerContext.RouteData.Values.Add(ODataRouteConstants.Key, keyValueSegment.Value);
+                            controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
 
                             // e.g. Try ActionOnBindingParameterType first, then fallback on Action action name
                             string actionOnBindingTypeActionName = action.Name + "On" + bindingParameterType.Name;

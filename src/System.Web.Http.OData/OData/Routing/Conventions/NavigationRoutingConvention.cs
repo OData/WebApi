@@ -49,7 +49,7 @@ namespace System.Web.Http.OData.Routing.Conventions
                 if (declaringType != null)
                 {
                     KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values.Add(ODataRouteConstants.Key, keyValueSegment.Value);
+                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
 
                     // e.g. Try GetNavigationPropertyFromDeclaringType first, then fallback on GetNavigationProperty action name
                     string propertyFromDeclaringTypeActionName = "Get" + navigationProperty.Name + "From" + declaringType.Name;

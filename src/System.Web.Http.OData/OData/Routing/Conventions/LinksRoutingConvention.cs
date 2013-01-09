@@ -57,7 +57,7 @@ namespace System.Web.Http.OData.Routing.Conventions
             {
                 AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
                 KeyValuePathSegment relatedKeySegment = odataPath.Segments[4] as KeyValuePathSegment;
-                controllerContext.RouteData.Values.Add(ODataRouteConstants.RelatedKey, relatedKeySegment.Value);
+                controllerContext.RouteData.Values[ODataRouteConstants.RelatedKey] = relatedKeySegment.Value;
                 return "DeleteLink";
             }
             return null;
@@ -66,9 +66,9 @@ namespace System.Web.Http.OData.Routing.Conventions
         private static void AddLinkInfoToRouteData(IHttpRouteData routeData, ODataPath odataPath)
         {
             KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-            routeData.Values.Add(ODataRouteConstants.Key, keyValueSegment.Value);
+            routeData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
             NavigationPathSegment navigationSegment = odataPath.Segments[3] as NavigationPathSegment;
-            routeData.Values.Add(ODataRouteConstants.NavigationProperty, navigationSegment.NavigationProperty.Name);
+            routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
         }
     }
 }

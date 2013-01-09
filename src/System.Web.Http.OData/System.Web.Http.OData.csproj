@@ -125,6 +125,7 @@
       <Link>Common\Error.cs</Link>
     </Compile>
     <Compile Include="ODataHttpRouteCollectionExtensions.cs" />
+    <Compile Include="ODataHttpRequestMessageExtensions.cs" />
     <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
     <Compile Include="OData\ODataRoutingAttribute.cs" />
@@ -146,7 +147,7 @@
     <Compile Include="MediaTypeFormatterExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ODataHttpErrorExtensions.cs" />
-    <Compile Include="ODataHttpRequestMessageExtensions.cs" />
+    <Compile Include="ODataHttpConfigurationExtensions.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilder.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinder.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConvention.cs" />
@@ -329,7 +330,6 @@
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
     <Compile Include="QueryableAttribute.cs" />
-    <Compile Include="ODataHttpConfigurationExtensions.cs" />
     <Compile Include="ODataUrlHelperExtensions.cs" />
     <Compile Include="TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />

@@ -130,11 +130,14 @@ namespace System.Web.Http.OData.Routing
                         request.SetODataRouteName(RouteName);
                         request.SetODataRoutingConventions(RoutingConventions);
 
-                        // Select controller name using the routing conventions
-                        string controllerName = SelectControllerName(path, request);
-                        if (controllerName != null)
+                        if (!values.ContainsKey(ODataRouteConstants.Controller))
                         {
-                            values[ODataRouteConstants.Controller] = controllerName;
+                            // Select controller name using the routing conventions
+                            string controllerName = SelectControllerName(path, request);
+                            if (controllerName != null)
+                            {
+                                values[ODataRouteConstants.Controller] = controllerName;
+                            }
                         }
 
                         return true;

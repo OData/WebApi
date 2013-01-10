@@ -9,6 +9,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing.Conventions;
+using System.Web.Http.Routing;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -64,8 +65,9 @@ namespace System.Web.Http.OData.Routing
             HttpRequestMessage request = controllerContext.Request;
             ODataPath odataPath = request.GetODataPath();
             IEnumerable<IODataRoutingConvention> routingConventions = request.GetODataRoutingConventions();
+            IHttpRouteData routeData = controllerContext.RouteData;
 
-            if (odataPath == null || routingConventions == null)
+            if (odataPath == null || routingConventions == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
                 return _innerSelector.SelectAction(controllerContext);
             }
@@ -76,7 +78,7 @@ namespace System.Web.Http.OData.Routing
                 string actionName = routingConvention.SelectAction(odataPath, controllerContext, actionMap);
                 if (actionName != null)
                 {
-                    controllerContext.RouteData.Values[ODataRouteConstants.Action] = actionName;
+                    routeData.Values[ODataRouteConstants.Action] = actionName;
                     return _innerSelector.SelectAction(controllerContext);
                 }
             }

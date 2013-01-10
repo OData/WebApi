@@ -28,6 +28,7 @@ namespace System.Web.Http.OData.Formatter
 
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Formatters.Clear();
+            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
             configuration.Routes.MapODataRoute(model);
 
             HttpServer server = new HttpServer(configuration);

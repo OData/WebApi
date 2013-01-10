@@ -70,10 +70,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
-            HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapODataRoute(GetSampleModel());
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapODataRoute(GetSampleModel());
+            request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
             request.SetEdmModel(_model);
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));

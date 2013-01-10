@@ -355,13 +355,16 @@ namespace System.Web.Http.OData.Formatter
                     throw new SerializationException(message);
                 }
 
-                UrlHelper urlHelper = _request.GetUrlHelper();
-
                 ODataPath path = _request.GetODataPath();
                 IEdmEntitySet targetEntitySet = path == null ? null : path.EntitySet;
 
                 // serialize a response
                 HttpConfiguration configuration = _request.GetConfiguration();
+                if (configuration == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+                }
+
                 Uri baseAddress = new Uri(_request.RequestUri, configuration.VirtualPathRoot);
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
@@ -375,8 +378,8 @@ namespace System.Web.Http.OData.Formatter
                     MessageQuotas = MessageWriterQuotas
                 };
 
-                IODataPathHandler pathHandler = _request.GetODataPathHandler();
-                Contract.Assert(pathHandler != null);
+                UrlHelper urlHelper = _request.GetUrlHelper();
+                Contract.Assert(urlHelper != null);
 
                 // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
                 // for errors, such as when routing itself fails. In that case, the route data property is not
@@ -405,10 +408,10 @@ namespace System.Web.Http.OData.Formatter
                 {
                     ODataSerializerContext writeContext = new ODataSerializerContext()
                     {
+                        Request = _request,
+                        Url = urlHelper,
                         EntitySet = targetEntitySet,
                         Model = model,
-                        UrlHelper = urlHelper,
-                        PathHandler = pathHandler,
                         RootElementName = GetRootElementName(path) ?? "root",
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                         Path = path,

@@ -18,16 +18,17 @@ namespace System.Web.Http.OData
 {
     public class EntitySetControllerTest
     {
-        private HttpServer _server;
-        private HttpClient _client;
+        private readonly HttpServer _server;
+        private readonly HttpClient _client;
+        private readonly IEdmModel _model;
 
         public EntitySetControllerTest()
         {
             HttpConfiguration configuration = new HttpConfiguration();
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EmployeesController.Employee>("Employees");
-            IEdmModel model = builder.GetEdmModel();
-            configuration.Routes.MapODataRoute(model);
+            _model = builder.GetEdmModel();
+            configuration.Routes.MapODataRoute(_model);
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
@@ -236,20 +237,17 @@ namespace System.Web.Http.OData
             Assert.DoesNotContain("Employees", apis);
         }
 
-        private static void SetupController(EntitySetController<FormatterPerson, int> controller)
+        private void SetupController(EntitySetController<FormatterPerson, int> controller)
         {
-            var config = new HttpConfiguration();
-            config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/FormatterPeople");
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapODataRoute(_model);
+            request.SetConfiguration(configuration);
             controller.Request = request;
-            controller.Configuration = config;
             controller.ControllerContext = new HttpControllerContext()
             {
                 ControllerDescriptor = new HttpControllerDescriptor() { ControllerName = "FormatterPeople" }
             };
-            controller.Url = new UrlHelper(request);
         }
     }
 

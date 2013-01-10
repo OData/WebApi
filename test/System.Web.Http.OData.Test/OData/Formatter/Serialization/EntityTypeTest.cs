@@ -62,10 +62,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             request.SetEdmModel(_model);
-            HttpConfiguration config = new HttpConfiguration();
-            config.Routes.MapODataRoute(_model);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapODataRoute(_model);
+            request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
             return request;

@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;

@@ -13,19 +13,19 @@ namespace System.Web.Http.OData.Formatter
 {
     public class ODataActionTests
     {
-        HttpConfiguration _configuration;
         HttpServer _server;
         HttpClient _client;
         IEdmModel _model;
 
         public ODataActionTests()
         {
-            _configuration = new HttpConfiguration();
+            HttpConfiguration configuration = new HttpConfiguration();
             _model = GetModel();
-            _configuration.Formatters.Clear();
-            _configuration.Routes.MapODataRoute(_model);
+            configuration.Formatters.Clear();
+            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
+            configuration.Routes.MapODataRoute(_model);
 
-            _server = new HttpServer(_configuration);
+            _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
         }
 

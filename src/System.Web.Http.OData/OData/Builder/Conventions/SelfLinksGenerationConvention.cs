@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             {
                 configuration.HasFeedSelfLink(entitySetContext =>
                 {
-                    string selfLink = entitySetContext.UrlHelper.ODataLink(new EntitySetPathSegment(entitySetContext.EntitySet));
+                    string selfLink = entitySetContext.Url.ODataLink(new EntitySetPathSegment(entitySetContext.EntitySet));
 
                     if (selfLink == null)
                     {
@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 idLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            string idLink = entityContext.UrlHelper.ODataLink(idLinkPathSegments);
+            string idLink = entityContext.Url.ODataLink(idLinkPathSegments);
 
             if (idLink == null)
             {

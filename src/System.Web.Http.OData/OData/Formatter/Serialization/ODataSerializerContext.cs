@@ -15,14 +15,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
         private ODataMetadataLevel _metadataLevel;
 
         /// <summary>
-        /// Gets or sets the URL helper.
+        /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
-        public UrlHelper UrlHelper { get; set; }
+        public HttpRequestMessage Request { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IODataPathHandler"/> to use for generating OData paths.
+        /// Gets or sets the <see cref="UrlHelper"/> to use for generating OData links.
         /// </summary>
-        public IODataPathHandler PathHandler { get; set; }
+        public UrlHelper Url { get; set; }
 
         /// <summary>
         /// Gets or sets the entity set.

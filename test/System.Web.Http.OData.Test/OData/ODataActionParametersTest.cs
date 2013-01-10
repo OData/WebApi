@@ -12,8 +12,6 @@ namespace System.Web.Http.OData
 {
     public class ODataActionParametersTest
     {
-        private IEdmModel _model = GetModel();
-
         [Theory]
         [InlineData("Drive", "Vehicles(6)/Drive")]
         [InlineData("Drive", "Vehicles(6)/Container.Drive")]
@@ -23,9 +21,10 @@ namespace System.Web.Http.OData
         [InlineData("Drive", "Vehicles(6)/System.Web.Http.OData.Builder.TestModels.Car/org.odata.Container.Drive")]
         public void Can_find_action(string actionName, string url)
         {
-            ODataPath path = new DefaultODataPathHandler().Parse(_model, url);
+            IEdmModel model = GetModel();
+            ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
-            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model };
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
             IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
             Assert.NotNull(action);
             Assert.Equal(actionName, action.Name);
@@ -36,9 +35,9 @@ namespace System.Web.Http.OData
         {
             IEdmModel model = GetModel();
             string url = "Vehicles(8)/System.Web.Http.OData.Builder.TestModels.Car/Wash";
-            ODataPath path = new DefaultODataPathHandler().Parse(_model, url);
+            ODataPath path = new DefaultODataPathHandler().Parse(model, url);
             Assert.NotNull(path); // Guard
-            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model };
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
 
             IEdmFunctionImport action = ODataActionPayloadDeserializer.GetFunctionImport(context);
 
@@ -60,9 +59,11 @@ namespace System.Web.Http.OData
         [Fact]
         public void ParserThrows_InvalidArgument_when_multiple_overloads_found()
         {
+            IEdmModel model = GetModel();
+
             Assert.ThrowsArgument(() =>
             {
-                new DefaultODataPathHandler().Parse(_model, "Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
+                new DefaultODataPathHandler().Parse(model, "Vehicles/System.Web.Http.OData.Builder.TestModels.Car(8)/Park");
             }, "actionIdentifier", "Action resolution failed. Multiple actions matching the action identifier 'Park' were found. The matching actions are: org.odata.Container.Park, org.odata.Container.Park.");
         }
 

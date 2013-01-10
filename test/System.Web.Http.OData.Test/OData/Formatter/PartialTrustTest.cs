@@ -16,15 +16,15 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void PostEntry_InODataAtomFormat()
         {
-            var _config = new HttpConfiguration();
-            _config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            var config = new HttpConfiguration();
+            config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
 
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpServer host = new HttpServer(config))
             {
-                var _client = new HttpClient(host);
+                var client = new HttpClient(host);
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, new Uri(baseAddress + "People"));
                 requestMessage.Content = new StringContent(Resources.PersonEntryInAtom, Encoding.UTF8, "application/atom+xml");
-                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                using (HttpResponseMessage response = client.SendAsync(requestMessage).Result)
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -38,16 +38,16 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void PostEntry_InODataJsonLightFormat()
         {
-            var _config = new HttpConfiguration();
-            _config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            var config = new HttpConfiguration();
+            config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
 
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpServer host = new HttpServer(config))
             {
-                var _client = new HttpClient(host);
+                var client = new HttpClient(host);
                 HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, new Uri(baseAddress + "People"));
                 requestMessage.Content = new StringContent(Resources.PersonRequestEntryInPlainOldJson);
                 requestMessage.Content.Headers.ContentType = ODataMediaTypes.ApplicationJsonODataFullMetadata;
-                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                using (HttpResponseMessage response = client.SendAsync(requestMessage).Result)
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -61,16 +61,16 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void PostEntry_InODataJsonVerboseFormat()
         {
-            var _config = new HttpConfiguration();
-            _config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
+            var config = new HttpConfiguration();
+            config.Routes.MapODataRoute(ODataTestUtil.GetEdmModel());
 
-            using (HttpServer host = new HttpServer(_config))
+            using (HttpServer host = new HttpServer(config))
             {
-                var _client = new HttpClient(host);
+                var client = new HttpClient(host);
                 HttpRequestMessage requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, new Uri(baseAddress + "People"));
                 requestMessage.Content = new StringContent(Resources.PersonRequestEntryInPlainOldJson);
                 requestMessage.Content.Headers.ContentType = ODataTestUtil.ApplicationJsonMediaType;
-                using (HttpResponseMessage response = _client.SendAsync(requestMessage).Result)
+                using (HttpResponseMessage response = client.SendAsync(requestMessage).Result)
                 {
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);

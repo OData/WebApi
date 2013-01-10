@@ -31,7 +31,7 @@ namespace System.Web.Http.OData.Builder
             var productType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
-            var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance, UrlHelper = new UrlHelper(new HttpRequestMessage()) };
+            var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance };
             var entitySetLinkBuilderAnnotation = new EntitySetLinkBuilderAnnotation(actor);
 
             // Act
@@ -83,7 +83,7 @@ namespace System.Web.Http.OData.Builder
             var productType = model.SchemaElements.OfType<IEdmEntityType>().Single();
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
-            var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance, UrlHelper = new UrlHelper(new HttpRequestMessage()) };
+            var entityContext = new EntityInstanceContext { EdmModel = model, EntitySet = productsSet, EntityType = productType, EntityInstance = productInstance };
 
             // Act
             var editLink = actor.GetEditLink().Factory(entityContext);

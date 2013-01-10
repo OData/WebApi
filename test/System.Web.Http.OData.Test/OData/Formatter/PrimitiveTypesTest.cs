@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -86,7 +87,7 @@ namespace System.Web.Http.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
                 "http://localhost/WorkItems(10)/ID"))
             {
-                request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
+                request.SetConfiguration(configuration);
                 IEdmProperty property =
                     model.EntityContainers().Single().EntitySets().Single().ElementType.Properties().First();
                 request.SetEdmModel(model);
@@ -131,11 +132,9 @@ namespace System.Web.Http.OData.Formatter
 
             object actualValue;
 
-            using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
                 "http://localhost/WorkItems(10)/ID"))
             {
-                request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
                 request.SetEdmModel(model);
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
@@ -159,7 +158,7 @@ namespace System.Web.Http.OData.Formatter
         private static HttpConfiguration CreateConfiguration()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.AddFakeODataRoute();
+            configuration.Routes.MapFakeODataRoute();
             return configuration;
         }
 

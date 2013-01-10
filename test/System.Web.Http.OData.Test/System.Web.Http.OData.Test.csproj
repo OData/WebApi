@@ -111,9 +111,11 @@
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\MediaTypeFormatterTestBase.cs">
       <Link>OData\Formatter\MediaTypeFormatterTestBase.cs</Link>
     </Compile>
+    <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
-    <Compile Include="ODataUrlHelperExtensionsTest.cs" />
+    <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
+    <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
     <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotationTest.cs" />
@@ -128,6 +130,7 @@
     <Compile Include="OData\Builder\CollectionPropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
     <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\EdmDirectValueAnnotationsManagerExtensions.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
     <Compile Include="OData\PerRequestActionValueBinderTest.cs" />
     <Compile Include="OData\Routing\Conventions\ActionRoutingConventionTest.cs" />
@@ -141,7 +144,6 @@
     <Compile Include="OData\Formatter\ODataMetadataLevelHelperTest.cs" />
     <Compile Include="OData\FromODataUriTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataMessageReaderLearningTests.cs" />
-    <Compile Include="OData\Formatter\HttpConfigurationExtensions.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormattersTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMessageWriterLearningTests.cs" />
     <Compile Include="OData\ODataActionParametersTest.cs" />

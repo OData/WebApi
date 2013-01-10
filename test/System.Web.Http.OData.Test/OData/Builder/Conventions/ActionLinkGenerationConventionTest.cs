@@ -38,7 +38,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = carsEdmSet,
                     EntityType = carsEdmSet.ElementType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 paintAction);
@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = carsEdmSet,
                     EntityType = carsEdmSet.ElementType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 paintAction);
@@ -102,7 +102,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = vehiclesEdmSet,
                     EntityType = carEdmType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 paintAction);
@@ -140,7 +140,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 EdmModel = model,
                 EntitySet = vehiclesEdmSet,
                 EntityType = carEdmType,
-                UrlHelper = request.GetUrlHelper(),
+                Url = request.GetUrlHelper(),
                 EntityInstance = new Car { Model = 2009, Name = "Accord" }
             });
             Assert.Equal(

@@ -91,10 +91,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityType entityType = _edmEntityTypeReference.EntityDefinition();
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext
             {
+                Request = writeContext.Request,
                 EdmModel = writeContext.Model,
                 EntitySet = writeContext.EntitySet,
                 EntityType = entityType,
-                UrlHelper = writeContext.UrlHelper,
+                Url = writeContext.Url,
                 EntityInstance = graph,
                 SkipExpensiveAvailabilityChecks = writeContext.SkipExpensiveAvailabilityChecks
             };
@@ -195,36 +196,82 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             Contract.Assert(writeContext != null);
 
-            if (writeContext.MetadataLevel == ODataMetadataLevel.NoMetadata)
-            {
-                return Enumerable.Empty<ODataAction>();
-            }
-
             return context.EdmModel.GetAvailableProcedures(context.EntityType)
-                .Select(action => CreateODataAction(action, context))
+                .Select(action => CreateODataAction(action, context, writeContext.MetadataLevel))
                 .Where(action => action != null);
         }
 
-        private static ODataAction CreateODataAction(IEdmFunctionImport action, EntityInstanceContext context)
+        internal static ODataAction CreateODataAction(IEdmFunctionImport action, EntityInstanceContext context,
+            ODataMetadataLevel metadataLevel)
         {
-            ActionLinkBuilder builder = context.EdmModel.GetActionLinkBuilder(action);
-            if (builder != null)
-            {
-                Uri target = builder.BuildActionLink(context);
-                if (target != null)
-                {
-                    Uri baseUri = new Uri(context.UrlHelper.ODataLink(new MetadataPathSegment()));
-                    Uri metadata = new Uri(baseUri, "#" + action.Container.Name + "." + action.Name);
+            IEdmModel model = context.EdmModel;
 
-                    return new ODataAction
-                    {
-                        Metadata = metadata,
-                        Target = target,
-                        Title = action.Name
-                    };
-                }
+            if (ShouldOmitAction(action, model, metadataLevel))
+            {
+                return null;
             }
-            return null;
+
+            ActionLinkBuilder builder = model.GetActionLinkBuilder(action);
+
+            if (builder == null)
+            {
+                return null;
+            }
+
+            Uri target = builder.BuildActionLink(context);
+
+            if (target == null)
+            {
+                return null;
+            }
+
+            Uri baseUri = new Uri(context.Url.ODataLink(new MetadataPathSegment()));
+            Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(action, model, metadataLevel));
+
+            ODataAction odataAction = new ODataAction
+            {
+                Metadata = metadata,
+            };
+
+            bool alwaysIncludeDetails = metadataLevel == ODataMetadataLevel.Default ||
+                metadataLevel == ODataMetadataLevel.FullMetadata;
+
+            // Always omit the title in minimal/no metadata modes (it isn't customizable and thus always follows
+            // conventions).
+            if (alwaysIncludeDetails)
+            {
+                odataAction.Title = action.Name;
+            }
+
+            // TODO: Expose a way to specify whether or not a target follows conventions.
+            const bool TargetFollowsConventions = false;
+
+            if (alwaysIncludeDetails || !TargetFollowsConventions)
+            {
+                odataAction.Target = target;
+            }
+
+            return odataAction;
+        }
+
+        internal static string CreateMetadataFragment(IEdmFunctionImport action, IEdmModel model,
+            ODataMetadataLevel metadataLevel)
+        {
+            IEdmEntityContainer container = action.Container;
+            string actionName = action.Name;
+            string fragment;
+
+            if ((metadataLevel == ODataMetadataLevel.MinimalMetadata || metadataLevel == ODataMetadataLevel.NoMetadata)
+                && model.IsDefaultEntityContainer(container))
+            {
+                fragment = actionName;
+            }
+            else
+            {
+                fragment = container.Name + "." + actionName;
+            }
+
+            return fragment;
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataEntry entry, IEdmEntitySet entitySet,
@@ -263,6 +310,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 case ODataMetadataLevel.NoMetadata:
                 default: // All values already specified; just keeping the compiler happy.
                     return true;
+            }
+        }
+
+        internal static bool ShouldOmitAction(IEdmFunctionImport action, IEdmModel model,
+            ODataMetadataLevel metadataLevel)
+        {
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.MinimalMetadata:
+                case ODataMetadataLevel.NoMetadata:
+                    return model.IsAlwaysBindable(action);
+
+                case ODataMetadataLevel.Default:
+                case ODataMetadataLevel.FullMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return false;
             }
         }
 

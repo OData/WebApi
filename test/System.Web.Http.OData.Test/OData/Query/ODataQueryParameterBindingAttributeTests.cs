@@ -60,7 +60,7 @@ namespace System.Web.Http.OData.Query
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
             MethodInfo methodInfo = typeof(CustomerLowLevelController).GetMethod(methodName);
@@ -88,7 +88,7 @@ namespace System.Web.Http.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
             MethodInfo methodInfo = typeof(CustomerLowLevelController).GetMethod(methodName);
@@ -118,7 +118,7 @@ namespace System.Web.Http.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
             MethodInfo methodInfo = typeof(CustomerLowLevelController).GetMethod("GetVoidReturn");

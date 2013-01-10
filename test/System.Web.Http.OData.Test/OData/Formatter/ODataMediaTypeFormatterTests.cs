@@ -44,12 +44,10 @@ namespace System.Web.Http.OData.Formatter
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapODataRoute(model);
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(configuration.Routes.First());
+            request.SetConfiguration(configuration);
             request.SetEdmModel(model);
             IEdmEntitySet entitySet = model.EntityContainers().Single().EntitySets().Single();
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10")));
@@ -355,8 +353,8 @@ namespace System.Web.Http.OData.Formatter
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             request.SetEdmModel(model);
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.AddFakeODataRoute();
-            request.Properties["MS_HttpConfiguration"] = configuration;
+            configuration.Routes.MapFakeODataRoute();
+            request.SetConfiguration(configuration);
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(
                 model.EntityContainers().Single().EntitySets().Single())));
             return request;

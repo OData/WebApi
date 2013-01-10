@@ -8,7 +8,7 @@ using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http.OData.OData.Builder
+namespace System.Web.Http.OData.Builder
 {
     public class ODataUtilsLearningTests
     {

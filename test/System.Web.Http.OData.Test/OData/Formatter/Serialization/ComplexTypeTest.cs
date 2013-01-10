@@ -46,9 +46,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             request.SetEdmModel(GetSampleModel());
-            HttpConfiguration config = new HttpConfiguration();
-            config.AddFakeODataRoute();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapFakeODataRoute();
+            request.SetConfiguration(configuration);
             return request;
         }
 

@@ -230,7 +230,7 @@ namespace System.Web.Http.OData.Query
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod(methodName));
@@ -254,7 +254,7 @@ namespace System.Web.Http.OData.Query
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?select");
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));
@@ -276,7 +276,7 @@ namespace System.Web.Http.OData.Query
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$custom");
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));
@@ -300,7 +300,7 @@ namespace System.Web.Http.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$skip=1");
             HttpConfiguration config = new HttpConfiguration();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("GetNonGenericEnumerable"));
@@ -322,7 +322,7 @@ namespace System.Web.Http.OData.Query
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("GetIEnumerableOfCustomer"));
@@ -351,7 +351,7 @@ namespace System.Web.Http.OData.Query
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$skip=1");
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod(actionName));
@@ -381,7 +381,7 @@ namespace System.Web.Http.OData.Query
             QueryableAttribute attribute = new QueryableAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
             HttpConfiguration config = new HttpConfiguration();
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Primitive", typeof(PrimitiveController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(PrimitiveController).GetMethod("GetIEnumerableOfInt"));

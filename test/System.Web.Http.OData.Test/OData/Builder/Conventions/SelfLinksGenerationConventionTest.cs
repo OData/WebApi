@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = carsEdmEntitySet,
                     EntityType = carsEdmEntitySet.ElementType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 includeCast: false);
@@ -110,7 +110,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = carsEdmEntitySet,
                     EntityType = carsEdmEntitySet.ElementType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 includeCast: true);
@@ -143,7 +143,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = carType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Accord" }
                 },
                 ODataMetadataLevel.Default);
@@ -176,7 +176,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     EdmModel = model,
                     EntitySet = vehiclesEdmEntitySet,
                     EntityType = sportbikeType,
-                    UrlHelper = request.GetUrlHelper(),
+                    Url = request.GetUrlHelper(),
                     EntityInstance = new Car { Model = 2009, Name = "Ninja" }
                 },
                 ODataMetadataLevel.Default);

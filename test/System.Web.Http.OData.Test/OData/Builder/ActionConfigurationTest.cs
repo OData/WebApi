@@ -360,7 +360,7 @@ namespace System.Web.Http.OData.Builder
                 EdmModel = model,
                 EntitySet = entitySet,
                 EntityType = movieType,
-                UrlHelper = urlHelper,
+                Url = urlHelper,
                 EntityInstance = new Movie { ID = 1, Name = "Avatar" },
                 SkipExpensiveAvailabilityChecks = false
             };

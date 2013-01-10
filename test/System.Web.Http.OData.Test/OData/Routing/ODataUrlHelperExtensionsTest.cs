@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http.Hosting;
 using System.Web.Http.Routing;
 using Microsoft.TestCommon;
 
-namespace System.Web.Http
+namespace System.Web.Http.OData.Routing
 {
     public class ODataUrlHelperExtensionsTest
     {
@@ -23,7 +24,7 @@ namespace System.Web.Http
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
             config.Routes.MapHttpRoute("NotOData", "{controller}");
-            request.Properties["MS_HttpConfiguration"] = config;
+            request.SetConfiguration(config);
             UrlHelper urlHelper = new UrlHelper(request);
 
             Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
@@ -35,7 +36,7 @@ namespace System.Web.Http
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
             config.Routes.MapHttpRoute("OData", "prefix/{*notODataPath}");
-            request.Properties["MS_HttpConfiguration"] = config;
+            request.SetConfiguration(config);
             UrlHelper urlHelper = new UrlHelper(request);
 
             Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
@@ -47,7 +48,7 @@ namespace System.Web.Http
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
             config.Routes.MapHttpRoute("OData", "{prefix}/{*odataPath}");
-            request.Properties["MS_HttpConfiguration"] = config;
+            request.SetConfiguration(config);
             UrlHelper urlHelper = new UrlHelper(request);
 
             Assert.Null(urlHelper.GenerateLinkDirectly("OData", "odataPath"));
@@ -59,11 +60,11 @@ namespace System.Web.Http
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/vpath/prefix/Customers");
             HttpConfiguration config = new HttpConfiguration(new HttpRouteCollection("http://localhost/vpath"));
             config.Routes.MapHttpRoute("OData", "prefix/{*odataPath}");
-            request.Properties["MS_HttpConfiguration"] = config;
-            request.Properties["MS_HttpRouteData"] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(config);
             UrlHelper urlHelper = new UrlHelper(request);
 
-            Assert.Equal("http://localhost/vpath/prefix/odataPath", urlHelper.GenerateLinkDirectly("OData", "odataPath"));
+            Assert.Equal("http://localhost/vpath/prefix/odataPath",
+                urlHelper.GenerateLinkDirectly("OData", "odataPath"));
         }
     }
 }

@@ -552,10 +552,11 @@ namespace System.Web.Http.OData.Builder
         {
             return new EntityInstanceContext<TEntityType>
             {
+                Request = context.Request,
                 EdmModel = context.EdmModel,
                 EntitySet = context.EntitySet,
                 EntityType = context.EntityType,
-                UrlHelper = context.UrlHelper,
+                Url = context.Url,
                 EntityInstance = context.EntityInstance as TEntityType
             };
         }

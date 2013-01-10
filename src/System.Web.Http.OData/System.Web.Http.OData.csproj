@@ -145,7 +145,7 @@
     <Compile Include="OData\Formatter\ODataMetadataLevelHelper.cs" />
     <Compile Include="OData\Formatter\Serialization\EntitySelfLinks.cs" />
     <Compile Include="OData\FromODataUriAttribute.cs" />
-    <Compile Include="OData\ODataRouteConstants.cs" />
+    <Compile Include="OData\Routing\ODataRouteConstants.cs" />
     <Compile Include="OData\EntitySetController.cs" />
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
     <Compile Include="MediaTypeFormatterExtensions.cs" />

@@ -2,11 +2,9 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
-using System.Web.Http.OData.Query;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Atom;
@@ -100,8 +98,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
                     FeedContext feedContext = new FeedContext
                     {
+                        Request = writeContext.Request,
                         EntitySet = writeContext.EntitySet,
-                        UrlHelper = writeContext.UrlHelper,
+                        Url = writeContext.Url,
                         FeedInstance = graph
                     };
 

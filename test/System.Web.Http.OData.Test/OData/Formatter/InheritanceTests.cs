@@ -16,26 +16,23 @@ namespace System.Web.Http.OData.Formatter
 {
     public class InheritanceTests
     {
-        HttpConfiguration _configuration;
         HttpServer _server;
         HttpClient _client;
-        XNamespace _atomNamespace = "http://www.w3.org/2005/Atom";
         IEdmModel _model;
 
         public InheritanceTests()
         {
-            _configuration = new HttpConfiguration();
+            HttpConfiguration configuration = new HttpConfiguration();
             _model = GetEdmModel();
             IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create();
 
-            _configuration.Formatters.Clear();
-            _configuration.Formatters.AddRange(formatters);
+            configuration.Formatters.Clear();
+            configuration.Formatters.AddRange(formatters);
 
-            _configuration.AddFakeODataRoute();
+            configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
+            configuration.Routes.MapFakeODataRoute();
 
-            _configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
-
-            _server = new HttpServer(_configuration);
+            _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
         }
 

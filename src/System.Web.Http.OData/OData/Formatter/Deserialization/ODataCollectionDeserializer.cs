@@ -45,13 +45,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return null;
             }
 
+            // Recursion guard to avoid stack overflows
+            EnsureStackHelper.EnsureStack();
+
             return ReadItems(collection, readContext);
         }
 
         private IEnumerable ReadItems(ODataCollectionValue collection, ODataDeserializerContext readContext)
         {
-            RecurseEnter(readContext);
-
             IEdmTypeReference elementType = _edmCollectionType.ElementType();
             ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(elementType);
             Contract.Assert(deserializer != null);
@@ -67,8 +68,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     yield return deserializer.ReadInline(entry, readContext);
                 }
             }
-
-            RecurseLeave(readContext);
         }
 
         private ODataCollectionValue ReadCollection(ODataMessageReader messageReader)

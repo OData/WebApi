@@ -15,8 +15,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 {
     internal class ODataEntityDeserializer : ODataEntryDeserializer<ODataEntry>
     {
-        protected const int RecursionLimit = 100;
-
         public ODataEntityDeserializer(IEdmEntityTypeReference edmEntityType, ODataDeserializerProvider deserializerProvider)
             : base(edmEntityType, ODataPayloadKind.Entry, deserializerProvider)
         {
@@ -46,7 +44,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet,
                 EdmEntityType.EntityDefinition());
-            ODataEntry topLevelEntry = ReadEntryOrFeed(odataReader, readContext) as ODataEntry;
+            ODataEntry topLevelEntry = ReadEntryOrFeed(odataReader) as ODataEntry;
             Contract.Assert(topLevelEntry != null);
 
             return ReadInline(topLevelEntry, readContext);
@@ -58,6 +56,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             {
                 throw Error.Argument("entry", SRResources.ItemMustBeOfType, typeof(ODataEntry).Name);
             }
+
+            // Recursion guard to avoid stack overflows
+            EnsureStackHelper.EnsureStack();
 
             if (EdmEntityType.FullName() != entry.TypeName)
             {
@@ -83,15 +84,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
                 CreateEntityResource(entryAnnotation, EdmEntityType, readContext);
 
-                RecurseEnter(readContext);
                 ApplyEntityProperties(entry, entryAnnotation, readContext);
-                RecurseLeave(readContext);
 
                 return entryAnnotation.EntityResource;
             }
         }
 
-        internal static ODataItem ReadEntryOrFeed(ODataReader odataReader, ODataDeserializerContext readContext)
+        internal static ODataItem ReadEntryOrFeed(ODataReader odataReader)
         {
             ODataItem topLevelItem = null;
             Stack<ODataItem> itemsStack = new Stack<ODataItem>();
@@ -136,13 +135,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                             }
                         }
                         itemsStack.Push(entry);
-                        RecurseEnter(readContext);
                         break;
 
                     case ODataReaderState.EntryEnd:
                         Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek() == odataReader.Item, "The entry which is ending should be on the top of the items stack.");
                         itemsStack.Pop();
-                        RecurseLeave(readContext);
                         break;
 
                     case ODataReaderState.NavigationLinkStart:
@@ -159,13 +156,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         }
 
                         itemsStack.Push(navigationLink);
-                        RecurseEnter(readContext);
                         break;
 
                     case ODataReaderState.NavigationLinkEnd:
                         Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek() == odataReader.Item, "The navigation link which is ending should be on the top of the items stack.");
                         itemsStack.Pop();
-                        RecurseLeave(readContext);
                         break;
 
                     case ODataReaderState.FeedStart:
@@ -189,13 +184,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                         }
 
                         itemsStack.Push(feed);
-                        RecurseEnter(readContext);
                         break;
 
                     case ODataReaderState.FeedEnd:
                         Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek() == odataReader.Item, "The feed which is ending should be on the top of the items stack.");
                         itemsStack.Pop();
-                        RecurseLeave(readContext);
                         break;
 
                     case ODataReaderState.EntityReferenceLink:

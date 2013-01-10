@@ -13,9 +13,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// </summary>
     public class ODataDeserializerContext
     {
-        private const int MaxReferenceDepth = 200;
-        private int _currentReferenceDepth = 0;
-
         /// <summary>
         /// Gets or sets whether the <see cref="ODataMediaTypeFormatter"/> is reading a 
         /// PATCH request.
@@ -36,28 +33,5 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// Gets or sets the EDM model associated with the request.
         /// </summary>
         public IEdmModel Model { get; set; }
-
-        /// <summary>
-        /// Increments the current reference depth.
-        /// </summary>
-        /// <returns><c>false</c> if the current reference depth is greater than the maximum allowed and <c>false</c> otherwise.</returns>
-        public bool IncrementCurrentReferenceDepth()
-        {
-            if (++_currentReferenceDepth > MaxReferenceDepth)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Decrements the current reference depth.
-        /// </summary>
-        public void DecrementCurrentReferenceDepth()
-        {
-            _currentReferenceDepth--;
-            Contract.Assert(_currentReferenceDepth >= 0);
-        }
     }
 }

@@ -112,6 +112,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\EnsureStackHelper.cs">
+      <Link>Common\EnsureStackHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ExtensionsCommonAssemblyInfo.cs">
       <Link>Properties\ExtensionsCommonAssemblyInfo.cs</Link>
     </Compile>

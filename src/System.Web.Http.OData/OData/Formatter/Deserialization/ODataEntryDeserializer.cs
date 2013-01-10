@@ -55,19 +55,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             throw Error.NotSupported(SRResources.DoesNotSupportReadInLine, GetType().Name);
         }
 
-        internal static void RecurseEnter(ODataDeserializerContext readContext)
-        {
-            if (!readContext.IncrementCurrentReferenceDepth())
-            {
-                throw new SerializationException(SRResources.RecursionLimitExceeded);
-            }
-        }
-
-        internal static void RecurseLeave(ODataDeserializerContext readContext)
-        {
-            readContext.DecrementCurrentReferenceDepth();
-        }
-
         internal static object CreateResource(IEdmComplexType edmComplexType, IEdmModel edmModel)
         {
             Type clrType = EdmLibHelpers.GetClrType(new EdmComplexTypeReference(edmComplexType, isNullable: true), edmModel);

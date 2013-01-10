@@ -359,6 +359,9 @@ namespace System.Web.Http.OData.Query.Validators
         /// <param name="settings"></param>
         public virtual void ValidateQueryNode(QueryNode node, ODataValidationSettings settings)
         {
+            // Recursion guard to avoid stack overflows
+            EnsureStackHelper.EnsureStack();
+
             SingleValueNode singleNode = node as SingleValueNode;
             CollectionNode collectionNode = node as CollectionNode;
 

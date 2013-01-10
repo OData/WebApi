@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace System.Web.Http.OData.Query.Expressions
     /// Translates an OData $filter parse tree represented by <see cref="FilterClause"/> to 
     /// an <see cref="Expression"/> and applies it to an <see cref="IQueryable"/>.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
     internal class FilterBinder
     {
         private const string ODataItParameterName = "$it";
@@ -120,6 +122,9 @@ namespace System.Web.Http.OData.Query.Expressions
 
         private Expression Bind(QueryNode node)
         {
+            // Recursion guard to avoid stack overflows
+            EnsureStackHelper.EnsureStack();
+
             CollectionNode collectionNode = node as CollectionNode;
             SingleValueNode singleValueNode = node as SingleValueNode;
 

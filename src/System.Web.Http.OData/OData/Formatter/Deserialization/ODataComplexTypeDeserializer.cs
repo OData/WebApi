@@ -28,16 +28,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return null;
             }
 
-            RecurseEnter(readContext);
+            // Recursion guard to avoid stack overflows
+            EnsureStackHelper.EnsureStack();
 
             object complexResource = CreateResource(EdmComplexType.ComplexDefinition(), readContext.Model);
             foreach (ODataProperty complexProperty in complexValue.Properties)
             {
                 ApplyProperty(complexProperty, EdmComplexType, complexResource, DeserializerProvider, readContext);
             }
-
-            RecurseLeave(readContext);
-
             return complexResource;
         }
     }

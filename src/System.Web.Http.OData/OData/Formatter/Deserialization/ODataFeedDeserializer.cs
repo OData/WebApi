@@ -36,6 +36,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return null;
             }
 
+            // Recursion guard to avoid stack overflows
+            EnsureStackHelper.EnsureStack();
+
             return ReadItems(feed, readContext);
         }
 

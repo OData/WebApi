@@ -48,12 +48,17 @@ namespace System.Web.Http.OData.Routing.Conventions
 
                 if (declaringType != null)
                 {
-                    KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-
                     // e.g. Try GetNavigationPropertyFromDeclaringType first, then fallback on GetNavigationProperty action name
-                    string propertyFromDeclaringTypeActionName = "Get" + navigationProperty.Name + "From" + declaringType.Name;
-                    return actionMap.Contains(propertyFromDeclaringTypeActionName) ? propertyFromDeclaringTypeActionName : "Get" + navigationProperty.Name;
+                    string actionName = actionMap.FindMatchingAction(
+                        "Get" + navigationProperty.Name + "From" + declaringType.Name,
+                        "Get" + navigationProperty.Name);
+
+                    if (actionName != null)
+                    {
+                        KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+                        controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                        return actionName;
+                    }
                 }
             }
 

@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -55,12 +53,17 @@ namespace System.Web.Http.OData.Routing.Conventions
                         IEdmEntityType bindingParameterType = bindingParameter.Type.Definition as IEdmEntityType;
                         if (bindingParameterType != null)
                         {
-                            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                            controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-
                             // e.g. Try ActionOnBindingParameterType first, then fallback on Action action name
-                            string actionOnBindingTypeActionName = action.Name + "On" + bindingParameterType.Name;
-                            return actionMap.Contains(actionOnBindingTypeActionName) ? actionOnBindingTypeActionName : action.Name;
+                            string actionName = actionMap.FindMatchingAction(
+                                action.Name + "On" + bindingParameterType.Name,
+                                action.Name);
+
+                            if (actionName != null)
+                            {
+                                KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+                                controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                                return actionName;
+                            }
                         }
                     }
                 }
@@ -79,8 +82,9 @@ namespace System.Web.Http.OData.Routing.Conventions
                         {
                             // e.g. Try ActionOnBindingParameterType first, then fallback on Action action name
                             IEdmEntityType elementType = bindingParameterType.ElementType.Definition as IEdmEntityType;
-                            string actionOnBindingTypeActionName = action.Name + "OnCollectionOf" + elementType.Name;
-                            return actionMap.Contains(actionOnBindingTypeActionName) ? actionOnBindingTypeActionName : action.Name;
+                            return actionMap.FindMatchingAction(
+                                action.Name + "OnCollectionOf" + elementType.Name,
+                                action.Name);
                         }
                     }
                 }

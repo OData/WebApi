@@ -15,6 +15,9 @@ namespace System.Web.Http.OData.Routing.Conventions
     /// </summary>
     public class LinksRoutingConvention : EntitySetRoutingConvention
     {
+        private const string DeleteLinkActionName = "DeleteLink";
+        private const string CreateLinkActionName = "CreateLink";
+
         /// <summary>
         /// Selects the action.
         /// </summary>
@@ -44,21 +47,30 @@ namespace System.Web.Http.OData.Routing.Conventions
             {
                 if (requestMethod == HttpMethod.Post || requestMethod == HttpMethod.Put)
                 {
-                    AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
-                    return "CreateLink";
+                    if (actionMap.Contains(CreateLinkActionName))
+                    {
+                        AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
+                        return CreateLinkActionName;
+                    }
                 }
                 else if (requestMethod == HttpMethod.Delete)
                 {
-                    AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
-                    return "DeleteLink";
+                    if (actionMap.Contains(DeleteLinkActionName))
+                    {
+                        AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
+                        return DeleteLinkActionName;
+                    }
                 }
             }
             else if (odataPath.PathTemplate == "~/entityset/key/$links/navigation/key" && requestMethod == HttpMethod.Delete)
             {
-                AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
-                KeyValuePathSegment relatedKeySegment = odataPath.Segments[4] as KeyValuePathSegment;
-                controllerContext.RouteData.Values[ODataRouteConstants.RelatedKey] = relatedKeySegment.Value;
-                return "DeleteLink";
+                if (actionMap.Contains(DeleteLinkActionName))
+                {
+                    AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
+                    KeyValuePathSegment relatedKeySegment = odataPath.Segments[4] as KeyValuePathSegment;
+                    controllerContext.RouteData.Values[ODataRouteConstants.RelatedKey] = relatedKeySegment.Value;
+                    return DeleteLinkActionName;
+                }
             }
             return null;
         }

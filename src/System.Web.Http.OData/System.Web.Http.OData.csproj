@@ -133,6 +133,7 @@
     <Compile Include="OData\AsyncEntitySetController.cs" />
     <Compile Include="OData\ODataRoutingAttribute.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
+    <Compile Include="OData\Routing\Conventions\ActionMapExtensions.cs" />
     <Compile Include="OData\Routing\Conventions\ODataRoutingConventions.cs" />
     <Compile Include="OData\Routing\ODataPathExtensions.cs" />
     <Compile Include="OData\ODataFormattingAttribute.cs" />

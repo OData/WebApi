@@ -78,16 +78,16 @@ namespace System.Web.Http.OData.Routing.Conventions
                 if (httpMethod == HttpMethod.Get)
                 {
                     // e.g. Try GetCustomers first, then fallback on Get action name
-                    string httpMethodName = "Get";
-                    string httpMethodAndEntitySetName = httpMethodName + entitySet.Name;
-                    return actionMap.Contains(httpMethodAndEntitySetName) ? httpMethodAndEntitySetName : httpMethodName;
+                    return actionMap.FindMatchingAction(
+                        "Get" + entitySet.Name,
+                        "Get");
                 }
                 else if (httpMethod == HttpMethod.Post)
                 {
                     // e.g. Try PostCustomer first, then fallback on Post action name
-                    string httpMethodName = "Post";
-                    string httpMethodAndEntityTypeName = httpMethodName + entitySet.ElementType.Name;
-                    return actionMap.Contains(httpMethodAndEntityTypeName) ? httpMethodAndEntityTypeName : httpMethodName;
+                    return actionMap.FindMatchingAction(
+                        "Post" + entitySet.ElementType.Name,
+                        "Post");
                 }
             }
             return null;

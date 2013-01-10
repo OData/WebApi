@@ -130,6 +130,11 @@
     <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
     <Compile Include="OData\PerRequestActionValueBinderTest.cs" />
+    <Compile Include="OData\Routing\Conventions\ActionRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\Conventions\LinksRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\Conventions\NavigationRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\Conventions\EntityRoutingConventionTest.cs" />
+    <Compile Include="OData\Routing\Conventions\EntitySetRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\ODataPathTest.cs" />
     <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />

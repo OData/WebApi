@@ -66,14 +66,19 @@ namespace System.Web.Http.OData.Routing.Conventions
 
                 Contract.Assert(httpMethodName != null);
 
-                KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-
                 IEdmEntityType entityType = odataPath.EdmType as IEdmEntityType;
 
                 // e.g. Try GetCustomer first, then fallback on Get action name
-                string httpMethodAndEntityName = httpMethodName + entityType.Name;
-                return actionMap.Contains(httpMethodAndEntityName) ? httpMethodAndEntityName : httpMethodName;
+                string actionName = actionMap.FindMatchingAction(
+                    httpMethodName + entityType.Name,
+                    httpMethodName);
+
+                if (actionName != null)
+                {
+                    KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                    return actionName;
+                }
             }
             return null;
         }

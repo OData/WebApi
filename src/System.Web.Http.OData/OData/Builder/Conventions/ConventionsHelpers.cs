@@ -34,12 +34,12 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         // Get properties of this entity type that are not already declared in the base entity type and are not already ignored.
-        public static IEnumerable<PropertyInfo> GetProperties(EntityTypeConfiguration entity)
+        public static IEnumerable<PropertyInfo> GetProperties(EntityTypeConfiguration entity, bool includeReadOnly)
         {
-            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as StructuralTypeConfiguration);
+            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as StructuralTypeConfiguration, includeReadOnly);
             if (entity.BaseType != null)
             {
-                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as StructuralTypeConfiguration);
+                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as StructuralTypeConfiguration, includeReadOnly);
                 return allProperties.Except(baseTypeProperties, PropertyEqualityComparer.Instance);
             }
             else
@@ -49,7 +49,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         // Get all properties of this type (that are not already ignored).
-        public static IEnumerable<PropertyInfo> GetAllProperties(StructuralTypeConfiguration type)
+        public static IEnumerable<PropertyInfo> GetAllProperties(StructuralTypeConfiguration type, bool includeReadOnly)
         {
             if (type == null)
             {
@@ -60,6 +60,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                 .ClrType
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties().Any(p1 => p1.Name == p.Name))
+                .Where(p => includeReadOnly || (p.GetSetMethod() != null || p.PropertyType.IsCollection()))
                 .ToArray();
         }
 

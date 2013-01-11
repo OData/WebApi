@@ -389,7 +389,7 @@ namespace System.Web.Http.OData.Builder
 
         private void MapEntityType(EntityTypeConfiguration entity)
         {
-            IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetProperties(entity);
+            IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetProperties(entity, includeReadOnly: _isQueryCompositionMode);
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;
@@ -423,7 +423,7 @@ namespace System.Web.Http.OData.Builder
 
         private void MapComplexType(ComplexTypeConfiguration complexType)
         {
-            IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetAllProperties(complexType);
+            IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetAllProperties(complexType, includeReadOnly: _isQueryCompositionMode);
             foreach (PropertyInfo property in properties)
             {
                 bool isCollection;

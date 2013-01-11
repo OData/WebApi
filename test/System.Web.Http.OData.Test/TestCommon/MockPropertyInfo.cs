@@ -8,6 +8,7 @@ namespace System.Web.Http.OData
     public sealed class MockPropertyInfo : Mock<PropertyInfo>
     {
         private readonly Mock<MethodInfo> _mockGetMethod = new Mock<MethodInfo>();
+        private readonly Mock<MethodInfo> _mockSetMethod = new Mock<MethodInfo>();
 
         public static implicit operator PropertyInfo(MockPropertyInfo mockPropertyInfo)
         {
@@ -28,6 +29,7 @@ namespace System.Web.Http.OData
             SetupGet(p => p.CanRead).Returns(true);
             SetupGet(p => p.CanWrite).Returns(true);
             Setup(p => p.GetGetMethod(It.IsAny<bool>())).Returns(_mockGetMethod.Object);
+            Setup(p => p.GetSetMethod(It.IsAny<bool>())).Returns(_mockSetMethod.Object);
             Setup(p => p.Equals(It.IsAny<object>())).Returns<PropertyInfo>(p => ReferenceEquals(Object, p));
 
             _mockGetMethod.SetupGet(m => m.Attributes).Returns(MethodAttributes.Public);

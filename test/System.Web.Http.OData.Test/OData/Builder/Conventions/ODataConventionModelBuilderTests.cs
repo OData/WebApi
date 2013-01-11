@@ -973,28 +973,20 @@ namespace System.Web.Http.OData.Builder.Conventions
             Type entityType = new
             {
                 ID = default(int),
-                ComplexCollection = new[] 
-                {
-                    new { ComplexProperty = default(string) }
-                },
                 NavigationCollection = new[]
                 {
                     new { ID = default(int) }
                 }
             }.GetType();
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(new HttpConfiguration(), isQueryCompositionMode: true);
             builder.AddEntitySet("entityset", builder.AddEntity(entityType));
 
             IEdmModel model = builder.GetEdmModel();
 
             IEdmEntityType entity = model.AssertHasEntitySet("entityset", entityType);
             entity.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
-            entity.AssertHasCollectionProperty(model, "ComplexCollection", new { ComplexProperty = default(string) }.GetType(), isNullable: true);
             entity.AssertHasNavigationProperty(model, "NavigationCollection", new { ID = default(int) }.GetType(), isNullable: false, multiplicity: EdmMultiplicity.ZeroOrOne);
-
-            IEdmComplexType complexType = model.AssertHasComplexType(new { ComplexProperty = default(string) }.GetType());
-            complexType.AssertHasPrimitiveProperty(model, "ComplexProperty", EdmPrimitiveTypeKind.String, isNullable: true);
         }
 
         [Theory]

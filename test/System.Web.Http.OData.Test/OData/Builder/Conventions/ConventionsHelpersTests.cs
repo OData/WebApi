@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
 
-            var properties = ConventionsHelpers.GetAllProperties(edmType.Object);
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true);
             var expectedProperties = new string[] { "Base_I", "Base_Complex", "Base_Str", "Derived_I", "Derived_Complex", "Collection", "PrivateSetPublicGet" };
 
             Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
             edmType.Setup(t => t.IgnoredProperties).Returns(typeof(GetProperties_Derived).GetProperties().Where(p => new string[] { "Base_I", "Derived_I" }.Contains(p.Name)));
 
-            var properties = ConventionsHelpers.GetAllProperties(edmType.Object);
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true);
             var expectedProperties = new string[] { "Base_Complex", "Base_Str", "Derived_Complex", "Collection", "PrivateSetPublicGet" };
 
             Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
@@ -94,7 +94,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
 
-            var properties = ConventionsHelpers.GetAllProperties(edmType.Object).Select(p => p.Name);
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true).Select(p => p.Name);
             Assert.DoesNotContain("Item", properties);
         }
 
@@ -104,10 +104,34 @@ namespace System.Web.Http.OData.Builder.Conventions
             Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_NestParent.Nest));
 
-            var properties = ConventionsHelpers.GetAllProperties(edmType.Object).Select(p => p.Name);
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true).Select(p => p.Name);
 
             Assert.Equal(1, properties.Count());
             Assert.Equal("NestProperty", properties.First());
+        }
+
+        [Fact]
+        public void GetProperties_IncludeReadOnlyProperties()
+        {
+            Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
+            edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
+
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true);
+            var expectedProperties = new string[] { "PrivateSetPublicGet", "Derived_I", "Derived_Complex", "Collection", "Base_Str", "Base_I", "Base_Complex" };
+
+            Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
+        }
+
+        [Fact]
+        public void GetProperties_ExcludeReadOnlyProperties()
+        {
+            Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
+            edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
+
+            var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: false);
+            var expectedProperties = new string[] { "Derived_I", "Derived_Complex", "Collection", "Base_Str", "Base_I", "Base_Complex" };
+
+            Assert.Equal(expectedProperties.OrderByDescending(name => name), properties.Select(p => p.Name).OrderByDescending(name => name));
         }
 
         [Fact]
@@ -309,67 +333,67 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             public GetProperties_Complex Id { get; set; }
         }
-    }
 
-    class GetProperties_Base
-    {
-        public int Base_I { get; set; }
-
-        private int Pri { get; set; }
-
-        public int InternalGet { internal get; set; }
-
-        public GetProperties_Complex Base_Complex { get; set; }
-
-        public virtual string Base_Str { get; set; }
-    }
-
-    class GetProperties_Derived : GetProperties_Base
-    {
-        public static int SomeStaticProperty1 { get; set; }
-
-        internal static int SomeStaticProperty2 { get; set; }
-
-        private static int SomeStaticProperty3 { get; set; }
-
-        public string Derived_I { get; set; }
-
-        public string PrivateSetPublicGet { get; private set; }
-
-        public string PrivateGetPublicSet { private get; set; }
-
-        public GetProperties_Complex Derived_Complex { get; set; }
-
-        public int[] Collection { get; private set; }
-
-        public string this[string str]
+        class GetProperties_Base
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            public int Base_I { get; set; }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-    }
+            private int Pri { get; set; }
 
-    class GetProperties_Complex
-    {
-        public int A { get; set; }
-    }
+            public int InternalGet { internal get; set; }
 
-    public class GetProperties_NestParent
-    {
-        public class Nest
-        {
-            public NestPropertyType NestProperty { get; set; }
+            public GetProperties_Complex Base_Complex { get; set; }
+
+            public virtual string Base_Str { get; set; }
         }
 
-        public class NestPropertyType
+        class GetProperties_Derived : GetProperties_Base
         {
+            public static int SomeStaticProperty1 { get; set; }
+
+            internal static int SomeStaticProperty2 { get; set; }
+
+            private static int SomeStaticProperty3 { get; set; }
+
+            public string Derived_I { get; set; }
+
+            public string PrivateSetPublicGet { get; private set; }
+
+            public string PrivateGetPublicSet { private get; set; }
+
+            public GetProperties_Complex Derived_Complex { get; set; }
+
+            public int[] Collection { get; private set; }
+
+            public string this[string str]
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
+        class GetProperties_Complex
+        {
+            public int A { get; set; }
+        }
+
+        public class GetProperties_NestParent
+        {
+            public class Nest
+            {
+                public NestPropertyType NestProperty { get; set; }
+            }
+
+            public class NestPropertyType
+            {
+            }
         }
     }
 }

@@ -298,7 +298,7 @@ namespace System.Web.Http.OData.Formatter
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
-                    ODataTestUtil.ApplicationAtomMediaTypeWithQuality))
+                    MediaTypeWithQualityHeaderValue.Parse("application/xml")))
                 // Act
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {

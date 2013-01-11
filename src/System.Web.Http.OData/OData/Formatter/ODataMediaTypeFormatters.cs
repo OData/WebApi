@@ -21,12 +21,14 @@ namespace System.Web.Http.OData.Formatter
         {
             return new ODataMediaTypeFormatter[]
             {
+                // Create JSON formatter first so it gets used when the request doesn't
+                // ask for a specific content type
+                CreateApplicationJson(),
                 CreateApplicationAtomXmlTypeFeed(),
                 CreateApplicationAtomXmlTypeEntry(),
                 CreateApplicationXml(),
                 CreateApplicationAtomSvcXml(),
-                CreateTextXml(),
-                CreateApplicationJson()
+                CreateTextXml()
             };
         }
 
@@ -73,12 +75,15 @@ namespace System.Web.Http.OData.Formatter
                 ODataPayloadKind.ServiceDocument,
                 ODataPayloadKind.Error,
                 ODataPayloadKind.Parameter);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
+
+            // Add minimal metadata as the first media type so it gets used when the request doesn't
+            // ask for a specific content type
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadata);

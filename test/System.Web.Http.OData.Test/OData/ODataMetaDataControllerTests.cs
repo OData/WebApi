@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.Tracing;
@@ -78,7 +79,9 @@ namespace System.Web.Http.OData.Builder
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
-            var response = client.GetAsync("http://localhost/").Result;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/xml"));
+            var response = client.SendAsync(request).Result;
 
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);

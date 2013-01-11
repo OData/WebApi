@@ -46,9 +46,13 @@ namespace System.Web.Http.OData
             }
 
             // If any OData formatters are registered globally, do nothing and use those instead
-            if (!controllerSettings.Formatters.Where(f => f != null && f.IsODataFormatter()).Any())
+            MediaTypeFormatterCollection controllerFormatters = controllerSettings.Formatters;
+            if (!controllerFormatters.Where(f => f != null && f.IsODataFormatter()).Any())
             {
-                controllerSettings.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
+                // Remove Xml and Json formatters to avoid media type conflicts
+                controllerFormatters.RemoveRange(
+                    controllerFormatters.Where(f => f is XmlMediaTypeFormatter || f is JsonMediaTypeFormatter));
+                controllerFormatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             }
 
             ServicesContainer services = controllerSettings.Services;

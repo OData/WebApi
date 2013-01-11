@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using System.Web.Http.OData.Formatter;
 using Microsoft.Data.Edm.Library;
@@ -22,6 +23,10 @@ namespace System.Web.Http.OData
             new ODataFormattingAttribute().Initialize(controllerSettings, controllerDescriptor);
 
             Assert.NotEmpty(controllerSettings.Formatters.OfType<ODataMediaTypeFormatter>());
+            Assert.Empty(controllerSettings.Formatters.Where(f => f is XmlMediaTypeFormatter));
+            Assert.Empty(controllerSettings.Formatters.Where(f => f is JsonMediaTypeFormatter));
+            // Formatters that aren't XmlMTF or JsonMTF are left in the formatter collection
+            Assert.NotEmpty(controllerSettings.Formatters.Where(f => !(f is ODataMediaTypeFormatter)));
         }
 
         [Fact]

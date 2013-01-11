@@ -243,10 +243,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 odataAction.Title = action.Name;
             }
 
-            // TODO: Expose a way to specify whether or not a target follows conventions.
-            const bool TargetFollowsConventions = false;
-
-            if (alwaysIncludeDetails || !TargetFollowsConventions)
+            // Omit the target in minimal/no metadata modes unless it doesn't follow conventions.
+            if (alwaysIncludeDetails || !builder.FollowsConventions)
             {
                 odataAction.Target = target;
             }

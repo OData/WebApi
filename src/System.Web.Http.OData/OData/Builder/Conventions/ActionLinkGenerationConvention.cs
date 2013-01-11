@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             // You only need to create links for bindable actions that bind to a single entity.
             if (action != null && action.IsBindable && action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity && action.GetActionLink() == null)
             {
-                action.HasActionLink(entityContext => GenerateActionLink(entityContext, action));
+                action.HasActionLink(entityContext => GenerateActionLink(entityContext, action), followsConventions: true);
             }
         }
 

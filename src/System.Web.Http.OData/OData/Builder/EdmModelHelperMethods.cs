@@ -136,7 +136,7 @@ namespace System.Web.Http.OData.Builder
                                 Func<EntityInstanceContext, Uri> actionFactory = action.GetActionLink();
                                 if (actionFactory != null)
                                 {
-                                    model.SetAnnotationValue<ActionLinkBuilder>(functionImport, new ActionLinkBuilder(actionFactory));
+                                    model.SetAnnotationValue<ActionLinkBuilder>(functionImport, new ActionLinkBuilder(actionFactory, action.FollowsConventions));
                                 }
                             }
                         }

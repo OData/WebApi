@@ -4,17 +4,15 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Builder.Conventions
 {
     public class ActionLinkGenerationConventionTest
     {
-        ActionLinkGenerationConvention _convention = new ActionLinkGenerationConvention();
-
         [Fact]
         public void GenerateActionLink_GeneratesLinkWithoutCast_IfEntitySetTypeDerivesFromActionEntityType()
         {
@@ -49,6 +47,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void GenerateActionLink_GeneratesLinkWithoutCast_IfEntitySetTypeMatchesActionEntityType()
         {
+            // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             var cars = builder.EntitySet<Car>("cars");
             var paintAction = cars.EntityType.Action("Paint");
@@ -63,6 +62,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
             request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
 
+            // Act
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
                 new EntityInstanceContext()
                 {
@@ -117,9 +117,10 @@ namespace System.Web.Http.OData.Builder.Conventions
             var vehicles = builder.EntitySet<Vehicle>("vehicles");
             var car = builder.AddEntity(typeof(Car));
             var paintAction = vehicles.EntityType.Action("Paint");
-            paintAction.HasActionLink(ctxt => new Uri("http://localhost/ActionTestWorks"));
+            paintAction.HasActionLink(ctxt => new Uri("http://localhost/ActionTestWorks"), false);
+            ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
 
-            _convention.Apply(paintAction, builder);
+            convention.Apply(paintAction, builder);
 
             IEdmModel model = builder.GetEdmModel();
             var vehiclesEdmSet = model.EntityContainers().Single().FindEntitySet("vehicles");
@@ -151,18 +152,40 @@ namespace System.Web.Http.OData.Builder.Conventions
         [Fact]
         public void Apply_SetsActionLinkBuilder_OnlyIfActionIsBindable()
         {
+            // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             var vehicles = builder.EntitySet<Vehicle>("vehicles");
             var paintAction = builder.Action("Paint");
+            ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
 
-            _convention.Apply(paintAction, builder);
+            // Act
+            convention.Apply(paintAction, builder);
 
+            // Assert
             IEdmModel model = builder.GetEdmModel();
             var paintEdmAction = model.EntityContainers().Single().Elements.OfType<IEdmFunctionImport>().Single();
 
             ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(paintEdmAction);
 
             Assert.Null(actionLinkBuilder);
+        }
+
+        [Fact]
+        public void Apply_FollowsConventions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = new ActionConfiguration(builder, "IgnoreAction");
+            Mock<IEdmTypeConfiguration> mockBindingParameterType = new Mock<IEdmTypeConfiguration>();
+            mockBindingParameterType.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            action.SetBindingParameter("IgnoreParameter", mockBindingParameterType.Object, false);
+            ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
+
+            // Act
+            convention.Apply(action, builder);
+
+            // Assert
+            Assert.True(action.FollowsConventions);
         }
     }
 }

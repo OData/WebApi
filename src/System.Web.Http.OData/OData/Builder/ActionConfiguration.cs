@@ -17,8 +17,9 @@ namespace System.Web.Http.OData.Builder
     public class ActionConfiguration : ProcedureConfiguration
     {
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
-        private BindingParameterConfiguration _bindingParameter = null;
-        private Func<EntityInstanceContext, Uri> _actionLinkFactory = null;
+        private BindingParameterConfiguration _bindingParameter;
+        private Func<EntityInstanceContext, Uri> _actionLinkFactory;
+        private bool _followsConventions;
 
         /// <summary>
         /// Create a new ActionConfiguration
@@ -87,6 +88,17 @@ namespace System.Web.Http.OData.Builder
                     return _bindingParameter.AlwaysBindable;
                 }
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether links provided by <see cref="GetActionLink"/> follow OData conventions.
+        /// </summary>
+        public bool FollowsConventions
+        {
+            get
+            {
+                return _followsConventions;
             }
         }
 
@@ -217,13 +229,14 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Register a factory that creates actions links.
         /// </summary>
-        public ActionConfiguration HasActionLink(Func<EntityInstanceContext, Uri> actionLinkFactory)
+        public ActionConfiguration HasActionLink(Func<EntityInstanceContext, Uri> actionLinkFactory, bool followsConventions)
         {
             if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
             {
                 throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
             }
             _actionLinkFactory = actionLinkFactory;
+            _followsConventions = followsConventions;
             return this;
         }
 

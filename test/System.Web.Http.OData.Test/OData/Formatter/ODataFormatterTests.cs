@@ -415,10 +415,10 @@ namespace System.Web.Http.OData.Formatter
             NavigationPropertyConfiguration mainToRelated = mainSet.EntityType.HasRequired((e) => e.Related);
 
             main.Action("DoAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasActionLink((c) =>
-                CreateAbsoluteUri("/MainEntity/DoAlways/" + ((MainEntity)(c.EntityInstance)).Id));
+                CreateAbsoluteUri("/MainEntity/DoAlways/" + ((MainEntity)(c.EntityInstance)).Id), false);
             main.TransientAction("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
                 "MainEntity").HasActionLink((c) =>
-                    CreateAbsoluteUri("/MainEntity/DoSometimes/" + ((MainEntity)(c.EntityInstance)).Id));
+                    CreateAbsoluteUri("/MainEntity/DoSometimes/" + ((MainEntity)(c.EntityInstance)).Id), false);
 
             mainSet.HasNavigationPropertyLink(mainToRelated, (c, p) => new Uri("/MainEntity/RelatedEntity/" +
                 c.EntityInstance.Id, UriKind.Relative), followsConventions: true);

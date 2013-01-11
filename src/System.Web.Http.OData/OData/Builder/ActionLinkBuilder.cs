@@ -17,14 +17,24 @@ namespace System.Web.Http.OData.Builder
         /// </remarks>
         /// </summary>
         /// <param name="actionLinkFactory">The actionLinkFactory this ActionLinkBuilder should use when building links.</param>
-        public ActionLinkBuilder(Func<EntityInstanceContext, Uri> actionLinkFactory)
+        /// <param name="followsConventions">
+        /// A value indicating whether the action link factory generates links that follow OData conventions.
+        /// </param>
+        public ActionLinkBuilder(Func<EntityInstanceContext, Uri> actionLinkFactory, bool followsConventions)
         {
             if (actionLinkFactory == null)
             {
                 throw Error.ArgumentNull("actionLinkFactory");
             }
+
             _actionLinkFactory = actionLinkFactory;
+            FollowsConventions = followsConventions;
         }
+
+        /// <summary>
+        /// Gets a boolean indicating whether the link factory follows OData conventions or not.
+        /// </summary>
+        public bool FollowsConventions { get; private set; }
 
         /// <summary>
         /// Builds the action link for the given entity.

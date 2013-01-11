@@ -4,12 +4,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder.TestModels;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Expressions;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -314,7 +314,7 @@ namespace System.Web.Http.OData.Builder
 
             // Act
             ActionConfiguration reward = customer.Action("Reward");
-            reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, (ctx.EntityInstance as Customer).CustomerId)));
+            reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, (ctx.EntityInstance as Customer).CustomerId)), false);
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             EntityInstanceContext<Customer> context = new EntityInstanceContext<Customer>()
@@ -394,6 +394,26 @@ namespace System.Web.Http.OData.Builder
             Assert.True(action.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.False(action.FindParameter("dateTime").Type.IsNullable);
             Assert.True(action.FindParameter("string").Type.IsNullable);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void HasActionLink_SetsFollowsConventions(bool value)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = new ActionConfiguration(builder, "IgnoreAction");
+            Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
+            bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            IEdmTypeConfiguration bindingParameterType = bindingParameterTypeMock.Object;
+            action.SetBindingParameter("IgnoreParameter", bindingParameterType, false);
+
+            // Act
+            action.HasActionLink((a) => { throw new NotImplementedException(); }, value);
+
+            // Assert
+            Assert.Equal(value, action.FollowsConventions);
         }
 
         public class Movie

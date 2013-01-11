@@ -117,6 +117,7 @@
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
+    <Compile Include="OData\Builder\ActionLinkBuilderTests.cs" />
     <Compile Include="OData\Builder\BindableProcedureFinderAnnotationTest.cs" />
     <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotationTest.cs" />
     <Compile Include="OData\Builder\MockEntitySetLinkBuilderAnnotation.cs" />

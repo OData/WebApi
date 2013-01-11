@@ -6,6 +6,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Builder
 {
@@ -147,6 +148,33 @@ namespace System.Web.Http.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             Assert.True(model.IsDefaultEntityContainer(model.SchemaElements.OfType<IEdmEntityContainer>().Single()));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ActionLink_PreservesFollowsConventions(bool value)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration configuration = new ActionConfiguration(builder, "IgnoreAction");
+            Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
+            bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            Type entityType = typeof(object);
+            bindingParameterTypeMock.Setup(o => o.ClrType).Returns(entityType);
+            configuration.SetBindingParameter("IgnoreParameter", bindingParameterTypeMock.Object, false);
+            configuration.HasActionLink((a) => { throw new NotImplementedException(); }, value);
+            builder.AddProcedure(configuration);
+            builder.AddEntity(entityType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmFunctionImport functionImport =
+                model.EntityContainers().Single().Elements.OfType<IEdmFunctionImport>().Single();
+            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(functionImport);
+            Assert.Equal(value, actionLinkBuilder.FollowsConventions);
         }
     }
 }

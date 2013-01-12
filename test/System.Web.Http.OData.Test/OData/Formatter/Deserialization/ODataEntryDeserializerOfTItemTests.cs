@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Reflection;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -16,7 +17,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [InlineData(typeof(ODataProperty))]
         public void ReadInline_ThrowsArgument_TypeMismatch(Type deserializerType)
         {
-            ODataEntryDeserializer deserializer = GetType().GetMethod("CreateDeserializer").MakeGenericMethod(deserializerType).Invoke(null, null) as ODataEntryDeserializer;
+            MethodInfo method = typeof(ODataEntryDeserializerOfTItemTests).GetMethod("CreateDeserializer",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            ODataEntryDeserializer deserializer = method.MakeGenericMethod(deserializerType).Invoke(null, null) as ODataEntryDeserializer;
 
             ArgumentException ex = Assert.ThrowsArgument(
                 () => deserializer.ReadInline("type mismatch item", new ODataDeserializerContext()),
@@ -24,11 +27,19 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.True(ex.Message.StartsWith(String.Format("The argument must be of type '{0}'.", deserializerType.Name)));
         }
 
-        public static ODataEntryDeserializer CreateDeserializer<TItem>()
+        private static ODataEntryDeserializer CreateDeserializer<TItem>()
             where TItem : class
         {
-            Mock<ODataEntryDeserializer<TItem>> deserializer = new Mock<ODataEntryDeserializer<TItem>>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported);
-            return deserializer.Object;
+            return new TestODataEntryDeserializer<TItem>(new Mock<IEdmTypeReference>().Object,
+                ODataPayloadKind.Unsupported);
+        }
+
+        private class TestODataEntryDeserializer<TItem> : ODataEntryDeserializer<TItem> where TItem :class
+        {
+            public TestODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
+                : base(edmType, payloadKind)
+            {
+            }
         }
     }
 }

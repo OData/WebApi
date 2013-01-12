@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Represents a factory that creates an <see cref="ODataDeserializer"/>s.
     /// </summary>
-    public abstract class ODataDeserializerProvider
+    internal abstract class ODataDeserializerProvider
     {
         private readonly ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer> _deserializerCache =
             new ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer>(new EdmTypeReferenceEqualityComparer());

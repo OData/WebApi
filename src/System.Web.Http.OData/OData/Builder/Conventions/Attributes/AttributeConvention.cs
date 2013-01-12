@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Base class for all attribute based conventions.
     /// </summary>
-    public abstract class AttributeConvention : IConvention
+    internal abstract class AttributeConvention : IConvention
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeConvention"/> class.

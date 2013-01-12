@@ -17,21 +17,6 @@ namespace System.Web.Http
     public static class ODataHttpRouteCollectionExtensions
     {
         /// <summary>
-        /// Maps the specified OData route without a route prefix and with the default OData route name.
-        /// </summary>
-        /// <param name="routes">A collection of routes for the application.</param>
-        /// <param name="model">The EDM model to use for parsing OData paths.</param>
-        public static void MapODataRoute(this HttpRouteCollection routes, IEdmModel model)
-        {
-            routes.MapODataRoute(
-                routeName: ODataRouteConstants.DefaultRouteName,
-                routePrefix: null,
-                model: model,
-                pathHandler: new DefaultODataPathHandler(),
-                routingConventions: ODataRoutingConventions.CreateDefault());
-        }
-
-        /// <summary>
         /// Maps the specified OData route.
         /// </summary>
         /// <param name="routes">A collection of routes for the application.</param>

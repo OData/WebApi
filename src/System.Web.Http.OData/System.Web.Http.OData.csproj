@@ -142,7 +142,6 @@
     <Compile Include="OData\Builder\NavigationLinkBuilder.cs" />
     <Compile Include="OData\EntitySetControllerHelpers.cs" />
     <Compile Include="OData\Formatter\ODataMetadataLevel.cs" />
-    <Compile Include="OData\Formatter\ODataMetadataLevelHelper.cs" />
     <Compile Include="OData\Formatter\Serialization\EntitySelfLinks.cs" />
     <Compile Include="OData\FromODataUriAttribute.cs" />
     <Compile Include="OData\Routing\ODataRouteConstants.cs" />
@@ -230,9 +229,9 @@
     <Compile Include="OData\Builder\EntitySetConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\EntityTypeConfiguration.cs" />
     <Compile Include="OData\Builder\EntityTypeConfigurationOfTEntityType.cs" />
-    <Compile Include="OData\Builder\NavigationPropertyBinding.cs" />
+    <Compile Include="OData\Builder\NavigationPropertyBindingConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationPropertyConfiguration.cs" />
-    <Compile Include="OData\Builder\NonBindingParameterConfiguration.cs" />
+    <Compile Include="OData\Builder\NonbindingParameterConfiguration.cs" />
     <Compile Include="OData\Builder\ODataConventionModelBuilder.cs" />
     <Compile Include="OData\Builder\ODataModelBuilder.cs" />
     <Compile Include="OData\Builder\ParameterConfiguration.cs" />
@@ -299,7 +298,7 @@
     <Compile Include="OData\Builder\EntitySetLinkBuilderAnnotation.cs" />
     <Compile Include="OData\Builder\EntitySetUrlAnnotation.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapper.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ClrTypeAnnotation.cs" />
+    <Compile Include="OData\ClrTypeAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializer.cs" />

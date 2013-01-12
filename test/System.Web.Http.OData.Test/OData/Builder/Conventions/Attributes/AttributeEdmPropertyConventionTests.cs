@@ -37,7 +37,6 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             where TPropertyConfiguration : PropertyConfiguration
             where TProperty : PropertyConfiguration
         {
-            bool applyCalled = false;
             Func<Attribute, bool> matchAllFilter = a => true;
 
             // build the type
@@ -61,13 +60,31 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             }
 
             // build the convention
-            Mock<AttributeEdmPropertyConvention<TPropertyConfiguration>> convention = new Mock<AttributeEdmPropertyConvention<TPropertyConfiguration>>(matchAllFilter, false);
-            convention.Setup(c => c.Apply(It.IsAny<TPropertyConfiguration>(), It.IsAny<StructuralTypeConfiguration>(), It.IsAny<Attribute>())).Callback(() => { applyCalled = true; });
+            SpyAttributeEdmPropertyConvention<TPropertyConfiguration> spy =
+                new SpyAttributeEdmPropertyConvention<TPropertyConfiguration>(matchAllFilter, allowMultiple: false);
 
             // Apply
-            (convention.Object as IEdmPropertyConvention).Apply(propertyConfiguration.Object, structuralType.Object);
+            (spy as IEdmPropertyConvention).Apply(propertyConfiguration.Object, structuralType.Object);
 
-            return applyCalled;
+            return spy.Called;
+        }
+
+        private class SpyAttributeEdmPropertyConvention<TPropertyConfiguration> :
+            AttributeEdmPropertyConvention<TPropertyConfiguration>
+            where TPropertyConfiguration : PropertyConfiguration
+        {
+            public SpyAttributeEdmPropertyConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
+                : base(attributeFilter, allowMultiple)
+            {
+            }
+
+            public bool Called { get; private set; }
+
+            public override void Apply(TPropertyConfiguration edmProperty,
+                StructuralTypeConfiguration structuralTypeConfiguration, Attribute attribute)
+            {
+                Called = true;
+            }
         }
     }
 }

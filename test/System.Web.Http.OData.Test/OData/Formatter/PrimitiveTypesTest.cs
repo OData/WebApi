@@ -92,6 +92,7 @@ namespace System.Web.Http.OData.Formatter
                     model.EntityContainers().Single().EntitySets().Single().ElementType.Properties().First();
                 request.SetEdmModel(model);
                 request.SetODataPath(new ODataPath(new PropertyAccessPathSegment(property)));
+                request.SetFakeODataRouteName();
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);

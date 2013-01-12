@@ -188,7 +188,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
-        public void CanCreateActionWithNonBindingParameters()
+        public void CanCreateActionWithNonbindingParameters()
         {
             // Arrange
             // Act
@@ -346,9 +346,10 @@ namespace System.Web.Http.OData.Builder
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
             UrlHelper urlHelper = new UrlHelper(request);
 
             // Act

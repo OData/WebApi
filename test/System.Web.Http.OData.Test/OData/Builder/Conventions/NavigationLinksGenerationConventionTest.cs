@@ -77,11 +77,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
@@ -141,11 +142,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
@@ -177,11 +179,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             IEdmNavigationProperty motorcycleManufacturerProperty = sportbikeType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(vehiclesEdmEntitySet);
 
@@ -210,10 +213,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             Uri uri =
                 NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(
@@ -242,10 +246,11 @@ namespace System.Web.Http.OData.Builder.Conventions
             var edmEntitySet = model.EntityContainers().Single().EntitySets().Single();
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute(), new HttpRouteValueDictionary(new { controller = "Customers" }));
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             Uri uri =
                 NavigationLinksGenerationConvention.GenerateNavigationPropertyLink(

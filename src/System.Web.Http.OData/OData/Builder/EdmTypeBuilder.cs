@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Builder
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref=" StructuralTypeConfiguration"/>'s.
     /// </summary>
-    public class EdmTypeBuilder
+    internal class EdmTypeBuilder
     {
         private readonly List<StructuralTypeConfiguration> _configurations;
         private readonly Dictionary<Type, IEdmStructuredType> _types = new Dictionary<Type, IEdmStructuredType>();

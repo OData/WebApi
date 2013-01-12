@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         [Fact]
         public void Ctor_ThrowsFor_Null_attributeFilter()
         {
-            Assert.ThrowsArgumentNull(() => { AttributeConvention convention = new Mock<AttributeConvention>(null, true).Object; }, "attributeFilter");
+            Assert.ThrowsArgumentNull(() => { AttributeConvention convention = new TestAttributeConvention(null, true); }, "attributeFilter");
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
                 return true;
             };
 
-            AttributeConvention convention = new Mock<AttributeConvention>(filter, true).Object;
+            AttributeConvention convention = new TestAttributeConvention(filter, true);
 
             // Act & Assert
             Assert.Equal(
@@ -40,7 +40,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         public void GetAttributes_Throws_IfMultipleAttributesPresentAndAllowMultipleIsFalse()
         {
             Func<Attribute, bool> filter = attribute => attribute.GetType() == typeof(SampleAttribute);
-            AttributeConvention convention = new Mock<AttributeConvention>(filter, false).Object;
+            AttributeConvention convention = new TestAttributeConvention(filter, false);
 
             Assert.ThrowsArgument(
                 () => convention.GetAttributes(GetType().GetMethod("GetAttributes_Throws_IfMultipleAttributesPresentAndAllowMultipleIsFalse")),
@@ -51,6 +51,14 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
         [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
         internal class SampleAttribute : Attribute
         {
+        }
+
+        private class TestAttributeConvention : AttributeConvention
+        {
+            public TestAttributeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
+                : base(attributeFilter, allowMultiple)
+            {
+            }
         }
     }
 }

@@ -4,16 +4,18 @@ namespace System.Web.Http.OData.Builder
 {
     /// <summary>
     /// Used to configure the binding for a navigation property for an entity set.
-    /// This configuration functionality is exposed by the model builder Fluent API, see <see cref="ODataModelBuilder"/>.
+    /// This configuration functionality is exposed by the model builder Fluent API, see <see
+    /// cref="ODataModelBuilder"/>.
     /// </summary>
-    public class NavigationPropertyBinding
+    public class NavigationPropertyBindingConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NavigationPropertyBinding"/> class.
+        /// Initializes a new instance of the <see cref="NavigationPropertyBindingConfiguration"/> class.
         /// </summary>
         /// <param name="navigationProperty">The navigation property for the binding.</param>
         /// <param name="entitySet">The target entity set of the binding.</param>
-        public NavigationPropertyBinding(NavigationPropertyConfiguration navigationProperty, EntitySetConfiguration entitySet)
+        public NavigationPropertyBindingConfiguration(NavigationPropertyConfiguration navigationProperty,
+            EntitySetConfiguration entitySet)
         {
             NavigationProperty = navigationProperty;
             EntitySet = entitySet;

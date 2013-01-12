@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using Moq;
 
@@ -10,6 +9,14 @@ namespace System.Web.Http.OData.Formatter
 {
     internal static class HttpRouteCollectionExtensions
     {
+        public static string RouteName
+        {
+            get
+            {
+                return "OData";
+            }
+        }
+
         public static void MapFakeODataRoute(this HttpRouteCollection routes)
         {
             Mock<IHttpRoute> mockRoute = new Mock<IHttpRoute>();
@@ -19,7 +26,7 @@ namespace System.Web.Http.OData.Formatter
             mockRoute.Setup(v => v.GetVirtualPath(
                 It.IsAny<HttpRequestMessage>(), It.IsAny<Dictionary<string, object>>())).Returns(
                 mockVirtualPath.Object);
-            routes.Add(ODataRouteConstants.DefaultRouteName, mockRoute.Object);
+            routes.Add(RouteName, mockRoute.Object);
         }
     }
 }

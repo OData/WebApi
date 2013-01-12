@@ -10,10 +10,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// Context information used by the <see cref="ODataSerializer"/> when serializing objects in OData message format.
     /// </summary>
-    public class ODataSerializerContext
+    internal class ODataSerializerContext
     {
-        private ODataMetadataLevel _metadataLevel;
-
         /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
@@ -53,18 +51,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the metadata level of the response.
         /// </summary>
-        public ODataMetadataLevel MetadataLevel
-        {
-            get
-            {
-                return _metadataLevel;
-            }
-            set
-            {
-                ODataMetadataLevelHelper.Validate(value, "value");
-                _metadataLevel = value;
-            }
-        }
+        public ODataMetadataLevel MetadataLevel { get; set; }
 
         /// <summary>
         /// The next page link, if any, to use when serializing a feed.

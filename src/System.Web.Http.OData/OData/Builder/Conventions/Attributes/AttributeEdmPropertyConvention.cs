@@ -6,7 +6,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// Base class for all attribute based <see cref="IEdmPropertyConvention"/>'s.
     /// </summary>
     /// <typeparam name="TPropertyConfiguration">The type of the property this configuration applies to.</typeparam>
-    public abstract class AttributeEdmPropertyConvention<TPropertyConfiguration> : AttributeConvention, IEdmPropertyConvention<TPropertyConfiguration>
+    internal abstract class AttributeEdmPropertyConvention<TPropertyConfiguration> : AttributeConvention, IEdmPropertyConvention<TPropertyConfiguration>
         where TPropertyConfiguration : PropertyConfiguration
     {
         /// <summary>

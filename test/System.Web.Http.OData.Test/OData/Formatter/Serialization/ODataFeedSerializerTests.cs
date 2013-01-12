@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.Routing;
@@ -53,19 +55,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_WritesEachEntityInstance()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
-            var mockCustomerSerializer = new Mock<ODataSerializer>(MockBehavior.Strict, ODataPayloadKind.Entry);
+            SpyODataSerializer spy = new SpyODataSerializer(ODataPayloadKind.Entry);
+            ODataSerializerProvider provider = new FakeODataSerializerProvider(spy);
             var mockWriter = new Mock<ODataWriter>();
 
-            mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
-                .Returns(mockCustomerSerializer.Object);
-            mockCustomerSerializer
-                .Setup(s => s.WriteObjectInline(_customers[0], It.IsAny<ODataWriter>(), _writeContext))
-                .Verifiable();
-            mockCustomerSerializer
-                .Setup(s => s.WriteObjectInline(_customers[1], It.IsAny<ODataWriter>(), _writeContext))
-                .Verifiable();
             mockWriter
                 .Setup(w => w.WriteStart(It.IsAny<ODataFeed>()))
                 .Callback((ODataFeed feed) =>
@@ -74,14 +67,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 })
                 .Verifiable();
 
-            _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
+            _serializer = new ODataFeedSerializer(_customersType, provider);
 
             // Act
             _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
 
             // Assert
-            mockSerializerProvider.Verify();
-            mockCustomerSerializer.Verify();
+            WriteObjectInlineCall[] expectedWriteCalls = new WriteObjectInlineCall[]
+            {
+                new WriteObjectInlineCall { Graph = _customers[0], WriteContext = _writeContext },
+                new WriteObjectInlineCall { Graph = _customers[1], WriteContext = _writeContext }
+            };
+            AssertEqual(expectedWriteCalls, spy.WriteObjectInlineCalls);
+
             mockWriter.Verify();
         }
 
@@ -89,8 +87,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Writes_InlineCountAndNextLink()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
-            var mockCustomerSerializer = new Mock<ODataSerializer>(MockBehavior.Strict, ODataPayloadKind.Entry);
+            SpyODataSerializer spy = new SpyODataSerializer(ODataPayloadKind.Entry);
+            ODataSerializerProvider provider = new FakeODataSerializerProvider(spy);
             var mockWriter = new Mock<ODataWriter>();
 
             Uri expectedNextLink = new Uri("http://nextlink.com");
@@ -101,15 +99,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 expectedNextLink,
                 expectedInlineCount
             );
-            mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
-                .Returns(mockCustomerSerializer.Object);
-            mockCustomerSerializer
-                .Setup(s => s.WriteObjectInline(_customers[0], It.IsAny<ODataWriter>(), _writeContext))
-                .Verifiable();
-            mockCustomerSerializer
-                .Setup(s => s.WriteObjectInline(_customers[1], It.IsAny<ODataWriter>(), _writeContext))
-                .Verifiable();
             ODataFeed actualFeed = null;
             mockWriter
                 .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
@@ -118,13 +107,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     actualFeed = feed;
                     Assert.Equal(expectedInlineCount, feed.Count);
                 });
-            _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
+            _serializer = new ODataFeedSerializer(_customersType, provider);
 
             _serializer.WriteObjectInline(result, mockWriter.Object, _writeContext);
 
             // Assert
-            mockSerializerProvider.Verify();
-            mockCustomerSerializer.Verify();
+            WriteObjectInlineCall[] expectedWriteCalls = new WriteObjectInlineCall[]
+            {
+                new WriteObjectInlineCall { Graph = _customers[0], WriteContext = _writeContext },
+                new WriteObjectInlineCall { Graph = _customers[1], WriteContext = _writeContext }
+            };
+            AssertEqual(expectedWriteCalls, spy.WriteObjectInlineCalls);
+
             mockWriter.Verify();
             Assert.Equal(expectedNextLink, actualFeed.NextPageLink);
         }
@@ -133,16 +127,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Writes_RequestNextPageLink()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>();
-            var mockCustomerSerializer = new Mock<ODataSerializer>(ODataPayloadKind.Entry);
+            ODataSerializer customerSerializer = new StubODataSerializer(ODataPayloadKind.Entry);
+            ODataSerializerProvider provider = new FakeODataSerializerProvider(customerSerializer);
             var mockWriter = new Mock<ODataWriter>();
 
             Uri expectedNextLink = new Uri("http://nextlink.com");
             _writeContext.NextPageLink = expectedNextLink;
 
-            mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
-                .Returns(mockCustomerSerializer.Object);
             ODataFeed actualFeed = null;
             mockWriter
                 .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
@@ -150,10 +141,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 {
                     actualFeed = feed;
                 });
-            _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
+            _serializer = new ODataFeedSerializer(_customersType, provider);
 
+            // Act
             _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
 
+            // Assert
             Assert.Equal(expectedNextLink, actualFeed.NextPageLink);
         }
 
@@ -161,25 +154,102 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Writes_RequestCount()
         {
             // Arrange
-            var mockSerializerProvider = new Mock<ODataSerializerProvider>();
-            var mockCustomerSerializer = new Mock<ODataSerializer>(ODataPayloadKind.Entry);
+            ODataSerializer customerSerializer = new StubODataSerializer(ODataPayloadKind.Entry);
+            ODataSerializerProvider provider = new FakeODataSerializerProvider(customerSerializer);
             var mockWriter = new Mock<ODataWriter>();
 
             long expectedCount = 12345;
             _writeContext.InlineCount = expectedCount;
 
-            mockSerializerProvider
-                .Setup(p => p.GetODataPayloadSerializer(_model, typeof(Customer)))
-                .Returns(mockCustomerSerializer.Object);
             mockWriter
                 .Setup(m => m.WriteStart(It.IsAny<ODataFeed>()))
                 .Callback((ODataFeed feed) =>
                 {
                     Assert.Equal(expectedCount, feed.Count);
                 });
-            _serializer = new ODataFeedSerializer(_customersType, mockSerializerProvider.Object);
+            _serializer = new ODataFeedSerializer(_customersType, provider);
 
+            // Act
             _serializer.WriteObjectInline(_customers, mockWriter.Object, _writeContext);
+
+            // Assert
+            mockWriter.Verify();
+        }
+
+        private static void AssertEqual(IList<WriteObjectInlineCall> expected, IList<WriteObjectInlineCall> actual)
+        {
+            Assert.Equal(expected.Count, actual.Count);
+
+            for (int index = 0; index < expected.Count; index++)
+            {
+                Assert.Equal(expected[index], actual[index]);
+            }
+        }
+
+        private class SpyODataSerializer : ODataSerializer
+        {
+            public SpyODataSerializer(ODataPayloadKind payloadKind)
+                : base(payloadKind)
+            {
+                WriteObjectInlineCalls = new List<WriteObjectInlineCall>();
+            }
+
+            public IList<WriteObjectInlineCall> WriteObjectInlineCalls { get; private set; }
+
+            public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+            {
+                WriteObjectInlineCall call = new WriteObjectInlineCall
+                {
+                    Graph = graph,
+                    WriteContext = writeContext,
+                };
+
+                WriteObjectInlineCalls.Add(call);
+            }
+        }
+
+        private class StubODataSerializer : ODataSerializer
+        {
+            public StubODataSerializer(ODataPayloadKind payloadKind)
+                : base(payloadKind)
+            {
+            }
+
+            public override void WriteObjectInline(object graph, ODataWriter writer,
+                ODataSerializerContext writeContext)
+            {
+            }
+        }
+
+        private class WriteObjectInlineCall
+        {
+            public object Graph { get; set; }
+
+            public ODataSerializerContext WriteContext { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                WriteObjectInlineCall other = obj as WriteObjectInlineCall;
+
+                if (other == null)
+                {
+                    return false;
+                }
+
+                bool equal = object.ReferenceEquals(Graph, other.Graph) &&
+                    object.ReferenceEquals(WriteContext, other.WriteContext);
+                return equal;
+            }
+
+            public override int GetHashCode()
+            {
+                return Graph.GetHashCode() ^ WriteContext.GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return string.Format(CultureInfo.CurrentCulture, "Graph: {0}, WriteContext: {1}", Graph, WriteContext);
+            }
         }
     }
 }

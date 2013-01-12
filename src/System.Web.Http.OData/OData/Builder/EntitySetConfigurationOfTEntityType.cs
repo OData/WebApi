@@ -60,7 +60,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entitySetName">The target entity set name for the binding. It will be created if it does not exist.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasManyBinding<TTargetType, TDerivedEntityType>(
+        public NavigationPropertyBindingConfiguration HasManyBinding<TTargetType, TDerivedEntityType>(
             Expression<Func<TDerivedEntityType, IEnumerable<TTargetType>>> navigationExpression, string entitySetName)
             where TTargetType : class
             where TDerivedEntityType : class, TEntityType
@@ -85,7 +85,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entitySetName">The target entity set name for the binding. It will be created if it does not exist.</param>
         /// <returns>A configuration object that can be used to further configure the relationship.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasManyBinding<TTargetType>(
+        public NavigationPropertyBindingConfiguration HasManyBinding<TTargetType>(
             Expression<Func<TEntityType, IEnumerable<TTargetType>>> navigationExpression, string entitySetName)
             where TTargetType : class
         {
@@ -106,7 +106,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="targetSet">The target entity set for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasManyBinding<TTargetType>(
+        public NavigationPropertyBindingConfiguration HasManyBinding<TTargetType>(
             Expression<Func<TEntityType, IEnumerable<TTargetType>>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet) where TTargetType : class
         {
@@ -133,7 +133,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="targetSet">The target entity set for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasManyBinding<TTargetType, TDerivedEntityType>(
+        public NavigationPropertyBindingConfiguration HasManyBinding<TTargetType, TDerivedEntityType>(
             Expression<Func<TDerivedEntityType, IEnumerable<TTargetType>>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet)
             where TTargetType : class
@@ -164,7 +164,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entitySetName">The target entity set name for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasRequiredBinding<TTargetType>(
+        public NavigationPropertyBindingConfiguration HasRequiredBinding<TTargetType>(
             Expression<Func<TEntityType, TTargetType>> navigationExpression, string entitySetName)
             where TTargetType : class
         {
@@ -186,7 +186,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entitySetName">The target entity set name for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasRequiredBinding<TTargetType, TDerivedEntityType>(
+        public NavigationPropertyBindingConfiguration HasRequiredBinding<TTargetType, TDerivedEntityType>(
             Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression, string entitySetName)
             where TTargetType : class
             where TDerivedEntityType : class, TEntityType
@@ -211,7 +211,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="targetSet">The target entity set for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasRequiredBinding<TTargetType>(
+        public NavigationPropertyBindingConfiguration HasRequiredBinding<TTargetType>(
             Expression<Func<TEntityType, TTargetType>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet) where TTargetType : class
         {
@@ -238,7 +238,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="targetSet">The target entity set for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasRequiredBinding<TTargetType, TDerivedEntityType>(
+        public NavigationPropertyBindingConfiguration HasRequiredBinding<TTargetType, TDerivedEntityType>(
             Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet)
             where TTargetType : class
@@ -269,7 +269,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entitySetName">The target entity set name for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasOptionalBinding<TTargetType>(
+        public NavigationPropertyBindingConfiguration HasOptionalBinding<TTargetType>(
             Expression<Func<TEntityType, TTargetType>> navigationExpression, string entitySetName)
             where TTargetType : class
         {
@@ -291,7 +291,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="entitySetName">The target entity set name for the binding. It will be created if it does not exist.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasOptionalBinding<TTargetType, TDerivedEntityType>(
+        public NavigationPropertyBindingConfiguration HasOptionalBinding<TTargetType, TDerivedEntityType>(
             Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression, string entitySetName)
             where TTargetType : class
             where TDerivedEntityType : class, TEntityType
@@ -316,7 +316,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="targetSet">The target entity set for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasOptionalBinding<TTargetType>(
+        public NavigationPropertyBindingConfiguration HasOptionalBinding<TTargetType>(
             Expression<Func<TEntityType, TTargetType>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet) where TTargetType : class
         {
@@ -343,7 +343,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="targetSet">The target entity set for the binding.</param>
         /// <returns>A configuration object that can be used to further configure the relationship further.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generic appropriate here")]
-        public NavigationPropertyBinding HasOptionalBinding<TTargetType, TDerivedEntityType>(
+        public NavigationPropertyBindingConfiguration HasOptionalBinding<TTargetType, TDerivedEntityType>(
             Expression<Func<TDerivedEntityType, TTargetType>> navigationExpression,
             EntitySetConfiguration<TTargetType> targetSet)
             where TTargetType : class
@@ -518,32 +518,32 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Finds the <see cref="NavigationPropertyBinding"/> for the navigation property with the given name.
+        /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
         /// </summary>
         /// <param name="propertyName">The name of the navigation property.</param>
         /// <returns>The binding, if found; otherwise, <see langword="null"/>.</returns>
-        public NavigationPropertyBinding FindBinding(string propertyName)
+        public NavigationPropertyBindingConfiguration FindBinding(string propertyName)
         {
             return _configuration.FindBinding(propertyName);
         }
 
         /// <summary>
-        /// Finds the <see cref="NavigationPropertyBinding"/> for the given navigation property and creates it if it does not exist.
+        /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the given navigation property and creates it if it does not exist.
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
         /// <returns>The binding if found else the created binding.</returns>
-        public NavigationPropertyBinding FindBinding(NavigationPropertyConfiguration navigationConfiguration)
+        public NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration)
         {
             return _configuration.FindBinding(navigationConfiguration, autoCreate: true);
         }
 
         /// <summary>
-        /// Finds the <see cref="NavigationPropertyBinding"/> for the given navigation property.
+        /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the given navigation property.
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
         /// <param name="autoCreate">Represents a value specifying if the binding should be created if it is not found.</param>
         /// <returns>The binding if found.</returns>
-        public NavigationPropertyBinding FindBinding(NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
+        public NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
         {
             return _configuration.FindBinding(navigationConfiguration, autoCreate);
         }

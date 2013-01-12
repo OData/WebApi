@@ -32,7 +32,6 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             where TEdmTypeConfiguration : StructuralTypeConfiguration
             where TConventionType : StructuralTypeConfiguration
         {
-            bool applyCalled = false;
             Func<Attribute, bool> matchAllFilter = a => true;
 
             ODataModelBuilder builder = new Mock<ODataModelBuilder>().Object;
@@ -46,13 +45,34 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             structuralType.Setup(t => t.ClrType).Returns(type.Object);
 
             // build the convention
-            Mock<AttributeEdmTypeConvention<TConventionType>> convention = new Mock<AttributeEdmTypeConvention<TConventionType>>(matchAllFilter, false);
-            convention.Setup(c => c.Apply(It.IsAny<TConventionType>(), builder, attribute)).Callback(() => { applyCalled = true; });
+            SpyAttributeEdmTypeConvention<TConventionType> spy =
+                new SpyAttributeEdmTypeConvention<TConventionType>(matchAllFilter, allowMultiple: false);
 
             // Apply
-            (convention.Object as IEdmTypeConvention).Apply(structuralType.Object, builder);
+            (spy as IEdmTypeConvention).Apply(structuralType.Object, builder);
 
-            return applyCalled;
+            return object.ReferenceEquals(builder, spy.ModelBuilder) &&
+                object.ReferenceEquals(attribute, spy.Attribute);
+        }
+
+        private class SpyAttributeEdmTypeConvention<TConventionType> : AttributeEdmTypeConvention<TConventionType>
+            where TConventionType : StructuralTypeConfiguration
+        {
+            public SpyAttributeEdmTypeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
+                : base(attributeFilter, allowMultiple)
+            {
+            }
+
+            public ODataModelBuilder ModelBuilder { get; private set; }
+
+            public Attribute Attribute { get; private set; }
+
+            public override void Apply(TConventionType edmTypeConfiguration, ODataModelBuilder model,
+                Attribute attribute)
+            {
+                ModelBuilder = model;
+                Attribute = attribute;
+            }
         }
     }
 }

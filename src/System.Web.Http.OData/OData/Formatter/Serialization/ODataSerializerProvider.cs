@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// An ODataSerializerProvider is a factory for creating ODataSerializers.
     /// </summary>
-    public abstract class ODataSerializerProvider
+    internal abstract class ODataSerializerProvider
     {
         private readonly ConcurrentDictionary<IEdmTypeReference, ODataSerializer> _serializerCache =
             new ConcurrentDictionary<IEdmTypeReference, ODataSerializer>(new EdmTypeReferenceEqualityComparer());

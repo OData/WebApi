@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Builder
     /// <summary>
     /// This class builds a cache that allows for efficient look up of bindable procedure by EntityType. 
     /// </summary>
-    public class BindableProcedureFinder
+    internal class BindableProcedureFinder
     {
         private Dictionary<IEdmEntityType, List<IEdmFunctionImport>> _map = new Dictionary<IEdmEntityType, List<IEdmFunctionImport>>();
 

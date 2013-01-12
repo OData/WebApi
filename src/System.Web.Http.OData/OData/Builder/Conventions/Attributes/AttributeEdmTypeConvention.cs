@@ -6,7 +6,7 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
     /// Base class for all <see cref="IEdmTypeConvention"/>'s based on a attribute on the type.
     /// </summary>
     /// <typeparam name="TEdmTypeConfiguration">The kind of Edm type that this convention must be applied to.</typeparam>
-    public abstract class AttributeEdmTypeConvention<TEdmTypeConfiguration> : AttributeConvention, IEdmTypeConvention
+    internal abstract class AttributeEdmTypeConvention<TEdmTypeConfiguration> : AttributeConvention, IEdmTypeConvention
         where TEdmTypeConfiguration : StructuralTypeConfiguration
     {
         /// <summary>

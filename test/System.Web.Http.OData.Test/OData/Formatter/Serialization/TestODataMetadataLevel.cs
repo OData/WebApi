@@ -1,11 +1,15 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-namespace System.Web.Http.OData.Formatter
+namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
     /// The amount of metadata information to serialize in an OData response (for JSON light).
     /// </summary>
-    internal enum ODataMetadataLevel
+    /// <remarks>
+    /// This enum is a public copy of the internal <see cref="ODataMetadataLevel"/>. It allows using metadata levels
+    /// in InlineData attributes on public test methods.
+    /// </remarks>
+    public enum TestODataMetadataLevel
     {
         /// <summary>
         /// Normal metadata; used for anything other than JSON light (Atom/XML, JSON verbose)

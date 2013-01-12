@@ -1213,6 +1213,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The request must have an associated OData route name. Consider using the extension method request.SetODataRouteName to set a route name..
+        /// </summary>
+        internal static string RequestMustHaveODataRouteName {
+            get {
+                return ResourceManager.GetString("RequestMustHaveODataRouteName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The last segment of the request URI &apos;{0}&apos; was not recognized as an OData action..
         /// </summary>
         internal static string RequestNotActionInvocation {

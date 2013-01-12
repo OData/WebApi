@@ -14,7 +14,7 @@ namespace System.Web.Http.OData.Builder
     public class EntitySetConfiguration
     {
         private readonly ODataModelBuilder _modelBuilder;
-        private readonly Dictionary<NavigationPropertyConfiguration, NavigationPropertyBinding> _entitySetBindings;
+        private readonly Dictionary<NavigationPropertyConfiguration, NavigationPropertyBindingConfiguration> _entitySetBindings;
 
         private string _url;
         private Func<FeedContext, Uri> _feedSelfLinkFactory;
@@ -77,13 +77,13 @@ namespace System.Web.Http.OData.Builder
             _editLinkBuilder = null;
             _readLinkBuilder = null;
             _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder>();
-            _entitySetBindings = new Dictionary<NavigationPropertyConfiguration, NavigationPropertyBinding>();
+            _entitySetBindings = new Dictionary<NavigationPropertyConfiguration, NavigationPropertyBindingConfiguration>();
         }
 
         /// <summary>
         /// Gets the navigation targets of this entity set.
         /// </summary>
-        public virtual IEnumerable<NavigationPropertyBinding> Bindings
+        public virtual IEnumerable<NavigationPropertyBindingConfiguration> Bindings
         {
             get
             {
@@ -236,8 +236,8 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
         /// <param name="targetEntitySet">The target entity set.</param>
-        /// <returns>The <see cref="NavigationPropertyBinding"/> so that it can be further configured.</returns>
-        public virtual NavigationPropertyBinding AddBinding(NavigationPropertyConfiguration navigationConfiguration, EntitySetConfiguration targetEntitySet)
+        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
+        public virtual NavigationPropertyBindingConfiguration AddBinding(NavigationPropertyConfiguration navigationConfiguration, EntitySetConfiguration targetEntitySet)
         {
             if (navigationConfiguration == null)
             {
@@ -255,7 +255,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
-            NavigationPropertyBinding navigationPropertyBinding = null;
+            NavigationPropertyBindingConfiguration navigationPropertyBinding = null;
             if (_entitySetBindings.ContainsKey(navigationConfiguration))
             {
                 navigationPropertyBinding = _entitySetBindings[navigationConfiguration];
@@ -266,7 +266,7 @@ namespace System.Web.Http.OData.Builder
             }
             else
             {
-                navigationPropertyBinding = new NavigationPropertyBinding(navigationConfiguration, targetEntitySet);
+                navigationPropertyBinding = new NavigationPropertyBindingConfiguration(navigationConfiguration, targetEntitySet);
                 _entitySetBindings[navigationConfiguration] = navigationPropertyBinding;
             }
             return navigationPropertyBinding;
@@ -288,8 +288,8 @@ namespace System.Web.Http.OData.Builder
         /// Finds the binding for the given navigation property and tries to create it if it doesnot exist.
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
-        /// <returns>The <see cref="NavigationPropertyBinding"/> so that it can be further configured.</returns>
-        public virtual NavigationPropertyBinding FindBinding(NavigationPropertyConfiguration navigationConfiguration)
+        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
+        public virtual NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration)
         {
             return FindBinding(navigationConfiguration, autoCreate: true);
         }
@@ -299,8 +299,8 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="autoCreate">Tells whether the binding should be auto created if it does not exist.</param>
         /// <param name="navigationConfiguration">The navigation property.</param>
-        /// <returns>The <see cref="NavigationPropertyBinding"/> so that it can be further configured.</returns>
-        public virtual NavigationPropertyBinding FindBinding(NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
+        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
+        public virtual NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
         {
             if (navigationConfiguration == null)
             {
@@ -407,11 +407,11 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Gets the <see cref="NavigationPropertyBinding"/> for the navigation property with the given name.
+        /// Gets the <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
         /// </summary>
         /// <param name="propertyName">The name of the navigation property.</param>
-        /// <returns>The <see cref="NavigationPropertyBinding" />.</returns>
-        public virtual NavigationPropertyBinding FindBinding(string propertyName)
+        /// <returns>The <see cref="NavigationPropertyBindingConfiguration" />.</returns>
+        public virtual NavigationPropertyBindingConfiguration FindBinding(string propertyName)
         {
             return Bindings.Single(b => b.NavigationProperty.Name == propertyName);
         }

@@ -71,11 +71,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(GetSampleModel());
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, GetSampleModel());
             request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainers().Single().FindEntitySet("employees");
             request.SetEdmModel(_model);
             request.SetODataPath(new ODataPath(new EntitySetPathSegment(entitySet)));
+            request.SetODataRouteName(routeName);
             return request;
         }
 

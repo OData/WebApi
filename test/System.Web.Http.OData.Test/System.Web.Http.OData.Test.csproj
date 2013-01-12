@@ -112,9 +112,12 @@
       <Link>OData\Formatter\MediaTypeFormatterTestBase.cs</Link>
     </Compile>
     <Compile Include="HttpRequestMessageExtensions.cs" />
+    <Compile Include="HttpRouteCollectionExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
+    <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
+    <Compile Include="OData\Formatter\Serialization\FakeODataSerializerProvider.cs" />
     <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilderTests.cs" />
@@ -132,6 +135,7 @@
     <Compile Include="OData\Builder\TestModels\EnumModel.cs" />
     <Compile Include="OData\AsyncEntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmDirectValueAnnotationsManagerExtensions.cs" />
+    <Compile Include="OData\Formatter\Serialization\TestODataMetadataLevel.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
     <Compile Include="OData\PerRequestActionValueBinderTest.cs" />
     <Compile Include="OData\Routing\Conventions\ActionRoutingConventionTest.cs" />
@@ -142,7 +146,6 @@
     <Compile Include="OData\Routing\ODataPathTest.cs" />
     <Compile Include="OData\EntitySetControllerTest.cs" />
     <Compile Include="OData\Formatter\JsonAssert.cs" />
-    <Compile Include="OData\Formatter\ODataMetadataLevelHelperTest.cs" />
     <Compile Include="OData\FromODataUriTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataMessageReaderLearningTests.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormattersTests.cs" />

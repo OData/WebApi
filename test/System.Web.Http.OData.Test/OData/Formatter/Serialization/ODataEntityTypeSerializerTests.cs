@@ -201,25 +201,26 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.Default, false)]
-        [InlineData(ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData(ODataMetadataLevel.NoMetadata, true)]
-        public void ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel, bool expectedResult)
+        [InlineData(TestODataMetadataLevel.Default, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, true)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true)]
+        public void ShouldAddTypeNameAnnotation(TestODataMetadataLevel metadataLevel, bool expectedResult)
         {
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldAddTypeNameAnnotation(metadataLevel);
+            bool actualResult = ODataEntityTypeSerializer.ShouldAddTypeNameAnnotation(
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);
         }
 
         [Theory]
-        [InlineData("MatchingType", "MatchingType", ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData("DoesNotMatch1", "DoesNotMatch2", ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData("IgnoredEntryType", "IgnoredEntitySetType", ODataMetadataLevel.NoMetadata, true)]
+        [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData("IgnoredEntryType", "IgnoredEntitySetType", TestODataMetadataLevel.NoMetadata, true)]
         public void ShouldSuppressTypeNameSerialization(string entryType, string entitySetType,
-            ODataMetadataLevel metadataLevel, bool expectedResult)
+            TestODataMetadataLevel metadataLevel, bool expectedResult)
         {
             // Arrange
             ODataEntry entry = new ODataEntry
@@ -230,7 +231,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act
             bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, null,
-                metadataLevel);
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);
@@ -355,9 +356,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.Default)]
-        [InlineData(ODataMetadataLevel.FullMetadata)]
-        public void CreateODataAction_IncludesTitle(ODataMetadataLevel metadataLevel)
+        [InlineData(TestODataMetadataLevel.Default)]
+        [InlineData(TestODataMetadataLevel.FullMetadata)]
+        public void CreateODataAction_IncludesTitle(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             string expectedActionName = "Action";
@@ -377,7 +378,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act
             ODataAction actualAction = ODataEntityTypeSerializer.CreateODataAction(functionImport, context,
-                metadataLevel);
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -385,9 +386,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.MinimalMetadata)]
-        [InlineData(ODataMetadataLevel.NoMetadata)]
-        public void CreateODataAction_OmitsTitle(ODataMetadataLevel metadataLevel)
+        [InlineData(TestODataMetadataLevel.MinimalMetadata)]
+        [InlineData(TestODataMetadataLevel.NoMetadata)]
+        public void CreateODataAction_OmitsTitle(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
@@ -405,7 +406,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act
             ODataAction actualAction = ODataEntityTypeSerializer.CreateODataAction(functionImport, context,
-                metadataLevel);
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -413,13 +414,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.Default, false)]
-        [InlineData(ODataMetadataLevel.Default, true)]
-        [InlineData(ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(ODataMetadataLevel.FullMetadata, true)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(ODataMetadataLevel.NoMetadata, false)]
-        public void CreateODataAction_IncludesTarget(ODataMetadataLevel metadataLevel, bool followsConventions)
+        [InlineData(TestODataMetadataLevel.Default, false)]
+        [InlineData(TestODataMetadataLevel.Default, true)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, false)]
+        public void CreateODataAction_IncludesTarget(TestODataMetadataLevel metadataLevel, bool followsConventions)
         {
             // Arrange
             Uri expectedTarget = new Uri("aa://Target");
@@ -438,7 +439,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act
             ODataAction actualAction = ODataEntityTypeSerializer.CreateODataAction(functionImport, context,
-                metadataLevel);
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.NotNull(actualAction);
@@ -446,9 +447,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.MinimalMetadata)]
-        [InlineData(ODataMetadataLevel.NoMetadata)]
-        public void CreateODataAction_OmitsTarget_WhenFollowingConventions(ODataMetadataLevel metadataLevel)
+        [InlineData(TestODataMetadataLevel.MinimalMetadata)]
+        [InlineData(TestODataMetadataLevel.NoMetadata)]
+        public void CreateODataAction_OmitsTarget_WhenFollowingConventions(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
@@ -466,19 +467,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Act
             ODataAction actualAction = ODataEntityTypeSerializer.CreateODataAction(functionImport, context,
-                metadataLevel);
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.NotNull(actualAction);
             Assert.Null(actualAction.Target);
         }
 
-        [Theory]
-        [InlineData(ODataMetadataLevel.Default)]
-        [InlineData(ODataMetadataLevel.FullMetadata)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata)]
-        [InlineData(ODataMetadataLevel.NoMetadata)]
-        public void CreateMetadataFragment_IncludesNonDefaultContainerName(ODataMetadataLevel metadataLevel)
+        [InlineData(TestODataMetadataLevel.Default)]
+        [InlineData(TestODataMetadataLevel.FullMetadata)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata)]
+        [InlineData(TestODataMetadataLevel.NoMetadata)]
+        public void CreateMetadataFragment_IncludesNonDefaultContainerName(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             string expectedContainerName = "Container";
@@ -490,16 +490,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = CreateFakeModel();
 
             // Act
-            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model, metadataLevel);
+            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model,
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedContainerName + "." + expectedActionName, actualFragment);
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.Default)]
-        [InlineData(ODataMetadataLevel.FullMetadata)]
-        public void CreateMetadataFragment_IncludesDefaultContainerName(ODataMetadataLevel metadataLevel)
+        [InlineData(TestODataMetadataLevel.Default)]
+        [InlineData(TestODataMetadataLevel.FullMetadata)]
+        public void CreateMetadataFragment_IncludesDefaultContainerName(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             string expectedContainerName = "Container";
@@ -513,16 +514,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = CreateFakeModel(annotationsManager);
 
             // Act
-            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model, metadataLevel);
+            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model,
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedContainerName + "." + expectedActionName, actualFragment);
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.MinimalMetadata)]
-        [InlineData(ODataMetadataLevel.NoMetadata)]
-        public void CreateMetadataFragment_OmitsDefaultContainerName(ODataMetadataLevel metadataLevel)
+        [InlineData(TestODataMetadataLevel.MinimalMetadata)]
+        [InlineData(TestODataMetadataLevel.NoMetadata)]
+        public void CreateMetadataFragment_OmitsDefaultContainerName(TestODataMetadataLevel metadataLevel)
         {
             // Arrange
             string expectedActionName = "Action";
@@ -535,22 +537,23 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = CreateFakeModel(annotationsManager);
 
             // Act
-            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model, metadataLevel);
+            string actualFragment = ODataEntityTypeSerializer.CreateMetadataFragment(action, model,
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedActionName, actualFragment);
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.Default, false, false)]
-        [InlineData(ODataMetadataLevel.Default, true, false)]
-        [InlineData(ODataMetadataLevel.FullMetadata, false, false)]
-        [InlineData(ODataMetadataLevel.FullMetadata, true, false)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata, false, false)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata, true, true)]
-        [InlineData(ODataMetadataLevel.NoMetadata, false, false)]
-        [InlineData(ODataMetadataLevel.NoMetadata, true, true)]
-        public void TestShouldOmitAction(ODataMetadataLevel metadataLevel, bool isAlwaysAvailable, bool expectedResult)
+        [InlineData(TestODataMetadataLevel.Default, false, false)]
+        [InlineData(TestODataMetadataLevel.Default, true, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, false, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, true)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, false, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true, true)]
+        public void TestShouldOmitAction(TestODataMetadataLevel metadataLevel, bool isAlwaysAvailable, bool expectedResult)
         {
             // Arrange
             IEdmFunctionImport action = CreateFakeFunctionImport(true);
@@ -564,7 +567,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmModel model = CreateFakeModel(annonationsManager);
 
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action, model, metadataLevel);
+            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action, model,
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);
@@ -679,6 +683,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
+            request.SetFakeODataRouteName();
             return new UrlHelper(request);
         }
 

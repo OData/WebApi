@@ -8,7 +8,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an OData deserializer.
     /// </summary>
-    public abstract class ODataDeserializer
+    internal abstract class ODataDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataDeserializer"/> class.

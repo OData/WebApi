@@ -241,8 +241,10 @@ namespace System.Web.Http.OData
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/FormatterPeople");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(_model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, _model);
             request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
             controller.Request = request;
             controller.ControllerContext = new HttpControllerContext()
             {

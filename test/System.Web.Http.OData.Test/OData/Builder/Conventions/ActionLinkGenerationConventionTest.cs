@@ -24,11 +24,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carsEdmSet = model.EntityContainers().Single().FindEntitySet("cars");
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
                 new EntityInstanceContext()
@@ -56,11 +57,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carsEdmSet = model.EntityContainers().Single().FindEntitySet("cars");
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             // Act
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
@@ -90,11 +92,12 @@ namespace System.Web.Http.OData.Builder.Conventions
             var carEdmType = model.FindDeclaredType("System.Web.Http.OData.Builder.TestModels.Car") as IEdmEntityType;
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapODataRoute(model);
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, null, model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
+            request.SetODataRouteName(routeName);
 
             Uri link = ActionLinkGenerationConvention.GenerateActionLink(
                 new EntityInstanceContext()
@@ -131,8 +134,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             configuration.Routes.MapODataRoute(model);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = configuration;
-            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.SetConfiguration(configuration);
 
             ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(paintEdmAction);
 

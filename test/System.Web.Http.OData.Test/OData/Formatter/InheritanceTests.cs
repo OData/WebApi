@@ -249,6 +249,7 @@ namespace System.Web.Http.OData.Formatter
         {
             request.SetODataPath(new DefaultODataPathHandler().Parse(_model, GetODataPath(request.RequestUri.AbsoluteUri)));
             request.SetEdmModel(_model);
+            request.SetFakeODataRouteName();
         }
 
         private static IEdmModel GetEdmModel()

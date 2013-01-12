@@ -98,7 +98,7 @@ namespace System.Web.Http.OData.Builder
             {
                 foreach (NavigationPropertyConfiguration navigation in entity.NavigationProperties)
                 {
-                    NavigationPropertyBinding binding = configuration.FindBinding(navigation);
+                    NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigation);
                     if (binding != null)
                     {
                         EdmEntityType edmEntityType = edmTypeMap[entity.ClrType] as EdmEntityType;

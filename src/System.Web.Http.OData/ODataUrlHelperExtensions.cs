@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.OData;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 
@@ -43,7 +44,13 @@ namespace System.Web.Http
             HttpRequestMessage request = urlHelper.Request;
             Contract.Assert(request != null);
 
-            string routeName = request.GetODataRouteName() ?? ODataRouteConstants.DefaultRouteName;
+            string routeName = request.GetODataRouteName();
+
+            if (routeName == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+            }
+
             IODataPathHandler pathHandler = request.GetODataPathHandler();
             return urlHelper.ODataLink(routeName, pathHandler, segments);
         }

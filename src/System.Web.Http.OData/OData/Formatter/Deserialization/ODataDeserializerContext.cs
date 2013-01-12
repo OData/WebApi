@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// This class encapsulates the state and settings that get passed to <see cref="ODataDeserializer"/>
     /// from the <see cref="ODataMediaTypeFormatter"/>.
     /// </summary>
-    public class ODataDeserializerContext
+    internal class ODataDeserializerContext
     {
         /// <summary>
         /// Gets or sets whether the <see cref="ODataMediaTypeFormatter"/> is reading a 

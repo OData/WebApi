@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// Represents an <see cref="ODataDeserializer" />'s that deserializes into an object backed by <see cref="IEdmType"/>.
     /// </summary>
     /// <typeparam name="TItem">The item type that this deserializer understands.</typeparam>
-    public abstract class ODataEntryDeserializer<TItem> : ODataEntryDeserializer
+    internal abstract class ODataEntryDeserializer<TItem> : ODataEntryDeserializer
         where TItem : class
     {
         /// <summary>

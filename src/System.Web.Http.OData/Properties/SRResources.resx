@@ -556,4 +556,7 @@
   <data name="QueryGetModelMustNotReturnNull" xml:space="preserve">
     <value>A model is required for querying. Consider implementing the QueryableAttribute.GetModel method never to return a null value.</value>
   </data>
+  <data name="RequestMustHaveODataRouteName" xml:space="preserve">
+    <value>The request must have an associated OData route name. Consider using the extension method request.SetODataRouteName to set a route name.</value>
+  </data>
 </root>

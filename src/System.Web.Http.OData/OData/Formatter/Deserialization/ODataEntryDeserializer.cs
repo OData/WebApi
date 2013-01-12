@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Base class for all <see cref="ODataDeserializer" />'s that deserialize into an object backed by <see cref="IEdmType"/>.
     /// </summary>
-    public abstract class ODataEntryDeserializer : ODataDeserializer
+    internal abstract class ODataEntryDeserializer : ODataDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataEntryDeserializer"/> class.

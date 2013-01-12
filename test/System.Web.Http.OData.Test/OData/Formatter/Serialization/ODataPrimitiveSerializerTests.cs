@@ -211,14 +211,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(0, ODataMetadataLevel.FullMetadata, true)]
-        [InlineData((short)1, ODataMetadataLevel.FullMetadata, false)]
-        [InlineData((short)1, ODataMetadataLevel.MinimalMetadata, true)]
-        [InlineData((short)1, ODataMetadataLevel.NoMetadata, true)]
-        public void ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel, bool expectedResult)
+        [InlineData(0, TestODataMetadataLevel.FullMetadata, true)]
+        [InlineData((short)1, TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData((short)1, TestODataMetadataLevel.MinimalMetadata, true)]
+        [InlineData((short)1, TestODataMetadataLevel.NoMetadata, true)]
+        public void ShouldSuppressTypeNameSerialization(object value, TestODataMetadataLevel metadataLevel,
+            bool expectedResult)
         {
             // Act
-            bool actualResult = ODataPrimitiveSerializer.ShouldSuppressTypeNameSerialization(value, metadataLevel);
+            bool actualResult = ODataPrimitiveSerializer.ShouldSuppressTypeNameSerialization(value,
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);

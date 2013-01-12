@@ -98,26 +98,28 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.Default, false)]
-        [InlineData(ODataMetadataLevel.FullMetadata, true)]
-        [InlineData(ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(ODataMetadataLevel.NoMetadata, true)]
-        public void ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel, bool expectedResult)
+        [InlineData(TestODataMetadataLevel.Default, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true)]
+        public void ShouldAddTypeNameAnnotation(TestODataMetadataLevel metadataLevel, bool expectedResult)
         {
             // Act
-            bool actualResult = ODataCollectionSerializer.ShouldAddTypeNameAnnotation(metadataLevel);
+            bool actualResult = ODataCollectionSerializer.ShouldAddTypeNameAnnotation(
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);
         }
 
         [Theory]
-        [InlineData(ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(ODataMetadataLevel.NoMetadata, true)]
-        public void ShouldSuppressTypeNameSerialization(ODataMetadataLevel metadataLevel, bool expectedResult)
+        [InlineData(TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true)]
+        public void ShouldSuppressTypeNameSerialization(TestODataMetadataLevel metadataLevel, bool expectedResult)
         {
             // Act
-            bool actualResult = ODataCollectionSerializer.ShouldSuppressTypeNameSerialization(metadataLevel);
+            bool actualResult = ODataCollectionSerializer.ShouldSuppressTypeNameSerialization(
+                (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);

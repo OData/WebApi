@@ -49,6 +49,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
+            request.SetFakeODataRouteName();
             return request;
         }
 

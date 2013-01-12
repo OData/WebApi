@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// supported if it is one of the special types or if it has a backing EDM type. Some of the special types are Uri which maps to ODataReferenceLink payload, 
     /// Uri[] which maps to ODataReferenceLinks payload, ODataWorkspace which maps to ODataServiceDocument payload.
     /// </summary>
-    public abstract class ODataSerializer
+    internal abstract class ODataSerializer
     {
         /// <summary>
         /// Constructs an ODataSerializer that can generate OData payload of the specified kind.

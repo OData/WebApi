@@ -32,8 +32,8 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
-        /// <param name="query">The IQueryable that we are applying query against.</param>
-        /// <returns>The query that the query has been applied to.</returns>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public override IQueryable ApplyTo(IQueryable query)
         {
             ValidateQuery(query);
@@ -43,9 +43,9 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
-        /// <param name="query">The IQueryable that we are applying query against.</param>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The settings to use in query composition.</param>
-        /// <returns>The query that the query has been applied to.</returns>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public override IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
             ValidateQuery(query);

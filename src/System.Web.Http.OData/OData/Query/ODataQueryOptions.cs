@@ -18,7 +18,7 @@ using Microsoft.Data.OData.Query;
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// This defines a composite OData query options that can be used to perform query composition. 
+    /// This defines a composite OData query options that can be used to perform query composition.
     /// Currently this only supports $filter, $orderby, $top, $skip, and $inlinecount.
     /// </summary>
     [ODataQueryParameterBinding]
@@ -29,11 +29,11 @@ namespace System.Web.Http.OData.Query
         private IAssembliesResolver _assembliesResolver;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from 
+        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
         /// </summary>
-        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
-        /// <param name="request">The incoming request message</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
+        /// <param name="request">The incoming request message.</param>
         public ODataQueryOptions(ODataQueryContext context, HttpRequestMessage request)
         {
             if (context == null)
@@ -177,8 +177,8 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
-        /// <param name="query">The IQueryable that we are applying query against.</param>
-        /// <returns>The query that the query has been applied to.</returns>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query)
         {
             return ApplyTo(query, new ODataQuerySettings());
@@ -187,9 +187,9 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
-        /// <param name="query">The IQueryable that we are applying query against.</param>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The settings to use in query composition.</param>
-        /// <returns>The query that the query has been applied to.</returns>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
             if (query == null)
@@ -268,8 +268,8 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Validate all odata queries, including $skip, $top, $orderby and $filter, based on the given <paramref name="validationSettings"/>. 
-        /// It throws ODataException if validation failed.
+        /// Validate all odata queries, including $skip, $top, $orderby and $filter, based on the given <paramref name="validationSettings"/>.
+        /// It throws an ODataException if validation failed.
         /// </summary>
         /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public virtual void Validate(ODataValidationSettings validationSettings)

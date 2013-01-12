@@ -3,7 +3,7 @@
 namespace System.Web.Http.OData.Query
 {
     /// <summary>
-    /// Represents the raw query values in the string format from the incoming request
+    /// Represents the raw query values in the string format from the incoming request.
     /// </summary>
     public class ODataRawQueryOptions
     {

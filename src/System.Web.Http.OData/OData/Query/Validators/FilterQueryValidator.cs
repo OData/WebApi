@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Query.Validators
     /// Represents a validator used to validate a <see cref="FilterQueryOption" /> based on the <see cref="ODataValidationSettings"/>.
     /// </summary>
     /// <remarks>
-    /// Please note this class is not thread safe. 
+    /// Please note this class is not thread safe.
     /// </remarks>
     public class FilterQueryValidator
     {
@@ -28,7 +28,7 @@ namespace System.Web.Http.OData.Query.Validators
         /// <param name="filterQueryOption">The $filter query.</param>
         /// <param name="settings">The validation settings.</param>
         /// <remarks>
-        /// Please note this method is not thread safe. 
+        /// Please note this method is not thread safe.
         /// </remarks>
         public virtual void Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings)
         {
@@ -49,10 +49,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to restrict the 'all' query inside the filter query
+        /// Override this method to restrict the 'all' query inside the filter query.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="allNode"></param>
         /// <param name="settings"></param>
@@ -83,10 +84,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to restrict the 'any' query inside the filter query
+        /// Override this method to restrict the 'any' query inside the filter query.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance. 
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="anyNode"></param>
         /// <param name="settings"></param>
@@ -123,7 +125,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// override this method to restrict the binary operators inside the filter query. That includes all the logical operators except 'not' and all math operators.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="binaryOperatorNode"></param>
         /// <param name="settings"></param>
@@ -166,7 +169,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Please note that 'not' is not included here. Please override ValidateUnaryOperatorNode to customize 'not'.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="binaryNode"></param>
         /// <param name="settings"></param>
@@ -196,10 +200,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method for the Arithmetic operators, including add, sub, mul, div, mod
+        /// Override this method for the Arithmetic operators, including add, sub, mul, div, mod.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="binaryNode"></param>
         /// <param name="settings"></param>
@@ -232,7 +237,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Override this method to restrict the 'constant' inside the filter query.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="constantNode"></param>
         /// <param name="settings"></param>
@@ -255,7 +261,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Override this method to restrict the 'cast' inside the filter query.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="convertNode"></param>
         /// <param name="settings"></param>
@@ -276,10 +283,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method for the navigation property node
+        /// Override this method for the navigation property node.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="sourceNode"></param>
         /// <param name="navigationProperty"></param>
@@ -301,10 +309,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate the parameter used in the filter query
+        /// Override this method to validate the parameter used in the filter query.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="rangeVariable"></param>
         /// <param name="settings"></param>
@@ -324,10 +333,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate property accessor
+        /// Override this method to validate property accessor.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="propertyAccessNode"></param>
         /// <param name="settings"></param>
@@ -348,10 +358,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate collection property accessor
+        /// Override this method to validate collection property accessor.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="propertyAccessNode"></param>
         /// <param name="settings"></param>
@@ -375,7 +386,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Override this method to validate Function calls, such as 'length', 'years', etc.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="node"></param>
         /// <param name="settings"></param>
@@ -400,10 +412,11 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate the Not operator
+        /// Override this method to validate the Not operator.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="unaryOperatorNode"></param>
         /// <param name="settings"></param>
@@ -427,7 +440,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Override this method if you want to visit each query node. 
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="node"></param>
         /// <param name="settings"></param>
@@ -455,7 +469,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Override this method if you want to validate casts on entity collections.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="entityCollectionCastNode"></param>
         /// <param name="settings"></param>
@@ -473,7 +488,8 @@ namespace System.Web.Http.OData.Query.Validators
         /// Override this method if you want to validate casts on single entities.
         /// </summary>
         /// <remarks>
-        /// This method should be called for unit testing purpose only. Please call Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
         /// <param name="singleEntityCastNode"></param>
         /// <param name="settings"></param>

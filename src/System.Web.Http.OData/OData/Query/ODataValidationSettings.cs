@@ -101,10 +101,10 @@ namespace System.Web.Http.OData.Query
 
         /// <summary>
         /// Gets a list of properties one can orderby the result with. Note, by default this list is empty, 
-        /// it actually means it can be ordered by any properties.
+        /// it means it can be ordered by any property.
         /// 
         /// For example, having an empty collection means client can order the queryable result by any properties.  
-        /// Adding "Name" to this list means we only allow queryable result to be ordered by Name property.
+        /// Adding "Name" to this list means that it only allows queryable result to be ordered by Name property.
         /// </summary>
         public Collection<string> AllowedOrderByProperties
         {
@@ -115,8 +115,8 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets the query parameters that are allowed inside query. The default is all query options, 
-        /// including $filter, $skip, $top, $orderby, $expand, $select, $inlineCount, $format and $skipToken
+        /// Gets or sets the query parameters that are allowed inside query. The default is all query options,
+        /// including $filter, $skip, $top, $orderby, $expand, $select, $inlineCount, $format and $skiptoken.
         /// </summary>
         public AllowedQueryOptions AllowedQueryOptions
         {

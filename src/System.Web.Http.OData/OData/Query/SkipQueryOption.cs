@@ -81,8 +81,8 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the $skip query to the given IQueryable.
         /// </summary>
-        /// <param name="query">The IQueryable that we are applying skip query against.</param>
-        /// <returns>The query that the skip query has been applied to.</returns>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable<T> ApplyTo<T>(IQueryable<T> query)
         {
             return ApplyToCore(query) as IOrderedQueryable<T>;
@@ -91,15 +91,15 @@ namespace System.Web.Http.OData.Query
         /// <summary>
         /// Apply the $skip query to the given IQueryable.
         /// </summary>
-        /// <param name="query">The IQueryable that we are applying skip query against.</param>
-        /// <returns>The query that the skip query has been applied to.</returns>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query)
         {
             return ApplyToCore(query);
         }
 
         /// <summary>
-        /// Validate the skip query based on the given <paramref name="validationSettings"/>. It throws ODataException if validation failed.
+        /// Validate the skip query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
         /// </summary>
         /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public void Validate(ODataValidationSettings validationSettings)

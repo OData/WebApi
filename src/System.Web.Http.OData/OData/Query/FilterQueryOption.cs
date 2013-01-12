@@ -86,9 +86,9 @@ namespace System.Web.Http.OData.Query
         /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
         /// how this method should handle null propagation.
         /// </remarks>
-        /// <param name="query">The IQueryable that we are applying filter query against.</param>
-        /// <param name="querySettings">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
-        /// <returns>The query that the filter query has been applied to.</returns>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
             return ApplyTo(query, querySettings, _defaultAssembliesResolver);
@@ -101,10 +101,10 @@ namespace System.Web.Http.OData.Query
         /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
         /// how this method should handle null propagation.
         /// </remarks>
-        /// <param name="query">The IQueryable that we are applying filter query against.</param>
-        /// <param name="querySettings">Specifies if we need to handle null propagation. Pass false if the underlying query provider handles null propagation. Otherwise pass true.</param>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
-        /// <returns>The query that the filter query has been applied to.</returns>
+        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)
         {
             if (query == null)
@@ -139,7 +139,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Validate the filter query based on the given <paramref name="validationSettings"/>. It throws ODataException if validation failed.
+        /// Validate the filter query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
         /// </summary>
         /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public void Validate(ODataValidationSettings validationSettings)

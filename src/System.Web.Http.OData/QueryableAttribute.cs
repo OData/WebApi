@@ -159,8 +159,8 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets the query parameters that are allowed inside query. The default is all query options, 
-        /// including $filter, $skip, $top, $orderby, $expand, $select, $inlineCount, $format and $skipToken
+        /// Gets or sets the query parameters that are allowed in queries. The default is all query options,
+        /// including $filter, $skip, $top, $orderby, $expand, $select, $inlineCount, $format and $skiptoken.
         /// </summary>
         public AllowedQueryOptions AllowedQueryOptions
         {
@@ -175,7 +175,7 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets an enum that represents a list of allowed functions used in the $filter query. 
+        /// Gets or sets a value that represents a list of allowed functions used in the $filter query. 
         /// 
         /// The allowed functions includes the following:
         /// 
@@ -207,7 +207,7 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets an enum that represents a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
+        /// Gets or sets a value that represents a list of allowed arithmetic operators including 'add', 'sub', 'mul', 'div', 'mod'.
         /// </summary>
         public AllowedArithmeticOperators AllowedArithmeticOperators
         {
@@ -222,7 +222,7 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets an enum that represents a list of allowed logical Operators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or', 'not'.
+        /// Gets or sets a value that represents a list of allowed logical Operators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or', 'not'.
         /// </summary>
         public AllowedLogicalOperators AllowedLogicalOperators
         {
@@ -237,12 +237,12 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets or sets a string with comma seperated list of property names. The queryable result can only be ordered by 
-        /// those properties defined in this list. 
+        /// Gets or sets a string with comma seperated list of property names. The queryable result can only be ordered by
+        /// those properties defined in this list.
         /// 
-        /// Note, by default this string is null, it means it can be ordered by any properties.
+        /// Note, by default this string is null, which means it can be ordered by any property.
         /// 
-        /// For example, setting this value to null or empty string means that we allow ordering the queryable result by any properties.  
+        /// For example, setting this value to null or empty string means that we allow ordering the queryable result by any properties.
         /// Setting this value to "Name" means we only allow queryable result to be ordered by Name property.
         /// </summary>
         public string AllowedOrderByProperties
@@ -302,9 +302,9 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the returning response message. 
-        /// It then validates the query from uri based on the validation settings on QueryableAttribute. It finally applies the query appropriately, 
-        /// and reset it back on the response message. 
+        /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the returning response message.
+        /// It then validates the query from uri based on the validation settings on QueryableAttribute. It finally applies the query appropriately,
+        /// and reset it back on the response message.
         /// </summary>
         /// <param name="actionExecutedContext">The context related to this action, including the response message, request message and HttpConfiguration etc.</param>
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)

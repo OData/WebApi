@@ -124,7 +124,7 @@ namespace System.Web.Http.OData
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             Assert.Equal(entity, (response.Content as ObjectContent).Value as FormatterPerson);
-            Assert.Equal("http://localhost/FormatterPeople(5)", response.Headers.Location.ToString());
+            Assert.Equal("http://localhost/People(5)", response.Headers.Location.ToString());
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace System.Web.Http.OData
             var response = controller.Post(entity).Result;
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-            Assert.Equal("http://localhost/FormatterPeople(5)", response.Headers.Location.ToString());
+            Assert.Equal("http://localhost/People(5)", response.Headers.Location.ToString());
             Assert.Equal("return-no-content", response.Headers.GetValues("Preference-Applied").First());
         }
 
@@ -238,19 +238,20 @@ namespace System.Web.Http.OData
             Assert.DoesNotContain("AsyncEmployees", apis);
         }
 
-        private void SetupController(AsyncEntitySetController<FormatterPerson, int> controller)
+        private static void SetupController(AsyncEntitySetController<FormatterPerson, int> controller)
         {
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/FormatterPeople");
-            HttpConfiguration configuration = new HttpConfiguration();
+            var config = new HttpConfiguration();
+            IEdmModel model = ODataTestUtil.GetEdmModel();
             string routeName = "Route";
-            configuration.Routes.MapODataRoute(routeName, null, _model);
-            request.SetConfiguration(configuration);
+            config.Routes.MapODataRoute(routeName, null, model);
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Mock"), "http://localhost/People");
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = new HttpRouteData(new HttpRoute());
+            request.Properties[HttpPropertyKeys.HttpConfigurationKey] = config;
+            request.SetODataPath(new DefaultODataPathHandler().Parse(model, "People"));
             request.SetODataRouteName(routeName);
             controller.Request = request;
-            controller.ControllerContext = new HttpControllerContext()
-            {
-                ControllerDescriptor = new HttpControllerDescriptor() { ControllerName = "FormatterPeople" }
-            };
+            controller.Configuration = config;
+            controller.Url = new UrlHelper(request);
         }
     }
 

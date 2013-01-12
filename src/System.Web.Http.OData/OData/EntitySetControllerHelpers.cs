@@ -76,9 +76,20 @@ namespace System.Web.Http.OData
                 response = request.CreateResponse(HttpStatusCode.Created, createdEntity);
             }
 
-            string controllerName = controller.ControllerContext.ControllerDescriptor.ControllerName;
+            ODataPath odataPath = request.GetODataPath();
+            if (odataPath == null)
+            {
+                throw Error.InvalidOperation(SRResources.LocationHeaderMissingODataPath);
+            }
+
+            EntitySetPathSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetPathSegment;
+            if (entitySetSegment == null)
+            {
+                throw Error.InvalidOperation(SRResources.LocationHeaderDoesNotStartWithEntitySet);
+            }
+
             response.Headers.Location = new Uri(controller.Url.ODataLink(
-                                                    new EntitySetPathSegment(controllerName),
+                                                    entitySetSegment,
                                                     new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(entityKey, ODataVersion.V3))));
             return response;
         }

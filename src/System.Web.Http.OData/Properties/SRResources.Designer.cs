@@ -682,6 +682,24 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A Location header could not be generated because the request&apos;s OData path does not start with an entity set path segment..
+        /// </summary>
+        internal static string LocationHeaderDoesNotStartWithEntitySet {
+            get {
+                return ResourceManager.GetString("LocationHeaderDoesNotStartWithEntitySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A Location header could not be generated because the request does not have an associated OData path..
+        /// </summary>
+        internal static string LocationHeaderMissingODataPath {
+            get {
+                return ResourceManager.GetString("LocationHeaderMissingODataPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; on the type &apos;{1}&apos; is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections..
         /// </summary>
         internal static string ManyToManyNavigationPropertyMustReturnCollection {

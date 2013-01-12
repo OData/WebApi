@@ -116,6 +116,7 @@
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\Formatter\Serialization\FakeODataSerializerProvider.cs" />
     <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />

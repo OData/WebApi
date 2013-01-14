@@ -11,13 +11,19 @@ namespace System.Web.Http.OData.Query.Expressions
     {
         private static ConcurrentDictionary<Type, Func<object, LinqParameterContainer>> _ctors = new ConcurrentDictionary<Type, Func<object, LinqParameterContainer>>();
 
-        // the propertyinfo of the property that holds the wrapped constant.
-        public abstract PropertyInfo PropertyInfo { get; }
-
         // the value of the constant.
         public abstract object Property { get; }
 
-        public static LinqParameterContainer Create(Type type, object value)
+        public static Expression Parameterize(Type type, object value)
+        {
+            // () => new LinqParameterContainer(constant).Property
+            // instead of returning a constant expression node, wrap that constant in a class the way compiler 
+            // does a closure, so that EF can parameterize the constant (resulting in better performance due to expression translation caching).
+            LinqParameterContainer containedValue = LinqParameterContainer.Create(type, value);
+            return Expression.Property(Expression.Constant(containedValue), "TypedProperty");
+        }
+
+        private static LinqParameterContainer Create(Type type, object value)
         {
             return _ctors.GetOrAdd(type, t =>
                 {
@@ -43,8 +49,6 @@ namespace System.Web.Http.OData.Query.Expressions
         // generated for this constant.
         internal class TypedLinqParameterContainer<T> : LinqParameterContainer
         {
-            private static PropertyInfo _propertyInfo = typeof(TypedLinqParameterContainer<T>).GetProperty("TypedProperty");
-
             public TypedLinqParameterContainer(T value)
             {
                 TypedProperty = value;
@@ -55,11 +59,6 @@ namespace System.Web.Http.OData.Query.Expressions
             public override object Property
             {
                 get { return TypedProperty; }
-            }
-
-            public override PropertyInfo PropertyInfo
-            {
-                get { return _propertyInfo; }
             }
         }
     }

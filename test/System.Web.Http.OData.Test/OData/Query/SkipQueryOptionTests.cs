@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Query
             var skip = new SkipQueryOption(skipValue, context);
 
             Assert.Throws<ODataException>(() =>
-                skip.ApplyTo(ODataQueryOptionTest.Customers));
+                skip.ApplyTo(ODataQueryOptionTest.Customers, new ODataQuerySettings()));
         }
 
         [Theory]
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Query
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();
 
-            var results = skipOption.ApplyTo(customers).ToArray();
+            var results = skipOption.ApplyTo(customers, new ODataQuerySettings()).ToArray();
             Assert.Equal(2, results.Length);
             Assert.Equal(2, results[0].CustomerId);
             Assert.Equal(3, results[1].CustomerId);
@@ -125,7 +125,7 @@ namespace System.Web.Http.OData.Query
             }).AsQueryable();
 
             IQueryable queryable = orderbyOption.ApplyTo(customers);
-            queryable = skipOption.ApplyTo(queryable);
+            queryable = skipOption.ApplyTo(queryable, new ODataQuerySettings());
             var results = ((IQueryable<Customer>)queryable).ToArray();
             Assert.Equal(2, results.Length);
             Assert.Equal(3, results[0].CustomerId);

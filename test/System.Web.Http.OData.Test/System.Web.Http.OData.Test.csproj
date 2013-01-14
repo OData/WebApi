@@ -140,6 +140,7 @@
     <Compile Include="OData\Formatter\Serialization\TestODataMetadataLevel.cs" />
     <Compile Include="OData\ODataFormattingAttributeTest.cs" />
     <Compile Include="OData\PerRequestActionValueBinderTest.cs" />
+    <Compile Include="OData\Query\Expressions\LinqParameterContainerTest.cs" />
     <Compile Include="OData\Routing\Conventions\ActionRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\LinksRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationRoutingConventionTest.cs" />

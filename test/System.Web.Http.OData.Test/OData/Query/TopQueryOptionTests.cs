@@ -63,7 +63,7 @@ namespace System.Web.Http.OData.Query
             var top = new TopQueryOption(topValue, context);
 
             Assert.Throws<ODataException>(() =>
-                top.ApplyTo(ODataQueryOptionTest.Customers));
+                top.ApplyTo(ODataQueryOptionTest.Customers, new ODataQuerySettings()));
         }
 
         [Theory]
@@ -104,7 +104,7 @@ namespace System.Web.Http.OData.Query
                 new Customer { CustomerId = 3, Name = "Alex" }
             }).AsQueryable();
 
-            var results = topOption.ApplyTo(customers).ToArray();
+            var results = topOption.ApplyTo(customers, new ODataQuerySettings()).ToArray();
             Assert.Equal(1, results.Length);
             Assert.Equal(1, results[0].CustomerId);
         }
@@ -127,8 +127,8 @@ namespace System.Web.Http.OData.Query
             }).AsQueryable();
 
             IQueryable queryable = orderbyOption.ApplyTo(customers);
-            queryable = skipOption.ApplyTo(queryable);
-            queryable = topOption.ApplyTo(queryable);
+            queryable = skipOption.ApplyTo(queryable, new ODataQuerySettings());
+            queryable = topOption.ApplyTo(queryable, new ODataQuerySettings());
             var results = ((IQueryable<Customer>)queryable).ToArray();
             Assert.Equal(2, results.Length);
             Assert.Equal(4, results[0].CustomerId);

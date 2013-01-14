@@ -27,7 +27,7 @@ namespace System.Web.Http.OData.Query.Expressions
     internal class FilterBinder
     {
         private const string ODataItParameterName = "$it";
-        
+
         private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
         private static readonly Expression _nullConstant = Expression.Constant(null);
@@ -319,11 +319,7 @@ namespace System.Web.Http.OData.Query.Expressions
 
             if (_querySettings.EnableConstantParameterization)
             {
-                // () => new LinqParameterContainer(constant).Property
-                // instead of returning a constant expression node, wrap that constant in a class the way compiler 
-                // does a closure, so that EF can parameterize the constant (resulting in better performance due to expression translation caching).
-                LinqParameterContainer value = LinqParameterContainer.Create(constantType, constantNode.Value);
-                return Expression.Property(Expression.Constant(value), value.PropertyInfo);
+                return LinqParameterContainer.Parameterize(constantType, constantNode.Value);
             }
             else
             {

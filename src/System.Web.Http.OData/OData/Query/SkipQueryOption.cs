@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Query
     public class SkipQueryOption
     {
         private int? _value;
-   
+
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and 
         /// an EdmModel from <see cref="ODataQueryContext"/>.
@@ -82,20 +82,22 @@ namespace System.Web.Http.OData.Query
         /// Apply the $skip query to the given IQueryable.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The query settings to use while applying this query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable<T> ApplyTo<T>(IQueryable<T> query)
+        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings)
         {
-            return ApplyToCore(query) as IOrderedQueryable<T>;
+            return ApplyToCore(query, querySettings) as IOrderedQueryable<T>;
         }
 
         /// <summary>
         /// Apply the $skip query to the given IQueryable.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The query settings to use while applying this query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
-            return ApplyToCore(query);
+            return ApplyToCore(query, querySettings);
         }
 
         /// <summary>
@@ -115,9 +117,9 @@ namespace System.Web.Http.OData.Query
             }
         }
 
-        private IQueryable ApplyToCore(IQueryable query)
+        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings)
         {
-            return ExpressionHelpers.Skip(query, Value, Context.ElementClrType);
+            return ExpressionHelpers.Skip(query, Value, Context.ElementClrType, querySettings.EnableConstantParameterization);
         }
     }
 }

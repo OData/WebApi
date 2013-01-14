@@ -245,12 +245,12 @@ namespace System.Web.Http.OData.Query
 
             if (Skip != null)
             {
-                result = Skip.ApplyTo(result);
+                result = Skip.ApplyTo(result, querySettings);
             }
 
             if (Top != null)
             {
-                result = Top.ApplyTo(result);
+                result = Top.ApplyTo(result, querySettings);
             }
 
             if (querySettings.PageSize.HasValue)

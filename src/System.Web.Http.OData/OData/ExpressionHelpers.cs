@@ -3,12 +3,13 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Web.Http.OData.Query.Expressions;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData.Query;
 
 namespace System.Web.Http.OData
 {
-    internal class ExpressionHelpers
+    internal static class ExpressionHelpers
     {
         public static long Count(IQueryable query, Type type)
         {
@@ -16,31 +17,22 @@ namespace System.Web.Http.OData
             return (long)countMethod.Invoke(null, new object[] { query });
         }
 
-        public static IQueryable<TEntityType> Skip<TEntityType>(IQueryable<TEntityType> query, int count)
-        {
-            return Skip(query, count, typeof(TEntityType)) as IQueryable<TEntityType>;
-        }
-
-        public static IQueryable Skip(IQueryable query, int count, Type type)
+        public static IQueryable Skip(IQueryable query, int count, Type type, bool parameterize)
         {
             MethodInfo skipMethod = ExpressionHelperMethods.QueryableSkipGeneric.MakeGenericMethod(type);
-            return skipMethod.Invoke(null, new object[] { query, count }) as IQueryable;
+            Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
+
+            Expression skipQuery = Expression.Call(null, skipMethod, new[] { query.Expression, skipValueExpression });
+            return query.Provider.CreateQuery(skipQuery);
         }
 
-        public static IQueryable<TEntityType> Take<TEntityType>(IQueryable<TEntityType> query, int count)
-        {
-            return Take(query, count, typeof(TEntityType)) as IQueryable<TEntityType>;
-        }
-
-        public static IQueryable Take(IQueryable query, int count, Type type)
+        public static IQueryable Take(IQueryable query, int count, Type type, bool parameterize)
         {
             MethodInfo takeMethod = ExpressionHelperMethods.QueryableTakeGeneric.MakeGenericMethod(type);
-            return takeMethod.Invoke(null, new object[] { query, count }) as IQueryable;
-        }
+            Expression takeValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
 
-        public static IQueryable<TEntityType> OrderBy<TEntityType>(IQueryable<TEntityType> query, IEdmProperty property, OrderByDirection direction, bool alreadyOrdered = false)
-        {
-            return OrderByProperty(query, property, direction, typeof(TEntityType), alreadyOrdered) as IQueryable<TEntityType>;
+            Expression takeQuery = Expression.Call(null, takeMethod, new[] { query.Expression, takeValueExpression });
+            return query.Provider.CreateQuery(takeQuery);
         }
 
         public static IQueryable OrderByIt(IQueryable query, OrderByDirection direction, Type type, bool alreadyOrdered = false)

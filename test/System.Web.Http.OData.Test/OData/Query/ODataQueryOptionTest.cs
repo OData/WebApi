@@ -274,7 +274,7 @@ namespace System.Web.Http.OData.Query
             IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             // Assert
-            string queryExpression = finalQuery.Expression.ToString();
+            string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
 
             Assert.Equal(queryExpression, expectedExpression);
@@ -296,14 +296,14 @@ namespace System.Web.Http.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ODataQuerySettings querySettings = new ODataQuerySettings
             {
-                EnsureStableOrdering = ensureStableOrdering,
+                EnsureStableOrdering = ensureStableOrdering
             };
 
             // Act
             IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             // Assert
-            string queryExpression = finalQuery.Expression.ToString();
+            string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("]") + 2);
 
             Assert.Equal(queryExpression, expectedExpression);
@@ -519,7 +519,7 @@ namespace System.Web.Http.OData.Query
             var options = new ODataQueryOptions(new ODataQueryContext(model, elementType), message);
             IQueryable finalQuery = options.ApplyTo(query);
 
-            string queryExpression = finalQuery.Expression.ToString();
+            string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("OrderBy"));
 
             Assert.Equal(queryExpression, expectedExpression);
@@ -561,7 +561,7 @@ namespace System.Web.Http.OData.Query
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             IQueryable finalQuery = options.ApplyTo(Customers);
 
-            string queryExpression = finalQuery.Expression.ToString();
+            string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
             queryExpression = queryExpression.Substring(queryExpression.IndexOf("OrderBy"));
 
             Assert.Equal(queryExpression, expectedExpression);

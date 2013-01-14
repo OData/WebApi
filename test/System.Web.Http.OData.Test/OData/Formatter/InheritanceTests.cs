@@ -2,13 +2,17 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
+using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -162,39 +166,23 @@ namespace System.Web.Http.OData.Formatter
         [Fact]
         public void Posting_NonDerivedType_To_Action_Expecting_BaseType_Throws()
         {
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/atom+xml");
+            StringContent content = new StringContent("{ '__metadata' : { 'type' : 'System.Web.Http.OData.Builder.TestModels.Motorcycle' } }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=verbose");
+            IODataRequestMessage oDataRequest = new ODataMessageWrapper(content.ReadAsStreamAsync().Result, content.Headers);
+            ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Car");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddRequestInfo(request);
-            request.Content = new StreamContent(body);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/atom+xml");
+            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            IEdmEntityTypeReference _motorcycle =
+                new EdmEntityTypeReference(_model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == "Car"), isNullable: false);
 
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            Assert.Contains(
+            ODataDeserializerContext context = new ODataDeserializerContext();
+            context.Path = new ODataPath(new ActionPathSegment(_model.EntityContainers().Single().FunctionImports().Single(f => f.Name == "PostMotorcycle_When_Expecting_Car")));
+
+            Assert.Throws<ODataException>(
+                () => new ODataEntityDeserializer(_motorcycle, deserializerProvider).Read(reader, context),
                 "An entry with type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' was found, " +
                 "but it is not assignable to the expected type 'System.Web.Http.OData.Builder.TestModels.Car'. " +
-                "The type specified in the entry must be equal to either the expected type or a derived type.",
-                response.Content.ReadAsStringAsync().Result);
-        }
-
-        [Fact]
-        public void Patch_NonDerivedType_To_Action_Expecting_BaseType_Throws()
-        {
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Car");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose"));
-            AddRequestInfo(request);
-            request.Content = new StringContent("{ '__metadata': { 'type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle' }, 'CanDoAWheelie' : false }");
-            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=verbose");
-
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            Assert.Contains(
-                "An entry with type 'System.Web.Http.OData.Builder.TestModels.Motorcycle' was found, " +
-                "but it is not assignable to the expected type 'System.Web.Http.OData.Builder.TestModels.Car'. " +
-                "The type specified in the entry must be equal to either the expected type or a derived type.",
-                response.Content.ReadAsStringAsync().Result);
+                "The type specified in the entry must be equal to either the expected type or a derived type.");
         }
 
         private Stream GetResponseStream(string uri, string contentType)
@@ -376,24 +364,6 @@ namespace System.Web.Http.OData.Formatter
             Assert.IsType<Motorcycle>(patch.GetEntity());
             patch.Patch(motorcycle);
             return motorcycle;
-        }
-
-        public string PostMotorcycle_When_Expecting_Car(Car car)
-        {
-            Assert.Null(car);
-            var carErrors = ModelState["car"];
-            Assert.NotNull(carErrors);
-
-            return carErrors.Errors[0].Exception.Message;
-        }
-
-        public string PatchMotorcycle_When_Expecting_Car(Delta<Car> delta)
-        {
-            Assert.Null(delta);
-            var deltaErrors = ModelState["delta"];
-            Assert.NotNull(deltaErrors);
-
-            return deltaErrors.Errors[0].Exception.Message;
         }
     }
 }

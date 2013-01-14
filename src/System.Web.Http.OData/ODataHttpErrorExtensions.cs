@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
+using System.Text;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http
@@ -20,6 +22,7 @@ namespace System.Web.Http
         private const string ExceptionTypeKey = "ExceptionType";
         private const string StackTraceKey = "StackTrace";
         private const string InnerExceptionKey = "InnerException";
+        private const string ModelStateKey = "ModelState";
 
         /// <summary>
         /// Converts the <paramref name="httpError"/> to an <see cref="ODataError"/>.
@@ -47,10 +50,16 @@ namespace System.Web.Http
             string innerErrorMessage = httpError.GetPropertyValue<string>(ExceptionMessageKey);
             if (innerErrorMessage == null)
             {
-                innerErrorMessage = httpError.GetPropertyValue<string>(MessageDetailKey);
-                return innerErrorMessage == null ?
-                    null :
-                    new ODataInnerError() { Message = innerErrorMessage };
+                string messageDetail = httpError.GetPropertyValue<string>(MessageDetailKey);
+                if (messageDetail == null)
+                {
+                    HttpError modelStateError = httpError.GetPropertyValue<HttpError>(ModelStateKey);
+                    return modelStateError == null ? null : new ODataInnerError { Message = ConvertModelStateErrors(modelStateError) };
+                }
+                else
+                {
+                    return new ODataInnerError() { Message = messageDetail };
+                }
             }
             else
             {
@@ -65,6 +74,36 @@ namespace System.Web.Http
                 }
                 return innerError;
             }
+        }
+
+        // Convert the model state errors in to a string (for debugging only).
+        // This should be improved once ODataError allows more details.
+        private static string ConvertModelStateErrors(HttpError error)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (KeyValuePair<string, object> modelStateError in error)
+            {
+                if (modelStateError.Value != null)
+                {
+                    builder.Append(modelStateError.Key);
+                    builder.Append(" : ");
+
+                    IEnumerable<string> errorMessages = modelStateError.Value as IEnumerable<string>;
+                    if (errorMessages != null)
+                    {
+                        foreach (string errorMessage in errorMessages)
+                        {
+                            builder.AppendLine(errorMessage);
+                        }
+                    }
+                    else
+                    {
+                        builder.AppendLine(modelStateError.Value.ToString());
+                    }
+                }
+            }
+
+            return builder.ToString();
         }
 
         private static TValue GetPropertyValue<TValue>(this HttpError httpError, string key)

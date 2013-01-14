@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http.ModelBinding;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 
@@ -57,6 +58,27 @@ namespace System.Web.Http
             Assert.Equal("error", oDataError.Message);
             Assert.Equal("messagedetail", oDataError.InnerError.Message);
             Assert.Null(oDataError.InnerError.InnerError);
+        }
+
+        [Fact]
+        public void ToODataError_CopiesModelStateErrorsToInnerError()
+        {
+            ModelStateDictionary dict = new ModelStateDictionary();
+            string errorMessage1 = "Object reference not set to an instance of an object.";
+            string errorMessage2 = "Some ModelState error";
+            string parameter1Name = "parameter1";
+            string parameter2Name = "parameter2";
+
+            dict.AddModelError(parameter1Name, new InvalidOperationException(errorMessage1));
+            dict.AddModelError(parameter2Name, errorMessage2);
+            var error = new HttpError(dict, includeErrorDetail: true);
+
+            ODataError oDataError = error.ToODataError();
+
+            Assert.Equal(
+                parameter1Name + " : " + errorMessage1 + Environment.NewLine +
+                parameter2Name + " : " + errorMessage2 + Environment.NewLine,
+                oDataError.InnerError.Message);
         }
     }
 }

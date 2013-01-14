@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Web.Http.OData;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
@@ -17,6 +18,9 @@ namespace System.Web.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataUrlHelperExtensions
     {
+        private static readonly string _escapedHashMark = Uri.HexEscape('#');
+        private static readonly string _escapedQuestionMark = Uri.HexEscape('?');
+
         /// <summary>
         /// Generates an OData link using the request's OData route name and path handler.
         /// </summary>
@@ -122,12 +126,21 @@ namespace System.Web.Http
 
                             string routePrefix = routeTemplate.Substring(0, odataPathTemplateIndex);
                             string link = virtualPathRoot + routePrefix + odataPath;
+                            link = UriEncode(link);
                             return new Uri(request.RequestUri, link).AbsoluteUri;
                         }
                     }
                 }
             }
             return null;
+        }
+
+        private static string UriEncode(string str)
+        {
+            string escape = Uri.EscapeUriString(str);
+            escape = escape.Replace("#", _escapedHashMark);
+            escape = escape.Replace("?", _escapedQuestionMark);
+            return escape;
         }
     }
 }

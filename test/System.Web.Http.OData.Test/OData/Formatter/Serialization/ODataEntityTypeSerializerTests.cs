@@ -229,7 +229,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntitySet entitySet = CreateEntitySetWithElementTypeName(entitySetType);
 
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, null, metadataLevel);
+            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, null,
+                metadataLevel);
 
             // Assert
             Assert.Equal(expectedResult, actualResult);
@@ -245,9 +246,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             string expectedMetadataPrefix = "http://Metadata";
 
             IEdmEntityContainer container = CreateFakeContainer(expectedContainerName);
-            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName, true);
+            IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName,
+                isBindable: true);
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri(expectedTarget), true);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri(expectedTarget),
+                followsConventions: true);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
             annotationsManager.SetIsAlwaysBindable(functionImport);
@@ -280,7 +283,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => null, false);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => null, followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
 
@@ -306,7 +309,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityContainer container = CreateFakeContainer("ContainerShouldNotAppearInResult");
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName);
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"), false);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
+                followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
             annotationsManager.SetDefaultContainer(container);
@@ -332,7 +336,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(true);
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"), false);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
+                followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
             annotationsManager.SetIsAlwaysBindable(functionImport);
@@ -360,7 +365,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, expectedActionName);
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"), false);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
+                followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
 
@@ -387,7 +393,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://Ignore"), false);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://Ignore"),
+                followsConventions: false);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
 
@@ -447,7 +454,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmEntityContainer container = CreateFakeContainer("IgnoreContainer");
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(container, "IgnoreAction");
 
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://Ignore"), true);
+            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://Ignore"),
+                followsConventions: true);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
 

@@ -314,7 +314,8 @@ namespace System.Web.Http.OData.Builder
 
             // Act
             ActionConfiguration reward = customer.Action("Reward");
-            reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, (ctx.EntityInstance as Customer).CustomerId)), false);
+            reward.HasActionLink(ctx => new Uri(string.Format(uriTemplate, (ctx.EntityInstance as Customer).CustomerId)),
+                followsConventions: false);
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             EntityInstanceContext<Customer> context = new EntityInstanceContext<Customer>()
@@ -407,10 +408,10 @@ namespace System.Web.Http.OData.Builder
             Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
             IEdmTypeConfiguration bindingParameterType = bindingParameterTypeMock.Object;
-            action.SetBindingParameter("IgnoreParameter", bindingParameterType, false);
+            action.SetBindingParameter("IgnoreParameter", bindingParameterType, alwaysBindable: false);
 
             // Act
-            action.HasActionLink((a) => { throw new NotImplementedException(); }, value);
+            action.HasActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
 
             // Assert
             Assert.Equal(value, action.FollowsConventions);

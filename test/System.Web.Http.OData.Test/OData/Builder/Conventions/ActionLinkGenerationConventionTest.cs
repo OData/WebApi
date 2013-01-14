@@ -117,7 +117,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             var vehicles = builder.EntitySet<Vehicle>("vehicles");
             var car = builder.AddEntity(typeof(Car));
             var paintAction = vehicles.EntityType.Action("Paint");
-            paintAction.HasActionLink(ctxt => new Uri("http://localhost/ActionTestWorks"), false);
+            paintAction.HasActionLink(ctxt => new Uri("http://localhost/ActionTestWorks"), followsConventions: false);
             ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
 
             convention.Apply(paintAction, builder);
@@ -178,7 +178,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             ActionConfiguration action = new ActionConfiguration(builder, "IgnoreAction");
             Mock<IEdmTypeConfiguration> mockBindingParameterType = new Mock<IEdmTypeConfiguration>();
             mockBindingParameterType.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
-            action.SetBindingParameter("IgnoreParameter", mockBindingParameterType.Object, false);
+            action.SetBindingParameter("IgnoreParameter", mockBindingParameterType.Object, alwaysBindable: false);
             ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
 
             // Act

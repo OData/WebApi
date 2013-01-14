@@ -12,7 +12,8 @@ namespace System.Web.Http.OData.Builder
         public void FollowsConventions_IsSpecifiedValue(bool value)
         {
             // Arrange
-            ActionLinkBuilder builder = new ActionLinkBuilder((a) => { throw new NotImplementedException(); }, value);
+            ActionLinkBuilder builder = new ActionLinkBuilder((a) => { throw new NotImplementedException(); },
+                followsConventions: value);
 
             // Act
             bool followsConventions = builder.FollowsConventions;

@@ -162,8 +162,9 @@ namespace System.Web.Http.OData.Builder
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
             Type entityType = typeof(object);
             bindingParameterTypeMock.Setup(o => o.ClrType).Returns(entityType);
-            configuration.SetBindingParameter("IgnoreParameter", bindingParameterTypeMock.Object, false);
-            configuration.HasActionLink((a) => { throw new NotImplementedException(); }, value);
+            configuration.SetBindingParameter("IgnoreParameter", bindingParameterTypeMock.Object,
+                alwaysBindable: false);
+            configuration.HasActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
             builder.AddProcedure(configuration);
             builder.AddEntity(entityType);
 

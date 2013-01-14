@@ -146,6 +146,25 @@ namespace System.Web.Http.OData.Formatter
         }
 
         [Fact]
+        public void Can_Post_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
+        {
+            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json;odata=minimalmetadata");
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata"));
+            AddRequestInfo(request);
+            request.Content = new StreamContent(body);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata");
+
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+
+            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+            ValidateMotorcycle(result, true);
+        }
+
+        [Fact]
         public void Can_Patch_DerivedType_To_Action_Expecting_BaseType()
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
@@ -159,6 +178,23 @@ namespace System.Web.Http.OData.Formatter
 
             dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             result = result.d;
+
+            Assert.False((bool)result.CanDoAWheelie);
+        }
+
+        [Fact]
+        public void Can_Patch_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata"));
+            AddRequestInfo(request);
+            request.Content = new StringContent("{ 'odata.type': 'System.Web.Http.OData.Builder.TestModels.Motorcycle', 'CanDoAWheelie' : false }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata");
+
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+
+            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
             Assert.False((bool)result.CanDoAWheelie);
         }
@@ -199,7 +235,20 @@ namespace System.Web.Http.OData.Formatter
 
         private static void ValidateMotorcycle(dynamic result)
         {
-            Assert.Equal("System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result.__metadata.type);
+            ValidateMotorcycle(result, false);
+        }
+
+        private static void ValidateMotorcycle(dynamic result, bool jsonLight)
+        {
+            if (jsonLight)
+            {
+                Assert.Equal("System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result["odata.type"]);
+            }
+            else
+            {
+                Assert.Equal("System.Web.Http.OData.Builder.TestModels.Motorcycle", (string)result.__metadata.type);
+            }
+
             Assert.Equal("sample motorcycle", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(2, (int)result.WheelCount);
@@ -235,7 +284,8 @@ namespace System.Web.Http.OData.Formatter
 
         private void AddRequestInfo(HttpRequestMessage request)
         {
-            request.SetODataPath(new DefaultODataPathHandler().Parse(_model, GetODataPath(request.RequestUri.AbsoluteUri)));
+            request.SetODataPath(new DefaultODataPathHandler().Parse(_model, GetODataPath(
+                request.RequestUri.AbsoluteUri)));
             request.SetEdmModel(_model);
             request.SetFakeODataRouteName();
         }
@@ -278,6 +328,7 @@ namespace System.Web.Http.OData.Formatter
             builder
                 .Action("GetVehicles")
                 .ReturnsFromEntitySet<Vehicle>("vehicles");
+
             builder
                 .Action("PatchMotorcycle_When_Expecting_Motorcycle")
                 .ReturnsFromEntitySet<Motorcycle>("motorcycles");
@@ -308,8 +359,7 @@ namespace System.Web.Http.OData.Formatter
         }
     }
 
-    [ODataFormatting]
-    public class InheritanceController : ApiController
+    public class InheritanceController : ODataController
     {
         private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true };
         private Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };

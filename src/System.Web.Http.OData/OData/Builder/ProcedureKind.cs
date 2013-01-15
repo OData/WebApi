@@ -8,8 +8,19 @@ namespace System.Web.Http.OData.Builder
     /// </summary>
     public enum ProcedureKind
     {
+        /// <summary>
+        /// An action
+        /// </summary>
         Action = 0,
+
+        /// <summary>
+        /// A function
+        /// </summary>
         Function = 1,
+
+        /// <summary>
+        /// A service operation
+        /// </summary>
         ServiceOperation = 2
     }
 }

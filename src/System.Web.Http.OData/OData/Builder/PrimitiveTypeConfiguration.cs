@@ -77,7 +77,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Gets the associated <see cref="ODataModelBuilder"/>.
+        /// Gets the <see cref="ODataModelBuilder"/> used to create this configuration.
         /// </summary>
         public ODataModelBuilder ModelBuilder
         {

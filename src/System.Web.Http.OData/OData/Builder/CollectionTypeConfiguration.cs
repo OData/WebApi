@@ -81,7 +81,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Gets the kind of the EdmType. In this case, it is <see cref="EdmTypeKind.Collection" />.
+        /// Gets the kind of the <see cref="IEdmType" />. In this case, it is <see cref="EdmTypeKind.Collection" />.
         /// </summary>
         public EdmTypeKind Kind
         {
@@ -89,7 +89,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
-        /// Gets the associated <see cref="ODataModelBuilder"/>.
+        /// Gets the <see cref="ODataModelBuilder"/> used to create this configuration.
         /// </summary>
         public ODataModelBuilder ModelBuilder
         {

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.TestCommon;
@@ -13,14 +14,17 @@ namespace System.Web.Http.OData.Builder
         public void DerivedProperties_ReturnsAllDerivedProperties()
         {
             Mock<EntityTypeConfiguration> entityA = new Mock<EntityTypeConfiguration>();
-            entityA.Setup(e => e.Properties).Returns(new[] { MockProperty("A1", entityA.Object), MockProperty("A2", entityA.Object) });
+            entityA.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("A1", entityA.Object));
+            entityA.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("A2", entityA.Object));
 
             Mock<EntityTypeConfiguration> entityB = new Mock<EntityTypeConfiguration>();
-            entityB.Setup(e => e.Properties).Returns(new[] { MockProperty("B1", entityB.Object), MockProperty("B2", entityB.Object) });
+            entityB.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("B1", entityB.Object));
+            entityB.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("B2", entityB.Object));
             entityB.Setup(e => e.BaseType).Returns(entityA.Object);
 
             Mock<EntityTypeConfiguration> entityC = new Mock<EntityTypeConfiguration>();
-            entityC.Setup(e => e.Properties).Returns(new[] { MockProperty("C1", entityC.Object), MockProperty("C2", entityC.Object) });
+            entityC.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("C1", entityC.Object));
+            entityC.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("C2", entityC.Object));
             entityC.Setup(e => e.BaseType).Returns(entityB.Object);
 
             Assert.Equal(

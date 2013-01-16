@@ -30,7 +30,7 @@ namespace System.Web.Http.OData
             var odataConstraint = Assert.IsType<ODataPathRouteConstraint>(constraint.Value);
             Assert.Same(model, odataConstraint.EdmModel);
             Assert.IsType<DefaultODataPathHandler>(odataConstraint.PathHandler);
-            Assert.IsType<Collection<IODataRoutingConvention>>(odataConstraint.RoutingConventions);
+            Assert.IsType<List<IODataRoutingConvention>>(odataConstraint.RoutingConventions);
         }
 
         [Fact]

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace System.Web.Http.OData.Routing.Conventions
@@ -10,12 +11,12 @@ namespace System.Web.Http.OData.Routing.Conventions
     public static class ODataRoutingConventions
     {
         /// <summary>
-        /// Creates a mutable collection of the default OData routing conventions.
+        /// Creates a mutable list of the default OData routing conventions.
         /// </summary>
-        /// <returns>A mutable collection of the default OData routing conventions.</returns>
-        public static Collection<IODataRoutingConvention> CreateDefault()
+        /// <returns>A mutable list of the default OData routing conventions.</returns>
+        public static IList<IODataRoutingConvention> CreateDefault()
         {
-            return new Collection<IODataRoutingConvention>()
+            return new List<IODataRoutingConvention>()
             {
                 new MetadataRoutingConvention(),
                 new EntitySetRoutingConvention(),

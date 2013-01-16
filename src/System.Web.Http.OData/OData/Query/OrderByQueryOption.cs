@@ -17,7 +17,7 @@ namespace System.Web.Http.OData.Query
     public class OrderByQueryOption
     {
         private OrderByClause _orderByClause;
-        private ICollection<OrderByNode> _orderByNodes;
+        private IList<OrderByNode> _orderByNodes;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
@@ -48,13 +48,9 @@ namespace System.Web.Http.OData.Query
         public ODataQueryContext Context { get; private set; }
 
         /// <summary>
-        /// Gets the collection of <see cref="OrderByPropertyNode"/> instance
-        /// for the current <see cref="OrderByQueryOption"/>.
+        /// Gets the mutable list of <see cref="OrderByPropertyNode"/> instances for this query option.
         /// </summary>
-        /// <remarks>
-        /// This collection can be modified as needed.
-        /// </remarks>
-        public ICollection<OrderByNode> OrderByNodes
+        public IList<OrderByNode> OrderByNodes
         {
             get
             {

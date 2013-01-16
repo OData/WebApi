@@ -36,7 +36,7 @@ namespace System.Web.Http.OData.Builder
         /// Get the bindingParameter. 
         /// <remarks>Null means the Action has no bindingParameter.</remarks>
         /// </summary>
-        public virtual BindingParameterConfiguration BindingParameter
+        public BindingParameterConfiguration BindingParameter
         {
             get { return _bindingParameter; }
         }

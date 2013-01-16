@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +24,8 @@ namespace System.Web.Http.OData.Builder
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         protected StructuralTypeConfiguration()
         {
+            ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
+            RemovedProperties = new List<PropertyInfo>();
         }
 
         /// <summary>
@@ -32,6 +35,7 @@ namespace System.Web.Http.OData.Builder
         /// <param name="modelBuilder">The associated <see cref="ODataModelBuilder"/>.</param>
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "The virtual property setters are only to support mocking frameworks, in which case this constructor shouldn't be called anyway.")]
         protected StructuralTypeConfiguration(ODataModelBuilder modelBuilder, Type clrType)
+            : this()
         {
             if (modelBuilder == null)
             {
@@ -47,8 +51,6 @@ namespace System.Web.Http.OData.Builder
             ModelBuilder = modelBuilder;
             Name = ClrType.EdmName();
             Namespace = ClrType.Namespace ?? DefaultNamespace;
-            ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
-            RemovedProperties = new List<PropertyInfo>();
         }
 
         /// <summary>
@@ -85,7 +87,7 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets the declared properties on this edm type.
         /// </summary>
-        public virtual IEnumerable<PropertyConfiguration> Properties
+        public IEnumerable<PropertyConfiguration> Properties
         {
             get
             {
@@ -96,11 +98,11 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets the properties from the backing CLR type that are to be ignored on this edm type.
         /// </summary>
-        public virtual IEnumerable<PropertyInfo> IgnoredProperties
+        public ReadOnlyCollection<PropertyInfo> IgnoredProperties
         {
             get
             {
-                return RemovedProperties;
+                return new ReadOnlyCollection<PropertyInfo>(RemovedProperties);
             }
         }
 
@@ -112,12 +114,12 @@ namespace System.Web.Http.OData.Builder
         /// <summary>
         /// Gets the collection of explicitly removed properties.
         /// </summary>
-        protected virtual ICollection<PropertyInfo> RemovedProperties { get; private set; }
+        protected internal IList<PropertyInfo> RemovedProperties { get; private set; }
 
         /// <summary>
         /// Gets the collection of explicitly added properties.
         /// </summary>
-        protected virtual Dictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
+        protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
 
         /// <summary>
         /// Adds a primitive property to this edm type.

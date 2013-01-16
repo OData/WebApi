@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.TestCommon;
@@ -27,15 +28,12 @@ namespace System.Web.Http.OData.Builder.Conventions.Attributes
             Mock<StructuralTypeConfiguration> type = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             type.Setup(t => t.ClrType).Returns(clrType.Object);
 
-            PropertyConfiguration[] mockProperties = new PropertyConfiguration[] 
-            { 
-                CreateMockProperty(new DataMemberAttribute()),
-                CreateMockProperty(new DataMemberAttribute()), 
-                CreateMockProperty()
-            };
-            type.Setup(t => t.Properties).Returns(mockProperties);
+            var mockPropertyWithoutAttributes = CreateMockProperty();
+            type.Object.ExplicitProperties.Add(new MockPropertyInfo(), CreateMockProperty(new DataMemberAttribute()));
+            type.Object.ExplicitProperties.Add(new MockPropertyInfo(), CreateMockProperty(new DataMemberAttribute()));
+            type.Object.ExplicitProperties.Add(new MockPropertyInfo(), mockPropertyWithoutAttributes);
 
-            type.Setup(t => t.RemoveProperty(mockProperties[2].PropertyInfo)).Verifiable();
+            type.Setup(t => t.RemoveProperty(mockPropertyWithoutAttributes.PropertyInfo)).Verifiable();
 
             // Act
             _convention.Apply(type.Object, new Mock<ODataModelBuilder>().Object);

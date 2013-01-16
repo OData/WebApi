@@ -28,18 +28,18 @@ namespace System.Web.Http.OData.Query
         public OrderByDirection Direction { get; private set; }
 
         /// <summary>
-        /// Creates a collection of <see cref="OrderByPropertyNode"/> instances from a linked list of <see cref="OrderByClause"/> instances.
+        /// Creates a list of <see cref="OrderByPropertyNode"/> instances from a linked list of <see cref="OrderByClause"/> instances.
         /// </summary>
         /// <param name="orderByClause">The head of the <see cref="OrderByClause"/> linked list.</param>
-        /// <returns>The collection of new <see cref="OrderByPropertyNode"/> instances.</returns>
-        public static ICollection<OrderByNode> CreateCollection(OrderByClause orderByClause)
+        /// <returns>The list of new <see cref="OrderByPropertyNode"/> instances.</returns>
+        public static IList<OrderByNode> CreateCollection(OrderByClause orderByClause)
         {
-            LinkedList<OrderByNode> result = new LinkedList<OrderByNode>();
+            List<OrderByNode> result = new List<OrderByNode>();
             for (OrderByClause clause = orderByClause; clause != null; clause = clause.ThenBy)
             {
                 if (clause.Expression is NonentityRangeVariableReferenceNode || clause.Expression is EntityRangeVariableReferenceNode)
                 {
-                    result.AddLast(new OrderByItNode(clause.Direction));
+                    result.Add(new OrderByItNode(clause.Direction));
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace System.Web.Http.OData.Query
                         throw new ODataException(SRResources.OrderByClauseNotSupported);
                     }
 
-                    result.AddLast(new OrderByPropertyNode(property.Property, clause.Direction));
+                    result.Add(new OrderByPropertyNode(property.Property, clause.Direction));
                 }
             }
 

@@ -14,12 +14,12 @@ namespace System.Web.Http.OData.Formatter
     public static class ODataMediaTypeFormatters
     {
         /// <summary>
-        /// Creates a set of media type formatters to handle OData.
+        /// Creates a list of media type formatters to handle OData.
         /// </summary>
-        /// <returns>A set of media type formatters to handle OData.</returns>
-        public static IEnumerable<ODataMediaTypeFormatter> Create()
+        /// <returns>A list of media type formatters to handle OData.</returns>
+        public static IList<ODataMediaTypeFormatter> Create()
         {
-            return new ODataMediaTypeFormatter[]
+            return new List<ODataMediaTypeFormatter>()
             {
                 // Create JSON formatter first so it gets used when the request doesn't
                 // ask for a specific content type

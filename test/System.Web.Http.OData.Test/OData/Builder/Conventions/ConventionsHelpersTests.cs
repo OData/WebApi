@@ -80,7 +80,8 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             Mock<StructuralTypeConfiguration> edmType = new Mock<StructuralTypeConfiguration>();
             edmType.Setup(t => t.ClrType).Returns(typeof(GetProperties_Derived));
-            edmType.Setup(t => t.IgnoredProperties).Returns(typeof(GetProperties_Derived).GetProperties().Where(p => new string[] { "Base_I", "Derived_I" }.Contains(p.Name)));
+            edmType.Object.RemovedProperties.Add(typeof(GetProperties_Derived).GetProperty("Base_I"));
+            edmType.Object.RemovedProperties.Add(typeof(GetProperties_Derived).GetProperty("Derived_I"));
 
             var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true);
             var expectedProperties = new string[] { "Base_Complex", "Base_Str", "Derived_Complex", "Collection", "PrivateSetPublicGet" };
@@ -139,7 +140,7 @@ namespace System.Web.Http.OData.Builder.Conventions
         {
             // Arrange
             Mock<EntityTypeConfiguration> baseEntity = new Mock<EntityTypeConfiguration>();
-            baseEntity.Setup(e => e.IgnoredProperties).Returns(new PropertyInfo[] { new MockPropertyInfo(typeof(int), "IgnoredBaseProperty") });
+            baseEntity.Object.RemovedProperties.Add(new MockPropertyInfo(typeof(int), "IgnoredBaseProperty"));
 
             Mock<EntityTypeConfiguration> derivedEntity = new Mock<EntityTypeConfiguration>();
             derivedEntity.Setup(e => e.BaseType).Returns(baseEntity.Object);

@@ -111,14 +111,18 @@
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\MediaTypeFormatterTestBase.cs">
       <Link>OData\Formatter\MediaTypeFormatterTestBase.cs</Link>
     </Compile>
+    <Compile Include="ODataHttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
+    <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
+    <Compile Include="OData\ODataRoutingAttributeTest.cs" />
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
     <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="OData\Formatter\Serialization\FakeODataSerializerProvider.cs" />
+    <Compile Include="OData\Routing\ODataPathRouteConstraintTest.cs" />
     <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
     <Compile Include="OData\Builder\ActionLinkBuilderTests.cs" />

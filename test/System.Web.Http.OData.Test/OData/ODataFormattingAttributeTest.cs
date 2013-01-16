@@ -45,5 +45,18 @@ namespace System.Web.Http.OData
             Assert.Same(odataFormatter, controllerSettings.Formatters.OfType<ODataMediaTypeFormatter>().First());
             Assert.Equal(formatterCount, controllerSettings.Formatters.Count);
         }
+
+        [Fact]
+        public void Initialize_RegistersContentNegotiator()
+        {
+            var config = new HttpConfiguration();
+            var controllerSettings = new HttpControllerSettings(config);
+            var controllerDescriptor = new HttpControllerDescriptor();
+            controllerDescriptor.Configuration = config;
+
+            new ODataFormattingAttribute().Initialize(controllerSettings, controllerDescriptor);
+
+            Assert.IsType<PerRequestContentNegotiator>(controllerSettings.Services.GetContentNegotiator());
+        }
     }
 }

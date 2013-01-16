@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.Tracing;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Library;
@@ -69,6 +70,34 @@ namespace System.Web.Http.OData.Builder
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithMultipleModels()
+        {
+            ODataConventionModelBuilder builder1 = new ODataConventionModelBuilder();
+            builder1.EntitySet<FormatterPerson>("People1");
+            var model1 = builder1.GetEdmModel();
+
+            ODataConventionModelBuilder builder2 = new ODataConventionModelBuilder();
+            builder2.EntitySet<FormatterPerson>("People2");
+            var model2 = builder2.GetEdmModel();
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataRoute("OData1", "v1", model1);
+            server.Configuration.Routes.MapODataRoute("OData2", "v2", model2);
+
+            HttpClient client = new HttpClient(server);
+            AssertHasEntitySet(client, "http://localhost/v1/$metadata", "People1");
+            AssertHasEntitySet(client, "http://localhost/v2/$metadata", "People2");
+        }
+
+        private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
+        {
+            var response = client.GetAsync(uri).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(entitySetName, response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]

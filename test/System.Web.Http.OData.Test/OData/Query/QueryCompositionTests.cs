@@ -8,6 +8,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
@@ -369,6 +370,37 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void Queryable_UsesRouteModel_ForMultipleModels()
+        {
+            // Model 1 only has Name, Model 2 only has Age
+            ODataModelBuilder builder1 = new ODataModelBuilder();
+            var personType1 = builder1.Entity<FormatterPerson>().Property(p => p.Name);
+            builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "link", false);
+            var model1 = builder1.GetEdmModel();
+
+            ODataModelBuilder builder2 = new ODataModelBuilder();
+            builder2.Entity<FormatterPerson>().Property(p => p.Age);
+            builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "link", false);
+            var model2 = builder2.GetEdmModel();
+
+            var config = new HttpConfiguration();
+            config.Routes.MapODataRoute("OData1", "v1", model1);
+            config.Routes.MapODataRoute("OData2", "v2", model2);
+
+            using (HttpServer host = new HttpServer(config))
+            using (HttpClient client = new HttpClient(host))
+            {
+                // Model 1 has the Name property but not the Age property
+                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v1/People?$orderby=Name", HttpStatusCode.OK);
+                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v1/People?$orderby=Age", HttpStatusCode.BadRequest);
+
+                // Model 2 has the Age property but not the Name property
+                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v2/People?$orderby=Name", HttpStatusCode.BadRequest);
+                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v2/People?$orderby=Age", HttpStatusCode.OK);
+            }
+        }
+
+        [Fact]
         public void QueryableWorksWith_ByteArrayComparison()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: false));
@@ -645,6 +677,14 @@ namespace System.Web.Http.OData.Query
             Assert.NotNull(actual);
 
             Assert.True(expected.Name == actual.Name && expected.Id == actual.Id);
+        }
+
+        private static void AssertRespondsWithExpectedStatusCode(HttpClient client, string uri, HttpStatusCode expectedStatusCode)
+        {
+            using (HttpResponseMessage response = client.GetAsync(uri).Result)
+            {
+                Assert.Equal(expectedStatusCode, response.StatusCode);
+            }
         }
 
         private class SetModelFilter : ActionFilterAttribute

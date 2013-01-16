@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 using Moq;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -91,6 +92,49 @@ namespace System.Web.Http.OData.Formatter
             {
                 // Assert
                 AssertODataVersion3JsonResponse(Resources.PersonEntryInJsonFullMetadata, response);
+            }
+        }
+
+        [Fact]
+        public void GetEntry_UsesRouteModel_ForMultipleModels()
+        {
+            // Model 1 only has Name, Model 2 only has Age
+            ODataModelBuilder builder1 = new ODataModelBuilder();
+            var personType1 = builder1.Entity<FormatterPerson>().Property(p => p.Name);
+            builder1.EntitySet<FormatterPerson>("People").HasIdLink(p => "link", false);
+            var model1 = builder1.GetEdmModel();
+
+            ODataModelBuilder builder2 = new ODataModelBuilder();
+            builder2.Entity<FormatterPerson>().Property(p => p.Age);
+            builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => "link", false);
+            var model2 = builder2.GetEdmModel();
+
+            var config = new HttpConfiguration();
+            config.Routes.MapODataRoute("OData1", "v1", model1);
+            config.Routes.MapODataRoute("OData2", "v2", model2);
+            
+            using (HttpServer host = new HttpServer(config))
+            using (HttpClient client = new HttpClient(host))
+            {
+                using (HttpResponseMessage response = client.GetAsync("http://localhost/v1/People(10)").Result)
+                {
+                    Assert.True(response.IsSuccessStatusCode);
+                    JToken json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+
+                    // Model 1 has the Name property but not the Age property
+                    Assert.NotNull(json["Name"]);
+                    Assert.Null(json["Age"]);
+                }
+
+                using (HttpResponseMessage response = client.GetAsync("http://localhost/v2/People(10)").Result)
+                {
+                    Assert.True(response.IsSuccessStatusCode);
+                    JToken json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+
+                    // Model 2 has the Age property but not the Name property
+                    Assert.Null(json["Name"]);
+                    Assert.NotNull(json["Age"]);
+                }
             }
         }
 

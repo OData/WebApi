@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http.OData.Builder.TestModels;
+using Microsoft.Data.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.Http.OData.Builder
@@ -192,6 +194,26 @@ namespace System.Web.Http.OData.Builder
 
             // Assert
             Assert.Equal(readLinkBuilder, _entityset.GetReadLink());
+        }
+
+        [Fact]
+        public void HasNavigationPropertyLink_CanReplaceExistingLinks()
+        {
+            // Arrange
+            var entity = _builder.AddEntity(typeof(Motorcycle));
+            var navigationProperty = entity.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.One);
+            var entityset = _builder.AddEntitySet("vehicles", entity);
+            Uri link1 = new Uri("http://link1");
+            Uri link2 = new Uri("http://link2");
+            entityset.HasNavigationPropertyLink(navigationProperty, new NavigationLinkBuilder((entityContext, property) => link1, followsConventions: true));
+
+            // Act
+            entityset.HasNavigationPropertyLink(navigationProperty, new NavigationLinkBuilder((entityContext, property) => link2, followsConventions: false));
+
+            // Assert
+            var navigationLink = entityset.GetNavigationPropertyLink(navigationProperty);
+            Assert.False(navigationLink.FollowsConventions);
+            Assert.Equal(link2, navigationLink.Factory(null, null));
         }
     }
 }

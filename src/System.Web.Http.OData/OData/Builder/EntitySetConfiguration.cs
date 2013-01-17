@@ -201,7 +201,7 @@ namespace System.Web.Http.OData.Builder
                 throw Error.Argument("navigationProperty", SRResources.NavigationPropertyNotInHierarchy, declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
-            _navigationPropertyLinkBuilders.Add(navigationProperty, navigationLinkBuilder);
+            _navigationPropertyLinkBuilders[navigationProperty] = navigationLinkBuilder;
             return this;
         }
 

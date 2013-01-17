@@ -109,16 +109,14 @@ namespace System.Web.Http.OData.Formatter
 
             foreach (Encoding supportedEncoding in formatter.SupportedEncodings)
             {
-                // Encoding's public surface area is mutable, so clone (and use separate instances) to prevent changes
-                // to one instance from affecting the other.
-                SupportedEncodings.Add((Encoding)supportedEncoding.Clone());
+                // Per-request formatters share the encoding instances with the parent formatter
+                SupportedEncodings.Add(supportedEncoding);
             }
 
             foreach (MediaTypeHeaderValue supportedMediaType in formatter.SupportedMediaTypes)
             {
-                // MediaTypeHeaderValue's public surface area is mutable, so clone (and use separate instances) to
-                // prevent changes to one instance from affecting the other.
-                SupportedMediaTypes.Add((MediaTypeHeaderValue)((ICloneable)supportedMediaType).Clone());
+                // Per-request formatters share the media type instances with the parent formatter
+                SupportedMediaTypes.Add(supportedMediaType);
             }
 
             // Parameter 2: version

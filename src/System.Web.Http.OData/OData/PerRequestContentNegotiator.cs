@@ -28,7 +28,15 @@ namespace System.Web.Http.OData
         public ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
             MediaTypeHeaderValue mediaType = request.Content == null ? null : request.Content.Headers.ContentType;
-            IEnumerable<MediaTypeFormatter> perRequestFormatters = formatters.Select(f => f.GetPerRequestFormatterInstance(type, request, mediaType));
+
+            List<MediaTypeFormatter> perRequestFormatters = new List<MediaTypeFormatter>();
+            foreach (MediaTypeFormatter formatter in formatters)
+            {
+                if (formatter != null)
+                {
+                    perRequestFormatters.Add(formatter.GetPerRequestFormatterInstance(type, request, mediaType));
+                }
+            }
             return _innerContentNegotiator.Negotiate(type, request, perRequestFormatters);
         }
     }

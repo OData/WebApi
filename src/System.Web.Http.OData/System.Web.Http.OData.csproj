@@ -56,11 +56,6 @@
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(UseNcrunch)' == 'TRUE'">
-    <SignAssembly>false</SignAssembly>
-    <DelaySign>false</DelaySign>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;ASPNETMVC;NCRUNCH</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Data.Edm, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

@@ -109,25 +109,12 @@ namespace System.Web.Http.OData.Builder
                     return new Uri(idLink);
                 }
             }
-            else
+            else if (IsDefaultOrFull(metadataLevel) ||
+                (IsMinimal(metadataLevel) && !_editLinkBuilder.FollowsConventions))
             {
-                if (IsDefaultOrFull(metadataLevel) ||
-                    (IsMinimal(metadataLevel) && !_editLinkBuilder.FollowsConventions))
-                {
-                    Uri generatedEditLink = _editLinkBuilder.Factory(instanceContext);
-                    if (generatedEditLink != null && generatedEditLink.Equals(new Uri(idLink)))
-                    {
-                        // edit link is the same as id link. emit only in default metadata mode.
-                        if (metadataLevel == ODataMetadataLevel.Default)
-                        {
-                            return new Uri(idLink);
-                        }
-                    }
-                    else
-                    {
-                        return generatedEditLink;
-                    }
-                }
+                // edit link is the not the same as id link. Generate if the client asked for it (full metadata modes) or
+                // if the client cannot infer it (not follow conventions).
+                return _editLinkBuilder.Factory(instanceContext);
             }
 
             // client can infer it and didn't ask for it.
@@ -149,25 +136,12 @@ namespace System.Web.Http.OData.Builder
                     return editLink;
                 }
             }
-            else
+            else if (IsDefaultOrFull(metadataLevel) ||
+                (IsMinimal(metadataLevel) && !_readLinkBuilder.FollowsConventions))
             {
-                if (IsDefaultOrFull(metadataLevel) ||
-                    (IsMinimal(metadataLevel) && !_readLinkBuilder.FollowsConventions))
-                {
-                    Uri generatedReadLink = _readLinkBuilder.Factory(instanceContext);
-                    if (editLink == generatedReadLink)
-                    {
-                        // read link is the same as edit link. emit only in default metadata mode.
-                        if (metadataLevel == ODataMetadataLevel.Default)
-                        {
-                            return editLink;
-                        }
-                    }
-                    else
-                    {
-                        return generatedReadLink;
-                    }
-                }
+                // read link is not the same as edit link. Generate if the client asked for it (full metadata modes) or
+                // if the client cannot infer it (not follow conventions).
+                return _readLinkBuilder.Factory(instanceContext);
             }
 
             // client can infer it and didn't ask for it.

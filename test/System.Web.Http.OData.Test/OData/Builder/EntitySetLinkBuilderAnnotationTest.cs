@@ -103,33 +103,6 @@ namespace System.Web.Http.OData.Builder
 
         [Theory]
         [InlineData(true, ODataMetadataLevel.Default, true)]
-        [InlineData(true, ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(true, ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(true, ODataMetadataLevel.NoMetadata, false)]
-        [InlineData(false, ODataMetadataLevel.Default, true)]
-        [InlineData(false, ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(false, ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(false, ODataMetadataLevel.NoMetadata, false)]
-        public void BuildEditLink_WhenEditLinkIsSameAsIdLink_And_IsSet(bool followsConventions, object metadataLevel, bool linkEmitted)
-        {
-            _entitySet.HasIdLink(new SelfLinkBuilder<string>((context) => "http://selflink/", followsConventions));
-            _entitySet.HasEditLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://selflink/"), followsConventions: false));
-            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(_entitySet);
-
-            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel, "http://selflink");
-
-            if (linkEmitted)
-            {
-                Assert.Equal("http://selflink/", generatedEditLink.AbsoluteUri);
-            }
-            else
-            {
-                Assert.Null(generatedEditLink);
-            }
-        }
-
-        [Theory]
-        [InlineData(true, ODataMetadataLevel.Default, true)]
         [InlineData(true, ODataMetadataLevel.FullMetadata, true)]
         [InlineData(true, ODataMetadataLevel.MinimalMetadata, false)]
         [InlineData(true, ODataMetadataLevel.NoMetadata, false)]
@@ -173,34 +146,6 @@ namespace System.Web.Http.OData.Builder
             if (linkEmitted)
             {
                 Assert.Equal("http://editlink/", generatedReadLink.AbsoluteUri);
-            }
-            else
-            {
-                Assert.Null(generatedReadLink);
-            }
-        }
-
-        [Theory]
-        [InlineData(true, ODataMetadataLevel.Default, true)]
-        [InlineData(true, ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(true, ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(true, ODataMetadataLevel.NoMetadata, false)]
-        [InlineData(false, ODataMetadataLevel.Default, true)]
-        [InlineData(false, ODataMetadataLevel.FullMetadata, false)]
-        [InlineData(false, ODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(false, ODataMetadataLevel.NoMetadata, false)]
-        public void BuildReadLink_WhenReadLinkIsSameAsEditLink_And_IsSet(bool followsConventions, object metadataLevel, bool linkEmitted)
-        {
-            _entitySet.HasEditLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://editlink_same_as_readlink/"), followsConventions));
-            _entitySet.HasReadLink(new SelfLinkBuilder<Uri>((context) => new Uri("http://editlink_same_as_readlink/"), followsConventions));
-
-            EntitySetLinkBuilderAnnotation linkBuilder = new EntitySetLinkBuilderAnnotation(_entitySet);
-
-            Uri generatedReadLink = linkBuilder.BuildReadLink(new EntityInstanceContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://editlink_same_as_readlink"));
-
-            if (linkEmitted)
-            {
-                Assert.Equal("http://editlink_same_as_readlink/", generatedReadLink.AbsoluteUri);
             }
             else
             {
@@ -262,6 +207,52 @@ namespace System.Web.Http.OData.Builder
             {
                 Assert.Null(generatedNavigationLink);
             }
+        }
+
+        [Fact]
+        public void CanConfigureIdLinkToNotFollowConventions()
+        {
+            string idLink = "http://id_link";
+
+            _entitySet.HasIdLink(new SelfLinkBuilder<string>((ctxt) => idLink, followsConventions: false));
+
+            var selfLinks = new EntitySetLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityInstanceContext(), ODataMetadataLevel.MinimalMetadata);
+
+            Assert.Equal(idLink, selfLinks.IdLink);
+            Assert.Null(selfLinks.EditLink);
+            Assert.Null(selfLinks.ReadLink);
+        }
+
+        [Fact]
+        public void CanConfigureEditLinkToNotFollowConventions()
+        {
+            string idLink = "http://id_link";
+            Uri editLink = new Uri("http://edit_link");
+
+            _entitySet.HasIdLink(new SelfLinkBuilder<string>((ctxt) => idLink, followsConventions: true));
+            _entitySet.HasEditLink(new SelfLinkBuilder<Uri>((ctxt) => editLink, followsConventions: false));
+
+            var selfLinks = new EntitySetLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityInstanceContext(), ODataMetadataLevel.MinimalMetadata);
+
+            Assert.Null(selfLinks.IdLink);
+            Assert.Equal(editLink, selfLinks.EditLink);
+            Assert.Null(selfLinks.ReadLink);
+        }
+
+        [Fact]
+        public void CanConfigureReadLinkToNotFollowConventions()
+        {
+            string idLink = "http://id_link";
+            Uri readLink = new Uri("http://read_link");
+
+            _entitySet.HasIdLink(new SelfLinkBuilder<string>((ctxt) => idLink, followsConventions: true));
+            _entitySet.HasReadLink(new SelfLinkBuilder<Uri>((ctxt) => readLink, followsConventions: false));
+
+            var selfLinks = new EntitySetLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityInstanceContext(), ODataMetadataLevel.MinimalMetadata);
+
+            Assert.Null(selfLinks.IdLink);
+            Assert.Null(selfLinks.EditLink);
+            Assert.Equal(readLink, selfLinks.ReadLink);
         }
     }
 }

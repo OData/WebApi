@@ -202,7 +202,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         [Theory]
         [InlineData(TestODataMetadataLevel.Default, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true)]
         [InlineData(TestODataMetadataLevel.MinimalMetadata, true)]
         [InlineData(TestODataMetadataLevel.NoMetadata, true)]
         public void ShouldAddTypeNameAnnotation(TestODataMetadataLevel metadataLevel, bool expectedResult)

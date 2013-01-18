@@ -54,15 +54,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
         internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive,
             ODataMetadataLevel metadataLevel)
         {
+            // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
+            // null when values should not be serialized. The TypeName property is different and should always be
+            // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
+            // to serialize the type name (a null value prevents serialization).
+
+            // Note that this annotation should not be used for Atom or JSON verbose formats, as it will interfere with
+            // the correct default behavior for those formats.
+
             Contract.Assert(primitive != null);
 
             object value = primitive.Value;
 
-            // Don't add a type name annotation for Atom or JSON verbose.
-            if (metadataLevel != ODataMetadataLevel.Default)
+            // Only add an annotation if we want to override ODataLib's default type name serialization behavior.
+            if (ShouldAddTypeNameAnnotation(metadataLevel))
             {
                 string typeName;
 
+                // Provide the type name to serialize (or null to force it not to serialize).
                 if (ShouldSuppressTypeNameSerialization(value, metadataLevel))
                 {
                     typeName = null;
@@ -77,6 +86,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     TypeName = typeName
                 });
             }
+        }
+
+        private static bool ShouldAddTypeNameAnnotation(ODataMetadataLevel metadataLevel)
+        {
+            // Don't interfere with the correct default behavior in non-JSON light formats.
+            // In all JSON light modes, take control of type name serialization.
+            // For primitives (unlike other types), the default behavior does not matches the requirements for minimal
+            // metadata mode, so the annotation is needed even in minimal metadata mode.
+            return metadataLevel != ODataMetadataLevel.Default;
         }
 
         internal static ODataValue CreatePrimitive(object value, ODataMetadataLevel metadataLevel)

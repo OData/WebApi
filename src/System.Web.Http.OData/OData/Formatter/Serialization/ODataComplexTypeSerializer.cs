@@ -91,12 +91,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataComplexValue value, ODataMetadataLevel metadataLevel)
         {
+            // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
+            // null when values should not be serialized. The TypeName property is different and should always be
+            // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
+            // to serialize the type name (a null value prevents serialization).
+
+            // Note that this annotation should not be used for Atom or JSON verbose formats, as it will interfere with
+            // the correct default behavior for those formats.
+
             Contract.Assert(value != null);
 
+            // Only add an annotation if we want to override ODataLib's default type name serialization behavior.
             if (ShouldAddTypeNameAnnotation(metadataLevel))
             {
                 string typeName;
 
+                // Provide the type name to serialize (or null to force it not to serialize).
                 if (ShouldSuppressTypeNameSerialization(metadataLevel))
                 {
                     typeName = null;
@@ -117,9 +127,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             switch (metadataLevel)
             {
+                // Don't interfere with the correct default behavior in non-JSON light formats.
                 case ODataMetadataLevel.Default:
+                // For complex types, the default behavior matches the requirements for minimal metadata mode, so no
+                // annotation is necessary.
                 case ODataMetadataLevel.MinimalMetadata:
                     return false;
+                // In other cases, this class must control the type name serialization behavior.
                 case ODataMetadataLevel.FullMetadata:
                 case ODataMetadataLevel.NoMetadata:
                 default: // All values already specified; just keeping the compiler happy.

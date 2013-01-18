@@ -206,14 +206,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             IEdmModel model = context.EdmModel;
 
-            if (ShouldOmitAction(action, model, metadataLevel))
+            ActionLinkBuilder builder = model.GetActionLinkBuilder(action);
+
+            if (builder == null)
             {
                 return null;
             }
 
-            ActionLinkBuilder builder = model.GetActionLinkBuilder(action);
-
-            if (builder == null)
+            if (ShouldOmitAction(action, model, builder, metadataLevel))
             {
                 return null;
             }
@@ -317,14 +317,17 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return metadataLevel != ODataMetadataLevel.Default;
         }
 
-        internal static bool ShouldOmitAction(IEdmFunctionImport action, IEdmModel model,
+        internal static bool ShouldOmitAction(IEdmFunctionImport action, IEdmModel model, ActionLinkBuilder builder,
             ODataMetadataLevel metadataLevel)
         {
+            Contract.Assert(model != null);
+            Contract.Assert(builder != null);
+
             switch (metadataLevel)
             {
                 case ODataMetadataLevel.MinimalMetadata:
                 case ODataMetadataLevel.NoMetadata:
-                    return model.IsAlwaysBindable(action);
+                    return model.IsAlwaysBindable(action) && builder.FollowsConventions;
 
                 case ODataMetadataLevel.Default:
                 case ODataMetadataLevel.FullMetadata:

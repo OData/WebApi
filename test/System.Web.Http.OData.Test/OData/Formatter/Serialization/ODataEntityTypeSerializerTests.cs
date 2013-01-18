@@ -342,7 +342,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             IEdmFunctionImport functionImport = CreateFakeFunctionImport(true);
 
             ActionLinkBuilder linkBuilder = new ActionLinkBuilder((a) => new Uri("aa://IgnoreTarget"),
-                followsConventions: false);
+                followsConventions: true);
             IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
             annotationsManager.SetActionLinkBuilder(functionImport, linkBuilder);
             annotationsManager.SetIsAlwaysBindable(functionImport);
@@ -549,15 +549,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.Default, false, false)]
-        [InlineData(TestODataMetadataLevel.Default, true, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, false, false)]
-        [InlineData(TestODataMetadataLevel.FullMetadata, true, false)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, false)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, true)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, false, false)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, true, true)]
-        public void TestShouldOmitAction(TestODataMetadataLevel metadataLevel, bool isAlwaysAvailable, bool expectedResult)
+        [InlineData(TestODataMetadataLevel.Default, false, false, false)]
+        [InlineData(TestODataMetadataLevel.Default, false, true, false)]
+        [InlineData(TestODataMetadataLevel.Default, true, false, false)]
+        [InlineData(TestODataMetadataLevel.Default, true, true, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, false, false, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, false, true, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true, false, false)]
+        [InlineData(TestODataMetadataLevel.FullMetadata, true, true, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, false, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, false, true, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, false, false)]
+        [InlineData(TestODataMetadataLevel.MinimalMetadata, true, true, true)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, false, false, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, false, true, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true, false, false)]
+        [InlineData(TestODataMetadataLevel.NoMetadata, true, true, true)]
+        public void TestShouldOmitAction(TestODataMetadataLevel metadataLevel, bool isAlwaysAvailable,
+            bool followsConventions, bool expectedResult)
         {
             // Arrange
             IEdmFunctionImport action = CreateFakeFunctionImport(true);
@@ -570,8 +579,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             IEdmModel model = CreateFakeModel(annonationsManager);
 
+            ActionLinkBuilder builder = new ActionLinkBuilder((a) => { throw new NotImplementedException(); },
+                followsConventions);
+
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action, model,
+            bool actualResult = ODataEntityTypeSerializer.ShouldOmitAction(action, model, builder,
                 (ODataMetadataLevel)metadataLevel);
 
             // Assert

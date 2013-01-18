@@ -460,7 +460,7 @@ namespace System.Web.Http.OData.Formatter
 
             main.Action("DoAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasActionLink((c) =>
                 CreateAbsoluteUri("/MainEntity/DoAlways/" + ((MainEntity)(c.EntityInstance)).Id),
-                followsConventions: false);
+                followsConventions: true);
             main.TransientAction("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
                 "MainEntity").HasActionLink((c) =>
                     CreateAbsoluteUri("/MainEntity/DoSometimes/" + ((MainEntity)(c.EntityInstance)).Id),

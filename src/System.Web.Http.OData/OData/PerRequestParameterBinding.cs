@@ -33,6 +33,14 @@ namespace System.Web.Http.OData
             _formatters = formatters;
         }
 
+        public override bool WillReadBody
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             List<MediaTypeFormatter> perRequestFormatters = new List<MediaTypeFormatter>();

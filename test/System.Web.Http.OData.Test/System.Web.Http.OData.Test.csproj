@@ -79,6 +79,7 @@
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
     <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
+    <Compile Include="OData\PerRequestParameterBindingTest.cs" />
     <Compile Include="OData\Routing\ODataPathRouteConstraintTest.cs" />
     <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />

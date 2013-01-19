@@ -216,21 +216,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.MinimalMetadata, false)]
+        [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.FullMetadata, false)]
+        [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.MinimalMetadata, true)]
         [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData("IgnoredEntryType", "IgnoredEntitySetType", TestODataMetadataLevel.NoMetadata, true)]
+        [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.NoMetadata, true)]
+        [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.NoMetadata, true)]
         public void ShouldSuppressTypeNameSerialization(string entryType, string entitySetType,
             TestODataMetadataLevel metadataLevel, bool expectedResult)
         {
             // Arrange
             ODataEntry entry = new ODataEntry
             {
-                TypeName = entryType
+                // The caller uses a namespace-qualified name, which this test leaves empty.
+                TypeName = "." + entryType
             };
             IEdmEntitySet entitySet = CreateEntitySetWithElementTypeName(entitySetType);
 
             // Act
-            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, null,
+            bool actualResult = ODataEntityTypeSerializer.ShouldSuppressTypeNameSerialization(entry, entitySet,
                 (ODataMetadataLevel)metadataLevel);
 
             // Assert

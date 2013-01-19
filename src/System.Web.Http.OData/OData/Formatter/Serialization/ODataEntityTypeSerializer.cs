@@ -339,12 +339,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Contract.Assert(entry != null);
 
             Contract.Assert(metadataLevel != ODataMetadataLevel.Default);
-            Contract.Assert(metadataLevel != ODataMetadataLevel.FullMetadata);
 
             switch (metadataLevel)
             {
                 case ODataMetadataLevel.NoMetadata:
                     return true;
+                case ODataMetadataLevel.FullMetadata:
+                    return false;
                 case ODataMetadataLevel.MinimalMetadata:
                 default: // All values already specified; just keeping the compiler happy.
                     string entitySetTypeName = GetElementTypeName(entitySet);

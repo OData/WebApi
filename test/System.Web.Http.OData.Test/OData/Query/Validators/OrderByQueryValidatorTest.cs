@@ -76,8 +76,19 @@ namespace System.Web.Http.OData.Query.Validators
         public void ValidateAllowsOrderByIt()
         {
             // Arrange
-            OrderByQueryOption option = new OrderByQueryOption("$it", _context);
+            OrderByQueryOption option = new OrderByQueryOption("$it", new ODataQueryContext(EdmCoreModel.Instance, typeof(int)));
             ODataValidationSettings settings = new ODataValidationSettings();
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Fact]
+        public void ValidateAllowsOrderByIt_IfExplicitlySpecified()
+        {
+            // Arrange
+            OrderByQueryOption option = new OrderByQueryOption("$it", new ODataQueryContext(EdmCoreModel.Instance, typeof(int)));
+            ODataValidationSettings settings = new ODataValidationSettings { AllowedOrderByProperties = { "$it" } };
 
             // Act & Assert
             Assert.DoesNotThrow(() => _validator.Validate(option, settings));

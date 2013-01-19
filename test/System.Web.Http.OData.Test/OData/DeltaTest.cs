@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -313,8 +314,8 @@ namespace System.Web.Http.OData
                 return new TheoryDataSet<string, string, object>()
                 {
                     { "IntProperty", "23", 23 },
-                    { "LongProperty", Error.Format("'{0}'", Int64.MaxValue), Int64.MaxValue }, // longs are serialized as strings in odata json
-                    { "LongProperty", Error.Format("'{0}'", Int64.MinValue), Int64.MinValue }, // longs are serialized as strings in odata json
+                    { "LongProperty", String.Format(CultureInfo.InvariantCulture, "'{0}'", Int64.MaxValue), Int64.MaxValue }, // longs are serialized as strings in odata json
+                    { "LongProperty", String.Format(CultureInfo.InvariantCulture, "'{0}'", Int64.MinValue), Int64.MinValue }, // longs are serialized as strings in odata json
                     { "NullableIntProperty", "null", null },
                     { "BoolProperty", "true", true },
                     { "NullableBoolProperty", "null", null },

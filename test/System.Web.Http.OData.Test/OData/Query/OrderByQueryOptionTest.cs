@@ -224,11 +224,13 @@ namespace System.Web.Http.OData.Query
                 actualCustomers.Select(enumModel => enumModel.Id));
         }
 
-        [Fact]
-        public void OrderBy_Throws_For_NestedProperties()
+        [Theory]
+        [InlineData("Address/City")]
+        [InlineData("SharePrice add 1")]
+        public void OrderBy_Throws_For_NestedPropertiesAndExpressions(string orderByQuery)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("Address/City", new ODataQueryContext(model, typeof(Customer)));
+            var orderByOption = new OrderByQueryOption(orderByQuery, new ODataQueryContext(model, typeof(Customer)));
 
             Assert.Throws<ODataException>(
                 () => orderByOption.OrderByNodes.Count(),
@@ -251,17 +253,6 @@ namespace System.Web.Http.OData.Query
 
             option.Validator = null;
             Assert.DoesNotThrow(() => option.Validate(settings));
-        }
-
-        [Fact]
-        public void OrderBy_Throws_For_Expressions()
-        {
-            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var orderByOption = new OrderByQueryOption("SharePrice add 1", new ODataQueryContext(model, typeof(Customer)));
-
-            Assert.Throws<ODataException>(
-                () => orderByOption.OrderByNodes.Count(),
-                "Only ordering by properties at the root level is supported for non-primitive collections. Nested properties and expressions are not supported.");
         }
 
         [Fact]

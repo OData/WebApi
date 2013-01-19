@@ -20,7 +20,7 @@ namespace System.Web.Http.OData.Query
             {
                 if (allowedArithmeticOperator != AllowedArithmeticOperators.All)
                 {
-                    allArithmeticOperators = allArithmeticOperators | allowedArithmeticOperator;
+                    allArithmeticOperators |= allowedArithmeticOperator;
                 }
             }
 

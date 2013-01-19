@@ -66,6 +66,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateProperty_SetsTypeName()
+        {
+            // Arrange
+            object graph = new int[] { 1, 2, 3 };
+            string elementName = "TestCollection";
+            ODataSerializerContext context = new ODataSerializerContext();
+
+            // Act
+            ODataProperty property = _serializer.CreateProperty(graph, elementName, context);
+
+            // Assert
+            Assert.NotNull(property);
+            Assert.NotNull(property.Value);
+            Assert.IsType<ODataCollectionValue>(property.Value);
+            ODataCollectionValue collection = (ODataCollectionValue)property.Value;
+            Assert.Equal("Collection(Edm.Int32)", collection.TypeName);
+        }
+
+        [Fact]
         public void AddTypeNameAnnotationAsNeeded_DoesNotAddAnnotation_InDefaultMetadataMode()
         {
             // Arrange

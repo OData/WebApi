@@ -363,21 +363,25 @@ namespace System.Web.Http.OData.Formatter
                     throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
                 }
 
-                Uri baseAddress = new Uri(_request.RequestUri, configuration.VirtualPathRoot);
+                UrlHelper urlHelper = _request.GetUrlHelper();
+                Contract.Assert(urlHelper != null);
+
+                string baseAddress = urlHelper.ODataLink();
+                if (baseAddress == null)
+                {
+                    throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
+                }
 
                 IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream);
 
                 ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
                 {
-                    BaseUri = baseAddress,
+                    BaseUri = new Uri(baseAddress),
                     Version = _version,
                     Indent = true,
                     DisableMessageStreamDisposal = true,
                     MessageQuotas = MessageWriterQuotas
                 };
-
-                UrlHelper urlHelper = _request.GetUrlHelper();
-                Contract.Assert(urlHelper != null);
 
                 // The MetadataDocumentUri is never required for errors. Additionally, it sometimes won't be available
                 // for errors, such as when routing itself fails. In that case, the route data property is not

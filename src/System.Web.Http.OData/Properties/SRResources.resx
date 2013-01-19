@@ -568,4 +568,7 @@
   <data name="ManyNavigationPropertiesCannotBeChanged" xml:space="preserve">
     <value>Cannot change multiplicity of the collection navigation property '{0}'.</value>
   </data>
+  <data name="UnableToDetermineBaseUrl" xml:space="preserve">
+    <value>The ODataMediaTypeFormatter was unable to determine the base URI for the request. The request must be processed by an OData route for the OData formatter to serialize the response.</value>
+  </data>
 </root>

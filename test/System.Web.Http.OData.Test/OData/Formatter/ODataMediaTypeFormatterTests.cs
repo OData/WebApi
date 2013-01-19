@@ -17,6 +17,7 @@ using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -80,6 +81,55 @@ namespace System.Web.Http.OData.Formatter
                     "<updated>*.*</updated>", "<updated>UpdatedTime</updated>");
                 Assert.Xml.Equal(expectedContent, actualContent, replaceUpdateTime);
             }
+        }
+
+        [Theory]
+        // Slight inconsistency between direct link generation and Url.Link adds a "/" at the end when the OData path is empty
+        // Tracked by Work Item 793
+        [InlineData("prefix", "http://localhost/prefix", "http://localhost/prefix/")]
+        [InlineData("{a}", "http://localhost/prefix", "http://localhost/prefix")]
+        [InlineData("{a}/{b}", "http://localhost/prefix/prefix2", "http://localhost/prefix/prefix2")]
+        public void WriteToStreamAsync_ReturnsCorrectBaseUri(string routePrefix, string requestUri, string expectedBaseUri)
+        {
+            IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpConfiguration configuration = new HttpConfiguration();
+            string routeName = "Route";
+            configuration.Routes.MapODataRoute(routeName, routePrefix, model);
+            request.SetConfiguration(configuration);
+            request.SetEdmModel(model);
+            request.SetODataPath(new ODataPath());
+            request.SetODataRouteName(routeName);
+            HttpRouteData routeData = new HttpRouteData(new HttpRoute());
+            routeData.Values.Add("a", "prefix");
+            routeData.Values.Add("b", "prefix2");
+            request.Properties[HttpPropertyKeys.HttpRouteDataKey] = routeData;
+
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
+            var content = new ObjectContent<ODataWorkspace>(new ODataWorkspace(), formatter);
+
+            string actualContent = content.ReadAsStringAsync().Result;
+            Assert.Contains("xml:base=\"" + expectedBaseUri + "\"", actualContent);
+        }
+
+        [Fact]
+        public void WriteToStreamAsync_Throws_WhenBaseUriCannotBeGenerated()
+        {
+            IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapHttpRoute("OData", "{param}");
+            request.SetConfiguration(configuration);
+            request.SetEdmModel(model);
+            request.SetODataPath(new ODataPath());
+            request.SetODataRouteName("OData");
+
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
+            var content = new ObjectContent<ODataWorkspace>(new ODataWorkspace(), formatter);
+
+            Assert.Throws<SerializationException>(
+                () => content.ReadAsStringAsync().Result,
+                "The ODataMediaTypeFormatter was unable to determine the base URI for the request. The request must be processed by an OData route for the OData formatter to serialize the response.");
         }
 
         [Theory]

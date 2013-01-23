@@ -40,7 +40,8 @@
 
     function onError(error, inputElement) {  // 'this' is the form element
         var container = $(this).find("[data-valmsg-for='" + escapeAttributeValue(inputElement[0].name) + "']"),
-            replace = $.parseJSON(container.attr("data-valmsg-replace") || null) !== false;
+            replaceAttrValue = container.attr("data-valmsg-replace"),
+            replace = replaceAttrValue ? $.parseJSON(replaceAttrValue) !== false : null;
 
         container.removeClass("field-validation-valid").addClass("field-validation-error");
         error.data("unobtrusiveContainer", container);
@@ -70,7 +71,8 @@
 
     function onSuccess(error) {  // 'this' is the form element
         var container = error.data("unobtrusiveContainer"),
-            replace = $.parseJSON(container.attr("data-valmsg-replace") || null);
+            replaceAttrValue = container.attr("data-valmsg-replace"),
+            replace = replaceAttrValue ? $.parseJSON(replaceAttrValue) : null;
 
         if (container) {
             container.addClass("field-validation-valid").removeClass("field-validation-error");

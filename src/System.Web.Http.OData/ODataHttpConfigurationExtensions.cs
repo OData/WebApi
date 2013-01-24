@@ -15,6 +15,8 @@ namespace System.Web.Http
     {
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
+        /// To avoid processing unexpected or malicious queries, use the validation settings on <see cref="QueryableAttribute"/> to validate
+        /// incoming queries. For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
         public static void EnableQuerySupport(this HttpConfiguration configuration)
@@ -24,6 +26,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type.
+        /// To avoid processing unexpected or malicious queries, use the validation settings on <see cref="QueryableAttribute"/> to validate
+        /// incoming queries. For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
         /// <param name="queryFilter">The action filter that executes the query.</param>

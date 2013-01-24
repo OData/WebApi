@@ -20,6 +20,8 @@ namespace System.Web.Http
 {
     /// <summary>
     /// This class defines an attribute that can be applied to an action to enable querying using the OData query syntax.
+    /// To avoid processing unexpected or malicious queries, use the validation settings on <see cref="QueryableAttribute"/> to validate
+    /// incoming queries. For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "We want to be able to subclass this type.")]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]

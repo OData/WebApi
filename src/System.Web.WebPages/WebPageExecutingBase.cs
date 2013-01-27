@@ -152,7 +152,7 @@ namespace System.Web.WebPages
         /// <summary>
         /// Normalizes path relative to the current virtual path and throws if a file does not exist at the location.
         /// </summary>
-        internal string NormalizeLayoutPagePath(string layoutPagePath)
+        protected internal virtual string NormalizeLayoutPagePath(string layoutPagePath)
         {
             var virtualPath = NormalizePath(layoutPagePath);
             // Look for it as specified, either absolute, relative or same folder
@@ -233,7 +233,7 @@ namespace System.Web.WebPages
                         {
                             WritePositionTaggedLiteral(writer, pageVirtualPath, attrVal.Prefix);
                         }
-                        
+
                         // Calculate length of the source span by the position of the next value (or suffix)
                         int sourceLength = next.Position - attrVal.Value.Position;
 

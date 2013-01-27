@@ -55,7 +55,7 @@ namespace System.Web.Mvc
 
         public string ViewPath { get; protected set; }
 
-        public void Render(ViewContext viewContext, TextWriter writer)
+        public virtual void Render(ViewContext viewContext, TextWriter writer)
         {
             if (viewContext == null)
             {

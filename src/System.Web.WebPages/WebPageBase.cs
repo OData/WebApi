@@ -116,7 +116,7 @@ namespace System.Web.WebPages
         /// <summary>
         /// Attempts to create a WebPageBase instance from a virtualPath and wraps complex compiler exceptions with simpler messages
         /// </summary>
-        private WebPageBase CreatePageFromVirtualPath(string virtualPath, HttpContextBase httpContext, Func<string, bool> virtualPathExists, DisplayModeProvider displayModeProvider, IDisplayMode displayMode)
+        protected virtual WebPageBase CreatePageFromVirtualPath(string virtualPath, HttpContextBase httpContext, Func<string, bool> virtualPathExists, DisplayModeProvider displayModeProvider, IDisplayMode displayMode)
         {
             try
             {

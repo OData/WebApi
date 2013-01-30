@@ -50,6 +50,7 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
+                MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
@@ -67,7 +68,6 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/atom+xml"),
                 MediaTypeHeaderValue.Parse("application/atom+xml;type=entry"),
                 MediaTypeHeaderValue.Parse("application/xml"),
-                MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
                 MediaTypeHeaderValue.Parse("text/xml")
             };
 
@@ -276,6 +276,7 @@ namespace System.Web.Http.OData.Formatter
             // Assert
             IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
             {
+                MediaTypeHeaderValue.Parse("application/atomsvc+xml"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json;odata=minimalmetadata"),
@@ -289,8 +290,7 @@ namespace System.Web.Http.OData.Formatter
                 MediaTypeHeaderValue.Parse("application/json;streaming=true"),
                 MediaTypeHeaderValue.Parse("application/json;streaming=false"),
                 MediaTypeHeaderValue.Parse("application/json"),
-                MediaTypeHeaderValue.Parse("application/xml"),
-                MediaTypeHeaderValue.Parse("application/atomsvc+xml")
+                MediaTypeHeaderValue.Parse("application/xml")
             };
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
@@ -443,7 +443,7 @@ namespace System.Web.Http.OData.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, serviceDocumentType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json; odata=minimalmetadata; streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/atomsvc+xml"), mediaType);
         }
 
         [Fact]

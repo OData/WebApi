@@ -109,11 +109,10 @@ namespace System.Web.Http.OData.Builder
 
             HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/xml"));
             var response = client.SendAsync(request).Result;
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("application/atomsvc+xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<workspace>", response.Content.ReadAsStringAsync().Result);
         }
 

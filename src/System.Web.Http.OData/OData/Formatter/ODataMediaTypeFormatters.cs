@@ -21,13 +21,13 @@ namespace System.Web.Http.OData.Formatter
         {
             return new List<ODataMediaTypeFormatter>()
             {
-                // Create JSON formatter first so it gets used when the request doesn't
-                // ask for a specific content type
+                // Create atomsvc+xml formatter first to handle service document requests without an Accept header in an XML format
+                CreateApplicationAtomSvcXml(),
+                // Create JSON formatter next so it gets used when the request doesn't ask for a specific content type
                 CreateApplicationJson(),
                 CreateApplicationAtomXmlTypeFeed(),
                 CreateApplicationAtomXmlTypeEntry(),
                 CreateApplicationXml(),
-                CreateApplicationAtomSvcXml(),
                 CreateTextXml()
             };
         }

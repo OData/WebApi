@@ -762,12 +762,6 @@ namespace System.Web.Mvc
                 }
             }
 
-            // if there weren't any elements at all in the request, just return
-            if (modelList.Count == 0)
-            {
-                return null;
-            }
-
             // replace the original collection
             object dictionary = bindingContext.Model;
             CollectionHelpers.ReplaceDictionary(keyType, valueType, dictionary, modelList);

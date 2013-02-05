@@ -1950,20 +1950,52 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
-        public void UpdateDictionaryReturnsNullIfNoValidElementsFound()
+        public void UpdateDictionaryReturnsEmptyDictionaryIfNoValidElementsFound()
         {
             // Arrange
+            ControllerContext controllerContext = new Mock<ControllerContext>().Object;
+
+            Dictionary<int, string> model = new Dictionary<int, string>();
+
             ModelBindingContext bindingContext = new ModelBindingContext()
             {
+                ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, model.GetType()),
                 ValueProvider = new SimpleValueProvider()
             };
-            DefaultModelBinder binder = new DefaultModelBinder();
+
+            Mock<IModelBinder> mockIntBinder = new Mock<IModelBinder>();
+            mockIntBinder
+                .Setup(b => b.BindModel(It.IsAny<ControllerContext>(), It.IsAny<ModelBindingContext>()))
+                .Returns(
+                    delegate(ControllerContext cc, ModelBindingContext bc)
+                    {
+                        return Int32.Parse(bc.ModelName.Substring(4, 1), CultureInfo.InvariantCulture) + 10;
+                    });
+
+            Mock<IModelBinder> mockStringBinder = new Mock<IModelBinder>();
+            mockStringBinder
+                .Setup(b => b.BindModel(It.IsAny<ControllerContext>(), It.IsAny<ModelBindingContext>()))
+                .Returns(
+                    delegate(ControllerContext cc, ModelBindingContext bc)
+                    {
+                        return (Int32.Parse(bc.ModelName.Substring(4, 1), CultureInfo.InvariantCulture) + 10) + "Value";
+                    });
+
+            DefaultModelBinder binder = new DefaultModelBinder()
+            {
+                Binders = new ModelBinderDictionary()
+                {
+                    { typeof(int), mockIntBinder.Object },
+                    { typeof(string), mockStringBinder.Object }
+                }
+            };
 
             // Act
-            object updatedModel = binder.UpdateDictionary(null, bindingContext, typeof(object), typeof(object));
+            Dictionary<int, string> updatedModel = binder.UpdateDictionary(controllerContext, bindingContext, typeof(int), typeof(string)) as Dictionary<int, string>;
 
             // Assert
-            Assert.Null(updatedModel);
+            Assert.NotNull(updatedModel);
+            Assert.Empty(updatedModel);
         }
 
         [Fact]

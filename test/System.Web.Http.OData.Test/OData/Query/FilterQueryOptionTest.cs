@@ -2,9 +2,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Query.Validators;
+using System.Web.Http.OData.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query;
@@ -351,10 +353,7 @@ namespace System.Web.Http.OData.Query
         public void ApplyToEnums_ReturnsCorrectQueryable(string filter, int[] enumModelIds)
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<EnumModel>("EnumModels");
-            var model = builder.GetEdmModel();
-
+            var model = GetEnumModel();
             var context = new ODataQueryContext(model, typeof(EnumModel));
             var filterOption = new FilterQueryOption(filter, context);
             IEnumerable<EnumModel> enumModels = EnumModelTestData;
@@ -388,10 +387,7 @@ namespace System.Web.Http.OData.Query
         public void ApplyToEnums_ThrowsNotSupported_ForStringFunctions(string filter, string exceptionMessage)
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<EnumModel>("EnumModels");
-            var model = builder.GetEdmModel();
-
+            var model = GetEnumModel();
             var context = new ODataQueryContext(model, typeof(EnumModel));
             var filterOption = new FilterQueryOption(filter, context);
             IEnumerable<EnumModel> enumModels = EnumModelTestData;
@@ -401,6 +397,15 @@ namespace System.Web.Http.OData.Query
                 () => filterOption.ApplyTo(enumModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }),
                 exceptionMessage
             );
+        }
+
+        private static IEdmModel GetEnumModel()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(EnumModel)));
+            var builder = new ODataConventionModelBuilder(config);
+            builder.EntitySet<EnumModel>("EnumModels");
+            return builder.GetEdmModel();
         }
     }
 }

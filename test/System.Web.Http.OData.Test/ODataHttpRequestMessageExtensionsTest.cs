@@ -5,6 +5,7 @@ using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
@@ -27,9 +28,7 @@ namespace System.Net.Http
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
-            IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmModel model = new EdmModel();
 
             // Act
             request.SetEdmModel(model);
@@ -43,9 +42,7 @@ namespace System.Net.Http
         public void GetODataPathHandlerReturnsDefaultPathHandlerByDefault()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Customer>(typeof(Customer).Name);
-            IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmModel model = new EdmModel();
             request.SetEdmModel(model);
 
             var pathHandler = request.GetODataPathHandler();

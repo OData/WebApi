@@ -3,7 +3,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.TestCommon;
 using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Routing
@@ -12,7 +14,9 @@ namespace System.Web.Http.OData.Routing
     {
         public static IEdmModel GetModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver());
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
             builder.EntitySet<RoutingCustomer>("RoutingCustomers");
             builder.EntitySet<Product>("Products");
             builder.EntitySet<SalesPerson>("SalesPeople");

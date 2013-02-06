@@ -5,9 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.OData;
-using Microsoft.Data.OData.Query.SemanticAst;
 
 namespace System.Web.Http.OData.Query
 {
@@ -21,7 +19,7 @@ namespace System.Web.Http.OData.Query
     }
 
     public class QueryCompositionCustomerController : ApiController
-    {   
+    {
         internal static List<QueryCompositionCustomer> CustomerList = new List<QueryCompositionCustomer>
             {  
                 new QueryCompositionCustomer 
@@ -92,16 +90,6 @@ namespace System.Web.Http.OData.Query
         }
     }
 
-    public class QueryCompositionCustomerWithTaskOfHttpResponseMessageController : ApiController
-    {
-        [Queryable]
-        public Task<HttpResponseMessage> Get()
-        {
-            return TaskHelpers.FromResult(
-                Request.CreateResponse(HttpStatusCode.OK, QueryCompositionCustomerController.CustomerList.AsEnumerable()));
-        }
-    }
-
     public class QueryCompositionCustomerGlobalController : ApiController
     {
         public IQueryable<QueryCompositionCustomer> Get()
@@ -117,74 +105,6 @@ namespace System.Web.Http.OData.Query
         public IQueryable<QueryCompositionCustomer> Get()
         {
             return QueryCompositionCustomerController.CustomerList.AsQueryable();
-        }
-
-        // low level api
-        [MyQueryable]
-        public IQueryable<QueryCompositionCustomer> Get(int key)
-        {
-            return QueryCompositionCustomerController.CustomerList.AsQueryable();
-        }
-    }
-
-    public class MyQueryableAttribute : QueryableAttribute
-    {
-        public override void ValidateQuery(HttpRequestMessage request, ODataQueryOptions queryOptions)
-        {
-            if (queryOptions.Filter != null)
-            {
-                queryOptions.Filter.Validator = new MyFilterQueryValidator();
-            }
-
-            if (queryOptions.OrderBy != null)
-            {
-                queryOptions.OrderBy.Validator = new MyOrderByQueryValidator();
-            }
-
-            base.ValidateQuery(request, queryOptions);
-        }
-    }
-
-    public class MyFilterQueryValidator : FilterQueryValidator
-    {
-        public override void ValidateConstantNode(ConstantNode constantNode, ODataValidationSettings settings)
-        {
-            // Validate that client did not send a big constant in the query
-            if (Convert.ToInt32(constantNode.Value) > 100)
-            {
-                throw new ODataException("Any constant that is more than 100 is not allowed.");
-            }
-
-            base.ValidateConstantNode(constantNode, settings);
-        }
-    }
-
-    public class MyOrderByQueryValidator : OrderByQueryValidator
-    {
-        public override void Validate(OrderByQueryOption option, ODataValidationSettings validationSettings)
-        {
-            // validate the orderby is executed in a way that one can order either by Id or by Name, but not both
-            if (option.OrderByNodes.Count > 1)
-            {
-                throw new ODataException("Order by more than one property is not allowed.");
-            }
-
-            base.Validate(option, validationSettings);
-        }
-    }
-
-    public class QueryCompositionCategoryValidationController : ApiController
-    {
-        [Queryable(AllowedQueryOptions = AllowedQueryOptions.OrderBy | AllowedQueryOptions.Filter)]
-        public IQueryable<QueryCompositionCategory> Get()
-        {
-            return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
-        }
-
-        [Queryable(AllowedOrderByProperties = "Id")]
-        public IQueryable<QueryCompositionCategory> Get(int key)
-        {
-            return Enumerable.Empty<QueryCompositionCategory>().AsQueryable();
         }
     }
 
@@ -232,34 +152,6 @@ namespace System.Web.Http.OData.Query
             }
 
             return result.Count();
-        }
-    }
-
-    public class QueryCompositionCustomerLowLevelWithoutDefaultOrderController : ApiController
-    {
-        // demo 2: low level APIs
-        public IQueryable<QueryCompositionCustomer> Get(ODataQueryOptions queryOptions)
-        {
-            if (!ModelState.IsValid)
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            IQueryable<QueryCompositionCustomer> result = null;
-            try
-            {
-                ODataQuerySettings querySettings = new ODataQuerySettings
-                {
-                    EnsureStableOrdering = false
-                };
-                result = queryOptions.ApplyTo(QueryCompositionCustomerController.CustomerList.AsQueryable(), querySettings) as IQueryable<QueryCompositionCustomer>;
-            }
-            catch (ODataException exception)
-            {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, exception));
-            }
-
-            return result;
         }
     }
 

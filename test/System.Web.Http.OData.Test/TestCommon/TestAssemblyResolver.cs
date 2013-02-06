@@ -16,6 +16,11 @@ namespace System.Web.Http.OData.TestCommon
             _assemblies.Add(assembly);
         }
 
+        public TestAssemblyResolver(params Type[] types)
+            : this(new MockAssembly(types))
+        {
+        }
+
         public ICollection<Assembly> GetAssemblies()
         {
             return _assemblies;

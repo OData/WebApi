@@ -102,6 +102,9 @@
     <Compile Include="..\System.Net.Http.Formatting.Test\Formatting\MediaTypeFormatterTestBase.cs">
       <Link>OData\Formatter\MediaTypeFormatterTestBase.cs</Link>
     </Compile>
+    <Compile Include="..\System.Web.Http.Test\Util\ContextUtil.cs">
+      <Link>TestCommon\ContextUtil.cs</Link>
+    </Compile>
     <Compile Include="ODataHttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="HttpRequestMessageExtensions.cs" />
     <Compile Include="HttpRouteCollectionExtensions.cs" />

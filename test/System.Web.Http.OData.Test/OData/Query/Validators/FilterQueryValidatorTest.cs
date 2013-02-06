@@ -78,7 +78,7 @@ namespace System.Web.Http.OData.Query.Validators
 
             Assert.Throws<ODataException>(() =>
                  _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
-                new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.AllMathFunctions }), 
+                new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.AllMathFunctions }),
                 "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
         }
 
@@ -205,7 +205,7 @@ namespace System.Web.Http.OData.Query.Validators
             // Act & Assert
             Assert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
-       
+
         [Theory]
         [PropertyData("CloseToLongInputs")]
         public void AlmostLongInputs_DonotCauseMaxNodeCountExceededExceptionOrTimeoutDuringCompilation(string filter)
@@ -219,8 +219,60 @@ namespace System.Web.Http.OData.Query.Validators
             FilterQueryOption option = new FilterQueryOption(filter, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(()=> _validator.Validate(option, settings));
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
             Assert.DoesNotThrow(() => option.ApplyTo(new List<Product>().AsQueryable(), new ODataQuerySettings()));
+        }
+
+        [Fact]
+        public void AllowedArithmeticOperators_ThrowsOnNotAllowedOperators()
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                AllowedArithmeticOperators = AllowedArithmeticOperators.All & ~AllowedArithmeticOperators.Modulo
+            };
+
+            FilterQueryOption option = new FilterQueryOption("ProductID mod 2 eq 0", _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _validator.Validate(option, settings),
+                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on QueryableAttribute or QueryValidationSettings.");
+        }
+
+        [Fact]
+        public void AllowedFunctions_ThrowsOnNotAllowedFunctions()
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.All & ~AllowedFunctions.Length
+            };
+
+            FilterQueryOption option = new FilterQueryOption("length(ProductName) eq 6", _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _validator.Validate(option, settings),
+                "Function 'length' is not allowed. To allow it, set the 'AllowedFunctions' property on QueryableAttribute or QueryValidationSettings.");
+
+        }
+
+        [Fact]
+        public void AllowedLogicalOperators_ThrowsOnNotAllowedOperators()
+        {
+            // Arrange
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                AllowedLogicalOperators = AllowedLogicalOperators.All & ~AllowedLogicalOperators.NotEqual
+            };
+
+            FilterQueryOption option = new FilterQueryOption("length(ProductName) ne 6", _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _validator.Validate(option, settings),
+                "Logical operator 'NotEqual' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on QueryableAttribute or QueryValidationSettings.");
         }
 
         [Fact]

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,15 +8,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Text;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
-using System.Web.Http.Hosting;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Query.Controllers;
 using System.Web.Http.OData.Query.Validators;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
@@ -114,7 +113,7 @@ namespace System.Web.Http.OData.Query
                 AllowedLogicalOperators.None - 1,
                 AllowedLogicalOperators.GreaterThanOrEqual);
         }
-        
+
         [Fact]
         public void EnableConstantParameterization_Property_RoundTrips()
         {
@@ -435,7 +434,7 @@ namespace System.Web.Http.OData.Query
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
-            Assert.DoesNotThrow(()=>attribute.ValidateQuery(request, options));
+            Assert.DoesNotThrow(() => attribute.ValidateQuery(request, options));
         }
 
         [Fact]
@@ -500,7 +499,7 @@ namespace System.Web.Http.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.Http.OData.Builder.TestModels.Customer)), request);
-            
+
             // Act & Assert
             Assert.DoesNotThrow(() => attribute.ApplyQuery(new List<System.Web.Http.OData.Builder.TestModels.Customer>().AsQueryable(), options));
         }
@@ -622,6 +621,75 @@ namespace System.Web.Http.OData.Query
             Assert.NotNull(queryModel);
             Assert.Same(model, queryModel);
             Assert.False(descriptor.Properties.ContainsKey("MS_EdmModelSystem.Web.Http.OData.Query.QueryCompositionCustomer"));
+        }
+
+        [Fact]
+        public void QueryableOnActionUnknownOperatorIsAllowed()
+        {
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
+                "http://localhost:8080/?$orderby=$it desc&unknown=12",
+                Enumerable.Range(0, 5).AsQueryable());
+
+            // unsupported operator - ignored
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            List<int> result = actionExecutedContext.Response.Content.ReadAsAsync<List<int>>().Result;
+            Assert.Equal(new[] { 4, 3, 2, 1, 0 }, result);
+        }
+
+        [Fact]
+        public void QueryableOnActionUnknownOperatorStartingDollarSignThrows()
+        {
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
+                "http://localhost:8080/QueryCompositionCustomer?$orderby=Name desc&$unknown=12",
+                QueryCompositionCustomerController.CustomerList.AsQueryable());
+
+            var exception = Assert.Throws<HttpResponseException>(() => attribute.OnActionExecuted(actionExecutedContext));
+
+            // QueryableAttribute will validate and throws
+            Assert.Equal(HttpStatusCode.BadRequest, exception.Response.StatusCode);
+        }
+
+        [Fact]
+        public virtual void QueryableUsesConfiguredAssembliesResolver_For_MappingDerivedTypes()
+        {
+            // Arrange
+            QueryableAttribute attribute = new QueryableAttribute();
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
+                "http://localhost:8080/QueryCompositionCustomer/?$filter=Id eq 2",
+                QueryCompositionCustomerController.CustomerList.AsQueryable());
+
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
+            IEdmModel model = modelBuilder.GetEdmModel();
+            model.SetAnnotationValue<ClrTypeAnnotation>(model.FindType("System.Web.Http.OData.Query.QueryCompositionCustomer"), null);
+
+            bool called = false;
+            Mock<IAssembliesResolver> assembliesResolver = new Mock<IAssembliesResolver>();
+            assembliesResolver
+                .Setup(r => r.GetAssemblies())
+                .Returns(new DefaultAssembliesResolver().GetAssemblies())
+                .Callback(() => { called = true; })
+                .Verifiable();
+            actionExecutedContext.Request.GetConfiguration().Services.Replace(typeof(IAssembliesResolver), assembliesResolver.Object);
+
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            // Assert
+            Assert.True(called);
+        }
+
+        private static HttpActionExecutedContext GetActionExecutedContext<TResponse>(string uri, TResponse result)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            var actionContext = ContextUtil.CreateActionContext(ContextUtil.CreateControllerContext(request: request));
+            var response = request.CreateResponse<TResponse>(HttpStatusCode.OK, result);
+            var actionExecutedContext = new HttpActionExecutedContext { ActionContext = actionContext, Response = response };
+            actionContext.ActionDescriptor.Configuration = request.GetConfiguration();
+            return actionExecutedContext;
         }
     }
 }

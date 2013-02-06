@@ -57,7 +57,7 @@ namespace System.Web.Http
             {
                 config = new HttpConfiguration();
             }
-            return new HttpControllerDescriptor(config);
+            return new HttpControllerDescriptor() { Configuration = config };
         }
     }
 }

@@ -749,6 +749,20 @@ namespace System.Web.Http.OData.Query
             Assert.True(enumerator.MoveNext());
             Assert.Equal(result, enumerator.Current);
         }
+
+        [Fact]
+        public void ODataQueryOptions_IgnoresUnknownOperatorStartingWithDollar()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$filter=$it eq 6&$unknown=value");
+            ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+
+            var queryable = options.ApplyTo(Enumerable.Range(0, 10).AsQueryable());
+
+            IEnumerator enumerator = queryable.GetEnumerator();
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal(6, enumerator.Current);
+        }
     }
 
     public class ODataQueryOptionTest_ComplexModel

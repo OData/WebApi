@@ -368,6 +368,24 @@ namespace System.Web.Http.OData.Query.Expressions
         }
         #endregion
 
+        [Theory]
+        [InlineData("StringProp gt 'Middle'", "Middle", false)]
+        [InlineData("StringProp ge 'Middle'", "Middle", true)]
+        [InlineData("StringProp lt 'Middle'", "Middle", false)]
+        [InlineData("StringProp le 'Middle'", "Middle", true)]
+        [InlineData("StringProp ge StringProp", "", true)]
+        [InlineData("StringProp gt null", "", true)]
+        [InlineData("null gt StringProp", "", false)]
+        [InlineData("'Middle' gt StringProp", "Middle", false)]
+        [InlineData("'a' lt 'b'", "", true)]
+        public void StringComparisons_Work(string filter, string value, bool expectedResult)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter);
+            var result = RunFilter(filters.WithoutNullPropagation, new DataTypes { StringProp = value });
+            
+            Assert.Equal(result, expectedResult);
+        }
+
         // Issue: 477
         [Theory]
         [InlineData("indexof('hello', StringProp) gt UIntProp")]

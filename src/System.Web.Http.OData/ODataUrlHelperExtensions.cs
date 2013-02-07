@@ -118,7 +118,9 @@ namespace System.Web.Http
                         // If there are, fall back to the slow path.
                         if (indexOfFirstOpenBracket == odataPathTemplateIndex)
                         {
-                            string virtualPathRoot = config.VirtualPathRoot;
+                            // Use the virtual path root on the request if one is specified
+                            // Otherwise, fall back on the virtual path root for the configuration
+                            string virtualPathRoot = request.GetVirtualPathRoot() ?? config.VirtualPathRoot;
                             if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
                             {
                                 virtualPathRoot += "/";

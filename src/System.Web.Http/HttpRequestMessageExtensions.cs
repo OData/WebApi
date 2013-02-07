@@ -744,6 +744,41 @@ namespace System.Net.Http
 
             request.Properties[HttpPropertyKeys.UrlHelperKey] = urlHelper;
         }
+
+        /// <summary>
+        /// Retrieves the root virtual path associated with this request.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
+        /// <returns>The root virtual path associated with this request.</returns>
+        public static string GetVirtualPathRoot(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetProperty<string>(HttpPropertyKeys.VirtualPathRoot);
+        }
+
+        /// <summary>
+        /// Sets the root virtual path associated with this request.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/>.</param>
+        /// <param name="virtualPathRoot">The virtual path root to associate with this request.</param>
+        public static void SetVirtualPathRoot(this HttpRequestMessage request, string virtualPathRoot)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (virtualPathRoot == null)
+            {
+                throw Error.ArgumentNull("virtualPathRoot");
+            }
+
+            request.Properties[HttpPropertyKeys.VirtualPathRoot] = virtualPathRoot;
+        }
         
         /// <summary>
         /// Gets a value indicating whether the request originates from a local address or not.

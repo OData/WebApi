@@ -77,7 +77,8 @@ namespace System.Web.Http
 
             for (int i = 0; i < _collection.Count; i++)
             {
-                IHttpRouteData routeData = _collection[i].GetRouteData(_virtualPathRoot, request);
+                string virtualPathRoot = GetVirtualPathRoot(request);
+                IHttpRouteData routeData = _collection[i].GetRouteData(virtualPathRoot, request);
                 if (routeData != null)
                 {
                     return routeData;
@@ -111,8 +112,7 @@ namespace System.Web.Http
             }
 
             // Construct a new VirtualPathData with the resolved app path
-
-            string virtualPathRoot = _virtualPathRoot;
+            string virtualPathRoot = GetVirtualPathRoot(request);
             if (!virtualPathRoot.EndsWith("/", StringComparison.Ordinal))
             {
                 virtualPathRoot += "/";
@@ -121,6 +121,13 @@ namespace System.Web.Http
             // Note: The virtual path root here always ends with a "/" and the
             // virtual path never starts with a "/" (that's how routes work).
             return new HttpVirtualPathData(virtualPath.Route, virtualPathRoot + virtualPath.VirtualPath);
+        }
+
+        // Returns the virtual path root on the request if one is specified
+        // Otherwise, fall back on the virtual path root for the route collection
+        private string GetVirtualPathRoot(HttpRequestMessage request)
+        {
+            return request.GetVirtualPathRoot() ?? _virtualPathRoot;
         }
 
         public IHttpRoute CreateRoute(string routeTemplate, object defaults, object constraints)

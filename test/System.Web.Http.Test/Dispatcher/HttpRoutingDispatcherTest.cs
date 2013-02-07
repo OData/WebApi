@@ -71,6 +71,7 @@ namespace System.Web.Http.Dispatcher
             responseTask.WaitUntilCompleted();
 
             Assert.Equal(HttpStatusCode.NotFound, responseTask.Result.StatusCode);
+            Assert.True((bool)request.Properties["MS_NoRouteMatched"]);
         }
 
         [Fact]

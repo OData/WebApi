@@ -71,6 +71,7 @@ namespace System.Web.Http.Dispatcher
                 }
                 else
                 {
+                    request.Properties.Add(HttpPropertyKeys.NoRouteMatched, true);
                     return TaskHelpers.FromResult(request.CreateErrorResponse(
                         HttpStatusCode.NotFound,
                         Error.Format(SRResources.ResourceNotFound, request.RequestUri),

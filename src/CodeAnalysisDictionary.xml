@@ -48,6 +48,7 @@
             <Word>Auth</Word>
             <Word>bg</Word>
             <Word>Cors</Word>
+            <Word>Owin</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>

@@ -69,6 +69,16 @@ namespace System.Web.Http.Hosting
         public static readonly string IsLocalKey = "MS_IsLocal";
 
         /// <summary>
+        /// Provides a key that indicates whether the request failed to match a route.
+        /// </summary>
+        public static readonly string NoRouteMatched = "MS_NoRouteMatched";
+
+        /// <summary>
+        /// Provides a key for the root virtual path for a request.
+        /// </summary>
+        public static readonly string VirtualPathRoot = "MS_VirtualPathRoot";
+
+        /// <summary>
         /// Provides a key that indicates whether error details are to be included in the response for this HTTP request.
         /// </summary>
         public static readonly string IncludeErrorDetailKey = "MS_IncludeErrorDetail";

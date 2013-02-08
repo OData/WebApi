@@ -8,7 +8,6 @@
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
         <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
-        <ExtensionsTestResultsDirectory>$(MSBuildThisFileDirectory)bin\Extensions\$(Configuration)\test\TestResults\</ExtensionsTestResultsDirectory>
         <VS2012WindowsXamlInstallPath>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v11.0</VS2012WindowsXamlInstallPath>
         <!-- Check for the Windows XAML msbuild extensions to determine VS version to use, if both 2010 and 2012 are installed -->
         <VisualStudioVersion Condition="Exists($(VS2012WindowsXamlInstallPath))">11.0</VisualStudioVersion>
@@ -24,10 +23,6 @@
             <ReleaseRoot>.</ReleaseRoot>
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
         </SolutionsToBuild>    
-        <SolutionsToBuild Include="Extensions.sln">
-            <ReleaseRoot>Extensions</ReleaseRoot>
-            <BuildInParallel>false</BuildInParallel>
-        </SolutionsToBuild>
     </ItemGroup>    
 
     <Target Name="Integration" DependsOnTargets="Clean;Build;UnitTest" />
@@ -76,9 +71,6 @@
         <ItemGroup>            
             <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll">
                 <ResultsDirectory>$(TestResultsDirectory)</ResultsDirectory>
-            </TestDLLsXunit>
-            <TestDLLsXunit Include="bin\Extensions\$(Configuration)\test\*.Test.dll">
-                <ResultsDirectory>$(ExtensionsTestResultsDirectory)</ResultsDirectory>
             </TestDLLsXunit>
             <XunitProject Include="tools\WebStack.xunit.targets">
                 <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=%(TestDLLsXunit.ResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>

@@ -832,16 +832,6 @@ namespace System.Web.Http.OData.Builder.Conventions
         }
 
         [Fact]
-        public void ModelBuilder_CanBuild_HttpErrorAsComplextype()
-        {
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.ComplexType<HttpError>();
-            var model = modelBuilder.GetEdmModel();
-
-            Assert.NotNull(model);
-        }
-
-        [Fact]
         public void ComplexType_Containing_EntityCollection_Throws()
         {
             MockType entityType = new MockType("EntityType");

@@ -105,20 +105,5 @@ namespace System.Web.Http
 
             return builder.ToString();
         }
-
-        private static TValue GetPropertyValue<TValue>(this HttpError httpError, string key)
-        {
-            Contract.Assert(httpError != null);
-
-            object value;
-            if (httpError.TryGetValue(key, out value))
-            {
-                if (value is TValue)
-                {
-                    return (TValue)value;
-                }
-            }
-            return default(TValue);
-        }
     }
 }

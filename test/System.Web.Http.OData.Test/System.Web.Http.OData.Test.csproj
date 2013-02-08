@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\Extensions\Debug\Test\</OutputPath>
+    <OutputPath>..\..\bin\Debug\Test\</OutputPath>
     <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -30,7 +30,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Extensions\Release\Test\</OutputPath>
+    <OutputPath>..\..\bin\Release\Test\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -40,7 +40,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Extensions\CodeAnalysis\Test\</OutputPath>
+    <OutputPath>..\..\bin\CodeAnalysis\Test\</OutputPath>
     <DefineConstants>TRACE;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -73,9 +73,6 @@
     <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
@@ -85,12 +82,6 @@
       <HintPath>..\..\packages\System.Spatial.5.2.0\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.4.0.20710.0\lib\net40\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.SelfHost">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.SelfHost.4.0.20710.0\lib\net40\System.Web.Http.SelfHost.dll</HintPath>
-    </Reference>
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
@@ -342,9 +333,21 @@
     <EmbeddedResource Include="Resources\WorkItemEntryInJsonLight.json" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\System.Net.Http.Formatting\System.Net.Http.Formatting.csproj">
+      <Project>{668e9021-ce84-49d9-98fb-df125a9fcdb0}</Project>
+      <Name>System.Net.Http.Formatting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\System.Web.Http.OData\System.Web.Http.OData.csproj">
       <Project>{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}</Project>
       <Name>System.Web.Http.OData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.Http.SelfHost\System.Web.Http.SelfHost.csproj">
+      <Project>{66492e69-ce4c-4fb1-9b1f-88dee09d06f1}</Project>
+      <Name>System.Web.Http.SelfHost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Web.Http\System.Web.Http.csproj">
+      <Project>{ddc1ce0c-486e-4e35-bb3b-eab61f8f9440}</Project>
+      <Name>System.Web.Http</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
       <Project>{fccc4cb7-baf7-4a57-9f89-e5766fe536c0}</Project>

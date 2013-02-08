@@ -18,7 +18,7 @@ namespace System.Web.WebPages.Deployment.Test
             var assemblies = new[]
             {
                 new AssemblyName("System.Web.WebPages.Deployment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
-                new AssemblyName("System.Web.WebPages.Deployment, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
+                new AssemblyName("System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
                 new AssemblyName("System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
             };
 
@@ -26,7 +26,7 @@ namespace System.Web.WebPages.Deployment.Test
             var maxVersion = AssemblyUtils.GetMaxWebPagesVersion(assemblies);
 
             // Assert
-            Assert.Equal(new Version("2.1.0.0"), maxVersion);
+            Assert.Equal(new Version("3.0.0.0"), maxVersion);
         }
 
         [Fact]
@@ -39,14 +39,14 @@ namespace System.Web.WebPages.Deployment.Test
                 new AssemblyName("System.Web.WebPages.Development, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"),
                 new AssemblyName("System.Web.WebPages.Deployment, Version=2.2.0.0, Culture=neutral, PublicKeyToken=7777777777777777"),
                 new AssemblyName("System.Web.WebPages.Deployment, Version=2.3.0.0, Culture=en-US, PublicKeyToken=31bf3856ad364e35"),
-                new AssemblyName("System.Web.WebPages.Deployment, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
+                new AssemblyName("System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
             };
 
             // Act
             var maxVersion = AssemblyUtils.GetMaxWebPagesVersion(assemblies);
 
             // Assert
-            Assert.Equal(new Version("2.1.0.0"), maxVersion);
+            Assert.Equal(new Version("3.0.0.0"), maxVersion);
         }
 
         [Fact]
@@ -86,13 +86,13 @@ namespace System.Web.WebPages.Deployment.Test
             var binDirectory = @"X:\test\project";
             TestFileSystem fileSystem = new TestFileSystem();
             fileSystem.AddFile(Path.Combine(binDirectory, "System.Web.WebPages.Deployment.dll"));
-            Func<string, AssemblyName> getAssembyName = _ => new AssemblyName("System.Web.WebPages.Deployment, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+            Func<string, AssemblyName> getAssembyName = _ => new AssemblyName("System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 
             // Act
             var binVersion = AssemblyUtils.GetVersionFromBin(binDirectory, fileSystem, getAssembyName);
 
             // Assert
-            Assert.Equal(new Version("2.1.0.0"), binVersion);
+            Assert.Equal(new Version("3.0.0.0"), binVersion);
         }
 
         [Fact]
@@ -159,17 +159,17 @@ namespace System.Web.WebPages.Deployment.Test
             var expectedAssemblies = new[]
             {
                 "Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "System.Web.Razor, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "System.Web.Helpers, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "System.Web.WebPages, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "System.Web.WebPages.Administration, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "System.Web.WebPages.Razor, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "WebMatrix.Data, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
-                "WebMatrix.WebData, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "System.Web.WebPages.Administration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "WebMatrix.Data, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "WebMatrix.WebData, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
             };
 
             // Act 
-            var assemblies = AssemblyUtils.GetAssembliesForVersion(new Version("2.1.0.0"))
+            var assemblies = AssemblyUtils.GetAssembliesForVersion(new Version("3.0.0.0"))
                 .Select(c => c.ToString())
                 .ToArray();
 

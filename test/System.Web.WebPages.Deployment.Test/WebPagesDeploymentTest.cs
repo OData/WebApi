@@ -291,18 +291,18 @@ namespace System.Web.WebPages.Deployment.Test
         public void ObsoleteGetVersionReturnsVersionFromConfigIfDisabled()
         {
             // Arrange
-            var maxVersion = new Version("2.1.3.4");
+            var maxVersion = new Version("3.0.3.4");
             var fileSystem = new TestFileSystem();
             var configuration = new NameValueCollection();
             configuration["webPages:Enabled"] = "False";
-            configuration["webPages:Version"] = "2.0";
+            configuration["webPages:Version"] = "3.0";
             var path = "blah";
 
             // Act
             var version = WebPagesDeployment.GetObsoleteVersionInternal(path, configuration, fileSystem);
 
             // Assert
-            Assert.Equal(new Version("2.0.0.0"), version);
+            Assert.Equal(new Version("3.0.0.0"), version);
         }
 
         private static string GetTempPath()

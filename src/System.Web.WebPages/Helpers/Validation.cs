@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Web.Infrastructure.DynamicValidationHelper;
 
 namespace System.Web.Helpers
 {
@@ -21,11 +19,7 @@ namespace System.Web.Helpers
         {
             // We don't actually need the request object; we'll get HttpContext.Current directly.
             HttpContext context = HttpContext.Current;
-            Func<NameValueCollection> formGetter;
-            Func<NameValueCollection> queryStringGetter;
-            ValidationUtility.GetUnvalidatedCollections(context, out formGetter, out queryStringGetter);
-
-            return new UnvalidatedRequestValues(new HttpRequestWrapper(context.Request), formGetter, queryStringGetter);
+            return new UnvalidatedRequestValues(new HttpRequestWrapper(context.Request));
         }
 
         public static string Unvalidated(this HttpRequestBase request, string key)

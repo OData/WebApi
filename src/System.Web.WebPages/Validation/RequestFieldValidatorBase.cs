@@ -68,7 +68,7 @@ namespace System.Web.WebPages
                 Debug.Assert(HttpContext.Current == null, "This flag should not be set when we are hosted.");
                 return request.Form[field];
             }
-            return _useUnvalidatedValues ? request.Unvalidated(field) : request.Form[field];
+            return _useUnvalidatedValues ? request.Unvalidated[field] : request.Form[field];
         }
     }
 }

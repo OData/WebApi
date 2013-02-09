@@ -20,11 +20,11 @@
         <StyleCopTreatErrorsAsWarnings Condition=" '$(StyleCopTreatErrorsAsWarnings)' == '' ">false</StyleCopTreatErrorsAsWarnings>
         <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">false</StyleCopEnabled>
 
-        <!-- VisualStudioVersion does not appear in 4.0 so its absence defaults to Dev10 -->
-        <VisualStudioVersion Condition = "'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+        <!-- VisualStudioVersion defaults to Dev11 -->
+        <VisualStudioVersion Condition = "'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
 
-        <!-- Target 4.0 for both VS2010 and VS 11 by default -->
-        <TargetFrameworkVersion Condition = "'$(TargetFrameworkVersion)' == ''">v4.0</TargetFrameworkVersion>
+        <!-- Target 4.5 by default -->
+        <TargetFrameworkVersion Condition = "'$(TargetFrameworkVersion)' == ''">v4.5</TargetFrameworkVersion>
 
         <!-- Use CustomAfterMicrosoftCommonTargets property (defined in Microsoft.Common.targets) to
              inject post-Common targets files without requiring the inclusion -->

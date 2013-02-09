@@ -24,7 +24,9 @@ namespace Microsoft.Web.WebPages.OAuth
                 byte[] serializedWithPadding = new byte[ms.Length + _padding.Length];
                 Buffer.BlockCopy(_padding, 0, serializedWithPadding, 0, _padding.Length);
                 Buffer.BlockCopy(ms.GetBuffer(), 0, serializedWithPadding, _padding.Length, (int)ms.Length);
+#pragma warning disable 0618 // Encode is [Obsolete] in 4.5
                 return MachineKey.Encode(serializedWithPadding, MachineKeyProtection.All);
+#pragma warning restore 0618
             }
         }
 
@@ -38,9 +40,9 @@ namespace Microsoft.Web.WebPages.OAuth
             {
                 return false;
             }
-
+#pragma warning disable 0618 // Decode is [Obsolete] in 4.5
             byte[] decodedWithPadding = MachineKey.Decode(protectedData, MachineKeyProtection.All);
-
+#pragma warning restore 0618
             if (decodedWithPadding.Length < _padding.Length)
             {
                 return false;
@@ -63,6 +65,7 @@ namespace Microsoft.Web.WebPages.OAuth
                     // use temp variable to keep both out parameters consistent and only set them when the input stream is read completely
                     string name = br.ReadString();
                     string userId = br.ReadString();
+
                     // make sure that we consume the entire input stream
                     if (ms.ReadByte() == -1)
                     {

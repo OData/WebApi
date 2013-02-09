@@ -8,7 +8,7 @@ namespace System.Web.Mvc
     public sealed class FormValueProvider : NameValueCollectionValueProvider
     {
         public FormValueProvider(ControllerContext controllerContext)
-            : this(controllerContext, new UnvalidatedRequestValuesWrapper(controllerContext.HttpContext.Request.Unvalidated()))
+            : this(controllerContext, new UnvalidatedRequestValuesWrapper(controllerContext.HttpContext.Request.Unvalidated))
         {
         }
 

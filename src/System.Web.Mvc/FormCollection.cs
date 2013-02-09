@@ -90,7 +90,7 @@ namespace System.Web.Mvc
 
                     return new FormCollection(controllerContext.Controller,
                                               () => controllerContext.HttpContext.Request.Form,
-                                              () => controllerContext.HttpContext.Request.Unvalidated().Form);
+                                              () => controllerContext.HttpContext.Request.Unvalidated.Form);
                 }
             }
         }

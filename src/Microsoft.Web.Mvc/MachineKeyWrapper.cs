@@ -10,12 +10,16 @@ namespace Microsoft.Web.Mvc
     {
         public byte[] Decode(string encodedData, MachineKeyProtection protectionOption)
         {
+#pragma warning disable 0618 // Decode is [Obsolete] in 4.5
             return MachineKey.Decode(encodedData, protectionOption);
+#pragma warning restore 0618
         }
 
         public string Encode(byte[] data, MachineKeyProtection protectionOption)
         {
+#pragma warning disable 0618 // Encode is [Obsolete] in 4.5
             return MachineKey.Encode(data, protectionOption);
+#pragma warning restore 0618
         }
     }
 }

@@ -2,7 +2,6 @@
 
 using System.Collections.Specialized;
 using System.Web;
-using System.Web.Helpers;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -17,8 +16,15 @@ namespace Microsoft.WebPages.Test.Helpers
             NameValueCollection expectedForm = new NameValueCollection();
             NameValueCollection expectedQueryString = new NameValueCollection();
 
+            Mock<System.Web.UnvalidatedRequestValuesBase> mockUnvalidatedRequestValue = new Mock<System.Web.UnvalidatedRequestValuesBase>();
+            mockUnvalidatedRequestValue.SetupGet(u => u.Form).Returns(expectedForm);
+            mockUnvalidatedRequestValue.SetupGet(u => u.QueryString).Returns(expectedQueryString);
+
+            Mock<HttpRequestBase> mockRequest = new Mock<HttpRequestBase>();
+            mockRequest.SetupGet(r => r.Unvalidated).Returns(mockUnvalidatedRequestValue.Object);
+
             // Act
-            UnvalidatedRequestValues unvalidatedValues = new UnvalidatedRequestValues(null, () => expectedForm, () => expectedQueryString);
+            System.Web.Helpers.UnvalidatedRequestValues unvalidatedValues = new System.Web.Helpers.UnvalidatedRequestValues(mockRequest.Object);
 
             // Assert
             Assert.Same(expectedForm, unvalidatedValues.Form);
@@ -56,11 +62,17 @@ namespace Microsoft.WebPages.Test.Helpers
                 { "baz", "bazServerVars" },
                 { "quux", "quuxServerVars" },
             };
+
+            Mock<System.Web.UnvalidatedRequestValuesBase> mockUnvalidatedRequestValue = new Mock<System.Web.UnvalidatedRequestValuesBase>();
+            mockUnvalidatedRequestValue.SetupGet(u => u.Form).Returns(form);
+            mockUnvalidatedRequestValue.SetupGet(u => u.QueryString).Returns(queryString);
+
             Mock<HttpRequestBase> mockRequest = new Mock<HttpRequestBase>();
             mockRequest.Setup(o => o.Cookies).Returns(cookies);
             mockRequest.Setup(o => o.ServerVariables).Returns(serverVars);
+            mockRequest.SetupGet(r => r.Unvalidated).Returns(mockUnvalidatedRequestValue.Object);
 
-            UnvalidatedRequestValues unvalidatedValues = new UnvalidatedRequestValues(mockRequest.Object, () => form, () => queryString);
+            System.Web.Helpers.UnvalidatedRequestValues unvalidatedValues = new System.Web.Helpers.UnvalidatedRequestValues(mockRequest.Object);
 
             // Act
             string fooValue = unvalidatedValues["foo"];

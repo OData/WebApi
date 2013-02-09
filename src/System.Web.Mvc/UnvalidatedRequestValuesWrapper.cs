@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Specialized;
-using System.Web.Helpers;
 
 namespace System.Web.Mvc
 {
@@ -9,9 +8,9 @@ namespace System.Web.Mvc
 
     internal sealed class UnvalidatedRequestValuesWrapper : IUnvalidatedRequestValues
     {
-        private readonly UnvalidatedRequestValues _unvalidatedValues;
+        private readonly UnvalidatedRequestValuesBase _unvalidatedValues;
 
-        public UnvalidatedRequestValuesWrapper(UnvalidatedRequestValues unvalidatedValues)
+        public UnvalidatedRequestValuesWrapper(UnvalidatedRequestValuesBase unvalidatedValues)
         {
             _unvalidatedValues = unvalidatedValues;
         }

@@ -8,24 +8,20 @@ namespace System.Web.Helpers
     public sealed class UnvalidatedRequestValues
     {
         private readonly HttpRequestBase _request;
-        private readonly Func<NameValueCollection> _formGetter;
-        private readonly Func<NameValueCollection> _queryStringGetter;
 
-        internal UnvalidatedRequestValues(HttpRequestBase request, Func<NameValueCollection> formGetter, Func<NameValueCollection> queryStringGetter)
+        internal UnvalidatedRequestValues(HttpRequestBase request)
         {
             _request = request;
-            _formGetter = formGetter;
-            _queryStringGetter = queryStringGetter;
         }
 
         public NameValueCollection Form
         {
-            get { return _formGetter(); }
+            get { return _request.Unvalidated.Form; }
         }
 
         public NameValueCollection QueryString
         {
-            get { return _queryStringGetter(); }
+            get { return _request.Unvalidated.QueryString; }
         }
 
         // this item getter follows the same logic as HttpRequest.get_Item

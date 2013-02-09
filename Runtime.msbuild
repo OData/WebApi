@@ -8,10 +8,6 @@
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
         <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
-        <VS2012WindowsXamlInstallPath>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v11.0</VS2012WindowsXamlInstallPath>
-        <!-- Check for the Windows XAML msbuild extensions to determine VS version to use, if both 2010 and 2012 are installed -->
-        <VisualStudioVersion Condition="Exists($(VS2012WindowsXamlInstallPath))">11.0</VisualStudioVersion>
-        <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
     </PropertyGroup>
     
     <ItemGroup>            
@@ -19,7 +15,7 @@
             <ReleaseRoot>.</ReleaseRoot>
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
         </SolutionsToBuild>    
-        <SolutionsToBuild Include="RuntimeRT.sln" Condition=" '$(VisualStudioVersion)' == '11.0' ">
+        <SolutionsToBuild Include="RuntimeRT.sln">
             <ReleaseRoot>.</ReleaseRoot>
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
         </SolutionsToBuild>    

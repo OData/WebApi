@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Linq;
+using System.Web.Hosting;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -25,27 +27,26 @@ namespace System.Web.Mvc.Test
         public void FileExistsReturnsTrueForExistingPath()
         {
             // Arrange
-            var engine = new TestableBuildManagerViewEngine();
-            var buildManagerMock = new MockBuildManager("some path", typeof(object));
-            engine.BuildManager = buildManagerMock;
+            string testPath = "/Path.txt";
+            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider(testPath));
 
             // Act
-            bool result = engine.FileExists("some path");
+            bool result = engine.FileExists(testPath);
 
             // Assert
             Assert.True(result);
         }
 
         [Fact]
-        public void FileExistsReturnsFalseWhenBuildManagerFileExistsReturnsFalse()
+        public void FileExistsReturnsFalseForNonExistentPath()
         {
             // Arrange
-            var engine = new TestableBuildManagerViewEngine();
-            var buildManagerMock = new MockBuildManager("some path", false);
-            engine.BuildManager = buildManagerMock;
+            string matchingPath = "/Path.txt";
+            string nonMatchingPath = "/PathOther.txt";
+            var engine = new TestableBuildManagerViewEngine(pathProvider: CreatePathProvider(matchingPath));
 
             // Act
-            bool result = engine.FileExists("some path");
+            bool result = engine.FileExists(nonMatchingPath);
 
             // Assert
             Assert.False(result);
@@ -136,6 +137,13 @@ namespace System.Web.Mvc.Test
             Assert.Same(activator.Object, engine.ViewPageActivator);
         }
 
+        private static VirtualPathProvider CreatePathProvider(params string[] files)
+        {
+            var vpp = new Mock<VirtualPathProvider>();
+            vpp.Setup(c => c.FileExists(It.IsAny<string>())).Returns<string>(p => files.Contains(p, StringComparer.OrdinalIgnoreCase));
+            return vpp.Object;
+        }
+
         private class NoParameterlessCtor
         {
             public NoParameterlessCtor(int x)
@@ -155,8 +163,8 @@ namespace System.Web.Mvc.Test
             {
             }
 
-            public TestableBuildManagerViewEngine(IViewPageActivator viewPageActivator = null, IResolver<IViewPageActivator> activatorResolver = null, IDependencyResolver dependencyResolver = null)
-                : base(viewPageActivator, activatorResolver, dependencyResolver)
+            public TestableBuildManagerViewEngine(IViewPageActivator viewPageActivator = null, IResolver<IViewPageActivator> activatorResolver = null, IDependencyResolver dependencyResolver = null, VirtualPathProvider pathProvider = null)
+                : base(viewPageActivator, activatorResolver, dependencyResolver, pathProvider)
             {
             }
 

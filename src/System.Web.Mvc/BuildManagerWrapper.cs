@@ -8,11 +8,6 @@ namespace System.Web.Mvc
 {
     internal sealed class BuildManagerWrapper : IBuildManager
     {
-        bool IBuildManager.FileExists(string virtualPath)
-        {
-            return BuildManager.GetObjectFactory(virtualPath, false) != null;
-        }
-
         Type IBuildManager.GetCompiledType(string virtualPath)
         {
             return BuildManager.GetCompiledType(virtualPath);

@@ -40,16 +40,6 @@ namespace System.Web.Mvc.Test
             _compiledType = compiledType;
         }
 
-        bool IBuildManager.FileExists(string virtualPath)
-        {
-            if (_expectedVirtualPath == virtualPath)
-            {
-                return _fileExists;
-            }
-
-            throw new InvalidOperationException("Unexpected call to IBuildManager.FileExists()");
-        }
-
         public Type GetCompiledType(string virtualPath)
         {
             if (_expectedVirtualPath == virtualPath)

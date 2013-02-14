@@ -662,10 +662,10 @@ namespace System.Web.Http.OData.Query
 
         [Theory]
         [InlineData("http://localhost/Customers", 10, "http://localhost/Customers?$skip=10")]
-        [InlineData("http://localhost/Customers?$filter=Name eq 'Steve'", 10, "http://localhost/Customers?$filter=Name%20eq%20'Steve'&$skip=10")]
+        [InlineData("http://localhost/Customers?$filter=Age ge 18", 10, "http://localhost/Customers?$filter=Age%20ge%2018&$skip=10")]
         [InlineData("http://localhost/Customers?$top=20", 10, "http://localhost/Customers?$top=10&$skip=10")]
         [InlineData("http://localhost/Customers?$skip=5&$top=10", 2, "http://localhost/Customers?$top=8&$skip=7")]
-        [InlineData("http://localhost/Customers?$filter=Name eq 'Steve'&$orderby=Age&$top=11&$skip=6", 10, "http://localhost/Customers?$filter=Name%20eq%20'Steve'&$orderby=Age&$top=1&$skip=16")]
+        [InlineData("http://localhost/Customers?$filter=Age ge 18&$orderby=Name&$top=11&$skip=6", 10, "http://localhost/Customers?$filter=Age%20ge%2018&$orderby=Name&$top=1&$skip=16")]
         [InlineData("http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26", 10, "http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26&$skip=10")]
         public void GetNextPageLink_GetsNextPageLink(string requestUri, int pageSize, string nextPageUri)
         {

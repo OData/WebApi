@@ -3,7 +3,8 @@
 using System.Collections.Generic;
 using System.Net.Http.Formatting;
 using System.Text;
-using Microsoft.Data.Edm;
+using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter
@@ -16,20 +17,31 @@ namespace System.Web.Http.OData.Formatter
         /// <summary>
         /// Creates a list of media type formatters to handle OData.
         /// </summary>
+        /// <param name="serializerProvider">The serializer provider to use.</param>
+        /// <param name="deserializerProvider">The deserializer provider to use.</param>
         /// <returns>A list of media type formatters to handle OData.</returns>
-        public static IList<ODataMediaTypeFormatter> Create()
+        public static IList<ODataMediaTypeFormatter> Create(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
             return new List<ODataMediaTypeFormatter>()
             {
                 // Create atomsvc+xml formatter first to handle service document requests without an Accept header in an XML format
-                CreateApplicationAtomSvcXml(),
+                CreateApplicationAtomSvcXml(serializerProvider, deserializerProvider),
                 // Create JSON formatter next so it gets used when the request doesn't ask for a specific content type
-                CreateApplicationJson(),
-                CreateApplicationAtomXmlTypeFeed(),
-                CreateApplicationAtomXmlTypeEntry(),
-                CreateApplicationXml(),
-                CreateTextXml()
+                CreateApplicationJson(serializerProvider, deserializerProvider),
+                CreateApplicationAtomXmlTypeFeed(serializerProvider, deserializerProvider),
+                CreateApplicationAtomXmlTypeEntry(serializerProvider, deserializerProvider),
+                CreateApplicationXml(serializerProvider, deserializerProvider),
+                CreateTextXml(serializerProvider, deserializerProvider)
             };
+        }
+
+        /// <summary>
+        /// Creates a list of media type formatters to handle OData.
+        /// </summary>
+        /// <returns>A list of media type formatters to handle OData.</returns>
+        public static IList<ODataMediaTypeFormatter> Create()
+        {
+            return Create(new DefaultODataSerializerProvider(), new DefaultODataDeserializerProvider());
         }
 
         private static void AddSupportedEncodings(MediaTypeFormatter formatter)
@@ -40,32 +52,34 @@ namespace System.Web.Http.OData.Formatter
                 throwOnInvalidBytes: true));
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationAtomSvcXml()
+        private static ODataMediaTypeFormatter CreateApplicationAtomSvcXml(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(ODataPayloadKind.ServiceDocument);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.ServiceDocument);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomSvcXml);
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeEntry()
+        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeEntry(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(ODataPayloadKind.Entry);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.Entry);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeEntry);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeFeed()
+        private static ODataMediaTypeFormatter CreateApplicationAtomXmlTypeFeed(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
-            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(ODataPayloadKind.Feed);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, deserializerProvider, ODataPayloadKind.Feed);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXmlTypeFeed);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationAtomXml);
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationJson()
+        private static ODataMediaTypeFormatter CreateApplicationJson(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                serializerProvider,
+                deserializerProvider,
                 ODataPayloadKind.Feed,
                 ODataPayloadKind.Entry,
                 ODataPayloadKind.Property,
@@ -94,9 +108,11 @@ namespace System.Web.Http.OData.Formatter
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateApplicationXml()
+        private static ODataMediaTypeFormatter CreateApplicationXml(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                serializerProvider,
+                deserializerProvider,
                 ODataPayloadKind.Property,
                 ODataPayloadKind.EntityReferenceLink,
                 ODataPayloadKind.EntityReferenceLinks,
@@ -108,16 +124,18 @@ namespace System.Web.Http.OData.Formatter
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateFormatterWithoutMediaTypes(params ODataPayloadKind[] payloadKinds)
+        private static ODataMediaTypeFormatter CreateFormatterWithoutMediaTypes(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider, params ODataPayloadKind[] payloadKinds)
         {
-            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(payloadKinds);
+            ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider, payloadKinds);
             AddSupportedEncodings(formatter);
             return formatter;
         }
 
-        private static ODataMediaTypeFormatter CreateTextXml()
+        private static ODataMediaTypeFormatter CreateTextXml(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
+                serializerProvider,
+                deserializerProvider,
                 ODataPayloadKind.Property,
                 ODataPayloadKind.EntityReferenceLink,
                 ODataPayloadKind.EntityReferenceLinks,

@@ -44,7 +44,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
         private IEnumerable ReadItems(ODataFeed feed, ODataDeserializerContext readContext)
         {
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(_edmEntityType);
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(_edmEntityType);
 
             ODataFeedAnnotation feedAnnotation = feed.GetAnnotation<ODataFeedAnnotation>();
             Contract.Assert(feedAnnotation != null, "Each feed we create should gave annotation on it.");

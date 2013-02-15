@@ -79,7 +79,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             ArrayList valueCollection = new ArrayList();
 
             IEdmTypeReference itemType = _edmCollectionType.ElementType();
-            ODataSerializer itemSerializer = SerializerProvider.GetEdmTypeSerializer(itemType);
+            ODataEntrySerializer itemSerializer = SerializerProvider.GetEdmTypeSerializer(itemType);
             if (itemSerializer == null)
             {
                 throw Error.NotSupported(SRResources.TypeCannotBeSerialized, itemType.FullName(), typeof(ODataMediaTypeFormatter).Name);

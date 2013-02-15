@@ -5,49 +5,91 @@ using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class DefaultODataDeserializerProvider : ODataDeserializerProvider
+    /// <summary>
+    /// The default <see cref="ODataDeserializerProvider"/>.
+    /// </summary>
+    public class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
+        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer> _deserializerCache =
+            new ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer>(new EdmTypeReferenceEqualityComparer());
+
         // cache the clrtype to ODataDeserializer mappings as we might have to crawl the 
         // inheritance hierarchy to find the mapping.
         private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataDeserializer> _clrTypeMappingCache =
             new ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataDeserializer>();
 
-        protected override ODataEntryDeserializer CreateDeserializer(IEdmTypeReference edmType)
+        /// <inheritdoc />
+        public override ODataEntryDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
         {
-            if (edmType != null)
+            if (edmType == null)
             {
-                switch (edmType.TypeKind())
-                {
-                    case EdmTypeKind.Entity:
-                        return new ODataEntityDeserializer(edmType.AsEntity(), this);
-
-                    case EdmTypeKind.Primitive:
-                        return new ODataPrimitiveDeserializer(edmType.AsPrimitive());
-
-                    case EdmTypeKind.Complex:
-                        return new ODataComplexTypeDeserializer(edmType.AsComplex(), this);
-
-                    case EdmTypeKind.Collection:
-                        IEdmCollectionTypeReference collectionType = edmType.AsCollection();
-                        if (collectionType.ElementType().IsEntity())
-                        {
-                            return new ODataFeedDeserializer(collectionType, this);
-                        }
-                        else
-                        {
-                            return new ODataCollectionDeserializer(collectionType, this);
-                        }
-                }
+                throw Error.ArgumentNull("edmType");
             }
 
-            return null;
+            return _deserializerCache.GetOrAdd(edmType, CreateEdmTypeDeserializer);
         }
 
+        /// <summary>
+        /// Sets the <see cref="ODataEntryDeserializer"/> for the given edmType in the deserializer cache.
+        /// </summary>
+        /// <param name="edmType">The EDM type.</param>
+        /// <param name="deserializer">The deserializer to use for the given EDM type.</param>
+        public void SetEdmTypeDeserializer(IEdmTypeReference edmType, ODataEntryDeserializer deserializer)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            _deserializerCache.AddOrUpdate(edmType, deserializer, (t, s) => deserializer);
+        }
+
+        /// <inheritdoc />
+        public virtual ODataEntryDeserializer CreateEdmTypeDeserializer(IEdmTypeReference edmType)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            switch (edmType.TypeKind())
+            {
+                case EdmTypeKind.Entity:
+                    return new ODataEntityDeserializer(edmType.AsEntity(), this);
+
+                case EdmTypeKind.Primitive:
+                    return new ODataPrimitiveDeserializer(edmType.AsPrimitive());
+
+                case EdmTypeKind.Complex:
+                    return new ODataComplexTypeDeserializer(edmType.AsComplex(), this);
+
+                case EdmTypeKind.Collection:
+                    IEdmCollectionTypeReference collectionType = edmType.AsCollection();
+                    if (collectionType.ElementType().IsEntity())
+                    {
+                        return new ODataFeedDeserializer(collectionType, this);
+                    }
+                    else
+                    {
+                        return new ODataCollectionDeserializer(collectionType, this);
+                    }
+
+                default:
+                    return null;
+            }
+        }
+
+        /// <inheritdoc />
         public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
+            }
+
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
             }
 
             if (type == typeof(Uri))
@@ -72,7 +114,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 }
                 else
                 {
-                    return GetODataDeserializer(edmType);
+                    return GetEdmTypeDeserializer(edmType);
                 }
             });
         }

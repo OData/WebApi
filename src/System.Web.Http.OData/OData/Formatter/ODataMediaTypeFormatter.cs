@@ -50,6 +50,12 @@ namespace System.Web.Http.OData.Formatter
         {
         }
 
+        internal ODataMediaTypeFormatter(ODataDeserializerProvider deserializerProvider,
+            ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
+            : this(deserializerProvider, serializerProvider, payloadKinds, DefaultODataVersion, request: null)
+        {
+        }
+
         internal ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds,
             HttpRequestMessage request)
             : this(new DefaultODataDeserializerProvider(), new DefaultODataSerializerProvider(),

@@ -10,7 +10,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// Context information used by the <see cref="ODataSerializer"/> when serializing objects in OData message format.
     /// </summary>
-    internal class ODataSerializerContext
+    public class ODataSerializerContext
     {
         /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.

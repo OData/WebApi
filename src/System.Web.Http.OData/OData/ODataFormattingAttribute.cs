@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Formatting;
@@ -22,8 +24,9 @@ namespace System.Web.Http.OData
     /// <item><description>It attaches the request to the OData formatter instance.</description></item>
     /// </list>
     /// </remarks>
+    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes", Justification = "We want to be able to subclass this type.")]
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public sealed class ODataFormattingAttribute : Attribute, IControllerConfiguration
+    public class ODataFormattingAttribute : Attribute, IControllerConfiguration
     {
         /// <summary>
         /// Callback invoked to set per-controller overrides for this controllerDescriptor.
@@ -52,7 +55,7 @@ namespace System.Web.Http.OData
                 // Remove Xml and Json formatters to avoid media type conflicts
                 controllerFormatters.RemoveRange(
                     controllerFormatters.Where(f => f is XmlMediaTypeFormatter || f is JsonMediaTypeFormatter));
-                controllerFormatters.InsertRange(0, ODataMediaTypeFormatters.Create());
+                controllerFormatters.InsertRange(0, CreateODataFormatters());
             }
 
             ServicesContainer services = controllerSettings.Services;
@@ -68,6 +71,15 @@ namespace System.Web.Http.OData
             IContentNegotiator originalContentNegotiator = services.GetContentNegotiator();
             IContentNegotiator contentNegotiator = new PerRequestContentNegotiator(originalContentNegotiator);
             controllerSettings.Services.Replace(typeof(IContentNegotiator), contentNegotiator);
+        }
+
+        /// <summary>
+        /// Creates the OData formatters.
+        /// </summary>
+        /// <returns>A collection of OData formatters.</returns>
+        public virtual IList<ODataMediaTypeFormatter> CreateODataFormatters()
+        {
+            return ODataMediaTypeFormatters.Create();
         }
     }
 }

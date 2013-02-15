@@ -6,9 +6,14 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Represents an OData deserializer.
+    /// An <see cref="ODataDeserializer"/> is used to read an ODataMessage into a CLR object.
     /// </summary>
-    internal abstract class ODataDeserializer
+    /// <remarks>
+    /// Each supported CLR type has a corresponding <see cref="ODataDeserializer" />. A CLR type is supported if it is one of
+    /// the special types or if it has a backing EDM type. Some of the special types are Uri which maps to ODataReferenceLink payload, 
+    /// Uri[] which maps to ODataReferenceLinks payload, ODataWorkspace which maps to ODataServiceDocument payload.
+    /// </remarks>
+    public abstract class ODataDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataDeserializer"/> class.
@@ -25,7 +30,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public ODataPayloadKind ODataPayloadKind { get; private set; }
 
         /// <summary>
-        /// Read an <see cref="IODataRequestMessage"/> using messageReader.
+        /// Reads an <see cref="IODataRequestMessage"/> using messageReader.
         /// </summary>
         /// <param name="messageReader">The messageReader to use.</param>
         /// <param name="readContext">The read context.</param>

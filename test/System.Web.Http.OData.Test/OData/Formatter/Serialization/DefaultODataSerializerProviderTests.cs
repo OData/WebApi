@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Web.Http.OData.Formatter.Deserialization;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -37,6 +39,50 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     { typeof(TimeSpan), EdmPrimitiveTypeKind.Time }
                 };
             }
+        }
+
+        [Fact]
+        public void CreateEdmTypeSerializer_ThrowsArgumentNull_EdmType()
+        {
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            Assert.ThrowsArgumentNull(
+                () => serializerProvider.CreateEdmTypeSerializer(edmType: null),
+                "edmType");
+        }
+
+        [Fact]
+        public void CreateEdmTypeSerializer_Returns_Null_ForUnsupportedType()
+        {
+            // Arrange
+            Mock<IEdmType> unsupportedEdmType = new Mock<IEdmType>();
+            unsupportedEdmType.Setup(e => e.TypeKind).Returns(EdmTypeKind.None);
+            Mock<IEdmTypeReference> unsupportedEdmTypeReference = new Mock<IEdmTypeReference>();
+            unsupportedEdmTypeReference.Setup(e => e.Definition).Returns(unsupportedEdmType.Object);
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            // Act & Assert
+            Assert.Null(serializerProvider.CreateEdmTypeSerializer(unsupportedEdmTypeReference.Object));
+        }
+
+        [Fact]
+        public void GetODataPayloadSerializer_ThrowsArgumentNull_Model()
+        {
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            Assert.ThrowsArgumentNull(
+                () => serializerProvider.GetODataPayloadSerializer(model: null, type: null),
+               "model");
+        }
+
+        [Fact]
+        public void GetODataPayloadSerializer_ThrowsArgumentNull_Type()
+        {
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            Assert.ThrowsArgumentNull(
+                () => serializerProvider.GetODataPayloadSerializer(model: EdmCoreModel.Instance, type: null),
+               "type");
         }
 
         [Theory]
@@ -134,5 +180,70 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             Assert.Same(firstCallSerializer, secondCallSerializer);
         }
+
+        [Fact]
+        public void GetEdmTypeSerializer_ThrowsArgumentNull_EdmType()
+        {
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            Assert.ThrowsArgumentNull(
+                () => serializerProvider.GetEdmTypeSerializer(edmType: null),
+                "edmType");
+        }
+
+        [Fact]
+        public void GetODataSerializer_Calls_CreateSerializer_ForAnEdmType()
+        {
+            // Arrange
+            Mock<DefaultODataSerializerProvider> serializerProvider = new Mock<DefaultODataSerializerProvider>() { CallBase = true };
+            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
+            serializerProvider.Setup(d => d.CreateEdmTypeSerializer(edmType)).Verifiable();
+
+            // Act
+            serializerProvider.Object.GetEdmTypeSerializer(edmType);
+
+            // Assert
+            serializerProvider.Verify();
+        }
+
+        [Fact]
+        public void GetEdmTypeSerializer_Caches_CreateEdmTypeSerializerOutput()
+        {
+            // Arrange
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
+
+            // Act
+            var serializer1 = serializerProvider.GetEdmTypeSerializer(edmType);
+            var serializer2 = serializerProvider.GetEdmTypeSerializer(edmType);
+
+            // Assert
+            Assert.Same(serializer2, serializer1);
+        }
+
+        [Fact]
+        public void GetODataSerializer_ThrowsArgumentNull_EdmType()
+        {
+            // Arrange
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => serializerProvider.SetEdmTypeSerializer(edmType: null, serializer: null),
+                "edmType");
+        }
+
+        [Fact]
+        public void GetEdmTypeSerializer_Returns_SetEdmTypeSerializerInput()
+        {
+            // Arrange
+            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            IEdmTypeReference edmType = EdmCoreModel.Instance.GetInt32(isNullable: true);
+            ODataEntrySerializer serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Property).Object;
+            serializerProvider.SetEdmTypeSerializer(edmType, serializer);
+
+            // Act & Assert
+            Assert.Same(serializer, serializerProvider.GetEdmTypeSerializer(edmType));
+        } 
     }
 }

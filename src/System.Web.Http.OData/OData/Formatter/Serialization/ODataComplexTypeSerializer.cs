@@ -59,7 +59,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
                 {
                     IEdmTypeReference propertyType = property.Type;
-                    ODataSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
+                    ODataEntrySerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
                     if (propertySerializer == null)
                     {
                         throw Error.NotSupported("Type {0} is not a serializable type", propertyType.FullName());

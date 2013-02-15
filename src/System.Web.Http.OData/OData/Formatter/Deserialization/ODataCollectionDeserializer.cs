@@ -54,7 +54,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         private IEnumerable ReadItems(ODataCollectionValue collection, ODataDeserializerContext readContext)
         {
             IEdmTypeReference elementType = _edmCollectionType.ElementType();
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(elementType);
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(elementType);
             Contract.Assert(deserializer != null);
 
             foreach (object entry in collection.Items)

@@ -74,7 +74,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     throw new SerializationException(message);
                 }
 
-                ODataEntityDeserializer deserializer = DeserializerProvider.GetODataDeserializer(new EdmEntityTypeReference(entityType, isNullable: false)) as ODataEntityDeserializer;
+                ODataEntityDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(new EdmEntityTypeReference(entityType, isNullable: false)) as ODataEntityDeserializer;
                 return deserializer.ReadInline(entry, readContext);
             }
             else
@@ -299,7 +299,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
             Contract.Assert(entityResource != null, "entityResource != null");
 
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(navigationProperty.Type);
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
             object value = deserializer.ReadInline(entry, readContext);
 
             if (readContext.IsPatchMode)
@@ -316,7 +316,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataFeedAnnotation feedAnnotation = feed.GetAnnotation<ODataFeedAnnotation>();
             Contract.Assert(feedAnnotation != null, "Each feed we create should gave annotation on it.");
 
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetODataDeserializer(navigationProperty.Type);
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
             object value = deserializer.ReadInline(feed, readContext);
 
             if (readContext.IsPatchMode)

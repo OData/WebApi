@@ -177,7 +177,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             List<ODataProperty> properties = new List<ODataProperty>();
             foreach (IEdmStructuralProperty property in edmProperties)
             {
-                ODataSerializer serializer = SerializerProvider.GetEdmTypeSerializer(property.Type);
+                ODataEntrySerializer serializer = SerializerProvider.GetEdmTypeSerializer(property.Type);
                 if (serializer == null)
                 {
                     throw Error.NotSupported(SRResources.TypeCannotBeSerialized, property.Type.FullName(), typeof(ODataMediaTypeFormatter).Name);

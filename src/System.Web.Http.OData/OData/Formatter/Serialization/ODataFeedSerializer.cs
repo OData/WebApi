@@ -144,7 +144,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                         throw Error.NotSupported(SRResources.NullElementInCollection);
                     }
 
-                    ODataSerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType());
+                    ODataEntrySerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType()) as ODataEntrySerializer;
                     if (entrySerializer == null)
                     {
                         throw Error.NotSupported(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name);

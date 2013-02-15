@@ -89,7 +89,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             else
             {
-                ODataEntryDeserializer deserializer = _provider.GetODataDeserializer(parameterType);
+                ODataEntryDeserializer deserializer = _provider.GetEdmTypeDeserializer(parameterType);
                 return deserializer.ReadInline(value, readContext);
             }
         }

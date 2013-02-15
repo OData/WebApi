@@ -3,6 +3,7 @@
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -14,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void Constructor_Succeeds_ForValidComplexType()
         {
-            var deserializerProvider = new StubODataDeserializerProvider();
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
             var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
 
             Assert.Equal(deserializer.DeserializerProvider, deserializerProvider);
@@ -25,7 +26,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void ReadInline_Throws_ForNonODataComplexValues()
         {
-            var deserializerProvider = new StubODataDeserializerProvider();
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
             var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
 
             Assert.ThrowsArgument(() =>
@@ -38,7 +39,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadInline()
         {
             // Arrange
-            var deserializerProvider = new StubODataDeserializerProvider();
+            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
             var deserializer = new ODataComplexTypeDeserializer(_addressEdmType, deserializerProvider);
 
             ODataComplexValue complexValue = new ODataComplexValue
@@ -64,19 +65,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.Null(address.Country);
             Assert.Null(address.State);
             Assert.Null(address.ZipCode);
-        }
-
-        private class StubODataDeserializerProvider : ODataDeserializerProvider
-        {
-            protected override ODataEntryDeserializer CreateDeserializer(IEdmTypeReference type)
-            {
-                return null;
-            }
-
-            public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type)
-            {
-                return null;
-            }
         }
     }
 }

@@ -70,12 +70,14 @@
     <Compile Include="HttpRouteCollectionExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEntrySerializerTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataSerializerTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
     <Compile Include="OData\ODataRoutingAttributeTest.cs" />
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
     <Compile Include="OData\EntitySetControllerHelpersTest.cs" />
     <Compile Include="OData\Formatter\HttpRouteCollectionExtensions.cs" />
-    <Compile Include="OData\Formatter\Serialization\FakeODataSerializerProvider.cs" />
     <Compile Include="OData\Routing\ODataPathRouteConstraintTest.cs" />
     <Compile Include="OData\Routing\ODataUrlHelperExtensionsTest.cs" />
     <Compile Include="OData\Builder\ActionConfigurationTest.cs" />
@@ -125,7 +127,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItemTests.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConventionTest.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEdmTypeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\IgnoreDataMemberAttributeEdmPropertyConventionTests.cs" />

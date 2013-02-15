@@ -1,24 +1,55 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
-using System.Runtime.Serialization;
-using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
-    /// The default <see cref="ODataSerializerProvider" />
+    /// The default <see cref="ODataSerializerProvider"/>.
     /// </summary>
-    internal class DefaultODataSerializerProvider : ODataSerializerProvider
+    public class DefaultODataSerializerProvider : ODataSerializerProvider
     {
+        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEntrySerializer> _serializerCache =
+            new ConcurrentDictionary<IEdmTypeReference, ODataEntrySerializer>(new EdmTypeReferenceEqualityComparer());
+
         // cache the clrtype to ODataSerializer mappings as we might have to crawl the 
         // inheritance hierarchy to find the mapping.
         private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataSerializer> _clrTypeMappingCache =
             new ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataSerializer>();
 
-        public override ODataSerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
+        /// <inheritdoc />
+        public override ODataEntrySerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+            return _serializerCache.GetOrAdd(edmType, CreateEdmTypeSerializer);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="ODataEntrySerializer"/> for the given <paramref name="edmType"/> in the serializer cache.
+        /// </summary>
+        /// <param name="edmType">The EDM type.</param>
+        /// <param name="serializer">The serializer to use for the given EDM type.</param>
+        public void SetEdmTypeSerializer(IEdmTypeReference edmType, ODataEntrySerializer serializer)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            _serializerCache.AddOrUpdate(edmType, serializer, (t, s) => serializer);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ODataEntrySerializer"/> for the given edm type.
+        /// </summary>
+        /// <param name="edmType">The <see cref="IEdmTypeReference"/>.</param>
+        /// <returns>The constructed <see cref="ODataEntrySerializer"/>.</returns>
+        public virtual ODataEntrySerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
         {
             if (edmType == null)
             {
@@ -48,14 +79,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     return new ODataEntityTypeSerializer(edmType.AsEntity(), this);
 
                 default:
-                    string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(),
-                        typeof(ODataMediaTypeFormatter).Name);
-                    throw new SerializationException(message);
+                    return null;
             }
         }
 
+        /// <inheritdoc />
         public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type)
         {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
             if (type == null)
             {
                 throw Error.ArgumentNull("type");

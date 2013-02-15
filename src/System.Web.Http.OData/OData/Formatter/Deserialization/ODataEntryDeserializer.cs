@@ -13,9 +13,9 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Base class for all <see cref="ODataDeserializer" />'s that deserialize into an object backed by <see cref="IEdmType"/>.
+    /// Base class for all <see cref="ODataDeserializer" />s that deserialize into an object backed by <see cref="IEdmType"/>.
     /// </summary>
-    internal abstract class ODataEntryDeserializer : ODataDeserializer
+    public abstract class ODataEntryDeserializer : ODataDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataEntryDeserializer"/> class.
@@ -228,7 +228,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 edmComplexType = propertyType.AsComplex();
             }
 
-            ODataEntryDeserializer deserializer = deserializerProvider.GetODataDeserializer(edmComplexType);
+            ODataEntryDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(edmComplexType);
             return deserializer.ReadInline(complexValue, readContext);
         }
 
@@ -278,7 +278,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             IEdmCollectionTypeReference collectionType = propertyType as IEdmCollectionTypeReference;
             Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");
 
-            ODataEntryDeserializer deserializer = deserializerProvider.GetODataDeserializer(collectionType);
+            ODataEntryDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(collectionType);
             return deserializer.ReadInline(collection, readContext);
         }
     }

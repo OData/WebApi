@@ -8,10 +8,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
-using System.Web.Http.Routing;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter
 {
@@ -93,6 +95,19 @@ namespace System.Web.Http.OData.Formatter
             }
 
             return _model;
+        }
+
+        public static ODataMessageWriter GetMockODataMessageWriter()
+        {
+            Mock<IODataResponseMessage> responseMessage = new Mock<IODataResponseMessage>();
+            return new ODataMessageWriter(responseMessage.Object);
+        }
+
+        public static ODataSerializerProvider GetMockODataSerializerProvider(ODataSerializer serializer)
+        {
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            serializerProvider.Setup(sp => sp.GetODataPayloadSerializer(It.IsAny<IEdmModel>(), It.IsAny<Type>())).Returns(serializer);
+            return serializerProvider.Object;
         }
     }
 

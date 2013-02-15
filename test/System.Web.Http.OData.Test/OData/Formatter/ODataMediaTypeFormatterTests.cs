@@ -17,7 +17,6 @@ using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.OData.TestCommon.Models;
 using System.Web.Http.Routing;
-using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
@@ -38,7 +37,7 @@ namespace System.Web.Http.OData.Formatter
         {
             WriteToStreamAsyncReturnsODataRepresentation(Resources.WorkItemEntryInAtom, false);
         }
-        
+
         private static void WriteToStreamAsyncReturnsODataRepresentation(string expectedContent, bool json)
         {
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -274,13 +273,18 @@ namespace System.Web.Http.OData.Formatter
             // Arrange
             var model = CreateModel();
 
-            SpyODataSerializer spy = new SpyODataSerializer(ODataPayloadKind.Property);
+            Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
 
-            ODataSerializerProvider serializerProvider = new FakeODataSerializerProvider(spy);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int))).Returns(serializer.Object);
+            serializer
+                .Setup(s => s.WriteObject(42, It.IsAny<ODataMessageWriter>(), It.Is<ODataSerializerContext>(c => c.MetadataLevel == ODataMetadataLevel.FullMetadata)))
+                .Verifiable();
+
 
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
 
-            var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider, Enumerable.Empty<ODataPayloadKind>(), ODataVersion.V3, CreateFakeODataRequest(model));
+            var formatter = new ODataMediaTypeFormatter(deserializerProvider, serializerProvider.Object, Enumerable.Empty<ODataPayloadKind>(), ODataVersion.V3, CreateFakeODataRequest(model));
             HttpContent content = new StringContent("42");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
 
@@ -288,7 +292,7 @@ namespace System.Web.Http.OData.Formatter
             formatter.WriteToStreamAsync(typeof(int), 42, new MemoryStream(), content, transportContext: null);
 
             // Assert
-            Assert.Equal(ODataMetadataLevel.FullMetadata, spy.MetadataLevel);
+            serializer.Verify();
         }
 
         [Fact]
@@ -450,22 +454,6 @@ namespace System.Web.Http.OData.Formatter
                       </content>
                     </entry>"
                 );
-            }
-        }
-
-        private class SpyODataSerializer : ODataSerializer
-        {
-            public SpyODataSerializer(ODataPayloadKind payloadKind)
-                : base(payloadKind)
-            {
-            }
-
-            public ODataMetadataLevel MetadataLevel { get; private set; }
-
-            public override void WriteObject(object graph, ODataMessageWriter messageWriter,
-                ODataSerializerContext writeContext)
-            {
-                MetadataLevel = writeContext.MetadataLevel;
             }
         }
     }

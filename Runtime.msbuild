@@ -1,4 +1,6 @@
 <Project DefaultTargets="UnitTest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="tools/WebStack.tasks.targets"/>
+
     <PropertyGroup>
         <!-- build.cmd sets /p:Desktop=true. The CI server does not; instead, it does an additional step with /p:Configuration=CodeAnalysis. -->
         <Configuration Condition=" '$(Configuration)' == '' and '$(Desktop)' == 'true' ">CodeAnalysis</Configuration>
@@ -72,7 +74,19 @@
                 <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=%(TestDLLsXunit.ResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
             </XunitProject>
         </ItemGroup>
+
+         <!-- Re-create the test results directory so that print summary doesn't run on old test results -->
+        <RemoveDir Directories="%(TestDLLsXunit.ResultsDirectory)" />
         <MakeDir Directories="%(TestDLLsXunit.ResultsDirectory)" />
+
         <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
+
+         <!-- Call PrintTestRunSummary regardless of whether the tests passed or failed -->
+        <CallTarget Targets="PrintTestRunSummary" />
+        <OnError ExecuteTargets="PrintTestRunSummary" />
+    </Target>
+
+    <Target Name="PrintTestRunSummary">
+        <PrintTestRunSummary TestResultsDirectory="$(TestResultsDirectory)" />
     </Target>
 </Project>

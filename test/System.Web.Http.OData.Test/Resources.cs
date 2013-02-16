@@ -257,7 +257,7 @@ namespace System.Web.Http
 
         private static string GetPath(string fileName)
         {
-            const string projectDefaultNamespace = "System.Web.Http.OData";
+            const string projectDefaultNamespace = "System.Web.Http";
             const string resourcesFolderName = "Resources";
             const string pathSeparator = ".";
             return projectDefaultNamespace + pathSeparator + resourcesFolderName + pathSeparator + fileName;

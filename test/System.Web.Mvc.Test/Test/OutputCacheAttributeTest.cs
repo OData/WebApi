@@ -94,6 +94,49 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void OnActionExecutingThrowsIfDurationEquals0()
+        {
+            // Arrange
+            OutputCacheAttribute attr = new OutputCacheAttribute();
+            attr.Duration = 0;
+            Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
+            context.Setup(c => c.IsChildAction).Returns(true);
+
+            // Act & assert
+            Assert.Throws<InvalidOperationException>(
+                delegate { attr.OnActionExecuting(context.Object); }, "Duration must be a positive number.");
+        }
+
+        [Fact]
+        public void OnActionExecutingThrowsIfVaryByParamIsEmptyAndDurationIsNonZero()
+        {
+            // Arrange
+            OutputCacheAttribute attr = new OutputCacheAttribute();
+            attr.Duration = 1;
+            attr.VaryByParam = String.Empty;
+            Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
+            context.Setup(c => c.IsChildAction).Returns(true);
+
+            // Act & assert
+            Assert.Throws<InvalidOperationException>(
+                delegate { attr.OnActionExecuting(context.Object); }, "VaryByParam must be '*', 'none', or a semicolon-delimited list of keys.");
+        }
+
+        [Fact]
+        public void OnActionExecutingThrowsIfCacheProfileSetAndNoOtherAttributesPresent()
+        {
+            // Arrange
+            OutputCacheAttribute attr = new OutputCacheAttribute();
+            attr.CacheProfile = "something";
+            Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
+            context.Setup(c => c.IsChildAction).Returns(true);
+
+            // Act & assert
+            Assert.Throws<InvalidOperationException>(
+                delegate { attr.OnActionExecuting(context.Object); }, "OutputCacheAttribute for child actions only supports Duration, VaryByCustom, and VaryByParam values. Please do not set CacheProfile, Location, NoStore, SqlDependency, VaryByContentEncoding, or VaryByHeader values for child actions.");
+        }
+
+        [Fact]
         public void SqlDependencyProperty()
         {
             // Arrange

@@ -314,6 +314,15 @@ namespace System.Web.Mvc
 
         private void ValidateChildActionConfiguration()
         {
+            if (!String.IsNullOrWhiteSpace(CacheProfile) ||
+                !String.IsNullOrWhiteSpace(SqlDependency) ||
+                !String.IsNullOrWhiteSpace(VaryByContentEncoding) ||
+                !String.IsNullOrWhiteSpace(VaryByHeader) ||
+                _locationWasSet || _noStoreWasSet)
+            {
+                throw new InvalidOperationException(MvcResources.OutputCacheAttribute_ChildAction_UnsupportedSetting);
+            }
+
             if (Duration <= 0)
             {
                 throw new InvalidOperationException(MvcResources.OutputCacheAttribute_InvalidDuration);
@@ -322,15 +331,6 @@ namespace System.Web.Mvc
             if (String.IsNullOrWhiteSpace(VaryByParam))
             {
                 throw new InvalidOperationException(MvcResources.OutputCacheAttribute_InvalidVaryByParam);
-            }
-
-            if (!String.IsNullOrWhiteSpace(CacheProfile) ||
-                !String.IsNullOrWhiteSpace(SqlDependency) ||
-                !String.IsNullOrWhiteSpace(VaryByContentEncoding) ||
-                !String.IsNullOrWhiteSpace(VaryByHeader) ||
-                _locationWasSet || _noStoreWasSet)
-            {
-                throw new InvalidOperationException(MvcResources.OutputCacheAttribute_ChildAction_UnsupportedSetting);
             }
         }
 

@@ -17,7 +17,7 @@ namespace System.Web.Http
         private static readonly Uri _referenceBaseAddress = new Uri("http://localhost");
 
         private readonly string _virtualPathRoot;
-        private readonly Collection<IHttpRoute> _collection = new Collection<IHttpRoute>();
+        private readonly List<IHttpRoute> _collection = new List<IHttpRoute>();
         private readonly IDictionary<string, IHttpRoute> _dictionary = new Dictionary<string, IHttpRoute>(StringComparer.OrdinalIgnoreCase);
         private bool _disposed;
 
@@ -75,9 +75,9 @@ namespace System.Web.Http
                 throw Error.ArgumentNull("request");
             }
 
-            foreach (IHttpRoute route in _collection)
+            for (int i = 0; i < _collection.Count; i++)
             {
-                IHttpRouteData routeData = route.GetRouteData(_virtualPathRoot, request);
+                IHttpRouteData routeData = _collection[i].GetRouteData(_virtualPathRoot, request);
                 if (routeData != null)
                 {
                     return routeData;

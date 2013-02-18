@@ -65,28 +65,26 @@
             Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
     </Target>
 
-    <Target Name="UnitTest" DependsOnTargets="Build">
-        <ItemGroup>            
-            <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll">
-                <ResultsDirectory>$(TestResultsDirectory)</ResultsDirectory>
-            </TestDLLsXunit>
-            <XunitProject Include="tools\WebStack.xunit.targets">
-                <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=%(TestDLLsXunit.ResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
-            </XunitProject>
-        </ItemGroup>
+    <Target Name = "UnitTest" DependsOnTargets="Build">
+      <CallTarget Targets="RunTests;PrintTestRunSummary" RunEachTargetSeparately="True" />
+    </Target>
+  
+    <Target Name = "RunTests">
+      <ItemGroup>
+        <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll" />
+        <XunitProject Include="tools\WebStack.xunit.targets">
+          <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=$(TestResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
+        </XunitProject>
+      </ItemGroup>
 
-         <!-- Re-create the test results directory so that print summary doesn't run on old test results -->
-        <RemoveDir Directories="%(TestDLLsXunit.ResultsDirectory)" />
-        <MakeDir Directories="%(TestDLLsXunit.ResultsDirectory)" />
-
-        <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
-
-         <!-- Call PrintTestRunSummary regardless of whether the tests passed or failed -->
-        <CallTarget Targets="PrintTestRunSummary" />
-        <OnError ExecuteTargets="PrintTestRunSummary" />
+      <!-- Re-create the test results directory so that print summary doesn't run on old test results -->
+      <RemoveDir Directories="$(TestResultsDirectory)" />
+      <MakeDir Directories="$(TestResultsDirectory)" />
+      
+      <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
     </Target>
 
     <Target Name="PrintTestRunSummary">
-        <PrintTestRunSummary TestResultsDirectory="$(TestResultsDirectory)" />
+      <PrintTestRunSummary TestResultsDirectory="$(TestResultsDirectory)" />
     </Target>
 </Project>

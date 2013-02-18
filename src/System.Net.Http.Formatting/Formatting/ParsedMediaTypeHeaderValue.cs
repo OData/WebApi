@@ -18,13 +18,14 @@ namespace System.Net.Http.Formatting
         public ParsedMediaTypeHeaderValue(MediaTypeHeaderValue mediaType)
         {
             Contract.Assert(mediaType != null, "The 'mediaType' parameter should not be null.");
+            // Performance-sensitive
+            string mediaTypeValue = mediaType.MediaType;
+            int delimiterIndex = mediaTypeValue.IndexOf(MediaTypeSubtypeDelimiter);
 
-            string[] splitMediaType = mediaType.MediaType.Split(MediaTypeSubtypeDelimiter);
+            Contract.Assert(delimiterIndex > 0, "The constructor of the MediaTypeHeaderValue would have failed if there wasn't a type and subtype.");
 
-            Contract.Assert(splitMediaType.Length == 2, "The constructor of the MediaTypeHeaderValue would have failed if there wasn't a type and subtype.");
-
-            _type = splitMediaType[0];
-            _subType = splitMediaType[1];
+            _type = mediaTypeValue.Substring(0, delimiterIndex);
+            _subType = mediaTypeValue.Substring(delimiterIndex + 1);
         }
 
         public string Type

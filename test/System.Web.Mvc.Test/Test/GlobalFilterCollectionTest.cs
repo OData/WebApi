@@ -15,7 +15,6 @@ namespace System.Web.Mvc.Test
         [Theory]
         [InlineData("string")]
         [InlineData(42)]
-        [CLSCompliant(false)]
         public void AddRejectsNonFilterInstances(object instance)
         {
             // Act + Assert

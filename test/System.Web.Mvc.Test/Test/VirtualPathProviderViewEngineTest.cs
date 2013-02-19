@@ -11,7 +11,6 @@ using Moq;
 
 namespace System.Web.Mvc.Test
 {
-    [CLSCompliant(false)]
     public class VirtualPathProviderViewEngineTest : IDisposable
     {
         private ControllerContext _context = CreateContext();

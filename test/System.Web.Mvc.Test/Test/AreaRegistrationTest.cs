@@ -60,7 +60,6 @@ namespace System.Web.Mvc.Test
         }
     }
 
-    [CLSCompliant(false)]
     public class AnnotatedRouteCollection : RouteCollection
     {
         public List<string> _areasLoaded = new List<string>();

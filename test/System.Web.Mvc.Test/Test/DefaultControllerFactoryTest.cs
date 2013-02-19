@@ -8,7 +8,6 @@ using Moq;
 
 namespace System.Web.Mvc.Test
 {
-    [CLSCompliant(false)]
     public class DefaultControllerFactoryTest
     {
         static DefaultControllerFactoryTest()

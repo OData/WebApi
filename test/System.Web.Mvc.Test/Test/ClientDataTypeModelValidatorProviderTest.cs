@@ -7,7 +7,6 @@ using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
 {
-    [CLSCompliant(false)]
     public class ClientDataTypeModelValidatorProviderTest
     {
         private static readonly ModelMetadataProvider _metadataProvider = new DataAnnotationsModelMetadataProvider();

@@ -93,37 +93,43 @@ namespace System.Web.Mvc.Test
                 delegate { attr.OnResultExecuting(null); }, "filterContext");
         }
 
-        [Fact]
-        public void OnActionExecutingThrowsIfDurationEquals0()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void OnActionExecuting_Throws_IfDurationIsNotPositive(int duration)
         {
             // Arrange
             OutputCacheAttribute attr = new OutputCacheAttribute();
-            attr.Duration = 0;
+            attr.Duration = duration;
             Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
             context.Setup(c => c.IsChildAction).Returns(true);
 
             // Act & assert
             Assert.Throws<InvalidOperationException>(
-                delegate { attr.OnActionExecuting(context.Object); }, "Duration must be a positive number.");
+                () => attr.OnActionExecuting(context.Object),
+                "Duration must be a positive number.");
         }
 
-        [Fact]
-        public void OnActionExecutingThrowsIfVaryByParamIsEmptyAndDurationIsNonZero()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void OnActionExecuting_Throws_IfVaryByParamIsNullOrEmptyAndDurationIsPositive(string varyByParam)
         {
             // Arrange
             OutputCacheAttribute attr = new OutputCacheAttribute();
             attr.Duration = 1;
-            attr.VaryByParam = String.Empty;
+            attr.VaryByParam = varyByParam;
             Mock<ActionExecutingContext> context = new Mock<ActionExecutingContext>();
             context.Setup(c => c.IsChildAction).Returns(true);
 
             // Act & assert
             Assert.Throws<InvalidOperationException>(
-                delegate { attr.OnActionExecuting(context.Object); }, "VaryByParam must be '*', 'none', or a semicolon-delimited list of keys.");
+                () => attr.OnActionExecuting(context.Object),
+                "VaryByParam must be '*', 'none', or a semicolon-delimited list of keys.");
         }
 
         [Fact]
-        public void OnActionExecutingThrowsIfCacheProfileSetAndNoOtherAttributesPresent()
+        public void OnActionExecuting_Throws_IfCacheProfileSet()
         {
             // Arrange
             OutputCacheAttribute attr = new OutputCacheAttribute();
@@ -133,7 +139,8 @@ namespace System.Web.Mvc.Test
 
             // Act & assert
             Assert.Throws<InvalidOperationException>(
-                delegate { attr.OnActionExecuting(context.Object); }, "OutputCacheAttribute for child actions only supports Duration, VaryByCustom, and VaryByParam values. Please do not set CacheProfile, Location, NoStore, SqlDependency, VaryByContentEncoding, or VaryByHeader values for child actions.");
+                () => attr.OnActionExecuting(context.Object),
+                "OutputCacheAttribute for child actions only supports Duration, VaryByCustom, and VaryByParam values. Please do not set CacheProfile, Location, NoStore, SqlDependency, VaryByContentEncoding, or VaryByHeader values for child actions.");
         }
 
         [Fact]

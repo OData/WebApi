@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Xunit.Sdk;
 
 namespace Microsoft.TestCommon
@@ -11,7 +12,7 @@ namespace Microsoft.TestCommon
     {
         public TheoryAttribute()
         {
-            Timeout = TimeoutConstant.DefaultTimeout;
+            Timeout = Debugger.IsAttached ? Int32.MaxValue : TimeoutConstant.DefaultTimeout;
             Platforms = Platform.All;
             PlatformJustification = "Unsupported platform (test runs on {0}, current platform is {1})";
         }

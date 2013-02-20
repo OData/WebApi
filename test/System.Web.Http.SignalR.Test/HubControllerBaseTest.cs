@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.AspNet.SignalR.Infrastructure;
 using Microsoft.TestCommon;
 using Moq;
-using SignalR;
-using SignalR.Hubs;
 
 namespace System.Web.Http
 {
@@ -21,11 +22,11 @@ namespace System.Web.Http
         public void Clients_ReturnsHubContextsClients()
         {
             Mock<IHubContext> mockContext = new Mock<IHubContext>();
-            object clients = new object();
+            IHubConnectionContext clients = new HubConnectionContext();
             mockContext.Setup(mock => mock.Clients).Returns(clients);
             var controller = new HubContextController(mockContext.Object);
 
-            Assert.Same(clients, controller.Clients as object);
+            Assert.Same(clients, controller.Clients);
         }
 
         [Fact]

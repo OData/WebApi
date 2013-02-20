@@ -2,8 +2,9 @@
 
 using System.Diagnostics.Contracts;
 using System.Web.Http.Properties;
-using SignalR;
-using SignalR.Hubs;
+using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.AspNet.SignalR.Infrastructure;
 
 namespace System.Web.Http
 {
@@ -24,9 +25,9 @@ namespace System.Web.Http
         }
 
         /// <summary>
-        /// Gets a dynamic object that represents all clients connected to the hub.
+        /// Gets an <see cref="IHubConnectionContext"/> that represents the clients connected to the hub.
         /// </summary>
-        public dynamic Clients
+        public IHubConnectionContext Clients
         {
             get
             {

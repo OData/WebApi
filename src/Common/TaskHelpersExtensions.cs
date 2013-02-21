@@ -223,91 +223,19 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Cast Task to Task of object
         /// </summary>
-        [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
-        internal static Task<object> CastToObject(this Task task)
+        internal static async Task<object> CastToObject(this Task task)
         {
-            // Stay on the same thread if we can
-            if (task.IsCompleted)
-            {
-                if (task.IsFaulted)
-                {
-                    return TaskHelpers.FromErrors<object>(task.Exception.InnerExceptions);
-                }
-                if (task.IsCanceled)
-                {
-                    return TaskHelpers.Canceled<object>();
-                }
-                if (task.Status == TaskStatus.RanToCompletion)
-                {
-                    return TaskHelpers.FromResult<object>((object)null);
-                }
-            }
-
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-
-            // schedule a synchronous task to cast: no need to worry about sync context or try/catch
-            task.ContinueWith(innerTask =>
-            {
-                if (innerTask.IsFaulted)
-                {
-                    tcs.SetException(innerTask.Exception.InnerExceptions);
-                }
-                else if (innerTask.IsCanceled)
-                {
-                    tcs.SetCanceled();
-                }
-                else
-                {
-                    tcs.SetResult((object)null);
-                }
-            }, TaskContinuationOptions.ExecuteSynchronously);
-
-            return tcs.Task;
+            await task;
+            return null;
         }
 
         /// <summary>
         /// Cast Task of T to Task of object
         /// </summary>
         [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "The usages here are deemed safe, and provide the implementations that this rule relies upon.")]
-        internal static Task<object> CastToObject<T>(this Task<T> task)
+        internal static async Task<object> CastToObject<T>(this Task<T> task)
         {
-            // Stay on the same thread if we can
-            if (task.IsCompleted)
-            {
-                if (task.IsFaulted)
-                {
-                    return TaskHelpers.FromErrors<object>(task.Exception.InnerExceptions);
-                }
-                if (task.IsCanceled)
-                {
-                    return TaskHelpers.Canceled<object>();
-                }
-                if (task.Status == TaskStatus.RanToCompletion)
-                {
-                    return TaskHelpers.FromResult<object>((object)task.Result);
-                }
-            }
-
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-
-            // schedule a synchronous task to cast: no need to worry about sync context or try/catch
-            task.ContinueWith(innerTask =>
-            {
-                if (innerTask.IsFaulted)
-                {
-                    tcs.SetException(innerTask.Exception.InnerExceptions);
-                }
-                else if (innerTask.IsCanceled)
-                {
-                    tcs.SetCanceled();
-                }
-                else
-                {
-                    tcs.SetResult((object)innerTask.Result);
-                }
-            }, TaskContinuationOptions.ExecuteSynchronously);
-
-            return tcs.Task;
+            return (object)await task;
         }
 
         /// <summary>

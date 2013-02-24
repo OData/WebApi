@@ -338,6 +338,36 @@ namespace System.Web.Mvc.Html.Test
         }
 
         [Fact]
+        public void ActionLinkProducesLowercaseUrls()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper();
+            htmlHelper.RouteCollection.LowercaseUrls = true;
+
+            // Act
+            MvcHtmlString html = htmlHelper.ActionLink("about", "About", "Home");
+
+            // Assert
+            Assert.True(html.ToHtmlString() == html.ToHtmlString().ToLowerInvariant());
+        }
+
+        [Fact]
+        public void ActionLinkProducesLowercaseUrlsAfterRegisteringAnArea()
+        {
+            // Arrange
+            HtmlHelper htmlHelper = MvcHelper.GetHtmlHelper();
+            MyAreaRegistration myArea = new MyAreaRegistration();
+            myArea.CreateContextAndRegister(htmlHelper.RouteCollection, null);
+            htmlHelper.RouteCollection.LowercaseUrls = true;
+
+            // Act
+            MvcHtmlString html = htmlHelper.ActionLink("about", "About", "Home");
+
+            // Assert
+            Assert.True(html.ToHtmlString() == html.ToHtmlString().ToLowerInvariant());
+        }
+
+        [Fact]
         public void NullOrEmptyStringParameterThrows()
         {
             // Arrange
@@ -558,6 +588,27 @@ namespace System.Web.Mvc.Html.Test
 
             // Assert
             Assert.Equal(@"<a foo-baz=""baz"" href=""" + AppPathModifier + @"/app/named/home2/newaction/someid"">linktext</a>", html.ToHtmlString());
+        }
+        
+        // Class for the ActionLinkProducesLowercaseUrlsAfterRegisteringAnArea test
+        private class MyAreaRegistration : AreaRegistration
+        {
+            public override string AreaName
+            {
+                get
+                {
+                    return "MyArea";
+                }
+            }
+
+            public override void RegisterArea(AreaRegistrationContext context)
+            {
+                context.MapRoute(
+                    "MyArea_default",
+                    "MyArea/{controller}/{action}/{id}",
+                    new { action = "Index", id = UrlParameter.Optional }
+                );
+            }
         }
     }
 }

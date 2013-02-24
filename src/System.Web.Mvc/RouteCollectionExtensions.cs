@@ -18,7 +18,15 @@ namespace System.Web.Mvc
             }
 
             usingAreas = false;
-            RouteCollection filteredRoutes = new RouteCollection();
+
+            // Ensure that we continue using the same settings as the previous route collection
+            // if we are using areas and the route collection is exchanged
+            RouteCollection filteredRoutes = new RouteCollection()
+            {
+                AppendTrailingSlash = routes.AppendTrailingSlash,
+                LowercaseUrls = routes.LowercaseUrls,
+                RouteExistingFiles = routes.RouteExistingFiles
+            };
 
             using (routes.GetReadLock())
             {

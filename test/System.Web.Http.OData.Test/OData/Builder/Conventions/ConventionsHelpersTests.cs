@@ -56,7 +56,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     { Guid.Empty, "guid'00000000-0000-0000-0000-000000000000'" },
                     { DateTime.FromBinary(0), "datetime'0001-01-01T00:00:00'" },
                     { TimeSpan.FromSeconds(86456), "time'P1DT56S'" },
-                    { DateTimeOffset.FromFileTime(0), "datetimeoffset'1600-12-31T16:00:00-08:00'" },
+                    { DateTimeOffset.FromFileTime(0).ToUniversalTime(), "datetimeoffset'1601-01-01T00:00:00Z'" },
                     { SimpleEnum.First, "'First'" },
                     { FlagsEnum.One | FlagsEnum.Two, "'One, Two'" },
                 };

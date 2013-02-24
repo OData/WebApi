@@ -66,11 +66,16 @@ namespace WebMatrix.WebData.Test
 
                 // Verify simple membership
                 var providers = Membership.Providers;
-                Assert.Equal(1, providers.Count);
+                var simpleMembershipProviderFound = false;
                 foreach (var provider in providers)
                 {
-                    Assert.IsAssignableFrom<SimpleMembershipProvider>(provider);
+                    if (provider is SimpleMembershipProvider)
+                    {
+                        simpleMembershipProviderFound = true;
+                        break;
+                    }
                 }
+                Assert.True(simpleMembershipProviderFound);
                 Assert.True(Roles.Enabled);
             });
         }
@@ -86,11 +91,16 @@ namespace WebMatrix.WebData.Test
 
                 // Verify simple membership
                 var providers = Membership.Providers;
-                Assert.Equal(1, providers.Count);
+                var simpleMembershipProviderFound = false;
                 foreach (var provider in providers)
                 {
-                    Assert.IsAssignableFrom<SqlMembershipProvider>(provider);
+                    if (provider is SimpleMembershipProvider)
+                    {
+                        simpleMembershipProviderFound = true;
+                        break;
+                    }
                 }
+                Assert.False(simpleMembershipProviderFound);
                 Assert.False(Roles.Enabled);
             });
         }

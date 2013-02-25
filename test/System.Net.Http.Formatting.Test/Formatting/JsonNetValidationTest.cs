@@ -41,6 +41,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
+#if !NETFX_CORE // SimpleRequiredMemberSelector uses MemberInfo which is not avaiable on portable libraries
         [Theory]
         [PropertyData("Theories")]
         public void ModelErrorsPopulatedWithValidationErrors(string json, Type type, int expectedErrors)
@@ -54,6 +55,7 @@ namespace System.Net.Http.Formatting
 
             mockLogger.Verify(mock => mock.LogError(It.IsAny<string>(), It.IsAny<Exception>()), Times.Exactly(expectedErrors));
         }
+#endif
 
         [Fact]
         public void HittingMaxDepthRaisesOnlyOneValidationError()
@@ -78,6 +80,7 @@ namespace System.Net.Http.Formatting
         }
     }
 
+#if !NETFX_CORE // IRequiredMemeberSelector uses MemberInfo which is not avaiable on portable libraries
     // this IRMS treats all member names that start with "Required" as required
     public class SimpleRequiredMemberSelector : IRequiredMemberSelector
     {
@@ -86,6 +89,7 @@ namespace System.Net.Http.Formatting
             return member.Name.StartsWith("Required");
         }
     }
+#endif
 
     public class DataContractWithRequiredMembers
     {

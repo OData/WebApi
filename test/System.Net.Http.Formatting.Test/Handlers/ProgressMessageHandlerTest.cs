@@ -133,7 +133,11 @@ namespace System.Net.Http.Handlers
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
+#if NETFX_CORE
+                HttpResponseMessage response = new HttpResponseMessage() { RequestMessage = request };
+#else
                 HttpResponseMessage response = request.CreateResponse();
+#endif
                 if (_includeResponseEntity)
                 {
                     response.Content = new StringContent("Response Entity");

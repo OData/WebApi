@@ -38,6 +38,7 @@ namespace System.Net.Http.Formatting
             Assert.Equal("application/xml", mediaType.MediaType);
         }
 
+#if !NETFX_CORE // We don't support MaxDepth in the portable library
         [Fact]
         public void MaxDepthReturnsCorrectValue()
         {
@@ -63,6 +64,7 @@ namespace System.Net.Http.Formatting
             Task task = formatter.ReadFromStreamAsync(typeof(SampleType), stream, null, null);
             Assert.Throws<SerializationException>(() => task.Wait());
         }
+#endif
 
         [Fact]
         public void Indent_RoundTrips()
@@ -241,7 +243,15 @@ namespace System.Net.Http.Formatting
 
             // Arrange
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+            
             string formattedContent = "<string xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/\">" + content + "</string>";
+#if NETFX_CORE
+            // We need to supply the xml declaration when compiled in portable library for non utf-8 content
+            if (String.Equals("utf-16", encoding, StringComparison.OrdinalIgnoreCase))
+            {
+                formattedContent = "<?xml version=\"1.0\" encoding=\"UTF-16\"?>" + formattedContent;
+            }
+#endif
             string mediaType = string.Format("application/xml; charset={0}", encoding);
 
             // Act & assert
@@ -273,7 +283,12 @@ namespace System.Net.Http.Formatting
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
 
+#if !NETFX_CORE
             Assert.False(formatter.CanReadType(typeof(InvalidDataContract)));
+#else
+            // The formatter is unable to positively identify non readable types, so true is always returned
+            Assert.True(formatter.CanReadType(typeof(InvalidDataContract)));
+#endif
         }
 
         [Fact]
@@ -281,7 +296,12 @@ namespace System.Net.Http.Formatting
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
 
+#if !NETFX_CORE
             Assert.False(formatter.CanWriteType(typeof(InvalidDataContract)));
+#else
+            // The formatter is unable to positively identify non readable types, so true is always returned
+            Assert.True(formatter.CanWriteType(typeof(InvalidDataContract)));
+#endif
         }
 
         public class InvalidDataContract

@@ -65,7 +65,11 @@ namespace System.Net.Http.Formatting
                     // Classes
                     { new DataContractType() { s = "foo", i = 49, NotAMember = "Error" }, "{\"s\":\"foo\",\"i\":49}" },
                     { new POCOType() { s = "foo", t = "Error"}, "{\"s\":\"foo\"}" },
+#if !NETFX_CORE // Only publics are serialized in portable library
                     { new SerializableType("protected") { publicField = "public", protectedInternalField = "protected internal", internalField = "internal", PublicProperty = "private", nonSerializedField = "Error" }, "{\"publicField\":\"public\",\"internalField\":\"internal\",\"protectedInternalField\":\"protected internal\",\"protectedField\":\"protected\",\"privateField\":\"private\"}" },
+#else
+                    { new SerializableType("protected") { publicField = "public", protectedInternalField = "protected internal", internalField = "internal", PublicProperty = "private", nonSerializedField = "Error" }, "{\"publicField\":\"public\",\"PublicProperty\":\"private\"}" },
+#endif
                     { new { field1 = "x", field2 = (string)null, field3 = "y" }, "{\"field1\":\"x\",\"field2\":null,\"field3\":\"y\"}" },
                     
                     // Generics
@@ -137,7 +141,8 @@ namespace System.Net.Http.Formatting
             }
             else
             {
-                Assert.Equal(expectedObject, Deserialize(json, type), new ObjectComparer());
+                object o = Deserialize(json, type);
+                Assert.Equal(expectedObject, o, new ObjectComparer());
             }
         }
 
@@ -454,11 +459,16 @@ namespace System.Net.Http.Formatting
 
         public bool Equals(SerializableType other)
         {
+#if !NETFX_CORE // Only publics are serialized in portable library
             return this.publicField == other.publicField &&
                 this.internalField == other.internalField &&
                 this.protectedInternalField == other.protectedInternalField &&
                 this.protectedField == other.protectedField &&
                 this.privateField == other.privateField;
+#else
+            return this.publicField == other.publicField &&
+                this.privateField == other.privateField;
+#endif
         }
     }
 

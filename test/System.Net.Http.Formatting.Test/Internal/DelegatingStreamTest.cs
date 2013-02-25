@@ -2,6 +2,7 @@
 
 using System.IO;
 using System.Net.Http.Mocks;
+using System.Threading;
 using Microsoft.TestCommon;
 using Moq;
 using Moq.Protected;
@@ -191,6 +192,7 @@ namespace System.Net.Http.Internal
             mockInnerStream.Verify(s => s.Read(buffer, offset, count), Times.Once());
         }
 
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
         [Fact]
         public void DelegatingStream_BeginRead()
         {
@@ -223,6 +225,23 @@ namespace System.Net.Http.Internal
 
             // Assert 
             mockInnerStream.Verify(s => s.EndRead(mockIAsyncResult.Object), Times.Once());
+        }
+#endif
+        [Fact]
+        public void DelegatingStream_ReadAsyc()
+        {
+            // Arrange
+            Mock<Stream> mockInnerStream = new Mock<Stream>();
+            MockDelegatingStream mockStream = new MockDelegatingStream(mockInnerStream.Object);
+            byte[] buffer = new byte[2];
+            int offset = 1;
+            int count = 1;
+
+            // Act
+            mockStream.ReadAsync(buffer, offset, count, CancellationToken.None);
+
+            // Assert 
+            mockInnerStream.Verify(s => s.ReadAsync(buffer, offset, count, CancellationToken.None), Times.Once());
         }
 
         [Fact]
@@ -284,6 +303,7 @@ namespace System.Net.Http.Internal
             mockInnerStream.Verify(s => s.Write(buffer, offset, count), Times.Once());
         }
 
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
         [Fact]
         public void DelegatingStream_BeginWrite()
         {
@@ -316,6 +336,23 @@ namespace System.Net.Http.Internal
 
             // Assert 
             mockInnerStream.Verify(s => s.EndWrite(mockIAsyncResult.Object), Times.Once());
+        }
+#endif
+        [Fact]
+        public void DelegatingStream_WriteAsync()
+        {
+            // Arrange
+            Mock<Stream> mockInnerStream = new Mock<Stream>();
+            MockDelegatingStream mockStream = new MockDelegatingStream(mockInnerStream.Object);
+            byte[] buffer = new byte[2];
+            int offset = 1;
+            int count = 1;
+
+            // Act
+            mockStream.WriteAsync(buffer, offset, count, CancellationToken.None);
+
+            // Assert 
+            mockInnerStream.Verify(s => s.WriteAsync(buffer, offset, count, CancellationToken.None), Times.Once());
         }
 
         [Fact]

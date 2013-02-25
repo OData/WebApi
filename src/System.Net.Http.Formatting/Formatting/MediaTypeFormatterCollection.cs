@@ -54,7 +54,7 @@ namespace System.Net.Http.Formatting
             get { return Items.OfType<JsonMediaTypeFormatter>().FirstOrDefault(); }
         }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // FormUrlEncodedMediaTypeFormatter is not supported in portable library.
         /// <summary>
         /// Gets the <see cref="MediaTypeFormatter"/> to use for <c>application/x-www-form-urlencoded</c> data.
         /// </summary>

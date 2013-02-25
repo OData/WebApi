@@ -17,7 +17,9 @@ namespace System.Net.Http.Formatting
     {
         public DataContractJsonMediaTypeFormatter()
         {
+#if !NETFX_CORE // DataContractJsonSerializer is not supported in portable library 
             UseDataContractJsonSerializer = true;
+#endif
         }
     }
 
@@ -63,6 +65,7 @@ namespace System.Net.Http.Formatting
                 expectedDefaultValue: false);
         }
 
+#if !NETFX_CORE // We don't support MaxDepth in the portable library
         [Fact]
         public void MaxDepth_RoundTrips()
         {
@@ -76,6 +79,7 @@ namespace System.Net.Http.Formatting
                 illegalUpperValue: null,
                 roundTripTestValue: 256);
         }
+#endif
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
@@ -94,12 +98,18 @@ namespace System.Net.Http.Formatting
             Assert.False(isSerializable != canSupport && isSerializable, String.Format("2nd CanReadType returned wrong value for '{0}'.", variationType));
         }
 
+
         [Fact]
         public void CanReadType_ReturnsFalse_ForInvalidDataContracts()
         {
             JsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
 
+#if !NETFX_CORE
             Assert.False(formatter.CanReadType(typeof(InvalidDataContract)));
+#else
+            // The formatter is unable to positively identify non readable types, so true is always returned
+            Assert.True(formatter.CanReadType(typeof(InvalidDataContract)));
+#endif
         }
 
         [Fact]
@@ -107,8 +117,14 @@ namespace System.Net.Http.Formatting
         {
             JsonMediaTypeFormatter formatter = new DataContractJsonMediaTypeFormatter();
 
+#if !NETFX_CORE
             Assert.False(formatter.CanWriteType(typeof(InvalidDataContract)));
+#else
+            // The formatter is unable to positively identify non readable types, so true is always returned
+            Assert.True(formatter.CanWriteType(typeof(InvalidDataContract)));
+#endif
         }
+
 
         public class InvalidDataContract
         {
@@ -157,7 +173,7 @@ namespace System.Net.Http.Formatting
         }
 
         [Fact]
-        public void UseDataContractJsonSerializer_True()
+        public void UseDataContractJsonSerializer_Default()
         {
             DataContractJsonMediaTypeFormatter jsonFormatter = new DataContractJsonMediaTypeFormatter();
             MemoryStream memoryStream = new MemoryStream();
@@ -168,6 +184,7 @@ namespace System.Net.Http.Formatting
             Assert.False(serializedString.Contains("\r\n"), "Using DCJS should emit data without indentation by default.");
         }
 
+#if !NETFX_CORE // Indent won't throw on portable libraries because UDCJS is not available, so this test is not needed
         [Fact]
         public void UseDataContractJsonSerializer_True_Indent_Throws()
         {
@@ -179,6 +196,7 @@ namespace System.Net.Http.Formatting
                     new SampleType(),
                     memoryStream, content, transportContext: null));
         }
+#endif
 
         [Theory]
         [TestDataSet(typeof(HttpTestData), "ReadAndWriteCorrectCharacterEncoding")]

@@ -91,12 +91,12 @@ namespace System.Net.Http.Internal
             return _innerStream.Read(buffer, offset, count);
         }
 
-#if NETFX_CORE
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return _innerStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
-#else
+
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return _innerStream.BeginRead(buffer, offset, count, callback, state);
@@ -118,7 +118,6 @@ namespace System.Net.Http.Internal
             _innerStream.Flush();
         }
 
-#if NETFX_CORE
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             return _innerStream.CopyToAsync(destination, bufferSize, cancellationToken);
@@ -128,7 +127,6 @@ namespace System.Net.Http.Internal
         {
             return _innerStream.FlushAsync(cancellationToken);
         }
-#endif
 
         public override void SetLength(long value)
         {
@@ -140,12 +138,12 @@ namespace System.Net.Http.Internal
             _innerStream.Write(buffer, offset, count);
         }
 
-#if NETFX_CORE
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return _innerStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
-#else
+
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return _innerStream.BeginWrite(buffer, offset, count, callback, state);

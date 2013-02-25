@@ -109,8 +109,9 @@ namespace System.Net.Http
 #if NETFX_CORE
             protected override void Dispose(bool disposing)
             {
+                // Note we don't call dipose on the inner stream as the stream will get disposed when this
+                // HttpContent instance is disposed.
                 _serializeToStreamTask.TrySetResult(true);
-                base.Dispose(disposing);
             }
 #else
             public override void Close()

@@ -29,7 +29,14 @@ namespace Microsoft.TestCommon
             Array values = Enum.GetValues(typeof(TEnum));
             foreach (object value in values)
             {
-                Assert.True(_isDefined((TEnum)value));
+                if (ValueExistsForFramework((TEnum)value))
+                {
+                    Assert.True(_isDefined((TEnum)value));
+                }
+                else
+                {
+                    Assert.False(_isDefined((TEnum)value));
+                }
             }
         }
 
@@ -45,19 +52,37 @@ namespace Microsoft.TestCommon
             Array values = Enum.GetValues(typeof(TEnum));
             foreach (object value in values)
             {
-                _validate((TEnum)value, "parameter");
+                if (ValueExistsForFramework((TEnum)value))
+                {
+                    _validate((TEnum)value, "parameter");
+                }
             }
         }
 
         [Fact]
         public void Validate_ThrowsForUndefinedValues()
         {
-            Assert.ThrowsInvalidEnumArgument(
+            AssertForUndefinedValue(
                 () => _validate(_undefined, "parameter"),
                 "parameter",
                 (int)Convert.ChangeType(_undefined, typeof(int)),
                 typeof(TEnum),
                 allowDerivedExceptions: false);
+        }
+
+        protected virtual void AssertForUndefinedValue(Action testCode, string parameterName, int invalidValue, Type enumType, bool allowDerivedExceptions = false)
+        {
+            Assert.ThrowsInvalidEnumArgument(
+                testCode,
+                parameterName,
+                invalidValue,
+                enumType,
+                allowDerivedExceptions);
+        }
+
+        protected virtual bool ValueExistsForFramework(TEnum value)
+        {
+            return true;
         }
     }
 }

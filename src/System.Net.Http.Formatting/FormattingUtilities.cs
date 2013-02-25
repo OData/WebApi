@@ -112,7 +112,7 @@ namespace System.Net.Http
         /// </summary>
         public static readonly Type QueryableInterfaceGenericType = typeof(IQueryable<>);
 
-#if !NETFX_CORE
+#if !NETFX_CORE // XsdDataContractExporter is not supported in portable libraries
         /// <summary>
         /// An instance of <see cref="XsdDataContractExporter"/>.
         /// </summary>
@@ -164,7 +164,7 @@ namespace System.Net.Http
         /// <returns></returns>
         public static XmlDictionaryReaderQuotas CreateDefaultReaderQuotas()
         {
-#if NETFX_CORE
+#if NETFX_CORE // On core we set the max Quota
             return XmlDictionaryReaderQuotas.Max;
 #else
             return new XmlDictionaryReaderQuotas()

@@ -60,14 +60,13 @@ namespace System.Net.Http.Handlers
             return byteRead;
         }
 
-#if NETFX_CORE
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             int readCount = await InnerStream.ReadAsync(buffer, offset, count, cancellationToken);
             ReportBytesReceived(readCount, userState: null);
             return readCount;
         }
-#else
+#if !NETFX_CORE // BeginX and EndX are not supported on streams in portable libraries
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return InnerStream.BeginRead(buffer, offset, count, callback, state);
@@ -93,13 +92,13 @@ namespace System.Net.Http.Handlers
             ReportBytesSent(1, userState: null);
         }
 
-#if NETFX_CORE
-        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+       public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             await InnerStream.WriteAsync(buffer, offset, count, cancellationToken);
             ReportBytesSent(count, userState: null);
         }
-#else
+
+#if !NETFX_CORE // BeginX and EndX are not supported on streams in portable libraries
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return new ProgressWriteAsyncResult(InnerStream, this, buffer, offset, count, callback, state);

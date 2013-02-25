@@ -58,7 +58,12 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void ReadDeeplyNestedObjectWorks()
         {
-            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter() { MaxDepth = 5001 };
+            XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter() 
+            { 
+#if !NETFX_CORE // We don't support MaxDepth in the portable library
+                MaxDepth = 5001 
+#endif
+            };
 
             StringContent content = new StringContent(GetDeeplyNestedObject(5000));
 
@@ -229,6 +234,13 @@ namespace System.Net.Http.Formatting
             // Arrange
             XmlSerializerMediaTypeFormatter formatter = new XmlSerializerMediaTypeFormatter();
             string formattedContent = "<string>" + content + "</string>";
+#if NETFX_CORE
+            if (String.Equals("utf-16", encoding, StringComparison.OrdinalIgnoreCase))
+            {
+                // We need to supply the xml declaration when compiled in portable library for non utf-8 content
+                formattedContent = "<?xml version=\"1.0\" encoding=\"UTF-16\"?>" + formattedContent;
+            }
+#endif
             string mediaType = string.Format("application/xml; charset={0}", encoding);
 
             // Act & assert

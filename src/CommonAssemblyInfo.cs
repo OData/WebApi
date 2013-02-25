@@ -10,8 +10,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
+#if !NOT_CLS_COMPLIANT
 [assembly: CLSCompliant(true)]
-
+#endif
 [assembly: NeutralResourcesLanguage("en-US")]
 
 // ===========================================================================

@@ -39,8 +39,11 @@ namespace System.Net.Http.Mocks
                 SendAsyncException = new Exception("SendAsync exception");
                 throw SendAsyncException;
             }
-
+#if !NETFX_CORE // Extension method only available on non portable library
             return TaskHelpers.FromResult(request.CreateResponse());
+#else
+            return TaskHelpers.FromResult(new HttpResponseMessage { RequestMessage = request });
+#endif
         }
     }
 }

@@ -25,7 +25,7 @@ namespace System.Net.Http.Formatting
         private JsonSerializerSettings _jsonSerializerSettings;
         private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
 
-#if !NETFX_CORE
+#if !NETFX_CORE // DataContractJsonSerializer is not supported in portable library
         private ConcurrentDictionary<Type, DataContractJsonSerializer> _dataContractSerializerCache = new ConcurrentDictionary<Type, DataContractJsonSerializer>();
         private readonly IContractResolver _defaultContractResolver;
         private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
@@ -42,7 +42,7 @@ namespace System.Net.Http.Formatting
             SupportedMediaTypes.Add(MediaTypeConstants.TextJsonMediaType);
 
             // Initialize serializer
-#if !NETFX_CORE
+#if !NETFX_CORE // DataContractJsonSerializer is not supported in portable library
             _defaultContractResolver = new JsonContractResolver(this);
 #endif
             _jsonSerializerSettings = CreateDefaultSerializerSettings();
@@ -51,7 +51,7 @@ namespace System.Net.Http.Formatting
             SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
             SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
 
-#if !NETFX_CORE
+#if !NETFX_CORE // MediaTypeMappings are not supported in portable library
             _requestHeaderMapping = new XmlHttpRequestHeaderMapping();
             MediaTypeMappings.Add(_requestHeaderMapping);
 #endif
@@ -91,7 +91,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // DataContractJsonSerializer is not supported in portable library
         /// <summary>
         /// Gets or sets a value indicating whether to use <see cref="DataContractJsonSerializer"/> by default.
         /// </summary>
@@ -106,7 +106,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public bool Indent { get; set; }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // MaxDepth not supported in portable library
         /// <summary>
         /// Gets or sets the maximum depth allowed by this formatter.
         /// </summary>
@@ -137,7 +137,7 @@ namespace System.Net.Http.Formatting
         {
             return new JsonSerializerSettings()
             {
-#if !NETFX_CORE
+#if !NETFX_CORE // no Contract resolver in portable libraries
                 ContractResolver = _defaultContractResolver,
 #endif
                 MissingMemberHandling = MissingMemberHandling.Ignore,
@@ -161,7 +161,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("type");
             }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No DataContratJsonSerializer in portable library version
             if (UseDataContractJsonSerializer)
             {
                 // If there is a registered non-null serializer, we can support this type.
@@ -191,7 +191,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("type");
             }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No DataContratJsonSerializer in portable library version
             if (UseDataContractJsonSerializer)
             {
                 MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
@@ -246,7 +246,7 @@ namespace System.Net.Http.Formatting
 
                 try
                 {
-#if !NETFX_CORE
+#if !NETFX_CORE // No DataContratJsonSerializer in portable library version
                     if (UseDataContractJsonSerializer)
                     {
                         DataContractJsonSerializer dataContractSerializer = GetDataContractSerializer(type);
@@ -310,7 +310,7 @@ namespace System.Net.Http.Formatting
                 throw Error.ArgumentNull("writeStream");
             }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No DataContratJsonSerializer in portable library version
             if (UseDataContractJsonSerializer && Indent)
             {
                 throw Error.NotSupported(Properties.Resources.UnsupportedIndent, typeof(DataContractJsonSerializer));
@@ -321,7 +321,7 @@ namespace System.Net.Http.Formatting
             {
                 Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No DataContratJsonSerializer in portable library version
                 if (UseDataContractJsonSerializer)
                 {
                     if (MediaTypeFormatter.TryGetDelegatingTypeForIQueryableGenericOrSame(ref type))
@@ -355,7 +355,7 @@ namespace System.Net.Http.Formatting
             });
         }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No DataContratJsonSerializer in portable library version
         private static DataContractJsonSerializer CreateDataContractSerializer(Type type, bool throwOnError)
         {
             if (type == null)

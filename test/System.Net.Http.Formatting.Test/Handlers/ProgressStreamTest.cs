@@ -64,6 +64,7 @@ namespace System.Net.Http.Handlers
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
 
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
         [Fact]
         public void BeginEndRead_ReportsBytesRead()
         {
@@ -95,6 +96,37 @@ namespace System.Net.Http.Handlers
             Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
+#else
+        [Fact]
+        public void ReadAsync_ReportsBytesRead()
+        {
+            // Arrange
+            HttpResponseMessage response = CreateResponse();
+            Stream innerStream = response.Content.ReadAsStreamAsync().Result;
+            long? expectedLength = response.Content.Headers.ContentLength;
+            MockProgressEventHandler mockProgressEventHandler;
+            ProgressMessageHandler progressMessageHandler = MockProgressEventHandler.CreateProgressMessageHandler(out mockProgressEventHandler, sendProgress: false);
+            ProgressStream progressStream = CreateProgressStream(innerStream: innerStream, progressMessageHandler: progressMessageHandler, response: response);
+            object userState = new object();
+
+            // Act/Assert
+            int totalBytesRead = 0;
+            int bytesRead = 0;
+            do
+            {
+                byte[] buffer = new byte[8];
+                bytesRead = progressStream.ReadAsync(buffer, 0, buffer.Length).Result;
+                totalBytesRead += bytesRead;
+
+                Assert.Equal(totalBytesRead, mockProgressEventHandler.EventArgs.BytesTransferred);
+                Assert.Equal((100L * totalBytesRead) / expectedLength, mockProgressEventHandler.EventArgs.ProgressPercentage);
+            }
+            while (bytesRead > 0);
+
+            Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
+            Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
+        }
+#endif
 
         [Fact]
         public void Write_ReportsBytesWritten()
@@ -152,6 +184,7 @@ namespace System.Net.Http.Handlers
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
 
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
         [Fact]
         public void BeginEndWrite_ReportsBytesWritten()
         {
@@ -192,6 +225,39 @@ namespace System.Net.Http.Handlers
             Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
+#else
+        [Fact]
+        public void WriteAsync_ReportsBytesWritten()
+        {
+            // Arrange
+            ManualResetEvent writeComplete = new ManualResetEvent(false);
+            HttpRequestMessage request = CreateRequest();
+            Stream innerStream = new MemoryStream();
+            byte[] buffer = CreateBufferContent();
+            long? expectedLength = request.Content.Headers.ContentLength;
+            MockProgressEventHandler mockProgressEventHandler;
+            ProgressMessageHandler progressMessageHandler = MockProgressEventHandler.CreateProgressMessageHandler(out mockProgressEventHandler, sendProgress: true);
+            ProgressStream progressStream = CreateProgressStream(innerStream: innerStream, progressMessageHandler: progressMessageHandler, request: request);
+            object userState = new object();
+
+            // Act/Assert
+            int totalBytesWritten = 0;
+            int bytesWritten = 0;
+            while (totalBytesWritten < expectedLength)
+            {
+                bytesWritten = Math.Min(8, (int)expectedLength - totalBytesWritten);
+                progressStream.WriteAsync(buffer, totalBytesWritten, bytesWritten).Wait();
+
+                totalBytesWritten += bytesWritten;
+
+                Assert.Equal(totalBytesWritten, mockProgressEventHandler.EventArgs.BytesTransferred);
+                Assert.Equal((100L * totalBytesWritten) / expectedLength, mockProgressEventHandler.EventArgs.ProgressPercentage);
+            }
+
+            Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
+            Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
+        }
+#endif
 
         internal static ProgressStream CreateProgressStream(
             Stream innerStream = null,

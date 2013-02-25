@@ -71,6 +71,7 @@ namespace System.Net.Http.Formatting
                 expectedDefaultValue: false);
         }
 
+#if !NETFX_CORE // MaxDepth is not supported in portable libraries
         [Fact]
         public void MaxDepth_RoundTrips()
         {
@@ -84,6 +85,7 @@ namespace System.Net.Http.Formatting
                 illegalUpperValue: null,
                 roundTripTestValue: 256);
         }
+#endif
 
         [Theory]
         [TestDataSet(typeof(CommonUnitTestDataSets), "RepresentativeValueAndRefTypeTestDataCollection")]
@@ -168,7 +170,12 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void UseDataContractJsonSerializer_False()
         {
-            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter 
+            { 
+#if !NETFX_CORE // No JsonSerializer in portable libraries
+                UseDataContractJsonSerializer = false
+#endif
+            };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
             Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
@@ -182,7 +189,13 @@ namespace System.Net.Http.Formatting
         [Fact]
         public void UseDataContractJsonSerializer_False_Indent()
         {
-            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false, Indent = true };
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter
+            {
+#if !NETFX_CORE // No JsonSerializer in portable libraries
+                UseDataContractJsonSerializer = false, 
+#endif
+                Indent = true 
+            };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
             Assert.Task.Succeeds(formatter.WriteToStreamAsync(typeof(SampleType), new SampleType(), memoryStream, content, transportContext: null));
@@ -196,7 +209,12 @@ namespace System.Net.Http.Formatting
         [InlineData(typeof(IEnumerable<string>))]
         public void UseJsonFormatterWithNull(Type type)
         {
-            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter { UseDataContractJsonSerializer = false };
+            JsonMediaTypeFormatter formatter = new JsonMediaTypeFormatter
+            {
+#if !NETFX_CORE // No JsonSerializer in portable libraries
+                UseDataContractJsonSerializer = false 
+#endif
+            };
             MemoryStream memoryStream = new MemoryStream();
             HttpContent content = new StringContent(String.Empty);
             Assert.Task.Succeeds(formatter.WriteToStreamAsync(type, null, memoryStream, content, transportContext: null));

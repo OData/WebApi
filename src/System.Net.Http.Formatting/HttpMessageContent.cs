@@ -304,7 +304,7 @@ namespace System.Net.Http
             base.Dispose(disposing);
         }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No Begin/EndX in portable libraries
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
         private static void OnWriteComplete(IAsyncResult result)
         {
@@ -421,7 +421,7 @@ namespace System.Net.Http
             }
         }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // not used due to no Begin/End Support
         private Task<HttpContent> PrepareContentAsync()
         {
             if (Content == null)

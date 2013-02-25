@@ -101,6 +101,7 @@ namespace System.Net.Http
             Assert.True(serializeToStreamTask.Task.Result);
         }
 
+#if !NETFX_CORE // No Stream.Close on portable libraries 
         [Fact]
         public void NonClosingDelegatingStream_Close_CompletesTaskButDoNotCloseInnerStream()
         {
@@ -118,7 +119,8 @@ namespace System.Net.Http
             Assert.Equal(TaskStatus.RanToCompletion, serializeToStreamTask.Task.Status);
             Assert.True(serializeToStreamTask.Task.Result);
         }
-
+#endif
+        
         private class MockStreamAction
         {
             bool _close;

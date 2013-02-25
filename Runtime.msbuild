@@ -17,10 +17,6 @@
             <ReleaseRoot>.</ReleaseRoot>
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
         </SolutionsToBuild>    
-        <SolutionsToBuild Include="RuntimeRT.sln">
-            <ReleaseRoot>.</ReleaseRoot>
-            <BuildInParallel>$(BuildInParallel)</BuildInParallel>
-        </SolutionsToBuild>    
     </ItemGroup>    
 
     <Target Name="Integration" DependsOnTargets="Clean;Build;UnitTest" />
@@ -71,7 +67,7 @@
   
     <Target Name = "RunTests">
       <ItemGroup>
-        <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll" Exclude="**\SPA.Test.dll" />
+        <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll;bin\$(Configuration)\Test\NetCore\*.Test.dll" Exclude="**\SPA.Test.dll" />
         <XunitProject Include="tools\WebStack.xunit.targets">
           <Properties>TestAssembly=%(TestDLLsXunit.FullPath);XmlPath=$(TestResultsDirectory)%(TestDLLsXunit.FileName)-XunitResults.xml</Properties>
         </XunitProject>

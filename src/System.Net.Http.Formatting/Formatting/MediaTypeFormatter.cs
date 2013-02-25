@@ -39,7 +39,7 @@ namespace System.Net.Http.Formatting
         {
             SupportedMediaTypes = new MediaTypeHeaderValueCollection();
             SupportedEncodings = new Collection<Encoding>();
-#if !NETFX_CORE
+#if !NETFX_CORE // No MediaTypeMappings in portable library
             MediaTypeMappings = new Collection<MediaTypeMapping>();
 #endif
         }
@@ -82,7 +82,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public Collection<Encoding> SupportedEncodings { get; private set; }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // No MediaTypeMappings in portable library
         /// <summary>
         /// Gets the mutable collection of <see cref="MediaTypeMapping"/> elements used
         /// by this <see cref="MediaTypeFormatter"/> instance to determine the
@@ -160,29 +160,7 @@ namespace System.Net.Http.Formatting
 
         private static int InitializeDefaultCollectionKeySize()
         {
-#if NETFX_CORE
             return Int32.MaxValue;
-#else
-            // we first detect if we are running on 4.5, return Max value if we are.
-            Type comparerType = Type.GetType(IWellKnownComparerTypeName, throwOnError: false);
-
-            if (comparerType != null)
-            {
-                return Int32.MaxValue;
-            }
-
-            // we should try to read it from the AppSettings 
-            // if we found the aspnet settings configured, we will use that. Otherwise, we used the default 
-            NameValueCollection settings = ConfigurationManager.AppSettings;
-            int result;
-
-            if (settings == null || !Int32.TryParse(settings["aspnet:MaxHttpCollectionKeys"], out result) || result < 0)
-            {
-                result = DefaultMaxHttpCollectionKeys;
-            }
-
-            return result;
-#endif
         }
 
         /// <summary>

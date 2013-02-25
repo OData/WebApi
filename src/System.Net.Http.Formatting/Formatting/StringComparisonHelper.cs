@@ -22,7 +22,7 @@ namespace System.Net.Http.Formatting
         {
             return value == StringComparison.CurrentCulture ||
                    value == StringComparison.CurrentCultureIgnoreCase ||
-#if !NETFX_CORE
+#if !NETFX_CORE 
                    value == StringComparison.InvariantCulture ||
                    value == StringComparison.InvariantCultureIgnoreCase ||
 #endif

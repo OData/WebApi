@@ -69,7 +69,7 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public bool Indent { get; set; }
 
-#if !NETFX_CORE
+#if !NETFX_CORE // MaxDepth is not supported in portable libraries
         /// <summary>
         /// Gets or sets the maximum depth allowed by this formatter.
         /// </summary>

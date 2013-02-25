@@ -45,10 +45,12 @@ namespace System.Net.Http.Formatting
             Collection<MediaTypeHeaderValue> supportedMediaTypes = formatter.SupportedMediaTypes;
             Assert.NotNull(supportedMediaTypes);
             Assert.Equal(0, supportedMediaTypes.Count);
-
+#if !NETFX_CORE // No MediaTypeMapping support in portable libraries
             Collection<MediaTypeMapping> mappings = formatter.MediaTypeMappings;
+
             Assert.NotNull(mappings);
             Assert.Equal(0, mappings.Count);
+#endif
         }
 
         [Fact]
@@ -116,6 +118,7 @@ namespace System.Net.Http.Formatting
             Assert.ThrowsArgument(() => supportedMediaTypes.Insert(0, mediaType), "item", Error.Format(Properties.Resources.CannotUseMediaRangeForSupportedMediaType, typeof(MediaTypeHeaderValue).Name, mediaType.MediaType));
         }
 
+#if !NETFX_CORE // No MediaTypeMapping support in portable libraries
         [Fact]
         public void MediaTypeMappings_IsMutable()
         {
@@ -129,6 +132,7 @@ namespace System.Net.Http.Formatting
 
             Assert.True(standardMappings.SequenceEqual(formatter.MediaTypeMappings));
         }
+#endif
 
         [Fact]
         public void SelectCharacterEncoding_ThrowsIfNoSupportedEncodings()

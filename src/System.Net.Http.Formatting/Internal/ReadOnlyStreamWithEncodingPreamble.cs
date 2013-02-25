@@ -14,9 +14,7 @@ namespace System.Net.Http.Internal
     /// </summary>
     internal class ReadOnlyStreamWithEncodingPreamble : Stream
     {
-#if NETFX_CORE
         private static Task<int> _cancelledTask = GetCancelledTask();
-#endif
         private Stream _innerStream;
         private ArraySegment<byte> _remainingBytes;
 
@@ -108,14 +106,12 @@ namespace System.Net.Http.Internal
             throw new NotImplementedException();
         }
 
-#if NETFX_CORE
         private static Task<int> GetCancelledTask()
         {
             var tcs = new TaskCompletionSource<int>();
             tcs.SetCanceled();
             return tcs.Task;
         }
-#endif
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -146,7 +142,6 @@ namespace System.Net.Http.Internal
             return result;
         }
 
-#if NETFX_CORE
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             if (_remainingBytes.Array == null)
@@ -160,7 +155,6 @@ namespace System.Net.Http.Internal
 
             return Task.FromResult(Read(buffer, offset, count));
         }
-#endif
 
         public override long Seek(long offset, SeekOrigin origin)
         {

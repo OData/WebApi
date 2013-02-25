@@ -23,10 +23,16 @@ namespace System.Net.Http.Formatting
         public void Constructor()
         {
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection();
+#if !NETFX_CORE // No FormUrlEncodedMediaTypeFormatter in portable library version
             Assert.Equal(3, collection.Count);
+#else
+            Assert.Equal(2, collection.Count);
+#endif
             Assert.NotNull(collection.XmlFormatter);
             Assert.NotNull(collection.JsonFormatter);
+#if !NETFX_CORE // No FormUrlEncodedMediaTypeFormatter in portable library version
             Assert.NotNull(collection.FormUrlEncodedFormatter);
+#endif
         }
 
         [Fact]
@@ -91,10 +97,14 @@ namespace System.Net.Http.Formatting
             {
                 new XmlMediaTypeFormatter(),
                 new JsonMediaTypeFormatter(),
+#if !NETFX_CORE // No FormUrlEncodedMediaTypeFormatter in portable library version
                 new FormUrlEncodedMediaTypeFormatter(),
+#endif
                 new XmlMediaTypeFormatter(),
                 new JsonMediaTypeFormatter(),
+#if !NETFX_CORE // No FormUrlEncodedMediaTypeFormatter in portable library version
                 new FormUrlEncodedMediaTypeFormatter(),
+#endif
             };
 
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(formatters);
@@ -131,6 +141,7 @@ namespace System.Net.Http.Formatting
             Assert.Null(collection.JsonFormatter);
         }
 
+#if !NETFX_CORE // No FormUrlEncodedMediaTypeFormatter in portable library version
         [Fact]
         public void FormUrlEncodedFormatter_SetByCtor()
         {
@@ -145,6 +156,7 @@ namespace System.Net.Http.Formatting
             MediaTypeFormatterCollection collection = new MediaTypeFormatterCollection(new MediaTypeFormatter[0]);
             Assert.Null(collection.FormUrlEncodedFormatter);
         }
+#endif
 
         [Fact]
         public void Remove_SetsXmlFormatter()

@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net.Http.Formatting.Parsers;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.TestCommon;
 
 namespace System.Net.Http
@@ -109,7 +111,7 @@ namespace System.Net.Http
         public void ReadAsMultipartAsync_ThrowsOnNullStreamProvider()
         {
             HttpContent content = CreateContent(ValidBoundary);
-            Assert.ThrowsArgumentNull(() => content.ReadAsMultipartAsync((MultipartMemoryStreamProvider)null), "streamProvider");
+            Assert.ThrowsArgumentNull(() => content.ReadAsMultipartAsync((MultipartStreamProvider)null).Wait(), "streamProvider");
         }
 
         [Fact]
@@ -117,7 +119,7 @@ namespace System.Net.Http
         {
             HttpContent content = CreateContent(ValidBoundary);
             Assert.ThrowsArgumentGreaterThanOrEqualTo(
-                () => content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), ParserData.MinBufferSize - 1),
+                () => content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), ParserData.MinBufferSize - 1).Wait(),
                 "bufferSize", ParserData.MinBufferSize.ToString(), ParserData.MinBufferSize - 1);
         }
 
@@ -342,26 +344,39 @@ namespace System.Net.Http
         {
             public override int Read(byte[] buffer, int offset, int count)
             {
-                throw new Exception(ExceptionSyncStreamMessage);
+                throw new IOException(ExceptionSyncStreamMessage);
+            }
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                throw new IOException(ExceptionAsyncStreamMessage);
             }
 
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
             public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
-                throw new Exception(ExceptionAsyncStreamMessage);
+                throw new IOException(ExceptionAsyncStreamMessage);
             }
+#endif
         }
 
         public class WriteErrorStream : MemoryStream
         {
             public override void Write(byte[] buffer, int offset, int count)
             {
-                throw new Exception(ExceptionSyncStreamMessage);
+                throw new IOException(ExceptionSyncStreamMessage);
             }
 
+            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                throw new IOException(ExceptionAsyncStreamMessage);
+            }
+
+#if !NETFX_CORE // BeginX and EndX not supported on Streams in portable libraries
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
-                throw new Exception(ExceptionAsyncStreamMessage);
+                throw new IOException(ExceptionAsyncStreamMessage);
             }
+#endif
         }
 
         public class BadStreamProvider : MultipartStreamProvider

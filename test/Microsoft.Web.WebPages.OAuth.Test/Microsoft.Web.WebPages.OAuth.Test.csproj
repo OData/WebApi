@@ -8,6 +8,7 @@
     <RootNamespace>Microsoft.Web.WebPages.OAuth.Test</RootNamespace>
     <AssemblyName>Microsoft.Web.WebPages.OAuth.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DotNetOpenAuth.AspNet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">

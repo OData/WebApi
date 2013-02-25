@@ -8,6 +8,7 @@
     <RootNamespace>WebMatrix.Data.Test</RootNamespace>
     <AssemblyName>WebMatrix.Data.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

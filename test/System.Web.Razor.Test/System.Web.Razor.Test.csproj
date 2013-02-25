@@ -9,6 +9,7 @@
     <AssemblyName>System.Web.Razor.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
     <NoWarn>0618</NoWarn>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

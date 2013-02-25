@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Runtime.sln))\tools\WebStack.settings.targets" />
-  <PropertyGroup>    
+  <PropertyGroup>
     <ProjectGuid>{8AC2A2E4-2F11-4D40-A887-62E2583A65E6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -10,6 +10,7 @@
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
     <!-- Temporarily disable Obsolete Warnings as Errors -->
     <NoWarn>0618</NoWarn>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

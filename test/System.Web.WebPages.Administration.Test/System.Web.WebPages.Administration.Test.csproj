@@ -8,6 +8,7 @@
     <RootNamespace>System.Web.WebPages.Administration.Test</RootNamespace>
     <AssemblyName>System.Web.WebPages.Administration.Test</AssemblyName>
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

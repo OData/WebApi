@@ -10,6 +10,7 @@
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
     <!-- Temporarily disable Obsolete Warnings as Errors -->
     <NoWarn>0618</NoWarn>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="PreApplicationStartCodeTest.cs" />

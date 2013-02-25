@@ -10,6 +10,7 @@
     <OutputPath>..\..\bin\$(Configuration)\Test\</OutputPath>
     <!-- Force signing off -->
     <SignAssembly>false</SignAssembly>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

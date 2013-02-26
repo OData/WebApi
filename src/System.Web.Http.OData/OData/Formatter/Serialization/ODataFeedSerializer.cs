@@ -14,28 +14,42 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />
     /// </summary>
-    internal class ODataFeedSerializer : ODataEntrySerializer
+    public class ODataFeedSerializer : ODataEntrySerializer
     {
-        private readonly IEdmCollectionTypeReference _edmCollectionType;
-        private readonly IEdmEntityType _edmElementType;
+        private const string Feed = "feed";
 
-        public ODataFeedSerializer(IEdmCollectionTypeReference edmCollectionType, ODataSerializerProvider serializerProvider)
-            : base(edmCollectionType, ODataPayloadKind.Feed, serializerProvider)
+        /// <summary>
+        /// Initializes a new instance of <see cref="ODataFeedSerializer"/>.
+        /// </summary>
+        /// <param name="edmType">The <see cref="IEdmCollectionTypeReference"/> that this serializer handles.</param>
+        /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write nested entries.</param>
+        public ODataFeedSerializer(IEdmCollectionTypeReference edmType, ODataSerializerProvider serializerProvider)
+            : base(edmType, ODataPayloadKind.Feed, serializerProvider)
         {
-            Contract.Assert(edmCollectionType != null);
-            _edmCollectionType = edmCollectionType;
-            if (!edmCollectionType.ElementType().IsEntity())
+            Contract.Assert(edmType != null);
+            if (!edmType.ElementType().IsEntity())
             {
-                throw Error.NotSupported(SRResources.TypeMustBeEntityCollection, edmCollectionType.ElementType().FullName(), typeof(IEdmEntityType).Name);
+                throw Error.NotSupported(SRResources.TypeMustBeEntityCollection, edmType.ElementType().FullName(), typeof(IEdmEntityType).Name);
             }
 
-            Contract.Assert(edmCollectionType.ElementType() != null);
-            Contract.Assert(edmCollectionType.ElementType().AsEntity() != null);
-            Contract.Assert(edmCollectionType.ElementType().AsEntity().Definition != null);
-            Contract.Assert(edmCollectionType.ElementType().AsEntity().Definition as IEdmEntityType != null);
-            _edmElementType = _edmCollectionType.ElementType().AsEntity().Definition as IEdmEntityType;
+            Contract.Assert(edmType.ElementType() != null);
+            Contract.Assert(edmType.ElementType().AsEntity() != null);
+
+            EntityCollectionType = edmType;
+            EntityType = EntityCollectionType.ElementType().AsEntity();
         }
 
+        /// <summary>
+        /// Gets the <see cref="IEdmCollectionTypeReference"/> of the feed.
+        /// </summary>
+        public IEdmCollectionTypeReference EntityCollectionType { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="IEdmEntityType"/> of the entries of this feed.
+        /// </summary>
+        public IEdmEntityTypeReference EntityType { get; private set; }
+
+        /// <inheritdoc />
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
@@ -55,14 +69,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
-            // No null check; entity type is not required for successful serialization.
-            IEdmEntityType entityType = _edmElementType;
+            IEdmEntityType entityType = EntityType.EntityDefinition();
 
             ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType);
             WriteObjectInline(graph, writer, writeContext);
             writer.Flush();
         }
 
+        /// <inheritdoc />
         public override void WriteObjectInline(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -75,65 +89,32 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            if (graph != null)
-            {
-                WriteFeed(graph, writer, writeContext);
-            }
-            else
-            {
-                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, "feed"));
-            }
+            WriteFeed(graph, writer, writeContext);
         }
 
         private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
+            Contract.Assert(writer != null);
+            Contract.Assert(writeContext != null);
+
+            if (graph == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
+            }
+
             IEnumerable enumerable = graph as IEnumerable; // Data to serialize
             if (enumerable != null)
             {
-                ODataFeed feed = new ODataFeed();
+                ODataFeed feed = CreateODataFeed(enumerable, writeContext);
 
-                if (writeContext.EntitySet != null)
+                if (feed == null)
                 {
-                    IEdmModel model = writeContext.Model;
-                    EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
-                    FeedContext feedContext = new FeedContext
-                    {
-                        Request = writeContext.Request,
-                        EntitySet = writeContext.EntitySet,
-                        Url = writeContext.Url,
-                        FeedInstance = graph
-                    };
-
-                    Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(feedContext);
-                    if (feedSelfLink != null)
-                    {
-                        feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = "self", Href = feedSelfLink } });
-                    }
+                    throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
                 }
 
-                // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
-                feed.Id = "http://schemas.datacontract.org/2004/07/" + _edmCollectionType.FullName();
-
-                // Compute and save the NextPageLink for JSON Light streaming support.
-                Uri nextPageLink = null;
-
-                // If we have more OData format specific information apply it now.
-                PageResult odataFeedAnnotations = graph as PageResult;
-                if (odataFeedAnnotations != null)
-                {
-                    feed.Count = odataFeedAnnotations.Count;
-                    nextPageLink = odataFeedAnnotations.NextPageLink;
-                }
-                else
-                {
-                    nextPageLink = writeContext.NextPageLink;
-
-                    long? inlineCount = writeContext.InlineCount;
-                    if (inlineCount.HasValue)
-                    {
-                        feed.Count = inlineCount.Value;
-                    }
-                }
+                // save this for later to support JSON lite streaming.
+                Uri nextPageLink = feed.NextPageLink;
+                feed.NextPageLink = null;
 
                 writer.WriteStart(feed);
 
@@ -149,8 +130,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     {
                         throw Error.NotSupported(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name);
                     }
-
-                    Contract.Assert(entrySerializer.ODataPayloadKind == ODataPayloadKind.Entry);
 
                     entrySerializer.WriteObjectInline(entry, writer, writeContext);
                 }
@@ -168,6 +147,59 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
                 writer.WriteEnd();
             }
+        }
+
+        /// <summary>
+        /// Create the <see cref="ODataFeed"/> to be written for the given feed instance.
+        /// </summary>
+        /// <param name="feedInstance">The instance representing the feed being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The created <see cref="ODataFeed"/> object.</returns>
+        public virtual ODataFeed CreateODataFeed(IEnumerable feedInstance, ODataSerializerContext writeContext)
+        {
+            ODataFeed feed = new ODataFeed();
+
+            if (writeContext.EntitySet != null)
+            {
+                IEdmModel model = writeContext.Model;
+                EntitySetLinkBuilderAnnotation linkBuilder = model.GetEntitySetLinkBuilder(writeContext.EntitySet);
+                FeedContext feedContext = new FeedContext
+                {
+                    Request = writeContext.Request,
+                    EntitySet = writeContext.EntitySet,
+                    Url = writeContext.Url,
+                    FeedInstance = feedInstance
+                };
+
+                Uri feedSelfLink = linkBuilder.BuildFeedSelfLink(feedContext);
+                if (feedSelfLink != null)
+                {
+                    feed.SetAnnotation(new AtomFeedMetadata() { SelfLink = new AtomLinkMetadata() { Relation = "self", Href = feedSelfLink } });
+                }
+            }
+
+            // TODO: Bug 467590: remove the hardcoded feed id. Get support for it from the model builder ?
+            feed.Id = "http://schemas.datacontract.org/2004/07/" + EntityCollectionType.FullName();
+
+            // If we have more OData format specific information apply it now.
+            PageResult odataFeedAnnotations = feedInstance as PageResult;
+            if (odataFeedAnnotations != null)
+            {
+                feed.Count = odataFeedAnnotations.Count;
+                feed.NextPageLink = odataFeedAnnotations.NextPageLink;
+            }
+            else
+            {
+                feed.NextPageLink = writeContext.NextPageLink;
+
+                long? inlineCount = writeContext.InlineCount;
+                if (inlineCount.HasValue)
+                {
+                    feed.Count = inlineCount.Value;
+                }
+            }
+
+            return feed;
         }
     }
 }

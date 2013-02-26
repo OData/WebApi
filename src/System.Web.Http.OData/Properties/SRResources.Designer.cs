@@ -214,6 +214,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} cannot write an object of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string CannotWriteType {
+            get {
+                return ResourceManager.GetString("CannotWriteType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The given model does not contain the type &apos;{0}&apos;..
         /// </summary>
         internal static string ClrTypeNotInModel {
@@ -660,6 +669,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string ItemMustBeOfType {
             get {
                 return ResourceManager.GetString("ItemMustBeOfType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The element type of the EDM collection type &apos;{0}&apos; is null. Collection types with null element type are not valid..
+        /// </summary>
+        internal static string ItemTypeOfCollectionNull {
+            get {
+                return ResourceManager.GetString("ItemTypeOfCollectionNull", resourceCulture);
             }
         }
         
@@ -1254,6 +1272,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string RequestNotActionInvocation {
             get {
                 return ResourceManager.GetString("RequestNotActionInvocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;RootElementName&apos; property is required on &apos;{0}&apos;..
+        /// </summary>
+        internal static string RootElementNameMissing {
+            get {
+                return ResourceManager.GetString("RootElementNameMissing", resourceCulture);
             }
         }
         

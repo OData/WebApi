@@ -6,6 +6,7 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -38,9 +39,108 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        void CreateODataValue_Serializes_AllElementsInTheCollection()
+        public void Ctor_ThrowsArgumentNull_EdmType()
         {
-            var oDataValue = _serializer.CreateODataValue(new int[] { 1, 2, 3 }, new ODataSerializerContext());
+            Assert.ThrowsArgumentNull(
+                () => new ODataCollectionSerializer(edmType: null, serializerProvider: null),
+                "edmType");
+        }
+
+        [Fact]
+        public void Ctor_ThrowsArgumentNull_SerializerProvider()
+        {
+            Assert.ThrowsArgumentNull(
+                () => new ODataCollectionSerializer(edmType: new Mock<IEdmCollectionTypeReference>().Object, serializerProvider: null),
+                "serializerProvider");
+        }
+
+        [Fact]
+        public void Ctor_ThrowsArgument_EdmType_IfElementTypeIsNull()
+        {
+            Mock<IEdmCollectionType> collectionType = new Mock<IEdmCollectionType>();
+            collectionType.Setup(c => c.ElementType).Returns<IEdmCollectionType>(null);
+            IEdmCollectionTypeReference collectionTypeReference = new EdmCollectionTypeReference(collectionType.Object, isNullable: true);
+
+            Assert.ThrowsArgument(
+                () => new ODataCollectionSerializer(edmType: collectionTypeReference, serializerProvider: new DefaultODataSerializerProvider()),
+                "edmType",
+                "The element type of the EDM collection type '' is null. Collection types with null element type are not valid.");
+        }
+
+        [Fact]
+        public void Ctor_SetsProperty_ElementType()
+        {
+            // Arrange
+            Mock<IEdmCollectionType> collectionType = new Mock<IEdmCollectionType>();
+            Mock<IEdmTypeReference> elementType = new Mock<IEdmTypeReference>();
+            collectionType.Setup(c => c.ElementType).Returns(elementType.Object);
+            IEdmCollectionTypeReference collectionTypeReference = new EdmCollectionTypeReference(collectionType.Object, isNullable: true);
+
+            // Act
+            var serializer = new ODataCollectionSerializer(collectionTypeReference, new Mock<ODataSerializerProvider>().Object);
+
+            // Assert
+            Assert.Equal(elementType.Object, serializer.ElementType);
+        }
+
+        [Fact]
+        public void Ctor_SetsProperty_CollectionType()
+        {
+            // Arrange
+            Mock<IEdmCollectionType> collectionType = new Mock<IEdmCollectionType>();
+            Mock<IEdmTypeReference> elementType = new Mock<IEdmTypeReference>();
+            collectionType.Setup(c => c.ElementType).Returns(elementType.Object);
+            IEdmCollectionTypeReference collectionTypeReference = new EdmCollectionTypeReference(collectionType.Object, isNullable: true);
+
+            // Act
+            var serializer = new ODataCollectionSerializer(collectionTypeReference, new Mock<ODataSerializerProvider>().Object);
+
+            // Assert
+            Assert.Equal(collectionTypeReference, serializer.CollectionType);
+        }
+
+        [Fact]
+        public void WriteObject_Throws_ArgumentNull_MessageWriter()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.WriteObject(graph: null, messageWriter: null, writeContext: null),
+                "messageWriter");
+        }
+
+        [Fact]
+        public void WriteObject_Throws_ArgumentNull_WriteContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
+                "writeContext");
+        }
+
+        [Fact]
+        public void CreateODataValue_Calls_CreateODataCollectionValue()
+        {
+            // Arrange
+            ODataCollectionValue oDataCollectionValue = new ODataCollectionValue();
+            var collection = new object[0];
+            Mock<ODataCollectionSerializer> serializer =
+                new Mock<ODataCollectionSerializer>(_serializer.CollectionType, new DefaultODataSerializerProvider());
+            serializer.CallBase = true;
+            serializer
+                .Setup(s => s.CreateODataCollectionValue(collection, It.IsAny<ODataSerializerContext>()))
+                .Returns(oDataCollectionValue)
+                .Verifiable();
+
+            // Act
+            ODataValue value = serializer.Object.CreateODataValue(collection, new ODataSerializerContext());
+
+            // Assert
+            serializer.Verify();
+            Assert.Same(oDataCollectionValue, value);
+        }
+
+        [Fact]
+        public void CreateODataCollectionValue_Serializes_AllElementsInTheCollection()
+        {
+            var oDataValue = _serializer.CreateODataCollectionValue(new int[] { 1, 2, 3 }, new ODataSerializerContext());
 
             var values = Assert.IsType<ODataCollectionValue>(oDataValue);
 
@@ -54,9 +154,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataValue_Returns_EmptyODataCollectionValue_ForNull()
+        public void CreateODataCollectionValue_Returns_EmptyODataCollectionValue_ForNull()
         {
-            var oDataValue = _serializer.CreateODataValue(null, new ODataSerializerContext());
+            var oDataValue = _serializer.CreateODataCollectionValue(null, new ODataSerializerContext());
 
             Assert.NotNull(oDataValue);
             ODataCollectionValue collection = Assert.IsType<ODataCollectionValue>(oDataValue);
@@ -64,14 +164,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataValue_SetsTypeName()
+        public void CreateODataCollectionValue_SetsTypeName()
         {
             // Arrange
             object graph = new int[] { 1, 2, 3 };
             ODataSerializerContext context = new ODataSerializerContext();
 
             // Act
-            ODataValue oDataValue = _serializer.CreateODataValue(graph, context);
+            ODataValue oDataValue = _serializer.CreateODataCollectionValue(graph, context);
 
             // Assert
             ODataCollectionValue collection = Assert.IsType<ODataCollectionValue>(oDataValue);

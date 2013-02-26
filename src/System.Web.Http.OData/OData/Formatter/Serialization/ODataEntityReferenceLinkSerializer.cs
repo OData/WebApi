@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
-using System.Globalization;
-using System.Linq;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
@@ -13,16 +9,20 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
-    /// ODataSerializer for serializing navigation links. For example, the response to the url
-    /// http://localhost/Products(10)/$links/Category gets serialized using this.
+    /// Represents an <see cref="ODataSerializer"/> for serializing $links response.
     /// </summary>
-    internal class ODataEntityReferenceLinkSerializer : ODataSerializer
+    /// <remarks>For example, the response to the url http://localhost/Products(10)/$links/Category gets serialized using this.</remarks>
+    public class ODataEntityReferenceLinkSerializer : ODataSerializer
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="ODataEntityReferenceLinkSerializer"/>.
+        /// </summary>
         public ODataEntityReferenceLinkSerializer()
             : base(ODataPayloadKind.EntityReferenceLink)
         {
         }
 
+        /// <inheritdoc/>
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
@@ -49,8 +49,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.NavigationPropertyMissingDuringSerialization);
             }
 
-            messageWriter.WriteEntityReferenceLink(new ODataEntityReferenceLink { Url = graph as Uri }, entitySet,
-                navigationProperty);
+            if (graph != null)
+            {
+                Uri uri = graph as Uri;
+                if (uri == null)
+                {
+                    throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
+                }
+
+                messageWriter.WriteEntityReferenceLink(new ODataEntityReferenceLink { Url = uri }, entitySet, navigationProperty);
+            }
         }
 
         private static IEdmNavigationProperty GetNavigationProperty(ODataPath path)

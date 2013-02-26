@@ -4,13 +4,22 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
-    internal class ODataMetadataSerializer : ODataSerializer
+    /// <summary>
+    /// Represents an <see cref="ODataSerializer"/> for serializing $metadata. 
+    /// </summary>
+    public class ODataMetadataSerializer : ODataSerializer
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="ODataMetadataSerializer"/>.
+        /// </summary>
         public ODataMetadataSerializer()
             : base(ODataPayloadKind.MetadataDocument)
         {
         }
 
+        /// <inheritdoc/>
+        /// <remarks>The metadata written is from the model set on the <paramref name="messageWriter"/>. The <paramref name="graph" />
+        /// is not used.</remarks>
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)

@@ -13,6 +13,17 @@ namespace System.Web.Http.OData.Builder
 
         public SelfLinkBuilder<Uri> ReadLinkBuilder { get; set; }
 
+        public Func<FeedContext, Uri> FeedSelfLinkBuilder { get; set; }
+
+        public override Uri BuildFeedSelfLink(FeedContext context)
+        {
+            if (FeedSelfLinkBuilder != null)
+            {
+                return FeedSelfLinkBuilder(context);
+            }
+            return null;
+        }
+
         public override Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, string idLink)
         {
             if (EditLinkBuilder != null)

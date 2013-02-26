@@ -571,4 +571,13 @@
   <data name="UnableToDetermineBaseUrl" xml:space="preserve">
     <value>The ODataMediaTypeFormatter was unable to determine the base URI for the request. The request must be processed by an OData route for the OData formatter to serialize the response.</value>
   </data>
+  <data name="ItemTypeOfCollectionNull" xml:space="preserve">
+    <value>The element type of the EDM collection type '{0}' is null. Collection types with null element type are not valid.</value>
+  </data>
+  <data name="CannotWriteType" xml:space="preserve">
+    <value>{0} cannot write an object of type '{1}'.</value>
+  </data>
+  <data name="RootElementNameMissing" xml:space="preserve">
+    <value>The 'RootElementName' property is required on '{0}'.</value>
+  </data>
 </root>

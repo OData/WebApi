@@ -2,12 +2,12 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Deserialization;
 using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -99,8 +99,8 @@ namespace System.Web.Http.OData.Formatter
 
         public static ODataMessageWriter GetMockODataMessageWriter()
         {
-            Mock<IODataResponseMessage> responseMessage = new Mock<IODataResponseMessage>();
-            return new ODataMessageWriter(responseMessage.Object);
+            MockODataRequestMessage requestMessage = new MockODataRequestMessage();
+            return new ODataMessageWriter(requestMessage);
         }
 
         public static ODataSerializerProvider GetMockODataSerializerProvider(ODataSerializer serializer)

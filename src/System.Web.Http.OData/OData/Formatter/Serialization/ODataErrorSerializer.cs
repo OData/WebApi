@@ -6,13 +6,20 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
-    internal class ODataErrorSerializer : ODataSerializer
+    /// <summary>
+    /// Represents an <see cref="ODataSerializer"/> to serialize <see cref="ODataError"/>s and <see cref="HttpError"/>s.
+    /// </summary>
+    public class ODataErrorSerializer : ODataSerializer
     {
+        /// <summary>
+        /// Initializes a new instance of the class <see cref="ODataSerializer"/>.
+        /// </summary>
         public ODataErrorSerializer()
             : base(ODataPayloadKind.Error)
         {
         }
 
+        /// <inheritdoc/>
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (graph == null)

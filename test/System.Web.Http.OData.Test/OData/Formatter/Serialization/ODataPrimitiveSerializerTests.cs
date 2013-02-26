@@ -10,6 +10,7 @@ using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
@@ -101,6 +102,31 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteObject_Throws_RootElementNameMissing()
+        {
+            ODataSerializerContext writeContext = new ODataSerializerContext();
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true));
+
+            Assert.Throws<ArgumentException>(
+                () => serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), writeContext),
+                "The 'RootElementName' property is required on 'ODataSerializerContext'.\r\nParameter name: writeContext");
+        }
+
+        [Fact]
+        public void WriteObject_Calls_CreateODataPrimitiveValue()
+        {
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property" };
+            Mock<ODataPrimitiveSerializer> serializer = new Mock<ODataPrimitiveSerializer>(
+                EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true));
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataPrimitiveValue(42, writeContext)).Returns(new ODataPrimitiveValue(42)).Verifiable();
+
+            serializer.Object.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), writeContext);
+
+            serializer.Verify();
+        }
+
+        [Fact]
         public void CreateODataValue_PrimitiveValue()
         {
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
@@ -182,13 +208,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreatePrimitive_ReturnsODataNullProperty_ForNullValue()
+        public void CreatePrimitive_ReturnsNull_ForNullValue()
         {
             // Act
             ODataValue value = ODataPrimitiveSerializer.CreatePrimitive(null, ODataMetadataLevel.Default);
 
             // Assert
-            Assert.IsType<ODataNullValue>(value);
+            Assert.Null(value);
         }
 
         [Theory]

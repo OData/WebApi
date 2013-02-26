@@ -11,15 +11,20 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Serialization
 {
     /// <summary>
-    /// ODataSerializer for serializing <see cref="IEdmPrimitiveType" />'s.
+    /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="IEdmPrimitiveType" />'s.
     /// </summary>
-    internal class ODataPrimitiveSerializer : ODataEntrySerializer
+    public class ODataPrimitiveSerializer : ODataEntrySerializer
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="ODataPrimitiveSerializer"/>.
+        /// </summary>
+        /// <param name="edmPrimitiveType">The EDM primitive type this serializer handles.</param>
         public ODataPrimitiveSerializer(IEdmPrimitiveTypeReference edmPrimitiveType)
             : base(edmPrimitiveType, ODataPayloadKind.Property)
         {
         }
 
+        /// <inheritdoc/>
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
@@ -32,10 +37,33 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
+            if (writeContext.RootElementName == null)
+            {
+                throw Error.Argument("writeContext", SRResources.RootElementNameMissing, typeof(ODataSerializerContext).Name);
+            }
+
             messageWriter.WriteProperty(CreateProperty(graph, writeContext.RootElementName, writeContext));
         }
 
-        public override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        /// <inheritdoc/>
+        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        {
+            ODataPrimitiveValue value = CreateODataPrimitiveValue(graph, writeContext);
+            if (value == null)
+            {
+                return new ODataNullValue();
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="writeContext"></param>
+        /// <returns></returns>
+        public virtual ODataPrimitiveValue CreateODataPrimitiveValue(object graph, ODataSerializerContext writeContext)
         {
             ODataMetadataLevel metadataLevel = writeContext != null ?
                 writeContext.MetadataLevel : ODataMetadataLevel.Default;
@@ -90,11 +118,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
             return metadataLevel != ODataMetadataLevel.Default;
         }
 
-        internal static ODataValue CreatePrimitive(object value, ODataMetadataLevel metadataLevel)
+        internal static ODataPrimitiveValue CreatePrimitive(object value, ODataMetadataLevel metadataLevel)
         {
             if (value == null)
             {
-                return new ODataNullValue();
+                return null;
             }
 
             object supportedValue = ConvertUnsupportedPrimitives(value);

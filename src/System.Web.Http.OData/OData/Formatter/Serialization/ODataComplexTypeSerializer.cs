@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
@@ -10,16 +11,33 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// ODataSerializer for serializing complex types.
     /// </summary>
-    internal class ODataComplexTypeSerializer : ODataEntrySerializer
+    public class ODataComplexTypeSerializer : ODataEntrySerializer
     {
         private readonly IEdmComplexTypeReference _edmComplexType;
 
-        public ODataComplexTypeSerializer(IEdmComplexTypeReference edmComplexType, ODataSerializerProvider serializerProvider)
-            : base(edmComplexType, ODataPayloadKind.Property, serializerProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataComplexTypeSerializer"/> class.
+        /// </summary>
+        /// <param name="edmType">The edm complex type this serializer instance can serialize.</param>
+        /// <param name="serializerProvider">The serializer provider to use to serialize nested objects.</param>
+        public ODataComplexTypeSerializer(IEdmComplexTypeReference edmType, ODataSerializerProvider serializerProvider)
+            : base(edmType, ODataPayloadKind.Property, serializerProvider)
         {
-            _edmComplexType = edmComplexType;
+            _edmComplexType = edmType;
         }
 
+        /// <summary>
+        /// Gets the <see cref="IEdmComplexTypeReference"/> this serializer handles.
+        /// </summary>
+        public IEdmComplexTypeReference ComplexType
+        {
+            get
+            {
+                return _edmComplexType;
+            }
+        }
+
+        /// <inheritdoc/>
         public override void WriteObject(object graph, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
@@ -37,7 +55,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
             messageWriter.WriteProperty(property);
         }
 
-        public override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        /// <inheitdoc />
+        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        {
+            ODataComplexValue value = CreateODataComplexValue(graph, writeContext);
+            if (value == null)
+            {
+                return new ODataNullValue();
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Creates an <see cref="ODataComplexValue"/> for the object represented by <paramref name="graph"/>.
+        /// </summary>
+        /// <param name="graph">The value of the <see cref="ODataComplexValue"/> to be created.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The created <see cref="ODataComplexValue"/>.</returns>
+        public virtual ODataComplexValue CreateODataComplexValue(object graph, ODataSerializerContext writeContext)
         {
             if (writeContext == null)
             {
@@ -46,37 +82,35 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (graph == null)
             {
-                return new ODataNullValue();
+                return null;
             }
-            else
+
+            List<ODataProperty> propertyCollection = new List<ODataProperty>();
+            foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
             {
-                List<ODataProperty> propertyCollection = new List<ODataProperty>();
-                foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
+                IEdmTypeReference propertyType = property.Type;
+                ODataEntrySerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
+                if (propertySerializer == null)
                 {
-                    IEdmTypeReference propertyType = property.Type;
-                    ODataEntrySerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
-                    if (propertySerializer == null)
-                    {
-                        throw Error.NotSupported("Type {0} is not a serializable type", propertyType.FullName());
-                    }
-
-                    // TODO 453795: [OData]Cleanup reflection code in the ODataFormatter.
-                    object propertyValue = graph.GetType().GetProperty(property.Name).GetValue(graph, index: null);
-
-                    propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
+                    throw Error.NotSupported(SRResources.TypeCannotBeSerialized, propertyType.FullName(), typeof(ODataMediaTypeFormatter).Name);
                 }
 
-                string typeName = _edmComplexType.FullName();
+                // TODO 453795: [OData]Cleanup reflection code in the ODataFormatter.
+                object propertyValue = graph.GetType().GetProperty(property.Name).GetValue(graph, index: null);
 
-                ODataComplexValue value = new ODataComplexValue()
-                {
-                    Properties = propertyCollection,
-                    TypeName = typeName
-                };
-
-                AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
-                return value;
+                propertyCollection.Add(propertySerializer.CreateProperty(propertyValue, property.Name, writeContext));
             }
+
+            string typeName = _edmComplexType.FullName();
+
+            ODataComplexValue value = new ODataComplexValue()
+            {
+                Properties = propertyCollection,
+                TypeName = typeName
+            };
+
+            AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
+            return value;
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataComplexValue value, ODataMetadataLevel metadataLevel)

@@ -201,10 +201,10 @@ namespace System.Web.Http
 
             FilterGrouping filterGrouping = actionDescriptor.GetFilterGrouping();
 
-            IEnumerable<IActionFilter> actionFilters = filterGrouping.ActionFilters;
-            IEnumerable<IAuthenticationFilter> authenticationFilters = filterGrouping.AuthenticationFilters;
-            IEnumerable<IAuthorizationFilter> authorizationFilters = filterGrouping.AuthorizationFilters;
-            IEnumerable<IExceptionFilter> exceptionFilters = filterGrouping.ExceptionFilters;
+            IActionFilter[] actionFilters = filterGrouping.ActionFilters;
+            IAuthenticationFilter[] authenticationFilters = filterGrouping.AuthenticationFilters;
+            IAuthorizationFilter[] authorizationFilters = filterGrouping.AuthorizationFilters;
+            IExceptionFilter[] exceptionFilters = filterGrouping.ExceptionFilters;
 
             Func<Task<HttpResponseMessage>> result = InvokeActionWithAuthenticationFilters(actionContext, cancellationToken, authenticationFilters,
                 InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, () =>
@@ -284,7 +284,7 @@ namespace System.Web.Http
         }
 
         private async Task<HttpResponseMessage> ExecuteAction(HttpActionBinding actionBinding, HttpActionContext actionContext,
-            CancellationToken cancellationToken, IEnumerable<IActionFilter> actionFilters, ServicesContainer controllerServices)
+            CancellationToken cancellationToken, IActionFilter[] actionFilters, ServicesContainer controllerServices)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await actionBinding.ExecuteBindingAsync(actionContext, cancellationToken);
@@ -314,7 +314,7 @@ namespace System.Web.Http
             }
         }
 
-        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Func<Task<HttpResponseMessage>> innerAction, HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IExceptionFilter> filters)
+        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Func<Task<HttpResponseMessage>> innerAction, HttpActionContext actionContext, CancellationToken cancellationToken, IExceptionFilter[] filters)
         {
             Contract.Assert(innerAction != null);
             Contract.Assert(actionContext != null);
@@ -338,10 +338,9 @@ namespace System.Web.Http
 
             // Note: exception filters need to be scheduled in the reverse order so that
             // the more specific filter (e.g. Action) executes before the less specific ones (e.g. Global)
-            filters = filters.Reverse();
-
-            foreach (IExceptionFilter exceptionFilter in filters)
+            for (int i = filters.Length - 1; i >= 0; i--)
             {
+                IExceptionFilter exceptionFilter = filters[i];
                 cancellationToken.ThrowIfCancellationRequested();
                 await exceptionFilter.ExecuteExceptionFilterAsync(executedContext, cancellationToken);
             }
@@ -358,7 +357,7 @@ namespace System.Web.Http
 
         internal Func<Task<HttpResponseMessage>> InvokeActionWithAuthenticationFilters(
             HttpActionContext actionContext, CancellationToken cancellationToken,
-            IEnumerable<IAuthenticationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
+            IAuthenticationFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
         {
             return () => InvokeActionWithAuthenticationFiltersAsync(actionContext, cancellationToken, filters,
                 innerAction);
@@ -366,7 +365,7 @@ namespace System.Web.Http
 
         internal async Task<HttpResponseMessage> InvokeActionWithAuthenticationFiltersAsync(
             HttpActionContext actionContext, CancellationToken cancellationToken,
-            IEnumerable<IAuthenticationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
+            IAuthenticationFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
         {
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
@@ -376,8 +375,9 @@ namespace System.Web.Http
             HttpAuthenticationContext authenticationContext = new HttpAuthenticationContext(actionContext);
             authenticationContext.Principal = _principalService.GetCurrentPrincipal(Request);
 
-            foreach (IAuthenticationFilter filter in filters)
+            for (int i = 0; i < filters.Length; i++)
             {
+                IAuthenticationFilter filter = filters[i];
                 cancellationToken.ThrowIfCancellationRequested();
                 IAuthenticationResult result = await filter.AuthenticateAsync(authenticationContext,
                     cancellationToken);
@@ -403,8 +403,9 @@ namespace System.Web.Http
                 }
             }
 
-            foreach (IAuthenticationFilter filter in filters)
+            for (int i = 0; i < filters.Length; i++)
             {
+                IAuthenticationFilter filter = filters[i];
                 cancellationToken.ThrowIfCancellationRequested();
                 innerResult = await filter.ChallengeAsync(actionContext, innerResult, cancellationToken) ??
                     innerResult;
@@ -416,25 +417,28 @@ namespace System.Web.Http
 
         internal static Func<Task<HttpResponseMessage>> InvokeActionWithAuthorizationFilters(
             HttpActionContext actionContext, CancellationToken cancellationToken,
-            IEnumerable<IAuthorizationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
+            IAuthorizationFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
         {
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
             Contract.Assert(innerAction != null);
 
-            // Because the continuation gets built from the inside out we need to reverse the filter list
-            // so that least specific filters (Global) get run first and the most specific filters (Action) get run last.
-            filters = filters.Reverse();
-
-            Func<Task<HttpResponseMessage>> result = filters.Aggregate(innerAction, (continuation, filter) =>
+            // We need to reverse the filter list so that least specific filters (Global) get run first and the most specific filters (Action) get run last.
+            Func<Task<HttpResponseMessage>> result = innerAction;
+            for (int i = filters.Length - 1; i >= 0; i--)
             {
-                return () => filter.ExecuteAuthorizationFilterAsync(actionContext, cancellationToken, continuation);
-            });
+                IAuthorizationFilter filter = filters[i];
+                Func<Func<Task<HttpResponseMessage>>, IAuthorizationFilter, Func<Task<HttpResponseMessage>>> chainContinuation = (continuation, innerFilter) =>
+                {
+                    return () => innerFilter.ExecuteAuthorizationFilterAsync(actionContext, cancellationToken, continuation);
+                };
+                result = chainContinuation(result, filter);
+            }
 
             return result;
         }
 
-        internal static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters(HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IActionFilter> filters, Func<Task<HttpResponseMessage>> innerAction)
+        internal static Func<Task<HttpResponseMessage>> InvokeActionWithActionFilters(HttpActionContext actionContext, CancellationToken cancellationToken, IActionFilter[] filters, Func<Task<HttpResponseMessage>> innerAction)
         {
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
@@ -442,12 +446,16 @@ namespace System.Web.Http
 
             // Because the continuation gets built from the inside out we need to reverse the filter list
             // so that least specific filters (Global) get run first and the most specific filters (Action) get run last.
-            filters = filters.Reverse();
-
-            Func<Task<HttpResponseMessage>> result = filters.Aggregate(innerAction, (continuation, filter) =>
+            Func<Task<HttpResponseMessage>> result = innerAction;
+            for (int i = filters.Length - 1; i >= 0; i--)
             {
-                return () => filter.ExecuteActionFilterAsync(actionContext, cancellationToken, continuation);
-            });
+                IActionFilter filter = filters[i];
+                Func<Func<Task<HttpResponseMessage>>, IActionFilter, Func<Task<HttpResponseMessage>>> chainContinuation = (continuation, innerFilter) =>
+                {
+                    return () => innerFilter.ExecuteActionFilterAsync(actionContext, cancellationToken, continuation);
+                };
+                result = chainContinuation(result, filter);
+            }
 
             return result;
         }

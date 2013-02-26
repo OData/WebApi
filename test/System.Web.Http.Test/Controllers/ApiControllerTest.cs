@@ -482,7 +482,7 @@ namespace System.Web.Http
                 log.Add("innerAction");
                 return null;
             });
-            List<IActionFilter> filters = new List<IActionFilter>() {
+            var filters = new IActionFilter[] {
                 globalFilterMock.Object,
                 actionFilterMock.Object,
             };
@@ -520,7 +520,7 @@ namespace System.Web.Http
                 log.Add("innerAction");
                 return null;
             });
-            List<IAuthorizationFilter> filters = new List<IAuthorizationFilter>() {
+            var filters = new IAuthorizationFilter[] {
                 globalFilterMock.Object,
                 actionFilterMock.Object,
             };
@@ -550,7 +550,7 @@ namespace System.Web.Http
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new[] { exceptionFilterMock.Object };
+            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
 
             // Act
             var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
@@ -574,7 +574,7 @@ namespace System.Web.Http
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new[] { exceptionFilterMock.Object };
+            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
 
             // Act
             var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
@@ -600,7 +600,7 @@ namespace System.Web.Http
                 log.Add("exceptionFilter");
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new[] { exceptionFilterMock.Object };
+            var filters = new IExceptionFilter[] { exceptionFilterMock.Object };
 
             // Act
             var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);
@@ -637,7 +637,7 @@ namespace System.Web.Http
                 ec.Response = actionFilterResponse;
                 return Task.Factory.StartNew(() => { });
             });
-            var filters = new[] { globalFilterMock.Object, actionFilterMock.Object };
+            var filters = new IExceptionFilter[] { globalFilterMock.Object, actionFilterMock.Object };
 
             // Act
             var result = ApiController.InvokeActionWithExceptionFilters(() => actionTask, _actionContextInstance, CancellationToken.None, filters);

@@ -11,10 +11,10 @@ namespace System.Web.Http
     /// </summary>
     internal class FilterGrouping
     {
-        private readonly List<IActionFilter> _actionFilters = new List<IActionFilter>();
-        private readonly List<IAuthenticationFilter> _authenticationFilters = new List<IAuthenticationFilter>();
-        private readonly List<IAuthorizationFilter> _authorizationFilters = new List<IAuthorizationFilter>();
-        private readonly List<IExceptionFilter> _exceptionFilters = new List<IExceptionFilter>();
+        private IActionFilter[] _actionFilters;
+        private IAuthenticationFilter[] _authenticationFilters;
+        private IAuthorizationFilter[]_authorizationFilters;
+        private IExceptionFilter[] _exceptionFilters;
 
         public FilterGrouping(IEnumerable<FilterInfo> filters)
         {
@@ -28,28 +28,28 @@ namespace System.Web.Http
             FilterScope authorizationOverride = SelectLastOverrideScope<IAuthorizationFilter>(overrides);
             FilterScope exceptionOverride = SelectLastOverrideScope<IExceptionFilter>(overrides);
 
-            _actionFilters.AddRange(SelectAvailable<IActionFilter>(cache, actionOverride));
-            _authenticationFilters.AddRange(SelectAvailable<IAuthenticationFilter>(cache, authenticationOverride));
-            _authorizationFilters.AddRange(SelectAvailable<IAuthorizationFilter>(cache, authorizationOverride));
-            _exceptionFilters.AddRange(SelectAvailable<IExceptionFilter>(cache, exceptionOverride));
+            _actionFilters = SelectAvailable<IActionFilter>(cache, actionOverride).ToArray();
+            _authenticationFilters = SelectAvailable<IAuthenticationFilter>(cache, authenticationOverride).ToArray();
+            _authorizationFilters = SelectAvailable<IAuthorizationFilter>(cache, authorizationOverride).ToArray();
+            _exceptionFilters = SelectAvailable<IExceptionFilter>(cache, exceptionOverride).ToArray();
         }
 
-        public IEnumerable<IActionFilter> ActionFilters
+        public IActionFilter[] ActionFilters
         {
             get { return _actionFilters; }
         }
 
-        public IEnumerable<IAuthenticationFilter> AuthenticationFilters
+        public IAuthenticationFilter[] AuthenticationFilters
         {
             get { return _authenticationFilters; }
         }
 
-        public IEnumerable<IAuthorizationFilter> AuthorizationFilters
+        public IAuthorizationFilter[] AuthorizationFilters
         {
             get { return _authorizationFilters; }
         }
 
-        public IEnumerable<IExceptionFilter> ExceptionFilters
+        public IExceptionFilter[] ExceptionFilters
         {
             get { return _exceptionFilters; }
         }

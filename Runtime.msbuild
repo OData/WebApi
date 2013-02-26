@@ -30,8 +30,8 @@
     </Target>
 
     <Target Name="Prereq" DependsOnTargets="PreRestorePackages">
-        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="RestorePackages" StopOnFirstFailure="true" />
         <MSBuild Projects=".nuget\nuget.targets" Targets="RestoreBinaryDependencies" />
+        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="RestorePackages" StopOnFirstFailure="true" />
     </Target>
 
     <Target Name="PreRestorePackages">
@@ -40,14 +40,15 @@
                 Include="test\Microsoft.Web.Http.Data.Test\*.csproj;
                          src\System.Web.WebPages.Administration\*.csproj;
                          src\System.Web.WebPages.Deployment\*.csproj;
-                         src\Microsoft.Web.WebPages.OAuth\*.csproj" />
+                         src\Microsoft.Web.WebPages.OAuth\*.csproj;
+                         src\System.Net.Http.Formatting.NetCore\*.csproj" />
         </ItemGroup>
         <Message Text="Restoring NuGet packages..." Importance="High" />
     </Target>
 
     <Target Name="RestorePackages" DependsOnTargets="PreRestorePackages">
-        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="EnableRestore;RestorePackages" StopOnFirstFailure="true" />
         <MSBuild Projects=".nuget\nuget.targets" Targets="EnableRestore;RestoreBinaryDependencies" />
+        <MSBuild Projects="@(RestoreCsProjFiles)" Targets="EnableRestore;RestorePackages" StopOnFirstFailure="true" />
     </Target>
 
     <Target Name="Build" DependsOnTargets="Prereq">

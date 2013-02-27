@@ -304,7 +304,16 @@ namespace System.Web.Http.Controllers
                     }
                     else
                     {
-                        bool match = Array.TrueForAll(attrs, selector => selector.IsValidForRequest(controllerContext, actionDescriptor.MethodInfo));
+                        bool match = true;
+                        for (int i = 0; i < attrs.Length; i++)
+                        {
+                            IActionMethodSelector selector = attrs[i];
+                            if (!selector.IsValidForRequest(controllerContext, actionDescriptor.MethodInfo))
+                            {
+                                match = false;
+                                break;
+                            }
+                        }
                         if (match)
                         {
                             if (matchesWithSelectionAttributes == null)

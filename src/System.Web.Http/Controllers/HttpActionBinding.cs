@@ -82,8 +82,9 @@ namespace System.Web.Http.Controllers
             }
 
             // First, make sure the actionBinding is valid before trying to execute it. This keeps us in a known state in case of errors.
-            foreach (HttpParameterBinding parameterBinder in ParameterBindings)
+            for (int i = 0; i < ParameterBindings.Length; i++)
             {
+                HttpParameterBinding parameterBinder = ParameterBindings[i];
                 if (!parameterBinder.IsValid)
                 {
                     // Throwing an exception because the webService developer's action signature is bad.

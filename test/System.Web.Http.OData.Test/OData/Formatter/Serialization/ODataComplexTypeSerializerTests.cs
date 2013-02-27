@@ -35,12 +35,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateProperty_WritesAllDeclaredProperties()
+        public void CreateODataValue_WritesAllDeclaredProperties()
         {
-            var property = _serializer.CreateProperty(_address, "ComplexElement", new ODataSerializerContext());
+            var odataValue = _serializer.CreateODataValue(_address, new ODataSerializerContext());
 
-            Assert.Equal("ComplexElement", property.Name);
-            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(property.Value);
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
             Assert.Equal(complexValue.TypeName, "Default.Address");
             Assert.Equal(
@@ -54,12 +53,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateProperty_ReturnsODataProperty_ForNullValue()
+        public void CreateODataValue_ReturnsODataNullValue_ForNullValue()
         {
-            var property = _serializer.CreateProperty(null, "ComplexElement", new ODataSerializerContext());
+            var odataValue = _serializer.CreateODataValue(null, new ODataSerializerContext());
 
-            Assert.NotNull(property);
-            Assert.Null(property.Value);
+            Assert.IsType<ODataNullValue>(odataValue);
         }
 
         [Fact]

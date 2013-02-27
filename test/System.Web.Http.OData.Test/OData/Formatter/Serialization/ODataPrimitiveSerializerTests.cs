@@ -101,26 +101,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateProperty()
+        public void CreateODataValue_PrimitiveValue()
         {
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
             var serializer = new ODataPrimitiveSerializer(edmPrimitiveType);
 
-            var odataProperty = serializer.CreateProperty(20, "elementName", writeContext: null);
-            Assert.NotNull(odataProperty);
-            Assert.Equal(odataProperty.Name, "elementName");
-            Assert.Equal(odataProperty.Value, 20);
+            var odataValue = serializer.CreateODataValue(20, writeContext: null);
+            Assert.NotNull(odataValue);
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.Equal(primitiveValue.Value, 20);
         }
 
         [Fact]
-        public void CreateProperty_ReturnsODataProperty_ForNullValue()
+        public void CreateODataValue_ReturnsODataNullValue_ForNullValue()
         {
             IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string));
             var serializer = new ODataPrimitiveSerializer(edmPrimitiveType);
-            var property = serializer.CreateProperty(null, "elementName", new ODataSerializerContext());
+            var odataValue = serializer.CreateODataValue(null, new ODataSerializerContext());
 
-            Assert.NotNull(property);
-            Assert.Null(property.Value);
+            Assert.IsType<ODataNullValue>(odataValue);
         }
 
         [Theory]

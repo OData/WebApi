@@ -71,6 +71,7 @@
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
+    <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntrySerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />

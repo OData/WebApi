@@ -129,8 +129,8 @@
   <data name="PropertyMustHavePublicGetterAndSetter" xml:space="preserve">
     <value>The PropertyInfo provided must have public 'get' and 'set' accessor methods.</value>
   </data>
-  <data name="CreatePropertyNotSupported" xml:space="preserve">
-    <value>{0} does not support CreateProperty.</value>
+  <data name="CreateODataValueNotSupported" xml:space="preserve">
+    <value>{0} does not support CreateODataValue.</value>
   </data>
   <data name="TypeMustBeEntityCollection" xml:space="preserve">
     <value>{0} is not a collection of type {1}. The ODataFeedSerializer can serialize only entity collections.</value>

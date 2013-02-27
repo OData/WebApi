@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -67,16 +68,24 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Creates an <see cref="ODataProperty"/> that gets written as a part of an <see cref="ODataItem"/> with the given propertyName 
-        /// and the writeContext.
+        /// Creates an <see cref="ODataValue"/> for the object represented by <paramref name="graph"/>.
         /// </summary>
-        /// <param name="graph">The object to be written.</param>
-        /// <param name="elementName">The name of the property to create.</param>
+        /// <param name="graph">The value of the <see cref="ODataValue"/> to be created.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        /// <returns>The <see cref="ODataProperty"/> created.</returns>
-        public virtual ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
+        /// <returns>The <see cref="ODataValue"/> created.</returns>
+        public virtual ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
         {
-            throw Error.NotSupported(SRResources.CreatePropertyNotSupported, GetType().Name);
+            throw Error.NotSupported(SRResources.CreateODataValueNotSupported, GetType().Name);
+        }
+
+        internal ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
+        {
+            Contract.Assert(elementName != null);
+            return new ODataProperty
+            {
+                Name = elementName,
+                Value = CreateODataValue(graph, writeContext)
+            };
         }
     }
 }

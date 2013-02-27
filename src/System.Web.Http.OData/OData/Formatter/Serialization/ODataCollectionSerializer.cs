@@ -46,17 +46,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     Name = writeContext.RootElementName
                 });
 
-            ODataProperty property = CreateProperty(graph, writeContext.RootElementName, writeContext);
-
-            Contract.Assert(property != null);
-
-            ODataCollectionValue collectionValue = property.Value as ODataCollectionValue;
-
-            Contract.Assert(collectionValue != null);
-
-            foreach (object item in collectionValue.Items)
+            ODataValue value = CreateODataValue(graph, writeContext);
+            if (value != null)
             {
-                writer.WriteItem(item);
+                ODataCollectionValue collectionValue = value as ODataCollectionValue;
+                Contract.Assert(value != null);
+
+                foreach (object item in collectionValue.Items)
+                {
+                    writer.WriteItem(item);
+                }
             }
 
             writer.WriteEnd();
@@ -64,13 +63,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
+        public override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
         {
-            if (String.IsNullOrWhiteSpace(elementName))
-            {
-                throw Error.ArgumentNullOrEmpty("elementName");
-            }
-
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");
@@ -91,7 +85,9 @@ namespace System.Web.Http.OData.Formatter.Serialization
             {
                 foreach (object item in enumerable)
                 {
-                    valueCollection.Add(itemSerializer.CreateProperty(item, "element", writeContext).Value);
+                    // ODataCollectionWriter expects the individual elements in the collection to be the underlying values
+                    // and not ODataValues.
+                    valueCollection.Add(itemSerializer.CreateODataValue(item, writeContext).GetInnerValue());
                 }
             }
 
@@ -110,12 +106,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             };
 
             AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
-
-            return new ODataProperty()
-            {
-                Name = elementName,
-                Value = value
-            };
+            return value;
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataCollectionValue value,

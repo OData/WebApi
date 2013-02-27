@@ -60,6 +60,7 @@
     <Compile Include="ODataHttpRequestMessageExtensions.cs" />
     <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
+    <Compile Include="OData\Formatter\ODataValueExtensions.cs" />
     <Compile Include="OData\ODataRoutingAttribute.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
     <Compile Include="OData\Routing\Conventions\ActionMapExtensions.cs" />

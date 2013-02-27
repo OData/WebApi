@@ -38,12 +38,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        void CreateProperty_Serializes_AllElementsInTheCollection()
+        void CreateODataValue_Serializes_AllElementsInTheCollection()
         {
-            var property = _serializer.CreateProperty(new int[] { 1, 2, 3 }, "TestCollection", new ODataSerializerContext());
+            var oDataValue = _serializer.CreateODataValue(new int[] { 1, 2, 3 }, new ODataSerializerContext());
 
-            Assert.Equal(property.Name, "TestCollection");
-            var values = Assert.IsType<ODataCollectionValue>(property.Value);
+            var values = Assert.IsType<ODataCollectionValue>(oDataValue);
 
             List<int> elements = new List<int>();
             foreach (var item in values.Items)
@@ -55,32 +54,27 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateProperty_ReturnsODataProperty_ForNullValue()
+        public void CreateODataValue_Returns_EmptyODataCollectionValue_ForNull()
         {
-            var property = _serializer.CreateProperty(null, "TestCollection", new ODataSerializerContext());
+            var oDataValue = _serializer.CreateODataValue(null, new ODataSerializerContext());
 
-            Assert.NotNull(property);
-            Assert.IsType(typeof(ODataCollectionValue), property.Value);
-            ODataCollectionValue collection = (ODataCollectionValue)property.Value;
+            Assert.NotNull(oDataValue);
+            ODataCollectionValue collection = Assert.IsType<ODataCollectionValue>(oDataValue);
             Assert.Empty(collection.Items);
         }
 
         [Fact]
-        public void CreateProperty_SetsTypeName()
+        public void CreateODataValue_SetsTypeName()
         {
             // Arrange
             object graph = new int[] { 1, 2, 3 };
-            string elementName = "TestCollection";
             ODataSerializerContext context = new ODataSerializerContext();
 
             // Act
-            ODataProperty property = _serializer.CreateProperty(graph, elementName, context);
+            ODataValue oDataValue = _serializer.CreateODataValue(graph, context);
 
             // Assert
-            Assert.NotNull(property);
-            Assert.NotNull(property.Value);
-            Assert.IsType<ODataCollectionValue>(property.Value);
-            ODataCollectionValue collection = (ODataCollectionValue)property.Value;
+            ODataCollectionValue collection = Assert.IsType<ODataCollectionValue>(oDataValue);
             Assert.Equal("Collection(Edm.Int32)", collection.TypeName);
         }
 

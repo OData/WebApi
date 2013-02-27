@@ -37,13 +37,8 @@ namespace System.Web.Http.OData.Formatter.Serialization
             messageWriter.WriteProperty(property);
         }
 
-        public override ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
+        public override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
         {
-            if (String.IsNullOrWhiteSpace(elementName))
-            {
-                throw Error.ArgumentNullOrEmpty("elementName");
-            }
-
             if (writeContext == null)
             {
                 throw Error.ArgumentNull("writeContext");
@@ -51,7 +46,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (graph == null)
             {
-                return new ODataProperty() { Name = elementName, Value = null };
+                return new ODataNullValue();
             }
             else
             {
@@ -80,12 +75,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 };
 
                 AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
-
-                return new ODataProperty()
-                {
-                    Name = elementName,
-                    Value = value
-                };
+                return value;
             }
         }
 

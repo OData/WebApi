@@ -60,14 +60,33 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateProperty_Throws_NotSupported()
+        public void CreateODataValue_Throws_NotSupported()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
             var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
-                () => serializer.Object.CreateProperty(graph: null, elementName: "element", writeContext: null),
-                "ODataEntrySerializerProxy does not support CreateProperty.");
+                () => serializer.Object.CreateODataValue(graph: null, writeContext: null),
+                "ODataEntrySerializerProxy does not support CreateODataValue.");
+        }
+
+        [Fact]
+        public void CreateProperty_Returns_ODataProperty()
+        {
+            // Arrange
+            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
+            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported);
+            serializer
+                .Setup(s => s.CreateODataValue(42, null))
+                .Returns(new ODataPrimitiveValue(42));
+
+            // Act
+            ODataProperty property = serializer.Object.CreateProperty(graph: 42, elementName: "SomePropertyName", writeContext: null);
+
+            // Assert
+            Assert.NotNull(property);
+            Assert.Equal("SomePropertyName", property.Name);
+            Assert.Equal(42, property.Value);
         }
     }
 }

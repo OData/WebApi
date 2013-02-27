@@ -35,20 +35,13 @@ namespace System.Web.Http.OData.Formatter.Serialization
             messageWriter.WriteProperty(CreateProperty(graph, writeContext.RootElementName, writeContext));
         }
 
-        public override ODataProperty CreateProperty(object graph, string elementName, ODataSerializerContext writeContext)
+        public override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
         {
-            if (String.IsNullOrWhiteSpace(elementName))
-            {
-                throw Error.ArgumentNullOrEmpty("elementName");
-            }
-
             ODataMetadataLevel metadataLevel = writeContext != null ?
                 writeContext.MetadataLevel : ODataMetadataLevel.Default;
 
-            ODataValue value = CreatePrimitive(graph, metadataLevel);
-
             // TODO: Bug 467598: validate the type of the object being passed in here with the underlying primitive type. 
-            return new ODataProperty() { Name = elementName, Value = value };
+            return CreatePrimitive(graph, metadataLevel);
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive,

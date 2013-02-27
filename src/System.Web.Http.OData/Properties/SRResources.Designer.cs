@@ -259,11 +259,11 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} does not support CreateProperty..
+        ///   Looks up a localized string similar to {0} does not support CreateODataValue..
         /// </summary>
-        internal static string CreatePropertyNotSupported {
+        internal static string CreateODataValueNotSupported {
             get {
-                return ResourceManager.GetString("CreatePropertyNotSupported", resourceCulture);
+                return ResourceManager.GetString("CreateODataValueNotSupported", resourceCulture);
             }
         }
         

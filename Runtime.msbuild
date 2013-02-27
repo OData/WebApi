@@ -7,6 +7,7 @@
         <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
         <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(Configuration)' != 'Release' ">true</CodeAnalysis>
         <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
+        <BuildPortable Condition=" '$(BuildPortable)' == '' ">false</BuildPortable>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
         <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
@@ -16,12 +17,18 @@
         <SolutionsToBuild Include="Runtime.sln">
             <ReleaseRoot>.</ReleaseRoot>
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
+            <PortableLibrary>RuntimePortable.sln</PortableLibrary>
         </SolutionsToBuild>    
     </ItemGroup>    
 
     <Target Name="Integration" DependsOnTargets="Clean;Build;UnitTest" />
 
     <Target Name="Clean">
+        <MSBuild
+            Projects="%(SolutionsToBuild.PortableLibrary)"
+            Targets="Clean"
+            Condition=" '%(SolutionsToBuild.PortableLibrary)' != '' "
+            Properties="Configuration=$(Configuration);VisualStudioVersion=$(VisualStudioVersion)" />
         <MSBuild
             Projects="@(SolutionsToBuild)"
             Targets="Clean"
@@ -55,6 +62,12 @@
         <!-- we need to batch the solution files since they both build Microsoft.TestCommon -->
       <Error Condition=" '$(CodeAnalysis)' == 'true' and '$(Configuration)' == 'Release' " Text="Unable to run code analysis in Release configuration. Release assemblies do not include SuppressMessage attributes (so code analysis would always fail with the errors that are normally suppressed)." />
       <MakeDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
+      <MSBuild
+            Projects="%(SolutionsToBuild.PortableLibrary)"
+            BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
+            Targets="Build"
+            Condition=" '$(BuildPortable)' == 'true' and '%(SolutionsToBuild.PortableLibrary)' != '' "
+            Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
       <MSBuild
             Projects="%(SolutionsToBuild.Identity)"
             BuildInParallel="%(SolutionsToBuild.BuildInParallel)"

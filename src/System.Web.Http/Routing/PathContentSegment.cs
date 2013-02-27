@@ -20,7 +20,19 @@ namespace System.Web.Http.Routing
             get
             {
                 // TODO: Verify this is correct. Maybe add an assert.
-                return Subsegments.Any<PathSubsegment>(seg => (seg is PathParameterSubsegment) && ((PathParameterSubsegment)seg).IsCatchAll);
+                // Performance sensitive
+                // Caching count is faster for IList<T>
+                int subsegmentCount = Subsegments.Count;
+                for (int i = 0; i < subsegmentCount; i++)
+                {
+                    PathSubsegment seg = Subsegments[i];
+                    PathParameterSubsegment paramterSubSegment = seg as PathParameterSubsegment;
+                    if (paramterSubSegment != null && paramterSubSegment.IsCatchAll)
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
         }
 

@@ -135,7 +135,14 @@ namespace System.Web.Http.ModelBinding
             }
 
             // if the key is not found in the dictionary, we just say that it's valid (since there are no errors)
-            return this.FindKeysWithPrefix(key).All(entry => entry.Value.Errors.Count == 0);
+            foreach (KeyValuePair<string, ModelState> entry in this.FindKeysWithPrefix(key))
+            {
+                if (entry.Value.Errors.Count != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void Merge(ModelStateDictionary dictionary)

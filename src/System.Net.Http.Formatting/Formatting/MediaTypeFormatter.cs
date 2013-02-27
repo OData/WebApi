@@ -205,16 +205,25 @@ namespace System.Net.Http.Formatting
         /// <returns>The <see cref="Encoding"/> to use when reading the request or writing the response.</returns>
         public Encoding SelectCharacterEncoding(HttpContentHeaders contentHeaders)
         {
+            // Performance-sensitive
             Encoding encoding = null;
+            // Faster to cache the count for Collection<T>
+            int supportedEncodingsCount = SupportedEncodings.Count;
             if (contentHeaders != null && contentHeaders.ContentType != null)
             {
                 // Find encoding based on content type charset parameter
                 string charset = contentHeaders.ContentType.CharSet;
                 if (!String.IsNullOrWhiteSpace(charset))
                 {
-                    encoding =
-                        SupportedEncodings.FirstOrDefault(
-                            enc => charset.Equals(enc.WebName, StringComparison.OrdinalIgnoreCase));
+                    for (int i = 0; i < supportedEncodingsCount; i++)
+                    {
+                        Encoding supportedEncoding = SupportedEncodings[i];
+                        if (charset.Equals(supportedEncoding.WebName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            encoding = supportedEncoding;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -222,7 +231,10 @@ namespace System.Net.Http.Formatting
             {
                 // We didn't find a character encoding match based on the content headers.
                 // Instead we try getting the default character encoding.
-                encoding = SupportedEncodings.FirstOrDefault();
+                if (supportedEncodingsCount > 0)
+                {
+                    encoding = SupportedEncodings[0];
+                }
             }
 
             if (encoding == null)

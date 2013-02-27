@@ -470,6 +470,7 @@ namespace System.Net.Http.Formatting
         /// <returns>A <see cref="MediaTypeFormatterMatch"/> indicating the quality of the match or null is no match.</returns>
         protected virtual MediaTypeFormatterMatch MatchType(Type type, MediaTypeFormatter formatter)
         {
+            // Performance-sensitive
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
@@ -481,7 +482,11 @@ namespace System.Net.Http.Formatting
 
             // We already know that we do match on type -- otherwise we wouldn't even be called --
             // so this is just a matter of determining how we match.
-            MediaTypeHeaderValue mediaType = formatter.SupportedMediaTypes.FirstOrDefault();
+            MediaTypeHeaderValue mediaType = null;
+            if (formatter.SupportedMediaTypes.Count > 0)
+            {
+                mediaType = formatter.SupportedMediaTypes[0];
+            }
             return new MediaTypeFormatterMatch(formatter, mediaType, FormattingUtilities.Match, MediaTypeFormatterMatchRanking.MatchOnCanWriteType);
         }
 

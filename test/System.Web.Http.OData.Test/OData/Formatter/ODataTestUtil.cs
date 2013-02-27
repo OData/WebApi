@@ -111,9 +111,4 @@ namespace System.Web.Http.OData.Formatter
         public int OrderAmount { get; set; }
         public string OrderName { get; set; }
     }
-
-    public class PersonContext : DbContext
-    {
-        DbSet<FormatterPerson> Persons { get; set; }
-    }
 }

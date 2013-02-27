@@ -11,10 +11,6 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\EntityFramework.5.0.0\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.Edm, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -259,9 +255,10 @@
     <EmbeddedResource Include="Resources\SupplierRequestEntryInAtom.xml" />
     <EmbeddedResource Include="Resources\TimeSpanInXml.xml" />
     <EmbeddedResource Include="Resources\WorkItemEntryInAtom.xml" />
-    <None Include="App.config" />
     <Compile Include="OData\Builder\Conventions\Attributes\KeyAttributeEdmPropertyConventionTests.cs" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <EmbeddedResource Include="Resources\ArrayOfBooleanInJsonLight.json" />
     <EmbeddedResource Include="Resources\ArrayOfByteInJsonFullMetadata.json" />
     <EmbeddedResource Include="Resources\ArrayOfInt32InJsonLight.json" />

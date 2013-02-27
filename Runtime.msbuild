@@ -43,12 +43,17 @@
 
     <Target Name="PreRestorePackages">
         <ItemGroup>
+            <!-- The list below is an optimization. Rather than running RestorePackages over every project, we
+				 maintain a subset that references all used packages and run RestorePackages over just this subset.
+				 Note that this list needs to be updated from time to time to ensure the outcome is the same as running
+				 RestorePackages against every project. -->
             <RestoreCsProjFiles
-                Include="test\Microsoft.Web.Http.Data.Test\*.csproj;
-                         src\System.Web.WebPages.Administration\*.csproj;
-                         src\System.Web.WebPages.Deployment\*.csproj;
+                Include="src\Microsoft.AspNet.Mvc.Facebook\*.csproj;
                          src\Microsoft.Web.WebPages.OAuth\*.csproj;
-                         src\System.Net.Http.Formatting.NetCore\*.csproj" />
+                         src\System.Net.Http.Formatting.NetCore\*.csproj;
+                         src\System.Web.Http.SignalR\*.csproj;
+                         src\System.Web.WebPages.Administration\*.csproj;
+                         test\System.Web.Http.OData.Test\*.csproj" />
         </ItemGroup>
         <Message Text="Restoring NuGet packages..." Importance="High" />
     </Target>

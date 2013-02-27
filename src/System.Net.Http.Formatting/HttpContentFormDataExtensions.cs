@@ -51,8 +51,13 @@ namespace System.Net.Http
             }
 
             MediaTypeFormatter[] formatters = new MediaTypeFormatter[1] { new FormUrlEncodedMediaTypeFormatter() };
-            return content.ReadAsAsync<FormDataCollection>(formatters)
-                .Then(formdata => formdata != null ? formdata.ReadAsNameValueCollection() : null, runSynchronously: true);
+            return ReadAsAsyncCore(content, formatters);
+        }
+
+        private static async Task<NameValueCollection> ReadAsAsyncCore(HttpContent content, MediaTypeFormatter[] formatters)
+        {
+            FormDataCollection formData = await content.ReadAsAsync<FormDataCollection>(formatters);
+            return formData == null ? null : formData.ReadAsNameValueCollection();
         }
     }
 }

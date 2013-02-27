@@ -178,7 +178,7 @@ namespace System.Web.Http.Filters
             Mock<ActionFilterAttribute> filterMock = new Mock<ActionFilterAttribute>();
             var filter = (IActionFilter)filterMock.Object;
             Exception exception = new Exception("{ABCC912C-B6D1-4C27-9059-732ABC644A0C}");
-            Func<Task<HttpResponseMessage>> continuation = () => TaskHelpers.FromError<HttpResponseMessage>(new AggregateException(exception));
+            Func<Task<HttpResponseMessage>> continuation = () => TaskHelpers.FromError<HttpResponseMessage>(exception);
 
             // Act
             var result = filter.ExecuteActionFilterAsync(context, CancellationToken.None, continuation);

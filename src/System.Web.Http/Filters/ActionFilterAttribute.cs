@@ -47,49 +47,45 @@ namespace System.Web.Http.Filters
                 return TaskHelpers.FromResult(actionContext.Response);
             }
 
-            Task<HttpResponseMessage> internalTask = continuation();
-            bool calledOnActionExecuted = false;
-
-            return internalTask
-                .Then(response =>
-                {
-                    calledOnActionExecuted = true;
-                    Tuple<HttpResponseMessage, Exception> result = CallOnActionExecuted(actionContext, response: response);
-                    return result.Item1 != null ? TaskHelpers.FromResult(result.Item1) : TaskHelpers.FromError<HttpResponseMessage>(result.Item2);
-                }, cancellationToken)
-                .Catch<HttpResponseMessage>(info =>
-                {
-                    // If we've already called OnActionExecuted, that means this catch is running because
-                    // OnActionExecuted threw an exception, so we just want to re-throw the exception rather
-                    // that calling OnActionExecuted again. We also need to reset the response to forget about it
-                    // since a filter threw an exception.
-                    if (calledOnActionExecuted)
-                    {
-                        actionContext.Response = null;
-                        return info.Throw();
-                    }
-
-                    Tuple<HttpResponseMessage, Exception> result = CallOnActionExecuted(actionContext, exception: info.Exception);
-                    return result.Item1 != null ? info.Handled(result.Item1) : info.Throw(result.Item2);
-                }, cancellationToken);
+            return CallOnActionExecutedAsync(actionContext, cancellationToken, continuation);
         }
 
-        private Tuple<HttpResponseMessage, Exception> CallOnActionExecuted(HttpActionContext actionContext, HttpResponseMessage response = null, Exception exception = null)
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to intercept all exceptions")]
+        private async Task<HttpResponseMessage> CallOnActionExecutedAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
-            Contract.Assert(actionContext != null);
-            Contract.Assert(response != null || exception != null);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
-
-            OnActionExecuted(executedContext);
-
-            if (executedContext.Response != null)
+            HttpResponseMessage response = null;
+            Exception exception = null;
+            try
             {
-                return new Tuple<HttpResponseMessage, Exception>(executedContext.Response, null);
+                response = await continuation();
             }
-            if (executedContext.Exception != null)
+            catch (Exception e)
             {
-                return new Tuple<HttpResponseMessage, Exception>(null, executedContext.Exception);
+                exception = e;
+            }
+
+            try
+            {
+                HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
+                OnActionExecuted(executedContext);
+
+                if (executedContext.Response != null)
+                {
+                    return executedContext.Response;
+                }
+                if (executedContext.Exception != null)
+                {
+                    throw executedContext.Exception;
+                }
+            }
+            catch
+            {
+                // Catch is running because OnActionExecuted threw an exception, so we just want to re-throw the exception.
+                // We also need to reset the response to forget about it since a filter threw an exception.
+                actionContext.Response = null;
+                throw;
             }
 
             throw Error.InvalidOperation(SRResources.ActionFilterAttribute_MustSupplyResponseOrException, GetType().Name);

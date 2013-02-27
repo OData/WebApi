@@ -149,50 +149,53 @@ namespace System.Net.Http
 
             HttpMessageContent.ValidateHttpMessageContent(content, true, true);
 
-            return content.ReadAsStreamAsync().Then(stream =>
+            return content.ReadAsHttpRequestMessageAsyncCore(uriScheme, bufferSize, maxHeaderSize);
+        }
+
+        private static async Task<HttpRequestMessage> ReadAsHttpRequestMessageAsyncCore(this HttpContent content, string uriScheme, int bufferSize, int maxHeaderSize)
+        {
+            Stream stream = await content.ReadAsStreamAsync();
+            HttpUnsortedRequest httpRequest = new HttpUnsortedRequest();
+            HttpRequestHeaderParser parser = new HttpRequestHeaderParser(httpRequest, HttpRequestHeaderParser.DefaultMaxRequestLineSize, maxHeaderSize);
+            ParserState parseStatus;
+
+            byte[] buffer = new byte[bufferSize];
+            int bytesRead = 0;
+            int headerConsumed = 0;
+
+            while (true)
             {
-                HttpUnsortedRequest httpRequest = new HttpUnsortedRequest();
-                HttpRequestHeaderParser parser = new HttpRequestHeaderParser(httpRequest, HttpRequestHeaderParser.DefaultMaxRequestLineSize, maxHeaderSize);
-                ParserState parseStatus;
-
-                byte[] buffer = new byte[bufferSize];
-                int bytesRead = 0;
-                int headerConsumed = 0;
-
-                while (true)
+                try
                 {
-                    try
-                    {
-                        bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new IOException(Properties.Resources.HttpMessageErrorReading, e);
-                    }
-
-                    try
-                    {
-                        parseStatus = parser.ParseBuffer(buffer, bytesRead, ref headerConsumed);
-                    }
-                    catch (Exception)
-                    {
-                        parseStatus = ParserState.Invalid;
-                    }
-
-                    if (parseStatus == ParserState.Done)
-                    {
-                        return CreateHttpRequestMessage(uriScheme, httpRequest, stream, bytesRead - headerConsumed);
-                    }
-                    else if (parseStatus != ParserState.NeedMoreData)
-                    {
-                        throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
-                    }
-                    else if (bytesRead == 0)
-                    {
-                        throw new IOException(Properties.Resources.ReadAsHttpMessageUnexpectedTermination);
-                    }
+                    bytesRead = stream.Read(buffer, 0, buffer.Length);
                 }
-            });
+                catch (Exception e)
+                {
+                    throw new IOException(Properties.Resources.HttpMessageErrorReading, e);
+                }
+
+                try
+                {
+                    parseStatus = parser.ParseBuffer(buffer, bytesRead, ref headerConsumed);
+                }
+                catch (Exception)
+                {
+                    parseStatus = ParserState.Invalid;
+                }
+
+                if (parseStatus == ParserState.Done)
+                {
+                    return CreateHttpRequestMessage(uriScheme, httpRequest, stream, bytesRead - headerConsumed);
+                }
+                else if (parseStatus != ParserState.NeedMoreData)
+                {
+                    throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
+                }
+                else if (bytesRead == 0)
+                {
+                    throw new IOException(Properties.Resources.ReadAsHttpMessageUnexpectedTermination);
+                }
+            }
         }
 
         /// <summary>
@@ -243,51 +246,54 @@ namespace System.Net.Http
 
             HttpMessageContent.ValidateHttpMessageContent(content, false, true);
 
-            return content.ReadAsStreamAsync().Then(stream =>
+            return content.ReadAsHttpResponseMessageAsyncCore(bufferSize, maxHeaderSize);
+        }
+
+        private static async Task<HttpResponseMessage> ReadAsHttpResponseMessageAsyncCore(this HttpContent content, int bufferSize, int maxHeaderSize)
+        {
+            Stream stream = await content.ReadAsStreamAsync();
+            HttpUnsortedResponse httpResponse = new HttpUnsortedResponse();
+            HttpResponseHeaderParser parser = new HttpResponseHeaderParser(httpResponse, HttpResponseHeaderParser.DefaultMaxStatusLineSize, maxHeaderSize);
+            ParserState parseStatus;
+
+            byte[] buffer = new byte[bufferSize];
+            int bytesRead = 0;
+            int headerConsumed = 0;
+
+            while (true)
             {
-                HttpUnsortedResponse httpResponse = new HttpUnsortedResponse();
-                HttpResponseHeaderParser parser = new HttpResponseHeaderParser(httpResponse, HttpResponseHeaderParser.DefaultMaxStatusLineSize, maxHeaderSize);
-                ParserState parseStatus;
-
-                byte[] buffer = new byte[bufferSize];
-                int bytesRead = 0;
-                int headerConsumed = 0;
-
-                while (true)
+                try
                 {
-                    try
-                    {
-                        bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new IOException(Properties.Resources.HttpMessageErrorReading, e);
-                    }
-
-                    try
-                    {
-                        parseStatus = parser.ParseBuffer(buffer, bytesRead, ref headerConsumed);
-                    }
-                    catch (Exception)
-                    {
-                        parseStatus = ParserState.Invalid;
-                    }
-
-                    if (parseStatus == ParserState.Done)
-                    {
-                        // Create and return parsed HttpResponseMessage
-                        return CreateHttpResponseMessage(httpResponse, stream, bytesRead - headerConsumed);
-                    }
-                    else if (parseStatus != ParserState.NeedMoreData)
-                    {
-                        throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
-                    }
-                    else if (bytesRead == 0)
-                    {
-                        throw new IOException(Properties.Resources.ReadAsHttpMessageUnexpectedTermination);
-                    }
+                    bytesRead = stream.Read(buffer, 0, buffer.Length);
                 }
-            });
+                catch (Exception e)
+                {
+                    throw new IOException(Properties.Resources.HttpMessageErrorReading, e);
+                }
+
+                try
+                {
+                    parseStatus = parser.ParseBuffer(buffer, bytesRead, ref headerConsumed);
+                }
+                catch (Exception)
+                {
+                    parseStatus = ParserState.Invalid;
+                }
+
+                if (parseStatus == ParserState.Done)
+                {
+                    // Create and return parsed HttpResponseMessage
+                    return CreateHttpResponseMessage(httpResponse, stream, bytesRead - headerConsumed);
+                }
+                else if (parseStatus != ParserState.NeedMoreData)
+                {
+                    throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
+                }
+                else if (bytesRead == 0)
+                {
+                    throw new IOException(Properties.Resources.ReadAsHttpMessageUnexpectedTermination);
+                }
+            }
         }
 
         /// <summary>

@@ -62,22 +62,24 @@ namespace System.Web.Http.Dispatcher
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A <see cref="Task{HttpResponseMessage}"/> representing the ongoing operation.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We report the error in the HTTP response.")]
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // Runs Content Negotiation and Error Handling on the result of SendAsyncInternal
             try
             {
-                return SendAsyncInternal(request, cancellationToken)
-                      .Catch(info => info.Handled(HandleException(request, info.Exception)));
+                return await SendAsyncCore(request, cancellationToken);
+            }
+            catch (HttpResponseException httpResponseException)
+            {
+                return httpResponseException.Response;
             }
             catch (Exception exception)
             {
-                return TaskHelpers.FromResult(HandleException(request, exception));
+                return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
             }
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller becomes owner.")]
-        private Task<HttpResponseMessage> SendAsyncInternal(HttpRequestMessage request, CancellationToken cancellationToken)
+        private Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
@@ -124,20 +126,6 @@ namespace System.Web.Http.Dispatcher
             controllerContext.ControllerDescriptor = httpControllerDescriptor;
 
             return httpController.ExecuteAsync(controllerContext, cancellationToken);
-        }
-
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller owns HttpResponseMessage instance.")]
-        private static HttpResponseMessage HandleException(HttpRequestMessage request, Exception exception)
-        {
-            Exception unwrappedException = exception.GetBaseException();
-            HttpResponseException httpResponseException = unwrappedException as HttpResponseException;
-
-            if (httpResponseException != null)
-            {
-                return httpResponseException.Response;
-            }
-
-            return request.CreateErrorResponse(HttpStatusCode.InternalServerError, unwrappedException);
         }
     }
 }

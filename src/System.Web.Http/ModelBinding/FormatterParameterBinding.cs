@@ -87,21 +87,26 @@ namespace System.Web.Http.ModelBinding
             Type type = paramFromBody.ParameterType;
             HttpRequestMessage request = actionContext.ControllerContext.Request;
             IFormatterLogger formatterLogger = new ModelStateFormatterLogger(actionContext.ModelState, paramFromBody.ParameterName);
-            Task<object> task = ReadContentAsync(request, type, _formatters, formatterLogger);
+            
+            return ExecuteBindingAsyncCore(metadataProvider, actionContext, paramFromBody, type, request, formatterLogger, cancellationToken);
+        }
 
-            return task.Then(
-                (model) =>
-                {
-                    // Put the parameter result into the action context.
-                    SetValue(actionContext, model);
+        // Perf-sensitive - keeping the async method as small as possible
+        private async Task ExecuteBindingAsyncCore(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, HttpParameterDescriptor paramFromBody,
+            Type type, HttpRequestMessage request, IFormatterLogger formatterLogger, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            object model = await ReadContentAsync(request, type, _formatters, formatterLogger);
 
-                    // validate the object graph. 
-                    // null indicates we want no body parameter validation
-                    if (BodyModelValidator != null)
-                    {
-                        BodyModelValidator.Validate(model, type, metadataProvider, actionContext, paramFromBody.ParameterName);
-                    }
-                });
+            // Put the parameter result into the action context.
+            SetValue(actionContext, model);
+
+            // validate the object graph.
+            // null indicates we want no body parameter validation
+            if (BodyModelValidator != null)
+            {
+                BodyModelValidator.Validate(model, type, metadataProvider, actionContext, paramFromBody.ParameterName);
+            }
         }
     }
 }

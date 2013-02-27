@@ -182,29 +182,25 @@ namespace System.Web.Http.SelfHost.Channels
                 {
                     HttpMessageEncodingRequestContext requestContext =
                         HttpMessageEncodingRequestContext.GetContextFromMessage(message);
-                    try
-                    {
-                        response.Content.CopyToAsync(stream)
-                            .Catch((info) =>
-                                       {
-                                           if (requestContext != null)
-                                           {
-                                               requestContext.Exception = info.Exception;
-                                           }
 
-                                           return info.Throw();
-                                       })
-                            .Wait();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (requestContext != null)
-                        {
-                            requestContext.Exception = ex;
-                        }
+                    WriteMessageCore(response, stream, requestContext).Wait();
+                }
+            }
 
-                        throw;
+            private async Task WriteMessageCore(HttpResponseMessage response, Stream stream, HttpMessageEncodingRequestContext requestContext)
+            {
+                try
+                {
+                    await response.Content.CopyToAsync(stream);
+                }
+                catch (Exception ex)
+                {
+                    if (requestContext != null)
+                    {
+                        requestContext.Exception = ex;
                     }
+
+                    throw;
                 }
             }
 

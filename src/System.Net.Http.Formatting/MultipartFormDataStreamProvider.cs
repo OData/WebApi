@@ -103,27 +103,24 @@ namespace System.Net.Http
         /// Read the non-file contents as form data.
         /// </summary>
         /// <returns></returns>
-        public override Task ExecutePostProcessingAsync()
+        public override async Task ExecutePostProcessingAsync()
         {
             // Find instances of HttpContent for which we created a memory stream and read them asynchronously
             // to get the string content and then add that as form data
-            IEnumerable<Task> readTasks = Contents.Where((content, index) => _isFormData[index] == true).Select(
-                formContent =>
+            for (int index = 0; index < Contents.Count; index++)
+            {
+                if (_isFormData[index])
                 {
+                    HttpContent formContent = Contents[index];
                     // Extract name from Content-Disposition header. We know from earlier that the header is present.
                     ContentDispositionHeaderValue contentDisposition = formContent.Headers.ContentDisposition;
                     string formFieldName = FormattingUtilities.UnquoteToken(contentDisposition.Name) ?? String.Empty;
 
                     // Read the contents as string data and add to form data
-                    return formContent.ReadAsStringAsync().Then(
-                        formFieldValue =>
-                        {
-                            FormData.Add(formFieldName, formFieldValue);
-                        }, runSynchronously: true);
-                });
-
-            // Actually execute the read tasks while trying to stay on the same thread
-            return TaskHelpers.Iterate(readTasks);
+                    string formFieldValue = await formContent.ReadAsStringAsync();
+                    FormData.Add(formFieldName, formFieldValue);
+                }
+            }
         }
     }
 }

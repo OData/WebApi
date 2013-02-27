@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,10 +40,18 @@ namespace System.Net.Http.Handlers
         /// </summary>
         public event EventHandler<HttpProgressEventArgs> HttpReceiveProgress;
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             AddRequestProgress(request);
-            return base.SendAsync(request, cancellationToken).Then(response => AddResponseProgress(request, response));
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+
+            if (HttpReceiveProgress != null && response != null && response.Content != null)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await AddResponseProgressAsync(request, response);
+            }
+
+            return response;
         }
 
         /// <summary>
@@ -80,27 +89,14 @@ namespace System.Net.Http.Handlers
             }
         }
 
-        private Task<HttpResponseMessage> AddResponseProgress(HttpRequestMessage request, HttpResponseMessage response)
+        private async Task<HttpResponseMessage> AddResponseProgressAsync(HttpRequestMessage request, HttpResponseMessage response)
         {
-            Task<HttpResponseMessage> responseTask;
-            if (HttpReceiveProgress != null && response != null && response.Content != null)
-            {
-                responseTask = response.Content.ReadAsStreamAsync().Then(
-                    stream =>
-                    {
-                        ProgressStream progressStream = new ProgressStream(stream, this, request, response);
-                        HttpContent progressContent = new StreamContent(progressStream);
-                        response.Content.Headers.CopyTo(progressContent.Headers);
-                        response.Content = progressContent;
-                        return response;
-                    }, runSynchronously: true);
-            }
-            else
-            {
-                responseTask = TaskHelpers.FromResult(response);
-            }
-
-            return responseTask;
+            Stream stream = await response.Content.ReadAsStreamAsync();
+            ProgressStream progressStream = new ProgressStream(stream, this, request, response);
+            HttpContent progressContent = new StreamContent(progressStream);
+            response.Content.Headers.CopyTo(progressContent.Headers);
+            response.Content = progressContent;
+            return response;
         }
     }
 }

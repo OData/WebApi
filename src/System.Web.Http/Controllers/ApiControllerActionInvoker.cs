@@ -15,28 +15,27 @@ namespace System.Web.Http.Controllers
                 throw Error.ArgumentNull("actionContext");
             }
 
+            return InvokeActionAsyncCore(actionContext, cancellationToken);
+        }
+
+        private async Task<HttpResponseMessage> InvokeActionAsyncCore(HttpActionContext actionContext, CancellationToken cancellationToken)
+        {
             HttpActionDescriptor actionDescriptor = actionContext.ActionDescriptor;
             HttpControllerContext controllerContext = actionContext.ControllerContext;
 
-            return TaskHelpers.RunSynchronously(() =>
+            try
             {
-                return actionDescriptor.ExecuteAsync(controllerContext, actionContext.ActionArguments, cancellationToken)
-                                       .Then(value => actionDescriptor.ResultConverter.Convert(controllerContext, value), cancellationToken);
-            }, cancellationToken)
-            .Catch<HttpResponseMessage>(info =>
+                cancellationToken.ThrowIfCancellationRequested();
+                object actionResult = await actionDescriptor.ExecuteAsync(controllerContext, actionContext.ActionArguments, cancellationToken);
+                return actionDescriptor.ResultConverter.Convert(controllerContext, actionResult);
+            }
+            catch (HttpResponseException httpResponseException)
             {
-                // Propagate anything which isn't HttpResponseException
-                HttpResponseException httpResponseException = info.Exception as HttpResponseException;
-                if (httpResponseException == null)
-                {
-                    return info.Throw();
-                }
-
                 HttpResponseMessage response = httpResponseException.Response;
                 response.EnsureResponseHasRequest(actionContext.Request);
 
-                return info.Handled(response);
-            }, cancellationToken);
+                return response;
+            }
         }
     }
 }

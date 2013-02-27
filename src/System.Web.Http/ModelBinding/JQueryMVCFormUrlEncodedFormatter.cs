@@ -38,25 +38,27 @@ namespace System.Web.Http.ModelBinding
                 return base.ReadFromStreamAsync(type, readStream, content, formatterLogger);
             }
 
-            return base.ReadFromStreamAsync(typeof(FormDataCollection), readStream, content, formatterLogger).Then(
-                (obj) =>
-                {
-                    FormDataCollection fd = (FormDataCollection)obj;
+            return ReadFromStreamAsyncCore(type, readStream, content, formatterLogger);
+        }
 
-                    try
-                    {
-                        return fd.ReadAs(type, String.Empty, RequiredMemberSelector, formatterLogger);
-                    }
-                    catch (Exception e)
-                    {
-                        if (formatterLogger == null)
-                        {
-                            throw;
-                        }
-                        formatterLogger.LogError(String.Empty, e);
-                        return GetDefaultValueForType(type);
-                    }
-                });
+        private async Task<object> ReadFromStreamAsyncCore(Type type, Stream readStream, HttpContent content, IFormatterLogger formatterLogger)
+        {
+            object obj = await base.ReadFromStreamAsync(typeof(FormDataCollection), readStream, content, formatterLogger);
+            FormDataCollection fd = (FormDataCollection)obj;
+
+            try
+            {
+                return fd.ReadAs(type, String.Empty, RequiredMemberSelector, formatterLogger);
+            }
+            catch (Exception e)
+            {
+                if (formatterLogger == null)
+                {
+                    throw;
+                }
+                formatterLogger.LogError(String.Empty, e);
+                return GetDefaultValueForType(type);
+            }
         }
     }
 }

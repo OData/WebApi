@@ -63,10 +63,10 @@ namespace System.Web.Http.OData
         /// <param name="key">The entity key of the entity to retrieve.</param>
         /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "Needs to be this name to follow routing conventions.")]
-        public virtual Task<HttpResponseMessage> Get([FromODataUri] TKey key)
+        public virtual async Task<HttpResponseMessage> Get([FromODataUri] TKey key)
         {
-            return GetEntityByKeyAsync(key)
-                .Then(entity => EntitySetControllerHelpers.GetByKeyResponse<TEntity>(Request, entity), runSynchronously: true);
+            TEntity entity = await GetEntityByKeyAsync(key);
+            return EntitySetControllerHelpers.GetByKeyResponse<TEntity>(Request, entity);
         }
 
         /// <summary>
@@ -74,10 +74,10 @@ namespace System.Web.Http.OData
         /// </summary>
         /// <param name="entity">The entity to insert into the entity set.</param>
         /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
-        public virtual Task<HttpResponseMessage> Post([FromBody] TEntity entity)
+        public virtual async Task<HttpResponseMessage> Post([FromBody] TEntity entity)
         {
-            return CreateEntityAsync(entity)
-                .Then(createdEntity => EntitySetControllerHelpers.PostResponse<TEntity, TKey>(this, createdEntity, GetKey(createdEntity)), runSynchronously: true);
+            TEntity createdEntity = await CreateEntityAsync(entity);
+            return EntitySetControllerHelpers.PostResponse<TEntity, TKey>(this, createdEntity, GetKey(createdEntity));
         }
 
         /// <summary>
@@ -86,10 +86,10 @@ namespace System.Web.Http.OData
         /// <param name="key">The entity key of the entity to replace.</param>
         /// <param name="update">The updated entity.</param>
         /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
-        public virtual Task<HttpResponseMessage> Put([FromODataUri] TKey key, [FromBody] TEntity update)
+        public virtual async Task<HttpResponseMessage> Put([FromODataUri] TKey key, [FromBody] TEntity update)
         {
-            return UpdateEntityAsync(key, update)
-                .Then(updatedEntity => EntitySetControllerHelpers.PutResponse<TEntity>(Request, updatedEntity), runSynchronously: true);
+            TEntity updatedEntity = await UpdateEntityAsync(key, update);
+            return EntitySetControllerHelpers.PutResponse<TEntity>(Request, updatedEntity);
         }
 
         /// <summary>
@@ -100,10 +100,10 @@ namespace System.Web.Http.OData
         /// <returns>A <see cref="Task"/> that contains the response message to send back to the client when it completes.</returns>
         [AcceptVerbs("PATCH", "MERGE")]
         [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "1#", Justification = "Patch is the action name by WebAPI convention.")]
-        public virtual Task<HttpResponseMessage> Patch([FromODataUri] TKey key, Delta<TEntity> patch)
+        public virtual async Task<HttpResponseMessage> Patch([FromODataUri] TKey key, Delta<TEntity> patch)
         {
-            return PatchEntityAsync(key, patch)
-                .Then(patchedEntity => EntitySetControllerHelpers.PatchResponse<TEntity>(Request, patchedEntity), runSynchronously: true);
+            TEntity patchedEntity = await PatchEntityAsync(key, patch);
+            return EntitySetControllerHelpers.PatchResponse<TEntity>(Request, patchedEntity);
         }
 
         /// <summary>

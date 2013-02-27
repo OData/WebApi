@@ -583,7 +583,7 @@ namespace System.Web.Http
             Assert.NotNull(result);
             result.WaitUntilCompleted();
             Assert.Equal(TaskStatus.Canceled, result.Status);
-            Assert.Equal(new string[] { }, log.ToArray());
+            Assert.Equal(new string[] { "exceptionFilter" }, log.ToArray());
         }
 
         [Fact]

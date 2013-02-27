@@ -164,65 +164,70 @@ namespace System.Web.Http.SelfHost
             base.Dispose(disposing);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "ReplyContext and HttpResponseMessage are disposed later.")]
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We never want to fail here so we have to catch all exceptions.")]
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This method is a coordinator, so this coupling is expected.")]
-        private void ProcessRequestContext(ChannelContext channelContext, System.ServiceModel.Channels.RequestContext requestContext)
+        // async void is OK here. This is a fire and forget method and any exceptions that occur will be turned into
+        // HTTP responses that get sent back to clients.
+        private async void ProcessRequestContext(ChannelContext channelContext, RequestContext requestContext)
         {
             Contract.Assert(channelContext != null);
             Contract.Assert(requestContext != null);
 
+            HttpResponseMessage response = await SendAsync(channelContext, requestContext);
+            Message reply = response.ToMessage();
+            BeginReply(new ReplyContext(channelContext, requestContext, reply));
+        }
+
+        private static async Task<HttpResponseMessage> SendAsync(ChannelContext channelContext, RequestContext requestContext)
+        {
             HttpRequestMessage request = null;
             try
             {
-                // Get the HTTP request from the WCF Message
-                request = requestContext.RequestMessage.ToHttpRequestMessage();
-                if (request == null)
+                request = CreateHttpRequestMessage(requestContext);
+            }
+            catch
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+
+            // Submit request up the stack
+            try
+            {
+                HttpResponseMessage response = await channelContext.Server.SendAsync(request, channelContext.Server._cancellationTokenSource.Token);
+
+                if (response == null)
                 {
-                    throw Error.InvalidOperation(SRResources.HttpMessageHandlerInvalidMessage, requestContext.RequestMessage.GetType());
+                    response = request.CreateResponse(HttpStatusCode.InternalServerError);
                 }
 
-                // create principal information and add it the request for the windows auth case
-                SetCurrentPrincipal(request);
-
-                // Add the retrieve client certificate delegate to the property bag to enable lookup later on
-                request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
-
-                // Add information about whether the request is local or not
-                request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => IsLocal(requestContext.RequestMessage)));
-
-                // Submit request up the stack
-                HttpResponseMessage responseMessage = null;
-
-                channelContext.Server.SendAsync(request, channelContext.Server._cancellationTokenSource.Token)
-                    .Then(response =>
-                    {
-                        responseMessage = response ?? request.CreateResponse(HttpStatusCode.InternalServerError);
-                    })
-                    .Catch(info =>
-                    {
-                        responseMessage = request.CreateErrorResponse(HttpStatusCode.InternalServerError, info.Exception);
-                        return info.Handled();
-                    })
-                    .Finally(() =>
-                    {
-                        if (responseMessage == null) // No Then or Catch, must've been canceled
-                        {
-                            responseMessage = request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.RequestCancelled);
-                        }
-
-                        Message reply = responseMessage.ToMessage();
-                        BeginReply(new ReplyContext(channelContext, requestContext, reply));
-                    });
+                return response;
             }
-            catch (Exception e)
+            catch (OperationCanceledException operationCanceledException)
             {
-                HttpResponseMessage response = request != null ?
-                    request.CreateErrorResponse(HttpStatusCode.InternalServerError, e) :
-                    new HttpResponseMessage(HttpStatusCode.BadRequest);
-                Message reply = response.ToMessage();
-                BeginReply(new ReplyContext(channelContext, requestContext, reply));
+                return request.CreateErrorResponse(HttpStatusCode.ServiceUnavailable, SRResources.RequestCancelled, operationCanceledException);
             }
+            catch (Exception exception)
+            {
+                return request.CreateErrorResponse(HttpStatusCode.InternalServerError, exception);
+            }
+        }
+
+        private static HttpRequestMessage CreateHttpRequestMessage(RequestContext requestContext)
+        {
+            // Get the HTTP request from the WCF Message
+            HttpRequestMessage request = requestContext.RequestMessage.ToHttpRequestMessage();
+            if (request == null)
+            {
+                throw Error.InvalidOperation(SRResources.HttpMessageHandlerInvalidMessage, requestContext.RequestMessage.GetType());
+            }
+
+            // create principal information and add it the request for the windows auth case
+            SetCurrentPrincipal(request);
+
+            // Add the retrieve client certificate delegate to the property bag to enable lookup later on
+            request.Properties.Add(HttpPropertyKeys.RetrieveClientCertificateDelegateKey, _retrieveClientCertificate);
+
+            // Add information about whether the request is local or not
+            request.Properties.Add(HttpPropertyKeys.IsLocalKey, new Lazy<bool>(() => IsLocal(requestContext.RequestMessage)));
+            return request;
         }
 
         private static bool IsLocal(Message message)

@@ -27,9 +27,21 @@ namespace System.Net.Http.Internal
             Task writeTask = Task.Factory.FromAsync(InnerStream.BeginWrite, InnerStream.EndWrite, buffer, offset, count, state);
             if (callback != null)
             {
-                return writeTask.Finally(() => callback(writeTask), runSynchronously: true);
+                return WriteAndCallbackAsync(writeTask, callback);
             }
             return writeTask;
+        }
+
+        private static async Task WriteAndCallbackAsync(Task writeTask, AsyncCallback callback)
+        {
+            try
+            {
+                await writeTask;
+            }
+            finally
+            {
+                callback(writeTask);
+            }
         }
 
         public override void EndWrite(IAsyncResult asyncResult)

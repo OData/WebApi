@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -140,9 +141,14 @@ namespace System.Net.Http
                 throw Error.InvalidOperation(Properties.Resources.NoReadSerializerAvailable, type.Name, mediaTypeAsString);
             }
 
-            return content.ReadAsStreamAsync()
-                          .Then(stream => formatter.ReadFromStreamAsync(type, stream, content, formatterLogger)
-                          .CastFromObject<T>());
+            return ReadAsAsyncCore<T>(content, type, formatterLogger, formatter);
+        }
+
+        private static async Task<T> ReadAsAsyncCore<T>(HttpContent content, Type type, IFormatterLogger formatterLogger, MediaTypeFormatter formatter)
+        {
+            Stream stream = await content.ReadAsStreamAsync();
+            object result = await formatter.ReadFromStreamAsync(type, stream, content, formatterLogger);
+            return (T)result;
         }
     }
 }

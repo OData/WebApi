@@ -154,7 +154,7 @@ namespace System.Net.Http
         public void ReadAsFormDataAsync_HandlesNonFormData()
         {
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "test/unknown");
-            Assert.Throws<InvalidOperationException>(() => content.ReadAsFormDataAsync());
+            Assert.Throws<InvalidOperationException>(() => content.ReadAsFormDataAsync().Wait());
         }
     }
 }

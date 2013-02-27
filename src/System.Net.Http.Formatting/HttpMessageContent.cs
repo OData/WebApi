@@ -33,10 +33,6 @@ namespace System.Net.Http
         private const string DefaultRequestMediaType = DefaultMediaType + "; " + MsgTypeParameter + "=" + DefaultRequestMsgType;
         private const string DefaultResponseMediaType = DefaultMediaType + "; " + MsgTypeParameter + "=" + DefaultResponseMsgType;
 
-#if !NETFX_CORE
-        private static readonly AsyncCallback _onWriteComplete = new AsyncCallback(OnWriteComplete);
-#endif
-
         // Set of header fields that only support single values such as Set-Cookie.
         private static readonly HashSet<string> _singleValueHeaderFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -180,7 +176,6 @@ namespace System.Net.Http
         /// <param name="stream">The <see cref="Stream"/> to which to write.</param>
         /// <param name="context">The associated <see cref="TransportContext"/>.</param>
         /// <returns>A <see cref="Task"/> instance that is asynchronously serializing the object's content.</returns>
-#if NETFX_CORE
         protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
             if (stream == null)
@@ -198,35 +193,6 @@ namespace System.Net.Http
                 await Content.CopyToAsync(stream);
             }
         }
-#else
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
-        {
-            Contract.Assert(stream != null);
-
-            // Serialize header
-            byte[] header = SerializeHeader();
-
-            TaskCompletionSource<object> writeTask = new TaskCompletionSource<object>();
-            try
-            {
-                // We don't use TaskFactory.FromAsync as it generates an FxCop CA908 error
-                Tuple<HttpMessageContent, Stream, TaskCompletionSource<object>> state =
-                    new Tuple<HttpMessageContent, Stream, TaskCompletionSource<object>>(this, stream, writeTask);
-                IAsyncResult result = stream.BeginWrite(header, 0, header.Length, _onWriteComplete, state);
-                if (result.CompletedSynchronously)
-                {
-                    WriteComplete(result, this, stream, writeTask);
-                }
-            }
-            catch (Exception e)
-            {
-                writeTask.TrySetException(e);
-            }
-
-            return writeTask.Task;
-        }
-#endif
 
         /// <summary>
         /// Computes the length of the stream if possible.
@@ -280,14 +246,6 @@ namespace System.Net.Http
         {
             if (disposing)
             {
-                // If we ended up spinning up a task to get the content stream, make sure we observe any
-                // exceptions so that the task finalizer doesn't tear down our app domain.
-                if (_streamTask != null && _streamTask.IsValueCreated && _streamTask.Value != null)
-                {
-                    _streamTask.Value.Catch(info => info.Handled());
-                    _streamTask = null;
-                }
-
                 if (HttpRequestMessage != null)
                 {
                     HttpRequestMessage.Dispose();
@@ -303,60 +261,6 @@ namespace System.Net.Http
 
             base.Dispose(disposing);
         }
-
-#if !NETFX_CORE // No Begin/EndX in portable libraries
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        private static void OnWriteComplete(IAsyncResult result)
-        {
-            if (result.CompletedSynchronously)
-            {
-                return;
-            }
-
-            Tuple<HttpMessageContent, Stream, TaskCompletionSource<object>> state =
-                (Tuple<HttpMessageContent, Stream, TaskCompletionSource<object>>)result.AsyncState;
-            Contract.Assert(state != null, "state cannot be null");
-            try
-            {
-                WriteComplete(result, state.Item1, state.Item2, state.Item3);
-            }
-            catch (Exception e)
-            {
-                state.Item3.TrySetException(e);
-            }
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is propagated.")]
-        private static void WriteComplete(IAsyncResult result, HttpMessageContent thisPtr, Stream stream, TaskCompletionSource<object> writeTask)
-        {
-            Contract.Assert(result != null, "result cannot be null");
-            Contract.Assert(thisPtr != null, "thisPtr cannot be null");
-            Contract.Assert(stream != null, "stream cannot be null");
-            Contract.Assert(writeTask != null, "writeTask cannot be null");
-
-            try
-            {
-                stream.EndWrite(result);
-            }
-            catch (Exception e)
-            {
-                writeTask.TrySetException(e);
-            }
-
-            thisPtr.PrepareContentAsync().Then(content =>
-            {
-                if (content != null)
-                {
-                    content.CopyToAsync(stream)
-                        .CopyResultToCompletionSource(writeTask, completionResult: null);
-                }
-                else
-                {
-                    writeTask.TrySetResult(null);
-                }
-            });
-        }
-#endif
 
         /// <summary>
         /// Serializes the HTTP request line.
@@ -420,22 +324,6 @@ namespace System.Net.Http
                 }
             }
         }
-
-#if !NETFX_CORE // not used due to no Begin/End Support
-        private Task<HttpContent> PrepareContentAsync()
-        {
-            if (Content == null)
-            {
-                return TaskHelpers.FromResult<HttpContent>(null);
-            }
-
-            return _streamTask.Value.Then(readStream =>
-            {
-                ValidateStreamForReading(readStream);
-                return Content;
-            }, runSynchronously: true);
-        }
-#endif
 
         private byte[] SerializeHeader()
         {

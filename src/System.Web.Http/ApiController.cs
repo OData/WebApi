@@ -172,22 +172,24 @@ namespace System.Web.Http
             // Func<Task<HttpResponseMessage>>
             Task<HttpResponseMessage> result = InvokeActionWithAuthorizationFilters(actionContext, cancellationToken, authorizationFilters, () =>
             {
-                HttpActionBinding actionBinding = actionDescriptor.ActionBinding;
-                Task bindTask = actionBinding.ExecuteBindingAsync(actionContext, cancellationToken);
-                return bindTask.Then<HttpResponseMessage>(() =>
-                {
-                    _modelState = actionContext.ModelState;
-                    Func<Task<HttpResponseMessage>> invokeFunc = InvokeActionWithActionFilters(actionContext, cancellationToken, actionFilters, () =>
-                    {
-                        return controllerServices.GetActionInvoker().InvokeActionAsync(actionContext, cancellationToken);
-                    });
-                    return invokeFunc();
-                });
+                return ExecuteAction(actionDescriptor.ActionBinding, actionContext, cancellationToken, actionFilters, controllerServices);
             })();
 
-            result = InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
+            return InvokeActionWithExceptionFilters(result, actionContext, cancellationToken, exceptionFilters);
+        }
 
-            return result;
+        private async Task<HttpResponseMessage> ExecuteAction(HttpActionBinding actionBinding, HttpActionContext actionContext,
+            CancellationToken cancellationToken, IEnumerable<IActionFilter> actionFilters, ServicesContainer controllerServices)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await actionBinding.ExecuteBindingAsync(actionContext, cancellationToken);
+
+            _modelState = actionContext.ModelState;
+            cancellationToken.ThrowIfCancellationRequested();
+            return await InvokeActionWithActionFilters(actionContext, cancellationToken, actionFilters, () =>
+            {
+                return controllerServices.GetActionInvoker().InvokeActionAsync(actionContext, cancellationToken);
+            })();
         }
 
         protected virtual void Initialize(HttpControllerContext controllerContext)
@@ -203,41 +205,46 @@ namespace System.Web.Http
             _configuration = controllerContext.Configuration;
         }
 
-        internal static Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Task<HttpResponseMessage> actionTask, HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IExceptionFilter> filters)
+        internal static async Task<HttpResponseMessage> InvokeActionWithExceptionFilters(Task<HttpResponseMessage> actionTask, HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IExceptionFilter> filters)
         {
             Contract.Assert(actionTask != null);
             Contract.Assert(actionContext != null);
             Contract.Assert(filters != null);
 
-            return actionTask.Catch<HttpResponseMessage>(
-                info =>
-                {
-                    HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, info.Exception);
+            Exception exception = null;
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return await actionTask;
+            }
+            catch (Exception e)
+            {
+                exception = e;
+            }
 
-                    // Note: exception filters need to be scheduled in the reverse order so that
-                    // the more specific filter (e.g. Action) executes before the less specific ones (e.g. Global)
-                    filters = filters.Reverse();
+            // This code path only runs if the task is faulted with an exception
+            Contract.Assert(exception != null);
 
-                    // Note: in order to work correctly with the TaskHelpers.Iterate method, the lazyTaskEnumeration
-                    // must be lazily evaluated. Otherwise all the tasks might start executing even though we want to run them
-                    // sequentially and not invoke any of the following ones if an earlier fails.
-                    IEnumerable<Task> lazyTaskEnumeration = filters.Select(filter => filter.ExecuteExceptionFilterAsync(executedContext, cancellationToken));
-                    Task<HttpResponseMessage> resultTask =
-                        TaskHelpers.Iterate(lazyTaskEnumeration, cancellationToken)
-                                   .Then<HttpResponseMessage>(() =>
-                                   {
-                                       if (executedContext.Response != null)
-                                       {
-                                           return TaskHelpers.FromResult<HttpResponseMessage>(executedContext.Response);
-                                       }
-                                       else
-                                       {
-                                           return TaskHelpers.FromError<HttpResponseMessage>(executedContext.Exception);
-                                       }
-                                   }, runSynchronously: true);
+            HttpActionExecutedContext executedContext = new HttpActionExecutedContext(actionContext, exception);
 
-                    return info.Task(resultTask);
-                });
+            // Note: exception filters need to be scheduled in the reverse order so that
+            // the more specific filter (e.g. Action) executes before the less specific ones (e.g. Global)
+            filters = filters.Reverse();
+
+            foreach (IExceptionFilter exceptionFilter in filters)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await exceptionFilter.ExecuteExceptionFilterAsync(executedContext, cancellationToken);
+            }
+
+            if (executedContext.Response != null)
+            {
+                return executedContext.Response;
+            }
+            else
+            {
+                throw executedContext.Exception;
+            }
         }
 
         internal static Func<Task<HttpResponseMessage>> InvokeActionWithAuthorizationFilters(HttpActionContext actionContext, CancellationToken cancellationToken, IEnumerable<IAuthorizationFilter> filters, Func<Task<HttpResponseMessage>> innerAction)

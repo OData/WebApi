@@ -152,8 +152,14 @@ namespace System.Web.Http
                 Thread.CurrentPrincipal = _anonymousPrincipal.Value;
             }
 
-            return base.SendAsync(request, cancellationToken)
-                       .Finally(() => Thread.CurrentPrincipal = originalPrincipal, runSynchronously: true);
+            try
+            {
+                return base.SendAsync(request, cancellationToken);
+            }
+            finally
+            {
+                Thread.CurrentPrincipal = originalPrincipal;
+            }
         }
 
         private void EnsureInitialized()

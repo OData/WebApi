@@ -37,15 +37,24 @@ namespace System.Net.Http.Formatting
         private static Lazy<int> _defaultMaxHttpCollectionKeys = new Lazy<int>(InitializeDefaultCollectionKeySize, true); // Max number of keys is 1000
         private static int _maxHttpCollectionKeys = -1;
 
+        private readonly List<MediaTypeHeaderValue> _supportedMediaTypes;
+        private readonly List<Encoding> _supportedEncodings;
+#if !NETFX_CORE // No MediaTypeMappings in portable library
+        private readonly List<MediaTypeMapping> _mediaTypeMappings;
+#endif
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MediaTypeFormatter"/> class.
         /// </summary>
         protected MediaTypeFormatter()
         {
-            SupportedMediaTypes = new MediaTypeHeaderValueCollection();
-            SupportedEncodings = new Collection<Encoding>();
+            _supportedMediaTypes = new List<MediaTypeHeaderValue>();
+            SupportedMediaTypes = new MediaTypeHeaderValueCollection(_supportedMediaTypes);
+            _supportedEncodings = new List<Encoding>();
+            SupportedEncodings = new Collection<Encoding>(_supportedEncodings);
 #if !NETFX_CORE // No MediaTypeMappings in portable library
-            MediaTypeMappings = new Collection<MediaTypeMapping>();
+            _mediaTypeMappings = new List<MediaTypeMapping>();
+            MediaTypeMappings = new Collection<MediaTypeMapping>(_mediaTypeMappings);
 #endif
         }
 
@@ -80,12 +89,22 @@ namespace System.Net.Http.Formatting
         /// </summary>
         public Collection<MediaTypeHeaderValue> SupportedMediaTypes { get; private set; }
 
+        internal List<MediaTypeHeaderValue> SupportedMediaTypesInternal 
+        { 
+            get { return _supportedMediaTypes; }
+        }
+
         /// <summary>
         /// Gets the mutable collection of character encodings supported by
         /// this <see cref="MediaTypeFormatter"/> instance. The encodings are
         /// used when reading or writing data. 
         /// </summary>
         public Collection<Encoding> SupportedEncodings { get; private set; }
+
+        internal List<Encoding> SupportedEncodingsInternal
+        {
+            get { return _supportedEncodings; }
+        }
 
 #if !NETFX_CORE // No MediaTypeMappings in portable library
         /// <summary>
@@ -94,6 +113,11 @@ namespace System.Net.Http.Formatting
         /// <see cref="MediaTypeHeaderValue"/> of requests or responses.
         /// </summary>
         public Collection<MediaTypeMapping> MediaTypeMappings { get; private set; }
+
+        internal List<MediaTypeMapping> MediaTypeMappingsInternal
+        {
+            get { return _mediaTypeMappings; }
+        }
 #endif
 
 #if !NETFX_CORE // IRequiredMemeberSelector is not in portable libraries because there is no model state on the client.
@@ -207,17 +231,15 @@ namespace System.Net.Http.Formatting
         {
             // Performance-sensitive
             Encoding encoding = null;
-            // Faster to cache the count for Collection<T>
-            int supportedEncodingsCount = SupportedEncodings.Count;
             if (contentHeaders != null && contentHeaders.ContentType != null)
             {
                 // Find encoding based on content type charset parameter
                 string charset = contentHeaders.ContentType.CharSet;
                 if (!String.IsNullOrWhiteSpace(charset))
                 {
-                    for (int i = 0; i < supportedEncodingsCount; i++)
+                    for (int i = 0; i < _supportedEncodings.Count; i++)
                     {
-                        Encoding supportedEncoding = SupportedEncodings[i];
+                        Encoding supportedEncoding = _supportedEncodings[i];
                         if (charset.Equals(supportedEncoding.WebName, StringComparison.OrdinalIgnoreCase))
                         {
                             encoding = supportedEncoding;
@@ -231,9 +253,9 @@ namespace System.Net.Http.Formatting
             {
                 // We didn't find a character encoding match based on the content headers.
                 // Instead we try getting the default character encoding.
-                if (supportedEncodingsCount > 0)
+                if (_supportedEncodings.Count > 0)
                 {
-                    encoding = SupportedEncodings[0];
+                    encoding = _supportedEncodings[0];
                 }
             }
 
@@ -281,7 +303,11 @@ namespace System.Net.Http.Formatting
             // If content type is not set then set it based on supported media types.
             if (headers.ContentType == null)
             {
-                MediaTypeHeaderValue defaultMediaType = SupportedMediaTypes.FirstOrDefault();
+                MediaTypeHeaderValue defaultMediaType = null;
+                if (_supportedMediaTypes.Count > 0)
+                {
+                    defaultMediaType = _supportedMediaTypes[0];
+                }
                 if (defaultMediaType != null)
                 {
                     headers.ContentType = defaultMediaType.Clone();
@@ -291,7 +317,11 @@ namespace System.Net.Http.Formatting
             // If content type charset parameter is not set then set it based on the supported encodings.
             if (headers.ContentType != null && headers.ContentType.CharSet == null)
             {
-                Encoding defaultEncoding = SupportedEncodings.FirstOrDefault();
+                Encoding defaultEncoding = null;
+                if (_supportedEncodings.Count > 0)
+                {
+                    defaultEncoding = _supportedEncodings[0];
+                }
                 if (defaultEncoding != null)
                 {
                     headers.ContentType.CharSet = defaultEncoding.WebName;
@@ -388,6 +418,11 @@ namespace System.Net.Http.Formatting
         internal class MediaTypeHeaderValueCollection : Collection<MediaTypeHeaderValue>
         {
             private static readonly Type _mediaTypeHeaderValueType = typeof(MediaTypeHeaderValue);
+
+            internal MediaTypeHeaderValueCollection(IList<MediaTypeHeaderValue> list)
+                : base(list)
+            {
+            }
 
             /// <summary>
             /// Inserts the <paramref name="item"/> into the collection at the specified <paramref name="index"/>.

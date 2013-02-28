@@ -77,9 +77,9 @@
             LogStandardErrorAsError="true"
             Condition=" !Exists('$(PackagesDir)\Microsoft.Web.StyleCop') " />
         <Exec
-            Command='$(NuGetCommand) install Microsoft.Bcl.Build -source $(PackageSources) -o "$(PackagesDir)" -pre -ExcludeVersion > NUL'
+            Command='$(NuGetCommand) install Microsoft.Bcl.Build -source $(PackageSources) -o "$(PackagesDir)" -Version 1.0.0-rc > NUL'
             LogStandardErrorAsError="true"
-            Condition=" !Exists('$(PackagesDir)\Microsoft.Bcl.Build') " />
+            Condition=" !Exists('$(PackagesDir)\Microsoft.Bcl.Build.1.0.0-rc') " />
     </Target>
 
     <Target Name="CheckPrerequisites">

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+#if !NETFX_CORE // In portable library we have our own implementation of Concurrent Dictionary which is in the internal namespace
 using System.Collections.Concurrent;
+#endif
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;

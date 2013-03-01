@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteRangeStreamContentTest.cs" />
+    <Compile Include="Internal\ConcurrentDictionaryTests.cs" />
     <Compile Include="InvalidByteRangeExceptionTest.cs" />
     <Compile Include="Formatting\FormUrlEncodedFromContentTests.cs" />
     <Compile Include="Formatting\FormUrlEncodedFromUriQueryTests.cs" />

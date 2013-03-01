@@ -164,7 +164,7 @@ namespace System.Net.Http
         /// <returns></returns>
         public static XmlDictionaryReaderQuotas CreateDefaultReaderQuotas()
         {
-#if NETFX_CORE // On core we set the max Quota
+#if NETFX_CORE // MaxDepth is a DOS mitigation. We don't support MaxDepth in portable libraries because it is strictly client side.
             return XmlDictionaryReaderQuotas.Max;
 #else
             return new XmlDictionaryReaderQuotas()

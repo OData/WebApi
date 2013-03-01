@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+#if NETFX_CORE // This file should only be included by the NetCore version of the formatting project, but adding a guard here just in case.
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,13 +9,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Collections.Concurrent
+namespace System.Net.Http.Internal
 {
     // TODO: Remove this class after BCL makes their portable library version.
     internal sealed class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
-        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private object _lock = new object();
 
         public ICollection<TKey> Keys
         {
@@ -67,14 +68,9 @@ namespace System.Collections.Concurrent
 
         public bool ContainsKey(TKey key)
         {
-            _lock.EnterReadLock();
-            try
+            lock (_lock)
             {
-                 return _dictionary.ContainsKey(key);
-            }
-            finally
-            {
-                _lock.ExitReadLock();
+                return _dictionary.ContainsKey(key);
             }
         }
 
@@ -131,99 +127,53 @@ namespace System.Collections.Concurrent
 
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> addValueFactory)
         {
-            _lock.EnterUpgradeableReadLock();
-            try
+            lock (_lock)
             {
                 TValue value;
 
-                if (_dictionary.ContainsKey(key))
-                {
-                    return _dictionary[key];
-                }
-                else
+                if (!_dictionary.TryGetValue(key, out value))
                 {
                     value = addValueFactory.Invoke(key);
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _dictionary.Add(key, value);
-                        return value;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                    }
+                    _dictionary.Add(key, value);
                 }
-            }
-            finally
-            {
-                _lock.ExitUpgradeableReadLock();
+
+                return value;
             }
         }
 
         public bool TryAdd(TKey key, TValue value)
         {
-            _lock.EnterUpgradeableReadLock();
-            try
+            lock (_lock)
             {
                 if (_dictionary.ContainsKey(key))
                 {
                     return false;
                 }
 
-                _lock.EnterWriteLock();
-                try
-                {
-                    _dictionary.Add(key, value);
-                    return true;
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
-            }
-            finally
-            {
-                _lock.ExitUpgradeableReadLock();
+                _dictionary.Add(key, value);
+                return true;
             }
         }
 
         public TValue AddOrUpdate(TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
         {
-            _lock.EnterUpgradeableReadLock();
-            try
+            lock (_lock)
             {
+                TValue value;
+
                 // update
-                if (_dictionary.ContainsKey(key))
+                if (_dictionary.TryGetValue(key, out value))
                 {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _dictionary[key] = updateValueFactory.Invoke(key, _dictionary[key]);
-                        return _dictionary[key];
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                    }
+                    value = updateValueFactory.Invoke(key, value);
+                    _dictionary[key] = value;
+                    return value;
                 }
 
                 // add
-                _lock.EnterWriteLock();
-                try
-                {
-                    _dictionary.Add(key, addValue);
-                    return addValue;
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
-            }
-            finally
-            {
-                _lock.ExitUpgradeableReadLock();
+                _dictionary.Add(key, addValue);
+                return addValue;
             }
         }
     }
 }
+#endif

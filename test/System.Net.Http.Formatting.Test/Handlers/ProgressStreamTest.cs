@@ -96,7 +96,8 @@ namespace System.Net.Http.Handlers
             Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
-#else
+#endif
+
         [Fact]
         public void ReadAsync_ReportsBytesRead()
         {
@@ -126,7 +127,6 @@ namespace System.Net.Http.Handlers
             Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
-#endif
 
         [Fact]
         public void Write_ReportsBytesWritten()
@@ -225,7 +225,8 @@ namespace System.Net.Http.Handlers
             Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
-#else
+#endif
+
         [Fact]
         public void WriteAsync_ReportsBytesWritten()
         {
@@ -257,7 +258,6 @@ namespace System.Net.Http.Handlers
             Assert.Equal(expectedLength, mockProgressEventHandler.EventArgs.TotalBytes);
             Assert.Equal(100, mockProgressEventHandler.EventArgs.ProgressPercentage);
         }
-#endif
 
         internal static ProgressStream CreateProgressStream(
             Stream innerStream = null,

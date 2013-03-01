@@ -58,8 +58,16 @@ namespace System.Net.Http
                     Assert.True(streamAction.WasInvoked);
                     Assert.Same(content, streamAction.Content);
                     Assert.IsType<PushStreamContent.CompleteTaskOnCloseStream>(streamAction.OutputStream);
+#if NETFX_CORE
+                    // In portable libraries, we expect the dispose to be called because we passed close: true above
+                    // on netfx45, we let the HttpContent call close on the stream.
+                    // CompleteTaskOnCloseStream for this reason does not dispose the innerStream when close is called
+                    Assert.False(outputStream.CanRead);
+#else
                     Assert.True(outputStream.CanRead);
-                });
+#endif
+
+                    });
         }
 
         [Fact]
@@ -83,6 +91,29 @@ namespace System.Net.Http
                 });
         }
 
+#if NETFX_CORE
+        // In the non portable version, we don't want to close the inner stream as HttpContent will do that for us
+        // For the portable library version, we implement dispose in order to signal task completion
+        // since there is no Close on Stream. In that case we do want to dispose the inner stream since in
+        // client scenarios we can't rely on HttpContent.Dispose to do this for us since the stream is not
+        // necessarily owned by HttpContent.
+        [Fact]
+        public void CompleteTaskOnCloseStream_Dispose_CompletesTaskAndClosesInnerStream()
+        {
+            // Arrange
+            Mock<Stream> mockInnerStream = new Mock<Stream>() { CallBase = true };
+            TaskCompletionSource<bool> serializeToStreamTask = new TaskCompletionSource<bool>();
+            MockCompleteTaskOnCloseStream mockStream = new MockCompleteTaskOnCloseStream(mockInnerStream.Object, serializeToStreamTask);
+
+            // Act
+            mockStream.Dispose();
+
+            // Assert
+            mockInnerStream.Protected().Verify("Dispose", Times.Once(), true);
+            Assert.Equal(TaskStatus.RanToCompletion, serializeToStreamTask.Task.Status);
+            Assert.True(serializeToStreamTask.Task.Result);
+        }
+#else
         [Fact]
         public void CompleteTaskOnCloseStream_Dispose_CompletesTaskButDoNotCloseInnerStream()
         {
@@ -101,7 +132,6 @@ namespace System.Net.Http
             Assert.True(serializeToStreamTask.Task.Result);
         }
 
-#if !NETFX_CORE // No Stream.Close on portable libraries 
         [Fact]
         public void NonClosingDelegatingStream_Close_CompletesTaskButDoNotCloseInnerStream()
         {
@@ -120,7 +150,7 @@ namespace System.Net.Http
             Assert.True(serializeToStreamTask.Task.Result);
         }
 #endif
-        
+
         private class MockStreamAction
         {
             bool _close;
@@ -149,7 +179,11 @@ namespace System.Net.Http
 
                 if (_close)
                 {
+#if NETFX_CORE
+                    stream.Dispose();
+#else
                     stream.Close();
+#endif
                 }
 
                 if (_throwException)

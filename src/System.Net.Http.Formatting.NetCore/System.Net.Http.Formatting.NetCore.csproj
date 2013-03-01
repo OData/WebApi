@@ -184,7 +184,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Collections\Concurrent\ConcurrentDictionary.cs" />
+    <Compile Include="Internal\ConcurrentDictionary.cs" />
     <Compile Include="MediaTypeHeaderValueExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

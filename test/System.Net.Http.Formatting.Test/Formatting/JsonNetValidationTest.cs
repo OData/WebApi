@@ -41,7 +41,7 @@ namespace System.Net.Http.Formatting
             }
         }
 
-#if !NETFX_CORE // SimpleRequiredMemberSelector uses MemberInfo which is not avaiable on portable libraries
+#if !NETFX_CORE // IRequiredMemeberSelector is not in portable libraries because there is no model state on the client.
         [Theory]
         [PropertyData("Theories")]
         public void ModelErrorsPopulatedWithValidationErrors(string json, Type type, int expectedErrors)
@@ -80,7 +80,7 @@ namespace System.Net.Http.Formatting
         }
     }
 
-#if !NETFX_CORE // IRequiredMemeberSelector uses MemberInfo which is not avaiable on portable libraries
+#if !NETFX_CORE // IRequiredMemeberSelector is not in portable libraries because there is no model state on the client.
     // this IRMS treats all member names that start with "Required" as required
     public class SimpleRequiredMemberSelector : IRequiredMemberSelector
     {

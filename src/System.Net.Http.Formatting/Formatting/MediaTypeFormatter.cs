@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+#if !NETFX_CORE // In portable library we have our own implementation of Concurrent Dictionary which is in the internal namespace
 using System.Collections.Concurrent;
+#endif
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -11,6 +13,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+#if NETFX_CORE // In portable library we have our own implementation of Concurrent Dictionary which is in the internal namespace
+using System.Net.Http.Internal;
+#endif
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -89,7 +94,9 @@ namespace System.Net.Http.Formatting
         /// <see cref="MediaTypeHeaderValue"/> of requests or responses.
         /// </summary>
         public Collection<MediaTypeMapping> MediaTypeMappings { get; private set; }
+#endif
 
+#if !NETFX_CORE // IRequiredMemeberSelector is not in portable libraries because there is no model state on the client.
         /// <summary>
         /// Gets or sets the <see cref="IRequiredMemberSelector"/> used to determine required members.
         /// </summary>

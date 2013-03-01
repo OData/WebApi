@@ -227,6 +227,7 @@ namespace System.Net.Http.Internal
             mockInnerStream.Verify(s => s.EndRead(mockIAsyncResult.Object), Times.Once());
         }
 #endif
+
         [Fact]
         public void DelegatingStream_ReadAsyc()
         {
@@ -338,6 +339,7 @@ namespace System.Net.Http.Internal
             mockInnerStream.Verify(s => s.EndWrite(mockIAsyncResult.Object), Times.Once());
         }
 #endif
+
         [Fact]
         public void DelegatingStream_WriteAsync()
         {

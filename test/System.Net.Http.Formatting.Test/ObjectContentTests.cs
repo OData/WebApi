@@ -190,12 +190,10 @@ namespace System.Net.Http
                 return true;
             }
 
-#if !NETFX_CORE // No override available in portable library projects
             public override Task WriteToStreamAsync(Type type, object value, Stream stream, HttpContent content, TransportContext transportContext)
             {
                 throw new NotImplementedException();
             }
-#endif
         }
     }
 }

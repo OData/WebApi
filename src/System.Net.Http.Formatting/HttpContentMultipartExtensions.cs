@@ -115,18 +115,18 @@ namespace System.Net.Http
                 throw Error.ArgumentMustBeGreaterThanOrEqualTo("bufferSize", bufferSize, MinBufferSize);
             }
 
-            Stream stream = null;
+            Stream stream;
             try
             {
-                try
-                {
-                    stream = await content.ReadAsStreamAsync();
-                }
-                catch (Exception e)
-                {
-                    throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorReading, e);
-                }
+                stream = await content.ReadAsStreamAsync();
+            }
+            catch (Exception e)
+            {
+                throw new IOException(Properties.Resources.ReadAsMimeMultipartErrorReading, e);
+            }
 
+            using (stream)
+            {
                 using (var parser = new MimeMultipartBodyPartParser(content, streamProvider))
                 {
                     byte[] data = new byte[bufferSize];
@@ -138,13 +138,6 @@ namespace System.Net.Http
                     // Let the stream provider post-process when everything is complete
                     await streamProvider.ExecutePostProcessingAsync();
                     return streamProvider;
-                }
-            }
-            finally
-            {
-                if (stream != null)
-                {
-                    stream.Dispose();
                 }
             }
         }
@@ -208,10 +201,10 @@ namespace System.Net.Http
                 }
             }
 
-            return CheckPartCompletion(context.PartsEnumerator.Current, context.Result);
+            return CheckIsFinalPart(context.PartsEnumerator.Current, context.Result);
         }
 
-        private static bool CheckPartCompletion(MimeBodyPart part, ICollection<HttpContent> result)
+        private static bool CheckIsFinalPart(MimeBodyPart part, ICollection<HttpContent> result)
         {
             Contract.Assert(part != null, "part cannot be null.");
             Contract.Assert(result != null, "result cannot be null.");

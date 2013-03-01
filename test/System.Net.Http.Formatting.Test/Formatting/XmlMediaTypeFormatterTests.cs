@@ -278,17 +278,13 @@ namespace System.Net.Http.Formatting
             return WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
+#if !NETFX_CORE // Different behavior in portable libraries due to no DataContract validation
         [Fact]
         public void CanReadType_ReturnsFalse_ForInvalidDataContracts()
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
 
-#if !NETFX_CORE
             Assert.False(formatter.CanReadType(typeof(InvalidDataContract)));
-#else
-            // The formatter is unable to positively identify non readable types, so true is always returned
-            Assert.True(formatter.CanReadType(typeof(InvalidDataContract)));
-#endif
         }
 
         [Fact]
@@ -296,13 +292,27 @@ namespace System.Net.Http.Formatting
         {
             XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
 
-#if !NETFX_CORE
             Assert.False(formatter.CanWriteType(typeof(InvalidDataContract)));
+        }
 #else
+        [Fact]
+        public void CanReadType_InPortableLibrary_ReturnsFalse_ForInvalidDataContracts()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+
+            // The formatter is unable to positively identify non readable types, so true is always returned
+            Assert.True(formatter.CanReadType(typeof(InvalidDataContract)));
+        }
+
+        [Fact]
+        public void CanWriteType_InPortableLibrary_ReturnsTrue_ForInvalidDataContracts()
+        {
+            XmlMediaTypeFormatter formatter = new XmlMediaTypeFormatter();
+
             // The formatter is unable to positively identify non readable types, so true is always returned
             Assert.True(formatter.CanWriteType(typeof(InvalidDataContract)));
-#endif
         }
+#endif
 
         public class InvalidDataContract
         {

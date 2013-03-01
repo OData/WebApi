@@ -459,13 +459,14 @@ namespace System.Net.Http.Formatting
 
         public bool Equals(SerializableType other)
         {
-#if !NETFX_CORE // Only publics are serialized in portable library
+#if !NETFX_CORE // Only publics are serialized in portable library. privateField is serialized through PublicProperty
             return this.publicField == other.publicField &&
                 this.internalField == other.internalField &&
                 this.protectedInternalField == other.protectedInternalField &&
                 this.protectedField == other.protectedField &&
                 this.privateField == other.privateField;
-#else
+#else 
+            // this.privateField is serialized through this.PublicProperty, thus the comparison here
             return this.publicField == other.publicField &&
                 this.privateField == other.privateField;
 #endif

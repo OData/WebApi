@@ -70,6 +70,14 @@ namespace Microsoft.TestCommon
                 allowDerivedExceptions: false);
         }
 
+        /// <summary>
+        /// Override this if InvalidEnumArgument is not supported in the targetted platform
+        /// </summary>
+        /// <param name="testCode">A delegate to the code to be tested</param>
+        /// <param name="paramName">The name of the parameter that should throw the exception</param>
+        /// <param name="invalidValue">The expected invalid value that should appear in the message</param>
+        /// <param name="enumType">The type of the enumeration</param>
+        /// <param name="allowDerivedExceptions">Pass true to allow exceptions which derive from TException; pass false, otherwise</param>
         protected virtual void AssertForUndefinedValue(Action testCode, string parameterName, int invalidValue, Type enumType, bool allowDerivedExceptions = false)
         {
             Assert.ThrowsInvalidEnumArgument(
@@ -80,6 +88,11 @@ namespace Microsoft.TestCommon
                 allowDerivedExceptions);
         }
 
+        /// <summary>
+        /// Override this to determine if a given enum value for an enum exists in a given framework
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns>Wheter the value exists</returns>
         protected virtual bool ValueExistsForFramework(TEnum value)
         {
             return true;

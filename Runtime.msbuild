@@ -1,5 +1,6 @@
 <Project DefaultTargets="UnitTest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="tools/WebStack.tasks.targets"/>
+    <UsingTask TaskName="SkipStrongNames.CheckSkipStrongNamesStatus" AssemblyFile="$(SkipStrongNamesExe)" />
 
     <PropertyGroup>
         <!-- build.cmd sets /p:Desktop=true. The CI server does not; instead, it does an additional step with /p:Configuration=CodeAnalysis. -->
@@ -11,6 +12,8 @@
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
         <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
         <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
+        <SkipStrongNamesExe>$(MSBuildThisFileDirectory)packages\Microsoft.Web.SkipStrongNames.1.0.0\tools\SkipStrongNames.exe</SkipStrongNamesExe>
+        <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
     </PropertyGroup>
     
     <ItemGroup>            
@@ -19,7 +22,23 @@
             <BuildInParallel>$(BuildInParallel)</BuildInParallel>
             <PortableLibrary>RuntimePortable.sln</PortableLibrary>
         </SolutionsToBuild>    
-    </ItemGroup>    
+    </ItemGroup>
+
+    <Target Name="EnableSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">
+      <Exec Command="$(SkipStrongNamesExe) -e $(SkipStrongNamesXml)" />
+      <CheckSkipStrongNamesStatus AssembliesFile="$(SkipStrongNamesXml)">
+        <Output TaskParameter="Status" PropertyName="Status" />
+      </CheckSkipStrongNamesStatus>
+      <Message Text="SkipStrongNames: $(Status)" Importance="High" />
+    </Target>
+
+    <Target Name="DisableSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">
+      <Exec Command="$(SkipStrongNamesExe) -d $(SkipStrongNamesXml)" />
+      <CheckSkipStrongNamesStatus AssembliesFile="$(SkipStrongNamesXml)">
+        <Output TaskParameter="Status" PropertyName="Status" />
+      </CheckSkipStrongNamesStatus>
+      <Message Text="SkipStrongNames: $(Status)" Importance="High" />
+    </Target>
 
     <Target Name="Integration" DependsOnTargets="Clean;Build;UnitTest" />
 
@@ -34,6 +53,10 @@
             Targets="Clean"
             Properties="Configuration=$(Configuration);VisualStudioVersion=$(VisualStudioVersion)" />
         <RemoveDir Directories="bin\%(SolutionsToBuild.ReleaseRoot)\$(Configuration)" />
+    </Target>
+
+    <Target Name="RestoreSkipStrongNames">
+      <MSBuild Projects=".nuget\nuget.targets" Targets="RestoreSkipStrongNames" />
     </Target>
 
     <Target Name="Prereq" DependsOnTargets="PreRestorePackages">
@@ -80,11 +103,11 @@
             Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
     </Target>
 
-    <Target Name = "UnitTest" DependsOnTargets="Build">
+    <Target Name="UnitTest" DependsOnTargets="CheckSkipStrongNames;Build">
       <CallTarget Targets="RunTests;PrintTestRunSummary" RunEachTargetSeparately="True" />
     </Target>
   
-    <Target Name = "RunTests">
+    <Target Name="RunTests" DependsOnTargets="CheckSkipStrongNames">
       <ItemGroup>
         <TestDLLsXunit Include="bin\$(Configuration)\test\*.Test.dll;bin\$(Configuration)\test\*.Test.*.dll;bin\$(Configuration)\Test\NetCore\*.Test.dll" Exclude="**\SPA.Test.dll" />
         <XunitProject Include="tools\WebStack.xunit.targets">
@@ -97,6 +120,13 @@
       <MakeDir Directories="$(TestResultsDirectory)" />
       
       <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
+    </Target>
+
+    <Target Name="CheckSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">
+      <CheckSkipStrongNamesStatus AssembliesFile="$(SkipStrongNamesXml)">
+        <Output TaskParameter="Status" PropertyName="Status" />
+      </CheckSkipStrongNamesStatus>
+      <Error Text="Unit tests will not run correctly unless SkipStrongNames is Enabled. Current status: $(Status). Run the EnableSkipStrongNames target to fix this problem." Condition="'$(Status)' != 'Enabled'" />
     </Target>
 
     <Target Name="PrintTestRunSummary">

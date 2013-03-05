@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -34,9 +35,20 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             object complexResource = CreateResource(EdmComplexType.ComplexDefinition(), readContext.Model);
             foreach (ODataProperty complexProperty in complexValue.Properties)
             {
-                ApplyProperty(complexProperty, EdmComplexType, complexResource, DeserializerProvider, readContext);
+                DeserializationHelpers.ApplyProperty(complexProperty, EdmComplexType, complexResource, DeserializerProvider, readContext);
             }
             return complexResource;
+        }
+
+        private static object CreateResource(IEdmComplexType edmComplexType, IEdmModel edmModel)
+        {
+            Type clrType = EdmLibHelpers.GetClrType(new EdmComplexTypeReference(edmComplexType, isNullable: true), edmModel);
+            if (clrType == null)
+            {
+                throw Error.Argument("edmComplexType", SRResources.MappingDoesNotContainEntityType, edmComplexType.FullName());
+            }
+
+            return Activator.CreateInstance(clrType);
         }
     }
 }

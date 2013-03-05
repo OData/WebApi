@@ -308,7 +308,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw new SerializationException(message);
             }
 
-            SetProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
+            DeserializationHelpers.SetProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
         }
 
         private void ApplyFeedInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataFeed feed, ODataDeserializerContext readContext)
@@ -325,14 +325,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw new SerializationException(message);
             }
 
-            SetCollectionProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
+            DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
         }
 
         private void ApplyValueProperties(ODataEntry entry, IEdmStructuredTypeReference entityType, object entityResource, ODataDeserializerContext readContext)
         {
             foreach (ODataProperty property in entry.Properties)
             {
-                ApplyProperty(property, entityType, entityResource, DeserializerProvider, readContext);
+                DeserializationHelpers.ApplyProperty(property, entityType, entityResource, DeserializerProvider, readContext);
             }
         }
 

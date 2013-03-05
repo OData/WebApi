@@ -77,7 +77,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             Assert.Throws<NotSupportedException>(
                 () => new ODataFeedSerializer(new EdmCollectionTypeReference(collectionType, isNullable: false), new DefaultODataSerializerProvider()),
-                "namespace.name is not a collection of type IEdmEntityType. The ODataFeedSerializer can serialize only entity collections.");
+                "namespace.name is not a collection of type IEdmEntityType. Only entity collections are supported.");
         }
 
         [Fact]

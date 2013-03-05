@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     public class ODataEntityReferenceLinkDeserializerTests
     {
         [Fact]
-        public void Constructor()
+        public void Ctor_DoesnotThrow()
         {
             var deserializer = new ODataEntityReferenceLinkDeserializer();
 
@@ -21,7 +21,28 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Read()
+        public void Read_ThrowsArgumentNull_MessageReader()
+        {
+            var deserializer = new ODataEntityReferenceLinkDeserializer();
+
+            Assert.ThrowsArgumentNull(
+                () => deserializer.Read(messageReader: null, readContext: new ODataDeserializerContext()),
+                "messageReader");
+        }
+
+        [Fact]
+        public void Read_ThrowsArgumentNull_ReadContext()
+        {
+            var deserializer = new ODataEntityReferenceLinkDeserializer();
+            ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
+
+            Assert.ThrowsArgumentNull(
+                () => deserializer.Read(messageReader, readContext: null),
+                "readContext");
+        }
+
+        [Fact]
+        public void Read_RoundTrips()
         {
             // Arrange
             var deserializer = new ODataEntityReferenceLinkDeserializer();

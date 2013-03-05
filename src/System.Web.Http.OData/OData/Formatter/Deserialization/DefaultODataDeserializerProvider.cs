@@ -97,9 +97,9 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 return new ODataEntityReferenceLinkDeserializer();
             }
 
-            if (typeof(ODataActionParameters).IsAssignableFrom(type))
+            if (type == typeof(ODataActionParameters))
             {
-                return new ODataActionPayloadDeserializer(type, this);
+                return new ODataActionPayloadDeserializer(this);
             }
 
             Tuple<IEdmModel, Type> cacheKey = Tuple.Create(model, type);

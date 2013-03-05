@@ -2,21 +2,41 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
+using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class ODataCollectionDeserializer : ODataEntryDeserializer<ODataCollectionValue>
+    /// <summary>
+    /// Represents an <see cref="ODataDeserializer"/> that can read odata collection payloads.
+    /// </summary>
+    public class ODataCollectionDeserializer : ODataEntryDeserializer
     {
-        private readonly IEdmCollectionTypeReference _edmCollectionType;
-
-        public ODataCollectionDeserializer(IEdmCollectionTypeReference edmCollectionType, ODataDeserializerProvider deserializerProvider)
-            : base(edmCollectionType, ODataPayloadKind.Collection, deserializerProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataCollectionDeserializer"/> class.
+        /// </summary>
+        /// <param name="edmType">The collection type that this deserializer can read.</param>
+        /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
+        public ODataCollectionDeserializer(IEdmCollectionTypeReference edmType, ODataDeserializerProvider deserializerProvider)
+            : base(edmType, ODataPayloadKind.Collection, deserializerProvider)
         {
-            _edmCollectionType = edmCollectionType;
+            CollectionType = edmType;
+            ElementType = edmType.ElementType();
         }
 
+        /// <summary>
+        /// Gets the collection type that this deserializer can read.
+        /// </summary>
+        public IEdmCollectionTypeReference CollectionType { get; private set; }
+
+        /// <summary>
+        /// Gets the element type of the collection type that this deserializer can read.
+        /// </summary>
+        public IEdmTypeReference ElementType { get; private set; }
+
+        /// <inheritdoc />
         public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
@@ -24,42 +44,54 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            if (readContext == null)
-            {
-                throw Error.ArgumentNull("readContext");
-            }
-
             ODataCollectionValue value = ReadCollection(messageReader);
             return ReadInline(value, readContext);
         }
 
-        public override object ReadInline(ODataCollectionValue collection, ODataDeserializerContext readContext)
+        /// <inheritdoc />
+        public sealed override object ReadInline(object item, ODataDeserializerContext readContext)
         {
-            if (readContext == null)
+            if (item == null)
             {
-                throw Error.ArgumentNull("readContext");
+                return null;
             }
+
+            ODataCollectionValue collection = item as ODataCollectionValue;
 
             if (collection == null)
             {
-                return null;
+                throw Error.Argument("item", SRResources.ArgumentMustBeOfType, typeof(ODataCollectionValue).Name);
             }
 
             // Recursion guard to avoid stack overflows
             EnsureStackHelper.EnsureStack();
 
-            return ReadItems(collection, readContext);
+            return ReadCollectionValue(collection, readContext);
         }
 
-        private IEnumerable ReadItems(ODataCollectionValue collection, ODataDeserializerContext readContext)
+        /// <summary>
+        /// Deserializes the given <paramref name="collectionValue"/> under the given <paramref name="readContext"/>.
+        /// </summary>
+        /// <param name="collectionValue">The <see cref="ODataCollectionValue"/> to deserialize.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        /// <returns>The deserialized collection.</returns>
+        public virtual IEnumerable ReadCollectionValue(ODataCollectionValue collectionValue, ODataDeserializerContext readContext)
         {
-            IEdmTypeReference elementType = _edmCollectionType.ElementType();
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(elementType);
-            Contract.Assert(deserializer != null);
-
-            foreach (object entry in collection.Items)
+            if (collectionValue == null)
             {
-                if (elementType.IsPrimitive())
+                throw Error.ArgumentNull("collectionValue");
+            }
+
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(ElementType);
+            if (deserializer == null)
+            {
+                throw new SerializationException(
+                    Error.Format(SRResources.TypeCannotBeDeserialized, ElementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+            }
+
+            foreach (object entry in collectionValue.Items)
+            {
+                if (ElementType.IsPrimitive())
                 {
                     yield return entry;
                 }
@@ -74,7 +106,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             Contract.Assert(messageReader != null);
 
-            ODataCollectionReader reader = messageReader.CreateODataCollectionReader(_edmCollectionType.ElementType());
+            ODataCollectionReader reader = messageReader.CreateODataCollectionReader(CollectionType.ElementType());
             ArrayList items = new ArrayList();
             string typeName = null;
 

@@ -61,6 +61,8 @@
     <Compile Include="ODataMediaTypeFormatterCollectionExtensions.cs" />
     <Compile Include="OData\AsyncEntitySetController.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpers.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkBase.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataItemBase.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensions.cs" />
     <Compile Include="OData\ODataRoutingAttribute.cs" />
     <Compile Include="OData\PerRequestContentNegotiator.cs" />
@@ -187,11 +189,10 @@
     <Compile Include="OData\PerRequestActionValueBinder.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializer.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryAnnotation.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItem.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataFeedAnnotation.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEntryWithNavigationLinks.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataFeedWithEntries.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializer.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataNavigationLinkAnnotation.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataNavigationLinkWithItems.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializer.cs" />
     <Compile Include="OData\FeedContext.cs" />
     <Compile Include="OData\Formatter\EdmPrimitiveHelpers.cs" />

@@ -103,6 +103,12 @@ namespace System.Web.Http.OData.Formatter
             return new ODataMessageWriter(requestMessage);
         }
 
+        public static ODataMessageReader GetMockODataMessageReader()
+        {
+            MockODataRequestMessage requestMessage = new MockODataRequestMessage();
+            return new ODataMessageReader(requestMessage);
+        }
+
         public static ODataSerializerProvider GetMockODataSerializerProvider(ODataSerializer serializer)
         {
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();

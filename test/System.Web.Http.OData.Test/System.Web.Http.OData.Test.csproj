@@ -73,6 +73,7 @@
     <Compile Include="OData\EntityInstanceContextTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpersTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializerTest.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializerTest.cs" />
@@ -132,7 +133,6 @@
     <Compile Include="OData\Builder\EdmTypeConfigurationExtensionsTest.cs" />
     <Compile Include="OData\Builder\TestModels\InheritanceModels.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerOfTItemTests.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConventionTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionTests.cs" />

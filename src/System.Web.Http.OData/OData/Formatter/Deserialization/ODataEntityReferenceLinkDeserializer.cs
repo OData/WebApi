@@ -8,13 +8,20 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class ODataEntityReferenceLinkDeserializer : ODataDeserializer
+    /// <summary>
+    /// Represents an <see cref="ODataDeserializer"/> that can read OData entity reference link payloads.
+    /// </summary>
+    public class ODataEntityReferenceLinkDeserializer : ODataDeserializer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataEntityReferenceLinkDeserializer"/> class.
+        /// </summary>
         public ODataEntityReferenceLinkDeserializer()
             : base(ODataPayloadKind.EntityReferenceLink)
-        { 
+        {
         }
 
+        /// <inheritdoc />
         public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
         {
             if (messageReader == null)

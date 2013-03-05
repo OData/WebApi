@@ -9,6 +9,7 @@ using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -39,9 +40,82 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void Default_Ctor()
+        public void Ctor_ThrowsArgumentNull_EdmType()
         {
-            Assert.DoesNotThrow(() => new ODataPrimitiveDeserializer(EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int))));
+            Assert.ThrowsArgumentNull(
+                () => new ODataPrimitiveDeserializer(edmType: null),
+                "edmType");
+        }
+
+        [Fact]
+        public void Ctor_SetsProperty_PrimitiveType()
+        {
+            Mock<IEdmPrimitiveTypeReference> primitiveType = new Mock<IEdmPrimitiveTypeReference>();
+            var deserializer = new ODataPrimitiveDeserializer(primitiveType.Object);
+
+            Assert.Equal(primitiveType.Object, deserializer.PrimitiveType);
+        }
+
+        [Fact]
+        public void ReadInline_ReturnsNull_IfItemIsNull()
+        {
+            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
+            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+
+            Assert.Null(deserializer.ReadInline(item: null, readContext: new ODataDeserializerContext()));
+        }
+
+        [Fact]
+        public void ReadInline_Throws_ArgumentMustBeOfType()
+        {
+            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
+            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+
+            Assert.ThrowsArgument(
+                () => deserializer.ReadInline(42, new ODataDeserializerContext()),
+                "item",
+                "The argument must be of type 'ODataProperty'");
+        }
+
+        [Fact]
+        public void ReadInline_Calls_ReadPrimitive()
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
+            Mock<ODataPrimitiveDeserializer> deserializer = new Mock<ODataPrimitiveDeserializer>(primitiveType);
+            ODataProperty property = new ODataProperty();
+            ODataDeserializerContext readContext = new ODataDeserializerContext();
+
+            deserializer.Setup(d => d.ReadPrimitive(property, readContext)).Returns(42).Verifiable();
+
+            // Act
+            var result = deserializer.Object.ReadInline(property, readContext);
+
+            // Assert
+            deserializer.Verify();
+            Assert.Equal(42, result);
+        }
+
+        [Fact]
+        public void Read_ThrowsArgumentNull_MessageReader()
+        {
+            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
+            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+
+            Assert.ThrowsArgumentNull(
+                () => deserializer.Read(messageReader: null, readContext: new ODataDeserializerContext()),
+                "messageReader");
+        }
+
+        [Fact]
+        public void ReadPrimitive_ThrowsArgumentNull_PrimitiveProperty()
+        {
+            IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
+            var deserializer = new ODataPrimitiveDeserializer(primitiveType);
+
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ReadPrimitive(primitiveProperty: null, readContext: new ODataDeserializerContext()),
+                "primitiveProperty");
         }
 
         [Theory]

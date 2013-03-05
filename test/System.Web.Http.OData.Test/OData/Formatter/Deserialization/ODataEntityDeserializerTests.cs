@@ -1,13 +1,18 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
+using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
@@ -31,6 +36,495 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             _productEdmType = _edmModel.GetEdmTypeReference(typeof(Product)).AsEntity();
             _supplierEdmType = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
             _deserializerProvider = new DefaultODataDeserializerProvider();
+        }
+
+        [Fact]
+        public void Ctor_ThrowsArgumentNull_EdmType()
+        {
+            Assert.ThrowsArgumentNull(
+                () => new ODataEntityDeserializer(edmType: null, deserializerProvider: _deserializerProvider),
+                "edmType");
+        }
+
+        [Fact]
+        public void Ctor_ThrowsArgumentNull_DeserializerProvider()
+        {
+            Assert.ThrowsArgumentNull(
+                () => new ODataEntityDeserializer(edmType: _productEdmType, deserializerProvider: null),
+                "deserializerProvider");
+        }
+
+        [Fact]
+        public void Ctor_SetsProperty_EntityType()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.Equal(_productEdmType, deserializer.EntityType);
+        }
+
+        [Fact]
+        public void Read_ThrowsArgumentNull_MessageReader()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.Read(messageReader: null, readContext: _readContext),
+                "messageReader");
+        }
+
+        [Fact]
+        public void Read_ThrowsArgumentNull_ReadContext()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.Read(messageReader: ODataTestUtil.GetMockODataMessageReader(), readContext: null),
+                "readContext");
+        }
+
+        [Fact]
+        public void Read_ThrowsArgument_ODataPathMissing()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgument(
+                () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), new ODataDeserializerContext()),
+                "readContext",
+                "The operation cannot be completed because no ODataPath is available for the request.");
+        }
+
+        [Fact]
+        public void Read_ThrowsArgument_EntitysetMissing()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.Throws<SerializationException>(
+                () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), new ODataDeserializerContext { Path = new ODataPath() }),
+                "The related entity set could not be found from the OData path. The related entity set is required to deserialize the payload.");
+        }
+
+        [Fact]
+        public void ReadInline_ThrowsArgumentNull_Item()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ReadInline(item: null, readContext: new ODataDeserializerContext()),
+                "item");
+        }
+
+        [Fact]
+        public void ReadInline_Throws_ArgumentMustBeOfType()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgument(
+                () => deserializer.ReadInline(item: 42, readContext: new ODataDeserializerContext()),
+                "item",
+                "The argument must be of type 'ODataEntry'");
+        }
+
+        [Fact]
+        public void ReadInline_Calls_ReadEntry()
+        {
+            // Arrange
+            var deserializer = new Mock<ODataEntityDeserializer>(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry());
+            ODataDeserializerContext readContext = new ODataDeserializerContext();
+
+            deserializer.CallBase = true;
+            deserializer.Setup(d => d.ReadEntry(entry, readContext)).Returns(42).Verifiable();
+
+            // Act
+            var result = deserializer.Object.ReadInline(entry, readContext);
+
+            // Assert
+            deserializer.Verify();
+            Assert.Equal(42, result);
+        }
+
+        [Fact]
+        public void ReadEntry_ThrowsArgumentNull_EntryWrapper()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ReadEntry(entryWrapper: null, readContext: _readContext),
+                "entryWrapper");
+        }
+
+        [Fact]
+        public void ReadEntry_ThrowsArgumentNull_ReadContext()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry());
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ReadEntry(entry, readContext: null),
+                "readContext");
+        }
+
+        [Fact]
+        public void ReadEntry_ThrowsArgument_ModelMissingFromReadContext()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
+
+            Assert.ThrowsArgument(
+                () => deserializer.ReadEntry(entry, new ODataDeserializerContext()),
+                "readContext",
+                "The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.");
+        }
+
+        [Fact]
+        public void ReadEntry_ThrowsODataException_EntityTypeNotInModel()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "MissingType" });
+
+            Assert.Throws<ODataException>(
+                () => deserializer.ReadEntry(entry, _readContext),
+                "Cannot find the entity type 'MissingType' in the model.");
+        }
+
+        [Fact]
+        public void ReadEntry_ThrowsODataException_CannotInstantiateAbstractEntityType()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.Entity<BaseType>().Abstract();
+            IEdmModel model = builder.GetEdmModel();
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "System.Web.Http.OData.Formatter.Deserialization.BaseType" });
+
+            Assert.Throws<ODataException>(
+                () => deserializer.ReadEntry(entry, new ODataDeserializerContext { Model = model }),
+                "An instance of the abstract entity type 'System.Web.Http.OData.Formatter.Deserialization.BaseType' was found. Abstract entity types cannot be instantiated.");
+        }
+
+        [Fact]
+        public void ReadEntry_ThrowsSerializationException_TypeCannotBeDeserialized()
+        {
+            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
+            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns<ODataEntryDeserializer>(null);
+            var deserializer = new ODataEntityDeserializer(_productEdmType, deserializerProvider.Object);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
+
+            Assert.Throws<SerializationException>(
+                () => deserializer.ReadEntry(entry, _readContext),
+                "'ODataDemo.Supplier' cannot be deserialized using the ODataMediaTypeFormatter.");
+        }
+
+        [Fact]
+        public void ReadEntry_DispatchesToRightDeserializer_IfEntityTypeNameIsDifferent()
+        {
+            // Arrange
+            Mock<ODataEntryDeserializer> supplierDeserializer = new Mock<ODataEntryDeserializer>(_supplierEdmType, ODataPayloadKind.Entry);
+            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
+            var deserializer = new ODataEntityDeserializer(_productEdmType, deserializerProvider.Object);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
+
+            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(supplierDeserializer.Object);
+            supplierDeserializer.Setup(d => d.ReadInline(entry, _readContext)).Returns(42).Verifiable();
+
+            // Act
+            object result = deserializer.ReadEntry(entry, _readContext);
+
+            // Assert
+            Assert.Equal(42, result);
+            supplierDeserializer.Verify();
+        }
+
+        [Fact]
+        public void ReadEntry_Calls_CreateEntityResource()
+        {
+            // Arrange
+            Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = Enumerable.Empty<ODataProperty>() });
+            deserializer.CallBase = true;
+            deserializer.Setup(d => d.CreateEntityResource(_readContext)).Returns(42).Verifiable();
+
+            // Act
+            var result = deserializer.Object.ReadEntry(entry, _readContext);
+
+            // Assert
+            Assert.Equal(42, result);
+            deserializer.Verify();
+        }
+
+        [Fact]
+        public void ReadEntry_Calls_ApplyStructuralProperties()
+        {
+            // Arrange
+            Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = Enumerable.Empty<ODataProperty>() });
+            deserializer.CallBase = true;
+            deserializer.Setup(d => d.CreateEntityResource(_readContext)).Returns(42);
+            deserializer.Setup(d => d.ApplyStructuralProperties(42, entry, _readContext)).Verifiable();
+
+            // Act
+            deserializer.Object.ReadEntry(entry, _readContext);
+
+            // Assert
+            deserializer.Verify();
+        }
+
+        [Fact]
+        public void ReadEntry_Calls_ApplyNaviagationProperties()
+        {
+            // Arrange
+            Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_productEdmType, _deserializerProvider);
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = Enumerable.Empty<ODataProperty>() });
+            deserializer.CallBase = true;
+            deserializer.Setup(d => d.CreateEntityResource(_readContext)).Returns(42);
+            deserializer.Setup(d => d.ApplyNavigationProperties(42, entry, _readContext)).Verifiable();
+
+            // Act
+            deserializer.Object.ReadEntry(entry, _readContext);
+
+            // Assert
+            deserializer.Verify();
+        }
+
+        [Fact]
+        public void CreateEntityResource_ThrowsArgumentNull_ReadContext()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.CreateEntityResource(readContext: null),
+                "readContext");
+        }
+
+        [Fact]
+        public void CreateEntityResource_ThrowsArgument_ModelMissingFromReadContext()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgument(
+                () => deserializer.CreateEntityResource(new ODataDeserializerContext()),
+                "readContext",
+                "The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.");
+        }
+
+        [Fact]
+        public void CreateEntityResource_ThrowsODataException_MappingDoesNotContainEntityType()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.Throws<ODataException>(
+                () => deserializer.CreateEntityResource(new ODataDeserializerContext { Model = EdmCoreModel.Instance }),
+                "The provided mapping doesn't contain an entry for the entity type 'ODataDemo.Product'.");
+        }
+
+        [Fact]
+        public void CreateEntityResource_CreatesDeltaOfT_IfPatchMode()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _readContext.Model,
+                IsPatchMode = true,
+                PatchEntityType = typeof(Delta<Product>)
+            };
+
+            Assert.IsType<Delta<Product>>(deserializer.CreateEntityResource(readContext));
+        }
+
+        [Fact]
+        public void CreateEntityResource_CreatesT_IfNotPatchMode()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _readContext.Model,
+                IsPatchMode = false
+            };
+
+            Assert.IsType<Product>(deserializer.CreateEntityResource(readContext));
+        }
+
+        [Fact]
+        public void ApplyNavigationProperties_ThrowsArgumentNull_EntryWrapper()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ApplyNavigationProperties(42, entryWrapper: null, readContext: _readContext),
+                "entryWrapper");
+        }
+
+        [Fact]
+        public void ApplyNavigationProperties_Calls_ApplyNavigationPropertyForEachNavigationLink()
+        {
+            // Arrange
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry());
+            entry.NavigationLinks.Add(new ODataNavigationLinkWithItems(new ODataNavigationLink()));
+            entry.NavigationLinks.Add(new ODataNavigationLinkWithItems(new ODataNavigationLink()));
+
+            Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_productEdmType, _deserializerProvider);
+            deserializer.CallBase = true;
+            deserializer.Setup(d => d.ApplyNavigationProperty(42, entry.NavigationLinks[0], _readContext)).Verifiable();
+            deserializer.Setup(d => d.ApplyNavigationProperty(42, entry.NavigationLinks[1], _readContext)).Verifiable();
+
+            // Act
+            deserializer.Object.ApplyNavigationProperties(42, entry, _readContext);
+
+            // Assert
+            deserializer.Verify();
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_ThrowsArgumentNull_NavigationLinkWrapper()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ApplyNavigationProperty(42, navigationLinkWrapper: null, readContext: _readContext),
+                "navigationLinkWrapper");
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_ThrowsArgumentNull_EntityResource()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink());
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ApplyNavigationProperty(entityResource: null, navigationLinkWrapper: navigationLink, readContext: _readContext),
+                "entityResource");
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_ThrowsODataException_NavigationPropertyNotfound()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "SomeProperty" });
+
+            Assert.Throws<ODataException>(
+                () => deserializer.ApplyNavigationProperty(42, navigationLink, _readContext),
+                "Cannot find navigation property 'SomeProperty' on the entity type 'ODataDemo.Product'.");
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_ThrowsODataException_WhenPatchingNavigationProperty()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Supplier" });
+            navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataEntry()));
+            _readContext.IsPatchMode = true;
+
+            Assert.Throws<ODataException>(
+                () => deserializer.ApplyNavigationProperty(42, navigationLink, _readContext),
+                "Cannot apply PATCH to navigation property 'Supplier' on entity type 'ODataDemo.Product'.");
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_ThrowsODataException_WhenPatchingCollectionNavigationProperty()
+        {
+            var deserializer = new ODataEntityDeserializer(_supplierEdmType, _deserializerProvider);
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Products" });
+            navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataFeed()));
+            _readContext.IsPatchMode = true;
+
+            Assert.Throws<ODataException>(
+                () => deserializer.ApplyNavigationProperty(42, navigationLink, _readContext),
+                "Cannot apply PATCH to navigation property 'Products' on entity type 'ODataDemo.Supplier'.");
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_Calls_ReadInlineOnFeed()
+        {
+            // Arrange
+            IEdmCollectionTypeReference productsType = new EdmCollectionTypeReference(new EdmCollectionType(_productEdmType), isNullable: false);
+            Mock<ODataEntryDeserializer> productsDeserializer = new Mock<ODataEntryDeserializer>(productsType, ODataPayloadKind.Feed);
+            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
+            var deserializer = new ODataEntityDeserializer(_supplierEdmType, deserializerProvider.Object);
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Products" });
+            navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataFeed()));
+
+            Supplier supplier = new Supplier();
+            IEnumerable products = new[] { new Product { ID = 42 } };
+
+            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(productsDeserializer.Object);
+            productsDeserializer.Setup(d => d.ReadInline(navigationLink.NestedItems[0], _readContext)).Returns(products).Verifiable();
+
+            // Act
+            deserializer.ApplyNavigationProperty(supplier, navigationLink, _readContext);
+
+            // Assert
+            productsDeserializer.Verify();
+            Assert.Equal(1, supplier.Products.Count());
+            Assert.Equal(42, supplier.Products.First().ID);
+        }
+
+        [Fact]
+        public void ApplyNavigationProperty_Calls_ReadInlineOnEntry()
+        {
+            // Arrange
+            Mock<ODataEntryDeserializer> supplierDeserializer = new Mock<ODataEntryDeserializer>(_supplierEdmType, ODataPayloadKind.Feed);
+            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
+            var deserializer = new ODataEntityDeserializer(_productEdmType, deserializerProvider.Object);
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Supplier" });
+            navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataEntry()));
+
+            Product product = new Product();
+            Supplier supplier = new Supplier { ID = 42 };
+
+            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(supplierDeserializer.Object);
+            supplierDeserializer.Setup(d => d.ReadInline(navigationLink.NestedItems[0], _readContext)).Returns(supplier).Verifiable();
+
+            // Act
+            deserializer.ApplyNavigationProperty(product, navigationLink, _readContext);
+
+            // Assert
+            supplierDeserializer.Verify();
+            Assert.Equal(supplier, product.Supplier);
+        }
+
+        [Fact]
+        public void ApplyStructuralProperties_ThrowsArgumentNull_entryWrapper()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ApplyStructuralProperties(42, entryWrapper: null, readContext: _readContext),
+                "entryWrapper");
+        }
+
+        [Fact]
+        public void ApplyStructuralProperties_Calls_ApplyStructuralPropertyOnEachPropertyInEntry()
+        {
+            // Arrange
+            var deserializer = new Mock<ODataEntityDeserializer>(_productEdmType, _deserializerProvider);
+            ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = properties });
+
+            deserializer.CallBase = true;
+            deserializer.Setup(d => d.ApplyStructuralProperty(42, properties[0], _readContext)).Verifiable();
+            deserializer.Setup(d => d.ApplyStructuralProperty(42, properties[1], _readContext)).Verifiable();
+
+            // Act
+            deserializer.Object.ApplyStructuralProperties(42, entry, _readContext);
+
+            // Assert
+            deserializer.Verify();
+        }
+
+        [Fact]
+        public void ApplyStructuralProperty_ThrowsArgumentNull_EntityResource()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ApplyStructuralProperty(entityResource: null, structuralProperty: new ODataProperty(), readContext: _readContext),
+                "entityResource");
+        }
+
+        [Fact]
+        public void ApplyStructuralProperty_ThrowsArgumentNull_StructuralProperty()
+        {
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ApplyStructuralProperty(42, structuralProperty: null, readContext: _readContext),
+                "structuralProperty");
+        }
+
+        [Fact]
+        public void ApplyStructuralProperty_SetsProperty()
+        {
+            // Arrange
+            var deserializer = new ODataEntityDeserializer(_productEdmType, _deserializerProvider);
+            Product product = new Product();
+            ODataProperty property = new ODataProperty { Name = "ID", Value = 42 };
+
+            // Act
+            deserializer.ApplyStructuralProperty(product, property, _readContext);
+
+            // Assert
+            Assert.Equal(42, product.ID);
         }
 
         [Fact]
@@ -135,7 +629,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Read_ThrowsOnUnknownEntityType(Resources.SupplierRequestEntryInAtom, false,
                 "An entry with type 'ODataDemo.Supplier' was found, but it is not assignable to the expected type 'ODataDemo.Product'. The type specified in the entry must be equal to either the expected type or a derived type.");
         }
-        
+
         private void Read_ThrowsOnUnknownEntityType(string content, bool json, string expectedMessage)
         {
             IEdmEntityType supplierEntityType =
@@ -178,6 +672,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
 
             return new HttpRequestODataMessage(request);
+        }
+
+        public abstract class BaseType
+        {
+            public int ID { get; set; }
         }
 
         public class Product

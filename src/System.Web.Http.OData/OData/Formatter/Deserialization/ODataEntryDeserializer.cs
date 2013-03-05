@@ -36,6 +36,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         protected ODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
             : this(edmType, payloadKind)
         {
+            if (deserializerProvider == null)
+            {
+                throw Error.ArgumentNull("deserializerProvider");
+            }
+
             DeserializerProvider = deserializerProvider;
         }
 

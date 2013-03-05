@@ -1,59 +1,82 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections;
-using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class ODataFeedDeserializer : ODataEntryDeserializer<ODataFeed>
+    /// <summary>
+    /// Represents an <see cref="ODataDeserializer"/> that can read OData feeds.
+    /// </summary>
+    public class ODataFeedDeserializer : ODataEntryDeserializer
     {
-        private IEdmCollectionTypeReference _edmCollectionType;
-        private IEdmEntityTypeReference _edmEntityType;
-
-        public ODataFeedDeserializer(IEdmCollectionTypeReference edmCollectionType, ODataDeserializerProvider deserializerProvider)
-            : base(edmCollectionType, ODataPayloadKind.Feed, deserializerProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataFeedDeserializer"/> class.
+        /// </summary>
+        /// <param name="edmType">The entity collection type that this deserializer can read.</param>
+        /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
+        public ODataFeedDeserializer(IEdmCollectionTypeReference edmType, ODataDeserializerProvider deserializerProvider)
+            : base(edmType, ODataPayloadKind.Feed, deserializerProvider)
         {
-            _edmCollectionType = edmCollectionType;
-            if (!edmCollectionType.ElementType().IsEntity())
+            CollectionType = edmType;
+            if (!edmType.ElementType().IsEntity())
             {
-                throw Error.NotSupported(SRResources.TypeMustBeEntityCollection, edmCollectionType.ElementType().FullName(), typeof(IEdmEntityType).Name);
+                throw Error.Argument("edmType", SRResources.TypeMustBeEntityCollection, edmType.ElementType().FullName(), typeof(IEdmEntityType).Name);
             }
-            _edmEntityType = _edmCollectionType.ElementType().AsEntity();
+
+            EntityType = CollectionType.ElementType().AsEntity();
         }
 
-        public override object ReadInline(ODataFeed feed, ODataDeserializerContext readContext)
-        {
-            if (readContext == null)
-            {
-                throw Error.ArgumentNull("readContext");
-            }
+        /// <summary>
+        /// Gets the entity collection type that this deserializer can read.
+        /// </summary>
+        public IEdmCollectionTypeReference CollectionType { get; private set; }
 
-            if (feed == null)
+        /// <summary>
+        /// Gets the entity type of the feed.
+        /// </summary>
+        public IEdmEntityTypeReference EntityType { get; private set; }
+
+        /// <inheritdoc />
+        public sealed override object ReadInline(object item, ODataDeserializerContext readContext)
+        {
+            if (item == null)
             {
                 return null;
+            }
+
+            ODataFeedWithEntries feed = item as ODataFeedWithEntries;
+            if (feed == null)
+            {
+                throw Error.Argument("item", SRResources.ArgumentMustBeOfType, typeof(ODataFeedWithEntries).Name);
             }
 
             // Recursion guard to avoid stack overflows
             EnsureStackHelper.EnsureStack();
 
-            return ReadItems(feed, readContext);
+            return ReadFeed(feed, readContext);
         }
 
-        private IEnumerable ReadItems(ODataFeed feed, ODataDeserializerContext readContext)
+        /// <summary>
+        /// Deserializes the given <paramref name="feed"/> under the given <paramref name="readContext"/>.
+        /// </summary>
+        /// <param name="feed">The feed to deserialize.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        /// <returns>The deserialized feed object.</returns>
+        public virtual IEnumerable ReadFeed(ODataFeedWithEntries feed, ODataDeserializerContext readContext)
         {
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(_edmEntityType);
-
-            ODataFeedAnnotation feedAnnotation = feed.GetAnnotation<ODataFeedAnnotation>();
-            Contract.Assert(feedAnnotation != null, "Each feed we create should gave annotation on it.");
-
-            foreach (ODataEntry entry in feedAnnotation)
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(EntityType);
+            if (deserializer == null)
             {
-                ODataEntryAnnotation annotation = entry.GetAnnotation<ODataEntryAnnotation>();
-                Contract.Assert(annotation != null);
+                throw new SerializationException(
+                    Error.Format(SRResources.TypeCannotBeDeserialized, EntityType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+            }
 
+            foreach (ODataEntryWithNavigationLinks entry in feed.Entries)
+            {
                 yield return deserializer.ReadInline(entry, readContext);
             }
         }

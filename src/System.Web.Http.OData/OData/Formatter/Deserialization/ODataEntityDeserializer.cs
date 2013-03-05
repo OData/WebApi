@@ -3,7 +3,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
@@ -13,16 +12,28 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class ODataEntityDeserializer : ODataEntryDeserializer<ODataEntry>
+    /// <summary>
+    /// Represents an <see cref="ODataDeserializer"/> for reading OData entry payloads.
+    /// </summary>
+    public class ODataEntityDeserializer : ODataEntryDeserializer
     {
-        public ODataEntityDeserializer(IEdmEntityTypeReference edmEntityType, ODataDeserializerProvider deserializerProvider)
-            : base(edmEntityType, ODataPayloadKind.Entry, deserializerProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataEntityDeserializer"/> class.
+        /// </summary>
+        /// <param name="edmType">The entity type that this serializer handles.</param>
+        /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
+        public ODataEntityDeserializer(IEdmEntityTypeReference edmType, ODataDeserializerProvider deserializerProvider)
+            : base(edmType, ODataPayloadKind.Entry, deserializerProvider)
         {
-            EdmEntityType = edmEntityType;
+            EntityType = edmType;
         }
 
-        public IEdmEntityTypeReference EdmEntityType { get; private set; }
+        /// <summary>
+        /// Gets the entity type that this serializer handles.
+        /// </summary>
+        public IEdmEntityTypeReference EntityType { get; private set; }
 
+        /// <inheritdoc />
         public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
@@ -35,6 +46,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
+            if (readContext.Path == null)
+            {
+                throw Error.Argument("readContext", SRResources.ODataPathMissing);
+            }
+
             IEdmEntitySet entitySet = GetEntitySet(readContext.Path);
 
             if (entitySet == null)
@@ -42,188 +58,113 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw new SerializationException(SRResources.EntitySetMissingDuringDeserialization);
             }
 
-            ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet,
-                EdmEntityType.EntityDefinition());
-            ODataEntry topLevelEntry = ReadEntryOrFeed(odataReader) as ODataEntry;
+            ODataReader odataReader = messageReader.CreateODataEntryReader(entitySet, EntityType.EntityDefinition());
+            ODataEntryWithNavigationLinks topLevelEntry = ReadEntryOrFeed(odataReader) as ODataEntryWithNavigationLinks;
             Contract.Assert(topLevelEntry != null);
 
             return ReadInline(topLevelEntry, readContext);
         }
 
-        public override object ReadInline(ODataEntry entry, ODataDeserializerContext readContext)
+        /// <inheritdoc />
+        public sealed override object ReadInline(object item, ODataDeserializerContext readContext)
         {
-            if (entry == null)
+            if (item == null)
             {
-                throw Error.Argument("entry", SRResources.ItemMustBeOfType, typeof(ODataEntry).Name);
+                throw Error.ArgumentNull("item");
+            }
+
+            ODataEntryWithNavigationLinks entryWrapper = item as ODataEntryWithNavigationLinks;
+            if (entryWrapper == null)
+            {
+                throw Error.Argument("item", SRResources.ArgumentMustBeOfType, typeof(ODataEntry).Name);
             }
 
             // Recursion guard to avoid stack overflows
             EnsureStackHelper.EnsureStack();
 
-            if (EdmEntityType.FullName() != entry.TypeName)
+            return ReadEntry(entryWrapper, readContext);
+        }
+
+        /// <summary>
+        /// Deserializes the given <paramref name="entryWrapper"/> under the given <paramref name="readContext"/>.
+        /// </summary>
+        /// <param name="entryWrapper">The OData entry to deserialize.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        /// <returns>The deserialized entity.</returns>
+        public virtual object ReadEntry(ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        {
+            if (entryWrapper == null)
             {
-                // received a derived type in a base type deserializer.
-                // delegate it to the appropriate derived type deserializer.
+                throw Error.ArgumentNull("entryWrapper");
+            }
+
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
+            if (!String.IsNullOrEmpty(entryWrapper.Entry.TypeName) && EntityType.FullName() != entryWrapper.Entry.TypeName)
+            {
+                // received a derived type in a base type deserializer. delegate it to the appropriate derived type deserializer.
                 IEdmModel model = readContext.Model;
-                IEdmEntityType entityType = model.FindType(entry.TypeName) as IEdmEntityType;
-                Contract.Assert(entityType != null, "edmlib should have already validated that it knows the edm type and is the same as or derives from EdmEntityType");
+
+                if (model == null)
+                {
+                    throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
+                }
+
+                IEdmEntityType entityType = model.FindType(entryWrapper.Entry.TypeName) as IEdmEntityType;
+                if (entityType == null)
+                {
+                    throw new ODataException(Error.Format(SRResources.EntityTypeNotInModel, entryWrapper.Entry.TypeName));
+                }
 
                 if (entityType.IsAbstract)
                 {
-                    string message = Error.Format(SRResources.CannotInstantiateAbstractEntityType, entry.TypeName);
-                    throw new SerializationException(message);
+                    string message = Error.Format(SRResources.CannotInstantiateAbstractEntityType, entryWrapper.Entry.TypeName);
+                    throw new ODataException(message);
                 }
 
-                ODataEntityDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(new EdmEntityTypeReference(entityType, isNullable: false)) as ODataEntityDeserializer;
-                return deserializer.ReadInline(entry, readContext);
+                ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(new EdmEntityTypeReference(entityType, isNullable: false));
+                if (deserializer == null)
+                {
+                    throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, entityType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                }
+
+                return deserializer.ReadInline(entryWrapper, readContext);
             }
             else
             {
-                ODataEntryAnnotation entryAnnotation = entry.GetAnnotation<ODataEntryAnnotation>();
-                Contract.Assert(entryAnnotation != null);
-
-                CreateEntityResource(entryAnnotation, EdmEntityType, readContext);
-
-                ApplyEntityProperties(entry, entryAnnotation, readContext);
-
-                return entryAnnotation.EntityResource;
+                object resource = CreateEntityResource(readContext);
+                ApplyEntityProperties(resource, entryWrapper, readContext);
+                return resource;
             }
         }
 
-        internal static ODataItem ReadEntryOrFeed(ODataReader odataReader)
+        /// <summary>
+        /// Creates a new instance of the backing CLR object for <see cref="ODataEntityDeserializer.EntityType"/>.
+        /// </summary>
+        /// <param name="readContext">The deserializer context.</param>
+        /// <returns>The created CLR object.</returns>
+        public virtual object CreateEntityResource(ODataDeserializerContext readContext)
         {
-            ODataItem topLevelItem = null;
-            Stack<ODataItem> itemsStack = new Stack<ODataItem>();
-
-            while (odataReader.Read())
+            if (readContext == null)
             {
-                switch (odataReader.State)
-                {
-                    case ODataReaderState.EntryStart:
-                        ODataEntry entry = (ODataEntry)odataReader.Item;
-                        ODataEntryAnnotation entryAnnotation = null;
-                        if (entry != null)
-                        {
-                            entryAnnotation = new ODataEntryAnnotation();
-                            entry.SetAnnotation(entryAnnotation);
-                        }
-
-                        if (itemsStack.Count == 0)
-                        {
-                            Contract.Assert(entry != null, "The top-level entry can never be null.");
-                            topLevelItem = entry;
-                        }
-                        else
-                        {
-                            ODataItem parentItem = itemsStack.Peek();
-                            ODataFeed parentFeed = parentItem as ODataFeed;
-                            if (parentFeed != null)
-                            {
-                                ODataFeedAnnotation parentFeedAnnotation = parentFeed.GetAnnotation<ODataFeedAnnotation>();
-                                Contract.Assert(parentFeedAnnotation != null, "Every feed we added to the stack should have the feed annotation on it.");
-                                parentFeedAnnotation.Add(entry);
-                            }
-                            else
-                            {
-                                ODataNavigationLink parentNavigationLink = (ODataNavigationLink)parentItem;
-                                ODataNavigationLinkAnnotation parentNavigationLinkAnnotation = parentNavigationLink.GetAnnotation<ODataNavigationLinkAnnotation>();
-                                Contract.Assert(parentNavigationLinkAnnotation != null, "Every navigation link we added to the stack should have the navigation link annotation on it.");
-
-                                Contract.Assert(parentNavigationLink.IsCollection == false, "Only singleton navigation properties can contain entry as their child.");
-                                Contract.Assert(parentNavigationLinkAnnotation.Count == 0, "Each navigation property can contain only one entry as its direct child.");
-                                parentNavigationLinkAnnotation.Add(entry);
-                            }
-                        }
-                        itemsStack.Push(entry);
-                        break;
-
-                    case ODataReaderState.EntryEnd:
-                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek() == odataReader.Item, "The entry which is ending should be on the top of the items stack.");
-                        itemsStack.Pop();
-                        break;
-
-                    case ODataReaderState.NavigationLinkStart:
-                        ODataNavigationLink navigationLink = (ODataNavigationLink)odataReader.Item;
-                        Contract.Assert(navigationLink != null, "Navigation link should never be null.");
-
-                        navigationLink.SetAnnotation(new ODataNavigationLinkAnnotation());
-                        Contract.Assert(itemsStack.Count > 0, "Navigation link can't appear as top-level item.");
-                        {
-                            ODataEntry parentEntry = (ODataEntry)itemsStack.Peek();
-                            ODataEntryAnnotation parentEntryAnnotation = parentEntry.GetAnnotation<ODataEntryAnnotation>();
-                            Contract.Assert(parentEntryAnnotation != null, "Every entry we added to the stack should have the entry annotation on it.");
-                            parentEntryAnnotation.Add(navigationLink);
-                        }
-
-                        itemsStack.Push(navigationLink);
-                        break;
-
-                    case ODataReaderState.NavigationLinkEnd:
-                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek() == odataReader.Item, "The navigation link which is ending should be on the top of the items stack.");
-                        itemsStack.Pop();
-                        break;
-
-                    case ODataReaderState.FeedStart:
-                        ODataFeed feed = (ODataFeed)odataReader.Item;
-                        Contract.Assert(feed != null, "Feed should never be null.");
-
-                        feed.SetAnnotation(new ODataFeedAnnotation());
-                        if (itemsStack.Count > 0)
-                        {
-                            ODataNavigationLink parentNavigationLink = (ODataNavigationLink)itemsStack.Peek();
-                            Contract.Assert(parentNavigationLink != null, "this has to be an inner feed. inner feeds always have a navigation link.");
-                            ODataNavigationLinkAnnotation parentNavigationLinkAnnotation = parentNavigationLink.GetAnnotation<ODataNavigationLinkAnnotation>();
-                            Contract.Assert(parentNavigationLinkAnnotation != null, "Every navigation link we added to the stack should have the navigation link annotation on it.");
-
-                            Contract.Assert(parentNavigationLink.IsCollection == true, "Only collection navigation properties can contain feed as their child.");
-                            parentNavigationLinkAnnotation.Add(feed);
-                        }
-                        else
-                        {
-                            topLevelItem = feed;
-                        }
-
-                        itemsStack.Push(feed);
-                        break;
-
-                    case ODataReaderState.FeedEnd:
-                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek() == odataReader.Item, "The feed which is ending should be on the top of the items stack.");
-                        itemsStack.Pop();
-                        break;
-
-                    case ODataReaderState.EntityReferenceLink:
-                        ODataEntityReferenceLink entityReferenceLink = (ODataEntityReferenceLink)odataReader.Item;
-                        Contract.Assert(entityReferenceLink != null, "Entity reference link should never be null.");
-
-                        Contract.Assert(itemsStack.Count > 0, "Entity reference link should never be reported as top-level item.");
-                        {
-                            ODataNavigationLink parentNavigationLink = (ODataNavigationLink)itemsStack.Peek();
-                            ODataNavigationLinkAnnotation parentNavigationLinkAnnotation = parentNavigationLink.GetAnnotation<ODataNavigationLinkAnnotation>();
-                            Contract.Assert(parentNavigationLinkAnnotation != null, "Every navigation link we added to the stack should have the navigation link annotation on it.");
-
-                            parentNavigationLinkAnnotation.Add(entityReferenceLink);
-                        }
-
-                        break;
-
-                    default:
-                        Contract.Assert(false, "We should never get here, it means the ODataReader reported a wrong state.");
-                        break;
-                }
+                throw Error.ArgumentNull("readContext");
             }
 
-            Contract.Assert(odataReader.State == ODataReaderState.Completed, "We should have consumed all of the input by now.");
-            Contract.Assert(topLevelItem != null, "A top level entry or feed should have been read by now.");
-            return topLevelItem;
-        }
-
-        private static void CreateEntityResource(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-        {
             IEdmModel model = readContext.Model;
-            Type clrType = EdmLibHelpers.GetClrType(entityType, model);
+
+            if (model == null)
+            {
+                throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
+            }
+
+            Type clrType = EdmLibHelpers.GetClrType(EntityType, model);
             if (clrType == null)
             {
-                throw Error.Argument("entityType", SRResources.MappingDoesNotContainEntityType, entityType.FullName());
+                throw new ODataException(
+                    Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
             }
 
             object resource;
@@ -237,48 +178,63 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 resource = Activator.CreateInstance(readContext.PatchEntityType, clrType);
             }
 
-            entryAnnotation.EntityResource = resource;
-            entryAnnotation.EntityType = entityType;
+            return resource;
         }
 
-        private void ApplyEntityProperties(ODataEntry entry, ODataEntryAnnotation entryAnnotation, ODataDeserializerContext readContext)
+        /// <summary>
+        /// Deserializes the navigation properties from <paramref name="entryWrapper"/> into <paramref name="entityResource"/>.
+        /// </summary>
+        /// <param name="entityResource">The object into which the navigation properties should be read.</param>
+        /// <param name="entryWrapper">The entry object containing the navigation properties.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        public virtual void ApplyNavigationProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
         {
-            object entityResource = entryAnnotation.EntityResource;
-            IEdmEntityTypeReference entityType = entryAnnotation.EntityType;
-
-            ApplyValueProperties(entry, entityType, entityResource, readContext);
-            ApplyNavigationProperties(entryAnnotation, entityType, entityResource, readContext);
-        }
-
-        private void ApplyNavigationProperties(ODataEntryAnnotation entryAnnotation, IEdmEntityTypeReference entityType, object entityResource, ODataDeserializerContext readContext)
-        {
-            Contract.Assert(entityType.TypeKind() == EdmTypeKind.Entity, "Only entity types can be specified for entities.");
-
-            foreach (ODataNavigationLink navigationLink in entryAnnotation)
+            if (entryWrapper == null)
             {
-                IEdmNavigationProperty navigationProperty = entityType.FindProperty(navigationLink.Name) as IEdmNavigationProperty;
-                Contract.Assert(navigationProperty != null, "ODataLib reader should have already validated that all navigation properties are declared and none is open.");
+                throw Error.ArgumentNull("entryWrapper");
+            }
 
-                ApplyNavigationProperty(navigationLink, navigationProperty, entityResource, readContext);
+            foreach (ODataNavigationLinkWithItems navigationLink in entryWrapper.NavigationLinks)
+            {
+                ApplyNavigationProperty(entityResource, navigationLink, readContext);
             }
         }
 
-        private void ApplyNavigationProperty(ODataNavigationLink navigationLink, IEdmNavigationProperty navigationProperty, object entityResource, ODataDeserializerContext readContext)
+        /// <summary>
+        /// Deserializes the navigation property from <paramref name="navigationLinkWrapper"/> into <paramref name="entityResource"/>.
+        /// </summary>
+        /// <param name="entityResource">The object into which the navigation property should be read.</param>
+        /// <param name="navigationLinkWrapper">The navigation link.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        public virtual void ApplyNavigationProperty(object entityResource, ODataNavigationLinkWithItems navigationLinkWrapper, ODataDeserializerContext readContext)
         {
-            ODataNavigationLinkAnnotation navigationLinkAnnotation = navigationLink.GetAnnotation<ODataNavigationLinkAnnotation>();
-            Contract.Assert(navigationLinkAnnotation != null, "navigationLinkAnnotation != null");
-            Contract.Assert(navigationLink.IsCollection.HasValue, "We should know the cardinality of the navigation link by now.");
-
-            foreach (ODataItem childItem in navigationLinkAnnotation)
+            if (navigationLinkWrapper == null)
             {
-                ODataEntityReferenceLink entityReferenceLink = childItem as ODataEntityReferenceLink;
+                throw Error.ArgumentNull("navigationLinkWrapper");
+            }
+
+            if (entityResource == null)
+            {
+                throw Error.ArgumentNull("entityResource");
+            }
+
+            IEdmNavigationProperty navigationProperty = EntityType.FindProperty(navigationLinkWrapper.NavigationLink.Name) as IEdmNavigationProperty;
+            if (navigationProperty == null)
+            {
+                throw new ODataException(
+                    Error.Format(SRResources.NavigationPropertyNotfound, navigationLinkWrapper.NavigationLink.Name, EntityType.FullName()));
+            }
+
+            foreach (ODataItemBase childItem in navigationLinkWrapper.NestedItems)
+            {
+                ODataEntityReferenceLinkBase entityReferenceLink = childItem as ODataEntityReferenceLinkBase;
                 if (entityReferenceLink != null)
                 {
                     // ignore links.
                     continue;
                 }
 
-                ODataFeed feed = childItem as ODataFeed;
+                ODataFeedWithEntries feed = childItem as ODataFeedWithEntries;
                 if (feed != null)
                 {
                     ApplyFeedInNavigationProperty(navigationProperty, entityResource, feed, readContext);
@@ -286,7 +242,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 }
 
                 // It must be entry by now.
-                ODataEntry entry = (ODataEntry)childItem;
+                ODataEntryWithNavigationLinks entry = (ODataEntryWithNavigationLinks)childItem;
                 if (entry != null)
                 {
                     ApplyEntryInNavigationProperty(navigationProperty, entityResource, entry, readContext);
@@ -294,55 +250,221 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
         }
 
-        private void ApplyEntryInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataEntry entry, ODataDeserializerContext readContext)
+        /// <summary>
+        /// Deserializes the structural properties from <paramref name="entryWrapper"/> into <paramref name="entityResource"/>.
+        /// </summary>
+        /// <param name="entityResource">The object into which the structural properties should be read.</param>
+        /// <param name="entryWrapper">The entry object containing the structural properties.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        public virtual void ApplyStructuralProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        {
+            if (entryWrapper == null)
+            {
+                throw Error.ArgumentNull("entryWrapper");
+            }
+
+            foreach (ODataProperty property in entryWrapper.Entry.Properties)
+            {
+                ApplyStructuralProperty(entityResource, property, readContext);
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the given <paramref name="structuralProperty"/> into <paramref name="entityResource"/>.
+        /// </summary>
+        /// <param name="entityResource">The object into which the structural property should be read.</param>
+        /// <param name="structuralProperty">The entry object containing the structural properties.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        public virtual void ApplyStructuralProperty(object entityResource, ODataProperty structuralProperty, ODataDeserializerContext readContext)
+        {
+            if (entityResource == null)
+            {
+                throw Error.ArgumentNull("entityResource");
+            }
+
+            if (structuralProperty == null)
+            {
+                throw Error.ArgumentNull("structuralProperty");
+            }
+
+            DeserializationHelpers.ApplyProperty(structuralProperty, EntityType, entityResource, DeserializerProvider, readContext);
+        }
+
+        /// <summary>
+        /// Reads an ODataFeed or an ODataItem from the reader.
+        /// </summary>
+        /// <param name="reader">The odata reader to read from.</param>
+        /// <returns>The read feed or entry.</returns>
+        public static ODataItemBase ReadEntryOrFeed(ODataReader reader)
+        {
+            if (reader == null)
+            {
+                throw Error.ArgumentNull("odataReader");
+            }
+
+            ODataItemBase topLevelItem = null;
+            Stack<ODataItemBase> itemsStack = new Stack<ODataItemBase>();
+
+            while (reader.Read())
+            {
+                switch (reader.State)
+                {
+                    case ODataReaderState.EntryStart:
+                        ODataEntry entry = (ODataEntry)reader.Item;
+                        ODataEntryWithNavigationLinks entryWrapper = null;
+                        if (entry != null)
+                        {
+                            entryWrapper = new ODataEntryWithNavigationLinks(entry);
+                        }
+
+                        if (itemsStack.Count == 0)
+                        {
+                            Contract.Assert(entry != null, "The top-level entry can never be null.");
+                            topLevelItem = entryWrapper;
+                        }
+                        else
+                        {
+                            ODataItemBase parentItem = itemsStack.Peek();
+                            ODataFeedWithEntries parentFeed = parentItem as ODataFeedWithEntries;
+                            if (parentFeed != null)
+                            {
+                                parentFeed.Entries.Add(entryWrapper);
+                            }
+                            else
+                            {
+                                ODataNavigationLinkWithItems parentNavigationLink = (ODataNavigationLinkWithItems)parentItem;
+                                Contract.Assert(parentNavigationLink.NavigationLink.IsCollection == false, "Only singleton navigation properties can contain entry as their child.");
+                                Contract.Assert(parentNavigationLink.NestedItems.Count == 0, "Each navigation property can contain only one entry as its direct child.");
+                                parentNavigationLink.NestedItems.Add(entryWrapper);
+                            }
+                        }
+                        itemsStack.Push(entryWrapper);
+                        break;
+
+                    case ODataReaderState.EntryEnd:
+                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek().Item == reader.Item, "The entry which is ending should be on the top of the items stack.");
+                        itemsStack.Pop();
+                        break;
+
+                    case ODataReaderState.NavigationLinkStart:
+                        ODataNavigationLink navigationLink = (ODataNavigationLink)reader.Item;
+                        Contract.Assert(navigationLink != null, "Navigation link should never be null.");
+
+                        ODataNavigationLinkWithItems navigationLinkWrapper = new ODataNavigationLinkWithItems(navigationLink);
+                        Contract.Assert(itemsStack.Count > 0, "Navigation link can't appear as top-level item.");
+                        {
+                            ODataEntryWithNavigationLinks parentEntry = (ODataEntryWithNavigationLinks)itemsStack.Peek();
+                            parentEntry.NavigationLinks.Add(navigationLinkWrapper);
+                        }
+
+                        itemsStack.Push(navigationLinkWrapper);
+                        break;
+
+                    case ODataReaderState.NavigationLinkEnd:
+                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek().Item == reader.Item, "The navigation link which is ending should be on the top of the items stack.");
+                        itemsStack.Pop();
+                        break;
+
+                    case ODataReaderState.FeedStart:
+                        ODataFeed feed = (ODataFeed)reader.Item;
+                        Contract.Assert(feed != null, "Feed should never be null.");
+
+                        ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(feed);
+                        if (itemsStack.Count > 0)
+                        {
+                            ODataNavigationLinkWithItems parentNavigationLink = (ODataNavigationLinkWithItems)itemsStack.Peek();
+                            Contract.Assert(parentNavigationLink != null, "this has to be an inner feed. inner feeds always have a navigation link.");
+                            Contract.Assert(parentNavigationLink.NavigationLink.IsCollection == true, "Only collection navigation properties can contain feed as their child.");
+                            parentNavigationLink.NestedItems.Add(feedWrapper);
+                        }
+                        else
+                        {
+                            topLevelItem = feedWrapper;
+                        }
+
+                        itemsStack.Push(feedWrapper);
+                        break;
+
+                    case ODataReaderState.FeedEnd:
+                        Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek().Item == reader.Item, "The feed which is ending should be on the top of the items stack.");
+                        itemsStack.Pop();
+                        break;
+
+                    case ODataReaderState.EntityReferenceLink:
+                        ODataEntityReferenceLink entityReferenceLink = (ODataEntityReferenceLink)reader.Item;
+                        Contract.Assert(entityReferenceLink != null, "Entity reference link should never be null.");
+                        ODataEntityReferenceLinkBase entityReferenceLinkWrapper = new ODataEntityReferenceLinkBase(entityReferenceLink);
+
+                        Contract.Assert(itemsStack.Count > 0, "Entity reference link should never be reported as top-level item.");
+                        {
+                            ODataNavigationLinkWithItems parentNavigationLink = (ODataNavigationLinkWithItems)itemsStack.Peek();
+                            parentNavigationLink.NestedItems.Add(entityReferenceLinkWrapper);
+                        }
+
+                        break;
+
+                    default:
+                        Contract.Assert(false, "We should never get here, it means the ODataReader reported a wrong state.");
+                        break;
+                }
+            }
+
+            Contract.Assert(reader.State == ODataReaderState.Completed, "We should have consumed all of the input by now.");
+            Contract.Assert(topLevelItem != null, "A top level entry or feed should have been read by now.");
+            return topLevelItem;
+        }
+
+        private void ApplyEntityProperties(object entityResource, ODataEntryWithNavigationLinks entryWrapper, ODataDeserializerContext readContext)
+        {
+            ApplyStructuralProperties(entityResource, entryWrapper, readContext);
+            ApplyNavigationProperties(entityResource, entryWrapper, readContext);
+        }
+
+        private void ApplyEntryInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataEntryWithNavigationLinks entry, ODataDeserializerContext readContext)
         {
             Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
             Contract.Assert(entityResource != null, "entityResource != null");
 
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
-            object value = deserializer.ReadInline(entry, readContext);
-
             if (readContext.IsPatchMode)
             {
                 string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
-                throw new SerializationException(message);
+                throw new ODataException(message);
             }
+
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
+            if (deserializer == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, navigationProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
+            }
+            object value = deserializer.ReadInline(entry, readContext);
 
             DeserializationHelpers.SetProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
         }
 
-        private void ApplyFeedInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataFeed feed, ODataDeserializerContext readContext)
+        private void ApplyFeedInNavigationProperty(IEdmNavigationProperty navigationProperty, object entityResource, ODataFeedWithEntries feed, ODataDeserializerContext readContext)
         {
-            ODataFeedAnnotation feedAnnotation = feed.GetAnnotation<ODataFeedAnnotation>();
-            Contract.Assert(feedAnnotation != null, "Each feed we create should gave annotation on it.");
-
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
-            object value = deserializer.ReadInline(feed, readContext);
+            Contract.Assert(navigationProperty != null && navigationProperty.PropertyKind == EdmPropertyKind.Navigation, "navigationProperty != null && navigationProperty.TypeKind == ResourceTypeKind.EntityType");
+            Contract.Assert(entityResource != null, "entityResource != null");
 
             if (readContext.IsPatchMode)
             {
                 string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name, navigationProperty.DeclaringEntityType().FullName());
-                throw new SerializationException(message);
+                throw new ODataException(message);
             }
+
+            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
+            if (deserializer == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, navigationProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
+            }
+            object value = deserializer.ReadInline(feed, readContext);
 
             DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty.Name, isDelta: false, value: value);
         }
 
-        private void ApplyValueProperties(ODataEntry entry, IEdmStructuredTypeReference entityType, object entityResource, ODataDeserializerContext readContext)
-        {
-            foreach (ODataProperty property in entry.Properties)
-            {
-                DeserializationHelpers.ApplyProperty(property, entityType, entityResource, DeserializerProvider, readContext);
-            }
-        }
-
         private static IEdmEntitySet GetEntitySet(ODataPath path)
         {
-            if (path == null)
-            {
-                throw new SerializationException(SRResources.ODataPathMissing);
-            }
-
+            Contract.Assert(path != null);
             return path.EntitySet;
         }
     }

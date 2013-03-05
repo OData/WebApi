@@ -520,6 +520,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot find the entity type &apos;{0}&apos; in the model..
+        /// </summary>
+        internal static string EntityTypeNotInModel {
+            get {
+                return ResourceManager.GetString("EntityTypeNotInModel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError..
         /// </summary>
         internal static string ErrorTypeMustBeODataErrorOrHttpError {
@@ -664,15 +673,6 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The item must be of type &apos;{0}&apos;..
-        /// </summary>
-        internal static string ItemMustBeOfType {
-            get {
-                return ResourceManager.GetString("ItemMustBeOfType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The element type of an EDM collection type cannot be null..
         /// </summary>
         internal static string ItemTypeOfCollectionNull {
@@ -790,6 +790,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The EDM model is missing on the read context. The model is required on the read context to deserialize the payload..
+        /// </summary>
+        internal static string ModelMissingFromReadContext {
+            get {
+                return ResourceManager.GetString("ModelMissingFromReadContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to More than one Procedure called &apos;{0}&apos; was found. Try using the other RemoveProcedure override..
         /// </summary>
         internal static string MoreThanOneProcedureFound {
@@ -885,6 +894,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string NavigationPropertyMissingDuringSerialization {
             get {
                 return ResourceManager.GetString("NavigationPropertyMissingDuringSerialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find navigation property &apos;{0}&apos; on the entity type &apos;{1}&apos;..
+        /// </summary>
+        internal static string NavigationPropertyNotfound {
+            get {
+                return ResourceManager.GetString("NavigationPropertyNotfound", resourceCulture);
             }
         }
         
@@ -1321,6 +1339,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be deserialized using the {1}..
+        /// </summary>
+        internal static string TypeCannotBeDeserialized {
+            get {
+                return ResourceManager.GetString("TypeCannotBeDeserialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; cannot be configured as a EntityType. It was previously configured as an ComplexType..
         /// </summary>
         internal static string TypeCannotBeEntityWasComplex {
@@ -1348,7 +1375,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a collection of type {1}. The ODataFeedSerializer can serialize only entity collections..
+        ///   Looks up a localized string similar to {0} is not a collection of type {1}. Only entity collections are supported..
         /// </summary>
         internal static string TypeMustBeEntityCollection {
             get {

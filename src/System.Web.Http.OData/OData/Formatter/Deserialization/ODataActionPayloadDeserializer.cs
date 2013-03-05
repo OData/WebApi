@@ -13,24 +13,41 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    internal class ODataActionPayloadDeserializer : ODataDeserializer
+    /// <summary>
+    /// Represents an <see cref="ODataDeserializer"/> for reading odata action parameters.
+    /// </summary>
+    public class ODataActionPayloadDeserializer : ODataDeserializer
     {
-        private ODataDeserializerProvider _provider;
-        private Type _payloadType;
-
-        public ODataActionPayloadDeserializer(Type payloadType, ODataDeserializerProvider provider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataActionPayloadDeserializer"/> class.
+        /// </summary>
+        /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
+        public ODataActionPayloadDeserializer(ODataDeserializerProvider deserializerProvider)
             : base(ODataPayloadKind.Parameter)
         {
-            Contract.Assert(payloadType != null);
-            Contract.Assert(provider != null);
-            _payloadType = payloadType;
-            _provider = provider;
+            if (deserializerProvider == null)
+            {
+                throw Error.ArgumentNull("deserializerProvider");
+            }
+
+            DeserializerProvider = deserializerProvider;
         }
 
+        /// <summary>
+        /// Gets the deserializer provider to use to read inner objects.
+        /// </summary>
+        public ODataDeserializerProvider DeserializerProvider { get; private set; }
+
+        /// <inheritdoc />
         public override object Read(ODataMessageReader messageReader, ODataDeserializerContext readContext)
         {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
             // Create the correct resource type;
-            ODataActionParameters payload = CreateNewPayload();
+            ODataActionParameters payload = new ODataActionParameters();
 
             IEdmFunctionImport action = GetFunctionImport(readContext);
             ODataParameterReader reader = messageReader.CreateODataParameterReader(action);
@@ -69,18 +86,6 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return payload;
         }
 
-        private ODataActionParameters CreateNewPayload()
-        {
-            if (_payloadType == typeof(ODataActionParameters))
-            {
-                return new ODataActionParameters();
-            }
-            else
-            {
-                return Activator.CreateInstance(_payloadType, false) as ODataActionParameters;
-            }
-        }
-
         private object Convert(object value, IEdmTypeReference parameterType, ODataDeserializerContext readContext)
         {
             if (parameterType.IsPrimitive())
@@ -89,7 +94,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             else
             {
-                ODataEntryDeserializer deserializer = _provider.GetEdmTypeDeserializer(parameterType);
+                ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameterType);
                 return deserializer.ReadInline(value, readContext);
             }
         }
@@ -116,14 +121,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             return list;
         }
 
-        internal static IEdmFunctionImport GetFunctionImport(ODataDeserializerContext context)
+        internal static IEdmFunctionImport GetFunctionImport(ODataDeserializerContext readContext)
         {
-            if (context == null)
+            if (readContext == null)
             {
-                throw Error.ArgumentNull("context");
+                throw Error.ArgumentNull("readContext");
             }
 
-            ODataPath path = context.Path;
+            ODataPath path = readContext.Path;
             if (path == null)
             {
                 throw new SerializationException(SRResources.ODataPathMissing);

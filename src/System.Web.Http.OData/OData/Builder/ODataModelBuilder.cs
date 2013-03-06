@@ -15,6 +15,9 @@ namespace System.Web.Http.OData.Builder
     // TODO: Feature 443884: add support for starting from an original model
     public class ODataModelBuilder
     {
+        private static readonly Version _defaultDataServiceVersion = new Version(3, 0);
+        private static readonly Version _defaultMaxDataServiceVersionn = new Version(3, 0);
+
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
         private Dictionary<string, EntitySetConfiguration> _entitySets = new Dictionary<string, EntitySetConfiguration>();
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
@@ -30,8 +33,8 @@ namespace System.Web.Http.OData.Builder
         {
             Namespace = "Default";
             ContainerName = "Container";
-            DataServiceVersion = new Version(3, 0);
-            MaxDataServiceVersion = new Version(3, 0);
+            DataServiceVersion = _defaultDataServiceVersion;
+            MaxDataServiceVersion = _defaultMaxDataServiceVersionn;
         }
 
         /// <summary>
@@ -53,7 +56,6 @@ namespace System.Web.Http.OData.Builder
             {
                 return _dataServiceVersion;
             }
-
             set
             {
                 if (value == null)
@@ -73,7 +75,6 @@ namespace System.Web.Http.OData.Builder
             {
                 return _maxDataServiceVersion;
             }
-
             set
             {
                 if (value == null)

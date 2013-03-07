@@ -1,14 +1,19 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Formatter.Deserialization;
+using System.Web.Http.OData.Formatter.Serialization;
 using System.Web.Http.Tracing;
 using System.Xml.Linq;
 using Microsoft.Data.Edm;
+using Microsoft.Data.OData;
+using Microsoft.Data.OData.Atom;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -112,7 +117,7 @@ namespace System.Web.Http.OData.Formatter
             var config = new HttpConfiguration();
             config.Routes.MapODataRoute("OData1", "v1", model1);
             config.Routes.MapODataRoute("OData2", "v2", model2);
-            
+
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
             {
@@ -362,6 +367,32 @@ namespace System.Web.Http.OData.Formatter
             }
         }
 
+        [Fact]
+        public void CustomSerializerWorks()
+        {
+            // Arrange
+            using (HttpConfiguration configuration = CreateConfiguration())
+            {
+                configuration.Formatters.InsertRange(
+                    0,
+                    ODataMediaTypeFormatters.Create(new CustomSerializerProvider(), new DefaultODataDeserializerProvider()));
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+                using (HttpRequestMessage request = CreateRequest("People", MediaTypeWithQualityHeaderValue.Parse("application/atom+xml")))
+                // Act
+                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    XElement xml = XElement.Load(response.Content.ReadAsStreamAsync().Result);
+
+                    Assert.Equal("My amazing feed", xml.Elements().Single(e => e.Name.LocalName == "title").Value);
+                }
+            }
+        }
+
         private static void AddDataServiceVersionHeaders(HttpRequestMessage request)
         {
             request.Headers.Add("DataServiceVersion", "2.0");
@@ -487,6 +518,34 @@ namespace System.Web.Http.OData.Formatter
             HttpRequestMessage request = CreateRequest(pathAndQuery, accept);
             AddDataServiceVersionHeaders(request);
             return request;
+        }
+
+        private class CustomFeedSerializer : ODataFeedSerializer
+        {
+            public CustomFeedSerializer(IEdmCollectionTypeReference edmType, ODataSerializerProvider serializerProvider)
+                : base(edmType, serializerProvider)
+            {
+            }
+
+            public override ODataFeed CreateODataFeed(IEnumerable feedInstance, ODataSerializerContext writeContext)
+            {
+                ODataFeed feed = base.CreateODataFeed(feedInstance, writeContext);
+                feed.Atom().Title = new AtomTextConstruct { Kind = AtomTextConstructKind.Text, Text = "My amazing feed" };
+                return feed;
+            }
+        }
+
+        private class CustomSerializerProvider : DefaultODataSerializerProvider
+        {
+            public override ODataEntrySerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
+            {
+                if (edmType.IsCollection() && edmType.AsCollection().ElementType().IsEntity())
+                {
+                    return new CustomFeedSerializer(edmType.AsCollection(), this);
+                }
+
+                return base.CreateEdmTypeSerializer(edmType);
+            }
         }
     }
 

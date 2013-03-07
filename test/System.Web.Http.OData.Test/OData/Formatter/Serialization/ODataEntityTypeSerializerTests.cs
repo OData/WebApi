@@ -98,6 +98,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteObject_Calls_WriteObjectInline()
+        {
+            // Arrange
+            object graph = new object();
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EntityType, new DefaultODataSerializerProvider());
+            serializer.Setup(s => s.WriteObjectInline(graph, It.IsAny<ODataWriter>(), _writeContext)).Verifiable();
+            serializer.CallBase = true;
+
+            // Act
+            serializer.Object.WriteObject(graph, ODataTestUtil.GetMockODataMessageWriter(), _writeContext);
+
+            // Assert
+            serializer.Verify();
+        }
+
+        [Fact]
         public void WriteObjectInline_ThrowsArgumentNull_Writer()
         {
             Assert.ThrowsArgumentNull(
@@ -259,6 +275,48 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateNavigationLinks_ThrowsArgumentNull_WriteContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateNavigationLinks(entityInstanceContext: null, writeContext: null).GetEnumerator().MoveNext(),
+                "writeContext");
+        }
+
+        [Fact]
+        public void CreateNavigationLinks_Returns_NavigationLinkForEachNaviagationProperty()
+        {
+            // Arrange
+            IEdmNavigationProperty property1 = CreateFakeNavigationProperty("Property1", _serializer.EntityType);
+            IEdmNavigationProperty property2 = CreateFakeNavigationProperty("Property2", _serializer.EntityType);
+            Mock<IEdmEntityType> entityType = new Mock<IEdmEntityType>();
+            entityType.Setup(e => e.DeclaredProperties).Returns(new[] { property1, property2 });
+
+            var serializer = new ODataEntityTypeSerializer(new EdmEntityTypeReference(entityType.Object, isNullable: false), new DefaultODataSerializerProvider());
+
+            MockEntitySetLinkBuilderAnnotation linkBuilder = new MockEntitySetLinkBuilderAnnotation
+            {
+                NavigationLinkBuilder = (ctxt, property, metadataLevel) => new Uri(property.Name, UriKind.Relative)
+            };
+            _model.SetEntitySetLinkBuilderAnnotation(_customerSet, linkBuilder);
+
+            // Act
+            IEnumerable<ODataNavigationLink> links = serializer.CreateNavigationLinks(new EntityInstanceContext(), _writeContext);
+
+            // Assert
+            Assert.Equal(new[] { "Property1", "Property2" }, links.Select(l => l.Name));
+            Assert.Equal(new[] { "Property1", "Property2" }, links.Select(l => l.Url.ToString()));
+            Assert.Equal(new bool?[] { false, false }, links.Select(l => l.IsCollection));
+        }
+
+        [Fact]
+        public void CreateStructuralPropertyBag_ThrowsArgumentNull_EntityInstanceContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateStructuralPropertyBag(entityInstanceContext: null, writeContext: null),
+                "entityInstanceContext");
+        }
+
+        [Fact]
         public void CreateStructuralPropertyBag_Calls_CreateStructuralProperty_ForAllStructuralProperties()
         {
             // Arrange
@@ -284,6 +342,72 @@ namespace System.Web.Http.OData.Formatter.Serialization
             serializer.Verify();
         }
 
+        [Fact]
+        public void CreateStructuralProperty_ThrowsArgumentNull_StructuralProperty()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateStructuralProperty(structuralProperty: null, entityInstance: 42, writeContext: null),
+                "structuralProperty");
+        }
+
+        [Fact]
+        public void CreateStructuralProperty_ThrowsArgumentNull_EntityInstance()
+        {
+            Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
+
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateStructuralProperty(property.Object, entityInstance: null, writeContext: null),
+                "entityInstance");
+        }
+
+        [Fact]
+        public void CreateStructuralProperty_ThrowsSerializationException_TypeCannotBeSerialized()
+        {
+            // Arrange
+            Mock<IEdmTypeReference> propertyType = new Mock<IEdmTypeReference>();
+            propertyType.Setup(t => t.Definition).Returns(new EdmEntityType("Namespace", "Name"));
+            Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
+            object entity = new object();
+            property.Setup(p => p.Type).Returns(propertyType.Object);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns<ODataEntrySerializer>(null);
+
+            var serializer = new ODataEntityTypeSerializer(_serializer.EntityType, serializerProvider.Object);
+
+            // Act & Assert
+            Assert.Throws<SerializationException>(
+                () => serializer.CreateStructuralProperty(property.Object, entity, new ODataSerializerContext()),
+                "'Namespace.Name' cannot be serialized using the ODataMediaTypeFormatter.");
+        }
+
+        [Fact]
+        public void CreateStructuralProperty_Calls_CreateCreateODataValueOnInnerSerializer()
+        {
+            // Arrange
+            Mock<IEdmTypeReference> propertyType = new Mock<IEdmTypeReference>();
+            propertyType.Setup(t => t.Definition).Returns(new EdmEntityType("Namespace", "Name"));
+            Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
+            property.Setup(p => p.Name).Returns("PropertyName");
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
+            object entity = new { PropertyName = 42 };
+            Mock<ODataEntrySerializer> innerSerializer = new Mock<ODataEntrySerializer>(propertyType.Object, ODataPayloadKind.Property);
+            ODataValue propertyValue = new Mock<ODataValue>().Object;
+
+            property.Setup(p => p.Type).Returns(propertyType.Object);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns(innerSerializer.Object);
+            innerSerializer.Setup(s => s.CreateODataValue(42, _writeContext)).Returns(propertyValue).Verifiable();
+
+            var serializer = new ODataEntityTypeSerializer(_serializer.EntityType, serializerProvider.Object);
+
+            // Act
+            ODataProperty createdProperty = serializer.CreateStructuralProperty(property.Object, entity, _writeContext);
+
+            // Assert
+            innerSerializer.Verify();
+            Assert.Equal("PropertyName", createdProperty.Name);
+            Assert.Equal(propertyValue, createdProperty.Value);
+        }
+
         private void VerifyEntityInstanceContext(EntityInstanceContext instanceContext, ODataSerializerContext writeContext)
         {
             Assert.Equal(writeContext.Model, instanceContext.EdmModel);
@@ -307,6 +431,71 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             // Assert
             Assert.Equal("Default.Customer", entry.TypeName);
+        }
+
+        [Fact]
+        public void CreateODataActions_ThrowsArgumentNull_EntityInstanceContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataActions(entityInstanceContext: null, writeContext: null),
+                "entityInstanceContext");
+        }
+
+        [Fact]
+        public void CreateODataActions_ThrowsArgumentNull_WriteContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataActions(new EntityInstanceContext(), writeContext: null),
+                "writeContext");
+        }
+
+        [Fact]
+        public void CreateODataActions_Calls_CreateODataActionForAllActionsOnEntityType()
+        {
+            // Arrange
+            IEdmFunctionImport[] actions = new[] { new Mock<IEdmFunctionImport>().Object, new Mock<IEdmFunctionImport>().Object };
+            ODataAction[] odataActions = new[] { new ODataAction(), new ODataAction() };
+            _model.SetAnnotationValue<BindableProcedureFinder>(_model, new FakeBindableProcedureFinder(actions));
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializer.EntityType, new DefaultODataSerializerProvider());
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext { EdmModel = _model, EntityType = _customerSet.ElementType };
+
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataAction(actions[0], entityInstanceContext, It.IsAny<ODataMetadataLevel>())).Returns(odataActions[0]).Verifiable();
+            serializer.Setup(s => s.CreateODataAction(actions[1], entityInstanceContext, It.IsAny<ODataMetadataLevel>())).Returns(odataActions[1]).Verifiable();
+
+            // Act
+            var result =
+                serializer.Object.CreateODataActions(entityInstanceContext, new ODataSerializerContext { MetadataLevel = ODataMetadataLevel.Default }).ToArray();
+
+            // Assert
+            serializer.Verify();
+            Assert.Equal(odataActions, result);
+        }
+
+        [Fact]
+        public void CreateODataAction_ThrowsArgumentNull_Action()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataAction(action: null, entityInstanceContext: null, metadataLevel: ODataMetadataLevel.Default),
+                "action");
+        }
+
+        [Fact]
+        public void CreateODataAction_ThrowsArgumentNull_EntityInstanceContext()
+        {
+            IEdmFunctionImport action = new Mock<IEdmFunctionImport>().Object;
+
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataAction(action, entityInstanceContext: null, metadataLevel: ODataMetadataLevel.Default),
+                "entityInstanceContext");
+        }
+
+        [Fact]
+        public void CreateODataAction_ReturnsNull_IfModelDoesntHaveActionLinkBuilder()
+        {
+            Mock<IEdmFunctionImport> action = new Mock<IEdmFunctionImport>();
+            Assert.Null(
+                _serializer.CreateODataAction(action.Object, new EntityInstanceContext { EdmModel = EdmCoreModel.Instance }, ODataMetadataLevel.Default));
         }
 
         [Fact]
@@ -822,6 +1011,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.Equal(expectedResult, actualResult);
         }
 
+        private static IEdmNavigationProperty CreateFakeNavigationProperty(string name, IEdmTypeReference type)
+        {
+            Mock<IEdmNavigationProperty> property = new Mock<IEdmNavigationProperty>();
+            property.Setup(p => p.Name).Returns(name);
+            property.Setup(p => p.Type).Returns(type);
+            return property.Object;
+        }
+
         private static void AssertEqual(ODataAction expected, ODataAction actual)
         {
             if (expected == null)
@@ -952,6 +1149,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
             public int ID { get; set; }
             public string Name { get; set; }
             public Customer Customer { get; set; }
+        }
+
+        private class FakeBindableProcedureFinder : BindableProcedureFinder
+        {
+            private IEdmFunctionImport[] _procedures;
+
+            public FakeBindableProcedureFinder(params IEdmFunctionImport[] procedures)
+                : base(EdmCoreModel.Instance)
+            {
+                _procedures = procedures;
+            }
+
+            public override IEnumerable<IEdmFunctionImport> FindProcedures(IEdmEntityType entityType)
+            {
+                return _procedures;
+            }
         }
 
         private class FakeAnnotationsManager : IEdmDirectValueAnnotationsManager

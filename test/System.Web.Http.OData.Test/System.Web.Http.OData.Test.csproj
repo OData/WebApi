@@ -70,6 +70,7 @@
     <Compile Include="HttpRouteCollectionExtensions.cs" />
     <Compile Include="ODataHttpRequestMessageExtensionsTest.cs" />
     <Compile Include="ODataHttpErrorExtensionsTest.cs" />
+    <Compile Include="OData\EntityInstanceContextTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializerTest.cs" />

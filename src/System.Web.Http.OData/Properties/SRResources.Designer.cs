@@ -673,7 +673,7 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The element type of the EDM collection type &apos;{0}&apos; is null. Collection types with null element type are not valid..
+        ///   Looks up a localized string similar to The element type of an EDM collection type cannot be null..
         /// </summary>
         internal static string ItemTypeOfCollectionNull {
             get {

@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.IO;
 using System.Linq;
 using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -62,6 +64,64 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteObject_ThrowsArgumentNull_MessageWriter()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.WriteObject(42, messageWriter: null, writeContext: new ODataSerializerContext()),
+                "messageWriter");
+        }
+
+        [Fact]
+        public void WriteObject_ThrowsArgumentNull_WriteContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
+                "writeContext");
+        }
+
+        [Fact]
+        public void WriteObject_ThrowsArgument_WriteContext_RootElementNameMissing()
+        {
+            Assert.ThrowsArgument(
+                () => _serializer.WriteObject(42, ODataTestUtil.GetMockODataMessageWriter(), new ODataSerializerContext()),
+                "writeContext",
+                "The 'RootElementName' property is required on 'ODataSerializerContext'.");
+        }
+
+        [Fact]
+        public void WriteObject_Calls_CreateODataComplexValue()
+        {
+            // Arrange
+            MemoryStream stream = new MemoryStream();
+            IODataResponseMessage message = new ODataMessageWrapper(stream);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message);
+            Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(_serializer.ComplexType, new DefaultODataSerializerProvider());
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName" };
+            object graph = new object();
+            ODataComplexValue complexValue = new ODataComplexValue
+            {
+                TypeName = "NS.Name",
+                Properties = new[] { new ODataProperty { Name = "Property1", Value = 42 } }
+            };
+
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataComplexValue(graph, writeContext)).Returns(complexValue).Verifiable();
+
+            // Act
+            serializer.Object.WriteObject(graph, messageWriter, writeContext);
+
+            // Assert
+            serializer.Verify();
+            stream.Seek(0, SeekOrigin.Begin);
+            XElement element = XElement.Load(stream);
+            Assert.Equal("ComplexPropertyName", element.Name.LocalName);
+            Assert.Equal("NS.Name", element.Attributes().Single(a => a.Name.LocalName == "type").Value);
+            Assert.Equal(1, element.Descendants().Count());
+            Assert.Equal("42", element.Descendants().Single().Value);
+            Assert.Equal("Property1", element.Descendants().Single().Name.LocalName);
+        }
+
+        [Fact]
         public void CreateODataValue_Calls_CreateODataComplexValue()
         {
             // Arrange
@@ -84,11 +144,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataValue_ReturnsODataNullValue_ForNullValue()
+        public void CreateODataValue_ReturnsNull_ForNullValue()
         {
             var odataValue = _serializer.CreateODataValue(null, new ODataSerializerContext());
 
-            Assert.IsType<ODataNullValue>(odataValue);
+            Assert.Null(odataValue);
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_ThrowsArgumentNull_WriteContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataComplexValue(graph: 42, writeContext: null),
+                "writeContext");
         }
 
         [Fact]
@@ -160,6 +228,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
             SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
             Assert.NotNull(annotation); // Guard
             Assert.Equal(expectedTypeName, annotation.TypeName);
+        }
+
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_AddsNullAnnotation_InJsonLightNoMetadataMode()
+        {
+            // Arrange
+            string expectedTypeName = "TypeName";
+            ODataComplexValue value = new ODataComplexValue
+            {
+                TypeName = expectedTypeName
+            };
+
+            // Act
+            ODataComplexTypeSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.NoMetadata);
+
+            // Assert
+            SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
+            Assert.NotNull(annotation); // Guard
+            Assert.Null(annotation.TypeName);
         }
 
         [Theory]

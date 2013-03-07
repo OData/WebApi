@@ -1,7 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Formatter.Serialization.Models;
+using System.Xml.Linq;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
@@ -64,7 +69,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.ThrowsArgument(
                 () => new ODataCollectionSerializer(edmType: collectionTypeReference, serializerProvider: new DefaultODataSerializerProvider()),
                 "edmType",
-                "The element type of the EDM collection type '' is null. Collection types with null element type are not valid.");
+                "The element type of an EDM collection type cannot be null.");
         }
 
         [Fact]
@@ -113,6 +118,68 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.ThrowsArgumentNull(
                 () => _serializer.WriteObject(graph: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
+        }
+
+        [Fact]
+        public void WriteObject_WritesValueReturnedFrom_CreateODataCollectionValue()
+        {
+            // Arrange
+            MemoryStream stream = new MemoryStream();
+            IODataResponseMessage message = new ODataMessageWrapper(stream);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message);
+            Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(_serializer.CollectionType, new DefaultODataSerializerProvider());
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName" };
+            IEnumerable enumerable = new object[0];
+            ODataCollectionValue collectionValue = new ODataCollectionValue { TypeName = "NS.Name", Items = new[] { 0, 1, 2 } };
+
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataCollectionValue(enumerable, writeContext)).Returns(collectionValue).Verifiable();
+
+            // Act
+            serializer.Object.WriteObject(enumerable, messageWriter, writeContext);
+
+            // Assert
+            serializer.Verify();
+            stream.Seek(0, SeekOrigin.Begin);
+            XElement element = XElement.Load(stream);
+            Assert.Equal("CollectionName", element.Name.LocalName);
+            Assert.Equal(3, element.Descendants().Count());
+            Assert.Equal(new[] { "0", "1", "2" }, element.Descendants().Select(e => e.Value));
+        }
+
+        [Fact]
+        public void CreateODataCollectionValue_ThrowsArgumentNull_WriteContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => _serializer.CreateODataCollectionValue(enumerable: null, writeContext: null),
+                "writeContext");
+        }
+
+        [Fact]
+        public void CreateODataValue_ThrowsArgument_IfGraphIsNotEnumerable()
+        {
+            object nonEnumerable = new object();
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            var serializer = new ODataCollectionSerializer(_serializer.CollectionType, serializerProvider.Object);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
+
+            Assert.ThrowsArgument(
+                () => serializer.CreateODataValue(graph: nonEnumerable, writeContext: new ODataSerializerContext()),
+                "graph",
+                "The argument must be of type 'IEnumerable'.");
+        }
+
+        [Fact]
+        public void CreateODataCollectionValue_ThrowsSerializationException_TypeCannotBeSerialized()
+        {
+            IEnumerable enumerable = new[] { 0 };
+            Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
+            var serializer = new ODataCollectionSerializer(_serializer.CollectionType, serializerProvider.Object);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
+
+            Assert.Throws<SerializationException>(
+                () => serializer.CreateODataCollectionValue(enumerable: enumerable, writeContext: new ODataSerializerContext()),
+                "'Edm.Int32' cannot be serialized using the ODataMediaTypeFormatter.");
         }
 
         [Fact]
@@ -167,11 +234,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void CreateODataCollectionValue_SetsTypeName()
         {
             // Arrange
-            object graph = new int[] { 1, 2, 3 };
+            IEnumerable enumerable = new int[] { 1, 2, 3 };
             ODataSerializerContext context = new ODataSerializerContext();
 
             // Act
-            ODataValue oDataValue = _serializer.CreateODataCollectionValue(graph, context);
+            ODataValue oDataValue = _serializer.CreateODataCollectionValue(enumerable, context);
 
             // Assert
             ODataCollectionValue collection = Assert.IsType<ODataCollectionValue>(oDataValue);
@@ -208,6 +275,25 @@ namespace System.Web.Http.OData.Formatter.Serialization
             SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
             Assert.NotNull(annotation); // Guard
             Assert.Equal(expectedTypeName, annotation.TypeName);
+        }
+
+        [Fact]
+        public void AddTypeNameAnnotationAsNeeded_AddsAnnotationWithNull_InJsonLightNoMetadataMode()
+        {
+            // Arrange
+            string expectedTypeName = "TypeName";
+            ODataCollectionValue value = new ODataCollectionValue
+            {
+                TypeName = expectedTypeName
+            };
+
+            // Act
+            ODataCollectionSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.NoMetadata);
+
+            // Assert
+            SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
+            Assert.NotNull(annotation); // Guard
+            Assert.Null(annotation.TypeName);
         }
 
         [Theory]

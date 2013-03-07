@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
@@ -55,18 +56,40 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter(ElementType);
-            writer.WriteStart(
-                new ODataCollectionStart
-                {
-                    Name = writeContext.RootElementName
-                });
+            WriteCollection(writer, graph, writeContext);
+        }
 
-            ODataValue value = CreateODataValue(graph, writeContext);
-            if (value != null)
+        /// <inheritdoc/>
+        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
+        {
+            IEnumerable enumerable = graph as IEnumerable;
+            if (enumerable == null)
             {
-                ODataCollectionValue collectionValue = value as ODataCollectionValue;
-                Contract.Assert(collectionValue != null);
+                throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
+            }
 
+            return CreateODataCollectionValue(enumerable, writeContext);
+        }
+
+        /// <summary>
+        /// Writes the given <paramref name="graph"/> using the given <paramref name="writer"/>.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataCollectionWriter"/> to use.</param>
+        /// <param name="graph">The collection to write.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        public void WriteCollection(ODataCollectionWriter writer, object graph, ODataSerializerContext writeContext)
+        {
+            if (writer == null)
+            {
+                throw Error.ArgumentNull("writer");
+            }
+
+            ODataCollectionValue collectionValue = CreateODataValue(graph, writeContext) as ODataCollectionValue;
+
+            writer.WriteStart(new ODataCollectionStart { Name = writeContext.RootElementName });
+
+            if (collectionValue != null)
+            {
                 foreach (object item in collectionValue.Items)
                 {
                     writer.WriteItem(item);
@@ -74,22 +97,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
             }
 
             writer.WriteEnd();
-            writer.Flush();
-        }
-
-        /// <inheritdoc/>
-        public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
-        {
-            return CreateODataCollectionValue(graph, writeContext);
         }
 
         /// <summary>
-        /// Creates an <see cref="ODataCollectionValue"/> for the object represented by <paramref name="graph"/>.
+        /// Creates an <see cref="ODataCollectionValue"/> for the enumerable represented by <paramref name="enumerable"/>.
         /// </summary>
-        /// <param name="graph">The value of the collection to be created.</param>
+        /// <param name="enumerable">The value of the collection to be created.</param>
         /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
         /// <returns>The created <see cref="ODataCollectionValue"/>.</returns>
-        public virtual ODataCollectionValue CreateODataCollectionValue(object graph, ODataSerializerContext writeContext)
+        public virtual ODataCollectionValue CreateODataCollectionValue(IEnumerable enumerable, ODataSerializerContext writeContext)
         {
             if (writeContext == null)
             {
@@ -98,21 +114,19 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ArrayList valueCollection = new ArrayList();
 
-            IEdmTypeReference itemType = CollectionType.ElementType();
-            ODataEntrySerializer itemSerializer = SerializerProvider.GetEdmTypeSerializer(itemType);
-            if (itemSerializer == null)
-            {
-                throw Error.NotSupported(SRResources.TypeCannotBeSerialized, itemType.FullName(), typeof(ODataMediaTypeFormatter).Name);
-            }
-
-            IEnumerable enumerable = graph as IEnumerable;
-
             if (enumerable != null)
             {
+                ODataEntrySerializer itemSerializer = null;
                 foreach (object item in enumerable)
                 {
-                    // ODataCollectionWriter expects the individual elements in the collection to be the underlying values
-                    // and not ODataValues.
+                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(ElementType);
+                    if (itemSerializer == null)
+                    {
+                        throw new SerializationException(
+                            Error.Format(SRResources.TypeCannotBeSerialized, ElementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                    }
+
+                    // ODataCollectionWriter expects the individual elements in the collection to be the underlying values and not ODataValues.
                     valueCollection.Add(itemSerializer.CreateODataValue(item, writeContext).GetInnerValue());
                 }
             }

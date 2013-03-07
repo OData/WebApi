@@ -52,15 +52,5 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// Gets or sets the metadata level of the response.
         /// </summary>
         public ODataMetadataLevel MetadataLevel { get; set; }
-
-        /// <summary>
-        /// The next page link, if any, to use when serializing a feed.
-        /// </summary>
-        public Uri NextPageLink { get; set; }
-
-        /// <summary>
-        /// The inline count, if any, to use when serializing a feed.
-        /// </summary>
-        public long? InlineCount { get; set; }
     }
 }

@@ -424,8 +424,6 @@ namespace System.Web.Http.OData.Formatter
                         SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                         Path = path,
                         MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
-                        NextPageLink = _request.GetNextPageLink(),
-                        InlineCount = _request.GetInlineCount()
                     };
 
                     serializer.WriteObject(value, messageWriter, writeContext);

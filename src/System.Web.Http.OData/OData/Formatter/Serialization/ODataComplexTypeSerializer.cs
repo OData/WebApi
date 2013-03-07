@@ -50,6 +50,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
+            if (writeContext.RootElementName == null)
+            {
+                throw Error.Argument("writeContext", SRResources.RootElementNameMissing, typeof(ODataSerializerContext).Name);
+            }
+
             ODataProperty property = CreateProperty(graph, writeContext.RootElementName, writeContext);
 
             messageWriter.WriteProperty(property);
@@ -58,13 +63,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <inheitdoc />
         public sealed override ODataValue CreateODataValue(object graph, ODataSerializerContext writeContext)
         {
-            ODataComplexValue value = CreateODataComplexValue(graph, writeContext);
-            if (value == null)
-            {
-                return new ODataNullValue();
-            }
-
-            return value;
+            return CreateODataComplexValue(graph, writeContext);
         }
 
         /// <summary>

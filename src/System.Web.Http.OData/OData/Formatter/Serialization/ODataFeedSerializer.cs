@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Properties;
@@ -73,7 +74,6 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType);
             WriteObjectInline(graph, writer, writeContext);
-            writer.Flush();
         }
 
         /// <inheritdoc />
@@ -89,64 +89,68 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            WriteFeed(graph, writer, writeContext);
-        }
-
-        private void WriteFeed(object graph, ODataWriter writer, ODataSerializerContext writeContext)
-        {
-            Contract.Assert(writer != null);
-            Contract.Assert(writeContext != null);
-
             if (graph == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
             }
 
             IEnumerable enumerable = graph as IEnumerable; // Data to serialize
-            if (enumerable != null)
+            if (enumerable == null)
             {
-                ODataFeed feed = CreateODataFeed(enumerable, writeContext);
-
-                if (feed == null)
-                {
-                    throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
-                }
-
-                // save this for later to support JSON lite streaming.
-                Uri nextPageLink = feed.NextPageLink;
-                feed.NextPageLink = null;
-
-                writer.WriteStart(feed);
-
-                foreach (object entry in enumerable)
-                {
-                    if (entry == null)
-                    {
-                        throw Error.NotSupported(SRResources.NullElementInCollection);
-                    }
-
-                    ODataEntrySerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType()) as ODataEntrySerializer;
-                    if (entrySerializer == null)
-                    {
-                        throw Error.NotSupported(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name);
-                    }
-
-                    entrySerializer.WriteObjectInline(entry, writer, writeContext);
-                }
-
-                // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
-                // the next page link will be written early in a manner not compatible with streaming=true. Instead, if
-                // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
-                // object before calling WriteEnd(), the next page link will be written at the end, as required for
-                // streaming=true support.
-
-                if (nextPageLink != null)
-                {
-                    feed.NextPageLink = nextPageLink;
-                }
-
-                writer.WriteEnd();
+                throw new SerializationException(
+                    Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
+
+            WriteFeed(enumerable, writer, writeContext);
+        }
+
+        private void WriteFeed(IEnumerable enumerable, ODataWriter writer, ODataSerializerContext writeContext)
+        {
+            Contract.Assert(writer != null);
+            Contract.Assert(writeContext != null);
+            Contract.Assert(enumerable != null);
+
+            ODataFeed feed = CreateODataFeed(enumerable, writeContext);
+            if (feed == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
+            }
+
+            // save this for later to support JSON lite streaming.
+            Uri nextPageLink = feed.NextPageLink;
+            feed.NextPageLink = null;
+
+            writer.WriteStart(feed);
+
+            foreach (object entry in enumerable)
+            {
+                if (entry == null)
+                {
+                    throw new SerializationException(SRResources.NullElementInCollection);
+                }
+
+                ODataEntrySerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType()) as ODataEntrySerializer;
+                if (entrySerializer == null)
+                {
+                    throw new SerializationException(
+                        Error.Format(SRResources.TypeCannotBeSerialized, entry.GetType(), typeof(ODataMediaTypeFormatter).Name));
+                }
+
+                entrySerializer.WriteObjectInline(entry, writer, writeContext);
+            }
+
+            // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
+            // the next page link will be written early in a manner not compatible with streaming=true. Instead, if
+            // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
+            // object before calling WriteEnd(), the next page link will be written at the end, as required for
+            // streaming=true support.
+
+            if (nextPageLink != null)
+            {
+                feed.NextPageLink = nextPageLink;
+            }
+
+            writer.WriteEnd();
         }
 
         /// <summary>
@@ -188,11 +192,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 feed.Count = odataFeedAnnotations.Count;
                 feed.NextPageLink = odataFeedAnnotations.NextPageLink;
             }
-            else
+            else if (writeContext.Request != null)
             {
-                feed.NextPageLink = writeContext.NextPageLink;
+                feed.NextPageLink = writeContext.Request.GetNextPageLink();
 
-                long? inlineCount = writeContext.InlineCount;
+                long? inlineCount = writeContext.Request.GetInlineCount();
                 if (inlineCount.HasValue)
                 {
                     feed.Count = inlineCount.Value;

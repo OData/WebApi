@@ -15,6 +15,9 @@ namespace System.Web.Http.OData.Builder
 
         public Func<FeedContext, Uri> FeedSelfLinkBuilder { get; set; }
 
+        public Func<EntityInstanceContext, IEdmNavigationProperty, ODataMetadataLevel, Uri> NavigationLinkBuilder { get; set; }
+
+
         public override Uri BuildFeedSelfLink(FeedContext context)
         {
             if (FeedSelfLinkBuilder != null)
@@ -56,6 +59,11 @@ namespace System.Web.Http.OData.Builder
 
         public override Uri BuildNavigationLink(EntityInstanceContext context, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
         {
+            if (NavigationLinkBuilder != null)
+            {
+                return NavigationLinkBuilder(context, navigationProperty, metadataLevel);
+            }
+
             return null;
         }
     }

@@ -1,0 +1,55 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Diagnostics.Contracts;
+using System.Globalization;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Cors;
+using System.Web.Http.Cors.Properties;
+using System.Web.Http.Tracing;
+
+namespace System.Web.Http.Cors.Tracing
+{
+    internal class CorsPolicyProviderTracer : ICorsPolicyProvider
+    {
+        private ICorsPolicyProvider _innerPolicyProvider;
+        private ITraceWriter _traceWriter;
+        private const string MethodName = "GetCorsPolicyAsync";
+
+        public CorsPolicyProviderTracer(ICorsPolicyProvider innerPolicyProvider, ITraceWriter traceWriter)
+        {
+            Contract.Assert(innerPolicyProvider != null);
+            Contract.Assert(traceWriter != null);
+
+            _innerPolicyProvider = innerPolicyProvider;
+            _traceWriter = traceWriter;
+        }
+
+        public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request)
+        {
+            return _traceWriter.TraceBeginEndAsync<CorsPolicy>(
+                request,
+                TraceCategories.CorsCategory,
+                TraceLevel.Info,
+                _innerPolicyProvider.GetType().Name,
+                MethodName,
+                beginTrace: (tr) =>
+                {
+                    tr.Message = String.Format(CultureInfo.CurrentCulture, SRResources.TraceCorsRequestContext, request.GetCorsRequestContext());
+                },
+                execute: () => _innerPolicyProvider.GetCorsPolicyAsync(request),
+                endTrace: (tr, policy) =>
+                {
+                    if (policy != null)
+                    {
+                        tr.Message = String.Format(CultureInfo.CurrentCulture, SRResources.TraceEndPolicyReturned, policy);
+                    }
+                    else
+                    {
+                        tr.Message = SRResources.TraceEndNoPolicyReturned;
+                    }
+                },
+                errorTrace: null);
+        }
+    }
+}

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
+using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Properties;
 using System.Web.Http.Routing;
@@ -28,8 +29,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Gets the <see name="HttpRequestMessage"/> of the current ApiController.
-        /// 
-        /// The setter is not intended to be used other than for unit testing purpose. 
+        ///
+        /// The setter is not intended to be used other than for unit testing purpose.
         /// </summary>
         public HttpRequestMessage Request
         {
@@ -47,8 +48,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Gets the <see name="HttpConfiguration"/> of the current ApiController.
-        /// 
-        /// The setter is not intended to be used other than for unit testing purpose. 
+        ///
+        /// The setter is not intended to be used other than for unit testing purpose.
         /// </summary>
         public HttpConfiguration Configuration
         {
@@ -66,8 +67,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Gets the <see name="HttpControllerContext"/> of the current ApiController.
-        /// 
-        /// The setter is not intended to be used other than for unit testing purpose. 
+        ///
+        /// The setter is not intended to be used other than for unit testing purpose.
         /// </summary>
         public HttpControllerContext ControllerContext
         {
@@ -103,8 +104,8 @@ namespace System.Web.Http
 
         /// <summary>
         /// Gets an instance of a <see name="UrlHelper" />, which is used to generate URLs to other APIs.
-        /// 
-        /// The setter is not intended to be used other than for unit testing purpose. 
+        ///
+        /// The setter is not intended to be used other than for unit testing purpose.
         /// </summary>
         public UrlHelper Url
         {
@@ -159,6 +160,12 @@ namespace System.Web.Http
             HttpControllerDescriptor controllerDescriptor = controllerContext.ControllerDescriptor;
             ServicesContainer controllerServices = controllerDescriptor.Configuration.Services;
             HttpActionDescriptor actionDescriptor = controllerServices.GetActionSelector().SelectAction(controllerContext);
+
+            if (_request != null)
+            {
+                _request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
+            }
+
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
 
             IEnumerable<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
@@ -303,10 +310,10 @@ namespace System.Web.Http
             }
         }
 
-        #endregion
+        #endregion IDisposable
 
         /// <summary>
-        /// Quickly split filters into different types 
+        /// Quickly split filters into different types
         /// </summary>
         /// <remarks>Avoid <see cref="M:ReadOnlyCollection.Select"/> because it has a very slow implementation that shows on profiles.</remarks>
         private class FilterGrouping

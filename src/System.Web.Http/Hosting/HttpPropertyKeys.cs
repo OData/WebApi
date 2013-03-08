@@ -22,6 +22,11 @@ namespace System.Web.Http.Hosting
         public static readonly string HttpRouteDataKey = "MS_HttpRouteData";
 
         /// <summary>
+        /// Provides a key for the <see cref="System.Web.Http.Controllers.HttpActionDescriptor"/> associated with this request.
+        /// </summary>
+        public static readonly string HttpActionDescriptorKey = "MS_HttpActionDescriptor";
+
+        /// <summary>
         /// Provides a key for the current <see cref="SynchronizationContext"/> stored in <see cref="HttpRequestMessage.Properties"/>.
         /// If <see cref="SynchronizationContext.Current"/> is <c>null</c> then no context is stored.
         /// </summary>

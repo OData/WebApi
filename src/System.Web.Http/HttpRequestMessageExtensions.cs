@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Hosting;
 using System.Web.Http.ModelBinding;
@@ -131,6 +132,21 @@ namespace System.Net.Http
             return request.GetProperty<IHttpRouteData>(HttpPropertyKeys.HttpRouteDataKey);
         }
 
+        /// <summary>
+        /// Gets the <see cref="System.Web.Http.Controllers.HttpActionDescriptor"/> selected for the given request or null if not available.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns>The <see cref="System.Web.Http.Controllers.HttpActionDescriptor"/> or null.</returns>
+        public static HttpActionDescriptor GetActionDescriptor(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetProperty<HttpActionDescriptor>(HttpPropertyKeys.HttpActionDescriptorKey);
+        }
+
         private static T GetProperty<T>(this HttpRequestMessage request, string key)
         {
             T value;
@@ -145,7 +161,7 @@ namespace System.Net.Http
         /// bounds for requested ranges.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="invalidByteRangeException">An <see cref="InvalidByteRangeException"/> instance, typically thrown by a 
+        /// <param name="invalidByteRangeException">An <see cref="InvalidByteRangeException"/> instance, typically thrown by a
         /// <see cref="ByteRangeStreamContent"/> instance.</param>
         /// <returns>An 416 (Requested Range Not Satisfiable) error response with a Content-Range header indicating the valid range.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Satisfiable", Justification = "Word is correctly spelled.")]
@@ -163,12 +179,12 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with message <paramref name="message"/>.
         /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
-        /// This method requires that <paramref name="request"/> has been associated with an instance of 
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
         /// <see cref="HttpConfiguration"/>.
         /// </remarks>
         /// <param name="request">The request.</param>
@@ -181,13 +197,13 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with message <paramref name="message"/>
-        /// and message detail <paramref name="messageDetail"/>.If no formatter is found, this method returns a response with 
+        /// and message detail <paramref name="messageDetail"/>.If no formatter is found, this method returns a response with
         /// status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
-        /// This method requires that <paramref name="request"/> has been associated with an instance of 
+        /// This method requires that <paramref name="request"/> has been associated with an instance of
         /// <see cref="HttpConfiguration"/>.
         /// </remarks>
         /// <param name="request">The request.</param>
@@ -202,7 +218,7 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> with error message <paramref name="message"/>
         /// for exception <paramref name="exception"/>. If no formatter is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
@@ -227,7 +243,7 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> for exception <paramref name="exception"/>.
         /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
@@ -250,7 +266,7 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
         /// with an instance of <see cref="ObjectContent{T}"/> wrapping an <see cref="HttpError"/> for model state <paramref name="modelState"/>.
         /// If no formatter is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
@@ -273,8 +289,8 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error 
-        /// with an instance of <see cref="ObjectContent{T}"/> wrapping <paramref name="error"/> as the content. If no formatter 
+        /// Helper method that performs content negotiation and creates a <see cref="HttpResponseMessage"/> representing an error
+        /// with an instance of <see cref="ObjectContent{T}"/> wrapping <paramref name="error"/> as the content. If no formatter
         /// is found, this method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
@@ -343,7 +359,7 @@ namespace System.Net.Http
         /// method returns a response with status 406 NotAcceptable.
         /// </summary>
         /// <remarks>
-        /// This method will use the provided <paramref name="configuration"/> or it will get the 
+        /// This method will use the provided <paramref name="configuration"/> or it will get the
         /// <see cref="HttpConfiguration"/> instance associated with <paramref name="request"/>.
         /// </remarks>
         /// <typeparam name="T">The type of the value.</typeparam>
@@ -351,7 +367,7 @@ namespace System.Net.Http
         /// <param name="statusCode">The status code of the created response.</param>
         /// <param name="value">The value to wrap. Can be <c>null</c>.</param>
         /// <param name="configuration">The configuration to use. Can be <c>null</c>.</param>
-        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>   
+        /// <returns>A response wrapping <paramref name="value"/> with <paramref name="statusCode"/>.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller will dispose")]
         public static HttpResponseMessage CreateResponse<T>(this HttpRequestMessage request, HttpStatusCode statusCode, T value, HttpConfiguration configuration)
         {

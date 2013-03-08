@@ -47,6 +47,7 @@
             <Word>dir</Word>
             <Word>Auth</Word>
             <Word>bg</Word>
+            <Word>Cors</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>

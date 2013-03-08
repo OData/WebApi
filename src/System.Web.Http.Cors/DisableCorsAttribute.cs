@@ -1,0 +1,27 @@
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Cors;
+
+namespace System.Web.Http.Cors
+{
+    /// <summary>
+    /// This class defines an attribute that can be applied to an action or a controller to disable CORS.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class DisableCorsAttribute : Attribute, ICorsPolicyProvider
+    {
+        /// <summary>
+        /// Gets the <see cref="CorsPolicy" />.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>
+        /// The <see cref="CorsPolicy" />.
+        /// </returns>
+        public Task<CorsPolicy> GetCorsPolicyAsync(HttpRequestMessage request)
+        {
+            return Task.FromResult<CorsPolicy>(null);
+        }
+    }
+}

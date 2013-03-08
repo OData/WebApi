@@ -2,6 +2,7 @@
 <assemblies defaultPublicKeyToken="31bf3856ad364e35">
   <!-- Production assemblies -->
   <assembly name="Microsoft.AspNet.Mvc.Facebook"/>
+  <assembly name="System.Web.Cors"/>
   <assembly name="Microsoft.Web.Helpers"/>
   <assembly name="Microsoft.Web.Http.Data"/>
   <assembly name="Microsoft.Web.Http.Data.EntityFramework"/>
@@ -12,6 +13,7 @@
   <assembly name="System.Web.Helpers"/>
   <assembly name="System.Web.Http"/>
   <assembly name="System.Web.Http.Common"/>
+  <assembly name="System.Web.Http.Cors"/>
   <assembly name="System.Web.Http.OData"/>
   <assembly name="System.Web.Http.SelfHost"/>
   <assembly name="System.Web.Http.SignalR"/>
@@ -39,8 +41,10 @@
   <assembly name="System.Net.Http.Formatting.Test"/>
   <assembly name="System.Net.Http.Formatting.NetCore.Test"/>
   <assembly name="System.Net.Http.Formatting.Test.Integration"/>
+  <assembly name="System.Web.Cors.Test"/>
   <assembly name="System.Web.Helpers.Test"/>
   <assembly name="System.Web.Http.Common.Test"/>
+  <assembly name="System.Web.Http.Cors.Test"/>
   <assembly name="System.Web.Http.Integration.Test"/>
   <assembly name="System.Web.Http.OData.Test"/>
   <assembly name="System.Web.Http.SelfHost.Test"/>

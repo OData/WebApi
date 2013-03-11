@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Threading;
@@ -63,6 +66,7 @@ namespace System.Web.Http.ModelBinding
             set;
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Disposed later")]
         public virtual Task<object> ReadContentAsync(HttpRequestMessage request, Type type, IEnumerable<MediaTypeFormatter> formatters, IFormatterLogger formatterLogger)
         {
             HttpContent content = request.Content;
@@ -78,7 +82,24 @@ namespace System.Web.Http.ModelBinding
                     return TaskHelpers.FromResult(defaultValue);
                 }
             }
-            return content.ReadAsAsync(type, formatters, formatterLogger);
+
+            try
+            {
+                return content.ReadAsAsync(type, formatters, formatterLogger);
+            }
+            catch (UnsupportedMediaTypeException exception)
+            {
+                // If there is no Content-Type header, provide a better error message
+                string errorFormat = content.Headers.ContentType == null ?
+                    SRResources.UnsupportedMediaTypeNoContentType :
+                    SRResources.UnsupportedMediaType;
+
+                throw new HttpResponseException(
+                    request.CreateErrorResponse(
+                        HttpStatusCode.UnsupportedMediaType,
+                        Error.Format(errorFormat, exception.MediaType.MediaType),
+                        exception));
+            }
         }
 
         public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
@@ -87,7 +108,7 @@ namespace System.Web.Http.ModelBinding
             Type type = paramFromBody.ParameterType;
             HttpRequestMessage request = actionContext.ControllerContext.Request;
             IFormatterLogger formatterLogger = new ModelStateFormatterLogger(actionContext.ModelState, paramFromBody.ParameterName);
-            
+
             return ExecuteBindingAsyncCore(metadataProvider, actionContext, paramFromBody, type, request, formatterLogger, cancellationToken);
         }
 

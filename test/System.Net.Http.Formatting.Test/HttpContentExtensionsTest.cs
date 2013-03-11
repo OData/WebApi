@@ -72,28 +72,30 @@ namespace System.Net.Http
             content.Headers.ContentType.CharSet = "utf-16";
             var formatters = new MediaTypeFormatter[] { new JsonMediaTypeFormatter() };
 
-            Assert.Throws<InvalidOperationException>(() => content.ReadAsAsync<List<string>>(formatters),
+            Assert.Throws<UnsupportedMediaTypeException>(() => content.ReadAsAsync<List<string>>(formatters),
                 "No MediaTypeFormatter is available to read an object of type 'List`1' from content with media type 'foo/bar'.");
         }
 
         [Fact]
-        public void ReadAsAsyncOfT_WhenTypeIsReferenceTypeAndNoMediaType_ReturnsNull()
+        public void ReadAsAsyncOfT_WhenTypeIsReferenceTypeAndNoMediaType_Throws()
         {
             var content = new StringContent("{}");
             content.Headers.ContentType = null;
             var formatters = new MediaTypeFormatter[] { new JsonMediaTypeFormatter() };
 
-            Assert.Equal(null, content.ReadAsAsync<List<string>>(formatters).Result);
+            Assert.Throws<UnsupportedMediaTypeException>(() => content.ReadAsAsync<List<string>>(formatters),
+                "No MediaTypeFormatter is available to read an object of type 'List`1' from content with media type 'application/octet-stream'.");
         }
 
         [Fact]
-        public void ReadAsAsyncOfT_WhenTypeIsValueTypeAndNoMediaType_ReturnsDefault()
+        public void ReadAsAsyncOfT_WhenTypeIsValueTypeAndNoMediaType_Throws()
         {
             var content = new StringContent("123456");
             content.Headers.ContentType = null;
             var formatters = new MediaTypeFormatter[] { new JsonMediaTypeFormatter() };
 
-            Assert.Equal(0, content.ReadAsAsync<int>(formatters).Result);
+            Assert.Throws<UnsupportedMediaTypeException>(() => content.ReadAsAsync<int>(formatters),
+                "No MediaTypeFormatter is available to read an object of type 'Int32' from content with media type 'application/octet-stream'.");
         }
 
         [Fact]

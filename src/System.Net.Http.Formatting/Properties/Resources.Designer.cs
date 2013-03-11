@@ -10,7 +10,7 @@
 
 namespace System.Net.Http.Properties {
     using System;
-    using System.Reflection;
+    
     
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
@@ -39,12 +39,7 @@ namespace System.Net.Http.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-#if NETFX_CORE
-                    var assembly = typeof(Resources).GetTypeInfo().Assembly;
-#else
-                    var assembly = typeof(Resources).Assembly;
-#endif
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Net.Http.Properties.Resources", assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Net.Http.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -629,15 +624,6 @@ namespace System.Net.Http.Properties {
         internal static string SerializerCannotSerializeType {
             get {
                 return ResourceManager.GetString("SerializerCannotSerializeType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;undefined&apos;.
-        /// </summary>
-        internal static string UndefinedMediaType {
-            get {
-                return ResourceManager.GetString("UndefinedMediaType", resourceCulture);
             }
         }
         

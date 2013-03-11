@@ -124,21 +124,22 @@ namespace System.Net.Http
             }
 
             MediaTypeFormatter formatter = null;
-            MediaTypeHeaderValue mediaType = content.Headers.ContentType;
-            if (mediaType != null)
-            {
-                formatter = new MediaTypeFormatterCollection(formatters).FindReader(type, mediaType);
-            }
-            else
-            {
-                T defaultValue = (T)MediaTypeFormatter.GetDefaultValueForType(type);
-                return TaskHelpers.FromResult<T>(defaultValue);
-            }
+            // Default to "application/octet-stream" if there is no content-type in accordance with section 7.2.1 of the HTTP spec
+            MediaTypeHeaderValue mediaType = content.Headers.ContentType ?? MediaTypeConstants.ApplicationOctetStreamMediaType;
+
+            formatter = new MediaTypeFormatterCollection(formatters).FindReader(type, mediaType);
 
             if (formatter == null)
             {
-                string mediaTypeAsString = mediaType != null ? mediaType.MediaType : Properties.Resources.UndefinedMediaType;
-                throw Error.InvalidOperation(Properties.Resources.NoReadSerializerAvailable, type.Name, mediaTypeAsString);
+                if (content.Headers.ContentLength == 0)
+                {
+                    T defaultValue = (T)MediaTypeFormatter.GetDefaultValueForType(type);
+                    return TaskHelpers.FromResult<T>(defaultValue);
+                }
+
+                throw new UnsupportedMediaTypeException(
+                    Error.Format(Properties.Resources.NoReadSerializerAvailable, type.Name, mediaType.MediaType),
+                    mediaType);
             }
 
             return ReadAsAsyncCore<T>(content, type, formatterLogger, formatter);

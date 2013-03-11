@@ -216,9 +216,6 @@
   <data name="SerializerCannotSerializeType" xml:space="preserve">
     <value>The '{0}' serializer cannot serialize the type '{1}'.</value>
   </data>
-  <data name="UndefinedMediaType" xml:space="preserve">
-    <value>'undefined'</value>
-  </data>
   <data name="UnsupportedIndent" xml:space="preserve">
     <value>Indentation is not supported by '{0}'.</value>
   </data>

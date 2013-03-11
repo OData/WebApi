@@ -414,4 +414,10 @@
   <data name="DependencyResolver_BeginScopeReturnsNull" xml:space="preserve">
     <value>A dependency resolver of type '{0}' returned an invalid value of null from its BeginScope method. If the container does not have a concept of scope, consider returning a scope that resolves in the root of the container instead.</value>
   </data>
+  <data name="UnsupportedMediaType" xml:space="preserve">
+    <value>The request entity's media type '{0}' is not supported for this resource.</value>
+  </data>
+  <data name="UnsupportedMediaTypeNoContentType" xml:space="preserve">
+    <value>The request contains an entity body but no Content-Type header. The inferred media type '{0}' is not supported for this resource.</value>
+  </data>
 </root>

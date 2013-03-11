@@ -85,6 +85,7 @@
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="Metadata\Providers\AssociatedMetadataProviderTest.cs" />
+    <Compile Include="ModelBinding\FormatterParameterBindingTest.cs" />
     <Compile Include="ModelBinding\HttpParameterBindingExtensionsTest.cs" />
     <Compile Include="ModelBinding\ParameterBindingProvidersTest.cs" />
     <Compile Include="Dispatcher\DefaultAssembliesResolverTest.cs" />

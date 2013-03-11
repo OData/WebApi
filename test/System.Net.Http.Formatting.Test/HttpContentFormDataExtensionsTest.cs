@@ -153,8 +153,8 @@ namespace System.Net.Http
         [Fact]
         public void ReadAsFormDataAsync_HandlesNonFormData()
         {
-            HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "test/unknown");
-            Assert.Throws<InvalidOperationException>(() => content.ReadAsFormDataAsync().Wait());
+            HttpContent content = new StringContent("{}", Encoding.UTF8, "test/unknown");
+            Assert.Throws<UnsupportedMediaTypeException>(() => content.ReadAsFormDataAsync().Wait());
         }
     }
 }

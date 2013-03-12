@@ -46,16 +46,25 @@ namespace System.Web.Http.ValueProviders.Providers
         }
 
         // This method turns a collection of name/value pairs into a Dictionary<string, object> for fast lookups
-        // We optimize for the common case of a name being associated with exactly one value by avoiding a List allocation if we can avoid it
-        // The first time the key appears, the value gets stored as a string. Only if the key appears a second time do we allocate a List to store the values for that key.
         [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification = "One of the casts is conditionally compiled")]
         private static Dictionary<string, object> InitializeValues(IEnumerable<KeyValuePair<string, string>> nameValuePairs)
         {
+            // Performance-sensitive.
+            // Optimize for the cases of 0 pairs, and for names being unique when present.
             Dictionary<string, object> values = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            // Avoid looping in the 0 case.
+            KeyValuePair<string, string>[] nameValuePairsArray = nameValuePairs as KeyValuePair<string, string>[];
+            if (nameValuePairsArray != null && nameValuePairsArray.Length == 0)
+            {
+                return values;
+            }
             foreach (KeyValuePair<string, string> nameValuePair in nameValuePairs)
             {
                 string name = nameValuePair.Key;
                 object value;
+                // We optimize for the common case of a name being associated with exactly one value by avoiding a List
+                // allocation if we can avoid it. The first time the key appears, the value gets stored as a string. 
+                // Only if the key appears a second time do we allocate a List to store the values for that key.
                 if (values.TryGetValue(name, out value))
                 {
                     List<string> valueStrings = value as List<string>;

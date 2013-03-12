@@ -213,7 +213,7 @@ namespace System.Web.Http.Controllers
                 return new LookupAdapter() { Source = _actionNameMapping };
             }
 
-            private IEnumerable<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, IEnumerable<ReflectedHttpActionDescriptor> actionsFound, bool hasActionRouteKey)
+            private IEnumerable<ReflectedHttpActionDescriptor> FindActionUsingRouteAndQueryParameters(HttpControllerContext controllerContext, ReflectedHttpActionDescriptor[] actionsFound, bool hasActionRouteKey)
             {
                 IDictionary<string, object> routeValues = controllerContext.RouteData.Values;
                 HashSet<string> routeParameterNames = new HashSet<string>(routeValues.Keys, StringComparer.OrdinalIgnoreCase);
@@ -228,6 +228,7 @@ namespace System.Web.Http.Controllers
                 bool hasQueryParameters = requestUri != null && !String.IsNullOrEmpty(requestUri.Query);
                 bool hasRouteParameters = routeParameterNames.Count != 0;
 
+                List<ReflectedHttpActionDescriptor> matches = new List<ReflectedHttpActionDescriptor>(actionsFound.Length);
                 if (hasRouteParameters || hasQueryParameters)
                 {
                     var combinedParameterNames = new HashSet<string>(routeParameterNames, StringComparer.OrdinalIgnoreCase);
@@ -240,24 +241,37 @@ namespace System.Web.Http.Controllers
                     }
 
                     // action parameters is a subset of route parameters and query parameters
-                    actionsFound = actionsFound.Where(descriptor => IsSubset(_actionParameterNames[descriptor], combinedParameterNames));
-
-                    if (actionsFound.Count() > 1)
+                    for (int i = 0; i < actionsFound.Length; i++)
+                    {
+                        ReflectedHttpActionDescriptor descriptor = actionsFound[i];
+                        if (IsSubset(_actionParameterNames[descriptor], combinedParameterNames))
+                        {
+                            matches.Add(descriptor);
+                        }
+                    }
+                    if (matches.Count > 1)
                     {
                         // select the results that match the most number of required parameters 
-                        actionsFound = actionsFound
+                        matches = matches
                             .GroupBy(descriptor => _actionParameterNames[descriptor].Length)
                             .OrderByDescending(g => g.Key)
-                            .First();
+                            .First()
+                            .ToList();
                     }
                 }
                 else
                 {
                     // return actions with no parameters
-                    actionsFound = actionsFound.Where(descriptor => _actionParameterNames[descriptor].Length == 0);
+                    for (int i = 0; i < actionsFound.Length; i++)
+                    {
+                        ReflectedHttpActionDescriptor descriptor = actionsFound[i];
+                        if (_actionParameterNames[descriptor].Length == 0)
+                        {
+                            matches.Add(descriptor);
+                        }
+                    }
                 }
-
-                return actionsFound;
+                return matches;
             }
 
             private static bool IsSubset(string[] actionParameters, HashSet<string> routeAndQueryParameters)

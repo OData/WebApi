@@ -33,8 +33,12 @@ namespace System.Web.Http.ValueProviders.Providers
 
         public virtual ValueProviderResult GetValue(string key)
         {
-            foreach (IValueProvider vp in this)
+            // Performance-sensitive
+            // Caching the count is faster for IList<T>
+            int itemCount = Items.Count;
+            for (int i = 0; i < itemCount; i++)
             {
+                IValueProvider vp = Items[i];
                 ValueProviderResult result = vp.GetValue(key);
                 if (result != null)
                 {

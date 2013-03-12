@@ -12,7 +12,8 @@ namespace System.Web.Http.Validation
 {
     public sealed class ModelValidationNode
     {
-        private IEnumerable<ModelValidator> _validators; 
+        private IEnumerable<ModelValidator> _validators;
+        private readonly List<ModelValidationNode> _childNodes;
 
         public ModelValidationNode(ModelMetadata modelMetadata, string modelStateKey)
             : this(modelMetadata, modelStateKey, null)
@@ -32,14 +33,17 @@ namespace System.Web.Http.Validation
 
             ModelMetadata = modelMetadata;
             ModelStateKey = modelStateKey;
-            ChildNodes = (childNodes != null) ? childNodes.ToList() : new List<ModelValidationNode>();
+            _childNodes = (childNodes != null) ? childNodes.ToList() : new List<ModelValidationNode>();
         }
 
         public event EventHandler<ModelValidatedEventArgs> Validated;
 
         public event EventHandler<ModelValidatingEventArgs> Validating;
 
-        public ICollection<ModelValidationNode> ChildNodes { get; private set; }
+        public ICollection<ModelValidationNode> ChildNodes 
+        {
+            get { return _childNodes; }
+        }
 
         public ModelMetadata ModelMetadata { get; private set; }
 
@@ -55,9 +59,11 @@ namespace System.Web.Http.Validation
             {
                 Validated += otherNode.Validated;
                 Validating += otherNode.Validating;
-                foreach (ModelValidationNode childNode in otherNode.ChildNodes)
+                List<ModelValidationNode> otherChildNodes = otherNode._childNodes;
+                for (int i = 0; i < otherChildNodes.Count; i++)
                 {
-                    ChildNodes.Add(childNode);
+                    ModelValidationNode childNode = otherChildNodes[i];
+                    _childNodes.Add(childNode);
                 }
             }
         }
@@ -137,8 +143,9 @@ namespace System.Web.Http.Validation
 
         private void ValidateChildren(HttpActionContext actionContext)
         {
-            foreach (ModelValidationNode child in ChildNodes)
+            for (int i = 0; i < _childNodes.Count; i++)
             {
+                ModelValidationNode child = _childNodes[i];
                 child.Validate(actionContext, this);
             }
 

@@ -206,8 +206,11 @@ namespace System.Web.Http.Validation
             _validators = actionContext.GetValidators(ModelMetadata);
 
             object container = TryConvertContainerToMetadataType(parentNode);
-            foreach (ModelValidator validator in _validators)
+            // Optimize for the common case where the validators are in an array
+            ModelValidator[] validators = _validators.AsArray();
+            for (int i = 0; i < validators.Length; i++)
             {
+                ModelValidator validator = validators[i];
                 foreach (ModelValidationResult validationResult in validator.Validate(ModelMetadata, container))
                 {
                     string trueModelStateKey = ModelBindingHelper.CreatePropertyModelName(ModelStateKey, validationResult.MemberName);

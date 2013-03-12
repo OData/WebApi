@@ -126,7 +126,7 @@ namespace System.Net.Http.Formatting
             IEnumerable<MediaTypeWithQualityHeaderValue> sortedAcceptValues = null;
 
             // Go through each formatter to find how well it matches.
-            Collection<MediaTypeFormatterMatch> matches = new Collection<MediaTypeFormatterMatch>();
+            ListWrapperCollection<MediaTypeFormatterMatch> matches = new ListWrapperCollection<MediaTypeFormatterMatch>();
             IList<MediaTypeFormatter> formatterList = formatters.AsIList();
             // Cache the count, which is faster for IList<T>.
             int formatterCount = formatterList.Count;
@@ -190,10 +190,13 @@ namespace System.Net.Http.Formatting
         /// <returns>The <see cref="MediaTypeFormatterMatch"/> determined to be the best match.</returns>
         protected virtual MediaTypeFormatterMatch SelectResponseMediaTypeFormatter(ICollection<MediaTypeFormatterMatch> matches)
         {
+            // Performance-sensitive
             if (matches == null)
             {
                 throw Error.ArgumentNull("matches");
             }
+
+            List<MediaTypeFormatterMatch> matchList = matches.AsList();
 
             MediaTypeFormatterMatch bestMatchOnType = null;
             MediaTypeFormatterMatch bestMatchOnAcceptHeaderLiteral = null;
@@ -203,8 +206,9 @@ namespace System.Net.Http.Formatting
             MediaTypeFormatterMatch bestMatchOnRequestMediaType = null;
 
             // Go through each formatter to find the best match in each category.
-            foreach (MediaTypeFormatterMatch match in matches)
+            for (int i = 0; i < matchList.Count; i++)
             {
+                MediaTypeFormatterMatch match = matchList[i];
                 switch (match.Ranking)
                 {
                     case MediaTypeFormatterMatchRanking.MatchOnCanWriteType:

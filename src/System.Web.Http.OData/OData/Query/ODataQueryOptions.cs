@@ -390,6 +390,13 @@ namespace System.Web.Http.OData.Query
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invokation without security issues.")]
         public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
         {
+            // Throw an overflow exception if resultsLimited is equal to Int32.MaxValue
+            checked
+            {
+                // Take (limit + 1) items so we can determine whether there are more results or not
+                queryable = queryable.Take(limit + 1);
+            }
+
             List<T> list = new List<T>();
             resultsLimited = false;
             using (IEnumerator<T> enumerator = queryable.GetEnumerator())

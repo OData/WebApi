@@ -184,6 +184,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="..\System.Net.Http.Formatting\UnsupportedMediaTypeException.cs">
+      <Link>UnsupportedMediaTypeException.cs</Link>
+    </Compile>
     <Compile Include="Internal\ConcurrentDictionary.cs" />
     <Compile Include="MediaTypeHeaderValueExtensions.cs" />
   </ItemGroup>

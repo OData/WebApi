@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -42,6 +44,7 @@ namespace System.Net.Http.Formatting
         /// <returns><c>true</c> if this is a subset of <paramref name="mediaType2"/>; false otherwise.</returns>
         public static bool IsSubsetOf(this MediaTypeHeaderValue mediaType1, MediaTypeHeaderValue mediaType2, out MediaTypeHeaderValueRange mediaType2Range)
         {
+            // Performance-sensitive
             Contract.Assert(mediaType1 != null);
 
             if (mediaType2 == null)
@@ -73,14 +76,29 @@ namespace System.Net.Http.Formatting
 
             // So far we either have a full match or a subset match. Now check that all of 
             // mediaType1's parameters are present and equal in mediatype2
-            foreach (NameValueHeaderValue parameter1 in mediaType1.Parameters)
+            // Optimize for the common case where the parameters inherit from Collection<T> and cache the count which is faster for Collection<T>.
+            Collection<NameValueHeaderValue> parameters1 = mediaType1.Parameters.AsCollection();
+            int parameterCount1 = parameters1.Count;
+            Collection<NameValueHeaderValue> parameters2 = mediaType2.Parameters.AsCollection(); 
+            int parameterCount2 = parameters2.Count;
+            for (int i = 0; i < parameterCount1; i++)
             {
-                if (!mediaType2.Parameters.Any(parameter2 => parameter1.Equals(parameter2)))
+                NameValueHeaderValue parameter1 = parameters1[i];
+                bool found = false;
+                for (int j = 0; j < parameterCount2; j++)
+                {
+                    NameValueHeaderValue parameter2 = parameters2[j];
+                    if (parameter1.Equals(parameter2))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
                 {
                     return false;
                 }
             }
-
             return true;
         }
     }

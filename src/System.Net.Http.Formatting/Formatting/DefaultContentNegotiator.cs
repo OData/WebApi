@@ -53,6 +53,7 @@ namespace System.Net.Http.Formatting
         /// or <c>null</c> if there is no appropriate formatter.</returns>
         public virtual ContentNegotiationResult Negotiate(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
+            // Performance-sensitive
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
@@ -67,7 +68,8 @@ namespace System.Net.Http.Formatting
             }
 
             // If formatter list is empty then we won't find a match
-            if (!formatters.Any())
+            IList<MediaTypeFormatter> formatterList = formatters.AsIList();
+            if (formatterList.Count == 0)
             {
                 return null;
             }
@@ -107,6 +109,7 @@ namespace System.Net.Http.Formatting
         /// <returns>A collection containing all the matches.</returns>
         protected virtual Collection<MediaTypeFormatterMatch> ComputeFormatterMatches(Type type, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
         {
+            // Performance-sensitive
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
@@ -124,8 +127,12 @@ namespace System.Net.Http.Formatting
 
             // Go through each formatter to find how well it matches.
             Collection<MediaTypeFormatterMatch> matches = new Collection<MediaTypeFormatterMatch>();
-            foreach (MediaTypeFormatter formatter in formatters)
+            IList<MediaTypeFormatter> formatterList = formatters.AsIList();
+            // Cache the count, which is faster for IList<T>.
+            int formatterCount = formatterList.Count;
+            for (int i = 0; i < formatterCount; i++) 
             {
+                MediaTypeFormatter formatter = formatterList[i];
                 MediaTypeFormatterMatch match = null;
 
                 // Check first that formatter can write the actual type

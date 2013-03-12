@@ -60,6 +60,8 @@
     <Compile Include="ActionDescriptorHelper.cs" />
     <Compile Include="Async\TaskAsyncActionDescriptor.cs" />
     <Compile Include="Async\TaskWrapperAsyncResult.cs" />
+    <Compile Include="AuthenticationChallengeContext.cs" />
+    <Compile Include="AuthenticationContext.cs" />
     <Compile Include="BuildManagerCompiledView.cs" />
     <Compile Include="BuildManagerViewEngine.cs" />
     <Compile Include="CachedAssociatedMetadataProvider.cs" />
@@ -71,6 +73,8 @@
     <Compile Include="CompareAttributeAdapter.cs" />
     <Compile Include="DataTypeAttributeAdapter.cs" />
     <Compile Include="FileExtensionsAttributeAdapter.cs" />
+    <Compile Include="IAuthenticationFilter.cs" />
+    <Compile Include="IOverrideFilter.cs" />
     <Compile Include="MembershipPasswordAttributeAdapter.cs" />
     <Compile Include="CompareAttribute.cs" />
     <Compile Include="ChildActionValueProvider.cs" />
@@ -83,6 +87,11 @@
     <Compile Include="Html\DisplayNameExtensions.cs" />
     <Compile Include="Html\NameExtensions.cs" />
     <Compile Include="Html\ValueExtensions.cs" />
+    <Compile Include="OverrideActionFiltersAttribute.cs" />
+    <Compile Include="OverrideAuthenticationAttribute.cs" />
+    <Compile Include="OverrideAuthorizationAttribute.cs" />
+    <Compile Include="OverrideExceptionFiltersAttribute.cs" />
+    <Compile Include="OverrideResultFiltersAttribute.cs" />
     <Compile Include="Razor\MvcCSharpRazorCodeGenerator.cs" />
     <Compile Include="Razor\SetModelTypeCodeGenerator.cs" />
     <Compile Include="ReflectedAttributeCache.cs" />

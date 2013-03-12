@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading;
 using System.Web.Mvc.Properties;
 using Microsoft.Web.Infrastructure.DynamicValidationHelper;
@@ -155,22 +156,43 @@ namespace System.Web.Mvc
 
                 try
                 {
-                    AuthorizationContext authContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
-                    if (authContext.Result != null)
+                    AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
+
+                    if (authenticationContext.Result != null)
                     {
-                        // the auth filter signaled that we should let it short-circuit the request
-                        InvokeActionResult(controllerContext, authContext.Result);
+                        // the authentication filter signaled that we should let it short-circuit the request
+                        InvokeActionResult(controllerContext, authenticationContext.Result);
                     }
                     else
                     {
-                        if (controllerContext.Controller.ValidateRequest)
+                        IPrincipal principal = authenticationContext.Principal;
+
+                        if (principal != null)
                         {
-                            ValidateRequest(controllerContext);
+                            Thread.CurrentPrincipal = principal;
+                            HttpContext.Current.User = principal;
                         }
 
-                        IDictionary<string, object> parameters = GetParameterValues(controllerContext, actionDescriptor);
-                        ActionExecutedContext postActionContext = InvokeActionMethodWithFilters(controllerContext, filterInfo.ActionFilters, actionDescriptor, parameters);
-                        InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters, postActionContext.Result);
+                        AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
+                        if (authorizationContext.Result != null)
+                        {
+                            // the authorization filter signaled that we should let it short-circuit the request
+                            // let any authentication filters turn the result into an authentication challenge; then run it
+                            AuthenticationChallengeContext challengeContext =
+                                InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
+                            InvokeActionResult(controllerContext, challengeContext.Result ?? authorizationContext.Result);
+                        }
+                        else
+                        {
+                            if (controllerContext.Controller.ValidateRequest)
+                            {
+                                ValidateRequest(controllerContext);
+                            }
+
+                            IDictionary<string, object> parameters = GetParameterValues(controllerContext, actionDescriptor);
+                            ActionExecutedContext postActionContext = InvokeActionMethodWithFilters(controllerContext, filterInfo.ActionFilters, actionDescriptor, parameters);
+                            InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters, postActionContext.Result);
+                        }
                     }
                 }
                 catch (ThreadAbortException)
@@ -318,6 +340,43 @@ namespace System.Web.Mvc
             Func<ResultExecutedContext> thunk = filters.Reverse().Aggregate(continuation,
                                                                             (next, filter) => () => InvokeActionResultFilter(filter, preContext, next));
             return thunk();
+        }
+
+        internal virtual AuthenticationContext InvokeAuthenticationFilters(ControllerContext controllerContext, IList<IAuthenticationFilter> filters, ActionDescriptor actionDescriptor)
+        {
+            AuthenticationContext context = new AuthenticationContext(controllerContext, actionDescriptor);
+            foreach (IAuthenticationFilter filter in filters)
+            {
+                filter.OnAuthentication(context);
+                // short-circuit evaluation
+                if (context.Result != null)
+                {
+                    break;
+                }
+
+                // short-circuit evaluation
+                if (context.Principal != null)
+                {
+                    break;
+                }
+            }
+
+            return context;
+        }
+
+        internal virtual AuthenticationChallengeContext InvokeAuthenticationFiltersChallenge(
+            ControllerContext controllerContext, IList<IAuthenticationFilter> filters,
+            ActionDescriptor actionDescriptor, ActionResult result)
+        {
+            AuthenticationChallengeContext context = new AuthenticationChallengeContext(controllerContext, actionDescriptor, result);
+            foreach (IAuthenticationFilter filter in filters)
+            {
+                filter.OnAuthenticationChallenge(context);
+                // unlike other filter types, don't short-circuit evaluation when context.Result != null (since it
+                // starts out that way, and multiple filters may add challenges to the result)
+            }
+
+            return context;
         }
 
         protected virtual AuthorizationContext InvokeAuthorizationFilters(ControllerContext controllerContext, IList<IAuthorizationFilter> filters, ActionDescriptor actionDescriptor)

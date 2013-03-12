@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading;
 
 namespace System.Web.Mvc.Async
@@ -12,6 +14,7 @@ namespace System.Web.Mvc.Async
         private static readonly object _invokeActionMethodTag = new object();
         private static readonly object _invokeActionMethodWithFiltersTag = new object();
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Refactoring to reduce coupling not currently justified.")]
         public virtual IAsyncResult BeginInvokeAction(ControllerContext controllerContext, string actionName, AsyncCallback callback, object state)
         {
             if (controllerContext == null)
@@ -34,27 +37,49 @@ namespace System.Web.Mvc.Async
                 {
                     try
                     {
-                        AuthorizationContext authContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
-                        if (authContext.Result != null)
+                        AuthenticationContext authenticationContext = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
+
+                        if (authenticationContext.Result != null)
                         {
-                            // the auth filter signaled that we should let it short-circuit the request
-                            continuation = () => InvokeActionResult(controllerContext, authContext.Result);
+                            // the authentication filter signaled that we should let it short-circuit the request
+                            continuation = () => InvokeActionResult(controllerContext, authenticationContext.Result);
                         }
                         else
                         {
-                            if (controllerContext.Controller.ValidateRequest)
+                            IPrincipal principal = authenticationContext.Principal;
+
+                            if (principal != null)
                             {
-                                ValidateRequest(controllerContext);
+                                Thread.CurrentPrincipal = principal;
+                                HttpContext.Current.User = principal;
                             }
 
-                            IDictionary<string, object> parameters = GetParameterValues(controllerContext, actionDescriptor);
-                            IAsyncResult asyncResult = BeginInvokeActionMethodWithFilters(controllerContext, filterInfo.ActionFilters, actionDescriptor, parameters, asyncCallback, asyncState);
-                            continuation = () =>
+                            AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
+                            if (authorizationContext.Result != null)
                             {
-                                ActionExecutedContext postActionContext = EndInvokeActionMethodWithFilters(asyncResult);
-                                InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters, postActionContext.Result);
-                            };
-                            return asyncResult;
+                                // the authorization filter signaled that we should let it short-circuit the request
+                                // let any authentication filters turn the result into an authentication challenge; then run it
+                                AuthenticationChallengeContext challengeContext =
+                                    InvokeAuthenticationFiltersChallenge(controllerContext,
+                                    filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
+                                continuation = () => InvokeActionResult(controllerContext, challengeContext.Result);
+                            }
+                            else
+                            {
+                                if (controllerContext.Controller.ValidateRequest)
+                                {
+                                    ValidateRequest(controllerContext);
+                                }
+
+                                IDictionary<string, object> parameters = GetParameterValues(controllerContext, actionDescriptor);
+                                IAsyncResult asyncResult = BeginInvokeActionMethodWithFilters(controllerContext, filterInfo.ActionFilters, actionDescriptor, parameters, asyncCallback, asyncState);
+                                continuation = () =>
+                                {
+                                    ActionExecutedContext postActionContext = EndInvokeActionMethodWithFilters(asyncResult);
+                                    InvokeActionResultWithFilters(controllerContext, filterInfo.ResultFilters, postActionContext.Result);
+                                };
+                                return asyncResult;
+                            }
                         }
                     }
                     catch (ThreadAbortException)

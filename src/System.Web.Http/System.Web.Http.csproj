@@ -79,6 +79,7 @@
     <Compile Include="Filters\OverrideAuthenticationAttribute.cs" />
     <Compile Include="Filters\OverrideAuthorizationAttribute.cs" />
     <Compile Include="Filters\OverrideExceptionFiltersAttribute.cs" />
+    <Compile Include="Routing\IHttpRouteProvider.cs" />
     <Compile Include="Tracing\TraceLevelHelper.cs" />
     <Compile Include="Tracing\TraceKindHelper.cs" />
     <Compile Include="Validation\IModelValidatorCache.cs" />

@@ -234,14 +234,14 @@
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializer.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializer.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEdmTypeDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProvider.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializer.cs" />
     <Compile Include="OData\Formatter\EdmLibHelpers.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializer.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataEntrySerializer.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializer.cs" />
     <Compile Include="HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />

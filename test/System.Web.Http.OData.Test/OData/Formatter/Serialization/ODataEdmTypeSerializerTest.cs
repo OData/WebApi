@@ -7,7 +7,7 @@ using Moq;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
-    public class ODataEntrySerializerTest
+    public class ODataEdmTypeSerializerTest
     {
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmType()
@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Assert.ThrowsArgumentNull(
                 () =>
                 {
-                    var serializer = new Mock<ODataEntrySerializer>(null, ODataPayloadKind.Unsupported).Object;
+                    var serializer = new Mock<ODataEdmTypeSerializer>(null, ODataPayloadKind.Unsupported).Object;
                 },
                 "edmType");
         }
@@ -24,7 +24,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void Ctor_SetsProperty_EdmType()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported).Object;
+            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported).Object;
 
             Assert.Same(edmType, serializer.EdmType);
         }
@@ -33,7 +33,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void Ctor_SetsProperty_ODataPayloadKind()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported).Object;
+            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported).Object;
 
             Assert.Equal(ODataPayloadKind.Unsupported, serializer.ODataPayloadKind);
         }
@@ -43,7 +43,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported, serializerProvider).Object;
+            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported, serializerProvider).Object;
 
             Assert.Same(serializerProvider, serializer.SerializerProvider);
         }
@@ -52,22 +52,22 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_Throws_NotSupported()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
+            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
                 () => serializer.Object.WriteObjectInline(graph: null, writer: null, writeContext: null),
-                "ODataEntrySerializerProxy does not support WriteObjectInline.");
+                "ODataEdmTypeSerializerProxy does not support WriteObjectInline.");
         }
 
         [Fact]
         public void CreateODataValue_Throws_NotSupported()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
+            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
                 () => serializer.Object.CreateODataValue(graph: null, writeContext: null),
-                "ODataEntrySerializerProxy does not support CreateODataValue.");
+                "ODataEdmTypeSerializerProxy does not support CreateODataValue.");
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             // Arrange
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Unsupported);
+            var serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Unsupported);
             serializer
                 .Setup(s => s.CreateODataValue(42, null))
                 .Returns(new ODataPrimitiveValue(42));

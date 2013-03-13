@@ -14,7 +14,7 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataDeserializer"/> for reading odata action parameters.
+    /// Represents an <see cref="ODataDeserializer"/> for reading OData action parameters.
     /// </summary>
     public class ODataActionPayloadDeserializer : ODataDeserializer
     {
@@ -94,7 +94,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             }
             else
             {
-                ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameterType);
+                ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameterType);
                 return deserializer.ReadInline(value, readContext);
             }
         }

@@ -10,11 +10,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     public abstract class ODataDeserializerProvider
     {
         /// <summary>
-        /// Gets the <see cref="ODataEntryDeserializer"/> for the given EDM type.
+        /// Gets the <see cref="ODataEdmTypeDeserializer"/> for the given EDM type.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
-        /// <returns>An <see cref="ODataEntryDeserializer"/> that can deserialize the given EDM type.</returns>
-        public abstract ODataEntryDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType);
+        /// <returns>An <see cref="ODataEdmTypeDeserializer"/> that can deserialize the given EDM type.</returns>
+        public abstract ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType);
 
         /// <summary>
         /// Gets an <see cref="ODataDeserializer"/> for the given type.

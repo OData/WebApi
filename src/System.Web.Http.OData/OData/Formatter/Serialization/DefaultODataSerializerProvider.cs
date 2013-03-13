@@ -11,16 +11,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// </summary>
     public class DefaultODataSerializerProvider : ODataSerializerProvider
     {
-        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEntrySerializer> _serializerCache =
-            new ConcurrentDictionary<IEdmTypeReference, ODataEntrySerializer>(new EdmTypeReferenceEqualityComparer());
+        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEdmTypeSerializer> _serializerCache =
+            new ConcurrentDictionary<IEdmTypeReference, ODataEdmTypeSerializer>(new EdmTypeReferenceEqualityComparer());
 
-        // cache the clrtype to ODataSerializer mappings as we might have to crawl the 
-        // inheritance hierarchy to find the mapping.
-        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataSerializer> _clrTypeMappingCache =
-            new ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataSerializer>();
+        // cache the clrtype to edm type mappings as we might have to crawl the inheritance hierarchy to find the mapping.
+        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, IEdmTypeReference> _clrTypeMappingCache =
+            new ConcurrentDictionary<Tuple<IEdmModel, Type>, IEdmTypeReference>();
+
+        private static readonly ODataWorkspaceSerializer _workspaceSerializer = new ODataWorkspaceSerializer();
+        private static readonly ODataEntityReferenceLinkSerializer _entityReferenceLinkSerializer = new ODataEntityReferenceLinkSerializer();
+        private static readonly ODataErrorSerializer _errorSerializer = new ODataErrorSerializer();
+        private static readonly ODataMetadataSerializer _metadataSerializer = new ODataMetadataSerializer();
 
         /// <inheritdoc />
-        public override ODataEntrySerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
+        public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
         {
             if (edmType == null)
             {
@@ -30,11 +34,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Sets the <see cref="ODataEntrySerializer"/> for the given <paramref name="edmType"/> in the serializer cache.
+        /// Sets the <see cref="ODataEdmTypeSerializer"/> for the given <paramref name="edmType"/> in the serializer cache.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
         /// <param name="serializer">The serializer to use for the given EDM type.</param>
-        public void SetEdmTypeSerializer(IEdmTypeReference edmType, ODataEntrySerializer serializer)
+        public void SetEdmTypeSerializer(IEdmTypeReference edmType, ODataEdmTypeSerializer serializer)
         {
             if (edmType == null)
             {
@@ -45,11 +49,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="ODataEntrySerializer"/> for the given edm type.
+        /// Creates a new instance of the <see cref="ODataEdmTypeSerializer"/> for the given edm type.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmTypeReference"/>.</param>
-        /// <returns>The constructed <see cref="ODataEntrySerializer"/>.</returns>
-        public virtual ODataEntrySerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
+        /// <returns>The constructed <see cref="ODataEdmTypeSerializer"/>.</returns>
+        public virtual ODataEdmTypeSerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
         {
             if (edmType == null)
             {
@@ -99,39 +103,40 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // handle the special types.
             if (type == typeof(ODataWorkspace))
             {
-                return new ODataWorkspaceSerializer();
+                return _workspaceSerializer;
             }
             else if (type == typeof(Uri))
             {
-                return new ODataEntityReferenceLinkSerializer();
+                return _entityReferenceLinkSerializer;
             }
             else if (type == typeof(ODataError) || type == typeof(HttpError))
             {
-                return new ODataErrorSerializer();
+                return _errorSerializer;
             }
             else if (typeof(IEdmModel).IsAssignableFrom(type))
             {
-                return new ODataMetadataSerializer();
+                return _metadataSerializer;
             }
 
             // TODO: Feature #694 - support Uri[] => EntityReferenceLinks
 
             // if it is not a special type, assume it has a corresponding EdmType.
             Tuple<IEdmModel, Type> cacheKey = Tuple.Create(model, type);
-            return _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
+            IEdmTypeReference edmType = _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
             {
                 IEdmModel m = key.Item1;
                 Type t = key.Item2;
-                IEdmTypeReference edmType = m.GetEdmTypeReference(t);
-                if (edmType != null)
-                {
-                    return GetEdmTypeSerializer(edmType);
-                }
-                else
-                {
-                    return null;
-                }
+                return m.GetEdmTypeReference(t);
             });
+
+            if (edmType != null)
+            {
+                return GetEdmTypeSerializer(edmType);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

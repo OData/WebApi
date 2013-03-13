@@ -10,9 +10,9 @@ using Microsoft.Data.OData;
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataDeserializer"/> that can read odata collection payloads.
+    /// Represents an <see cref="ODataDeserializer"/> that can read OData collection payloads.
     /// </summary>
-    public class ODataCollectionDeserializer : ODataEntryDeserializer
+    public class ODataCollectionDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataCollectionDeserializer"/> class.
@@ -82,7 +82,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("collectionValue");
             }
 
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(ElementType);
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(ElementType);
             if (deserializer == null)
             {
                 throw new SerializationException(

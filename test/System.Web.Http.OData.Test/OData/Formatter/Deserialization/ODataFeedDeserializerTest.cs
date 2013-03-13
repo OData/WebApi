@@ -116,7 +116,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
-            deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns<ODataEntryDeserializer>(null);
+            deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns<ODataEdmTypeDeserializer>(null);
 
             Assert.Throws<SerializationException>(
                 () => deserializer.ReadFeed(feedWrapper, readContext).GetEnumerator().MoveNext(),
@@ -128,7 +128,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            Mock<ODataEntryDeserializer> entityDeserializer = new Mock<ODataEntryDeserializer>(_customerType, ODataPayloadKind.Entry);
+            Mock<ODataEdmTypeDeserializer> entityDeserializer = new Mock<ODataEdmTypeDeserializer>(_customerType, ODataPayloadKind.Entry);
             ODataFeedDeserializer deserializer = new ODataFeedDeserializer(_customersType, deserializerProvider.Object);
             ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
             feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataEntry { Id = "1" }));

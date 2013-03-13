@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> that can read OData complex type payloads.
     /// </summary>
-    public class ODataComplexTypeDeserializer : ODataEntryDeserializer
+    public class ODataComplexTypeDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataComplexTypeDeserializer"/> class.

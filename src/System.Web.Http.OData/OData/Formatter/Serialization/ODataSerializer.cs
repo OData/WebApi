@@ -18,7 +18,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         /// <summary>
         /// Constructs an ODataSerializer that can generate OData payload of the specified kind.
         /// </summary>
-        /// <param name="payloadKind">The kind of odata payload that this serializer generates.</param>
+        /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
         protected ODataSerializer(ODataPayloadKind payloadKind)
         {
             ODataPayloadKindHelper.Validate(payloadKind, "payloadKind");

@@ -12,7 +12,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// ODataSerializer for serializing collection of Entities or Complex types or primitives.
     /// </summary>
-    public class ODataCollectionSerializer : ODataEntrySerializer
+    public class ODataCollectionSerializer : ODataEdmTypeSerializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataCollectionSerializer"/> class.
@@ -116,7 +116,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
 
             if (enumerable != null)
             {
-                ODataEntrySerializer itemSerializer = null;
+                ODataEdmTypeSerializer itemSerializer = null;
                 foreach (object item in enumerable)
                 {
                     itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(ElementType);

@@ -9,14 +9,14 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Base class for all <see cref="ODataDeserializer" />s that deserialize into an object backed by <see cref="IEdmType"/>.
     /// </summary>
-    public abstract class ODataEntryDeserializer : ODataDeserializer
+    public abstract class ODataEdmTypeDeserializer : ODataDeserializer
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataEntryDeserializer"/> class.
+        /// Initializes a new instance of the <see cref="ODataEdmTypeDeserializer"/> class.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
         /// <param name="payloadKind">The kind of OData payload that this deserializer reads.</param>
-        protected ODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
+        protected ODataEdmTypeDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
             : base(payloadKind)
         {
             if (edmType == null)
@@ -28,12 +28,12 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataEntryDeserializer"/> class.
+        /// Initializes a new instance of the <see cref="ODataEdmTypeDeserializer"/> class.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
         /// <param name="payloadKind">The kind of OData payload this deserializer handles.</param>
         /// <param name="deserializerProvider">The <see cref="ODataDeserializerProvider"/>.</param>
-        protected ODataEntryDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
+        protected ODataEdmTypeDeserializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
             : this(edmType, payloadKind)
         {
             if (deserializerProvider == null)

@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />
     /// </summary>
-    public class ODataFeedSerializer : ODataEntrySerializer
+    public class ODataFeedSerializer : ODataEdmTypeSerializer
     {
         private const string Feed = "feed";
 
@@ -129,7 +129,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     throw new SerializationException(SRResources.NullElementInCollection);
                 }
 
-                ODataEntrySerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType()) as ODataEntrySerializer;
+                ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetODataPayloadSerializer(writeContext.Model, entry.GetType()) as ODataEdmTypeSerializer;
                 if (entrySerializer == null)
                 {
                     throw new SerializationException(

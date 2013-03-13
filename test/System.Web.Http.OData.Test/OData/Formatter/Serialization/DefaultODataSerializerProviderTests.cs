@@ -239,7 +239,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Arrange
             DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             IEdmTypeReference edmType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            ODataEntrySerializer serializer = new Mock<ODataEntrySerializer>(edmType, ODataPayloadKind.Property).Object;
+            ODataEdmTypeSerializer serializer = new Mock<ODataEdmTypeSerializer>(edmType, ODataPayloadKind.Property).Object;
             serializerProvider.SetEdmTypeSerializer(edmType, serializer);
 
             // Act & Assert

@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> for reading OData entry payloads.
     /// </summary>
-    public class ODataEntityDeserializer : ODataEntryDeserializer
+    public class ODataEntityDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataEntityDeserializer"/> class.
@@ -125,7 +125,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                     throw new ODataException(message);
                 }
 
-                ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(new EdmEntityTypeReference(entityType, isNullable: false));
+                ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(new EdmEntityTypeReference(entityType, isNullable: false));
                 if (deserializer == null)
                 {
                     throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, entityType.FullName(), typeof(ODataMediaTypeFormatter).Name));
@@ -293,7 +293,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <summary>
         /// Reads an ODataFeed or an ODataItem from the reader.
         /// </summary>
-        /// <param name="reader">The odata reader to read from.</param>
+        /// <param name="reader">The OData reader to read from.</param>
         /// <returns>The read feed or entry.</returns>
         public static ODataItemBase ReadEntryOrFeed(ODataReader reader)
         {
@@ -431,7 +431,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw new ODataException(message);
             }
 
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
             if (deserializer == null)
             {
                 throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, navigationProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
@@ -452,7 +452,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
                 throw new ODataException(message);
             }
 
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(navigationProperty.Type);
             if (deserializer == null)
             {
                 throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, navigationProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));

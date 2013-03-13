@@ -7,7 +7,7 @@ using Moq;
 
 namespace System.Web.Http.OData.Formatter.Deserialization
 {
-    public class ODataEntryDeserializerTest
+    public class ODataEdmTypeDeserializerTest
     {
         [Fact]
         public void Ctor_Throws_ArgumentNullForEdmType()
@@ -15,7 +15,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             Assert.ThrowsArgumentNull(
                 () =>
                 {
-                    var deserializer = new Mock<ODataEntryDeserializer>(null, ODataPayloadKind.Unsupported).Object;
+                    var deserializer = new Mock<ODataEdmTypeDeserializer>(null, ODataPayloadKind.Unsupported).Object;
                 },
                 "edmType");
         }
@@ -23,7 +23,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void Ctor_SetsProperty_ODataPayloadKind()
         {
-            var deserializer = new Mock<ODataEntryDeserializer>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported);
+            var deserializer = new Mock<ODataEdmTypeDeserializer>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported);
 
             Assert.Equal(ODataPayloadKind.Unsupported, deserializer.Object.ODataPayloadKind);
         }
@@ -32,7 +32,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void Ctor_SetsProperty_EdmType()
         {
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            var deserializer = new Mock<ODataEntryDeserializer>(edmType, ODataPayloadKind.Unsupported);
+            var deserializer = new Mock<ODataEdmTypeDeserializer>(edmType, ODataPayloadKind.Unsupported);
 
             Assert.Same(edmType, deserializer.Object.EdmType);
         }
@@ -41,7 +41,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void Ctor_SetsProperty_DeserializerProvider()
         {
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            var deserializer = new Mock<ODataEntryDeserializer>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported, deserializerProvider.Object);
+            var deserializer = new Mock<ODataEdmTypeDeserializer>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported, deserializerProvider.Object);
 
             Assert.Same(deserializerProvider.Object, deserializer.Object.DeserializerProvider);
         }
@@ -49,11 +49,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         [Fact]
         public void ReadInline_Throws_NotSupported()
         {
-            var deserializer = new Mock<ODataEntryDeserializer>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported) { CallBase = true };
+            var deserializer = new Mock<ODataEdmTypeDeserializer>(new Mock<IEdmTypeReference>().Object, ODataPayloadKind.Unsupported) { CallBase = true };
 
             Assert.Throws<NotSupportedException>(
                 () => deserializer.Object.ReadInline(item: null, readContext: null),
-                "Type 'ODataEntryDeserializerProxy' does not support ReadInline.");
+                "Type 'ODataEdmTypeDeserializerProxy' does not support ReadInline.");
         }
     }
 }

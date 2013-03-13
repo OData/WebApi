@@ -13,7 +13,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="IEdmPrimitiveType" />'s.
     /// </summary>
-    public class ODataPrimitiveSerializer : ODataEntrySerializer
+    public class ODataPrimitiveSerializer : ODataEdmTypeSerializer
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ODataPrimitiveSerializer"/>.

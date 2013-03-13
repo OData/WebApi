@@ -193,7 +193,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             // Arrange
             DefaultODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
             IEdmTypeReference edmType = EdmCoreModel.Instance.GetInt32(isNullable: true);
-            ODataEntryDeserializer deserializer = new Mock<ODataEntryDeserializer>(edmType, ODataPayloadKind.Property).Object;
+            ODataEdmTypeDeserializer deserializer = new Mock<ODataEdmTypeDeserializer>(edmType, ODataPayloadKind.Property).Object;
             deserializerProvider.SetEdmTypeDeserializer(edmType, deserializer);
 
             // Act & Assert

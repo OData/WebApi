@@ -190,7 +190,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             IEdmPrimitiveTypeReference stringType = EdmCoreModel.Instance.GetString(isNullable: true);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
-            serializerProvider.Setup(s => s.GetEdmTypeSerializer(stringType)).Returns<ODataEntrySerializer>(null);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(stringType)).Returns<ODataEdmTypeSerializer>(null);
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(_serializer.ComplexType, serializerProvider.Object);
 
             Assert.Throws<NotSupportedException>(

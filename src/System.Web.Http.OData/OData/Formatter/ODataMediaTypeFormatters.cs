@@ -17,9 +17,21 @@ namespace System.Web.Http.OData.Formatter
         /// <summary>
         /// Creates a list of media type formatters to handle OData.
         /// </summary>
+        /// <returns>A list of media type formatters to handle OData.</returns>
+        public static IList<ODataMediaTypeFormatter> Create()
+        {
+            return Create(new DefaultODataSerializerProvider(), new DefaultODataDeserializerProvider());
+        }
+
+        /// <summary>
+        /// Creates a list of media type formatters to handle OData with the given <paramref name="serializerProvider"/> and 
+        /// <paramref name="deserializerProvider"/>.
+        /// </summary>
         /// <param name="serializerProvider">The serializer provider to use.</param>
         /// <param name="deserializerProvider">The deserializer provider to use.</param>
         /// <returns>A list of media type formatters to handle OData.</returns>
+        /// <remarks>The default serializer provider is <see cref="DefaultODataSerializerProvider"/> and the default deserializer provider is
+        /// <see cref="DefaultODataDeserializerProvider"/>.</remarks>
         public static IList<ODataMediaTypeFormatter> Create(ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
         {
             return new List<ODataMediaTypeFormatter>()
@@ -33,15 +45,6 @@ namespace System.Web.Http.OData.Formatter
                 CreateApplicationXml(serializerProvider, deserializerProvider),
                 CreateTextXml(serializerProvider, deserializerProvider)
             };
-        }
-
-        /// <summary>
-        /// Creates a list of media type formatters to handle OData.
-        /// </summary>
-        /// <returns>A list of media type formatters to handle OData.</returns>
-        public static IList<ODataMediaTypeFormatter> Create()
-        {
-            return Create(new DefaultODataSerializerProvider(), new DefaultODataDeserializerProvider());
         }
 
         private static void AddSupportedEncodings(MediaTypeFormatter formatter)

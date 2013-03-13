@@ -256,7 +256,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         public void WriteObjectInline_WritesEachEntityInstance()
         {
             // Arrange
-            Mock<ODataEntrySerializer> customerSerializer = new Mock<ODataEntrySerializer>(_customersType.ElementType(), ODataPayloadKind.Entry);
+            Mock<ODataEdmTypeSerializer> customerSerializer = new Mock<ODataEdmTypeSerializer>(_customersType.ElementType(), ODataPayloadKind.Entry);
             ODataSerializerProvider provider = ODataTestUtil.GetMockODataSerializerProvider(customerSerializer.Object);
             var mockWriter = new Mock<ODataWriter>();
 

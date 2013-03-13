@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// ODataSerializer for serializing complex types.
     /// </summary>
-    public class ODataComplexTypeSerializer : ODataEntrySerializer
+    public class ODataComplexTypeSerializer : ODataEdmTypeSerializer
     {
         private readonly IEdmComplexTypeReference _edmComplexType;
 
@@ -88,7 +88,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             foreach (IEdmProperty property in _edmComplexType.ComplexDefinition().Properties())
             {
                 IEdmTypeReference propertyType = property.Type;
-                ODataEntrySerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
+                ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);
                 if (propertySerializer == null)
                 {
                     throw Error.NotSupported(SRResources.TypeCannotBeSerialized, propertyType.FullName(), typeof(ODataMediaTypeFormatter).Name);

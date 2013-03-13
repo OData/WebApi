@@ -16,7 +16,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// ODataSerializer for serializing instances of <see cref="IEdmEntityType"/>
     /// </summary>
-    public class ODataEntityTypeSerializer : ODataEntrySerializer
+    public class ODataEntityTypeSerializer : ODataEdmTypeSerializer
     {
         private const string Entry = "entry";
 
@@ -238,7 +238,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("entityInstance");
             }
 
-            ODataEntrySerializer serializer = SerializerProvider.GetEdmTypeSerializer(structuralProperty.Type);
+            ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(structuralProperty.Type);
             if (serializer == null)
             {
                 throw new SerializationException(

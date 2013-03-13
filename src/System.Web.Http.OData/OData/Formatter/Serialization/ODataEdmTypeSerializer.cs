@@ -10,14 +10,14 @@ namespace System.Web.Http.OData.Formatter.Serialization
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> that serializes instances of objects backed by an <see cref="IEdmType"/>.
     /// </summary>
-    public abstract class ODataEntrySerializer : ODataSerializer
+    public abstract class ODataEdmTypeSerializer : ODataSerializer
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataEntrySerializer"/> class.
+        /// Initializes a new instance of the <see cref="ODataEdmTypeSerializer"/> class.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
-        /// <param name="payloadKind">The kind of odata payload that this serializer generates.</param>
-        protected ODataEntrySerializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
+        /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
+        protected ODataEdmTypeSerializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind)
             : base(payloadKind)
         {
             if (edmType == null)
@@ -29,12 +29,12 @@ namespace System.Web.Http.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataEntrySerializer"/> class.
+        /// Initializes a new instance of the <see cref="ODataEdmTypeSerializer"/> class.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
-        /// <param name="payloadKind">The kind of odata payload that this serializer generates.</param>
+        /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write inner objects.</param>
-        protected ODataEntrySerializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+        protected ODataEdmTypeSerializer(IEdmTypeReference edmType, ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
             : this(edmType, payloadKind)
         {
             if (serializerProvider == null)

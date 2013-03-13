@@ -196,7 +196,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadEntry_ThrowsSerializationException_TypeCannotBeDeserialized()
         {
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns<ODataEntryDeserializer>(null);
+            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns<ODataEdmTypeDeserializer>(null);
             var deserializer = new ODataEntityDeserializer(_productEdmType, deserializerProvider.Object);
             ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
 
@@ -209,7 +209,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ReadEntry_DispatchesToRightDeserializer_IfEntityTypeNameIsDifferent()
         {
             // Arrange
-            Mock<ODataEntryDeserializer> supplierDeserializer = new Mock<ODataEntryDeserializer>(_supplierEdmType, ODataPayloadKind.Entry);
+            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(_supplierEdmType, ODataPayloadKind.Entry);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(_productEdmType, deserializerProvider.Object);
             ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
@@ -421,7 +421,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         {
             // Arrange
             IEdmCollectionTypeReference productsType = new EdmCollectionTypeReference(new EdmCollectionType(_productEdmType), isNullable: false);
-            Mock<ODataEntryDeserializer> productsDeserializer = new Mock<ODataEntryDeserializer>(productsType, ODataPayloadKind.Feed);
+            Mock<ODataEdmTypeDeserializer> productsDeserializer = new Mock<ODataEdmTypeDeserializer>(productsType, ODataPayloadKind.Feed);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(_supplierEdmType, deserializerProvider.Object);
             ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Products" });
@@ -446,7 +446,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_Calls_ReadInlineOnEntry()
         {
             // Arrange
-            Mock<ODataEntryDeserializer> supplierDeserializer = new Mock<ODataEntryDeserializer>(_supplierEdmType, ODataPayloadKind.Feed);
+            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(_supplierEdmType, ODataPayloadKind.Feed);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(_productEdmType, deserializerProvider.Object);
             ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Supplier" });

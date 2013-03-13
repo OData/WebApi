@@ -10,11 +10,11 @@ namespace System.Web.Http.OData.Formatter.Serialization
     public abstract class ODataSerializerProvider
     {
         /// <summary>
-        /// Gets an <see cref="ODataEntrySerializer"/> for the given edmType.
+        /// Gets an <see cref="ODataEdmTypeSerializer"/> for the given edmType.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmTypeReference"/>.</param>
         /// <returns>The <see cref="ODataSerializer"/>.</returns>
-        public abstract ODataEntrySerializer GetEdmTypeSerializer(IEdmTypeReference edmType);
+        public abstract ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType);
 
         /// <summary>
         /// Gets an <see cref="ODataSerializer"/> for the given <paramref name="model"/> and <paramref name="type"/>.

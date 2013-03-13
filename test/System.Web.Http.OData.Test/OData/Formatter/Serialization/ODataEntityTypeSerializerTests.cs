@@ -370,7 +370,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
             object entity = new object();
             property.Setup(p => p.Type).Returns(propertyType.Object);
-            serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns<ODataEntrySerializer>(null);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns<ODataEdmTypeSerializer>(null);
 
             var serializer = new ODataEntityTypeSerializer(_serializer.EntityType, serializerProvider.Object);
 
@@ -390,7 +390,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             property.Setup(p => p.Name).Returns("PropertyName");
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
             object entity = new { PropertyName = 42 };
-            Mock<ODataEntrySerializer> innerSerializer = new Mock<ODataEntrySerializer>(propertyType.Object, ODataPayloadKind.Property);
+            Mock<ODataEdmTypeSerializer> innerSerializer = new Mock<ODataEdmTypeSerializer>(propertyType.Object, ODataPayloadKind.Property);
             ODataValue propertyValue = new Mock<ODataValue>().Object;
 
             property.Setup(p => p.Type).Returns(propertyType.Object);

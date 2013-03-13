@@ -9,7 +9,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> that can read OData primitve types.
     /// </summary>
-    public class ODataPrimitiveDeserializer : ODataEntryDeserializer
+    public class ODataPrimitiveDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataPrimitiveDeserializer"/> class.

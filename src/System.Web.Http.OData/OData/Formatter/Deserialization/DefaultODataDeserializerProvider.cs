@@ -10,16 +10,26 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// </summary>
     public class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
-        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer> _deserializerCache =
-            new ConcurrentDictionary<IEdmTypeReference, ODataEntryDeserializer>(new EdmTypeReferenceEqualityComparer());
+        private readonly ConcurrentDictionary<IEdmTypeReference, ODataEdmTypeDeserializer> _deserializerCache =
+            new ConcurrentDictionary<IEdmTypeReference, ODataEdmTypeDeserializer>(new EdmTypeReferenceEqualityComparer());
 
-        // cache the clrtype to ODataDeserializer mappings as we might have to crawl the 
-        // inheritance hierarchy to find the mapping.
-        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataDeserializer> _clrTypeMappingCache =
-            new ConcurrentDictionary<Tuple<IEdmModel, Type>, ODataDeserializer>();
+        // cache the clrtype to edmtype mappings as we might have to crawl the inheritance hierarchy to find the mapping.
+        private readonly ConcurrentDictionary<Tuple<IEdmModel, Type>, IEdmTypeReference> _clrTypeMappingCache =
+            new ConcurrentDictionary<Tuple<IEdmModel, Type>, IEdmTypeReference>();
+
+        private static readonly ODataEntityReferenceLinkDeserializer _entityReferenceLinkDeserializer = new ODataEntityReferenceLinkDeserializer();
+        private readonly ODataActionPayloadDeserializer _actionPayloadDeserializer;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultODataDeserializerProvider"/> class.
+        /// </summary>
+        public DefaultODataDeserializerProvider()
+        {
+            _actionPayloadDeserializer = new ODataActionPayloadDeserializer(this);
+        }
 
         /// <inheritdoc />
-        public override ODataEntryDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
+        public override ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
         {
             if (edmType == null)
             {
@@ -30,11 +40,11 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Sets the <see cref="ODataEntryDeserializer"/> for the given edmType in the deserializer cache.
+        /// Sets the <see cref="ODataEdmTypeDeserializer"/> for the given edmType in the deserializer cache.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
         /// <param name="deserializer">The deserializer to use for the given EDM type.</param>
-        public void SetEdmTypeDeserializer(IEdmTypeReference edmType, ODataEntryDeserializer deserializer)
+        public void SetEdmTypeDeserializer(IEdmTypeReference edmType, ODataEdmTypeDeserializer deserializer)
         {
             if (edmType == null)
             {
@@ -44,8 +54,13 @@ namespace System.Web.Http.OData.Formatter.Deserialization
             _deserializerCache.AddOrUpdate(edmType, deserializer, (t, s) => deserializer);
         }
 
-        /// <inheritdoc />
-        public virtual ODataEntryDeserializer CreateEdmTypeDeserializer(IEdmTypeReference edmType)
+        /// <summary>
+        /// Creates an <see cref="ODataEdmTypeDeserializer"/> that can deserialize payloads of the given <paramref name="edmType"/>.
+        /// </summary>
+        /// <param name="edmType">The EDM type that the created deserializer can handle.</param>
+        /// <returns>The created deserializer.</returns>
+        /// <remarks> Override this method if you want to use a custom deserializer. <see cref="GetEdmTypeDeserializer"/> calls into this method and caches the result.</remarks>
+        public virtual ODataEdmTypeDeserializer CreateEdmTypeDeserializer(IEdmTypeReference edmType)
         {
             if (edmType == null)
             {
@@ -94,29 +109,30 @@ namespace System.Web.Http.OData.Formatter.Deserialization
 
             if (type == typeof(Uri))
             {
-                return new ODataEntityReferenceLinkDeserializer();
+                return _entityReferenceLinkDeserializer;
             }
 
             if (type == typeof(ODataActionParameters))
             {
-                return new ODataActionPayloadDeserializer(this);
+                return _actionPayloadDeserializer;
             }
 
             Tuple<IEdmModel, Type> cacheKey = Tuple.Create(model, type);
-            return _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
+            IEdmTypeReference edmType = _clrTypeMappingCache.GetOrAdd(cacheKey, (key) =>
             {
                 IEdmModel m = key.Item1;
                 Type t = key.Item2;
-                IEdmTypeReference edmType = m.GetEdmTypeReference(t);
-                if (edmType == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return GetEdmTypeDeserializer(edmType);
-                }
+                return m.GetEdmTypeReference(t);
             });
+
+            if (edmType == null)
+            {
+                return null;
+            }
+            else
+            {
+                return GetEdmTypeDeserializer(edmType);
+            }
         }
     }
 }

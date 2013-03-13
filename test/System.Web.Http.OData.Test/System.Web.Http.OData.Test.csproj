@@ -77,7 +77,7 @@
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataWorkspaceSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializerTest.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataEntrySerializerTest.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataEdmTypeSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataMetadataSerializerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
@@ -134,7 +134,7 @@
     <Compile Include="OData\Builder\TestModels\InheritanceModels.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializerTests.cs" />
     <Compile Include="OData\Builder\Conventions\SelfLinksGenerationConventionTest.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryDeserializerTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEdmTypeDeserializerTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEdmTypeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\IgnoreDataMemberAttributeEdmPropertyConventionTests.cs" />

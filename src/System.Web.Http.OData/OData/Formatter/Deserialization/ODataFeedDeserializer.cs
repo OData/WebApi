@@ -11,7 +11,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> that can read OData feeds.
     /// </summary>
-    public class ODataFeedDeserializer : ODataEntryDeserializer
+    public class ODataFeedDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataFeedDeserializer"/> class.
@@ -68,7 +68,7 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// <returns>The deserialized feed object.</returns>
         public virtual IEnumerable ReadFeed(ODataFeedWithEntries feed, ODataDeserializerContext readContext)
         {
-            ODataEntryDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(EntityType);
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(EntityType);
             if (deserializer == null)
             {
                 throw new SerializationException(

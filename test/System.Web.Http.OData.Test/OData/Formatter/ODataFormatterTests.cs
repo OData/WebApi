@@ -537,7 +537,7 @@ namespace System.Web.Http.OData.Formatter
 
         private class CustomSerializerProvider : DefaultODataSerializerProvider
         {
-            public override ODataEntrySerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
+            public override ODataEdmTypeSerializer CreateEdmTypeSerializer(IEdmTypeReference edmType)
             {
                 if (edmType.IsCollection() && edmType.AsCollection().ElementType().IsEntity())
                 {

@@ -268,7 +268,7 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
-        /// Validate all odata queries, including $skip, $top, $orderby and $filter, based on the given <paramref name="validationSettings"/>.
+        /// Validate all OData queries, including $skip, $top, $orderby and $filter, based on the given <paramref name="validationSettings"/>.
         /// It throws an ODataException if validation failed.
         /// </summary>
         /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>

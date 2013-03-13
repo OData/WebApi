@@ -2,6 +2,7 @@
 
 using System.Web.Http.OData.Formatter.Serialization;
 using Microsoft.Data.Edm;
+
 namespace System.Web.Http.OData
 {
     /// <summary>

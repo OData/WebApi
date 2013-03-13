@@ -1,11 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Net.Http;
 using System.Web.Http.Controllers;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Routing.Conventions
 {
@@ -19,7 +15,7 @@ namespace System.Web.Http.OData.Routing.Conventions
         /// <summary>
         /// Selects the action.
         /// </summary>
-        /// <param name="odataPath">The odata path.</param>
+        /// <param name="odataPath">The OData path.</param>
         /// <param name="controllerContext">The controller context.</param>
         /// <param name="actionMap">The action map.</param>
         /// <returns></returns>

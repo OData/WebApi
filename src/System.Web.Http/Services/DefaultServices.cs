@@ -147,6 +147,8 @@ namespace System.Web.Http.Services
             configuration.RegisterForDispose(validatorCache);
             SetSingle<IModelValidatorCache>(validatorCache);
 
+            SetSingle<IPrincipalProvider>(new ThreadPrincipalProvider());
+
             _serviceTypesSingle = new HashSet<Type>(_defaultServicesSingle.Keys);
             _serviceTypesMulti = new HashSet<Type>(_defaultServicesMulti.Keys);
 

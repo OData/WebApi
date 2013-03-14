@@ -420,4 +420,7 @@
   <data name="UnsupportedMediaTypeNoContentType" xml:space="preserve">
     <value>The request contains an entity body but no Content-Type header. The inferred media type '{0}' is not supported for this resource.</value>
   </data>
+  <data name="ServicesContainerIPrincipalProviderRequired" xml:space="preserve">
+    <value>ServicesContainer must have an IPrincipalProvider.</value>
+  </data>
 </root>

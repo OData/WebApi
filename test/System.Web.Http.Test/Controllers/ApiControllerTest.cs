@@ -524,9 +524,10 @@ namespace System.Web.Http
                 globalFilterMock.Object,
                 actionFilterMock.Object,
             };
+            List<IAuthenticationFilter> authenticationFilters = new List<IAuthenticationFilter>();
 
             // Act
-            var result = ApiController.InvokeActionWithAuthorizationFilters(_actionContextInstance, CancellationToken.None, filters, innerAction);
+            var result = ApiController.InvokeActionWithAuthorizationFilters(_actionContextInstance, CancellationToken.None, filters, authenticationFilters, innerAction);
 
             // Assert
             Assert.NotNull(result);

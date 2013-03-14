@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -33,5 +32,10 @@ namespace System.Web.Http.OData.Formatter.Deserialization
         /// Gets or sets the EDM model associated with the request.
         /// </summary>
         public IEdmModel Model { get; set; }
+
+        /// <summary>
+        /// Gets or sets the HTTP Request that is being deserialized.
+        /// </summary>
+        public HttpRequestMessage Request { get; set; }
     }
 }

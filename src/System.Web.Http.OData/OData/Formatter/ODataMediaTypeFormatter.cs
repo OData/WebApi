@@ -283,13 +283,14 @@ namespace System.Web.Http.OData.Formatter
                         IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders);
                         oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
-                        ODataPath path = _request == null ? null : _request.GetODataPath();
+                        ODataPath path = _request.GetODataPath();
 
                         ODataDeserializerContext readContext = new ODataDeserializerContext
                         {
                             IsPatchMode = isPatchMode,
                             Path = path,
-                            Model = model
+                            Model = model,
+                            Request = _request
                         };
 
                         if (isPatchMode)

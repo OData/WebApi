@@ -334,6 +334,30 @@ namespace System.Web.Http.OData.Formatter
                 "The maximum number of bytes allowed to be read from the stream has been exceeded. After the last read operation, a total of 19 bytes has been read from the stream; however a maximum of 1 bytes is allowed.");
         }
 
+        [Fact]
+        public void Request_IsPassedThroughDeserializerContext()
+        {
+            // Arrange
+            var model = CreateModel();
+            var request = CreateFakeODataRequest(model);
+            Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Property);
+            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
+            deserializerProvider.Setup(p => p.GetODataDeserializer(model, typeof(int))).Returns(deserializer.Object);
+            deserializer.Setup(d => d.Read(It.IsAny<ODataMessageReader>(), It.Is<ODataDeserializerContext>(c => c.Request == request))).Verifiable();
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            var formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, serializerProvider, Enumerable.Empty<ODataPayloadKind>(),
+                ODataVersion.V3, request);
+            HttpContent content = new StringContent("42");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata=fullmetadata");
+
+            // Act
+            formatter.ReadFromStreamAsync(typeof(int), new MemoryStream(), content, formatterLogger: null);
+
+            // Assert
+            deserializer.Verify();
+        }
+
         private static Encoding CreateEncoding(string name)
         {
             if (name == "utf-8")

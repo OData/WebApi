@@ -14,9 +14,9 @@ namespace System.Web.Http.WebHost
     internal sealed class WebHostAssembliesResolver : IAssembliesResolver
     {
         /// <summary>
-        /// Returns a list of controllers available for the application.
+        /// Returns a list of assemblies that will be searched for types that implement IHttpController, such as ApiController.
         /// </summary>
-        /// <returns>An <see cref="ICollection{Assembly}" /> of controllers.</returns>
+        /// <returns>An <see cref="ICollection{Assembly}" /> of assemblies.</returns>
         ICollection<Assembly> IAssembliesResolver.GetAssemblies()
         {
             return BuildManager.GetReferencedAssemblies().OfType<Assembly>().ToList();
